@@ -162,6 +162,12 @@ cython_debug/
 # Precommit hooks: ruff cache
 .ruff_cache
 
+<<<<<<< HEAD
 # Test db sqlite file
 backend/test.db
 
+=======
+# Heavy data files
+*.tif
+*.tiff
+>>>>>>> 0bdfca2 (Demo notebooks in alerts/data to play with SuFoSaT data (and a bit with DIST-ALERT data))
