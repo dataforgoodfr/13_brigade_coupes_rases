@@ -16,11 +16,18 @@ python = "^3.10"
 # pandas = "^1.1.1"
 # jupyter = "^1.0.0"
 # ipykernel = "^5.3.4"
+rasterio = "^1.4.3"
+tqdm = "^4.67.1"
+geopandas = "^1.0.1"
+matplotlib = "^3.10.0"
+contextily = "^1.6.2"
+rasterstats = "^0.20.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.20.0"
 pytest = "^7.2.0"
 tox = "^4.4.8"
+ipykernel = "^6.29.5"
 
 [tool.ruff]
 # Same as Black.
