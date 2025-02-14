@@ -161,3 +161,6 @@ cython_debug/
 
 # Precommit hooks: ruff cache
 .ruff_cache
+
+# Large data files
+misc/data/
