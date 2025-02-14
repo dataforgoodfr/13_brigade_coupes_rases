@@ -1,0 +1,19 @@
+version: "3.9"
+volumes:
+  coupes-rases-data:
+    external: false
+
+services:
+  db:
+    build:
+      context: "."
+      dockerfile: ./docker/postgres/DockerFile
+    volumes:
+      - coupes-rases-data:/var/lib/postgresql/data
+    container_name: coupes-rases-database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devuser
+      DATABASES: local,test
