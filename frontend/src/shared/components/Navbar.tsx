@@ -1,4 +1,3 @@
-import { Disclosure } from "@headlessui/react";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 
@@ -7,8 +6,7 @@ interface Props {
 }
 export function Navbar({ className }: Props) {
 	return (
-		<Disclosure
-			as="nav"
+		<nav
 			className={clsx(
 				className,
 				"fixed flex top-0 bg-white shadow w-full items-center z-max",
@@ -34,6 +32,6 @@ export function Navbar({ className }: Props) {
 					Coupes rases
 				</Link>
 			</div>
-		</Disclosure>
+		</nav>
 	);
 }

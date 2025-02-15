@@ -9,9 +9,10 @@ lerna-debug.log*
 
 node_modules
 dist
+dev-dist
 dist-ssr
 *.local
-
+.vites-preview
 # Editor directories and files
 .idea
 .DS_Store

@@ -5,17 +5,59 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-// https://vite.dev/config/
-export default defineConfig({
-	test: {
-		css: true,
-		environment: "jsdom",
-		setupFiles: ["src/test/setup.ts"],
-	},
-	plugins: [
-		react(),
-		tailwindcss(),
-		tsconfigPaths(),
-		TanStackRouterVite({ autoCodeSplitting: true }),
-	],
+import { VitePWA } from "vite-plugin-pwa";
+
+export default defineConfig(({ mode }) => {
+	return {
+		test: {
+			css: true,
+			environment: "jsdom",
+			setupFiles: ["src/test/setup.ts"],
+		},
+		plugins: [
+			VitePWA({
+				registerType: "prompt",
+				injectRegister: false,
+				workbox: {
+					globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+					cleanupOutdatedCaches: true,
+					clientsClaim: true,
+				},
+				devOptions: {
+					enabled: mode === "development",
+					navigateFallback: "index.html",
+					suppressWarnings: true,
+					type: "module",
+				},
+				includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
+				manifest: {
+					name: "Coupes rases",
+					short_name: "Canopée",
+					description: "Gérez vos coupes rases",
+					theme_color: "#ffffff",
+					background_color: "#f0e7db",
+					display: "standalone",
+					scope: "/",
+					start_url: "/",
+					orientation: "portrait",
+					icons: [
+						{
+							src: "pwa-192x192.png",
+							sizes: "192x192",
+							type: "image/png",
+						},
+						{
+							src: "pwa-512x512.png",
+							sizes: "512x512",
+							type: "image/png",
+						},
+					],
+				},
+			}),
+			react(),
+			tailwindcss(),
+			tsconfigPaths(),
+			TanStackRouterVite({ autoCodeSplitting: true }),
+		],
+	};
 });

@@ -7,8 +7,13 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["src/routeTree.gen.ts"],
-		"include": ["src"]
+		"ignore": [
+			"src/routeTree.gen.ts",
+			"node_modules",
+			"dev-dist",
+			"dist",
+			"public/mockServiceWorker.js"
+		]
 	},
 	"formatter": {
 		"enabled": true,
