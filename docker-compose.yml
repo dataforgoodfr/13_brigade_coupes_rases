@@ -6,8 +6,8 @@ volumes:
 services:
   db:
     build:
-      context: "."
-      dockerfile: ./docker/postgres/DockerFile
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
     volumes:
       - coupes-rases-data:/var/lib/postgresql/data
     container_name: coupes-rases-database
@@ -17,3 +17,15 @@ services:
       POSTGRES_USER: devuser
       POSTGRES_PASSWORD: devuser
       DATABASES: local,test
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    container_name: coupes-rases-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
