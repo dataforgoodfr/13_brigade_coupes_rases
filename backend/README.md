@@ -1,6 +1,7 @@
 # Brigade Coupes Rases backend
 
 ## Installation
+Get poetry `https://python-poetry.org/docs/#installation`
 
 To install backend deps only:
 
