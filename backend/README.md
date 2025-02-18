@@ -1,6 +1,7 @@
 # Brigade Coupes Rases backend
 
 ## Installation
+
 Get poetry `https://python-poetry.org/docs/#installation`
 
 To install backend deps only:
@@ -40,5 +41,6 @@ Either way, once the server is running, you can access the API in `http://localh
 ## Run the tests
 
 ```bash
-python -m pytest
+cd backend
+poetry run python -m pytest
 ```
