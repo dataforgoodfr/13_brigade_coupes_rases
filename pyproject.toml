@@ -36,9 +36,6 @@ backend-start = "app.main:start_server"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
-[tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.8"
-
 [tool.ruff]
 # Same as Black.
 line-length = 96
