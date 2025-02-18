@@ -13,10 +13,6 @@ package-mode=false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# numpy = "^1.21.1"
-# pandas = "^1.1.1"
-# jupyter = "^1.0.0"
-# ipykernel = "^5.3.4"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.11"
