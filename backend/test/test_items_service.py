@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-TEST_DATABASE_URL = "sqlite:///./test.db"  # Use SQLite for testing
+TEST_DATABASE_URL = "sqlite:///./backend/test/data/test.db"  # Use SQLite for testing
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
