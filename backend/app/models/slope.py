@@ -2,9 +2,9 @@ from sqlalchemy import Column, Integer, String
 from app.database import Base
 
 
-# FIXME: This is just an example model. We should remove this and create our own models
-class Item(Base):
-    __tablename__ = "items"
+# FIXME: Model to be defined
+class Slope(Base):
+    __tablename__ = "slopes"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
