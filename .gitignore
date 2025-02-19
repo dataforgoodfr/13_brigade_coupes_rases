@@ -165,3 +165,7 @@ cython_debug/
 # Heavy data files
 *.tif
 *.tiff
+
+
+# Test db sqlite file
+backend/test.db

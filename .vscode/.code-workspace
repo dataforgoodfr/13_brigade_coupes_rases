@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "frontend",
+		},
+		{
+			"path": "backend",
+		},
+		{
+			"path": "data_pipeline",
+		},
+		{
+			"path": "analytics",
+		}
+	]
+}

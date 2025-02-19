@@ -52,6 +52,15 @@ Dans un premier temps, cliquez sur Fork pour récupérer le projet dans votre es
     - Liez la pull request à un ticket NocoDB en ajoutant le lien du ticket dans la description.
     - Rédigez une description détaillée de la pull request afin de fournir un maximum d’informations sur les modifications apportées.
 
+## Gestion des secrets
+Les secrets partagés entre les membres sont stockés dans une [base de données keepass](./keepass/secrets.kdbx).  
+Pour installer keepass suivez ce [lien](https://keepass.info/index.html).  
+Un mot de passe est nécessaire pour ouvrir la base de données, lire ou modifier les secrets. Pour récuperer le mot de passe contactez directement les responsables de sous-équipes.  
+
+### Bonnes pratiques 
+Considérez la base de données keepass comme étant la golden source de tous les secrets du projet.  
+Chaque secret utilisés dans le projet doit être référencés dans le keepass.  
+Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ... 
 # Architecture du Projet (sujet à améliorer et definir selon les expertises des volonteurs)
 
 L'ideeèr du projet est de créer une architecture modulaire qui permet d'automatiser le traitement des données, de stocker et organiser les informations dans une base de données, et de fournir une interface utilisateur pour interagir avec cette base de données. Voici un exemple possible de l'architecture :
@@ -139,3 +148,4 @@ Mettre à jour les dépendances:
 ### Utiliser Tox pour tester votre code
 
     tox -v
+

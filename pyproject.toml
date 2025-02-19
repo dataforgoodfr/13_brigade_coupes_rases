@@ -9,11 +9,40 @@ description = "Template"
 authors = ["DataForGood"]
 license = " MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# numpy = "^1.21.1"
-# pandas = "^1.1.1"
+
+[tool.poetry.group.backend.dependencies]
+python = "^3.11"
+fastapi = "^0.115.8"
+sqlalchemy = "^2.0.38"
+psycopg2-binary = "^2.9.10"
+pydantic-settings = "^2.7.1"
+uvicorn = "^0.34.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.20.0"
+pytest = "^7.2.0"
+tox = "^4.4.8"
+httpx = "^0.28.1"
+ipykernel = "^6.29.5"
+
+[tool.poetry.group.analytics.dependencies]
+cartopy = "^0.24.1"
+geopandas = "^1.0.1"
+matplotlib = "^3.10.0"
+py7zr = "^0.22.0"
+rasterio = "^1.4.3"
+tqdm = "^4.67.1"
+
+[tool.poetry.scripts]
+backend-start = "app.main:start_server"
+docker-start = "docker compose up -d --build"
+docker-stop = "docker compose down"
+
+[tool.poetry.group.exploration.dependencies]
 contextily = "^1.6.2"
 geopandas = "^1.0.1"
 numpy = "^2.2.2"
@@ -23,13 +52,6 @@ matplotlib = "^3.10.0"
 rasterio = "^1.4.3"
 earthengine-api = "^1.5.1"
 geemap = "^0.35.1"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
-pytest = "^7.2.0"
-tox = "^4.4.8"
-
-[tool.poetry.group.exploration.dependencies]
 jupyterlab = "^4.3.5"
 # jupyter = "^1.0.0"
 # ipykernel = "^5.3.4"
