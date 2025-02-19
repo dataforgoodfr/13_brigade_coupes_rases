@@ -7,7 +7,7 @@ class ClearcutBase(BaseModel):
     name: str
     description: str | None = None
     geoCoordinates: List[Tuple[float, float]] = Field(
-        default_factory=List[Tuple[float, float]],
+        default_factory=list,
         example=
             [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
     )

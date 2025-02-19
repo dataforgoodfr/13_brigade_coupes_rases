@@ -21,6 +21,7 @@ sqlalchemy = "^2.0.38"
 psycopg2-binary = "^2.9.10"
 pydantic-settings = "^2.7.1"
 uvicorn = "^0.34.0"
+package-name = "^0.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.20.0"

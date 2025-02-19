@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from pydantic import BaseModel, Field
 
 from app.schemas.shared import Point
@@ -5,13 +6,10 @@ from app.schemas.shared import Point
 class WatercourseBase(BaseModel):
     name: str
     description: str | None = None
-    geoCoordinates: list[Point] = Field(
-        default_factory=tuple,
-        example=[
-            (48.8566, 2.3522),
-            (34.0522,-118.2437),
-            (36.0522,-119.5696),
-        ]
+    geoCoordinates: List[Tuple[float, float]] = Field(
+        default_factory=list,
+        example=
+            [(1.0, 2.0), (3.0, 4.0), (5.0, 6.0)]
     )
 
 
