@@ -1,8 +1,6 @@
 from typing import List, Tuple
 from pydantic import BaseModel, Field
 
-from app.schemas.shared import Point
-
 class WatercourseBase(BaseModel):
     name: str
     description: str | None = None

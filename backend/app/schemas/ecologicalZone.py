@@ -1,7 +1,6 @@
 from typing import List, Tuple
 from pydantic import BaseModel, Field
 
-from app.schemas.shared import Point
 
 class EcologicalZoneBase(BaseModel):
     name: str
