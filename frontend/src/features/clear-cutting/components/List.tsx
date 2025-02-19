@@ -4,6 +4,7 @@ import { Filters } from "@/features/clear-cutting/components/shared/Filters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import { useNavigate } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
+
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
 	const navigate = useNavigate();
@@ -24,8 +25,8 @@ export function AsideList() {
 							className="cursor-pointer"
 							onClick={() =>
 								navigate({
-									to: "/map/clear-cuttings/$clearCuttingId",
-									params: { clearCuttingId: clearCutting.id },
+									to: "/map/report/$reportId",
+									params: { reportId: clearCutting.id },
 								})
 							}
 						>

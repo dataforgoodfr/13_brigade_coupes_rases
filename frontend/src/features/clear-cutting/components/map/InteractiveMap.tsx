@@ -1,24 +1,14 @@
 import { ClearCuttings } from "@/features/clear-cutting/components/map/ClearCuttings";
 import { useMapInstance } from "@/features/clear-cutting/components/map/Map.context";
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet } from "@tanstack/react-router";
 import type { LatLngExpression } from "leaflet";
-import { useEffect } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 
 const franceCenter: LatLngExpression = [46.695554, 2.440236];
 const wholeFranceZoom = 7;
 
 export function InteractiveMap() {
-	// const { browserLocation } = useGeolocation();
-	// console.log(browserLocation);
-
 	const { setMap } = useMapInstance();
-
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		navigate({ to: "/map/list", replace: false });
-	}, [navigate]);
 
 	return (
 		<>

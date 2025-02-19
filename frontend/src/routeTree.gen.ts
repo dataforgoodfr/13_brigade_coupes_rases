@@ -21,6 +21,7 @@ import { Route as AdministrationImport } from './routes/_administration'
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 const MapLazyImport = createFileRoute('/map')()
 =======
 const AdministrationLazyImport = createFileRoute('/administration')()
@@ -30,7 +31,12 @@ const MapListLazyImport = createFileRoute('/map/list')()
 const MapClearCuttingsClearCuttingIdLazyImport = createFileRoute(
   '/map/clear-cuttings/$clearCuttingId',
 =======
+=======
+const MapLazyImport = createFileRoute('/map')()
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 const IndexLazyImport = createFileRoute('/')()
+const MapListLazyImport = createFileRoute('/map/list')()
+const MapReportReportIdLazyImport = createFileRoute('/map/report/$reportId')()
 const ClearCuttingsMapLazyImport = createFileRoute('/clear-cuttings/map')()
 const ClearCuttingsListLazyImport = createFileRoute('/clear-cuttings/list')()
 const AdministrationUsersLazyImport = createFileRoute(
@@ -42,11 +48,15 @@ const AdministrationUsersLazyImport = createFileRoute(
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 const MapLazyRoute = MapLazyImport.update({
   id: '/map',
   path: '/map',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/map.lazy').then((d) => d.Route))
+<<<<<<< HEAD
 =======
 const AdministrationLazyRoute = AdministrationLazyImport.update({
   id: '/administration',
@@ -59,6 +69,9 @@ const AdministrationLazyRoute = AdministrationLazyImport.update({
 
 =======
 >>>>>>> f27a541 (add users list for admin)
+=======
+
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
@@ -87,6 +100,7 @@ const MapListLazyRoute = MapListLazyImport.update({
   getParentRoute: () => MapLazyRoute,
 } as any).lazy(() => import('./routes/map/list.lazy').then((d) => d.Route))
 
+<<<<<<< HEAD
 const MapClearCuttingsClearCuttingIdLazyRoute =
   MapClearCuttingsClearCuttingIdLazyImport.update({
     id: '/clear-cuttings/$clearCuttingId',
@@ -97,6 +111,15 @@ const MapClearCuttingsClearCuttingIdLazyRoute =
       (d) => d.Route,
     ),
   )
+=======
+const MapReportReportIdLazyRoute = MapReportReportIdLazyImport.update({
+  id: '/report/$reportId',
+  path: '/report/$reportId',
+  getParentRoute: () => MapLazyRoute,
+} as any).lazy(() =>
+  import('./routes/map/report.$reportId.lazy').then((d) => d.Route),
+)
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 
 const AdministrationUsersLazyRoute = AdministrationUsersLazyImport.update({
   id: '/users',
@@ -140,11 +163,15 @@ declare module '@tanstack/react-router' {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     '/map': {
       id: '/map'
       path: '/map'
       fullPath: '/map'
       preLoaderRoute: typeof MapLazyImport
+<<<<<<< HEAD
 =======
     '/administration': {
       id: '/administration'
@@ -153,6 +180,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdministrationLazyImport
       parentRoute: typeof rootRoute
 =======
+=======
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     '/_administration/users': {
       id: '/_administration/users'
       path: '/users'
@@ -176,11 +205,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapListLazyImport
       parentRoute: typeof MapLazyImport
     }
+<<<<<<< HEAD
     '/map/clear-cuttings/$clearCuttingId': {
       id: '/map/clear-cuttings/$clearCuttingId'
       path: '/clear-cuttings/$clearCuttingId'
       fullPath: '/map/clear-cuttings/$clearCuttingId'
       preLoaderRoute: typeof MapClearCuttingsClearCuttingIdLazyImport
+=======
+    '/map/report/$reportId': {
+      id: '/map/report/$reportId'
+      path: '/report/$reportId'
+      fullPath: '/map/report/$reportId'
+      preLoaderRoute: typeof MapReportReportIdLazyImport
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
       parentRoute: typeof MapLazyImport
     }
   }
@@ -216,10 +253,24 @@ const AdministrationRouteWithChildren = AdministrationRoute._addFileChildren(
 )
 >>>>>>> f27a541 (add users list for admin)
 
+interface MapLazyRouteChildren {
+  MapListLazyRoute: typeof MapListLazyRoute
+  MapReportReportIdLazyRoute: typeof MapReportReportIdLazyRoute
+}
+
+const MapLazyRouteChildren: MapLazyRouteChildren = {
+  MapListLazyRoute: MapListLazyRoute,
+  MapReportReportIdLazyRoute: MapReportReportIdLazyRoute,
+}
+
+const MapLazyRouteWithChildren =
+  MapLazyRoute._addFileChildren(MapLazyRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '': typeof AuthRoute
   '/login': typeof LoginRoute
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
@@ -228,6 +279,11 @@ export interface FileRoutesByFullPath {
 =======
   '/administration': typeof AdministrationLazyRoute
 =======
+=======
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
@@ -241,12 +297,18 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
 =======
   '/administration': typeof AdministrationLazyRoute
 =======
+=======
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
@@ -262,12 +324,18 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
 =======
   '/administration': typeof AdministrationLazyRoute
 =======
+=======
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/_administration/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
@@ -283,18 +351,25 @@ export interface FileRouteTypes {
     | '/login'
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
 =======
     | '/administration'
 =======
+=======
+    | '/map'
+    | '/map/list'
+    | '/map/report/$reportId'
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     | '/users'
 >>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
     | '/clear-cuttings/map'
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
   fileRoutesByTo: FileRoutesByTo
+  to: '/' | '' | '/login' | '/map' | '/map/list' | '/map/report/$reportId'
   to:
     | '/'
     | ''
@@ -320,12 +395,18 @@ export interface FileRouteTypes {
     | '/login'
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
 =======
     | '/administration'
 =======
+=======
+    | '/map'
+    | '/map/list'
+    | '/map/report/$reportId'
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     | '/_administration/users'
 >>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
@@ -341,6 +422,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   MapLazyRoute: typeof MapLazyRouteWithChildren
 =======
   AdministrationLazyRoute: typeof AdministrationLazyRoute
@@ -349,6 +431,9 @@ export interface RootRouteChildren {
   ClearCuttingsListLazyRoute: typeof ClearCuttingsListLazyRoute
   ClearCuttingsMapLazyRoute: typeof ClearCuttingsMapLazyRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  MapLazyRoute: typeof MapLazyRouteWithChildren
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -356,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdministrationRoute: AdministrationRouteWithChildren,
   AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   MapLazyRoute: MapLazyRouteWithChildren,
@@ -366,6 +452,9 @@ const rootRouteChildren: RootRouteChildren = {
   ClearCuttingsListLazyRoute: ClearCuttingsListLazyRoute,
   ClearCuttingsMapLazyRoute: ClearCuttingsMapLazyRoute,
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  MapLazyRoute: MapLazyRouteWithChildren,
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
 }
 
 export const routeTree = rootRoute
@@ -384,6 +473,7 @@ export const routeTree = rootRoute
         "/login",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         "/map"
 =======
         "/administration",
@@ -392,6 +482,9 @@ export const routeTree = rootRoute
         "/clear-cuttings/list",
         "/clear-cuttings/map"
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+        "/map"
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
       ]
     },
     "/": {
@@ -411,16 +504,28 @@ export const routeTree = rootRoute
     },
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     "/map": {
       "filePath": "map.lazy.tsx",
       "children": [
         "/map/list",
+<<<<<<< HEAD
         "/map/clear-cuttings/$clearCuttingId"
       ]
 =======
     "/administration": {
       "filePath": "administration.lazy.tsx"
 =======
+=======
+        "/map/report/$reportId"
+      ]
+    },
+    "/map/list": {
+      "filePath": "map/list.lazy.tsx",
+      "parent": "/map"
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
     "/_administration/users": {
       "filePath": "_administration/users.lazy.tsx",
       "parent": "/_administration"
@@ -430,12 +535,17 @@ export const routeTree = rootRoute
       "filePath": "clear-cuttings.list.lazy.tsx"
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
     },
+<<<<<<< HEAD
     "/map/list": {
       "filePath": "map/list.lazy.tsx",
       "parent": "/map"
     },
     "/map/clear-cuttings/$clearCuttingId": {
       "filePath": "map/clear-cuttings.$clearCuttingId.lazy.tsx",
+=======
+    "/map/report/$reportId": {
+      "filePath": "map/report.$reportId.lazy.tsx",
+>>>>>>> 92f8973 (refactor(map): Change in routes management)
       "parent": "/map"
     }
   }
