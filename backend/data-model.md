@@ -1,6 +1,18 @@
 
 ```mermaid
 erDiagram
+    WATER_COURSE{
+        char(36)        id                      PK
+        varchar(n)      code                    
+        varchar(n)      codeOrigin                    
+        path            course           
+    }
+    WATER_ZONE{
+        char(36)        id                      PK
+        varchar(n)      code                    
+        varchar(n)      codeOrigin                    
+        polygon         area           
+    }
     ECOLOGICAL_ZONING{
         char(36)        id                      PK
         varchar(n)      name                     
@@ -46,7 +58,17 @@ erDiagram
         point           center
         polygon         area
         enum            status
+        char(36)        department_id           FK
         NULL_char(36)   user_id                 FK              
+    }
+
+    REPORTING_WATER_COURSE{
+        char(36)        reporting_id            PK,FK
+        char(36)        water_course_id         PK,FK
+    }
+    REPORTING_WATER_ZONE{
+        char(36)        reporting_id            PK,FK
+        char(36)        water_zone_id           PK,FK
     }
 
     REPORTING_VERSION{
@@ -64,6 +86,8 @@ erDiagram
         varchar(n)      login
         varchar(n)      email
         varchar(n)      password
+        varchar(n)      firstname
+        varchar(n)      lastname
         enum            role
     }
 
@@ -96,6 +120,10 @@ erDiagram
     REPORTING           ||--o{ CADASTRAL_PARCEL_REPORTING   : linked
     ECOLOGICAL_ZONING   ||--o{ ECOLOGICAL_ZONING_REPORTING  : linked
     REPORTING           ||--o{ ECOLOGICAL_ZONING_REPORTING  : linked
+    WATER_COURSE        ||--o{ WATER_COURSE_REPORTING       : linked
+    REPORTING           ||--o{ WATER_COURSE_REPORTING       : linked
+    WATER_ZONE          ||--o{ WATER_ZONE_REPORTING         : linked
+    REPORTING           ||--o{ WATER_ZONE_REPORTING         : linked
     PICTURE             ||--o{ REPORTING_VERSION_PICTURE    : describe
     REPORTING_VERSION   ||--o{ REPORTING_VERSION_PICTURE    : describe
     REPORTING_VERSION   }o--|| USER                         : edited
@@ -104,3 +132,21 @@ erDiagram
     DEPARTMENT          ||--o{ USER_DEPARTMENT              : allowed
     
 ```
+
+# Explanations 
+
+## Versioning
+Reporting is generated automatically, for each changes from user a reporting version is created
+
+## Map data
+Tables ECOLOGICAL_ZONE, ECOLOGICAL_ZONING, WATER_COURSE, CADASTRAL_PARCEL, WATER_ZONE are used to display layers on the map, and to filters reporting (WATER_COURSE, WATER_ZONE, ECOLOGICAL_ZONE, ECOLOGICAL_ZONING).
+
+## Pictures 
+Table picture store picture urls, REPORTING_VERSION_PICTURE qualify a relation between a picture and a version of reporting. Type column in the table classify kind of picture related to reporting version. 
+
+## Department
+A reporting is located in a department, users can filter reportings by departments. Volunteers are affected to departments.
+If a reporting is located on multiple departments, the most overlapping department is assigned.
+
+## RGPD
+Users can be deleted, when there are deleted we should erase there firstname, lastname, password. They are kept in database to versioning purpose, to identify them we keep the login and email. 
