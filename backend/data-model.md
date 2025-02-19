@@ -7,12 +7,20 @@ erDiagram
         varchar(n)      codeOrigin                    
         path            course           
     }
+    WATER_COURSE_REPORTING{
+        char(36)        reporting_id            PK, FK
+        char(36)        water_course_id         PK, FK
+    } 
     WATER_ZONE{
         char(36)        id                      PK
         varchar(n)      code                    
         varchar(n)      codeOrigin                    
         polygon         area           
     }
+    WATER_ZONE_REPORTING{
+        char(36)        reporting_id            PK, FK
+        char(36)        water_zone_id         PK, FK
+    } 
     ECOLOGICAL_ZONING{
         char(36)        id                      PK
         varchar(n)      name                     
