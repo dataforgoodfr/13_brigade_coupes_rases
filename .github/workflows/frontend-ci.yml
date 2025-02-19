@@ -6,8 +6,12 @@ name: Frontend CI
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'frontend/**'
   pull_request:
     branches: ["main"]
+    paths:
+      - 'frontend/**'
 
 jobs:
   build-test:

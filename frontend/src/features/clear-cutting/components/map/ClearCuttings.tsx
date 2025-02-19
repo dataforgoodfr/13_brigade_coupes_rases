@@ -36,7 +36,6 @@ export function ClearCuttings() {
 	});
 
 	useEffect(() => dispatchGeoBounds(), [dispatchGeoBounds]);
-	console.log(data);
 
 	return (
 		<>

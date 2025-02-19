@@ -1,6 +1,13 @@
 import { string, z } from "zod";
 import { pointSchema } from "./types";
 
+export const clearCuttingStatusSchema = z.enum([
+	"toValidate",
+	"validated",
+	"rejected",
+	"waitingInformation",
+]);
+
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
 const ecologicalZoningSchema = z.object({
@@ -23,6 +30,7 @@ const clearCuttingPreviewSchema = z.object({
 	}),
 	imageUrl: z.string().url().optional(),
 	imagesCnt: z.number().optional(),
+	status: clearCuttingStatusSchema,
 });
 export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
 
@@ -50,6 +58,7 @@ export const clearCuttingSchema = z.object({
 	abusiveTags: z.array(z.string()).optional(),
 	customTags: z.array(z.string()).optional(),
 	imageUrls: z.array(z.string().url()),
+	status: clearCuttingStatusSchema,
 });
 
 export type ClearCutting = z.infer<typeof clearCuttingSchema>;

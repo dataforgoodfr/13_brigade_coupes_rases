@@ -10,15 +10,16 @@ export function useReloadPwa() {
 		updateServiceWorker,
 	} = useRegisterSW({
 		onRegistered(r) {
+			// biome-ignore lint/suspicious/noConsoleLog: <explanation>
 			console.log(`SW Registered: ${r}`);
 		},
 		onRegisterError(error) {
+			// biome-ignore lint/suspicious/noConsoleLog: <explanation>
 			console.log("SW registration error", error);
 		},
 	});
 	const { toast } = useToast();
 	useEffect(() => {
-		console.log({ offlineReady, needRefresh });
 		if (offlineReady) {
 			toast({
 				title: "L'application est prête",

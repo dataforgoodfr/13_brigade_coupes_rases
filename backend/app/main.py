@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.routes import clearcut, slope, watercourse
+from app.routes import items
 from app.database import engine, Base
-from app.routes import ecologicalZone
 
 # Create DB tables if not using Alembic (use migrations in production)
 Base.metadata.create_all(bind=engine)
@@ -15,7 +14,11 @@ app.include_router(slope.router)
 app.include_router(watercourse.router)
 
 
-if __name__ == "__main__":
+def start_server():
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    start_server()

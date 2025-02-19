@@ -18,7 +18,7 @@ import {
 } from "./filters";
 
 export const clearCuttingsApi = createApi({
-	reducerPath: "clearCuttings",
+	reducerPath: "api/clearCuttings",
 	baseQuery: fetchBaseQuery({
 		baseUrl: `${import.meta.env.VITE_API}`,
 	}),
@@ -45,7 +45,5 @@ export const { endpoints, useGetFiltersQuery, useGetClearCuttingQuery } =
 	clearCuttingsApi;
 export function useGetClearCuttingsQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
-	console.log(filters);
-
 	return clearCuttingsApi.useGetClearCuttingsQuery(filters ?? skipToken);
 }

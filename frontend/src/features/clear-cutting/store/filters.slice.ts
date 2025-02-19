@@ -1,11 +1,15 @@
 import { endpoints } from "@/features/clear-cutting/store/api";
 import type {
-	EcologicalZoning,
 	FiltersRequest,
 	Tag,
 } from "@/features/clear-cutting/store/filters";
 import type { Bounds } from "@/features/clear-cutting/store/types";
-import { type SelectableItem, toSelectableItems } from "@/shared/items";
+import {
+	type NamedId,
+	type SelectableItem,
+	listToSelectableItems,
+	recordToSelectableItemsTransformed,
+} from "@/shared/items";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
@@ -13,12 +17,16 @@ interface FiltersState {
 	tags: SelectableItem<Tag>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
-	ecologicalZoning: SelectableItem<EcologicalZoning>[];
+	ecologicalZoning: SelectableItem<NamedId>[];
+	departments: SelectableItem<NamedId>[];
+	regions: SelectableItem<NamedId>[];
 }
 const initialState: FiltersState = {
 	cutYears: [],
 	tags: [],
 	ecologicalZoning: [],
+	regions: [],
+	departments: [],
 };
 export const filtersSlice = createSlice({
 	initialState,
@@ -42,9 +50,12 @@ export const filtersSlice = createSlice({
 		builder.addMatcher(
 			endpoints.getFilters.matchFulfilled,
 			(state, { payload: { cutYears, tags, ecologicalZoning } }) => {
-				state.cutYears = toSelectableItems(cutYears);
-				state.tags = toSelectableItems(tags);
-				state.ecologicalZoning = toSelectableItems(ecologicalZoning);
+				state.cutYears = listToSelectableItems(cutYears);
+				state.tags = listToSelectableItems(tags);
+				state.ecologicalZoning = recordToSelectableItemsTransformed(
+					ecologicalZoning,
+					(key, name) => ({ id: key, name: name }),
+				);
 			},
 		);
 	},

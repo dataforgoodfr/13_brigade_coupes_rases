@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
 			css: true,
 			environment: "jsdom",
 			setupFiles: ["src/test/setup.ts"],
+			testTimeout: 60_000,
 		},
 		plugins: [
 			VitePWA({

@@ -26,6 +26,7 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"suspicious": { "noConsoleLog": "error" },
 			"correctness": { "noUnusedImports": "error" }
 		}
 	},
