@@ -158,3 +158,6 @@ If a reporting is located on multiple departments, the most overlapping departme
 
 ## RGPD
 Users can be deleted, when there are deleted we should erase there firstname, lastname, password. They are kept in database to versioning purpose, to identify them we keep the login and email. 
+
+## Manual reporting version fields edition
+There are extra fields edited by user in the REPORTING_VERSION table but it's not necessary to specify them in the model for now... If the model is validated we have to add them. 
