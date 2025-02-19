@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import items
+from app.routes import clearcut, ecologicalZone, slope, watercourse
 from app.database import engine, Base
 
 # Create DB tables if not using Alembic (use migrations in production)
