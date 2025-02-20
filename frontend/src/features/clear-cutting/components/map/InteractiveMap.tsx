@@ -28,7 +28,7 @@ export function InteractiveMap() {
 				</MapContainer>
 			</main>
 
-			<div className="m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
+			<div className="lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
 				<Outlet />
 			</div>
 		</>

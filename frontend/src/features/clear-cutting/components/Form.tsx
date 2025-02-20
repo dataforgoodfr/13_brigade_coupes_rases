@@ -1,5 +1,8 @@
-import { AccordionFullItem } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+import {
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useMapInstance } from "@/features/clear-cutting/components/map/Map.context";
 import { useGetClearCuttingQuery } from "@/features/clear-cutting/store/api";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -34,23 +37,32 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 
 	return (
 		<>
-			<div className="flex m-4 text-3xl font-bold align-baseline">
-				<Link to="/map/list">
-					<X size={40} />
-				</Link>
-				<h1 className="ml-6">{`${data?.address.city.toLocaleUpperCase()} - ${data?.cutYear}`}</h1>
-			</div>
-			<div className="overflow-scroll p-2 flex flex-col">
-				<Accordion.Root type="multiple">
-					{titleSection.map((sectionName) => (
-						<AccordionFullItem key={sectionName} title={sectionName} />
-					))}
-				</Accordion.Root>
+			<Link to="/map/list">
+				<X />
+			</Link>
+			<Accordion.Root className="w-full" type="multiple">
+				<AccordionItem value="item-1">
+					<AccordionTrigger>Is it accessible?</AccordionTrigger>
+					<AccordionContent>
+						Yes. It adheres to the WAI-ARIA design pattern.
+					</AccordionContent>
+				</AccordionItem>
 
-				<Button className="mx-auto mt-12 cursor-pointer" size="lg">
-					Valider
-				</Button>
-			</div>
+				<AccordionItem value="item-2">
+					<AccordionTrigger>Is it unstyled?</AccordionTrigger>
+					<AccordionContent>
+						Yes. It's unstyled by default, giving you freedom over the look and
+						feel.
+					</AccordionContent>
+				</AccordionItem>
+
+				<AccordionItem value="item-3">
+					<AccordionTrigger>Can it be animated?</AccordionTrigger>
+					<AccordionContent>
+						Yes! You can animate the Accordion with CSS or JavaScript.
+					</AccordionContent>
+				</AccordionItem>
+			</Accordion.Root>
 		</>
 	);
 }

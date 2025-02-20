@@ -15,6 +15,7 @@ import {
 	DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import clsx from "clsx";
 
 interface Props {
 	className?: string;
@@ -37,6 +38,11 @@ export function Navbar({ className }: Props) {
 				"flex flex-col item-center gap-16 bg-[#204933] shadow z-max min-w-20 max-w-20",
 			)}
 		>
+			<img
+				alt="Canopée"
+				src={canopeeWhiteIcon}
+				className="h-auto w-auto aspect-square object-cover mt-6 mx-4"
+			/>
 			<div className="flex flex-col gap-10 items-center">
 				<img
 					alt="Canopée"

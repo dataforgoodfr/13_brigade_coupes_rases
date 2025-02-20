@@ -18,6 +18,9 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0(react-hook-form@7.54.2(react@19.0.0-rc.1))
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@mui/icons-material':
         specifier: ^6.4.3
         version: 6.4.5(@mui/material@6.4.5(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0-rc.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0-rc.1))(@types/react@19.0.10)(react@19.0.0-rc.1))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))(@types/react@19.0.10)(react@19.0.0-rc.1)
@@ -27,8 +30,11 @@ importers:
       '@radix-ui/react-accordion':
         specifier: ^1.2.3
         version: 1.2.3(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
+<<<<<<< HEAD
 =======
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.3(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
@@ -38,6 +44,7 @@ importers:
       '@radix-ui/react-label':
         specifier: ^2.1.2
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 2.1.2(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
 =======
         version: 2.1.2(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
@@ -45,6 +52,9 @@ importers:
         specifier: ^2.1.6
         version: 2.1.6(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
 >>>>>>> f27a541 (add users list for admin)
+=======
+        version: 2.1.2(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@radix-ui/react-slot':
         specifier: ^1.1.2
         version: 1.1.2(@types/react@19.0.10)(react@19.0.0-rc.1)
@@ -118,6 +128,7 @@ importers:
       '@faker-js/faker':
         specifier: ^9.4.0
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 9.5.0
 =======
         version: 9.4.0
@@ -150,6 +161,9 @@ importers:
         specifier: ^1.109.2
         version: 1.109.2(@tanstack/react-router@1.99.6(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))
 >>>>>>> f27a541 (add users list for admin)
+=======
+        version: 9.5.0
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@tanstack/router-devtools':
         specifier: ^1.99.6
         version: 1.106.0(@tanstack/react-router@1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))(csstype@3.1.3)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
@@ -200,6 +214,7 @@ importers:
         version: 2.7.0(typescript@5.7.3)
       postcss:
 <<<<<<< HEAD
+<<<<<<< HEAD
         specifier: ^8.5.3
         version: 8.5.3
 =======
@@ -213,6 +228,10 @@ importers:
 =======
         version: 8.5.8(prettier@3.5.2)
 >>>>>>> f27a541 (add users list for admin)
+=======
+        specifier: ^8.5.3
+        version: 8.5.3
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       tailwindcss:
         specifier: ^4.0.7
         version: 4.0.7
@@ -1306,6 +1325,9 @@ packages:
     engines: {node: '>=18'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@mui/core-downloads-tracker@6.4.5':
     resolution: {integrity: sha512-zoXvHU1YuoodgMlPS+epP084Pqv9V+Vg+5IGv9n/7IIFVQ2nkTngYHYxElCq8pdTTbDcgji+nNh0lxri2abWgA==}
 
@@ -1397,8 +1419,11 @@ packages:
       '@types/react':
         optional: true
 
+<<<<<<< HEAD
 =======
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@open-draft/deferred-promise@2.2.0':
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
 
@@ -2563,6 +2588,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@tanstack/router-core@1.104.1':
     resolution: {integrity: sha512-8nP/V5paP+S/17rlw+B2F12R2bB9PixU/+qnD2QdCjK1ajnG4qA0pVN3VSTQe2oCKND6GPZpm2ikmQWumwss9Q==}
 =======
@@ -2574,6 +2600,10 @@ packages:
   '@tanstack/router-core@1.99.6':
     resolution: {integrity: sha512-tEfMLeONfyoyI1e/ygUeGFtTWeWQu0GR3OT8OR75EOeNXRmUEtI6H4ThrXcV8nwBd6B88wmp9LhSPLl9H2VwSA==}
 >>>>>>> f27a541 (add users list for admin)
+=======
+  '@tanstack/router-core@1.104.1':
+    resolution: {integrity: sha512-8nP/V5paP+S/17rlw+B2F12R2bB9PixU/+qnD2QdCjK1ajnG4qA0pVN3VSTQe2oCKND6GPZpm2ikmQWumwss9Q==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>=12'}
 
   '@tanstack/router-devtools@1.106.0':
@@ -2589,18 +2619,24 @@ packages:
         optional: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@tanstack/router-generator@1.106.0':
     resolution: {integrity: sha512-Q8nosyio6x7h8RbH+xJlGwWY9ht6w8Qa9fBZbFRsW+Ux9HMDesUU7C7o0cwRdYnZqDBXg5lYd8l5cZoI37+GYA==}
 =======
   '@tanstack/router-generator@1.109.2':
     resolution: {integrity: sha512-CCEH19Vl+ukMkP9gOZPg85U7rMwwlWxJ4hRMPgU7DIyMlzuvv7l6earvXzuGCKLN0m20TO0QuqjJfCFIKkP2RA==}
+=======
+  '@tanstack/router-generator@1.106.0':
+    resolution: {integrity: sha512-Q8nosyio6x7h8RbH+xJlGwWY9ht6w8Qa9fBZbFRsW+Ux9HMDesUU7C7o0cwRdYnZqDBXg5lYd8l5cZoI37+GYA==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>=12'}
     peerDependencies:
-      '@tanstack/react-router': ^1.109.2
+      '@tanstack/react-router': ^1.106.0
     peerDependenciesMeta:
       '@tanstack/react-router':
         optional: true
 
+<<<<<<< HEAD
   '@tanstack/router-generator@1.99.6':
     resolution: {integrity: sha512-XxAxESvr73zZVBoWvkkN2WSD9eVvdRktiB7gGPYaHoYV/35u1nIMyDoVM5PmeNhrNopzt8ZZzpr2TqTxeQAhjw==}
 >>>>>>> f27a541 (add users list for admin)
@@ -2611,6 +2647,8 @@ packages:
       '@tanstack/react-router':
         optional: true
 
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@tanstack/router-plugin@1.106.0':
     resolution: {integrity: sha512-1owlc0Sof+Dx+L6CI6B1r4KV6lXm5ZgK5SpywU7EO2afBX0FSJXYq6h8nqaaOQau7VqdgqtG/xjSgOGHmWqVzw==}
     engines: {node: '>=12'}
@@ -2710,6 +2748,7 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
@@ -2743,17 +2782,32 @@ packages:
   '@types/node@18.19.75':
     resolution: {integrity: sha512-UIksWtThob6ZVSyxcOqCLOUNg/dyO1Qvx4McgeuhrEtHTLFTf7BBhEazaE4K806FGTPtzd/2sE90qn4fVr7cyw==}
 
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
-  '@types/react-dom@19.0.3':
-    resolution: {integrity: sha512-0Knk+HJiMP/qOZgMyNFamlIjw9OFCsyC2ZbigmEEyXXixgre6IQpm/4V+r3qH4GC1JPvRJKInw+on2rV6YZLeA==}
+  '@types/prop-types@15.7.14':
+    resolution: {integrity: sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ==}
+
+  '@types/react-dom@19.0.4':
+    resolution: {integrity: sha512-4fSQ8vWFkg+TGhePfUzVmat3eC14TXYSsiiDSLI0dVLsrm9gZFABjPy/Qu6TKgl1tq1Bu1yDsuQgY3A3DOjCcg==}
     peerDependencies:
       '@types/react': ^19.0.0
 
+<<<<<<< HEAD
   '@types/react@19.0.8':
     resolution: {integrity: sha512-9P/o1IGdfmQxrujGbIMDyYaaCykhLKc0NGCtYcECNUr9UAaDe4gwvV9bR6tvd5Br1SG0j+PBpbKr2UYY8CwqSw==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  '@types/react-transition-group@4.4.12':
+    resolution: {integrity: sha512-8TV6R3h2j7a91c+1DXdJi3Syo69zzIZbz7Lg5tORM5LEJG7X/E6a1V3drRyBRZq7/utz7A+c4OgYLiLcYGHG6w==}
+    peerDependencies:
+      '@types/react': '*'
+
+  '@types/react@19.0.10':
+    resolution: {integrity: sha512-JuRQ9KXLEjaUNjTWpzuR231Z2WpIwczOkBEIvbHNCzQefFIT0L8IqE6NV6ULLyC1SI/i234JnDoMkfg+RjQj2g==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -2784,6 +2838,7 @@ packages:
       vite: ^4 || ^5 || ^6
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@vitest/expect@3.0.6':
     resolution: {integrity: sha512-zBduHf/ja7/QRX4HdP1DSq5XrPgdN+jzLOwaTq/0qZjYfgETNFCKf9nOAp2j3hmom3oTbczuUzrzg9Hafh7hNg==}
 =======
@@ -2794,6 +2849,11 @@ packages:
     resolution: {integrity: sha512-nNIOqupgZ4v5jWuQx2DSlHLEs7Q4Oh/7AYwNyE+k0UQzG7tSmjPXShUikn1mpNGzYEN2jJbTvLejwShMitovBA==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
 
+=======
+  '@vitest/expect@3.0.6':
+    resolution: {integrity: sha512-zBduHf/ja7/QRX4HdP1DSq5XrPgdN+jzLOwaTq/0qZjYfgETNFCKf9nOAp2j3hmom3oTbczuUzrzg9Hafh7hNg==}
+
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@vitest/mocker@3.0.6':
     resolution: {integrity: sha512-KPztr4/tn7qDGZfqlSPQoF2VgJcKxnDNhmfR3VgZ6Fy1bO8T9Fc1stUiTXtqz0yG24VpD00pZP5f8EOFknjNuQ==}
     peerDependencies:
@@ -2806,15 +2866,21 @@ packages:
         optional: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@vitest/pretty-format@3.0.6':
     resolution: {integrity: sha512-Zyctv3dbNL+67qtHfRnUE/k8qxduOamRfAL1BurEIQSyOEFffoMvx2pnDSSbKAAVxY0Ej2J/GH2dQKI0W2JyVg==}
 =======
   '@vitest/pretty-format@2.0.5':
     resolution: {integrity: sha512-h8k+1oWHfwTkyTkb9egzwNMfJAEx4veaPSnMeKbVSjp4euqGSbQlm5+6VHwTr7u4FJslVVsUG5nopCaAYdOmSQ==}
+=======
+  '@vitest/pretty-format@3.0.6':
+    resolution: {integrity: sha512-Zyctv3dbNL+67qtHfRnUE/k8qxduOamRfAL1BurEIQSyOEFffoMvx2pnDSSbKAAVxY0Ej2J/GH2dQKI0W2JyVg==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
-  '@vitest/pretty-format@2.1.9':
-    resolution: {integrity: sha512-KhRIdGV2U9HOUzxfiHmY8IFHTdqtOhIzCpd8WRdJiE7D/HUcZVD0EgQCVjm+Q9gkUXWgBvMmTtZgIG48wq7sOQ==}
+  '@vitest/runner@3.0.6':
+    resolution: {integrity: sha512-JopP4m/jGoaG1+CBqubV/5VMbi7L+NQCJTu1J1Pf6YaUbk7bZtaq5CX7p+8sY64Sjn1UQ1XJparHfcvTTdu9cA==}
 
+<<<<<<< HEAD
   '@vitest/pretty-format@3.0.5':
     resolution: {integrity: sha512-CjUtdmpOcm4RVtB+up8r2vVDLR16Mgm/bYdkGFe3Yj/scRfCpbSi2W/BDSDcFK7ohw8UXvjMbOp9H4fByd/cOA==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -2847,6 +2913,16 @@ packages:
   '@vitest/utils@3.0.5':
     resolution: {integrity: sha512-N9AX0NUoUtVwKwy21JtwzaqR5L5R5A99GAbrHfCCXK1lp593i/3AZAXhSP43wRQuxYsflrdzEfXZFo1reR1Nkg==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  '@vitest/snapshot@3.0.6':
+    resolution: {integrity: sha512-qKSmxNQwT60kNwwJHMVwavvZsMGXWmngD023OHSgn873pV0lylK7dwBTfYP7e4URy5NiBCHHiQGA9DHkYkqRqg==}
+
+  '@vitest/spy@3.0.6':
+    resolution: {integrity: sha512-HfOGx/bXtjy24fDlTOpgiAEJbRfFxoX3zIGagCqACkFKKZ/TTOE6gYMKXlqecvxEndKFuNHcHqP081ggZ2yM0Q==}
+
+  '@vitest/utils@3.0.6':
+    resolution: {integrity: sha512-18ktZpf4GQFTbf9jK543uspU03Q2qya7ZGya5yiZ0Gx0nnnalBvd5ZBislbl2EhLjM8A8rt4OilqKG7QwcGkvQ==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   acorn@8.14.0:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
@@ -2881,6 +2957,7 @@ packages:
     engines: {node: '>=10'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   ansis@3.15.0:
     resolution: {integrity: sha512-zIcWDJ+Kwqxfdnogx66Gxzr0kVmCcRAdat9nlY2IHsshqTN4fBH6tMeRMPA/2w0rpBayIJvjQAaa2/4RDrNqwg==}
     engines: {node: '>=14'}
@@ -2893,6 +2970,11 @@ packages:
     resolution: {integrity: sha512-hxDKLYT7hy3Y4sF3HxI926A3urzPxi73mZBB629m9bCVF+NyKNxbwCqqm+C/YrGPtxLwnl6d8/ZASCsz6SyvJA==}
     engines: {node: '>=16'}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  ansis@3.15.0:
+    resolution: {integrity: sha512-zIcWDJ+Kwqxfdnogx66Gxzr0kVmCcRAdat9nlY2IHsshqTN4fBH6tMeRMPA/2w0rpBayIJvjQAaa2/4RDrNqwg==}
+    engines: {node: '>=14'}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
@@ -3344,6 +3426,7 @@ packages:
     engines: {node: '>= 0.4'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   esbuild@0.24.2:
     resolution: {integrity: sha512-+9egpBW8I3CD5XPe0n6BfT5fxLzxrlDzqydF3aviG+9ni1lDC/OvMHcxqEFV0+LANZG5R1bFMWfUrjVsdwxJvA==}
 =======
@@ -3355,6 +3438,10 @@ packages:
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  esbuild@0.24.2:
+    resolution: {integrity: sha512-+9egpBW8I3CD5XPe0n6BfT5fxLzxrlDzqydF3aviG+9ni1lDC/OvMHcxqEFV0+LANZG5R1bFMWfUrjVsdwxJvA==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>=18'}
     hasBin: true
 
@@ -3440,6 +3527,7 @@ packages:
     engines: {node: '>= 0.4'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   form-data@4.0.2:
     resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
 =======
@@ -3450,6 +3538,10 @@ packages:
   form-data@4.0.1:
     resolution: {integrity: sha512-tzN8e4TX8+kkxGPK8D5u0FNmjPUjw3lwC9lSLxxoB/+GtsJG91CO8bSWy73APlgAZzZbXEYZJuxjkHH2w+Ezhw==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  form-data@4.0.2:
+    resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>= 6'}
 
   fraction.js@4.3.7:
@@ -4820,6 +4912,7 @@ packages:
     engines: {node: '>=10'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   type-fest@4.35.0:
     resolution: {integrity: sha512-2/AwEFQDFEy30iOLjrvHDIH7e4HEWH+f1Yl1bI5XMqzuoCUqwYCdxachgsgv0og/JdVZUhbfjcJAoHj5L1753A==}
 =======
@@ -4830,6 +4923,10 @@ packages:
   type-fest@4.33.0:
     resolution: {integrity: sha512-s6zVrxuyKbbAsSAD5ZPTB77q4YIdRctkTbJ2/Dqlinwz+8ooH2gd+YA7VA6Pa93KML9GockVvoxjZ2vHP+mu8g==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  type-fest@4.35.0:
+    resolution: {integrity: sha512-2/AwEFQDFEy30iOLjrvHDIH7e4HEWH+f1Yl1bI5XMqzuoCUqwYCdxachgsgv0og/JdVZUhbfjcJAoHj5L1753A==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>=16'}
 
   typed-array-buffer@1.0.3:
@@ -4889,6 +4986,7 @@ packages:
     engines: {node: '>= 10.0.0'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   unplugin@2.2.0:
     resolution: {integrity: sha512-m1ekpSwuOT5hxkJeZGRxO7gXbXT3gF26NjQ7GdVHoLoF8/nopLcd/QfPigpCy7i51oFHiRJg/CyHhj4vs2+KGw==}
 =======
@@ -4899,6 +4997,10 @@ packages:
   unplugin@2.1.2:
     resolution: {integrity: sha512-Q3LU0e4zxKfRko1wMV2HmP8lB9KWislY7hxXpxd+lGx0PRInE4vhMBVEZwpdVYHvtqzhSrzuIfErsob6bQfCzw==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  unplugin@2.2.0:
+    resolution: {integrity: sha512-m1ekpSwuOT5hxkJeZGRxO7gXbXT3gF26NjQ7GdVHoLoF8/nopLcd/QfPigpCy7i51oFHiRJg/CyHhj4vs2+KGw==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: '>=18.12.0'}
 
   upath@1.2.0:
@@ -4943,6 +5045,7 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   vite-node@3.0.6:
     resolution: {integrity: sha512-s51RzrTkXKJrhNbUzQRsarjmAae7VmMPAsRT7lppVpIg6mK3zGthP9Hgz0YQQKuNcF+Ii7DfYk3Fxz40jRmePw==}
 =======
@@ -4956,6 +5059,10 @@ packages:
   vite-node@3.0.5:
     resolution: {integrity: sha512-02JEJl7SbtwSDJdYS537nU6l+ktdvcREfLksk/NDAqtdKWGqHl+joXzEubHROmS3E6pip+Xgu2tFezMu75jH7A==}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  vite-node@3.0.6:
+    resolution: {integrity: sha512-s51RzrTkXKJrhNbUzQRsarjmAae7VmMPAsRT7lppVpIg6mK3zGthP9Hgz0YQQKuNcF+Ii7DfYk3Fxz40jRmePw==}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
@@ -6310,6 +6417,9 @@ snapshots:
       strict-event-emitter: 0.5.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@mui/core-downloads-tracker@6.4.5': {}
 
   '@mui/icons-material@6.4.5(@mui/material@6.4.5(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0-rc.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.0.0-rc.1))(@types/react@19.0.10)(react@19.0.0-rc.1))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))(@types/react@19.0.10)(react@19.0.0-rc.1)':
@@ -6395,8 +6505,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.0.10
 
+<<<<<<< HEAD
 =======
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@open-draft/deferred-promise@2.2.0': {}
 
   '@open-draft/logger@0.3.0':
@@ -7611,6 +7724,7 @@ snapshots:
       use-sync-external-store: 1.4.0(react@19.0.0-rc.1)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@tanstack/router-core@1.104.1':
 =======
   '@tanstack/router-cli@1.109.2(@tanstack/react-router@1.99.6(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))':
@@ -7624,6 +7738,10 @@ snapshots:
   '@tanstack/router-core@1.99.6':
 >>>>>>> f27a541 (add users list for admin)
     dependencies:
+=======
+  '@tanstack/router-core@1.104.1':
+    dependencies:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@tanstack/history': 1.99.13
       '@tanstack/store': 0.7.0
 
@@ -7638,17 +7756,22 @@ snapshots:
       csstype: 3.1.3
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@tanstack/router-generator@1.106.0(@tanstack/react-router@1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))':
 =======
   '@tanstack/router-generator@1.109.2(@tanstack/react-router@1.99.6(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))':
+=======
+  '@tanstack/router-generator@1.106.0(@tanstack/react-router@1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))':
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       '@tanstack/virtual-file-routes': 1.99.0
-      prettier: 3.5.2
-      tsx: 4.19.2
-      zod: 3.24.1
+      prettier: 3.5.1
+      tsx: 4.19.3
+      zod: 3.24.2
     optionalDependencies:
-      '@tanstack/react-router': 1.99.6(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
+      '@tanstack/react-router': 1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)
 
+<<<<<<< HEAD
   '@tanstack/router-generator@1.99.6(@tanstack/react-router@1.99.6(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))':
 >>>>>>> f27a541 (add users list for admin)
     dependencies:
@@ -7661,6 +7784,10 @@ snapshots:
 
   '@tanstack/router-plugin@1.106.0(@tanstack/react-router@1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))(vite@6.1.1(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3))':
     dependencies:
+=======
+  '@tanstack/router-plugin@1.106.0(@tanstack/react-router@1.106.0(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1))(vite@6.1.1(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3))':
+    dependencies:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@babel/core': 7.26.9
       '@babel/plugin-syntax-jsx': 7.25.9(@babel/core@7.26.9)
       '@babel/plugin-syntax-typescript': 7.25.9(@babel/core@7.26.9)
@@ -7706,6 +7833,7 @@ snapshots:
       pretty-format: 27.5.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)':
 =======
   '@testing-library/jest-dom@6.5.0':
@@ -7721,6 +7849,10 @@ snapshots:
   '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)':
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
     dependencies:
+=======
+  '@testing-library/react@16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1)':
+    dependencies:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@babel/runtime': 7.26.9
       '@testing-library/dom': 10.4.0
       react: 19.0.0-rc.1
@@ -7776,6 +7908,7 @@ snapshots:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@types/parse-json@4.0.2': {}
 
   '@types/prop-types@15.7.14': {}
@@ -7805,14 +7938,27 @@ snapshots:
       '@types/react': 19.0.10
 
 <<<<<<< HEAD
+=======
+  '@types/parse-json@4.0.2': {}
+
+  '@types/prop-types@15.7.14': {}
+
+  '@types/react-dom@19.0.4(@types/react@19.0.10)':
+    dependencies:
+      '@types/react': 19.0.10
+
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   '@types/react-transition-group@4.4.12(@types/react@19.0.10)':
     dependencies:
       '@types/react': 19.0.10
 
   '@types/react@19.0.10':
+<<<<<<< HEAD
 =======
   '@types/react@19.0.8':
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       csstype: 3.1.3
 
@@ -7847,6 +7993,7 @@ snapshots:
       - '@swc/helpers'
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@vitest/expect@3.0.6':
 =======
   '@vitest/expect@2.0.5':
@@ -7859,6 +8006,10 @@ snapshots:
   '@vitest/expect@3.0.5':
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
     dependencies:
+=======
+  '@vitest/expect@3.0.6':
+    dependencies:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@vitest/spy': 3.0.6
       '@vitest/utils': 3.0.6
       chai: 5.2.0
@@ -7874,6 +8025,7 @@ snapshots:
       vite: 6.1.1(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@vitest/pretty-format@3.0.6':
 =======
   '@vitest/pretty-format@2.0.5':
@@ -7886,6 +8038,9 @@ snapshots:
 
   '@vitest/pretty-format@3.0.5':
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  '@vitest/pretty-format@3.0.6':
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       tinyrainbow: 2.0.0
 
@@ -7901,6 +8056,7 @@ snapshots:
       pathe: 2.0.3
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@vitest/spy@3.0.6':
     dependencies:
       tinyspy: 3.0.2
@@ -7908,11 +8064,15 @@ snapshots:
   '@vitest/utils@3.0.6':
 =======
   '@vitest/spy@2.0.5':
+=======
+  '@vitest/spy@3.0.6':
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       tinyspy: 3.0.2
 
-  '@vitest/spy@3.0.5':
+  '@vitest/utils@3.0.6':
     dependencies:
+<<<<<<< HEAD
       tinyspy: 3.0.2
 
   '@vitest/utils@2.0.5':
@@ -7931,6 +8091,8 @@ snapshots:
   '@vitest/utils@3.0.5':
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
     dependencies:
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
       '@vitest/pretty-format': 3.0.6
       loupe: 3.1.3
       tinyrainbow: 2.0.0
@@ -7961,12 +8123,16 @@ snapshots:
   ansi-styles@5.2.0: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   ansis@3.15.0: {}
 =======
   ansi-styles@6.2.1: {}
 
   ansis@3.10.0: {}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  ansis@3.15.0: {}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   anymatch@3.1.3:
     dependencies:
@@ -8360,13 +8526,19 @@ snapshots:
   dom-accessibility-api@0.5.16: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   dom-helpers@5.2.1:
     dependencies:
       '@babel/runtime': 7.26.9
       csstype: 3.1.3
+<<<<<<< HEAD
 =======
   dom-accessibility-api@0.6.3: {}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   dunder-proto@1.0.1:
     dependencies:
@@ -8479,6 +8651,7 @@ snapshots:
       is-symbol: 1.1.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   esbuild-register@3.6.0(esbuild@0.24.2):
     dependencies:
@@ -8515,6 +8688,8 @@ snapshots:
       '@esbuild/win32-x64': 0.23.1
 
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   esbuild@0.24.2:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.24.2
@@ -8625,6 +8800,7 @@ snapshots:
       is-callable: 1.2.7
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   form-data@4.0.2:
 =======
   foreground-child@3.3.0:
@@ -8634,6 +8810,9 @@ snapshots:
 
   form-data@4.0.1:
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  form-data@4.0.2:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
@@ -9532,6 +9711,9 @@ snapshots:
       '@types/react': 19.0.10
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
   react-transition-group@4.4.5(react-dom@19.0.0-rc.1(react@19.0.0-rc.1))(react@19.0.0-rc.1):
     dependencies:
       '@babel/runtime': 7.26.9
@@ -9540,9 +9722,12 @@ snapshots:
       prop-types: 15.8.1
       react: 19.0.0-rc.1
       react-dom: 19.0.0-rc.1(react@19.0.0-rc.1)
+<<<<<<< HEAD
 =======
   react@19.0.0: {}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   react@19.0.0-rc.1: {}
 
@@ -10085,12 +10270,16 @@ snapshots:
   type-fest@0.21.3: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   type-fest@4.35.0: {}
 =======
   type-fest@2.19.0: {}
 
   type-fest@4.33.0: {}
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  type-fest@4.35.0: {}
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
 
   typed-array-buffer@1.0.3:
     dependencies:
@@ -10160,6 +10349,7 @@ snapshots:
   universalify@2.0.1: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   unplugin@2.2.0:
 =======
   unplugin@1.16.1:
@@ -10169,6 +10359,9 @@ snapshots:
 
   unplugin@2.1.2:
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  unplugin@2.2.0:
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       acorn: 8.14.0
       webpack-virtual-modules: 0.6.2
@@ -10208,6 +10401,7 @@ snapshots:
   util-deprecate@1.0.2: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   vite-node@3.0.6(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3):
 =======
   util@0.12.5:
@@ -10222,6 +10416,9 @@ snapshots:
 
   vite-node@3.0.5(@types/node@18.19.75)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.2):
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+  vite-node@3.0.6(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.3):
+>>>>>>> 8308e32 (feat(clear-cutting): Adding Acdordion component and first implementation of the clear-cutting form)
     dependencies:
       cac: 6.7.14
       debug: 4.4.0
