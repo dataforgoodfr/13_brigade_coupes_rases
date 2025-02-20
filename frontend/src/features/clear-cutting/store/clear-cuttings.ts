@@ -8,6 +8,8 @@ export const clearCuttingStatusSchema = z.enum([
 	"waitingInformation",
 ]);
 
+export type ClearCuttingStatus = z.infer<typeof clearCuttingStatusSchema>;
+
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
 const ecologicalZoningSchema = z.object({
