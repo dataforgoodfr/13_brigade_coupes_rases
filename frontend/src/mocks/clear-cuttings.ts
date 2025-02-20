@@ -2,6 +2,7 @@ import type {
 	ClearCutting,
 	ClearCuttingPreview,
 	ClearCuttingsResponse,
+	ClearCuttingStatus,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
 import { range } from "@/shared/array";
@@ -126,6 +127,11 @@ const createFranceRandomPoints = range<[number, number]>(
 	francRandomPointMock,
 );
 
+const getRandomStatus = (seed: number) =>
+	["validated", "toValidate", "rejected", "waitingInformation"][
+		seed % 4
+	] as ClearCuttingStatus;
+
 const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 	const name = faker.animal.dog();
 	const city = faker.location.city();
@@ -138,7 +144,7 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 			country: faker.location.country(),
 			postalCode: faker.location.zipCode(),
 		},
-		status: "validated",
+		status: getRandomStatus(Math.floor(center[0] + center[1])),
 		cutYear: 2021,
 		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
