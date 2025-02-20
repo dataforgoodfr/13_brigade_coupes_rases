@@ -4,6 +4,7 @@ import type {
 } from "@/features/clear-cutting/store/clear-cuttings";
 import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
 import { range } from "@/shared/array";
+import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
@@ -26,9 +27,29 @@ export const mockFilters = http.get("*/filters", () => {
   } satisfies FiltersResponse);
 });
 
-export const mockClearCuttings = http.get("*/clear-cuttings", () => {
+export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
+  const url = new URL(request.url);
+  const geoBoundsQueryString = url.searchParams.get("geoBounds");
+  let boundaries: Boundaries | undefined;
+
+  if (geoBoundsQueryString) {
+    const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
+    boundaries = [
+      [geoBounds[0], geoBounds[1]],
+      [geoBounds[0], geoBounds[3]],
+      [geoBounds[2], geoBounds[3]],
+      [geoBounds[2], geoBounds[1]],
+    ];
+  }
+
+  const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
+
   return HttpResponse.json({
-    clearCuttingPreviews: createFranceRandomPoints.map(createClearCutting),
+    clearCuttingPreviews: boundaries
+      ? clearCuttingPreviews.filter((ccp) =>
+          isPointInsidePolygon(boundaries, ccp.center)
+        )
+      : clearCuttingPreviews,
     clearCuttingsPoints: createFranceRandomPoints,
     ecologicalZoning: [],
     waterCourses: [],
