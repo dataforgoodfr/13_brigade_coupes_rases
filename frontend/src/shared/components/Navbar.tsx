@@ -15,7 +15,6 @@ import {
 	DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import clsx from "clsx";
 
 interface Props {
 	className?: string;
