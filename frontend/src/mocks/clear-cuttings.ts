@@ -124,8 +124,8 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
     imageUrl: faker.image.url(),
     geoCoordinates: randomPolygonFromLocation(
       center,
-      city.length / 10,
-      name.length
+      3.5,
+      7
     ),
   };
 };
