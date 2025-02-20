@@ -6,13 +6,14 @@ from app.services.watercourse import get_watercourses
 from app.schemas.watercourse import WatercourseResponse
 
 logger = getLogger(__name__)
+db_dependency = get_db_session()
 
 router = APIRouter(prefix="/watercourse", tags=["Water course"])
 
 
 @router.get("/", response_model=list[WatercourseResponse])
 def list_watercourses(
-    db: Session = get_db_session(),
+    db: Session = db_dependency,
     skip: int = 0,
     limit: int = 10):
     logger.info(db)
