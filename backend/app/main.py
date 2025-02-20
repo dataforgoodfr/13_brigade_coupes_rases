@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import clearcut, ecologicalZone, slope, watercourse
+from app.routes import clearcut, ecologicalZone, watercourse
 from app.database import engine, Base
 
 # Create DB tables if not using Alembic (use migrations in production)
@@ -10,7 +10,6 @@ app = FastAPI(title="Brigades Coupes Rases")
 # Include routes
 app.include_router(clearcut.router)
 app.include_router(ecologicalZone.router)
-app.include_router(slope.router)
 app.include_router(watercourse.router)
 
 

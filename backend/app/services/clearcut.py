@@ -20,10 +20,13 @@ def create_clearcut(db: Session, item: ClearcutCreate):
 def update_clearcut(db: Session, item: ClearcutCreate):
     logger.info(f"Creating item with name: {item.name}")
     raise HTTPException(status_code=501, detail="Not implemented yet.")
-    return db_item
+    db.update(item)
+    db.commit()
+    db.refresh(item)
+    return item
 
 
 def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
     logger.info("Get items called")
     raise HTTPException(status_code=501, detail="Not implemented yet.")
-    return db.query(Item).offset(skip).limit(limit).all()
+    return db.query(Clearcut).offset(skip).limit(limit).all()
