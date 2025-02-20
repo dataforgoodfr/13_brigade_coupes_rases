@@ -143,10 +143,6 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
 		imageUrl: faker.image.url(),
-		geoCoordinates: randomPolygonFromLocation(
-			center,
-			city.length / 10,
-			name.length,
-		),
+		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
