@@ -2,9 +2,9 @@ import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import { setGeoBounds } from "@/features/clear-cutting/store/filters.slice";
 import { useGeolocation } from "@/shared/hooks/geolocation";
 import { useAppDispatch } from "@/shared/hooks/store";
+import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
-import type { ZoomAnimEventHandlerFn } from "leaflet";
 import type { ClearCuttingStatus } from "../../store/clear-cuttings";
 
 export function ClearCuttings() {
@@ -86,11 +86,9 @@ export function ClearCuttings() {
 		}
 	}
 
-	return (
-		<>
-			<ClearCuttingPreview />
-
-			{data?.clearCuttingsPoints.map(([lat, lng]) => (
+	function ClearCuttingLocationPoint() {
+		if (!displayClearCuttingPreview) {
+			return data?.clearCuttingsPoints.map(([lat, lng]) => (
 				<Circle
 					key={`${lat},${lng}`}
 					color="#ff6467"
@@ -98,7 +96,15 @@ export function ClearCuttings() {
 					radius={200}
 					fillOpacity={0.7}
 				/>
-			))}
+			));
+		}
+	}
+
+	return (
+		<>
+			<ClearCuttingPreview />
+
+			<ClearCuttingLocationPoint />
 		</>
 	);
 }
