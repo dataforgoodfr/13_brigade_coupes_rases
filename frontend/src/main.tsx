@@ -4,8 +4,8 @@ import { Provider } from "react-redux";
 
 import { App } from "@/App";
 import "./index.css";
+import { MapProvider } from "./features/clear-cutting/components/map/Map.context";
 import { store } from "./shared/store/store";
-import { MapProvider, useMapInstance } from "./features/clear-cutting/components/map/Map.context";
 async function enableMocking() {
 	if (import.meta.env.MODE !== "development") {
 		return;
@@ -23,7 +23,7 @@ function App() {
 		<MapProvider>
 			<RouterProvider router={router} />
 		</MapProvider>
-	)
+	);
 }
 
 enableMocking().then(() => {
