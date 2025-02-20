@@ -32,7 +32,7 @@ def get_clearcuts_by_id(id: int, db: Session = get_db_session(), skip: int = 0, 
             summary="Get map page data",
             description="Retrieve all clearcut locations within a specified area and the preview datas of some relevant ones.",
             response_model=list[ClearcutResponse])
-def list_clearcuts(
+def list_clearcuts_previews_location(
     geoBounds: str = Query(..., description="List of coordinates points"),
     surface: float = None,
     isInEcologicalZone: bool = None,
@@ -48,7 +48,7 @@ def list_clearcuts(
             summary="Get list page data",
             description="Retrieve clearcut previews.",
             response_model=list[ClearcutResponse])
-def list_clearcuts(
+def list_clearcuts_previews(
     surface: float = None,
     isInEcologicalZone: bool = None,
     isExcessiveSlope: bool = None,
