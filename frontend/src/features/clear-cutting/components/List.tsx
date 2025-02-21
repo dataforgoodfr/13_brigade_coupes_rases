@@ -2,9 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Filters } from "@/features/clear-cutting/components/shared/Filters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
-import Camera from "@mui/icons-material/CameraAltOutlined";
 import { useNavigate } from "@tanstack/react-router";
-
+import { Camera } from "lucide-react";
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
 	const navigate = useNavigate();

@@ -18,7 +18,11 @@ import { Route as AuthImport } from './routes/_auth'
 
 // Create Virtual Routes
 
+<<<<<<< HEAD
 const MapLazyImport = createFileRoute('/map')()
+=======
+const AdministrationLazyImport = createFileRoute('/administration')()
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 const IndexLazyImport = createFileRoute('/')()
 const MapListLazyImport = createFileRoute('/map/list')()
 const MapClearCuttingsClearCuttingIdLazyImport = createFileRoute(
@@ -27,11 +31,21 @@ const MapClearCuttingsClearCuttingIdLazyImport = createFileRoute(
 
 // Create/Update Routes
 
+<<<<<<< HEAD
 const MapLazyRoute = MapLazyImport.update({
   id: '/map',
   path: '/map',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/map.lazy').then((d) => d.Route))
+=======
+const AdministrationLazyRoute = AdministrationLazyImport.update({
+  id: '/administration',
+  path: '/administration',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/administration.lazy').then((d) => d.Route),
+)
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 
 const LoginRoute = LoginImport.update({
   id: '/login',
@@ -92,11 +106,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+<<<<<<< HEAD
     '/map': {
       id: '/map'
       path: '/map'
       fullPath: '/map'
       preLoaderRoute: typeof MapLazyImport
+=======
+    '/administration': {
+      id: '/administration'
+      path: '/administration'
+      fullPath: '/administration'
+      preLoaderRoute: typeof AdministrationLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/clear-cuttings/list': {
+      id: '/clear-cuttings/list'
+      path: '/clear-cuttings/list'
+      fullPath: '/clear-cuttings/list'
+      preLoaderRoute: typeof ClearCuttingsListLazyImport
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
       parentRoute: typeof rootRoute
     }
     '/map/list': {
@@ -136,18 +165,30 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '': typeof AuthRoute
   '/login': typeof LoginRoute
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+=======
+  '/administration': typeof AdministrationLazyRoute
+  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
+  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '': typeof AuthRoute
   '/login': typeof LoginRoute
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+=======
+  '/administration': typeof AdministrationLazyRoute
+  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
+  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 }
 
 export interface FileRoutesById {
@@ -155,9 +196,15 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/_auth': typeof AuthRoute
   '/login': typeof LoginRoute
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+=======
+  '/administration': typeof AdministrationLazyRoute
+  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
+  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 }
 
 export interface FileRouteTypes {
@@ -166,25 +213,43 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/login'
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
+=======
+    | '/administration'
+    | '/clear-cuttings/list'
+    | '/clear-cuttings/map'
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | ''
     | '/login'
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
+=======
+    | '/administration'
+    | '/clear-cuttings/list'
+    | '/clear-cuttings/map'
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
   id:
     | '__root__'
     | '/'
     | '/_auth'
     | '/login'
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
+=======
+    | '/administration'
+    | '/clear-cuttings/list'
+    | '/clear-cuttings/map'
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
   fileRoutesById: FileRoutesById
 }
 
@@ -192,14 +257,26 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AuthRoute: typeof AuthRoute
   LoginRoute: typeof LoginRoute
+<<<<<<< HEAD
   MapLazyRoute: typeof MapLazyRouteWithChildren
+=======
+  AdministrationLazyRoute: typeof AdministrationLazyRoute
+  ClearCuttingsListLazyRoute: typeof ClearCuttingsListLazyRoute
+  ClearCuttingsMapLazyRoute: typeof ClearCuttingsMapLazyRoute
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
+<<<<<<< HEAD
   MapLazyRoute: MapLazyRouteWithChildren,
+=======
+  AdministrationLazyRoute: AdministrationLazyRoute,
+  ClearCuttingsListLazyRoute: ClearCuttingsListLazyRoute,
+  ClearCuttingsMapLazyRoute: ClearCuttingsMapLazyRoute,
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
 }
 
 export const routeTree = rootRoute
@@ -215,7 +292,13 @@ export const routeTree = rootRoute
         "/",
         "/_auth",
         "/login",
+<<<<<<< HEAD
         "/map"
+=======
+        "/administration",
+        "/clear-cuttings/list",
+        "/clear-cuttings/map"
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
       ]
     },
     "/": {
@@ -227,12 +310,20 @@ export const routeTree = rootRoute
     "/login": {
       "filePath": "login.tsx"
     },
+<<<<<<< HEAD
     "/map": {
       "filePath": "map.lazy.tsx",
       "children": [
         "/map/list",
         "/map/clear-cuttings/$clearCuttingId"
       ]
+=======
+    "/administration": {
+      "filePath": "administration.lazy.tsx"
+    },
+    "/clear-cuttings/list": {
+      "filePath": "clear-cuttings.list.lazy.tsx"
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
     },
     "/map/list": {
       "filePath": "map/list.lazy.tsx",
