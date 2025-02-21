@@ -25,5 +25,3 @@ dist-ssr
 !src/lib
 *storybook.log
 storybook-static
-
-.storybook
