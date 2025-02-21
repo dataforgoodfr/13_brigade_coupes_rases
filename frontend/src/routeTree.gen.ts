@@ -36,12 +36,20 @@ const MapLazyImport = createFileRoute('/map')()
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
 const IndexLazyImport = createFileRoute('/')()
 const MapListLazyImport = createFileRoute('/map/list')()
+<<<<<<< HEAD
 const MapReportReportIdLazyImport = createFileRoute('/map/report/$reportId')()
 const ClearCuttingsMapLazyImport = createFileRoute('/clear-cuttings/map')()
 const ClearCuttingsListLazyImport = createFileRoute('/clear-cuttings/list')()
 const AdministrationUsersLazyImport = createFileRoute(
   '/_administration/users',
+<<<<<<< HEAD
 >>>>>>> f27a541 (add users list for admin)
+=======
+=======
+const MapClearCuttingsClearCuttingIdLazyImport = createFileRoute(
+  '/map/clear-cuttings/$clearCuttingId',
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 )()
 
 // Create/Update Routes
@@ -101,6 +109,9 @@ const MapListLazyRoute = MapListLazyImport.update({
 } as any).lazy(() => import('./routes/map/list.lazy').then((d) => d.Route))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 const MapClearCuttingsClearCuttingIdLazyRoute =
   MapClearCuttingsClearCuttingIdLazyImport.update({
     id: '/clear-cuttings/$clearCuttingId',
@@ -111,6 +122,7 @@ const MapClearCuttingsClearCuttingIdLazyRoute =
       (d) => d.Route,
     ),
   )
+<<<<<<< HEAD
 =======
 const MapReportReportIdLazyRoute = MapReportReportIdLazyImport.update({
   id: '/report/$reportId',
@@ -120,6 +132,8 @@ const MapReportReportIdLazyRoute = MapReportReportIdLazyImport.update({
   import('./routes/map/report.$reportId.lazy').then((d) => d.Route),
 )
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
+=======
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 
 const AdministrationUsersLazyRoute = AdministrationUsersLazyImport.update({
   id: '/users',
@@ -206,11 +220,15 @@ declare module '@tanstack/react-router' {
       parentRoute: typeof MapLazyImport
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
     '/map/clear-cuttings/$clearCuttingId': {
       id: '/map/clear-cuttings/$clearCuttingId'
       path: '/clear-cuttings/$clearCuttingId'
       fullPath: '/map/clear-cuttings/$clearCuttingId'
       preLoaderRoute: typeof MapClearCuttingsClearCuttingIdLazyImport
+<<<<<<< HEAD
 =======
     '/map/report/$reportId': {
       id: '/map/report/$reportId'
@@ -218,6 +236,8 @@ declare module '@tanstack/react-router' {
       fullPath: '/map/report/$reportId'
       preLoaderRoute: typeof MapReportReportIdLazyImport
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
+=======
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
       parentRoute: typeof MapLazyImport
     }
   }
@@ -255,12 +275,13 @@ const AdministrationRouteWithChildren = AdministrationRoute._addFileChildren(
 
 interface MapLazyRouteChildren {
   MapListLazyRoute: typeof MapListLazyRoute
-  MapReportReportIdLazyRoute: typeof MapReportReportIdLazyRoute
+  MapClearCuttingsClearCuttingIdLazyRoute: typeof MapClearCuttingsClearCuttingIdLazyRoute
 }
 
 const MapLazyRouteChildren: MapLazyRouteChildren = {
   MapListLazyRoute: MapListLazyRoute,
-  MapReportReportIdLazyRoute: MapReportReportIdLazyRoute,
+  MapClearCuttingsClearCuttingIdLazyRoute:
+    MapClearCuttingsClearCuttingIdLazyRoute,
 }
 
 const MapLazyRouteWithChildren =
@@ -282,13 +303,20 @@ export interface FileRoutesByFullPath {
 =======
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
+<<<<<<< HEAD
   '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+<<<<<<< HEAD
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+=======
+  '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 }
 
 export interface FileRoutesByTo {
@@ -307,13 +335,20 @@ export interface FileRoutesByTo {
 =======
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
+<<<<<<< HEAD
   '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+<<<<<<< HEAD
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+=======
+  '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 }
 
 export interface FileRoutesById {
@@ -334,13 +369,20 @@ export interface FileRoutesById {
 =======
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
+<<<<<<< HEAD
   '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
   '/_administration/users': typeof AdministrationUsersLazyRoute
 >>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+<<<<<<< HEAD
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+=======
+  '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
 }
 
 export interface FileRouteTypes {
@@ -361,6 +403,7 @@ export interface FileRouteTypes {
 =======
     | '/map'
     | '/map/list'
+<<<<<<< HEAD
     | '/map/report/$reportId'
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
     | '/users'
@@ -370,10 +413,15 @@ export interface FileRouteTypes {
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '' | '/login' | '/map' | '/map/list' | '/map/report/$reportId'
+=======
+    | '/map/clear-cuttings/$clearCuttingId'
+  fileRoutesByTo: FileRoutesByTo
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
   to:
     | '/'
     | ''
     | '/login'
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     | '/map'
@@ -382,11 +430,21 @@ export interface FileRouteTypes {
 =======
     | '/administration'
 =======
+=======
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
     | '/users'
 >>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
     | '/clear-cuttings/map'
+<<<<<<< HEAD
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+=======
+    | '/map'
+    | '/map/list'
+    | '/map/clear-cuttings/$clearCuttingId'
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
   id:
     | '__root__'
     | '/'
@@ -405,13 +463,20 @@ export interface FileRouteTypes {
 =======
     | '/map'
     | '/map/list'
+<<<<<<< HEAD
     | '/map/report/$reportId'
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
     | '/_administration/users'
 >>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
     | '/clear-cuttings/map'
+<<<<<<< HEAD
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
+=======
+=======
+    | '/map/clear-cuttings/$clearCuttingId'
+>>>>>>> fc99bc1 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
   fileRoutesById: FileRoutesById
 }
 
@@ -512,6 +577,7 @@ export const routeTree = rootRoute
       "children": [
         "/map/list",
 <<<<<<< HEAD
+<<<<<<< HEAD
         "/map/clear-cuttings/$clearCuttingId"
       ]
 =======
@@ -520,6 +586,9 @@ export const routeTree = rootRoute
 =======
 =======
         "/map/report/$reportId"
+=======
+        "/map/clear-cuttings/$clearCuttingId"
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
       ]
     },
     "/map/list": {
@@ -536,6 +605,7 @@ export const routeTree = rootRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
     },
 <<<<<<< HEAD
+<<<<<<< HEAD
     "/map/list": {
       "filePath": "map/list.lazy.tsx",
       "parent": "/map"
@@ -546,6 +616,10 @@ export const routeTree = rootRoute
     "/map/report/$reportId": {
       "filePath": "map/report.$reportId.lazy.tsx",
 >>>>>>> 92f8973 (refactor(map): Change in routes management)
+=======
+    "/map/clear-cuttings/$clearCuttingId": {
+      "filePath": "map/clear-cuttings.$clearCuttingId.lazy.tsx",
+>>>>>>> 05e7205 (feat(clear-cutting-form): First implementation of clear-cutting-form (without the input))
       "parent": "/map"
     }
   }

@@ -25,8 +25,8 @@ export function AsideList() {
 							className="cursor-pointer"
 							onClick={() =>
 								navigate({
-									to: "/map/report/$reportId",
-									params: { reportId: clearCutting.id },
+									to: "/map/clear-cuttings/$clearCuttingId",
+									params: { clearCuttingId: clearCutting.id },
 								})
 							}
 						>

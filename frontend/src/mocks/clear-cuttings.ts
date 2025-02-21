@@ -1,8 +1,8 @@
 import type {
 	ClearCutting,
 	ClearCuttingPreview,
-	ClearCuttingStatus,
 	ClearCuttingsResponse,
+	ClearCuttingStatus,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
 import { range } from "@/shared/array";

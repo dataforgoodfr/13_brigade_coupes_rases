@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"; // Si tu utilises une fonction pour concaténer les classes
 import { ChevronDownIcon } from "lucide-react";
 import { Accordion } from "radix-ui";
 import * as React from "react";
 
 const AccordionItem = React.forwardRef<
-	React.ElementRef<typeof Accordion.Item>,
+	React.ComponentRef<typeof Accordion.Item>,
 	React.ComponentPropsWithoutRef<typeof Accordion.Item>
 >(({ children, className, ...props }, forwardedRef) => (
 	<Accordion.Item
@@ -21,7 +21,7 @@ const AccordionItem = React.forwardRef<
 AccordionItem.displayName = "AccordionItem";
 
 const AccordionTrigger = React.forwardRef<
-	React.ElementRef<typeof Accordion.Trigger>,
+	React.ComponentRef<typeof Accordion.Trigger>,
 	React.ComponentPropsWithoutRef<typeof Accordion.Trigger>
 >(({ children, className, ...props }, forwardedRef) => (
 	<Accordion.Header className="flex">
@@ -44,7 +44,7 @@ const AccordionTrigger = React.forwardRef<
 AccordionTrigger.displayName = "AccordionTrigger";
 
 const AccordionContent = React.forwardRef<
-	React.ElementRef<typeof Accordion.Content>,
+	React.ComponentRef<typeof Accordion.Content>,
 	React.ComponentPropsWithoutRef<typeof Accordion.Content>
 >(({ children, className, ...props }, forwardedRef) => (
 	<Accordion.Content
@@ -60,4 +60,29 @@ const AccordionContent = React.forwardRef<
 ));
 AccordionContent.displayName = "AccordionContent";
 
-export { AccordionContent, AccordionItem, AccordionTrigger };
+type AccordionFullItemProps = {
+	title: string;
+	children?: React.ReactNode;
+};
+
+function AccordionFullItem({ title, children }: AccordionFullItemProps) {
+	const val = React.useId();
+
+	return (
+		<>
+			<AccordionItem
+				value={val}
+				className="data-[state=closed]:border-b-2 data-[state=closed]:border-gray-200 data-[state=open]:border-b-0"
+			>
+				<AccordionTrigger className="cursor-pointer">{title}</AccordionTrigger>
+				<AccordionContent>
+					{children ??
+						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."}
+				</AccordionContent>
+			</AccordionItem>
+		</>
+	);
+}
+
+export { AccordionContent, AccordionFullItem, AccordionItem, AccordionTrigger };
+export type { AccordionFullItemProps };

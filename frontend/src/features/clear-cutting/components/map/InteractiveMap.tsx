@@ -9,7 +9,6 @@ const wholeFranceZoom = 7;
 
 export function InteractiveMap() {
 	const { setMap } = useMapInstance();
-
 	return (
 		<>
 			<main className="h-screen w-full z-0">
@@ -28,7 +27,7 @@ export function InteractiveMap() {
 				</MapContainer>
 			</main>
 
-			<div className="lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
+			<div className="m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
 				<Outlet />
 			</div>
 		</>

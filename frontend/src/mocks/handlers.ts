@@ -8,7 +8,7 @@ import { mockLogin, mockUsers } from "@/mocks/users";
 export const handlers = [
 	mockClearCuttings,
 	mockFilters,
-	mockClearCutting,
 	mockLogin,
+	mockClearCutting,
 	mockUsers,
 ];
