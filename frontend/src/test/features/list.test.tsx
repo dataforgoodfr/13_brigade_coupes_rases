@@ -6,7 +6,7 @@ describe("Clear cuttings list", () => {
 	it("should render list page", async () => {
 		renderApp({
 			user: volunteerMock,
-			route: "/clear-cuttings/map",
+			route: "/map/list",
 		});
 		await screen.findByText("Année de coupe");
 	});

@@ -106,16 +106,13 @@
 	}
 }
 
-
 @utility slide-down {
 	animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 @utility slide-up {
-
 	animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
-
 
 @layer base {
 	* {
