@@ -5,11 +5,9 @@ import { useAppDispatch } from "@/shared/hooks/store";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
-import type { ClearCuttingStatus } from "../../store/clear-cuttings";
+import { DISPLAY_PREVIEW_ZOOM_LEVEL, getAreaColor } from "@/features/clear-cutting/store/clear-cuttings";
 
 export function ClearCuttings() {
-	const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
-
 	const map = useMap();
 	const { browserLocation } = useGeolocation();
 	const [displayClearCuttingPreview, setDisplayClearCuttingPreview] =
@@ -56,19 +54,6 @@ export function ClearCuttings() {
 	});
 
 	useEffect(() => dispatchGeoBounds(), [dispatchGeoBounds]);
-
-	function getAreaColor(status: ClearCuttingStatus) {
-		switch (status) {
-			case "toValidate":
-				return "#FCAD02";
-			case "rejected":
-				return "#FF3300";
-			case "validated":
-				return "#204933";
-			case "waitingInformation":
-				return "#FCAD02";
-		}
-	}
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
