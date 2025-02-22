@@ -25,6 +25,8 @@
 		"@radix-ui/react-label": "^2.1.2",
 		"@radix-ui/react-slot": "^1.1.2",
 		"@radix-ui/react-toast": "^1.2.6",
+		"@radix-ui/react-toggle": "^1.1.2",
+		"@radix-ui/react-toggle-group": "^1.1.2",
 		"@reduxjs/toolkit": "^2.5.1",
 		"@tailwindcss/vite": "^4.0.3",
 		"@tanstack/react-router": "^1.99.6",
