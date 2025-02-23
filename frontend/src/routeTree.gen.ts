@@ -15,9 +15,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login'
 import { Route as AuthImport } from './routes/_auth'
+import { Route as AdministrationImport } from './routes/_administration'
 
 // Create Virtual Routes
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 const MapLazyImport = createFileRoute('/map')()
 =======
@@ -27,10 +29,18 @@ const IndexLazyImport = createFileRoute('/')()
 const MapListLazyImport = createFileRoute('/map/list')()
 const MapClearCuttingsClearCuttingIdLazyImport = createFileRoute(
   '/map/clear-cuttings/$clearCuttingId',
+=======
+const IndexLazyImport = createFileRoute('/')()
+const ClearCuttingsMapLazyImport = createFileRoute('/clear-cuttings/map')()
+const ClearCuttingsListLazyImport = createFileRoute('/clear-cuttings/list')()
+const AdministrationUsersLazyImport = createFileRoute(
+  '/_administration/users',
+>>>>>>> f27a541 (add users list for admin)
 )()
 
 // Create/Update Routes
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 const MapLazyRoute = MapLazyImport.update({
   id: '/map',
@@ -47,6 +57,8 @@ const AdministrationLazyRoute = AdministrationLazyImport.update({
 )
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
 
+=======
+>>>>>>> f27a541 (add users list for admin)
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
@@ -55,6 +67,11 @@ const LoginRoute = LoginImport.update({
 
 const AuthRoute = AuthImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdministrationRoute = AdministrationImport.update({
+  id: '/_administration',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,6 +98,14 @@ const MapClearCuttingsClearCuttingIdLazyRoute =
     ),
   )
 
+const AdministrationUsersLazyRoute = AdministrationUsersLazyImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdministrationRoute,
+} as any).lazy(() =>
+  import('./routes/_administration/users.lazy').then((d) => d.Route),
+)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -90,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/_administration': {
+      id: '/_administration'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AdministrationImport
       parentRoute: typeof rootRoute
     }
     '/_auth': {
@@ -107,6 +139,7 @@ declare module '@tanstack/react-router' {
       parentRoute: typeof rootRoute
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     '/map': {
       id: '/map'
       path: '/map'
@@ -119,6 +152,14 @@ declare module '@tanstack/react-router' {
       fullPath: '/administration'
       preLoaderRoute: typeof AdministrationLazyImport
       parentRoute: typeof rootRoute
+=======
+    '/_administration/users': {
+      id: '/_administration/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AdministrationUsersLazyImport
+      parentRoute: typeof AdministrationImport
+>>>>>>> f27a541 (add users list for admin)
     }
     '/clear-cuttings/list': {
       id: '/clear-cuttings/list'
@@ -147,6 +188,7 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+<<<<<<< HEAD
 interface MapLazyRouteChildren {
   MapListLazyRoute: typeof MapListLazyRoute
   MapClearCuttingsClearCuttingIdLazyRoute: typeof MapClearCuttingsClearCuttingIdLazyRoute
@@ -160,17 +202,34 @@ const MapLazyRouteChildren: MapLazyRouteChildren = {
 
 const MapLazyRouteWithChildren =
   MapLazyRoute._addFileChildren(MapLazyRouteChildren)
+=======
+interface AdministrationRouteChildren {
+  AdministrationUsersLazyRoute: typeof AdministrationUsersLazyRoute
+}
+
+const AdministrationRouteChildren: AdministrationRouteChildren = {
+  AdministrationUsersLazyRoute: AdministrationUsersLazyRoute,
+}
+
+const AdministrationRouteWithChildren = AdministrationRoute._addFileChildren(
+  AdministrationRouteChildren,
+)
+>>>>>>> f27a541 (add users list for admin)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '': typeof AuthRoute
   '/login': typeof LoginRoute
 <<<<<<< HEAD
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
 =======
   '/administration': typeof AdministrationLazyRoute
+=======
+  '/users': typeof AdministrationUsersLazyRoute
+>>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -181,11 +240,15 @@ export interface FileRoutesByTo {
   '': typeof AuthRoute
   '/login': typeof LoginRoute
 <<<<<<< HEAD
+<<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
 =======
   '/administration': typeof AdministrationLazyRoute
+=======
+  '/users': typeof AdministrationUsersLazyRoute
+>>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -194,14 +257,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
+  '/_administration': typeof AdministrationRouteWithChildren
   '/_auth': typeof AuthRoute
   '/login': typeof LoginRoute
+<<<<<<< HEAD
 <<<<<<< HEAD
   '/map': typeof MapLazyRouteWithChildren
   '/map/list': typeof MapListLazyRoute
   '/map/clear-cuttings/$clearCuttingId': typeof MapClearCuttingsClearCuttingIdLazyRoute
 =======
   '/administration': typeof AdministrationLazyRoute
+=======
+  '/_administration/users': typeof AdministrationUsersLazyRoute
+>>>>>>> f27a541 (add users list for admin)
   '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
   '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -214,11 +282,15 @@ export interface FileRouteTypes {
     | ''
     | '/login'
 <<<<<<< HEAD
+<<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
 =======
     | '/administration'
+=======
+    | '/users'
+>>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
     | '/clear-cuttings/map'
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -228,25 +300,34 @@ export interface FileRouteTypes {
     | ''
     | '/login'
 <<<<<<< HEAD
-    | '/map'
-    | '/map/list'
-    | '/map/clear-cuttings/$clearCuttingId'
-=======
-    | '/administration'
-    | '/clear-cuttings/list'
-    | '/clear-cuttings/map'
->>>>>>> 200571d (feat(storybook): Add basic storybook)
-  id:
-    | '__root__'
-    | '/'
-    | '/_auth'
-    | '/login'
 <<<<<<< HEAD
     | '/map'
     | '/map/list'
     | '/map/clear-cuttings/$clearCuttingId'
 =======
     | '/administration'
+=======
+    | '/users'
+>>>>>>> f27a541 (add users list for admin)
+    | '/clear-cuttings/list'
+    | '/clear-cuttings/map'
+>>>>>>> 200571d (feat(storybook): Add basic storybook)
+  id:
+    | '__root__'
+    | '/'
+    | '/_administration'
+    | '/_auth'
+    | '/login'
+<<<<<<< HEAD
+<<<<<<< HEAD
+    | '/map'
+    | '/map/list'
+    | '/map/clear-cuttings/$clearCuttingId'
+=======
+    | '/administration'
+=======
+    | '/_administration/users'
+>>>>>>> f27a541 (add users list for admin)
     | '/clear-cuttings/list'
     | '/clear-cuttings/map'
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -255,12 +336,16 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  AdministrationRoute: typeof AdministrationRouteWithChildren
   AuthRoute: typeof AuthRoute
   LoginRoute: typeof LoginRoute
+<<<<<<< HEAD
 <<<<<<< HEAD
   MapLazyRoute: typeof MapLazyRouteWithChildren
 =======
   AdministrationLazyRoute: typeof AdministrationLazyRoute
+=======
+>>>>>>> f27a541 (add users list for admin)
   ClearCuttingsListLazyRoute: typeof ClearCuttingsListLazyRoute
   ClearCuttingsMapLazyRoute: typeof ClearCuttingsMapLazyRoute
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -268,12 +353,16 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  AdministrationRoute: AdministrationRouteWithChildren,
   AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
+<<<<<<< HEAD
 <<<<<<< HEAD
   MapLazyRoute: MapLazyRouteWithChildren,
 =======
   AdministrationLazyRoute: AdministrationLazyRoute,
+=======
+>>>>>>> f27a541 (add users list for admin)
   ClearCuttingsListLazyRoute: ClearCuttingsListLazyRoute,
   ClearCuttingsMapLazyRoute: ClearCuttingsMapLazyRoute,
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -290,12 +379,16 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/_administration",
         "/_auth",
         "/login",
+<<<<<<< HEAD
 <<<<<<< HEAD
         "/map"
 =======
         "/administration",
+=======
+>>>>>>> f27a541 (add users list for admin)
         "/clear-cuttings/list",
         "/clear-cuttings/map"
 >>>>>>> 200571d (feat(storybook): Add basic storybook)
@@ -304,12 +397,19 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.lazy.tsx"
     },
+    "/_administration": {
+      "filePath": "_administration.tsx",
+      "children": [
+        "/_administration/users"
+      ]
+    },
     "/_auth": {
       "filePath": "_auth.tsx"
     },
     "/login": {
       "filePath": "login.tsx"
     },
+<<<<<<< HEAD
 <<<<<<< HEAD
     "/map": {
       "filePath": "map.lazy.tsx",
@@ -320,6 +420,11 @@ export const routeTree = rootRoute
 =======
     "/administration": {
       "filePath": "administration.lazy.tsx"
+=======
+    "/_administration/users": {
+      "filePath": "_administration/users.lazy.tsx",
+      "parent": "/_administration"
+>>>>>>> f27a541 (add users list for admin)
     },
     "/clear-cuttings/list": {
       "filePath": "clear-cuttings.list.lazy.tsx"
