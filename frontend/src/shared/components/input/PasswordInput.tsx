@@ -10,7 +10,12 @@ export const PasswordInput = forwardRef<
 	const [showPassword, setShowPassword] = useState(false);
 	return (
 		<div className="flex relative">
-			<Input type={showPassword ? "text" : "password"} ref={ref} {...props} />
+			<Input
+				type={showPassword ? "text" : "password"}
+				autoComplete="current-password"
+				ref={ref}
+				{...props}
+			/>
 			{!showPassword ? (
 				<EyeOffIcon
 					className={iconClassName}

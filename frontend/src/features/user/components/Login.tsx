@@ -1,90 +1,24 @@
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/shared/components/Button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/shared/components/Form";
-import { Input } from "@/shared/components/input/Input";
-
-import {
-	type LoginRequest,
-	loginRequestSchema,
-} from "@/features/user/store/user";
-import { loginThunk } from "@/features/user/store/user.slice";
-import { useAppDispatch } from "@/shared/hooks/store";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
+import preview from "@/assets/preview.png";
+import { LoginForm } from "@/features/user/components/LoginForm";
 export function Login() {
-	const form = useForm<LoginRequest>({
-		resolver: zodResolver(loginRequestSchema),
-		defaultValues: { email: "", password: "" },
-	});
-	const dispatch = useAppDispatch();
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-2xl">Connexion</CardTitle>
-				<CardDescription>
-					Entrez votre email et mot de passe ci-dessous pour vous connecter
-				</CardDescription>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit((login) => dispatch(loginThunk(login)))}
-						className="space-y-8"
-					>
-						<FormField
-							control={form.control}
-							name="email"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Email</FormLabel>
-									<FormControl>
-										<Input placeholder="john.doe@email.com" {...field} />
-									</FormControl>
-									<FormDescription>Votre email</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="password"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Mot de passe</FormLabel>
-									<FormControl>
-										<Input
-											autoComplete="current-password"
-											type="password"
-											placeholder=""
-											{...field}
-										/>
-									</FormControl>
-									<FormDescription>Votre mot de passe</FormDescription>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<Button className="w-full" type="submit">
-							Se connecter
-						</Button>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
+		<div className="flex w-full h-full">
+			<div className="w-full md:w-1/2 flex flex-col items-center justify-center">
+				<div className="w-3/4 sm:w-2/4">
+					<LoginForm />
+				</div>
+			</div>
+			<div className="hidden md:flex w-1/2 bg-gradient-to-r from-secondary to-primary  flex-col items-center justify-center ">
+				<div className="w-2/4">
+					<img alt="Preview" src={preview} className=" object-cover" />
+					<h1 className="text-2xl 2xl:text-4xl/6  text-primary-foreground text-center font-semibold font-poppins mt-14">
+						Visualiser les coupes rases abusives
+					</h1>
+					<h2 className="text-neutral-200 font-poppins text-center font-light">
+						Une seule source de données fiable xxx
+					</h2>
+				</div>
+			</div>
+		</div>
 	);
 }

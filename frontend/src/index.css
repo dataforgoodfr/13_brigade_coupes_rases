@@ -61,6 +61,8 @@
 }
 
 @theme inline {
+	--font-poppins: Poppins, sans-serif;
+	--font-inter: Inter, sans-serif;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);

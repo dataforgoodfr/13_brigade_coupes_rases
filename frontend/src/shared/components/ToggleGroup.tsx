@@ -8,21 +8,36 @@ import {
 } from "@/shared/components/Toggle";
 import { type ComponentProps, createContext, useContext } from "react";
 
+interface ToggleGroupImplSingleProps<T extends string = string> {
+	type: "single";
+	value?: T;
+	defaultValue?: T;
+	onValueChange?(value: T): void;
+}
+interface ToggleGroupImplMultipleProps<T extends string = string> {
+	type: "multiple";
+	value?: T[];
+	defaultValue?: T[];
+	onValueChange?(value: T[]): void;
+}
 const ToggleGroupContext = createContext<ToggleVariantsProps>({
 	size: "default",
 	variant: "default",
 });
-export type ToggleGroupProps = ComponentProps<
-	typeof ToggleGroupPrimitive.Root
+
+export type ToggleGroupProps<T extends string = string> = Omit<
+	ComponentProps<typeof ToggleGroupPrimitive.Root>,
+	"type" | "value" | "defaultValue" | "onValueChange"
 > &
+	(ToggleGroupImplSingleProps<T> | ToggleGroupImplMultipleProps<T>) &
 	ToggleVariantsProps;
-export function ToggleGroup({
+export function ToggleGroup<Value extends string>({
 	className,
 	variant,
 	size,
 	children,
 	...props
-}: ToggleGroupProps) {
+}: ToggleGroupProps<Value>) {
 	return (
 		<ToggleGroupPrimitive.Root
 			data-slot="toggle-group"
