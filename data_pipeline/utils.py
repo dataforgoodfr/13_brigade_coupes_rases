@@ -9,9 +9,10 @@ class S3Manager:
         load_dotenv(f".env")
         self.s3 = boto3.client(
             service_name="s3",
-            region_name=region,
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+            region_name="fr-par",
+            endpoint_url=f"https://s3.fr-par.scw.cloud",
+            aws_access_key_id=os.getenv("SCW_ACCESS_KEY"),
+            aws_secret_access_key=os.getenv("SCW_SECRET_KEY")
         )
     
     def list_bucket_contents(self, bucket_name):
