@@ -6,7 +6,7 @@ const wholeFranceZoom = 7;
 export function InteractiveMap() {
 	return (
 		<MapContainer
-			className="h-full"
+			className="h-full z-0"
 			center={franceCenter}
 			zoom={wholeFranceZoom}
 			scrollWheelZoom={true}
