@@ -49,3 +49,17 @@ class S3Manager:
         except Exception as e:
             print(f"❌ Erreur lors du téléchargement du fichier depuis S3: {e}")
 
+    def delete_from_s3(self, bucket_name, s3_key):
+        try:
+            self.s3.delete_object(Bucket=bucket_name, Key=s3_key)
+            print(f"✅ Fichier supprimé avec succès : {s3_key}")
+        except Exception as e:
+            print(f"❌ Erreur lors de la suppression du fichier depuis S3: {e}")
+    
+    def upload_to_s3(self, bucket_name, file_path, s3_key):
+        try:
+            with open(file_path, "rb") as f:
+                self.s3.upload_fileobj(f, bucket_name, s3_key)
+            print(f"✅ Fichier uploadé avec succès : {s3_key}")
+        except Exception as e:
+            print(f"❌ Erreur lors de l'upload du fichier vers S3: {e}")
