@@ -22,7 +22,10 @@ services:
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
+    volumes:
+      - ./backend:/code:cached
     container_name: coupes-rases-backend
+    command: 'tail -f /dev/null'
     ports:
       - "8000:8000"
     depends_on:
