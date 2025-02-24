@@ -16,10 +16,12 @@ async def home():
     return {"message": "Hello, World!"}
 
 
-def start_server():
+def start_server(
+    host: str, port: int, reload: bool, proxy_headers: bool, forwarded_allow_ips: str
+):
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host, port, reload, proxy_headers, forwarded_allow_ips)
 
 
 if __name__ == "__main__":

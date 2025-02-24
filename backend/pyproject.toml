@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "python_template"
+name = "app"
 version = "0.1.0"
 description = "Template"
 authors = ["DataForGood"]
@@ -32,7 +32,7 @@ httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
 [tool.poetry.scripts]
-dev = "uvicorn app.main:app --host=0.0.0.0 --port=8000 --proxy-headers --forwarded-allow-ips=*"
+devserver = "app.main:start_server(host='0.0.0.0', port=8000, reload=True, proxy_headers=True, forwarded_allow_ips='*')"
 
 [tool.ruff]
 # Same as Black.

@@ -1,7 +1,7 @@
 FROM python:3.11
 
 # Set working directory
-WORKDIR /code/backend
+WORKDIR /code
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
@@ -12,7 +12,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Copy Poetry configuration files
 COPY ./README.md ./poetry.lock ./pyproject.toml /code/
 
-COPY ../../backend /code/backend
+COPY ../../backend /code/
 
 # Install dependencies (runtime only)
 RUN poetry install --without dev
