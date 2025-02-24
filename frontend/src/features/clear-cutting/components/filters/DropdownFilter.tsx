@@ -1,24 +1,23 @@
+import { BUTTON_PROPS } from "@/features/clear-cutting/components/filters/utils";
+import { Button } from "@/shared/components/Button";
+import { DropdownChevron } from "@/shared/components/dropdown/DropdownChevron";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/shared/components/Button";
-import { ChevronDown } from "lucide-react";
-import type { PropsWithChildren } from "react";
+} from "@/shared/components/dropdown/DropdownMenu";
+import { type PropsWithChildren, useState } from "react";
 
 interface Props extends PropsWithChildren {
 	filter: string;
 }
 export function DropdownFilter({ children, filter }: Props) {
+	const [open, setOpen] = useState(false);
 	return (
-		<DropdownMenu>
+		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger>
-				<Button
-					variant="outline"
-					className="text-secondary border-secondary rounded-full "
-				>
-					{filter} <ChevronDown />
+				<Button {...BUTTON_PROPS}>
+					{filter} <DropdownChevron open={open} />
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent>{children}</DropdownMenuContent>

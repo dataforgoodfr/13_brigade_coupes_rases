@@ -9,19 +9,19 @@ import {
 	forwardRef,
 } from "react";
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+export const DropdownMenu = DropdownMenuPrimitive.Root;
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 
-const DropdownMenuGroup = DropdownMenuPrimitive.Group;
+export const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
-const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+export const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
 
-const DropdownMenuSub = DropdownMenuPrimitive.Sub;
+export const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
-const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
+export const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
-const DropdownMenuSubTrigger = forwardRef<
+export const DropdownMenuSubTrigger = forwardRef<
 	ComponentRef<typeof DropdownMenuPrimitive.SubTrigger>,
 	ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
 		inset?: boolean;
@@ -184,13 +184,3 @@ export const DropdownMenuShortcut = ({
 	);
 };
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut";
-
-export {
-	DropdownMenu,
-	DropdownMenuGroup,
-	DropdownMenuPortal,
-	DropdownMenuRadioGroup,
-	DropdownMenuSub,
-	DropdownMenuSubTrigger,
-	DropdownMenuTrigger,
-};

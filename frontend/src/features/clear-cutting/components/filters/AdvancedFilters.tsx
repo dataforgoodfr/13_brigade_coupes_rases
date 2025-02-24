@@ -1,13 +1,12 @@
+import { DropdownFilter } from "@/features/clear-cutting/components/filters/DropdownFilter";
+import { MultiSelectComboboxFilter } from "@/features/clear-cutting/components/filters/MultiSelectComboboxFilter";
 import {
 	filtersSlice,
 	getFiltersThunk,
 	selectCutYears,
 	selectDepartments,
 } from "@/features/clear-cutting/store/filters.slice";
-import {
-	MultiSelectCombobox,
-	type MultiSelectComboboxProps,
-} from "@/shared/components/select/MultiSelectCombobox";
+import { Slider } from "@/shared/components/Slider";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import type { NamedId, SelectableItem } from "@/shared/items";
 import clsx from "clsx";
@@ -17,29 +16,6 @@ const numberTranslator = ({ item }: SelectableItem<number>) => item.toString();
 const namedIdTranslator = ({ item }: SelectableItem<NamedId>) =>
 	item.name.toString();
 
-interface FiltersMultiSelectComboboxProps<TItem>
-	extends MultiSelectComboboxProps<TItem> {
-	label: string;
-}
-function FiltersMultiSelectCombobox<TItem>({
-	...props
-}: FiltersMultiSelectComboboxProps<TItem>) {
-	return (
-		<MultiSelectCombobox
-			{...props}
-			commandInputProps={{
-				...props.commandInputProps,
-				placeholder: props.label,
-			}}
-			buttonProps={{
-				...props.buttonProps,
-				children: props.label,
-				variant: "outline",
-				className: "rounded-full text-secondary border-secondary",
-			}}
-		/>
-	);
-}
 interface Props {
 	className?: string;
 }
@@ -53,7 +29,7 @@ export function AdvancedFilters({ className }: Props) {
 	}, [dispatch]);
 	return (
 		<div className={clsx("flex flex-wrap gap-1", className)}>
-			<FiltersMultiSelectCombobox
+			<MultiSelectComboboxFilter
 				label="Années de coupe"
 				getItemLabel={numberTranslator}
 				getItemValue={numberTranslator}
@@ -62,7 +38,7 @@ export function AdvancedFilters({ className }: Props) {
 					dispatch(filtersSlice.actions.toggleCutYear(cutYear))
 				}
 			/>
-			<FiltersMultiSelectCombobox
+			<MultiSelectComboboxFilter
 				label="Départements"
 				getItemLabel={namedIdTranslator}
 				getItemValue={namedIdTranslator}
@@ -71,6 +47,9 @@ export function AdvancedFilters({ className }: Props) {
 					dispatch(filtersSlice.actions.toggleDepartment(department))
 				}
 			/>
+			<DropdownFilter filter="Superficie">
+				<Slider />
+			</DropdownFilter>
 		</div>
 	);
 }

@@ -13,9 +13,12 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/shared/components/Form";
-import { ToggleGroup, ToggleGroupItem } from "@/shared/components/ToggleGroup";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
+import {
+	ToggleGroup,
+	ToggleGroupItem,
+} from "@/shared/components/toggle-group/ToggleGroup";
 import { useAppDispatch } from "@/shared/hooks/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogInIcon } from "lucide-react";

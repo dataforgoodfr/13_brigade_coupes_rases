@@ -2,7 +2,7 @@ import {
 	ToggleGroup,
 	ToggleGroupItem,
 	type ToggleGroupProps,
-} from "@/shared/components/ToggleGroup";
+} from "@/shared/components/toggle-group/ToggleGroup";
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 
