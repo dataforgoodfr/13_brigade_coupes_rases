@@ -11,6 +11,8 @@
 			"src/routeTree.gen.ts",
 			"node_modules",
 			"dev-dist",
+			".storybook",
+			"storybook-static",
 			"dist",
 			"public/mockServiceWorker.js"
 		]
