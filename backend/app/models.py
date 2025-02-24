@@ -49,7 +49,7 @@ class Department(Base):
     __tablename__ = "departments"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String, index=True)
+    code = Column(Integer, index=True)
     users = relationship("User", secondary=user_department, back_populates="departments")
     clear_cuts = relationship("ClearCut", back_populates="department")
 

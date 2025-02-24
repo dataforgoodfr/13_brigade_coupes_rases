@@ -25,7 +25,7 @@ def upgrade() -> None:
     op.create_table(
         "departments",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("code", sa.String(), nullable=True),
+        sa.Column("code", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_departments_code"), "departments", ["code"], unique=False)
