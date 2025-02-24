@@ -1,8 +1,12 @@
 devserver:
 	poetry run python -m app.main --host='0.0.0.0' --port=8000 --reload --proxy-headers --forwarded-allow-ips='*'
 
-migrate:
+generate-migration:
 	poetry run alembic revision --autogenerate -m "migration"
 
-upgrade:
+upgrade-db:
 	poetry run alembic upgrade head
+
+reset-db:
+	poetry run alembic downgrade base
+
