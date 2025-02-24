@@ -1,7 +1,11 @@
 import json
+import logging
 import requests
 from datetime import datetime
 
+# Configuration des logs
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def check_tif_in_s3(bucket_name, s3_key_prefix, s3_hook, **kwargs):
     not_in_s3 = True
@@ -33,7 +37,7 @@ def data_update(query: str, bucket_name: str, s3_key_metadata: str, s3_hook, **k
     date_extracted = datetime.strptime(data["updated"].split(".")[0], date_format)
 
     do_update = base_date < date_extracted
-    print(f"✅ Inspection de la metadata effectuée, mise à jour requise : {do_update}")
+    logger.info(f"✅ Inspection de la metadata effectuée, mise à jour requise : {do_update}")
 
     kwargs['ti'].xcom_push(key='do_update', value=do_update)
     kwargs['ti'].xcom_push(key='metadata', value=data)
@@ -44,7 +48,7 @@ def extract_tif_data_and_upload(url: str, s3_key: str, bucket_name: str, s3_hook
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         s3_hook.load_file_obj(r.raw, s3_key, bucket_name)
-    print(f"✅ Fichier uploadé avec succès sur S3: {s3_key}")
+    logger.info(f"✅ Fichier uploadé avec succès sur S3: {s3_key}")
 
 
 def update_metadata(bucket_name, s3_key, s3_hook, incr_version=0.1, **kwargs):
@@ -80,5 +84,3 @@ def update_metadata(bucket_name, s3_key, s3_hook, incr_version=0.1, **kwargs):
     s3_hook.load_string(meta_data_json, key=s3_key, bucket_name=bucket_name, replace=True)
 
     kwargs['ti'].xcom_push(key='update_meta_data', value=meta_data)
-
-

@@ -25,13 +25,13 @@ url = config["url"]
 
 # Définition du DAG
 with DAG(
-    'data_update_and_extract',
+    dag_id='etl_bcr_extract_sufosat',
     default_args={
-        'owner': 'airflow',
-        'start_date': datetime(2025, 2, 23),
+        'owner': 'dataeng',
         'retries': 1,
+        'start_date': datetime(2025, 2, 23),
     },
-    schedule_interval=timedelta(minutes=5),  
+    schedule_interval='@daily',  
     catchup=False,
 ) as dag:
     
@@ -66,7 +66,6 @@ with DAG(
         provide_context=True,
     )
 
-
     # Contrôle de l'exécution de extract_task basé sur do_update
     def conditionally_run_extract(**kwargs):
         do_update = kwargs['ti'].xcom_pull(task_ids='data_update', key='do_update')
@@ -88,5 +87,5 @@ with DAG(
         provide_context=True,
     )
 
-    file_in_s3 >> update_task >> condition_task >> [extract_task, skip_task] 
+    [file_in_s3, update_task] >> condition_task >> [extract_task, skip_task] 
     extract_task >> update_metadata
