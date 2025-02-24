@@ -1,4 +1,9 @@
-import { Button } from "@/components/ui/button";
+import {
+	type Region,
+	selectRegions,
+	toggleRegion,
+} from "@/features/admin/store/users-filters.slice";
+import { Button } from "@/shared/components/button/Button";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -6,12 +11,7 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-	type Region,
-	selectRegions,
-	toggleRegion,
-} from "@/features/admin/store/users-filters.slice";
+} from "@/shared/components/dropdown/DropdownMenu";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { useEffect, useState } from "react";
 

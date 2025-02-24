@@ -2,7 +2,6 @@ import { z } from "zod";
 import { boundsSchema } from "./types";
 
 const filtersRequestSchema = z.object({
-	tags: z.array(z.string()),
 	cutYears: z.array(z.number()),
 	areaMeters: z.number().optional(),
 	geoBounds: boundsSchema,

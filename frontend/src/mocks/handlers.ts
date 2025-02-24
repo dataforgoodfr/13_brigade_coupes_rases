@@ -1,4 +1,11 @@
-import { mockClearCuttings, mockFilters } from "@/mocks/clear-cuttings";
+import { mockClearCuttings } from "@/mocks/clear-cuttings";
+import { mockFilters } from "@/mocks/filters";
 import { mockLogin, mockUsers } from "@/mocks/users";
 
-export const handlers = [mockClearCuttings, mockFilters, mockLogin, mockUsers];
+export const handlers = [
+	mockClearCuttings,
+	mockFilters,
+	mockLogin,
+	mockFilters,
+	mockUsers,
+];

@@ -8,6 +8,6 @@ describe("Clear cuttings list", () => {
 			user: volunteerMock,
 			route: "/clear-cuttings/map",
 		});
-		await screen.findByText("Année de coupe");
+		await screen.findByText("Années de coupe");
 	});
 });

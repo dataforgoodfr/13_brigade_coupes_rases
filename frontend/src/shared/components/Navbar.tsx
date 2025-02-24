@@ -3,7 +3,8 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/dropdown/DropdownMenu";
+
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
 import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
 import { NavbarLink } from "@/shared/components/NavbarLink";
