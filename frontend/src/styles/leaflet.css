@@ -1,0 +1,13 @@
+.leaflet-popup {
+    > .leaflet-popup-content-wrapper {
+        border-radius: 20px;
+
+        > .leaflet-popup-content {
+            margin: calc(var(--spacing)* 6); /* m-6 */
+        }
+    }
+
+    .leaflet-popup-tip-container {
+        display: none;
+    }
+}

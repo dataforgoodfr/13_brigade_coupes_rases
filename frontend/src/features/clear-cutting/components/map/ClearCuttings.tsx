@@ -5,7 +5,11 @@ import { useAppDispatch } from "@/shared/hooks/store";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
-import { DISPLAY_PREVIEW_ZOOM_LEVEL, getAreaColor } from "@/features/clear-cutting/store/clear-cuttings";
+import {
+	DISPLAY_PREVIEW_ZOOM_LEVEL,
+	getAreaColor,
+} from "@/features/clear-cutting/store/clear-cuttings";
+import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
 
 export function ClearCuttings() {
 	const map = useMap();
@@ -65,7 +69,9 @@ export function ClearCuttings() {
 						color={getAreaColor(status)}
 						weight={0}
 						fillOpacity={0.75}
-					/>
+					>
+						<ClearCuttingMapPopUp />
+					</Polygon>
 				),
 			);
 		}
