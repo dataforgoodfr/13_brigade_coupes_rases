@@ -14,10 +14,11 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Button, type ButtonProps } from "@/shared/components/Button";
+import { Button, type ButtonProps } from "@/shared/components/button/Button";
+import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import type { SelectableItem } from "@/shared/items";
 
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check } from "lucide-react";
 import { useMemo, useState } from "react";
 
 export interface MultiSelectComboboxProps<TItem> {
@@ -29,6 +30,7 @@ export interface MultiSelectComboboxProps<TItem> {
 	items: readonly SelectableItem<TItem>[];
 	getItemLabel: (item: SelectableItem<TItem>) => string;
 	getItemValue: (item: SelectableItem<TItem>) => string;
+	closeAfterToggle?: boolean;
 }
 type SelectableItemEnhanced<T> = SelectableItem<T> & {
 	label: string;
@@ -43,6 +45,7 @@ export function MultiSelectCombobox<TITem>({
 	commandInputProps,
 	commandEmptyProps,
 	onItemsUnselected,
+	closeAfterToggle = false,
 }: MultiSelectComboboxProps<TITem>) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState("");
@@ -65,13 +68,13 @@ export function MultiSelectCombobox<TITem>({
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button {...buttonProps} aria-expanded={open}>
+				<ExpandButton open={open} {...buttonProps}>
 					{value
 						? enhancedItems.find(({ label }) => label === value)?.label
 						: buttonProps?.children}
-					{!open ? <ChevronDown /> : <ChevronUp />}
-				</Button>
+				</ExpandButton>
 			</PopoverTrigger>
+
 			<PopoverContent>
 				<>
 					<Command>
@@ -86,7 +89,9 @@ export function MultiSelectCombobox<TITem>({
 										onSelect={(cutYear) => {
 											onItemToggled?.(item);
 											setValue(cutYear === value ? "" : cutYear);
-											setOpen(false);
+											if (closeAfterToggle) {
+												setOpen(false);
+											}
 										}}
 									>
 										{label}

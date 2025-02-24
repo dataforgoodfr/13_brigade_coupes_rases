@@ -1,4 +1,3 @@
-import { BUTTON_PROPS } from "@/features/clear-cutting/components/filters/utils";
 import {
 	MultiSelectCombobox,
 	type MultiSelectComboboxProps,
@@ -20,7 +19,6 @@ export function MultiSelectComboboxFilter<TItem>({
 				placeholder: props.label,
 			}}
 			buttonProps={{
-				...BUTTON_PROPS,
 				...props.buttonProps,
 				children: props.label,
 			}}

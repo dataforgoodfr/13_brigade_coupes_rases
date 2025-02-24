@@ -3,6 +3,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 interface Props {
 	open: boolean;
 }
-export function DropdownChevron({ open }: Props) {
+export function ExpandChevron({ open }: Props) {
 	return open ? <ChevronUp /> : <ChevronDown />;
 }

@@ -1,4 +1,7 @@
-import { Button, type ButtonVariantsProps } from "@/shared/components/Button";
+import {
+	Button,
+	type ButtonVariantsProps,
+} from "@/shared/components/button/Button";
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "@storybook/test";
 import { MailIcon } from "lucide-react";

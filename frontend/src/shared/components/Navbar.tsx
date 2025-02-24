@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
 import {
 	DropdownMenuContent,
 	DropdownMenuItem,

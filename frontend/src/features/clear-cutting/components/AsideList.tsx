@@ -7,13 +7,13 @@ export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
 
 	return (
-		<div className="flex flex-col">
+		<div className="flex flex-col  h-full  ">
 			<h1 className="text-2xl 2xl:text-4xl/6  text-secondary text-start font-semibold font-poppins mt-14">
 				COUPES RASES
 			</h1>
-			<div className="px-5">
-				<AdvancedFilters className="mt-6" />
-				<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 overflow-auto mt-6">
+			<AdvancedFilters className="mt-6 px-5" />
+			<div className=" px-5 overflow-auto">
+				<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 ">
 					{data?.clearCuttingPreviews.map((clearCutting) => (
 						<li
 							key={clearCutting.id}

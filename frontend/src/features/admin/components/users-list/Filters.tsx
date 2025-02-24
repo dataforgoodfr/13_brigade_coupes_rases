@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -14,6 +13,7 @@ import {
 	setRole,
 } from "@/features/admin/store/users-filters.slice";
 import { type Role, USER_ROLES } from "@/features/user/store/user";
+import { Input } from "@/shared/components/input/Input";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { debounce } from "lodash-es";
 import { useState } from "react";

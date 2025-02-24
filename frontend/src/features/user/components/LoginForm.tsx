@@ -4,7 +4,6 @@ import {
 	loginRequestSchema,
 } from "@/features/user/store/user";
 import { loginThunk } from "@/features/user/store/user.slice";
-import { Button } from "@/shared/components/Button";
 import {
 	Form,
 	FormControl,
@@ -13,6 +12,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/shared/components/Form";
+import { Button } from "@/shared/components/button/Button";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import {

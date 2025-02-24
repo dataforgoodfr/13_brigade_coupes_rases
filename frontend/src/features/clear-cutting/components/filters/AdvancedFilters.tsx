@@ -1,5 +1,3 @@
-import { DropdownFilter } from "@/features/clear-cutting/components/filters/DropdownFilter";
-import { MultiSelectComboboxFilter } from "@/features/clear-cutting/components/filters/MultiSelectComboboxFilter";
 import {
 	filtersSlice,
 	getFiltersThunk,
@@ -7,6 +5,8 @@ import {
 	selectDepartments,
 } from "@/features/clear-cutting/store/filters.slice";
 import { Slider } from "@/shared/components/Slider";
+import { DropdownFilter } from "@/shared/components/dropdown/DropdownFilter";
+import { MultiSelectComboboxFilter } from "@/shared/components/select/MultiSelectComboboxFilter";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import type { NamedId, SelectableItem } from "@/shared/items";
 import clsx from "clsx";

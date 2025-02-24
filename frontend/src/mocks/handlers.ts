@@ -7,6 +7,5 @@ export const handlers = [
 	mockFilters,
 	mockLogin,
 	mockFilters,
-  mockUsers
+	mockUsers,
 ];
-
