@@ -5,10 +5,20 @@ from app.models import User, Department, ClearCut
 
 
 def test_user_creation(db):
-    # Test basic user creation
-    user = User(firstname="John", lastname="Doe", email="john.doe@example.com", role="user")
+    user = User(
+        firstname="Tétras", lastname="Foret", email="tetras.foret@example.com", role="volunteer"
+    )
     db.add(user)
     db.commit()
+
+    with pytest.raises(ValueError) as exc_info:
+        User(
+            firstname="Invalid",
+            lastname="User",
+            email="invalid.user@example.com",
+            role="not_a_valid_role",
+        )
+    assert str(exc_info.value) == "Role must be one of: admin, viewer, volunteer"
 
     assert user.id is not None
     assert user.created_at is not None
@@ -17,8 +27,7 @@ def test_user_creation(db):
 
 
 def test_department_creation(db):
-    # Test department creation
-    department = Department(code="DEP001")
+    department = Department(code=75)
     db.add(department)
     db.commit()
 
@@ -26,36 +35,52 @@ def test_department_creation(db):
 
 
 def test_clear_cut_creation(db):
-    # Test clear cut creation with geometry
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=15.5,
-        location=WKTElement("POINT(45.5 -122.7)"),
-        boundary=WKTElement("POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"),
+        location=WKTElement("POINT(48.8566 2.3522)"),
+        boundary=WKTElement(
+            "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+        ),
         status="pending",
     )
     db.add(clear_cut)
     db.commit()
+
+    with pytest.raises(ValueError) as exc_info:
+        ClearCut(
+            cut_date=datetime.now(),
+            slope_percentage=15.5,
+            location=WKTElement("POINT(48.8566 2.3522)"),
+            boundary=WKTElement(
+                "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+            ),
+            status="invalid_status",
+        )
+    assert str(exc_info.value) == "Status must be one of: pending, validated"
 
     assert clear_cut.id is not None
     assert clear_cut.created_at is not None
 
 
 def test_associations(db):
-    # Create test data
     user = User(
-        firstname="Jane", lastname="Smith", email="jane.smith@example.com", role="manager"
+        firstname="Houba",
+        lastname="Houba",
+        email="houba.houba@marsupilami.com",
+        role="volunteer",
     )
-    department = Department(code="DEP002")
+    department = Department(code="75")
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=20.0,
-        location=WKTElement("POINT(45.5 -122.7)"),
-        boundary=WKTElement("POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"),
-        status="approved",
+        location=WKTElement("POINT(48.8566 2.3522)"),
+        boundary=WKTElement(
+            "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+        ),
+        status="validated",
     )
 
-    # Test associations
     user.departments.append(department)
     user.clear_cuts.append(clear_cut)
     clear_cut.department = department
@@ -63,7 +88,6 @@ def test_associations(db):
     db.add_all([user, department, clear_cut])
     db.commit()
 
-    # Verify associations
     assert department in user.departments
     assert clear_cut in user.clear_cuts
     assert clear_cut.department == department

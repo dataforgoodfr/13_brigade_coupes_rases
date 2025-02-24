@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey, Flo
 from geoalchemy2 import Geometry
 from app.database import Base
 from datetime import datetime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 
 
 # FIXME: This is just an example model. We should remove this and create our own models
@@ -32,6 +32,8 @@ user_clear_cut = Table(
 class User(Base):
     __tablename__ = "users"
 
+    ROLES = ["admin", "viewer", "volunteer"]
+
     id = Column(Integer, primary_key=True, index=True)
     firstname = Column(String, index=True)
     lastname = Column(String, index=True)
@@ -43,6 +45,12 @@ class User(Base):
 
     departments = relationship("Department", secondary=user_department, back_populates="users")
     clear_cuts = relationship("ClearCut", secondary=user_clear_cut, back_populates="users")
+
+    @validates("role")
+    def validate_role(self, key, value):
+        if value not in User.ROLES:
+            raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
+        return value
 
 
 class Department(Base):
@@ -57,6 +65,8 @@ class Department(Base):
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
 
+    STATUSES = ["pending", "validated"]
+
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
     slope_percentage = Column(Float, index=True)
@@ -70,3 +80,9 @@ class ClearCut(Base):
 
     department = relationship("Department", back_populates="clear_cuts")
     users = relationship("User", secondary=user_clear_cut, back_populates="clear_cuts")
+
+    @validates("status")
+    def validate_status(self, key, value):
+        if value not in ClearCut.STATUSES:
+            raise ValueError(f"Status must be one of: {', '.join(ClearCut.STATUSES)}")
+        return value
