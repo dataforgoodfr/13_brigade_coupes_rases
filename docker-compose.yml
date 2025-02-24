@@ -29,3 +29,16 @@ services:
       - db
     environment:
       DATABASE_URL: postgresql://devuser:devuser@db:5432/local
+
+  frontend:
+      build:
+        context: frontend
+        dockerfile: ../docker/frontend/Dockerfile
+      container_name: coupes-rases-frontend
+      ports:
+        - "8080:8000"
+      depends_on:
+        - backend
+      environment:
+        # Base url of backend api
+        VITE_API: http://localhost:8000/api

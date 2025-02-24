@@ -1,18 +1,17 @@
 import type { Routes } from "@/shared/router";
-import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
-import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
+import { List, Map as MapIcon } from "lucide-react";
 const navigation = [
 	{
 		name: "List",
 		to: "/clear-cuttings/list" satisfies Routes,
-		icon: FormatListBulletedOutlinedIcon,
+		icon: List,
 	},
 	{
 		name: "Carte",
 		to: "/clear-cuttings/map" satisfies Routes,
-		icon: MapOutlinedIcon,
+		icon: MapIcon,
 	},
 ];
 
