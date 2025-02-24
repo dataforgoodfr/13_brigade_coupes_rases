@@ -7,24 +7,24 @@ import { userSlice } from "@/features/user/store/user.slice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 const reducer = combineReducers({
-  [clearCuttingsApi.reducerPath]: clearCuttingsApi.reducer,
-  [filtersSlice.reducerPath]: filtersSlice.reducer,
-  [usersApi.reducerPath]: usersApi.reducer,
-  [userSlice.reducerPath]: userSlice.reducer,
-  // Admin reducers
-  [adminApi.reducerPath]: adminApi.reducer,
-  [usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
+	[clearCuttingsApi.reducerPath]: clearCuttingsApi.reducer,
+	[filtersSlice.reducerPath]: filtersSlice.reducer,
+	[usersApi.reducerPath]: usersApi.reducer,
+	[userSlice.reducerPath]: userSlice.reducer,
+	// Admin reducers
+	[adminApi.reducerPath]: adminApi.reducer,
+	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
 });
 export const setupStore = (preloadedState?: Partial<RootState>) =>
-  configureStore({
-    reducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware()
-        .concat(clearCuttingsApi.middleware)
-        .concat(usersApi.middleware)
-        .concat(adminApi.middleware),
-    preloadedState,
-  });
+	configureStore({
+		reducer,
+		middleware: (getDefaultMiddleware) =>
+			getDefaultMiddleware()
+				.concat(clearCuttingsApi.middleware)
+				.concat(usersApi.middleware)
+				.concat(adminApi.middleware),
+		preloadedState,
+	});
 
 export const store = setupStore();
 // Infer the `RootState` and `AppDispatch` types from the store itself

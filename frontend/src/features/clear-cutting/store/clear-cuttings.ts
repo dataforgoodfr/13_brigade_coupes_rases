@@ -81,16 +81,15 @@ export const clearCuttingsResponseSchema = z.object({
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
 
-
 export function getAreaColor(status: ClearCuttingStatus) {
-  switch (status) {
-    case "toValidate":
-      return "#FCAD02";
-    case "rejected":
-      return "#FF3300";
-    case "validated":
-      return "#204933";
-    case "waitingInformation":
-      return "#FCAD02";
-  }
+	switch (status) {
+		case "toValidate":
+			return "#FCAD02";
+		case "rejected":
+			return "#FF3300";
+		case "validated":
+			return "#204933";
+		case "waitingInformation":
+			return "#FCAD02";
+	}
 }
