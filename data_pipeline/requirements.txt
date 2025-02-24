@@ -1,0 +1,6 @@
+geopandas==0.14.4
+rasterio==1.4.3
+boto3==1.36.22
+numpy==2.2.3
+pandas==2.2.3
+tqdm==4.67.1
