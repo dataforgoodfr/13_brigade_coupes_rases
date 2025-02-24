@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
 			testTimeout: 60_000,
 		},
 		preview: {
-			port: 8000	
+			port: 8000,
 		},
 		plugins: [
 			VitePWA({
