@@ -5,11 +5,12 @@ interface Props {
 	children?: ReactNode;
 	sideBar?: ReactNode;
 }
+
 export function AppLayout({ children, sideBar }: Props) {
 	return (
 		<>
 			<div className="h-screen">
-				<Navbar className="h-20" />
+				<Navbar className="h-20 z-10" />
 				<div className="flex pt-20 h-full ">
 					<main className="flex-grow">{children}</main>
 					{sideBar && (

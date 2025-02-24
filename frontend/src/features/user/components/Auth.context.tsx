@@ -6,9 +6,10 @@ import {
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type ReactNode, createContext, useContext, useEffect } from "react";
 
-export type AuthContext = { isAuthenticated: boolean };
+export type AuthContext = { isAuthenticated: boolean; isAdmin: boolean };
 const AuthCtx = createContext<AuthContext>({
 	isAuthenticated: false,
+	isAdmin: false,
 });
 
 export const useAuth = () => useContext(AuthCtx);
@@ -31,7 +32,12 @@ export function AuthProvider({ children }: Props) {
 	}, [user, dispatch]);
 
 	return (
-		<AuthCtx.Provider value={{ isAuthenticated: user !== undefined }}>
+		<AuthCtx.Provider
+			value={{
+				isAuthenticated: user !== undefined,
+				isAdmin: user?.role === "administrator",
+			}}
+		>
 			{children}
 		</AuthCtx.Provider>
 	);
