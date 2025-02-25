@@ -11,6 +11,8 @@
 			"src/routeTree.gen.ts",
 			"node_modules",
 			"dev-dist",
+			".storybook",
+			"storybook-static",
 			"dist",
 			"public/mockServiceWorker.js"
 		]
@@ -26,6 +28,7 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"suspicious": { "noConsoleLog": "error" },
 			"correctness": { "noUnusedImports": "error" }
 		}
 	},

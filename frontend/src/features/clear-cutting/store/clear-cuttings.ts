@@ -1,8 +1,20 @@
 import { string, z } from "zod";
 import { pointSchema } from "./types";
 
+export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
+
+export const clearCuttingStatusSchema = z.enum([
+	"toValidate",
+	"validated",
+	"rejected",
+	"waitingInformation",
+]);
+
+export type ClearCuttingStatus = z.infer<typeof clearCuttingStatusSchema>;
+
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
+
 const ecologicalZoningSchema = z.object({
 	id: z.string(),
 	name: z.string(),
@@ -23,6 +35,7 @@ const clearCuttingPreviewSchema = z.object({
 	}),
 	imageUrl: z.string().url().optional(),
 	imagesCnt: z.number().optional(),
+	status: clearCuttingStatusSchema,
 });
 export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
 
@@ -50,6 +63,7 @@ export const clearCuttingSchema = z.object({
 	abusiveTags: z.array(z.string()).optional(),
 	customTags: z.array(z.string()).optional(),
 	imageUrls: z.array(z.string().url()),
+	status: clearCuttingStatusSchema,
 });
 
 export type ClearCutting = z.infer<typeof clearCuttingSchema>;
@@ -66,3 +80,16 @@ export const clearCuttingsResponseSchema = z.object({
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
+
+export function getAreaColor(status: ClearCuttingStatus) {
+	switch (status) {
+		case "toValidate":
+			return "#FCAD02";
+		case "rejected":
+			return "#FF3300";
+		case "validated":
+			return "#204933";
+		case "waitingInformation":
+			return "#FCAD02";
+	}
+}

@@ -19,6 +19,7 @@ Install package manager [pnpm](https://pnpm.io/fr/installation)
 Install dependencies : `pnpm i`  
 To run in development mode : `pnpm dev`  
 To format and lint : `pnpm cleanup`
+To start storybook: `pnpm storybook`
 
 ## VS Code configuration
 

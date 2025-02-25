@@ -7,9 +7,11 @@ export function ReloadPrompt() {
 		updateServiceWorker,
 	} = useRegisterSW({
 		onRegistered(r) {
+			// biome-ignore lint/suspicious/noConsoleLog: PWA dev purpose
 			console.log(`SW Registered: ${r}`);
 		},
 		onRegisterError(error) {
+			// biome-ignore lint/suspicious/noConsoleLog: PWA dev purpose
 			console.log("SW registration error", error);
 		},
 	});
@@ -18,7 +20,6 @@ export function ReloadPrompt() {
 		setOfflineReady(false);
 		setNeedRefresh(false);
 	};
-	console.log({ offlineReady, needRefresh });
 	return (
 		<div className="ReloadPrompt-container">
 			{(offlineReady || needRefresh) && (

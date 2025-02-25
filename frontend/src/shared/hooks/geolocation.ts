@@ -9,7 +9,6 @@ export function useGeolocation() {
 	useEffect(() => {
 		const id = navigator.geolocation.watchPosition(
 			(location) => {
-				console.log({ location });
 				setResult({ browserLocation: location });
 			},
 			(error) => setResult({ browserLocation: undefined, error }),

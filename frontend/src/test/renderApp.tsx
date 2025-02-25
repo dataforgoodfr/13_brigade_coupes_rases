@@ -1,10 +1,21 @@
-import { type Routes as Route, router } from "@/shared/router";
+import {
+	type AuthContext,
+	AuthProvider,
+	useAuth,
+} from "@/features/user/components/Auth.context";
+import type { User } from "@/features/user/store/user";
+import { routeTree } from "@/routeTree.gen";
+import type { Routes as Route } from "@/shared/router";
 import {
 	type AppStore,
 	type RootState,
 	setupStore,
 } from "@/shared/store/store";
-import { RouterProvider } from "@tanstack/react-router";
+import {
+	RouterProvider,
+	createMemoryHistory,
+	createRouter,
+} from "@tanstack/react-router";
 import { type RenderOptions, render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Provider } from "react-redux";
@@ -12,19 +23,43 @@ interface Options extends Omit<RenderOptions, "queries"> {
 	preloadedState?: Partial<RootState>;
 	store?: AppStore;
 	route?: Route;
+	user?: User;
 }
 
-export async function renderApp(options: Options) {
+export function renderApp(options: Options) {
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
-		store = setupStore(preloadedState),
+		store = setupStore({
+			...preloadedState,
+			user: options.user
+				? { status: "success", value: options.user }
+				: preloadedState.user,
+		}),
+		route = options.route ?? "/",
 		...renderOptions
 	} = options;
-	await router.navigate({ to: options.route ?? "/" });
+	const history = createMemoryHistory({ initialEntries: [route] });
+	const router = createRouter({
+		routeTree,
+		history,
+		context: { auth: undefined as unknown as AuthContext },
+	});
+	function TestApp() {
+		return (
+			<AuthProvider>
+				<InnerTestApp />
+			</AuthProvider>
+		);
+	}
+	function InnerTestApp() {
+		const auth = useAuth();
+		return <RouterProvider router={router} context={{ auth }} />;
+	}
+
 	const Wrapper = () => (
 		<Provider store={store}>
-			<RouterProvider router={router} />
+			<TestApp />
 		</Provider>
 	);
 	return {

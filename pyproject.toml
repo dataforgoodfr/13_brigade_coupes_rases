@@ -45,6 +45,7 @@ geemap = "^0.35.1"
 jupyterlab = "^4.3.5"
 # jupyter = "^1.0.0"
 # ipykernel = "^5.3.4"
+requests = "^2.32.3"
 
 [tool.poetry.scripts]
 backend-start = "app.main:start_server"

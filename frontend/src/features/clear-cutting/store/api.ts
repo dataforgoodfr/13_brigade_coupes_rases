@@ -1,3 +1,4 @@
+import type { FiltersRequest } from "@/features/clear-cutting/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cutting/store/filters.slice";
 import { useAppSelector } from "@/shared/hooks/store";
 import {
@@ -11,22 +12,13 @@ import {
 	clearCuttingSchema,
 	clearCuttingsResponseSchema,
 } from "./clear-cuttings";
-import {
-	type FiltersRequest,
-	type FiltersResponse,
-	filtersResponseSchema,
-} from "./filters";
 
 export const clearCuttingsApi = createApi({
-	reducerPath: "clearCuttings",
+	reducerPath: "api/clearCuttings",
 	baseQuery: fetchBaseQuery({
 		baseUrl: `${import.meta.env.VITE_API}`,
 	}),
 	endpoints: (builder) => ({
-		getFilters: builder.query<FiltersResponse, void>({
-			query: () => "filters",
-			transformResponse: (data) => filtersResponseSchema.parse(data),
-		}),
 		getClearCutting: builder.query<ClearCutting, string>({
 			query: (id) => `clear-cuttings/${id}`,
 			transformResponse: (data) => clearCuttingSchema.parse(data),
@@ -41,11 +33,8 @@ export const clearCuttingsApi = createApi({
 	}),
 });
 
-export const { endpoints, useGetFiltersQuery, useGetClearCuttingQuery } =
-	clearCuttingsApi;
+export const { endpoints, useGetClearCuttingQuery } = clearCuttingsApi;
 export function useGetClearCuttingsQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
-	console.log(filters);
-
 	return clearCuttingsApi.useGetClearCuttingsQuery(filters ?? skipToken);
 }

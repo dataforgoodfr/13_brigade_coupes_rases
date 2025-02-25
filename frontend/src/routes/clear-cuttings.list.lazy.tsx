@@ -1,4 +1,4 @@
-import { AsideList } from "@/features/clear-cutting/components/List";
+import { AsideList } from "@/features/clear-cutting/components/AsideList";
 import { AppLayout } from "@/shared/components/AppLayout";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
