@@ -7,7 +7,7 @@ Created on Tue Feb 25 19:24:49 2025
 
 from pykeepass import PyKeePass
 
-kp = PyKeePass('secrets.kdbx', password='d*!@erzzj9C3YKyhbV7X')
+kp = PyKeePass('secrets.kdbx', password=)
 group = kp.find_groups(name='General', first=True)
 entry = kp.find_entries(title='SCW_ACCESS_KEY', first=True)
 entry.password
