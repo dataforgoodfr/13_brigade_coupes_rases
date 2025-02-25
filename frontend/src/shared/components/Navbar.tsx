@@ -27,7 +27,7 @@ export function Navbar() {
 	};
 	const dispatch = useAppDispatch();
 	return (
-		<nav className="flex flex-col item-center gap-16 bg-[#204933] shadow z-max min-w-20 max-w-20">
+		<nav className="flex flex-col item-center gap-16 bg-[#204933] shadow z-max min-w-20 max-w-20 overflow-visible">
 			<img
 				alt="Canopée"
 				src={canopeeWhiteIcon}
@@ -58,7 +58,7 @@ export function Navbar() {
 				)}
 			</div>
 			{user && (
-				<DropdownMenu>
+				<DropdownMenu data-testid="dropdown-menu-login">
 					<DropdownMenuTrigger asChild>
 						{user?.avatarUrl && (
 							<Avatar>
@@ -67,7 +67,7 @@ export function Navbar() {
 							</Avatar>
 						)}
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="w-56">
+					<DropdownMenuContent className="w-56 z-90">
 						<DropdownMenuLabel>Mon compte</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={handleLogout}>

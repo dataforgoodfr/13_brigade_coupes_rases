@@ -22,7 +22,7 @@ export function InteractiveMap() {
 
 	return (
 		<>
-			<main className="h-screen w-full">
+			<main className="h-screen w-full z-0">
 				<MapContainer
 					className="h-full"
 					center={franceCenter}

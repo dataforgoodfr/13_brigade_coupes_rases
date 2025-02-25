@@ -1,3 +1,4 @@
+import { MapProvider } from "@/features/clear-cutting/components/map/Map.context";
 import {
 	type AuthContext,
 	AuthProvider,
@@ -48,7 +49,9 @@ export function renderApp(options: Options) {
 	function TestApp() {
 		return (
 			<AuthProvider>
-				<InnerTestApp />
+				<MapProvider>
+					<InnerTestApp />
+				</MapProvider>
 			</AuthProvider>
 		);
 	}

@@ -12,7 +12,10 @@ export function AsideList() {
 	return (
 		<>
 			<Filters />
-			<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 overflow-auto ">
+			<ul
+				data-testid="clear-cutting-list"
+				className="grid grid-cols-1 gap-6 lg:grid-cols-2 overflow-auto "
+			>
 				{data?.clearCuttingPreviews.map((clearCutting) => (
 					<li
 						key={clearCutting.id}
