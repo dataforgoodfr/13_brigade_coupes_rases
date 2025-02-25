@@ -3,10 +3,10 @@ const franceCenter: LatLngExpression = [46.695554, 2.440236];
 const wholeFranceZoom = 7;
 
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useMapInstance } from "./Map.context";
 import { useEffect } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { ClearCuttings } from "./ClearCuttings";
+import { useMapInstance } from "./Map.context";
 
 export function InteractiveMap() {
 	const navigate = useNavigate();

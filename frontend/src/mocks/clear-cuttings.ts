@@ -1,8 +1,8 @@
 import type {
 	ClearCutting,
 	ClearCuttingPreview,
-	ClearCuttingsResponse,
 	ClearCuttingStatus,
+	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";

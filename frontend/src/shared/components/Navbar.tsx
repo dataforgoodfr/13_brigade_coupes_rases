@@ -49,8 +49,14 @@ export function Navbar({ className }: Props) {
 				className="h-auto w-auto aspect-square object-cover mt-6 mx-4"
 			/>
 			<div className="flex flex-col gap-10 items-center">
-				<NavbarLink to="/clear-cuttings/map"><House size={36} color="var(--primary-foreground)" /></NavbarLink>
-				{!user && <NavbarLink to="/login"><LogIn size={36} color="var(--primary-foreground)" /></NavbarLink>}
+				<NavbarLink to="/clear-cuttings/map">
+					<House size={36} color="var(--primary-foreground)" />
+				</NavbarLink>
+				{!user && (
+					<NavbarLink to="/login">
+						<LogIn size={36} color="var(--primary-foreground)" />
+					</NavbarLink>
+				)}
 
 				{user?.role === "administrator" && <NavbarItems />}
 			</div>
