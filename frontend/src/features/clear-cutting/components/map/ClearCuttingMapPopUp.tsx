@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Dot } from "@/components/ui/dot";
 import { Popup } from "react-leaflet";
-import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
+import { getClearCuttingStatusColor, type ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
 
 export function ClearCuttingMapPopUp({clearCutting}: {clearCutting: ClearCuttingPreview}) {
 	return (
@@ -11,7 +11,7 @@ export function ClearCuttingMapPopUp({clearCutting}: {clearCutting: ClearCutting
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
-						<Dot className="ml-2.5" color="red"/>
+						<Dot className="ml-2.5" color={getClearCuttingStatusColor(clearCutting.status)}/>
 					</div>
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>

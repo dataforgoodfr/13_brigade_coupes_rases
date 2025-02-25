@@ -87,7 +87,7 @@ export const clearCuttingsResponseSchema = z.object({
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
 
-export function getAreaColor(status: ClearCuttingStatus) {
+export function getClearCuttingStatusColor(status: ClearCuttingStatus) {
 	switch (status) {
 		case "toValidate":
 			return "#FCAD02";

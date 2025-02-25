@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
 import {
 	DISPLAY_PREVIEW_ZOOM_LEVEL,
-	getAreaColor,
+	getClearCuttingStatusColor,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
 
@@ -66,7 +66,7 @@ export function ClearCuttings() {
 					<Polygon
 						key={clearCutting.id}
 						positions={clearCutting.geoCoordinates}
-						color={getAreaColor(clearCutting.status)}
+						color={getClearCuttingStatusColor(clearCutting.status)}
 						weight={0}
 						fillOpacity={0.75}
 					>
