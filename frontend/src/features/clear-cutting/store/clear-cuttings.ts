@@ -32,6 +32,7 @@ const clearCuttingBaseSchema = z.object({
 	cutYear: z.number(),
 	ecologicalZones: z.array(z.string()),
 	abusiveTags: z.array(z.string()),
+	naturaZone: z.string().optional(),
 	cadastralParcel: z
 		.object({
 			id: string(),

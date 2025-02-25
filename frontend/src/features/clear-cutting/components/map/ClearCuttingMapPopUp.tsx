@@ -28,7 +28,7 @@ export function ClearCuttingMapPopUp({clearCutting}: {clearCutting: ClearCutting
 					<div>Date du signalement : <strong>{clearCutting.reportDate}</strong></div>
 					<div>Taille de la coupe : <strong>{clearCutting.cadastralParcel?.surfaceKm} HA</strong></div>
 					<div>Pente : <strong>{clearCutting.cadastralParcel?.slope} %</strong></div>
-					<div>Zone Natura : <strong> {/** TODO */} </strong></div>
+					<div>Zone Natura : <strong> {clearCutting.naturaZone} </strong></div>
 				</div>
 			</Popup>
 		</>
