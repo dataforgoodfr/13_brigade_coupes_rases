@@ -9,54 +9,6 @@ import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
-export const mockFilters = http.get("*/filters", () => {
-	return HttpResponse.json({
-		cutYears: [2021, 2022],
-		tags: [
-			{
-				isAbusive: true,
-				name: "Supérieur à 10 hectares",
-				id: faker.string.uuid(),
-			},
-		],
-		ecologicalZoning: {
-			[faker.string.uuid()]: faker.company.buzzAdjective(),
-		},
-		status: {},
-		departments: {},
-		region: {},
-	} satisfies FiltersResponse);
-});
-
-export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
-	const url = new URL(request.url);
-	const geoBoundsQueryString = url.searchParams.get("geoBounds");
-	let boundaries: Boundaries | undefined;
-
-	if (geoBoundsQueryString) {
-		const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
-		boundaries = [
-			[geoBounds[0], geoBounds[1]],
-			[geoBounds[0], geoBounds[3]],
-			[geoBounds[2], geoBounds[3]],
-			[geoBounds[2], geoBounds[1]],
-		];
-	}
-
-	const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
-
-	return HttpResponse.json({
-		clearCuttingPreviews: boundaries
-			? clearCuttingPreviews.filter((ccp) =>
-					isPointInsidePolygon(boundaries, ccp.center),
-				)
-			: clearCuttingPreviews,
-		clearCuttingsPoints: createFranceRandomPoints,
-		ecologicalZones: [],
-		waterCourses: [],
-	} satisfies ClearCuttingsResponse);
-});
-
 const francRandomPointMock = (): [number, number] => [
 	faker.location.latitude({
 		min: 43.883918307385926,
@@ -142,3 +94,52 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
+
+export const mockFilters = http.get("*/filters", () => {
+	return HttpResponse.json({
+		cutYears: [2021, 2022],
+		tags: [
+			{
+				isAbusive: true,
+				name: "Supérieur à 10 hectares",
+				id: faker.string.uuid(),
+			},
+		],
+		ecologicalZoning: {
+			[faker.string.uuid()]: faker.company.buzzAdjective(),
+		},
+		status: {},
+		departments: {},
+		region: {},
+	} satisfies FiltersResponse);
+});
+
+const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
+
+export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
+	const url = new URL(request.url);
+	const geoBoundsQueryString = url.searchParams.get("geoBounds");
+	let boundaries: Boundaries | undefined;
+
+	if (geoBoundsQueryString) {
+		const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
+		boundaries = [
+			[geoBounds[0], geoBounds[1]],
+			[geoBounds[0], geoBounds[3]],
+			[geoBounds[2], geoBounds[3]],
+			[geoBounds[2], geoBounds[1]],
+		];
+	}
+
+
+	return HttpResponse.json({
+		clearCuttingPreviews: boundaries
+			? clearCuttingPreviews.filter((ccp) =>
+					isPointInsidePolygon(boundaries, ccp.center),
+				)
+			: clearCuttingPreviews,
+		clearCuttingsPoints: createFranceRandomPoints,
+		ecologicalZones: [],
+		waterCourses: [],
+	} satisfies ClearCuttingsResponse);
+});
