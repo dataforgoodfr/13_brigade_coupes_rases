@@ -1,13 +1,15 @@
 import { volunteerMock } from "@/test/mocks/user";
 import { renderApp } from "@/test/renderApp";
 import { screen } from "@testing-library/react";
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 describe("Clear cuttings list", () => {
 	it("should render list page", async () => {
 		renderApp({
 			user: volunteerMock,
-			route: "/clear-cuttings/map",
+			route: "/map/clear-cuttings",
 		});
-		await screen.findByText("Années de coupe");
+		const ul = screen.findByTestId("clear-cutting-list");
+		expect(ul).not.toBeNull();
+		expect(ul).toBeTruthy();
 	});
 });

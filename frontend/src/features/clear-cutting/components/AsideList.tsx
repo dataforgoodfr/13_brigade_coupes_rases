@@ -23,7 +23,7 @@ export function AsideList() {
 			</h1>
 			<AdvancedFilters className="mt-6 px-5" />
 			<div className=" px-5 overflow-auto">
-				<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 ">
+				<ul data-testid="clear-cutting-list" className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 ">
 					{data?.clearCuttingPreviews.map((clearCutting) => (
 						<li
 							key={clearCutting.id}
