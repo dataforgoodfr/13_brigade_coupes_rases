@@ -146,9 +146,6 @@ def convert_geometries_to_wkt(sufosat_2024):
 
     geojson_str = sufosat_2024.to_json()
     logger.info("✅ Conversion str GEOJSON")
-
-    shutil.rmtree("dags/temp_tif")
-    shutil.rmtree("dags/temp_shape")
     
     return geojson_str
 
@@ -166,4 +163,18 @@ def process_geo_data(**kwargs):
     logger.info("✅ Calcul des coordonnées")
     gdata_new = convert_geometries_to_wkt(gdata)
 
+    shutil.rmtree("dags/temp_tif")
+    shutil.rmtree("dags/temp_shape")
+
     kwargs['ti'].xcom_push(key='geojson', value=gdata_new)
+
+def detect_clear_cut_by_size(**kwargs):
+    clear_cut = kwargs['ti'].xcom_pull(task_ids='process_geo_data', key='geojson')
+    clear_cut = gpd.read_file(clear_cut)
+    clear_cut["clear_cut"] = clear_cut["area_ha"] >= 10
+    
+    rest_to_detect = clear_cut[clear_cut.clear_cut == False]["clear_cut"].count()
+    gdata_new = convert_geometries_to_wkt(clear_cut)
+
+    kwargs['ti'].xcom_push(key='new_clear_cut', value=gdata_new)
+    kwargs['ti'].xcom_push(key='n_to_detect', value=rest_to_detect)

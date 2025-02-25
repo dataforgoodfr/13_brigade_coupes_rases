@@ -24,7 +24,7 @@ def upload_geodataframe_to_s3(bucket_name, s3_hook, **kwargs):
             logger.warning(f"⚠️ Impossible de supprimer {key} de S3. Erreur : {e}")
 
     # Récupération des données GeoJSON depuis XCom
-    gdata = gpd.read_file(kwargs['ti'].xcom_pull(task_ids='process_geo_data', key='geojson'))
+    gdata = gpd.read_file(kwargs['ti'].xcom_pull(task_ids='detect_clear_cut_by_size', key='new_clear_cut'))
     gdata_str = gdata.to_json()
 
     # Chargement du fichier sur S3

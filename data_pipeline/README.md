@@ -7,7 +7,7 @@
 
 ## 2 - Processus d'installation
 
-> S'assurer qu'on est à la racine de data_pipeline et 
+> S'assurer qu'on est à la racine de data_pipeline et ajouter les dossiers (logs/, config/ et plugins/) à la racine du fichier. N'oubliez pas de coller les config.json dans la conversation slack dans config
 
 1. Installer l'image airflow custom
 ```bash

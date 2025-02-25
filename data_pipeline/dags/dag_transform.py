@@ -88,6 +88,11 @@ with DAG(
         task_id= 'process_geo_data',
         python_callable=process_geo_data,
     )
+
+    detect_clear_cut_by_size = PythonOperator(
+        task_id= 'detect_clear_cut_by_size',
+        python_callable=detect_clear_cut_by_size,
+    )
     
     upload_geodataframe_to_s3 = PythonOperator(
         task_id= 'upload_geodataframe_to_s3',
@@ -97,4 +102,5 @@ with DAG(
     )
 
     is_in_local >> condition_task >> [load_from_S3, regroup_sufosat_days]
-    load_from_S3 >> regroup_sufosat_days >> polygonize_tif >> process_geo_data >> upload_geodataframe_to_s3
+    load_from_S3 >> regroup_sufosat_days >> polygonize_tif >> process_geo_data >> detect_clear_cut_by_size
+    detect_clear_cut_by_size >> upload_geodataframe_to_s3 
