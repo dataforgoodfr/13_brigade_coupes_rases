@@ -1,7 +1,4 @@
-import os
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 from app.main import app  # noqa: E402
 from app.database import get_db  # noqa: E402
