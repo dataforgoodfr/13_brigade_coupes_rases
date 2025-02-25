@@ -27,3 +27,14 @@ docker-compose up
 ## Utils --> S3 
 
 > [Documentation](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/_api/airflow/providers/amazon/aws/hooks/s3/index.html) officielle pour un CRUD simple pour S3. 
+
+
+## 
+Il faut créer un fichier .env dans le dossier data_pipeline/utils/config avec les variables necessaires la configuration de Airflow
+
+```text
+BUCKET_NAME={BUCKET_NAME}
+URL=...
+Etc
+```
+Vous trouverez un example avec le fichier [.env.example](config/.env.example)
