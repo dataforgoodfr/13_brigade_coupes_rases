@@ -22,18 +22,18 @@ poetry install
 poetry add package-name --group backend
 ```
 
-## Run the server
-
-It might be easier to run db + server with the docker-compose file in the root of the project.
-
+## Launch your containers
 ```bash
-poetry run docker-start
+docker compose up -d --build
 ```
 
-If you want to run the server manually, you need to have a postgres database running. Then run the following command to start the server:
+## Launch the server
 
 ```bash
-poetry run backend-start
+cd ./backend
+docker compose exec backend bash
+poetry install --with backend
+make devserver
 ```
 
 Either way, once the server is running, you can access the API in `http://localhost:8000`. You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.

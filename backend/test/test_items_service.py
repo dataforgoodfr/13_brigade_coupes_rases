@@ -1,26 +1,7 @@
-import os
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
-
-TEST_DATABASE_URL = "sqlite:///./backend/test/data/test.db"  # Use SQLite for testing
-os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
-
-
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-@pytest.fixture(scope="function")
-def db():
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    yield db
-    db.close()
-    Base.metadata.drop_all(bind=engine)
+from app.database import get_db  # noqa: E402
 
 
 @pytest.fixture(scope="function")
