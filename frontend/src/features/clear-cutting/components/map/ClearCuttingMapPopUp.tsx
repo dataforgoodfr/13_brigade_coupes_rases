@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Dot } from "@/components/ui/dot";
-import { Popup } from "react-leaflet";
 import {
-	getClearCuttingStatusColor,
 	type ClearCuttingPreview,
+	getClearCuttingStatusColor,
 } from "@/features/clear-cutting/store/clear-cuttings";
+import { Popup } from "react-leaflet";
 
 export function ClearCuttingMapPopUp({
 	clearCutting,
@@ -37,7 +37,7 @@ export function ClearCuttingMapPopUp({
 						Date du signalement : <strong>{clearCutting.reportDate}</strong>
 					</div>
 					<div>
-						Taille de la coupe : 
+						Taille de la coupe :
 						<strong>{clearCutting.cadastralParcel?.surfaceKm} HA</strong>
 					</div>
 					<div>
