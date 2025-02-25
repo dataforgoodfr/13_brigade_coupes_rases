@@ -1,7 +1,8 @@
 .leaflet-popup {
     > .leaflet-popup-content-wrapper {
         border-radius: 20px;
-
+        box-shadow: none;
+        
         > .leaflet-popup-content {
             margin: calc(var(--spacing)* 6); /* m-6 */
         }
