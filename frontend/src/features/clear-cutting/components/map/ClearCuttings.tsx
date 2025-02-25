@@ -62,15 +62,15 @@ export function ClearCuttings() {
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
 			return data?.clearCuttingPreviews.map(
-				({ geoCoordinates, id, status }) => (
+				(clearCutting) => (
 					<Polygon
-						key={id}
-						positions={geoCoordinates}
-						color={getAreaColor(status)}
+						key={clearCutting.id}
+						positions={clearCutting.geoCoordinates}
+						color={getAreaColor(clearCutting.status)}
 						weight={0}
 						fillOpacity={0.75}
 					>
-						<ClearCuttingMapPopUp />
+						<ClearCuttingMapPopUp clearCutting={clearCutting} />
 					</Polygon>
 				),
 			);
