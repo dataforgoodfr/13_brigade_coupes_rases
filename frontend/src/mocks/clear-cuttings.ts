@@ -52,7 +52,7 @@ export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
 				)
 			: clearCuttingPreviews,
 		clearCuttingsPoints: createFranceRandomPoints,
-		ecologicalZoning: [],
+		ecologicalZones: [],
 		waterCourses: [],
 	} satisfies ClearCuttingsResponse);
 });
@@ -122,12 +122,23 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 			city,
 			country: faker.location.country(),
 			postalCode: faker.location.zipCode(),
+			streetName: faker.location.streetAddress(),
+			streetNumber: faker.location.buildingNumber(),
 		},
 		status: getRandomStatus(Math.floor(center[0] + center[1])),
 		cutYear: 2021,
+		reportDate: faker.date.anytime().toLocaleDateString(),
+		creationDate: faker.date.anytime().toLocaleDateString(),
 		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
 		imageUrl: faker.image.url(),
+		cadastralParcel: {
+			id: faker.string.nanoid(),
+			slope: faker.number.int({min: 1, max: 60}),
+			surfaceKm: faker.number.int({min: 5, max: 500})
+		},
+		abusiveTags: ["PENTE >30%", "NATURA 2000", "SUP 20 HA"],
+		ecologicalZones: [],
 		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
