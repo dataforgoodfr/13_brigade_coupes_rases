@@ -33,7 +33,7 @@ docker compose up -d --build
 cd ./backend
 docker compose exec backend bash
 poetry install --with backend
-make run devserver
+make devserver
 ```
 
 Either way, once the server is running, you can access the API in `http://localhost:8000`. You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.
