@@ -21,6 +21,16 @@ tox = "^4.4.8"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
+[tool.poetry.group.backend.dependencies]
+python = "^3.11"
+fastapi = "^0.115.8"
+sqlalchemy = "^2.0.38"
+psycopg2-binary = "^2.9.10"
+pydantic-settings = "^2.7.1"
+uvicorn = "^0.34.0"
+geoalchemy2 = "^0.17.1"
+alembic = "^1.14.1"
+
 [tool.poetry.group.analytics.dependencies]
 cartopy = "^0.24.1"
 geopandas = "^1.0.1"
