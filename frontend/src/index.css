@@ -4,6 +4,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* If fonts need to be embedded */
+
+/* @font-face {
+	font-family: 'Inter';
+	src: url("./assets/fonts/Inter/Inter-VariableFont_opsz,wght.ttf") format('woff2-variations');
+	src: url("./assets/fonts/Inter/Inter-VariableFont_opsz,wght.ttf") format('woff2') ;
+	font-weight: 100 1000;
+    font-stretch: 25% 151%;
+}
+
+@font-face {
+	font-family: 'Plus Jakarta Sans';
+	src: url("./assets/fonts/Plus_Jakarta_Sans/PlusJakartaSans-VariableFont_wght.ttf") format('woff2-variations');
+	src: url("./assets/fonts/Plus_Jakarta_Sans/PlusJakartaSans-VariableFont_wght.ttf") format('woff2') ;
+	font-weight: 100 1000;
+    font-stretch: 25% 151%;
+} */
+
 :root {
 	--background: hsl(0 0% 100%);
 	--foreground: hsl(224 71.4% 4.1%);
