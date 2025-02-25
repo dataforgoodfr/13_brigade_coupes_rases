@@ -1,7 +1,8 @@
 import type {
+	ClearCutting,
 	ClearCuttingPreview,
-	ClearCuttingStatus,
 	ClearCuttingsResponse,
+	ClearCuttingStatus,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
@@ -36,6 +37,27 @@ export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
 		waterCourses: [],
 	} satisfies ClearCuttingsResponse);
 });
+
+export const mockClearCutting = http.get(
+	"*/clear-cuttings/:id",
+	({ params }) => {
+		const { id } = params as { id: string };
+		return HttpResponse.json({
+			id: id,
+			geoCoordinates: [francRandomPointMock()],
+			cutYear: 2021,
+			address: {
+				streetName: faker.location.street(),
+				streetNumber: faker.number.int().toString(),
+				postalCode: faker.location.zipCode(),
+				city: faker.location.city(),
+				country: "France",
+			},
+			imageUrls: [],
+			status: getRandomStatus(Date.now()),
+		} satisfies ClearCutting);
+	},
+);
 
 const francRandomPointMock = (): [number, number] => [
 	faker.location.latitude({

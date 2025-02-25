@@ -17,6 +17,10 @@ import {
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
+import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
+import { House } from "lucide-react";
+import { LogIn } from "lucide-react";
+
 interface Props {
 	className?: string;
 }
@@ -31,21 +35,22 @@ export function Navbar({ className }: Props) {
 		});
 	};
 	const dispatch = useAppDispatch();
+
 	return (
 		<nav
 			className={clsx(
 				className,
-				"fixed flex top-0 bg-white shadow w-full items-center",
+				"flex flex-col item-center gap-16 bg-(--color-primary) shadow z-max min-w-20 max-w-20 ",
 			)}
 		>
 			<img
 				alt="Canopée"
-				src="https://www.canopee.ong/wp-content/uploads/2023/08/logo-canopee.png"
-				className="h-8 w-auto px-6 "
+				src={canopeeWhiteIcon}
+				className="h-auto w-auto aspect-square object-cover mt-6 mx-4"
 			/>
-			<div className="flex grow h-full">
-				<NavbarLink to="/clear-cuttings/map">Coupes rases</NavbarLink>
-				{!user && <NavbarLink to="/login">Connexion</NavbarLink>}
+			<div className="flex flex-col gap-10 items-center">
+				<NavbarLink to="/clear-cuttings/map"><House size={36} color="var(--primary-foreground)" /></NavbarLink>
+				{!user && <NavbarLink to="/login"><LogIn size={36} color="var(--primary-foreground)" /></NavbarLink>}
 
 				{user?.role === "administrator" && <NavbarItems />}
 			</div>
