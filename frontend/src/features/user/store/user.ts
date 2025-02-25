@@ -6,6 +6,8 @@ export const loginRequestSchema = z.object({
 });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 
+export const USER_ROLES = ["visitor", "volunteer", "administrator"];
+
 export const roleSchema = z.enum(["visitor", "volunteer", "administrator"]);
 
 export type Role = z.infer<typeof roleSchema>;
@@ -13,6 +15,7 @@ export const commonUserSchema = z.object({
 	login: z.string(),
 	email: z.string(),
 	avatarUrl: z.string().url().optional(),
+	region: z.string().optional(),
 });
 
 const specificUserPropertiesSchema = z.discriminatedUnion("role", [

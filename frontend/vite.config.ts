@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => {
 			setupFiles: ["src/test/setup.ts"],
 			testTimeout: 60_000,
 		},
+		preview: {
+			port: 8000,
+		},
 		plugins: [
 			VitePWA({
 				registerType: "prompt",

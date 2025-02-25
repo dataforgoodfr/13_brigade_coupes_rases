@@ -19,13 +19,30 @@ services:
       DATABASES: local,test
 
   backend:
+    working_dir: /code/backend
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
+    volumes:
+      - .:/code:cached
     container_name: coupes-rases-backend
+    command: 'tail -f /dev/null'
     ports:
       - "8000:8000"
     depends_on:
       - db
     environment:
       DATABASE_URL: postgresql://devuser:devuser@db:5432/local
+
+  frontend:
+      build:
+        context: frontend
+        dockerfile: ../docker/frontend/Dockerfile
+      container_name: coupes-rases-frontend
+      ports:
+        - "8080:8000"
+      depends_on:
+        - backend
+      environment:
+        # Base url of backend api
+        VITE_API: http://localhost:8000/api

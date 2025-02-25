@@ -3,15 +3,18 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/dropdown/DropdownMenu";
+
+import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
 import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
+import { NavbarLink } from "@/shared/components/NavbarLink";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	DropdownMenu,
 	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
 interface Props {
@@ -41,34 +44,10 @@ export function Navbar({ className }: Props) {
 				className="h-8 w-auto px-6 "
 			/>
 			<div className="flex grow h-full">
-				<Link
-					to="/clear-cuttings/map"
-					activeProps={{
-						className: "border-green-500  text-gray-900",
-					}}
-					inactiveProps={{
-						className:
-							"border-transparent  text-gray-500 hover:border-gray-300 hover:text-gray-700",
-					}}
-					className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
-				>
-					Coupes rases
-				</Link>
-				{!user && (
-					<Link
-						to="/login"
-						activeProps={{
-							className: "border-green-500  text-gray-900",
-						}}
-						inactiveProps={{
-							className:
-								"border-transparent  text-gray-500 hover:border-gray-300 hover:text-gray-700",
-						}}
-						className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
-					>
-						Connexion
-					</Link>
-				)}
+				<NavbarLink to="/clear-cuttings/map">Coupes rases</NavbarLink>
+				{!user && <NavbarLink to="/login">Connexion</NavbarLink>}
+
+				{user?.role === "administrator" && <NavbarItems />}
 			</div>
 			{user && (
 				<DropdownMenu>

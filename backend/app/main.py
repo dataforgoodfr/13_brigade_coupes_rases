@@ -16,11 +16,36 @@ async def home():
     return {"message": "Hello, World!"}
 
 
-def start_server():
+def start_server(
+    host: str, port: int, reload: bool, proxy_headers: bool, forwarded_allow_ips: str
+):
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "app.main:app",
+        host=host,
+        port=port,
+        reload=reload,
+        proxy_headers=proxy_headers,
+        forwarded_allow_ips=forwarded_allow_ips,
+    )
 
 
 if __name__ == "__main__":
-    start_server()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str)
+    parser.add_argument("--port", type=int)
+    parser.add_argument("--reload", action="store_true")
+    parser.add_argument("--proxy-headers", action="store_true")
+    parser.add_argument("--forwarded-allow-ips", type=str)
+    args = parser.parse_args()
+
+    start_server(
+        host=args.host,
+        port=args.port,
+        reload=args.reload,
+        proxy_headers=args.proxy_headers,
+        forwarded_allow_ips=args.forwarded_allow_ips,
+    )

@@ -12,7 +12,10 @@ export function loginForm({ user }: Options) {
 		);
 	};
 	const submitForm = async () => {
-		const logButton = await screen.findByText("Se connecter");
+		const logButton = await screen.findByText("Connexion", {
+			exact: false,
+			selector: "button",
+		});
 		await user.click(logButton);
 	};
 	const login = async (email: string, password: string) => {
