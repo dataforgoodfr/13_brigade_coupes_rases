@@ -61,19 +61,28 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return data?.clearCuttingPreviews.map(
-				(clearCutting) => (
+			return data?.clearCuttingPreviews.map((clearCutting) => {
+				return (
 					<Polygon
 						key={clearCutting.id}
+						className="clear-cutting-area"
 						positions={clearCutting.geoCoordinates}
 						color={getClearCuttingStatusColor(clearCutting.status)}
 						weight={0}
 						fillOpacity={0.75}
+						eventHandlers={{
+							mouseover: (event) => {
+								event.target.openPopup();
+							},
+							mouseout: (event) => {
+								event.target.closePopup();
+							},
+						}}
 					>
 						<ClearCuttingMapPopUp clearCutting={clearCutting} />
 					</Polygon>
-				),
-			);
+				);
+			});
 		}
 	}
 

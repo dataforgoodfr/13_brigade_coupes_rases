@@ -1,14 +1,24 @@
 .leaflet-popup {
-    > .leaflet-popup-content-wrapper {
-        border-radius: 20px;
-        box-shadow: none;
-        
-        > .leaflet-popup-content {
-            margin: calc(var(--spacing)* 6); /* m-6 */
-        }
-    }
+    pointer-events: none;
+    
+	> .leaflet-popup-content-wrapper {
+		border-radius: 20px;
+		box-shadow: none;
 
-    .leaflet-popup-tip-container {
-        display: none;
-    }
+		> .leaflet-popup-content {
+			margin: calc(var(--spacing) * 6); /* m-6 */
+		}
+	}
+
+	.leaflet-popup-tip-container {
+		display: none;
+	}
+}
+
+.leaflet-interactive.clear-cutting-area {
+    transition: fill-opacity 0.3s ease;
+
+	&:hover {
+		fill-opacity: 0.95;
+	}
 }
