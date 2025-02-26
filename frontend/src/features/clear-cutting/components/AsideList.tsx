@@ -24,7 +24,6 @@ export function AsideList() {
 			<AdvancedFilters className="mt-6 px-5" />
 			<div className=" px-5 overflow-auto">
 				<ul
-					data-testid="clear-cutting-list"
 					className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 "
 				>
 					{data?.clearCuttingPreviews.map((clearCutting) => (
