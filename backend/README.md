@@ -49,6 +49,5 @@ poetry run python -m pytest
 ## Seed the database
 
 ```bash
-cd backend
-poetry run python seed_dev.py
+docker compose exec backend make seed-db
 ```
