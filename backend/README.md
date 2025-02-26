@@ -45,3 +45,10 @@ Either way, once the server is running, you can access the API in `http://localh
 cd backend
 poetry run python -m pytest
 ```
+
+## Seed the database
+
+```bash
+cd backend
+poetry run python seed_dev.py
+```
