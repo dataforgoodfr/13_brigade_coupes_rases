@@ -12,7 +12,7 @@ export function ClearCuttingMapPopUp({
 	return (
 		<>
 			<Popup closeButton={false} maxWidth={350}>
-				<div className="flex justify-between items-center mb-5 w-full font-[Inter]">
+				<div className="flex justify-between items-center mb-5 w-full font-inter">
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
@@ -24,7 +24,7 @@ export function ClearCuttingMapPopUp({
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>
 
-				<div className="flex mb-5 gap-2 font-[Inter]">
+				<div className="flex mb-5 gap-2 font-inter">
 					{clearCutting.abusiveTags.map((tag) => (
 						<Badge key={tag} className="text-sm" variant="secondary">
 							{tag}
@@ -32,7 +32,7 @@ export function ClearCuttingMapPopUp({
 					))}
 				</div>
 
-				<div className="flex flex-col gap-2.5 text-base text-secondary font-[Plus_Jakarta_Sans] font-medium">
+				<div className="flex flex-col gap-2.5 text-base text-secondary font-jakarta font-medium">
 					<div>
 						Date du signalement : <strong>{clearCutting.reportDate}</strong>
 					</div>
