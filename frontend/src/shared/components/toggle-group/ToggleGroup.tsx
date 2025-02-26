@@ -1,87 +1,87 @@
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
-import type { VariantProps } from "class-variance-authority";
-
-import { cn } from "@/lib/utils";
 import {
-	type ToggleVariantsProps,
-	toggleVariants,
-} from "@/shared/components/Toggle";
-import { type ComponentProps, createContext, useContext } from "react";
+	ToggleGroup as ShadcnToggleGroup,
+	ToggleGroupItem,
+	type ToggleGroupItemProps,
+	type ToggleGroupProps,
+} from "@/components/ui/toggle-group";
+import type { SelectableItemEnhanced } from "@/shared/items";
 
-interface ToggleGroupImplSingleProps<T extends string = string> {
-	type: "single";
-	value?: T;
-	defaultValue?: T;
-	onValueChange?(value: T): void;
-}
-interface ToggleGroupImplMultipleProps<T extends string = string> {
-	type: "multiple";
-	value?: T[];
-	defaultValue?: T[];
-	onValueChange?(value: T[]): void;
-}
-const ToggleGroupContext = createContext<ToggleVariantsProps>({
-	size: "default",
-	variant: "default",
-});
+export type ToggleGroupInputProps<TItem> = Omit<
+	ToggleGroupProps<string>,
+	"value" | "onValueChange"
+> & {
+	value: readonly SelectableItemEnhanced<TItem>[];
+	itemProps?: Omit<ToggleGroupItemProps, "value" | "children">;
+} & (
+		| {
+				type: "multiple";
+				onValueChange: (items: SelectableItemEnhanced<TItem>[]) => void;
+		  }
+		| {
+				type: "single";
+				allowEmptyValue?: boolean;
 
-export type ToggleGroupProps<T extends string = string> = Omit<
-	ComponentProps<typeof ToggleGroupPrimitive.Root>,
-	"type" | "value" | "defaultValue" | "onValueChange"
-> &
-	(ToggleGroupImplSingleProps<T> | ToggleGroupImplMultipleProps<T>) &
-	ToggleVariantsProps;
-export function ToggleGroup<Value extends string>({
-	className,
-	variant,
-	size,
-	children,
-	...props
-}: ToggleGroupProps<Value>) {
-	return (
-		<ToggleGroupPrimitive.Root
-			data-slot="toggle-group"
-			data-variant={variant}
-			data-size={size}
-			className={cn(
-				"group/toggle-group flex items-center rounded-md data-[variant=outline]:shadow-xs",
-				className,
-			)}
-			{...props}
-		>
-			<ToggleGroupContext.Provider value={{ variant, size }}>
-				{children}
-			</ToggleGroupContext.Provider>
-		</ToggleGroupPrimitive.Root>
+				onValueChange: (item?: SelectableItemEnhanced<TItem>) => void;
+		  }
 	);
-}
-
-export function ToggleGroupItem({
+export function ToggleGroup<TItem>({
 	className,
-	children,
-	variant,
 	size,
+	children,
+	variant = "outline",
+	value: items,
+	itemProps,
 	...props
-}: ComponentProps<typeof ToggleGroupPrimitive.Item> &
-	VariantProps<typeof toggleVariants>) {
-	const context = useContext(ToggleGroupContext);
-
+}: ToggleGroupInputProps<TItem>) {
+	const Items = items.map(({ value, label }) => (
+		<ToggleGroupItem key={value} value={value} {...itemProps}>
+			{label}
+		</ToggleGroupItem>
+	));
+	if (props.type === "multiple") {
+		const value = items
+			.filter(({ isSelected }) => isSelected)
+			.map(({ value }) => value);
+		return (
+			<ShadcnToggleGroup
+				{...props}
+				type={"multiple"}
+				value={value}
+				defaultValue={value}
+				onValueChange={(selectedValues) =>
+					props.onValueChange(
+						items.map((item) =>
+							selectedValues.includes(item.value)
+								? { ...item, isSelected: true }
+								: { ...item, isSelected: false },
+						),
+					)
+				}
+			>
+				{Items}
+			</ShadcnToggleGroup>
+		);
+	}
+	const value = items.find(({ isSelected }) => isSelected)?.value;
 	return (
-		<ToggleGroupPrimitive.Item
-			data-slot="toggle-group-item"
-			data-variant={context.variant || variant}
-			data-size={context.size || size}
-			className={cn(
-				toggleVariants({
-					variant: context.variant || variant,
-					size: context.size || size,
-				}),
-				"min-w-0 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l",
-				className,
-			)}
+		<ShadcnToggleGroup
 			{...props}
+			type="single"
+			defaultValue={value}
+			value={props.allowEmptyValue ? undefined : value}
+			onValueChange={(v) => {
+				if (!v && !props.allowEmptyValue) {
+					return;
+				}
+				const item = items.find((item) => item.value === v);
+				props.onValueChange(
+					item === undefined
+						? undefined
+						: { ...item, isSelected: !item.isSelected },
+				);
+			}}
 		>
-			{children}
-		</ToggleGroupPrimitive.Item>
+			{Items}
+		</ShadcnToggleGroup>
 	);
 }

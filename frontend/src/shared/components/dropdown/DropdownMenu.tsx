@@ -3,6 +3,7 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
+	type ComponentPropsWithRef,
 	type ComponentPropsWithoutRef,
 	type ComponentRef,
 	type HTMLAttributes,
@@ -119,7 +120,9 @@ export const DropdownMenuCheckboxItem = forwardRef<
 ));
 DropdownMenuCheckboxItem.displayName =
 	DropdownMenuPrimitive.CheckboxItem.displayName;
-
+export type DropdownMenuCheckboxItemProps = ComponentPropsWithRef<
+	typeof DropdownMenuCheckboxItem
+>;
 export const DropdownMenuRadioItem = forwardRef<
 	ComponentRef<typeof DropdownMenuPrimitive.RadioItem>,
 	ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
@@ -159,7 +162,9 @@ export const DropdownMenuLabel = forwardRef<
 	/>
 ));
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName;
-
+export type DropdownMenuLabelàProps = ComponentPropsWithRef<
+	typeof DropdownMenuLabel
+>;
 export const DropdownMenuSeparator = forwardRef<
 	ComponentRef<typeof DropdownMenuPrimitive.Separator>,
 	ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>

@@ -1,6 +1,11 @@
-export interface NamedId {
-	id: string;
-	name: string;
+import { useMemo, useState } from "react";
+
+export interface NamedId<
+	TId extends string = string,
+	TName extends string = string,
+> {
+	id: TId;
+	name: TName;
 }
 export interface SelectableItem<T> {
 	isSelected: boolean;
@@ -30,9 +35,62 @@ export function recordToSelectableItemsTransformed<TItem, TTransformed = TItem>(
 				item: transform(key, item),
 			}));
 }
-
+export type SelectableItemEnhanced<T> = SelectableItem<T> & {
+	label: string;
+	value: string;
+};
 export function recordToNamedId(record?: Record<string, string>): NamedId[] {
 	return record === undefined
 		? []
 		: Object.entries(record).map(([k, v]) => ({ id: k, name: v }));
 }
+
+export const useEnhancedItems = <
+	TItem,
+	TLabel extends string = string,
+	TValue extends string = string,
+>(
+	items: readonly SelectableItem<TItem>[],
+	getItemLabel: (item: SelectableItem<TItem>) => TLabel,
+	getItemValue: (item: SelectableItem<TItem>) => TValue,
+): SelectableItemEnhanced<TItem>[] =>
+	useMemo(
+		() =>
+			items.map((item) => ({
+				...item,
+				label: getItemLabel(item),
+				value: getItemValue(item),
+			})),
+		[items, getItemLabel, getItemValue],
+	);
+
+export const useSingleSelect = <
+	TItem,
+	TSelectableItem extends SelectableItem<TItem>,
+>(
+	items: TSelectableItem[],
+) => {
+	const [singleItems, setSingleItems] = useState(items);
+
+	const onChange = (item?: TSelectableItem) => {
+		if (item === undefined) {
+			setSingleItems(
+				singleItems.map((singleItem) => ({ ...singleItem, isSelected: false })),
+			);
+		} else {
+			setSingleItems(
+				singleItems.map((singleItem) =>
+					singleItem.item === item.item
+						? item
+						: { ...singleItem, isSelected: !item.isSelected },
+				),
+			);
+		}
+	};
+	const selectedItem = singleItems.find((i) => i.isSelected);
+	return [selectedItem, singleItems, onChange] as const;
+};
+
+export const selectableItemToString = <TItem>({
+	item,
+}: SelectableItem<TItem>) => JSON.stringify(item);

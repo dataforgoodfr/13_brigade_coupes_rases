@@ -17,6 +17,7 @@ export const mockFilters = http.get("*/filters", () => {
 		status: {},
 		departments: departments,
 		region: {},
+		areaPresetsHectare: [0.5, 1, 2, 5, 10],
 	} satisfies FiltersResponse);
 });
 
