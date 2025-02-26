@@ -2,9 +2,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { AdvancedFilters } from "@/features/clear-cutting/components/filters/AdvancedFilters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
+import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
+import { useNavigate } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
+	const navigate = useNavigate();
+
+	const handleCardClick = (clearCutting: ClearCuttingPreview) => {
+		navigate({
+			to: "/map/$clearCuttingId",
+			params: { clearCuttingId: clearCutting.id },
+		});
+	};
 
 	return (
 		<div className="flex flex-col  h-full  ">
@@ -13,13 +23,18 @@ export function AsideList() {
 			</h1>
 			<AdvancedFilters className="mt-6 px-5" />
 			<div className=" px-5 overflow-auto">
-				<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 ">
+				<ul
+					className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 "
+				>
 					{data?.clearCuttingPreviews.map((clearCutting) => (
 						<li
 							key={clearCutting.id}
 							className="col-span-1 flex flex-col divide-y divide-gray-200  rounded-lg bg-white text-center shadow"
 						>
-							<Card>
+							<Card
+								onClick={() => handleCardClick(clearCutting)}
+								className="cursor-pointer"
+							>
 								<CardContent className="pt-6">
 									{clearCutting.imageUrl && (
 										<div
