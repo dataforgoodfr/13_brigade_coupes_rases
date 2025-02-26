@@ -4,51 +4,84 @@ import {
 	selectCutYears,
 	selectDepartments,
 } from "@/features/clear-cutting/store/filters.slice";
-import { Slider } from "@/shared/components/Slider";
 import { DropdownFilter } from "@/shared/components/dropdown/DropdownFilter";
-import { MultiSelectComboboxFilter } from "@/shared/components/select/MultiSelectComboboxFilter";
+import { Input } from "@/shared/components/input/Input";
+import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import type { NamedId, SelectableItem } from "@/shared/items";
+import {
+	type NamedId,
+	type SelectableItem,
+	selectableItemToString,
+	useEnhancedItems,
+} from "@/shared/items";
 import clsx from "clsx";
 
 import { useEffect } from "react";
-const numberTranslator = ({ item }: SelectableItem<number>) => item.toString();
+
 const namedIdTranslator = ({ item }: SelectableItem<NamedId>) =>
 	item.name.toString();
 
 interface Props {
 	className?: string;
 }
+
 export function AdvancedFilters({ className }: Props) {
 	const dispatch = useAppDispatch();
-	const cutYears = useAppSelector(selectCutYears);
-	const departments = useAppSelector(selectDepartments);
+	const cutYears = useEnhancedItems(
+		useAppSelector(selectCutYears),
+		selectableItemToString,
+		selectableItemToString,
+	);
+	const departments = useEnhancedItems(
+		useAppSelector(selectDepartments),
+		namedIdTranslator,
+		namedIdTranslator,
+	);
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());
 	}, [dispatch]);
 	return (
 		<div className={clsx("flex flex-wrap gap-1", className)}>
-			<MultiSelectComboboxFilter
+			<ComboboxFilter
+				type="multiple"
+				countPreview
+				hasInput
+				hasReset
 				label="Années de coupe"
-				getItemLabel={numberTranslator}
-				getItemValue={numberTranslator}
 				items={cutYears}
-				onItemToggled={(cutYear) =>
-					dispatch(filtersSlice.actions.toggleCutYear(cutYear))
+				changeOnClose={(cutYears) =>
+					dispatch(filtersSlice.actions.setCutYears(cutYears))
 				}
 			/>
-			<MultiSelectComboboxFilter
+			<ComboboxFilter
+				type="multiple"
+				countPreview
+				hasInput
+				hasReset
 				label="Départements"
-				getItemLabel={namedIdTranslator}
-				getItemValue={namedIdTranslator}
 				items={departments}
-				onItemToggled={(department) =>
-					dispatch(filtersSlice.actions.toggleDepartment(department))
+				changeOnClose={(departments) =>
+					dispatch(filtersSlice.actions.setDepartments(departments))
 				}
 			/>
 			<DropdownFilter filter="Superficie">
-				<Slider />
+				<div className="flex flex-col w-45">
+					<div className="flex">
+						<Input
+							id="minArea"
+							type="number"
+							placeholder="Min"
+							suffix={"Hectares"}
+						/>
+						<Input
+							id="maxArea"
+							type="number"
+							placeholder="Max"
+							suffix={"Hectares"}
+						/>
+					</div>
+				</div>
 			</DropdownFilter>
 		</div>
 	);

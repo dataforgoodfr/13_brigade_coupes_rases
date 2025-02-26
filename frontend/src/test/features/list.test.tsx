@@ -1,4 +1,3 @@
-
 import { describe, it } from "vitest";
 describe("Clear cuttings list", () => {
 	it("should render list page", async () => {
@@ -10,6 +9,5 @@ describe("Clear cuttings list", () => {
 		// await screen.findByText("COUPES RASES");
 
 		return true;
-
 	});
 });

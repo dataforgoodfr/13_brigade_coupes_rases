@@ -19,5 +19,6 @@
 	"typescript.preferences.preferTypeOnlyAutoImports": true,
 	"json.schemas": [
 		{ "url": "https://json.schemastore.org/web-manifest-combined.json" }
-	]
+	],
+	"cSpell.words": ["Shadcn"]
 }

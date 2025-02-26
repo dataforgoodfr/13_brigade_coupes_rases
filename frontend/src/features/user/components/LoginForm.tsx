@@ -15,14 +15,11 @@ import {
 import { Button } from "@/shared/components/button/Button";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
-import {
-	ToggleGroup,
-	ToggleGroupItem,
-} from "@/shared/components/toggle-group/ToggleGroup";
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useAppDispatch } from "@/shared/hooks/store";
+import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogInIcon } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 type AuthenticationType = "password" | "sso";
@@ -32,8 +29,19 @@ export function LoginForm() {
 		defaultValues: { email: "", password: "" },
 	});
 	const dispatch = useAppDispatch();
-	const [authenticationType, setAuthenticationType] =
-		useState<AuthenticationType>("password");
+	const [authenticationType, authenticationTypes, setAuthenticationType] =
+		useSingleSelect<
+			AuthenticationType,
+			SelectableItemEnhanced<AuthenticationType>
+		>([
+			{
+				isSelected: true,
+				item: "password",
+				label: "Mot de passe",
+				value: "password",
+			},
+			{ isSelected: false, item: "sso", label: "SSO", value: "sso" },
+		]);
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
@@ -43,21 +51,14 @@ export function LoginForm() {
 			<h3 className="text-neutral-600 font-light">
 				Merci de saisir vos identifiants
 			</h3>
-			<ToggleGroup<AuthenticationType>
+			<ToggleGroup
 				className="mt-4 flex  flex-row  w-full"
 				type="single"
-				variant="outline"
-				value={authenticationType}
+				value={authenticationTypes}
+				itemProps={{ className: "basis-1/2" }}
 				onValueChange={setAuthenticationType}
-			>
-				<ToggleGroupItem className="basis-1/2" value="password">
-					Mot de passe
-				</ToggleGroupItem>
-				<ToggleGroupItem className="basis-1/2" value="sso">
-					SSO
-				</ToggleGroupItem>
-			</ToggleGroup>
-			{authenticationType === "password" ? (
+			/>
+			{authenticationType?.item === "password" ? (
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit((login) => dispatch(loginThunk(login)))}
