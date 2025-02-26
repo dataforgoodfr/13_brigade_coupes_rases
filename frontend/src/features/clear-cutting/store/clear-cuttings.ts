@@ -92,11 +92,11 @@ export const clearCuttingsResponseSchema = z.object({
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
 
-export const CLEAR_CUTTING_STATUS_COLORS: Record<ClearCuttingStatus, string>  = {
-	"toValidate": "#FCAD02",
-	"rejected": "#FF3300",
-	"validated": "#204933",
-	"waitingInformation": "#FCAD02",
+export const CLEAR_CUTTING_STATUS_COLORS: Record<ClearCuttingStatus, string> = {
+	toValidate: "#FCAD02",
+	rejected: "#FF3300",
+	validated: "#204933",
+	waitingInformation: "#FCAD02",
 };
 
 export function getClearCuttingStatusColor(status: ClearCuttingStatus) {

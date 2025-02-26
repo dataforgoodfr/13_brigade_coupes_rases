@@ -1,4 +1,7 @@
-export function Dot({ className, color }: { className: string, color: string }) {
+export function Dot({
+	className,
+	color,
+}: { className: string; color: string }) {
 	const style = {
 		width: "8px",
 		height: "8px",

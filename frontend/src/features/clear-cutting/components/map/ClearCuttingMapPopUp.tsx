@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { Dot } from "@/shared/components/dot";
 import {
 	type ClearCuttingPreview,
 	getClearCuttingStatusColor,
 } from "@/features/clear-cutting/store/clear-cuttings";
+import { Dot } from "@/shared/components/dot";
 import { Popup } from "react-leaflet";
 
 export function ClearCuttingMapPopUp({
