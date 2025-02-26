@@ -32,13 +32,13 @@ export function ClearCuttingMapPopUp({
 					))}
 				</div>
 
-				<div className="flex flex-col gap-2.5 text-base text-secondary font-[Plus Jakarta Sans] font-medium">
+				<div className="flex flex-col gap-2.5 text-base text-secondary font-[Plus_Jakarta_Sans] font-medium">
 					<div>
 						Date du signalement : <strong>{clearCutting.reportDate}</strong>
 					</div>
 					<div>
 						Taille de la coupe :
-						<strong>{clearCutting.cadastralParcel?.surfaceKm} HA</strong>
+						<strong> {clearCutting.cadastralParcel?.surfaceKm} HA</strong>
 					</div>
 					<div>
 						Pente : <strong>{clearCutting.cadastralParcel?.slope} %</strong>
