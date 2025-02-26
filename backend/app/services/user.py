@@ -24,20 +24,6 @@ def create_user(db: Session, user: UserCreate):
     db.refresh(new_user)
     return new_user
 
-# def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
-#     logger.info(f"Update clearcut")
-#     clearcut = db.get(ClearCut, id)
-#     if not clearcut:
-#         raise HTTPException(status_code=404, detail="Item not found")    
-#     update_data = clearcut_in.dict(exclude_unset=True)
-#     for key, value in update_data.items():
-#         setattr(clearcut, key, value)
-#     db.commit()
-#     db.refresh(clearcut)
-#     clearcut.location = to_shape(clearcut.location).wkt
-#     clearcut.boundary = to_shape(clearcut.boundary).wkt
-#     return clearcut
-
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     logger.info("Get items called")

@@ -30,6 +30,7 @@ pydantic-settings = "^2.7.1"
 uvicorn = "^0.34.0"
 geoalchemy2 = "^0.17.1"
 alembic = "^1.14.1"
+pydantic = {extras = ["email"], version = "^2.7.1"}
 
 [tool.poetry.group.analytics.dependencies]
 cartopy = "^0.24.1"

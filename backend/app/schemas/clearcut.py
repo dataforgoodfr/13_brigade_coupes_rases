@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from pydantic import BaseModel, validator, ValidationError, Field
+from pydantic import BaseModel, field_validator, Field
 from shapely.geometry import Point, Polygon
 from shapely.wkt import loads
 from typing import Any, Optional
@@ -20,7 +20,7 @@ class ClearCutCreate(BaseModel):
         example="POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))")
     department_id: int
 
-    @validator('location')
+    @field_validator('location')
     def validate_location(cls, value: str) -> str:
         try:
             # Convertir la chaîne WKT en un objet géométrique
@@ -31,7 +31,7 @@ class ClearCutCreate(BaseModel):
             raise ValueError(f"Invalid geometry format for location: {e}")
         return value
     
-    @validator('boundary')
+    @field_validator('boundary')
     def validate_location(cls, value: str) -> str:
         try:
             # Convertir la chaîne WKT en un objet géométrique
@@ -53,7 +53,7 @@ class ClearCutPatch(BaseModel):
     status: Optional[str] = None
     user_id: Optional[int] = None
     
-    @validator('status')
+    @field_validator('status')
     def validate_status(cls, value):
         if value not in ["pending", "validated"]:
             raise ValueError(f"Status must be one of: pending, validated")

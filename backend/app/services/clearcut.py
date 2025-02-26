@@ -30,8 +30,8 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
     logger.info(f"Update clearcut")
     clearcut = db.get(ClearCut, id)
     if not clearcut:
-        raise HTTPException(status_code=404, detail="Item not found")    
-    update_data = clearcut_in.dict(exclude_unset=True)
+        raise HTTPException(status_code=404, detail="Item not found")
+    update_data = clearcut_in.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(clearcut, key, value)
     db.commit()
