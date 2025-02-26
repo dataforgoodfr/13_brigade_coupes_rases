@@ -4,39 +4,58 @@ import type {
 	ClearCuttingStatus,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
+import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
-export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
-	const url = new URL(request.url);
-	const geoBoundsQueryString = url.searchParams.get("geoBounds");
-	let boundaries: Boundaries | undefined;
-
-	if (geoBoundsQueryString) {
-		const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
-		boundaries = [
-			[geoBounds[0], geoBounds[1]],
-			[geoBounds[0], geoBounds[3]],
-			[geoBounds[2], geoBounds[3]],
-			[geoBounds[2], geoBounds[1]],
-		];
-	}
-
-	const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
-
-	return HttpResponse.json({
-		clearCuttingPreviews: boundaries
-			? clearCuttingPreviews.filter((ccp) =>
-					isPointInsidePolygon(boundaries, ccp.center),
-				)
-			: clearCuttingPreviews,
-		clearCuttingsPoints: createFranceRandomPoints,
-		ecologicalZoning: [],
-		waterCourses: [],
-	} satisfies ClearCuttingsResponse);
-});
+const naturaZones = [
+	"",
+	"",
+	"",
+	"",
+	"DES_SITE",
+	"Les grands prés",
+	"Site classé de la Haute Vallée de l'Essonne",
+	"Gâtinais français",
+	"Vallée du Fusain",
+	"ETANG DE SAINT QUENTIN",
+	"MARAIS DITTEVILLE ET DE FONTENAY LE VICOMTE",
+	"Charmentray - Trilbardou",
+	"Massif de Rambouillet",
+	"Vallée de Chevreuse",
+	"Cinq étangs et leurs abords",
+	"Vallée de Chevreuse",
+	"Haute vallée de Chevreuse",
+	"Boucle de Guerne",
+	"Boucle de la Seine",
+	"Forêt de Rosny",
+	"Falaises de la Roche-Guyon et forêt de Moisson",
+	"Vexin français",
+	"Parc forestier de Sevran et ses abords ",
+	"Alisiers du plateau d'Avron",
+	"Bois de Bernouille",
+	"Mares du plateau d'Avron",
+	"Pointe de Givet",
+	"Roche à Wagne",
+	"Rochers du petit Chooz",
+	"Rochers et falaises de Charlemont",
+	"Etangs de la Champagne humide",
+	"Forêt d'Orient",
+	"Rièze de la croix Sainte-Anne",
+	"Marais de la Vanne",
+	"Montagne de Reims",
+	"Forêt d'Orient",
+	"Etangs de la Champagne humide",
+	"Forêt d'Orient",
+	"Etangs de la Champagne humide",
+	"Forêt d'Orient",
+	"Montagne de Reims",
+	"Etangs de la Champagne humide",
+	"Fontaine couverte et perte de l'Andousoir",
+	"Forêt d'Orient",
+];
 
 export const mockClearCutting = http.get(
 	"*/clear-cuttings/:id",
@@ -127,9 +146,67 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 		},
 		status: getRandomStatus(Math.floor(center[0] + center[1])),
 		cutYear: 2021,
+		reportDate: faker.date.anytime().toLocaleDateString(),
+		creationDate: faker.date.anytime().toLocaleDateString(),
 		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
 		imageUrl: faker.image.url(),
+		naturaZone: faker.string.fromCharacters(naturaZones),
+		cadastralParcel: {
+			id: faker.string.nanoid(),
+			slope: faker.number.int({ min: 1, max: 60 }),
+			surfaceKm: faker.number.int({ min: 5, max: 500 }),
+		},
+		abusiveTags: ["PENTE >30%", "NATURA 2000", "SUP 20 HA"],
+		ecologicalZones: [],
 		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
+
+export const mockFilters = http.get("*/filters", () => {
+	return HttpResponse.json({
+		cutYears: [2021, 2022],
+		tags: [
+			{
+				isAbusive: true,
+				name: "Supérieur à 10 hectares",
+				id: faker.string.uuid(),
+			},
+		],
+		ecologicalZoning: {
+			[faker.string.uuid()]: faker.company.buzzAdjective(),
+		},
+		status: {},
+		departments: {},
+		region: {},
+	} satisfies FiltersResponse);
+});
+
+const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
+
+export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
+	const url = new URL(request.url);
+	const geoBoundsQueryString = url.searchParams.get("geoBounds");
+	let boundaries: Boundaries | undefined;
+
+	if (geoBoundsQueryString) {
+		const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
+		boundaries = [
+			[geoBounds[0], geoBounds[1]],
+			[geoBounds[0], geoBounds[3]],
+			[geoBounds[2], geoBounds[3]],
+			[geoBounds[2], geoBounds[1]],
+		];
+	}
+
+	return HttpResponse.json({
+		clearCuttingPreviews: boundaries
+			? clearCuttingPreviews.filter((ccp) =>
+					isPointInsidePolygon(boundaries, ccp.center),
+				)
+			: clearCuttingPreviews,
+		clearCuttingsPoints: createFranceRandomPoints,
+		ecologicalZones: [],
+		waterCourses: [],
+	} satisfies ClearCuttingsResponse);
+});

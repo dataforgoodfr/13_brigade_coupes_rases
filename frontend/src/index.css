@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/leaflet.css";
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
@@ -63,6 +64,7 @@
 @theme inline {
 	--font-poppins: Poppins, sans-serif;
 	--font-inter: Inter, sans-serif;
+	--font-jakarta: "Plus Jakarta Sans", sans-serif;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
