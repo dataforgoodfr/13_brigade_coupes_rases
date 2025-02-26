@@ -61,10 +61,11 @@ export const mockClearCutting = http.get(
 	"*/clear-cuttings/:id",
 	({ params }) => {
 		const { id } = params as { id: string };
+		const date = faker.date.anytime();
+		const center = francRandomPointMock();
 		return HttpResponse.json({
 			id: id,
-			geoCoordinates: [francRandomPointMock()],
-			cutYear: 2021,
+			geoCoordinates: [center],
 			address: {
 				streetName: faker.location.street(),
 				streetNumber: faker.number.int().toString(),
@@ -74,6 +75,12 @@ export const mockClearCutting = http.get(
 			},
 			imageUrls: [],
 			status: getRandomStatus(Date.now()),
+			abusiveTags: [],
+			center,
+			creationDate: date.toISOString(),
+			cutYear: date.getFullYear(),
+			ecologicalZones: [],
+			reportDate: date.toISOString(),
 		} satisfies ClearCutting);
 	},
 );
@@ -179,6 +186,7 @@ export const mockFilters = http.get("*/filters", () => {
 		status: {},
 		departments: {},
 		region: {},
+		areaPresetsHectare: [0.5, 2, 5, 10],
 	} satisfies FiltersResponse);
 });
 
