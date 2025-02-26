@@ -92,15 +92,13 @@ export const clearCuttingsResponseSchema = z.object({
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
 
+export const CLEAR_CUTTING_STATUS_COLORS: Record<ClearCuttingStatus, string>  = {
+	"toValidate": "#FCAD02",
+	"rejected": "#FF3300",
+	"validated": "#204933",
+	"waitingInformation": "#FCAD02",
+};
+
 export function getClearCuttingStatusColor(status: ClearCuttingStatus) {
-	switch (status) {
-		case "toValidate":
-			return "#FCAD02";
-		case "rejected":
-			return "#FF3300";
-		case "validated":
-			return "#204933";
-		case "waitingInformation":
-			return "#FCAD02";
-	}
+	return CLEAR_CUTTING_STATUS_COLORS[status];
 }
