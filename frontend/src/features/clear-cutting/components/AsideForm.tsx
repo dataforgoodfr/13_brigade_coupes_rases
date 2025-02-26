@@ -35,7 +35,7 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 	return (
 		<>
 			<div className="flex m-4 text-3xl font-bold align-baseline">
-				<Link to="/map/clear-cuttings">
+				<Link to="/clear-cuttings">
 					<X size={40} />
 				</Link>
 				<h1 className="ml-6">{`${data?.address.city.toLocaleUpperCase()} - ${data?.cutYear}`}</h1>

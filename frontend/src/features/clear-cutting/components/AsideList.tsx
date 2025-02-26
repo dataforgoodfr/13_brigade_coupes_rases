@@ -11,7 +11,7 @@ export function AsideList() {
 
 	const handleCardClick = (clearCutting: ClearCuttingPreview) => {
 		navigate({
-			to: "/map/$clearCuttingId",
+			to: "/clear-cuttings/$clearCuttingId",
 			params: { clearCuttingId: clearCutting.id },
 		});
 	};
