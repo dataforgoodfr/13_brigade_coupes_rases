@@ -1,9 +1,8 @@
 from logging import getLogger
-from pydantic import BaseModel
+from .shared import DepartmentBase, UserBase
 
 logger = getLogger(__name__)
 
-# Schéma pour la création d'une nouvelle instance de ClearCut
-class DepartmentBase(BaseModel):
-    id: int
-    code: int
+
+class DepartmentResponse(DepartmentBase):
+    users: list[UserBase]
