@@ -31,6 +31,7 @@ docker compose up -d --build
 
 ```bash
 cd ./backend
+cp .env.example .env
 docker compose exec backend bash
 poetry install --with backend
 make devserver
