@@ -1,7 +1,7 @@
 import os
 import sys
 
-TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/local"
+TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 # Add parent path to get access to app imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

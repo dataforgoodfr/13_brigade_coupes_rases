@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from app.routes import items
+from app.routes import clearcut
+
 from app.database import engine, Base
 
 # Create DB tables if not using Alembic (use migrations in production)
@@ -8,12 +9,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Brigades Coupes Rases")
 
 # Include routes
-app.include_router(items.router)
+app.include_router(clearcut.router)
 
-
-@app.get("/")
-async def home():
-    return {"message": "Hello, World!"}
 
 
 def start_server(
