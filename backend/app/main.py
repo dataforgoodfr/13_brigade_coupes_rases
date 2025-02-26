@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import clearcut
+from app.routes import clearcut, departement
 
 from app.database import engine, Base
 
@@ -10,6 +10,7 @@ app = FastAPI(title="Brigades Coupes Rases")
 
 # Include routes
 app.include_router(clearcut.router)
+app.include_router(departement.router)
 
 
 
