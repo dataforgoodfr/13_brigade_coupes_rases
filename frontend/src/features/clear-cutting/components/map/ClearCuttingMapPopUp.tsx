@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Dot } from "@/components/ui/dot";
+import { Dot } from "@/shared/components/dot";
 import {
 	type ClearCuttingPreview,
 	getClearCuttingStatusColor,
