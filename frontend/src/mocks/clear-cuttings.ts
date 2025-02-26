@@ -121,8 +121,6 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 			city,
 			country: faker.location.country(),
 			postalCode: faker.location.zipCode(),
-			streetName: faker.location.streetAddress(),
-			streetNumber: faker.location.buildingNumber(),
 		},
 		status: getRandomStatus(Math.floor(center[0] + center[1])),
 		cutYear: 2021,

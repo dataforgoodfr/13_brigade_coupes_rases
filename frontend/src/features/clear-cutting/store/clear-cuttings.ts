@@ -40,19 +40,17 @@ const clearCuttingBaseSchema = z.object({
 			surfaceKm: z.number(),
 		})
 		.optional(),
-	address: z.object({
-		streetName: z.string(),
-		streetNumber: z.string(),
-		postalCode: z.string(),
-		city: z.string(),
-		state: z.string().optional(),
-		country: z.string(),
-	}),
+
 	status: clearCuttingStatusSchema,
 });
 
 const clearCuttingPreviewSchema = clearCuttingBaseSchema.and(
 	z.object({
+		address: z.object({
+			postalCode: z.string(),
+			city: z.string(),
+			country: z.string(),
+		}),
 		imageUrl: z.string().url().optional(),
 		imagesCnt: z.number().optional(),
 	}),
@@ -65,7 +63,14 @@ export const clearCuttingSchema = clearCuttingBaseSchema.and(
 		id: z.string(),
 		geoCoordinates: z.array(pointSchema),
 		waterCourses: z.array(z.string()).optional(),
-		
+		address: z.object({
+			streetName: z.string(),
+			streetNumber: z.string(),
+			postalCode: z.string(),
+			city: z.string(),
+			state: z.string().optional(),
+			country: z.string(),
+		}),
 		customTags: z.array(z.string()).optional(),
 		imageUrls: z.array(z.string().url()),
 	}),
