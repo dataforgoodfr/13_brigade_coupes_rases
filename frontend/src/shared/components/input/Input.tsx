@@ -21,7 +21,7 @@ const InputAside = ({ children }: PropsWithChildren) => {
 export const Input = forwardRef<HTMLInputElement, Props>(
 	({ className, type, suffix, prefix, ...props }, ref) => {
 		return (
-			<div className="">
+			<>
 				{prefix && <InputAside>{prefix}</InputAside>}
 				<input
 					type={type}
@@ -33,7 +33,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(
 					{...props}
 				/>
 				{suffix && <InputAside>{suffix}</InputAside>}
-			</div>
+			</>
 		);
 	},
 );
