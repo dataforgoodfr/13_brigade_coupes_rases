@@ -6,7 +6,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
-
+import { reactClickToComponent } from "vite-plugin-react-click-to-component";
 export default defineConfig(({ mode }) => {
 	return {
 		test: {
@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
 			react(),
 			tailwindcss(),
 			tsconfigPaths(),
+			reactClickToComponent(),
 			TanStackRouterVite({ autoCodeSplitting: true }),
 		],
 	};

@@ -58,19 +58,21 @@ const clearCuttingPreviewSchema = clearCuttingBaseSchema.and(
 
 export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
 
+const clearCuttingAddressSchema = z.object({
+	streetName: z.string(),
+	streetNumber: z.string(),
+	postalCode: z.string(),
+	city: z.string(),
+	state: z.string().optional(),
+	country: z.string(),
+});
+export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
 export const clearCuttingSchema = clearCuttingBaseSchema.and(
 	z.object({
 		id: z.string(),
 		geoCoordinates: z.array(pointSchema),
 		waterCourses: z.array(z.string()).optional(),
-		address: z.object({
-			streetName: z.string(),
-			streetNumber: z.string(),
-			postalCode: z.string(),
-			city: z.string(),
-			state: z.string().optional(),
-			country: z.string(),
-		}),
+		address: clearCuttingAddressSchema,
 		customTags: z.array(z.string()).optional(),
 		imageUrls: z.array(z.string().url()),
 	}),

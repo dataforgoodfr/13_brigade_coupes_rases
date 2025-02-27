@@ -5,12 +5,11 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"format": "biome format --write",
-		"lint": "biome lint --write",
 		"cleanup": "biome check --write",
+		"cleanup:tsc": "biome check --write && tsc",
 		"build": "pnpm cleanup && tsc -b && vite build",
 		"preview": "pnpm build && vite preview",
-		"test": "vitest --mode development ",
+		"test": "vitest run --mode development ",
 		"coverage": "vitest run --coverage",
 		"generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo-association-canopee.svg",
 		"storybook": "storybook dev -p 6006",
@@ -88,6 +87,7 @@
 		"typescript": "~5.7.2",
 		"vite": "^6.1.0",
 		"vite-plugin-pwa": "^0.21.1",
+		"vite-plugin-react-click-to-component": "^3.1.1",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.0.5",
 		"workbox-window": "^7.3.0"
