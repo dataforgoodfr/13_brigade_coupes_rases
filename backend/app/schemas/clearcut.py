@@ -30,11 +30,11 @@ class ClearCutCreate(BaseModel):
             if not isinstance(point, Point):
                 raise ValueError("Location must be a valid Point geometry")
         except Exception as e:
-            raise ValueError(f"Invalid geometry format for location: {e}")
+            raise ValueError(f"Invalid geometry format for location") from e
         return value
     
     @field_validator('boundary')
-    def validate_location(cls, value: str) -> str:
+    def validate_boundary(cls, value: str) -> str:
         try:
             # Convertir la chaîne WKT en un objet géométrique
             polygon = loads(value)
@@ -47,7 +47,7 @@ class ClearCutCreate(BaseModel):
                 raise ValueError("NaN values detected in coordinates.")
             
         except Exception as e:
-            raise ValueError(f"Invalid geometry format for boundary: {e}")
+            raise ValueError(f"Invalid geometry format for boundary") from e
         return value
 
 
