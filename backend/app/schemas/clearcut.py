@@ -3,7 +3,7 @@ from logging import getLogger
 from pydantic import BaseModel, field_validator, Field
 from shapely.geometry import Point, Polygon
 from shapely.wkt import loads
-from typing import Any, Optional
+from typing import Optional
 import numpy as np
 
 from app.schemas.shared import DepartmentBase, UserBase
@@ -30,7 +30,7 @@ class ClearCutCreate(BaseModel):
             if not isinstance(point, Point):
                 raise ValueError("Location must be a valid Point geometry")
         except Exception as e:
-            raise ValueError(f"Invalid geometry format for location") from e
+            raise ValueError("Invalid geometry format for location") from e
         return value
     
     @field_validator('boundary')
@@ -47,7 +47,7 @@ class ClearCutCreate(BaseModel):
                 raise ValueError("NaN values detected in coordinates.")
             
         except Exception as e:
-            raise ValueError(f"Invalid geometry format for boundary") from e
+            raise ValueError("Invalid geometry format for boundary") from e
         return value
 
 
@@ -58,7 +58,7 @@ class ClearCutPatch(BaseModel):
     @field_validator('status')
     def validate_status(cls, value):
         if value not in ["pending", "validated"]:
-            raise ValueError(f"Status must be one of: pending, validated")
+            raise ValueError("Status must be one of: pending, validated")
         return value
 
 

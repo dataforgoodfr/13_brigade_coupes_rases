@@ -8,12 +8,11 @@ logger = getLogger(__name__)
 
 
 def create_user(db: Session, user: UserCreate):
-    logger.info(f"Creating item with name: ")
+    logger.info("Creating item with name: ")
     new_user = User(
         firstname = user.firstname,
         lastname = user.lastname,
-        email = user.email
-        )
+        email = user.email)
     for department_id in user.departments:
         department_db = db.query(Department).filter(Department.id == department_id).first()
         if department_db is None:

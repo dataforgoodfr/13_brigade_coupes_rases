@@ -1,5 +1,5 @@
 from http.client import HTTPException
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from app.models import ClearCut
 from app.schemas.clearcut import ClearCutCreate, ClearCutPatch
 from logging import getLogger
@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 
 
 def create_clearcut(db: Session, clearcut: ClearCutCreate):
-    logger.info(f"Creating item with name: ")
+    logger.info("Creating item with name: ")
     db_item = ClearCut(
         cut_date = clearcut.cut_date,
         slope_percentage = clearcut.slope_percentage,
@@ -27,7 +27,7 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     return db_item
 
 def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
-    logger.info(f"Update clearcut")
+    logger.info("Update clearcut")
     clearcut = db.get(ClearCut, id)
     if not clearcut:
         raise HTTPException(status_code=404, detail="Item not found")

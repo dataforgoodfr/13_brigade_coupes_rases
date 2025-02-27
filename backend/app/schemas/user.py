@@ -2,8 +2,6 @@ from datetime import datetime
 from logging import getLogger
 from app.schemas.department import DepartmentBase
 from pydantic import BaseModel, Field
-from shapely.wkt import loads
-from typing import List
 from .shared import UserBase
 
 logger = getLogger(__name__)
