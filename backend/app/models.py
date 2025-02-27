@@ -79,6 +79,7 @@ class ClearCut(Base):
     updated_at = Column(DateTime, default=datetime.now)
 
     department = relationship("Department", back_populates="clear_cuts")
+    user = relationship("User", back_populates="clear_cuts")
     users = relationship("User", secondary=user_clear_cut, back_populates="clear_cuts")
 
     @validates("status")

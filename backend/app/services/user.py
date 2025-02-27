@@ -29,3 +29,8 @@ def get_users(db: Session, skip: int = 0, limit: int = 10):
     logger.info("Get items called")
     users = db.query(User).offset(skip).limit(limit).all()
     return users
+
+def get_users_by_id(id: int, db: Session):
+    logger.info(f"Get user : {id}")
+    user = db.get(User, id)
+    return user

@@ -1,4 +1,4 @@
-from app.services.clearcut import create_clearcut, get_clearcut, update_clearcut
+from app.services.clearcut import create_clearcut, get_clearcut, update_clearcut, get_clearcut_by_id
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from app.schemas.clearcut import ClearCutCreate, ClearCutResponse, ClearCutPatch
@@ -24,6 +24,12 @@ def update_existing_clearcut(id: int, item: ClearCutPatch, db: Session = db_depe
 
 
 @router.get("/", response_model=list[ClearCutResponse])
-def list_clearcut(db: Session = db_dependency, skip: int = 0, limit: int = 10):
+def list_clearcut(db: Session = db_dependency, skip: int = 0, limit: int = 10) -> list[ClearCutResponse]:
     logger.info(db)
     return get_clearcut(db, skip=skip, limit=limit)
+
+
+@router.get("/{id}", response_model=ClearCutResponse)
+def get_by_id(id: int, db: Session = db_dependency) -> ClearCutResponse:
+    logger.info(db)
+    return get_clearcut_by_id(id, db)

@@ -6,7 +6,7 @@ from app.database import engine, Base
 # Create DB tables if not using Alembic (use migrations in production)
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Brigades Coupes Rases")
+app = FastAPI(title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"})
 
 # Include routes
 app.include_router(clearcut.router)

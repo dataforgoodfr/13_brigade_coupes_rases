@@ -1,5 +1,5 @@
 from http.client import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.models import ClearCut
 from app.schemas.clearcut import ClearCutCreate, ClearCutPatch
 from logging import getLogger
@@ -42,9 +42,16 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
 
 
 def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
-    logger.info("Get items called")
+    logger.info("Get clearcuts called")
     clearcuts = db.query(ClearCut).offset(skip).limit(limit).all()
     for clearcut in clearcuts:
         clearcut.location = to_shape(clearcut.location).wkt
         clearcut.boundary = to_shape(clearcut.boundary).wkt
     return clearcuts
+
+def get_clearcut_by_id(id : int, db: Session):
+    logger.info(f"Get clearcuts {id}")
+    clearcut = db.get(ClearCut, id)
+    clearcut.location = to_shape(clearcut.location).wkt
+    clearcut.boundary = to_shape(clearcut.boundary).wkt
+    return clearcut

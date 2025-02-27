@@ -1,4 +1,4 @@
-from app.services.user import create_user, get_users
+from app.services.user import create_user, get_users, get_users_by_id
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserResponse
@@ -27,3 +27,10 @@ def create_new_user(item: UserCreate, db: Session = db_dependency) -> UserRespon
 def list_users(db: Session = db_dependency, skip: int = 0, limit: int = 10) -> list[UserResponse]:
     logger.info(db)
     return get_users(db, skip=skip, limit=limit)
+
+
+@router.get("/{id}", response_model=UserResponse)
+def get_user(id: int, db: Session = db_dependency) -> UserResponse:
+    logger.info(db)
+    return get_users_by_id(id, db)
+

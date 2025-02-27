@@ -6,6 +6,8 @@ from shapely.wkt import loads
 from typing import Any, Optional
 import numpy as np
 
+from app.schemas.shared import DepartmentBase, UserBase
+
 logger = getLogger(__name__)
 
 # Schéma pour la création d'une nouvelle instance de ClearCut
@@ -66,6 +68,8 @@ class ClearCutResponse(ClearCutCreate):
     user_id: Optional[int]
     created_at: datetime
     updated_at: datetime
+    user: Optional[UserBase] = None
+    department: Optional[DepartmentBase] = None
 
     class Config:
         from_attributes = True
