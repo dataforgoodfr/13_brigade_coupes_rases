@@ -1,8 +1,9 @@
-import { Link, type LinkProps } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import type React from "react";
+import type { ComponentProps } from "react";
 
-interface Props extends LinkProps {
+interface Props extends ComponentProps<typeof Link> {
 	Icon: LucideIcon;
 }
 export const NavbarLink: React.FC<Props> = ({ Icon, ...props }) => {
