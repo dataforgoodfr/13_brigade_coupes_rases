@@ -74,7 +74,6 @@ class ClearCut(Base):
     boundary = Column(Geometry("Polygon"), index=True)
     status = Column(String, index=True)
     department_id = Column(Integer, ForeignKey("departments.id"), index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
 
