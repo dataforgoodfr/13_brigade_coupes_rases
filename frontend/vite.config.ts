@@ -10,10 +10,10 @@ import { reactClickToComponent } from "vite-plugin-react-click-to-component";
 export default defineConfig(({ mode }) => {
 	return {
 		test: {
-			css: true,
 			environment: "jsdom",
 			setupFiles: ["src/test/setup.ts"],
 			testTimeout: 60_000,
+			pool: "forks",
 		},
 		preview: {
 			port: 8000,
