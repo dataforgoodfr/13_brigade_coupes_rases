@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 import os
-from sqlalchemy.orm import Session
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point, Polygon
 from app.database import Base, SessionLocal
