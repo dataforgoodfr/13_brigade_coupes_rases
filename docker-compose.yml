@@ -1,4 +1,3 @@
-version: "3.9"
 volumes:
   coupes-rases-data:
     external: false
@@ -19,6 +18,7 @@ services:
       DATABASES: local,test
 
   backend:
+    platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
     working_dir: /code/backend
     build:
       context: .
@@ -32,7 +32,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
+      DATABASE_URL: ${DATABASE_URL}
 
   frontend:
       build:
