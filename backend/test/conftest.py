@@ -3,7 +3,6 @@ import sys
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 import pytest  # noqa: E402
-from app.database import Base  # noqa: E402
 from alembic.config import Config
 from alembic import command
 
