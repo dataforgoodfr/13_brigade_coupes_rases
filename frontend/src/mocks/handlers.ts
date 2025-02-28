@@ -8,5 +8,5 @@ export const handlers = [
 	mockLogin,
 	mockFilters,
 	mockUsers,
-	mockClearCutting,
+	mockClearCutting(),
 ];

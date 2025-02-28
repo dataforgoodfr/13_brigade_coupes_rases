@@ -33,24 +33,23 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 	}, [map, data]);
 
 	return (
-		<>
+		<div className="m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
 			<div className="flex m-4 text-3xl font-bold align-baseline">
-				<Link to="/map/clear-cuttings">
+				<Link to="/clear-cuttings">
 					<X size={40} />
 				</Link>
 				<h1 className="ml-6">{`${data?.address.city.toLocaleUpperCase()} - ${data?.cutYear}`}</h1>
 			</div>
-			<div className="overflow-scroll p-2 flex flex-col">
-				<Accordion.Root type="multiple">
+			<div className="p-2 flex flex-col flex-grow overflow-auto">
+				<Accordion.Root type="multiple" className="grow">
 					{titleSection.map((sectionName) => (
 						<AccordionFullItem key={sectionName} title={sectionName} />
 					))}
 				</Accordion.Root>
-
-				<Button className="mx-auto mt-12 cursor-pointer" size="lg">
-					Valider
-				</Button>
 			</div>
-		</>
+			<Button className="mx-auto mt-12 cursor-pointer" size="lg">
+				Valider
+			</Button>
+		</div>
 	);
 }

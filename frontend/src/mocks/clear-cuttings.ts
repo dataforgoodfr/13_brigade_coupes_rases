@@ -1,5 +1,6 @@
 import type {
 	ClearCutting,
+	ClearCuttingAddress,
 	ClearCuttingPreview,
 	ClearCuttingStatus,
 	ClearCuttingsResponse,
@@ -57,22 +58,26 @@ const naturaZones = [
 	"Forêt d'Orient",
 ];
 
-export const mockClearCutting = http.get(
-	"*/clear-cuttings/:id",
-	({ params }) => {
+export const generateAddressMock = (
+	address: Partial<ClearCuttingAddress> = {},
+) =>
+	({
+		streetName: faker.location.street(),
+		streetNumber: faker.number.int().toString(),
+		postalCode: faker.location.zipCode(),
+		city: faker.location.city(),
+		country: "France",
+		...address,
+	}) satisfies ClearCuttingAddress;
+export const mockClearCutting = (clearCutting: Partial<ClearCutting> = {}) =>
+	http.get("*/clear-cuttings/:id", ({ params }) => {
 		const { id } = params as { id: string };
 		const date = faker.date.anytime();
 		const center = francRandomPointMock();
 		return HttpResponse.json({
 			id: id,
 			geoCoordinates: [center],
-			address: {
-				streetName: faker.location.street(),
-				streetNumber: faker.number.int().toString(),
-				postalCode: faker.location.zipCode(),
-				city: faker.location.city(),
-				country: "France",
-			},
+			address: generateAddressMock(),
 			imageUrls: [],
 			status: getRandomStatus(Date.now()),
 			abusiveTags: [],
@@ -81,9 +86,9 @@ export const mockClearCutting = http.get(
 			cutYear: date.getFullYear(),
 			ecologicalZones: [],
 			reportDate: date.toISOString(),
+			...clearCutting,
 		} satisfies ClearCutting);
-	},
-);
+	});
 
 const francRandomPointMock = (): [number, number] => [
 	faker.location.latitude({

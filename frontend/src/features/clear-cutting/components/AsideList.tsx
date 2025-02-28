@@ -5,20 +5,20 @@ import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
 import { useNavigate } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
+
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
 	const navigate = useNavigate();
 
 	const handleCardClick = (clearCutting: ClearCuttingPreview) => {
 		navigate({
-			to: "/map/$clearCuttingId",
+			to: "/clear-cuttings/$clearCuttingId",
 			params: { clearCuttingId: clearCutting.id },
 		});
 	};
-
 	return (
-		<div className="flex flex-col  h-full  ">
-			<h1 className="text-2xl 2xl:text-4xl/6  text-secondary text-start font-semibold font-poppins mt-14">
+		<div className="flex flex-col h-full m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
+			<h1 className="text-2xl 2xl:text-4xl/6  text-primary text-start font-semibold font-poppins mt-14">
 				COUPES RASES
 			</h1>
 			<AdvancedFilters className="mt-6 px-5" />

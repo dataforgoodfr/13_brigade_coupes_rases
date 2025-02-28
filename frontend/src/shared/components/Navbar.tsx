@@ -18,8 +18,7 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
-import { House } from "lucide-react";
-import { LogIn } from "lucide-react";
+import { House, LogIn } from "lucide-react";
 
 interface Props {
 	className?: string;
@@ -40,29 +39,26 @@ export function Navbar({ className }: Props) {
 		<nav
 			className={clsx(
 				className,
-				"flex flex-col item-center gap-16 bg-(--color-primary) shadow z-max min-w-20 max-w-20 ",
+				"flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
 			)}
 		>
-			<img
-				alt="Canopée"
-				src={canopeeWhiteIcon}
-				className="h-auto w-auto aspect-square object-cover mt-6 mx-4"
-			/>
-			<div className="flex flex-col gap-10 items-center">
-				<NavbarLink to="/clear-cuttings/map">
-					<House size={36} color="var(--primary-foreground)" />
-				</NavbarLink>
-				{!user && (
-					<NavbarLink to="/login">
-						<LogIn size={36} color="var(--primary-foreground)" />
-					</NavbarLink>
-				)}
+			<div className="flex flex-col items-center gap-16 ">
+				<img
+					alt="Canopée"
+					src={canopeeWhiteIcon}
+					className="h-auto aspect-square object-cover mt-6 size-11"
+				/>
+				<div className="flex flex-col gap-10 items-center">
+					<NavbarLink to="/clear-cuttings" Icon={House} title="Carte" />
+					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
 
-				{user?.role === "administrator" && <NavbarItems />}
+					{user?.role === "administrator" && <NavbarItems />}
+				</div>
 			</div>
+
 			{user && (
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger asChild className="size-11 ">
 						{user?.avatarUrl && (
 							<Avatar>
 								<AvatarImage alt="Avatar" src={user.avatarUrl} />

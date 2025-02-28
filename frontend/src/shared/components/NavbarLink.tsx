@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import type { PropsWithChildren } from "react";
+import type { LucideIcon } from "lucide-react";
 import type React from "react";
+import type { ComponentProps } from "react";
 
-type NavbarLinkProps = PropsWithChildren<{
-	to: string;
-}>;
-
-export const NavbarLink: React.FC<NavbarLinkProps> = ({ to, children }) => {
+interface Props extends ComponentProps<typeof Link> {
+	Icon: LucideIcon;
+}
+export const NavbarLink: React.FC<Props> = ({ Icon, ...props }) => {
 	return (
 		<Link
-			to={to}
+			{...props}
 			activeProps={{
 				className: "border-green-500  text-gray-900",
 			}}
@@ -19,7 +19,7 @@ export const NavbarLink: React.FC<NavbarLinkProps> = ({ to, children }) => {
 			}}
 			className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
 		>
-			{children}
+			<Icon className="text-primary-foreground size-11" />
 		</Link>
 	);
 };

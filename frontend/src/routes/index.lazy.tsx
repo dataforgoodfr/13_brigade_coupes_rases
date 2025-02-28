@@ -5,5 +5,5 @@ export const Route = createLazyFileRoute("/")({
 });
 
 function RouteComponent() {
-	return <Navigate to="/map" />;
+	return <Navigate to="/clear-cuttings" />;
 }
