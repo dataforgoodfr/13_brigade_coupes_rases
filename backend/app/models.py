@@ -21,13 +21,6 @@ user_department = Table(
     Column("department_id", Integer, ForeignKey("departments.id"), primary_key=True),
 )
 
-user_clear_cut = Table(
-    "user_clear_cut",
-    Base.metadata,
-    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
-    Column("clear_cut_id", Integer, ForeignKey("clear_cuts.id"), primary_key=True),
-)
-
 
 class User(Base):
     __tablename__ = "users"
@@ -45,7 +38,7 @@ class User(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     departments = relationship("Department", secondary=user_department, back_populates="users")
-    clear_cuts = relationship("ClearCut", secondary=user_clear_cut, back_populates="users")
+    clear_cuts = relationship("ClearCut", back_populates="user")
 
     @validates("role")
     def validate_role(self, key, value):
@@ -81,7 +74,6 @@ class ClearCut(Base):
 
     department = relationship("Department", back_populates="clear_cuts")
     user = relationship("User", back_populates="clear_cuts")
-    users = relationship("User", secondary=user_clear_cut, back_populates="clear_cuts")
 
     @validates("status")
     def validate_status(self, key, value):
