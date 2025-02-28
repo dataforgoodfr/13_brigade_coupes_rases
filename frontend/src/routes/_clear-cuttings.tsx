@@ -1,4 +1,5 @@
 import { InteractiveMap } from "@/features/clear-cutting/components/map/InteractiveMap";
+import { MapProvider } from "@/features/clear-cutting/components/map/Map.context";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_clear-cuttings")({
@@ -7,11 +8,9 @@ export const Route = createFileRoute("/_clear-cuttings")({
 
 function RouteComponent() {
 	return (
-		<>
+		<MapProvider>
 			<InteractiveMap />
-			<div className="m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
-				<Outlet />
-			</div>
-		</>
+			<Outlet />
+		</MapProvider>
 	);
 }

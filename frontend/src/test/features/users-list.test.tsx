@@ -7,7 +7,7 @@ describe("Users list", () => {
 	it("should see users list if administrator", async () => {
 		const { user } = renderApp({ route: "/login" });
 		await loginForm({ user }).logAdministrator();
-		(await screen.findByText("Utilisateurs")).click();
+		await user.click(await screen.findByTitle("Utilisateurs"));
 
 		//const currentPathname = window.location.pathname;
 
