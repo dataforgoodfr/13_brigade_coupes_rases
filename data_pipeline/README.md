@@ -9,17 +9,23 @@
 
 > S'assurer qu'on est à la racine de data_pipeline et ajouter les dossiers (logs/, config/ et plugins/) à la racine du fichier. N'oubliez pas de coller les config.json dans la conversation slack dans config
 
-1. Installer l'image airflow custom
+1. Ajouter le AIRFLOW_UID avec la commande 
 ```bash
-docker build . --tag extending_aiflow:latest
+mkdir -p ./logs ./plugins ./config
+echo -e "AIRFLOW_UID=$(id -u)" > .env
 ```
 
-2. Reconstruire le docker-compose
+2. Installer l'image airflow custom
 ```bash
-docker-compose up -d --no-deps --build airflow-webserver airflow-scheduler
+docker build . --tag bcr_dataeng_aiflow:latest
 ```
 
-3. Lancer l'image 
+3. Construire l'image 
+```bash
+docker compose up airflow-init
+```
+
+4. Lancer l'image 
 ```bash
 docker-compose up
 ```
