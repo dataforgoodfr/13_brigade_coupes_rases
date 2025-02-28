@@ -4,7 +4,11 @@
 
 - `data/ign/bdalti25/slope_gte_30.tif` is a compressed GeoTIFF raster covering the entirety of France in Lambert-93 projection. Each pixel represents whether the terrain slope is greater than or equal to 30%. Pixels that meet this condition are assigned a value of 1, while all other pixels are set to 0. The resolution of the raster is 25m x 25m. This file is derived from the [IGN's BD ALTI digital elevation model](https://geoservices.ign.fr/bdalti), and it is generated using the `notebooks/prepare_ign_slope_raster.ipynb` notebook.
 
-- `data/ign/bdalti25/slope_gte_30.fgb` is the vectorized version of `/data/ign/bdalti25/slope_gte_30.tif`
+- `data/ign/bdalti25/slope_gte_30.fgb` is the vectorized version of `/data/ign/bdalti25/slope_gte_30.tif`.
+
+- `data/abusive_clear_cuts/abusive_clear_cuts_2024.fgb` is a contains all the SUFOSAT clear cut geometries with an area >= 0.5 ha, as well as the intersection areas with Natura2000 zones and Slopes >= 30%. We leave the abusive clear cut filtering up to the consumers of the file. It is generated using the `notebooks/stats_abusive_clear_cuts.ipynb` notebook.
+
+- `data/abusive_clear_cuts/abusive_clear_cuts_2024.fgb` contains all the SUFOSAT clear cut geometries with an area >= 0.5 ha, as well as the intersection areas with Natura2000 zones and slopes >= 30% (in hectares). The filtering of abusive clear-cuts is left to the consumers of the file. It is generated using the `notebooks/stats_abusive_clear_cuts.ipynb` notebook.
 
 ## How to download the preprocessed data
 
