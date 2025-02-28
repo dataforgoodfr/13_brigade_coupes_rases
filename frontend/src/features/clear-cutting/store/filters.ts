@@ -31,6 +31,7 @@ export const filtersResponseSchema = z.object({
 	departments: z.record(z.string().uuid(), z.string()),
 	region: z.record(z.string().uuid(), z.string()),
 	status: z.record(z.string().uuid(), z.string()),
+	areaPresetsHectare: z.array(z.number()),
 });
 
 export type FiltersResponse = z.infer<typeof filtersResponseSchema>;

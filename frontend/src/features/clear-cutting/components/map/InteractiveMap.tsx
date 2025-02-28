@@ -1,15 +1,21 @@
-import { ClearCuttings } from "@/features/clear-cutting/components/map/ClearCuttings";
 import type { LatLngExpression } from "leaflet";
-import { MapContainer, TileLayer } from "react-leaflet";
 const franceCenter: LatLngExpression = [46.695554, 2.440236];
 const wholeFranceZoom = 7;
+
+import { MapContainer, TileLayer } from "react-leaflet";
+import { ClearCuttings } from "./ClearCuttings";
+import { useMapInstance } from "./Map.context";
+
 export function InteractiveMap() {
+	const { setMap } = useMapInstance();
+
 	return (
 		<MapContainer
-			className="h-full z-0"
+			className="h-screen w-full z-0"
 			center={franceCenter}
 			zoom={wholeFranceZoom}
 			scrollWheelZoom={true}
+			ref={setMap}
 		>
 			<TileLayer
 				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

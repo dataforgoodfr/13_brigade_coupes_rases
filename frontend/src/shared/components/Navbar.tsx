@@ -17,6 +17,9 @@ import {
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
+import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
+import { House, LogIn } from "lucide-react";
+
 interface Props {
 	className?: string;
 }
@@ -31,27 +34,31 @@ export function Navbar({ className }: Props) {
 		});
 	};
 	const dispatch = useAppDispatch();
+
 	return (
 		<nav
 			className={clsx(
 				className,
-				"fixed flex top-0 bg-white shadow w-full items-center",
+				"flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
 			)}
 		>
-			<img
-				alt="Canopée"
-				src="https://www.canopee.ong/wp-content/uploads/2023/08/logo-canopee.png"
-				className="h-8 w-auto px-6 "
-			/>
-			<div className="flex grow h-full">
-				<NavbarLink to="/clear-cuttings/map">Coupes rases</NavbarLink>
-				{!user && <NavbarLink to="/login">Connexion</NavbarLink>}
+			<div className="flex flex-col items-center gap-16 ">
+				<img
+					alt="Canopée"
+					src={canopeeWhiteIcon}
+					className="h-auto aspect-square object-cover mt-6 size-11"
+				/>
+				<div className="flex flex-col gap-10 items-center">
+					<NavbarLink to="/clear-cuttings" Icon={House} title="Carte" />
+					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
 
-				{user?.role === "administrator" && <NavbarItems />}
+					{user?.role === "administrator" && <NavbarItems />}
+				</div>
 			</div>
+
 			{user && (
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger asChild className="size-11 ">
 						{user?.avatarUrl && (
 							<Avatar>
 								<AvatarImage alt="Avatar" src={user.avatarUrl} />

@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'frontend/**'
+      - "frontend/**"
   pull_request:
     branches: ["main"]
     paths:
-      - 'frontend/**'
+      - "frontend/**"
 
 jobs:
   build-test:

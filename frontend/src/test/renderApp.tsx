@@ -1,3 +1,4 @@
+import { MapProvider } from "@/features/clear-cutting/components/map/Map.context";
 import {
 	type AuthContext,
 	AuthProvider,
@@ -19,14 +20,30 @@ import {
 import { type RenderOptions, render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Provider } from "react-redux";
-interface Options extends Omit<RenderOptions, "queries"> {
+type Split<S extends string, D extends string> = string extends S
+	? string[]
+	: S extends ""
+		? []
+		: S extends `${infer T}${D}${infer U}`
+			? [T, ...Split<U, D>]
+			: [S];
+type RouteSegment<R extends Route> = Split<R, "/">[number];
+type RouteParam<T extends string> = T extends `$${string}` ? T : never;
+type RouteSplit<R extends Route> = RouteParam<RouteSegment<R>>;
+type RouteParams<R extends Route> = {
+	[T in RouteSplit<R>]: string;
+};
+
+interface Options<R extends Route = Route>
+	extends Omit<RenderOptions, "queries"> {
 	preloadedState?: Partial<RootState>;
 	store?: AppStore;
-	route?: Route;
+	route?: R;
+	params?: RouteParams<R>;
 	user?: User;
 }
 
-export function renderApp(options: Options) {
+export function renderApp<R extends Route = Route>(options: Options<R>) {
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
@@ -37,9 +54,19 @@ export function renderApp(options: Options) {
 				: preloadedState.user,
 		}),
 		route = options.route ?? "/",
+		params,
 		...renderOptions
 	} = options;
-	const history = createMemoryHistory({ initialEntries: [route] });
+	const history = createMemoryHistory({
+		initialEntries: [
+			params
+				? route
+						.split("/")
+						.map((segment) => params[segment as RouteSplit<R>] ?? segment)
+						.join("/")
+				: route,
+		],
+	});
 	const router = createRouter({
 		routeTree,
 		history,
@@ -48,7 +75,9 @@ export function renderApp(options: Options) {
 	function TestApp() {
 		return (
 			<AuthProvider>
-				<InnerTestApp />
+				<MapProvider>
+					<InnerTestApp />
+				</MapProvider>
 			</AuthProvider>
 		);
 	}

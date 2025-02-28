@@ -10,3 +10,5 @@ upgrade-db:
 reset-db:
 	poetry run alembic downgrade base
 
+seed-db:
+	poetry run python -m seed_dev

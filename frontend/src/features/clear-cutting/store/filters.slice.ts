@@ -26,6 +26,9 @@ interface FiltersState {
 	ecologicalZoning: SelectableItem<NamedId>[];
 	departments: SelectableItem<NamedId>[];
 	regions: SelectableItem<NamedId>[];
+	minAreaHectare?: number;
+	maxAreaHectare?: number;
+	areaPresetsHectare: number[];
 }
 const initialState: FiltersState = {
 	cutYears: [],
@@ -33,6 +36,7 @@ const initialState: FiltersState = {
 	departments: [],
 	ecologicalZoning: [],
 	regions: [],
+	areaPresetsHectare: [],
 };
 
 export const getFiltersThunk = createAsyncThunk("filters/get", async () => {
@@ -48,15 +52,45 @@ export const filtersSlice = createSlice({
 				t.item.name === payload ? { ...t, isSelected: !t.isSelected } : t,
 			);
 		},
-		toggleCutYear: (state, { payload }: PayloadAction<number>) => {
+		updateCutYear: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<number>>,
+		) => {
 			state.cutYears = state.cutYears.map((y) =>
-				y.item === payload ? { ...y, isSelected: !y.isSelected } : y,
+				y.item === payload.item ? payload : y,
 			);
 		},
-		toggleDepartment: (state, { payload }: PayloadAction<NamedId>) => {
+		setCutYears: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<number>[]>,
+		) => {
+			state.cutYears = payload;
+		},
+		setMinAreaHectare: (
+			state,
+			{ payload }: PayloadAction<number | undefined>,
+		) => {
+			state.minAreaHectare = payload;
+		},
+		setMaxAreaHectare: (
+			state,
+			{ payload }: PayloadAction<number | undefined>,
+		) => {
+			state.maxAreaHectare = payload;
+		},
+		updateDepartment: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<NamedId>>,
+		) => {
 			state.departments = state.departments.map((d) =>
-				d.item.id === payload.id ? { ...d, isSelected: !d.isSelected } : d,
+				d.item.id === payload.item.id ? payload : d,
 			);
+		},
+		setDepartments: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<NamedId>[]>,
+		) => {
+			state.departments = payload;
 		},
 		setGeoBounds: (state, { payload }: PayloadAction<Bounds>) => {
 			state.geoBounds = payload;
@@ -67,7 +101,15 @@ export const filtersSlice = createSlice({
 			getFiltersThunk.fulfilled,
 			(
 				state,
-				{ payload: { cutYears, tags, ecologicalZoning, departments } },
+				{
+					payload: {
+						cutYears,
+						tags,
+						ecologicalZoning,
+						departments,
+						areaPresetsHectare,
+					},
+				},
 			) => {
 				state.cutYears = listToSelectableItems(cutYears);
 				state.tags = listToSelectableItems(tags);
@@ -79,13 +121,14 @@ export const filtersSlice = createSlice({
 					departments,
 					(key, name) => ({ id: key, name: name }),
 				);
+				state.areaPresetsHectare = areaPresetsHectare;
 			},
 		);
 	},
 });
 
 export const {
-	actions: { toggleCutYear, setGeoBounds, toggleTag },
+	actions: { updateCutYear: toggleCutYear, setGeoBounds, toggleTag },
 } = filtersSlice;
 
 const selectState = (state: RootState) => state.filters;
@@ -114,4 +157,13 @@ export const selectDepartments = createTypedDraftSafeSelector(
 export const selectTags = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.tags,
+);
+
+export const selectMinAreaHectare = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.minAreaHectare,
+);
+export const selectMaxAreaHectare = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.maxAreaHectare,
 );

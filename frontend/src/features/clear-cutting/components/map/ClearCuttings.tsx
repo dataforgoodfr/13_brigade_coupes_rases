@@ -1,7 +1,7 @@
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import {
 	DISPLAY_PREVIEW_ZOOM_LEVEL,
-	getAreaColor,
+	getClearCuttingStatusColor,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { setGeoBounds } from "@/features/clear-cutting/store/filters.slice";
 import { useGeolocation } from "@/shared/hooks/geolocation";
@@ -9,6 +9,7 @@ import { useAppDispatch } from "@/shared/hooks/store";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
+import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
 
 export function ClearCuttings() {
 	const map = useMap();
@@ -60,17 +61,28 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return data?.clearCuttingPreviews.map(
-				({ geoCoordinates, id, status }) => (
+			return data?.clearCuttingPreviews.map((clearCutting) => {
+				return (
 					<Polygon
-						key={id}
-						positions={geoCoordinates}
-						color={getAreaColor(status)}
+						key={clearCutting.id}
+						className="clear-cutting-area"
+						positions={clearCutting.geoCoordinates}
+						color={getClearCuttingStatusColor(clearCutting.status)}
 						weight={0}
 						fillOpacity={0.75}
-					/>
-				),
-			);
+						eventHandlers={{
+							mouseover: (event) => {
+								event.target.openPopup();
+							},
+							mouseout: (event) => {
+								event.target.closePopup();
+							},
+						}}
+					>
+						<ClearCuttingMapPopUp clearCutting={clearCutting} />
+					</Polygon>
+				);
+			});
 		}
 	}
 

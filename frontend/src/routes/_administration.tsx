@@ -1,4 +1,3 @@
-import { AppLayout } from "@/shared/components/AppLayout";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_administration")({
@@ -14,9 +13,5 @@ export const Route = createFileRoute("/_administration")({
 });
 
 function RouteComponent() {
-	return (
-		<AppLayout>
-			<Outlet />
-		</AppLayout>
-	);
+	return <Outlet />;
 }

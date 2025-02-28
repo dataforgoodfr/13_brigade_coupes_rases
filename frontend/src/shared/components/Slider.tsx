@@ -9,6 +9,7 @@ export function Slider({
 	value,
 	min = 0,
 	max = 100,
+
 	...props
 }: ComponentProps<typeof SliderPrimitive.Root>) {
 	const _values = useMemo(

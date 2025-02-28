@@ -31,6 +31,7 @@ docker compose up -d --build
 
 ```bash
 cd ./backend
+cp .env.example .env
 docker compose exec backend bash
 poetry install --with backend
 make devserver
@@ -43,4 +44,10 @@ Either way, once the server is running, you can access the API in `http://localh
 ```bash
 cd backend
 poetry run python -m pytest
+```
+
+## Seed the database
+
+```bash
+docker compose exec backend make seed-db
 ```
