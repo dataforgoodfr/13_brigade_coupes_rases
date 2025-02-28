@@ -40,7 +40,8 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     role = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now)
+    # TODO: updated_at is not set when departments are updated
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
 
     departments = relationship("Department", secondary=user_department, back_populates="users")
@@ -76,7 +77,7 @@ class ClearCut(Base):
     department_id = Column(Integer, ForeignKey("departments.id"), index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     department = relationship("Department", back_populates="clear_cuts")
     user = relationship("User", back_populates="clear_cuts")

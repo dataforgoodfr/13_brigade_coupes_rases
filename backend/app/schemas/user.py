@@ -13,7 +13,7 @@ class UserCreate(UserBase):
         example=[1])
 
 
-class UserPatch(BaseModel):
+class UserUpdate(UserCreate):
     pass
 
 
