@@ -2,18 +2,37 @@
 
 ## Installation
 
-Get poetry `https://python-poetry.org/docs/#installation`
+At the project root, do:
 
-To install backend deps only:
+```bash
+cp .env.example .env
+```
+
+Then customize the content of `.env` if needed.
+
+## Build and launch the containers
+```bash
+docker compose up -d --build
+```
+
+## Connect to the backend container
+
+```bash
+docker compose exec backend bash
+```
+The next commands will be run from the container (invoking make or poetry for example)
+
+## (optional) Launch the development server
 
 ```bash
 poetry install --with backend
+make devserver
 ```
 
-To install all dependencies:
+## Run the tests
 
 ```bash
-poetry install
+poetry run python -m pytest
 ```
 
 ## Adding a new backend package
@@ -22,32 +41,18 @@ poetry install
 poetry add package-name --group backend
 ```
 
-## Launch your containers
-```bash
-docker compose up -d --build
-```
-
-## Launch the server
-
-```bash
-cd ./backend
-cp .env.example .env
-docker compose exec backend bash
-poetry install --with backend
-make devserver
-```
-
-Either way, once the server is running, you can access the API in `http://localhost:8000`. You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.
-
-## Run the tests
-
-```bash
-cd backend
-poetry run python -m pytest
-```
-
 ## Seed the database
 
 ```bash
 docker compose exec backend make seed-db
 ```
+or directly from the container:
+
+```bash
+make seed-db
+```
+
+## Use the API
+
+Once the server is running, you can access the API in `http://localhost:8000`.
+You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.
