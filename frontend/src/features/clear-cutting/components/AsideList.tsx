@@ -1,10 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { AdvancedFilters } from "@/features/clear-cutting/components/filters/AdvancedFilters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
+import { IconButton } from "@/shared/components/button/Button";
 import { useNavigate } from "@tanstack/react-router";
-import { Camera } from "lucide-react";
+import { Camera, Filter } from "lucide-react";
 
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
@@ -17,11 +23,28 @@ export function AsideList() {
 		});
 	};
 	return (
-		<div className="flex flex-col h-full m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
-			<h1 className="text-2xl 2xl:text-4xl/6  text-primary text-start font-semibold font-poppins mt-14">
-				COUPES RASES
-			</h1>
-			<AdvancedFilters className="mt-6 px-5" />
+		<div className="flex flex-col h-full lg:inset-y-0 lg:z-50 lg:flex lg:w-250 lg:flex-col">
+			<Collapsible>
+				<div className="flex justify-between  items-center mt-14 border-b-1 border-zinc-200 px-3 py-2">
+					<h1 className="text-2xl 2xl:text-4xl/6  text-secondary text-start font-semibold font-poppins  ">
+						COUPES RASES
+					</h1>
+					<CollapsibleTrigger asChild>
+						<IconButton
+							variant="outline"
+							className="border-primary text-primary"
+							icon={<Filter />}
+							position="end"
+						>
+							Filtres
+						</IconButton>
+					</CollapsibleTrigger>
+				</div>
+				<CollapsibleContent>
+					<AdvancedFilters className="mt-6 px-5" />
+				</CollapsibleContent>
+			</Collapsible>
+
 			<div className=" px-5 overflow-auto">
 				<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-6 ">
 					{data?.clearCuttingPreviews.map((clearCutting) => (

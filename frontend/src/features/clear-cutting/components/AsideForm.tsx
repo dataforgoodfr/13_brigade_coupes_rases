@@ -1,7 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { useMapInstance } from "@/features/clear-cutting/components/map/Map.context";
 import { useGetClearCuttingQuery } from "@/features/clear-cutting/store/api";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
-import { Button } from "@/shared/components/button/Button";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
