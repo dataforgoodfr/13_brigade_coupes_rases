@@ -25,7 +25,6 @@ The next commands will be run from the container (invoking make or poetry for ex
 ## (optional) Launch the development server
 
 ```bash
-poetry install --with backend
 make devserver
 ```
 
