@@ -1,7 +1,6 @@
 import {
 	type FiltersRequest,
 	type FiltersResponse,
-	type Tag,
 	filtersResponseSchema,
 } from "@/features/clear-cutting/store/filters";
 import type { Bounds } from "@/features/clear-cutting/store/types";
@@ -10,8 +9,17 @@ import {
 	type NamedId,
 	type SelectableItem,
 	listToSelectableItems,
-	recordToSelectableItemsTransformed,
 } from "@/shared/items";
+import type {
+	Department,
+	EcologicalZoning,
+	Tag,
+} from "@/shared/store/referential/referential";
+import {
+	selectDepartmentsByIds,
+	selectEcologicalZoningByIds,
+	selectTagsByIds,
+} from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import {
@@ -23,9 +31,8 @@ interface FiltersState {
 	tags: SelectableItem<Tag>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
-	ecologicalZoning: SelectableItem<NamedId>[];
-	departments: SelectableItem<NamedId>[];
-	regions: SelectableItem<NamedId>[];
+	ecologicalZoning: SelectableItem<EcologicalZoning>[];
+	departments: SelectableItem<Department>[];
 	minAreaHectare?: number;
 	maxAreaHectare?: number;
 	areaPresetsHectare: number[];
@@ -35,23 +42,31 @@ const initialState: FiltersState = {
 	tags: [],
 	departments: [],
 	ecologicalZoning: [],
-	regions: [],
 	areaPresetsHectare: [],
 };
 
-export const getFiltersThunk = createAsyncThunk("filters/get", async () => {
-	const result = await api.get<FiltersResponse>("filters").json();
-	return filtersResponseSchema.parse(result);
-});
+export const getFiltersThunk = createAsyncThunk(
+	"filters/get",
+	async (_arg, { getState }) => {
+		const result = await api.get<FiltersResponse>("filters").json();
+		const { departments, tags, ecologicalZoning, ...response } =
+			filtersResponseSchema.parse(result);
+		const state = getState() as RootState;
+		return {
+			...response,
+			departments: selectDepartmentsByIds(state, departments ?? []),
+			tags: selectTagsByIds(state, tags ?? []),
+			ecologicalZoning: selectEcologicalZoningByIds(
+				state,
+				ecologicalZoning ?? [],
+			),
+		};
+	},
+);
 export const filtersSlice = createSlice({
 	initialState,
 	name: "filters",
 	reducers: {
-		toggleTag: (state, { payload }: PayloadAction<string>) => {
-			state.tags = state.tags.map((t) =>
-				t.item.name === payload ? { ...t, isSelected: !t.isSelected } : t,
-			);
-		},
 		updateCutYear: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<number>>,
@@ -113,14 +128,8 @@ export const filtersSlice = createSlice({
 			) => {
 				state.cutYears = listToSelectableItems(cutYears);
 				state.tags = listToSelectableItems(tags);
-				state.ecologicalZoning = recordToSelectableItemsTransformed(
-					ecologicalZoning,
-					(key, name) => ({ id: key, name: name }),
-				);
-				state.departments = recordToSelectableItemsTransformed(
-					departments,
-					(key, name) => ({ id: key, name: name }),
-				);
+				state.ecologicalZoning = listToSelectableItems(ecologicalZoning);
+				state.departments = listToSelectableItems(departments);
 				state.areaPresetsHectare = areaPresetsHectare;
 			},
 		);
@@ -128,7 +137,7 @@ export const filtersSlice = createSlice({
 });
 
 export const {
-	actions: { updateCutYear: toggleCutYear, setGeoBounds, toggleTag },
+	actions: { updateCutYear: toggleCutYear, setGeoBounds },
 } = filtersSlice;
 
 const selectState = (state: RootState) => state.filters;

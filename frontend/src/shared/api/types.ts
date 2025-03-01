@@ -44,3 +44,8 @@ export type RequestedContent<TValue, TError = unknown> = {
 	error?: TError;
 	value?: TValue;
 };
+
+export type RequiredRequestedContent<TValue, TError = unknown> = Omit<
+	RequestedContent<TValue, TError>,
+	"value"
+> & { value: TValue };

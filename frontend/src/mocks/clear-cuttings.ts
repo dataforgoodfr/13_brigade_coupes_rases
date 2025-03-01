@@ -5,7 +5,6 @@ import type {
 	ClearCuttingStatus,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -174,26 +173,6 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
-
-export const mockFilters = http.get("*/filters", () => {
-	return HttpResponse.json({
-		cutYears: [2021, 2022],
-		tags: [
-			{
-				isAbusive: true,
-				name: "Supérieur à 10 hectares",
-				id: faker.string.uuid(),
-			},
-		],
-		ecologicalZoning: {
-			[faker.string.uuid()]: faker.company.buzzAdjective(),
-		},
-		status: {},
-		departments: {},
-		region: {},
-		areaPresetsHectare: [0.5, 2, 5, 10],
-	} satisfies FiltersResponse);
-});
 
 const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
 

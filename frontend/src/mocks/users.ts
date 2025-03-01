@@ -1,9 +1,12 @@
-import type { LoginRequest, Role, User } from "@/features/user/store/user";
+import type {
+	LoginRequest,
+	Role,
+	UserResponse,
+} from "@/features/user/store/user";
 import { range } from "@/shared/array";
 import { fakerFR as faker } from "@faker-js/faker";
 
 import { http, HttpResponse } from "msw";
-
 export const mockLogin = http.post("*/login", async ({ request }) => {
 	const { email } = (await request.json()) as LoginRequest;
 	const login = email.split("@")[0];
@@ -14,32 +17,33 @@ export const mockLogin = http.post("*/login", async ({ request }) => {
 			email,
 			login,
 			avatarUrl,
-		} satisfies User);
+		} satisfies UserResponse);
 	}
 	return HttpResponse.json({
 		role: "volunteer",
-		departments: [],
+		affectedDepartments: [],
 		email,
 		login,
 		avatarUrl,
-	} satisfies User);
+	} satisfies UserResponse);
 });
 
-const fakeUsers = range(10, () => ({
+const fakeUsers: UserResponse[] = range(10, () => ({
 	login: faker.internet.username(),
 	email: faker.internet.email(),
-	role: faker.helpers.arrayElement(["volunteer", "administrator", "visitor"]),
+	...faker.helpers.arrayElement([
+		{ role: "volunteer", affectedDepartments: [] },
+		{ role: "administrator" },
+	]),
 	avatarUrl: faker.image.avatar(),
-	departments: [],
-	region: faker.location.state(),
-})) satisfies User[];
+}));
 
 export const mockUsers = http.get("*/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
 	const role = url.searchParams.get("role");
-	const regionsParam = url.searchParams.get("regions");
-	const regions = regionsParam ? regionsParam.split(",") : [];
+	const departmentsParam = url.searchParams.get("departments");
+	const departments = departmentsParam ? departmentsParam.split(",") : [];
 
 	let users = fakeUsers;
 
@@ -57,8 +61,10 @@ export const mockUsers = http.get("*/users", ({ request }) => {
 
 		if (role) isValidUser = isValidUser && user.role === role;
 
-		if (regions?.length)
-			isValidUser = isValidUser && regions.some((r) => user.region === r);
+		if (departments?.length && user.role === "volunteer")
+			isValidUser =
+				isValidUser &&
+				departments.some((r) => user?.affectedDepartments?.includes(r));
 
 		return isValidUser;
 	});
