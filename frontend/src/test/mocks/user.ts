@@ -1,8 +1,8 @@
-import type { User } from "@/features/user/store/user";
+import type { UserResponse } from "@/features/user/store/user";
 
 export const volunteerMock = {
 	role: "volunteer",
-	departments: [],
+	affectedDepartments: [],
 	email: "volunteer@email.com",
 	login: "volunteer",
-} satisfies User;
+} satisfies UserResponse;

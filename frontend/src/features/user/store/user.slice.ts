@@ -1,10 +1,13 @@
 import {
 	type LoginRequest,
 	type User,
+	type UserResponse,
+	userResponseSchema,
 	userSchema,
 } from "@/features/user/store/user";
 import { api } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
+import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import {
@@ -29,14 +32,23 @@ export function getStoredUser(): User | undefined {
 }
 export const loginThunk = createAsyncThunk(
 	"users/login",
-	async (loginRequest: LoginRequest) => {
-		const result = await api.post<User>("login", { json: loginRequest }).json();
-		const user = userSchema.parse(result);
-		setStoredUser(user);
-		return user;
+	async (loginRequest: LoginRequest, { getState }) => {
+		const result = await api
+			.post<UserResponse>("login", { json: loginRequest })
+			.json();
+		const user = userResponseSchema.parse(result);
+		if (user.role === "volunteer") {
+			const affectedDepartments = selectDepartmentsByIds(
+				getState() as RootState,
+				user.affectedDepartments ?? [],
+			);
+			const volunteer = userSchema.parse({ ...user, affectedDepartments });
+			setStoredUser(volunteer);
+			return volunteer;
+		}
+		return userSchema.parse(user);
 	},
 );
-
 export const userSlice = createSlice({
 	name: "user",
 	initialState: { status: "idle" } as RequestedContent<User>,
@@ -69,5 +81,5 @@ export const userSlice = createSlice({
 const selectState = (state: RootState) => state.user;
 export const selectLoggedUser = createTypedDraftSafeSelector(
 	selectState,
-	(user) => userSchema.safeParse(user.value).data,
+	(user) => user.value,
 );

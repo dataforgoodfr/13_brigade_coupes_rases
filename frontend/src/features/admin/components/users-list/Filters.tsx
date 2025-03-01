@@ -12,7 +12,7 @@ import {
 	setName,
 	setRole,
 } from "@/features/admin/store/users-filters.slice";
-import { type Role, USER_ROLES } from "@/features/user/store/user";
+import { ROLES, type Role } from "@/features/user/store/user";
 import { Input } from "@/shared/components/input/Input";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { debounce } from "lodash-es";
@@ -56,7 +56,7 @@ export const Filters: React.FC = () => {
 				<SelectContent>
 					<SelectItem value="all">Tous</SelectItem>
 
-					{USER_ROLES.map((role) => {
+					{ROLES.map((role) => {
 						return (
 							<SelectItem key={role} value={role}>
 								{role}
