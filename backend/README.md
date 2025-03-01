@@ -35,7 +35,7 @@ make devserver
 poetry run python -m pytest
 ```
 
-## Adding a new backend package
+## Add a new backend package
 
 ```bash
 poetry add package-name --group backend
