@@ -1,9 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import {
-	type ClearCuttingPreview,
-	getClearCuttingStatusColor,
-} from "@/features/clear-cutting/store/clear-cuttings";
-import { Dot } from "@/shared/components/dot";
+import { DotByStatus } from "@/features/clear-cutting/components/DotByStatus";
+import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
 import { Popup } from "react-leaflet";
 
 export function ClearCuttingMapPopUp({
@@ -16,18 +13,15 @@ export function ClearCuttingMapPopUp({
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
-						<Dot
-							className="ml-2.5"
-							color={getClearCuttingStatusColor(clearCutting.status)}
-						/>
+						<DotByStatus className="ml-2.5" status={clearCutting.status} />
 					</div>
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>
 
 				<div className="flex mb-5 gap-2 font-inter">
-					{clearCutting.abusiveTags.map((tag) => (
-						<Badge key={tag} className="text-sm" variant="secondary">
-							{tag}
+					{clearCutting.abusiveTags.map(({ id, type }) => (
+						<Badge key={id} className="text-sm" variant="secondary">
+							{type}
 						</Badge>
 					))}
 				</div>

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "@tanstack/react-router";
+import clsx from "clsx";
 import {
 	type ComponentProps,
 	type ComponentPropsWithRef,
@@ -8,21 +9,40 @@ import {
 } from "react";
 
 type Props = {
+	suffixClassName?: string;
 	suffix?: ReactNode;
+	prefixClassName?: string;
 	prefix?: ReactNode;
 } & ComponentProps<"input">;
-const InputAside = ({ children }: PropsWithChildren) => {
+
+type InputAsideProps = { className: string } & PropsWithChildren;
+const InputAside = ({ children, className }: InputAsideProps) => {
 	return (
-		<span className="absolute right-0 mr-2 h-full text-secondary z-5  bg-gray-300">
+		<span className={clsx(className, "absolute h-full flex items-center z-5")}>
 			{children}
 		</span>
 	);
 };
 export const Input = forwardRef<HTMLInputElement, Props>(
-	({ className, type, suffix, prefix, ...props }, ref) => {
+	(
+		{
+			className,
+			suffixClassName,
+			prefixClassName,
+			type,
+			suffix,
+			prefix,
+			...props
+		},
+		ref,
+	) => {
 		return (
-			<>
-				{prefix && <InputAside>{prefix}</InputAside>}
+			<div className="flex relative items-center">
+				{prefix && (
+					<InputAside className={clsx("left-0", prefixClassName)}>
+						{prefix}
+					</InputAside>
+				)}
 				<input
 					type={type}
 					className={cn(
@@ -32,8 +52,12 @@ export const Input = forwardRef<HTMLInputElement, Props>(
 					ref={ref}
 					{...props}
 				/>
-				{suffix && <InputAside>{suffix}</InputAside>}
-			</>
+				{suffix && (
+					<InputAside className={clsx("right-0", suffixClassName)}>
+						{suffix}
+					</InputAside>
+				)}
+			</div>
 		);
 	},
 );
