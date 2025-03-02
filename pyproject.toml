@@ -50,6 +50,7 @@ earthengine-api = "^1.5.1"
 geemap = "^0.35.1"
 jupyterlab = "^4.3.5"
 requests = "^2.32.3"
+# gdal is required too, check the setup section in `analytics/README.md`
 
 [tool.poetry.scripts]
 docker-start = "docker compose up -d --build"
