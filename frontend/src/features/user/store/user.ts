@@ -40,7 +40,16 @@ export const userSchema = commonUserSchema.and(
 		administratorResponseSchema,
 	]),
 );
+
+export const fullUserSchema = commonUserSchema.and(
+	z.object({
+		affectedDepartments: z.array(z.string()).optional(),
+		role: roleSchema,
+	}),
+);
+
 export type User = z.infer<typeof userSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 export type Volunteer = UserResponse & { role: "volunteer" };
 export type Administrator = UserResponse & { role: "administrator" };
+export type FullUser = z.infer<typeof fullUserSchema>;

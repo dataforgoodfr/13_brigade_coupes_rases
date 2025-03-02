@@ -1,7 +1,6 @@
 import {
-	type Region,
-	selectRegions,
-	toggleRegion,
+	selectDepartments,
+	toggleDepartment,
 } from "@/features/admin/store/users-filters.slice";
 import { Button } from "@/shared/components/button/Button";
 import {
@@ -17,7 +16,7 @@ import { useEffect, useState } from "react";
 
 export const RegionFilter: React.FC = () => {
 	const dispatch = useAppDispatch();
-	const regionsFilter = useAppSelector(selectRegions);
+	const departmentsFilter = useAppSelector(selectDepartments);
 
 	const [regions, setRegions] = useState([]);
 
@@ -41,19 +40,26 @@ export const RegionFilter: React.FC = () => {
 			<DropdownMenuContent className="w-56 h-96 overflow-y-auto">
 				<DropdownMenuLabel>Régions</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{regions.map((region: Region) => {
-					return (
-						<DropdownMenuCheckboxItem
-							key={region.code}
-							checked={regionsFilter.some((r) => r.code === region.code)}
-							onCheckedChange={() => {
-								dispatch(toggleRegion(region));
-							}}
-						>
-							{region.nom}
-						</DropdownMenuCheckboxItem>
-					);
-				})}
+				{regions.map(
+					(region: {
+						code: string;
+						nom: string;
+					}) => {
+						return (
+							<DropdownMenuCheckboxItem
+								key={region.code}
+								checked={departmentsFilter.some(
+									(department) => department === region.nom,
+								)}
+								onCheckedChange={() => {
+									dispatch(toggleDepartment(region.nom));
+								}}
+							>
+								{region.nom}
+							</DropdownMenuCheckboxItem>
+						);
+					},
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
