@@ -16,8 +16,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: pyproject.toml
 
       - name: Install poetry and pre-commit
         run: |
@@ -26,11 +24,14 @@ jobs:
           # See https://python-poetry.org/docs/cli/#export
           pip install poetry-plugin-export
 
+      - name: set PY
+        run: echo "PY=$(python -c 'import hashlib, sys;print(hashlib.sha256(sys.version.encode()+sys.executable.encode()).hexdigest())')" >> $GITHUB_ENV
+
       - name: Set up caching for pre-commit hooks
         uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit/
-          key: pre-commit|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+          key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit on all files
         run: pre-commit run --all-files --show-diff-on-failure --color=always
