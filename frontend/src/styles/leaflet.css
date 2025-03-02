@@ -1,0 +1,24 @@
+.leaflet-popup {
+	pointer-events: none;
+}
+
+.leaflet-popup > .leaflet-popup-content-wrapper {
+	border-radius: 20px;
+	box-shadow: none;
+}
+
+.leaflet-popup > .leaflet-popup-content-wrapper > .leaflet-popup-content {
+	margin: calc(var(--spacing) * 6); /* m-6 */
+}
+
+.leaflet-popup .leaflet-popup-tip-container {
+	display: none;
+}
+
+.leaflet-interactive.clear-cutting-area {
+	transition: fill-opacity 0.3s ease;
+}
+
+.leaflet-interactive.clear-cutting-area:hover {
+	fill-opacity: 0.95;
+}

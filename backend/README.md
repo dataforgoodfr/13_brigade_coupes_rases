@@ -2,45 +2,60 @@
 
 ## Installation
 
-Get poetry `https://python-poetry.org/docs/#installation`
-
-To install backend deps only:
+At the project root, do:
 
 ```bash
-poetry install --with backend
+cp .env.example .env
 ```
 
-To install all dependencies:
+Then customize the content of `.env` if needed.
+
+## Build and launch the containers
+```bash
+docker compose up -d --build
+```
+
+## Connect to the backend container
 
 ```bash
-poetry install
+docker compose exec backend bash
+```
+The next commands will be run from the container (invoking make or poetry for example)
+
+## (optional) Launch the development server
+
+```bash
+make devserver
 ```
 
-## Adding a new backend package
+## Run the tests
+
+We are using sqlite for tests (so that we can run tests in the CI). We are using `geoalchemy2` as well, this means we need to add a geo lib compatible with sqlite just for the unit tests (`spatialite` ). To install it in local, run:
+```
+ sudo apt-get install -y libsqlite3-mod-spatialitemeans
+```
+Then run all the tests with:
+```bash
+poetry run python -m pytest
+```
+## Add a new backend package
 
 ```bash
 poetry add package-name --group backend
 ```
 
-## Run the server
-
-It might be easier to run db + server with the docker-compose file in the root of the project.
+## Seed the database
 
 ```bash
-poetry run docker-start
+docker compose exec backend make seed-db
 ```
-
-If you want to run the server manually, you need to have a postgres database running. Then run the following command to start the server:
+or directly from the container:
 
 ```bash
-poetry run backend-start
+make seed-db
 ```
 
-Either way, once the server is running, you can access the API in `http://localhost:8000`. You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.
+## Use the API
 
-## Run the tests
-
-```bash
-cd backend
-poetry run python -m pytest
-```
+Once the server is running, you can access the API in `http://localhost:8000`.
+You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.

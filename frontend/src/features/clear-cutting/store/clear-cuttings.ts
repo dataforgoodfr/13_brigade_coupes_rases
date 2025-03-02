@@ -1,6 +1,8 @@
 import { string, z } from "zod";
 import { pointSchema } from "./types";
 
+export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
+
 export const clearCuttingStatusSchema = z.enum([
 	"toValidate",
 	"validated",
@@ -8,8 +10,11 @@ export const clearCuttingStatusSchema = z.enum([
 	"waitingInformation",
 ]);
 
+export type ClearCuttingStatus = z.infer<typeof clearCuttingStatusSchema>;
+
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
+
 const ecologicalZoningSchema = z.object({
 	id: z.string(),
 	name: z.string(),
@@ -17,49 +22,61 @@ const ecologicalZoningSchema = z.object({
 	logo: z.string().url(),
 });
 
-const clearCuttingPreviewSchema = z.object({
+const clearCuttingBaseSchema = z.object({
 	id: z.string(),
 	geoCoordinates: z.array(pointSchema),
+	name: z.string().optional(),
 	center: pointSchema,
-	name: z.string().optional(),
+	reportDate: z.string(),
+	creationDate: z.string(),
 	cutYear: z.number(),
-	address: z.object({
-		postalCode: z.string(),
-		city: z.string(),
-		country: z.string(),
-	}),
-	imageUrl: z.string().url().optional(),
-	imagesCnt: z.number().optional(),
-	status: clearCuttingStatusSchema,
-});
-export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
-
-export const clearCuttingSchema = z.object({
-	id: z.string(),
-	geoCoordinates: z.array(pointSchema),
-	name: z.string().optional(),
-	cutYear: z.number(),
-	address: z.object({
-		streetName: z.string(),
-		streetNumber: z.string(),
-		postalCode: z.string(),
-		city: z.string(),
-		state: z.string().optional(),
-		country: z.string(),
-	}),
+	ecologicalZones: z.array(z.string()),
+	abusiveTags: z.array(z.string()),
+	naturaZone: z.string().optional(),
 	cadastralParcel: z
 		.object({
 			id: string(),
+			slope: z.number(),
 			surfaceKm: z.number(),
 		})
 		.optional(),
-	ecologicalZonings: z.array(z.string()).optional(),
-	waterCourses: z.array(z.string()).optional(),
-	abusiveTags: z.array(z.string()).optional(),
-	customTags: z.array(z.string()).optional(),
-	imageUrls: z.array(z.string().url()),
+
 	status: clearCuttingStatusSchema,
 });
+
+const clearCuttingPreviewSchema = clearCuttingBaseSchema.and(
+	z.object({
+		address: z.object({
+			postalCode: z.string(),
+			city: z.string(),
+			country: z.string(),
+		}),
+		imageUrl: z.string().url().optional(),
+		imagesCnt: z.number().optional(),
+	}),
+);
+
+export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
+
+const clearCuttingAddressSchema = z.object({
+	streetName: z.string(),
+	streetNumber: z.string(),
+	postalCode: z.string(),
+	city: z.string(),
+	state: z.string().optional(),
+	country: z.string(),
+});
+export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
+export const clearCuttingSchema = clearCuttingBaseSchema.and(
+	z.object({
+		id: z.string(),
+		geoCoordinates: z.array(pointSchema),
+		waterCourses: z.array(z.string()).optional(),
+		address: clearCuttingAddressSchema,
+		customTags: z.array(z.string()).optional(),
+		imageUrls: z.array(z.string().url()),
+	}),
+);
 
 export type ClearCutting = z.infer<typeof clearCuttingSchema>;
 
@@ -67,11 +84,23 @@ const waterCourseSchema = z.object({
 	id: z.string(),
 	geoCoordinates: z.array(pointSchema),
 });
+
 export const clearCuttingsResponseSchema = z.object({
 	clearCuttingsPoints: z.array(clearCuttingPointsSchema),
 	clearCuttingPreviews: z.array(clearCuttingPreviewSchema),
 	waterCourses: z.array(waterCourseSchema),
-	ecologicalZoning: z.array(ecologicalZoningSchema),
+	ecologicalZones: z.array(ecologicalZoningSchema),
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
+
+export const CLEAR_CUTTING_STATUS_COLORS: Record<ClearCuttingStatus, string> = {
+	toValidate: "#FCAD02",
+	rejected: "#FF3300",
+	validated: "#204933",
+	waitingInformation: "#FCAD02",
+};
+
+export function getClearCuttingStatusColor(status: ClearCuttingStatus) {
+	return CLEAR_CUTTING_STATUS_COLORS[status];
+}

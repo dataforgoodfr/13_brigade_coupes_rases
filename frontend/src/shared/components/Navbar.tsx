@@ -3,16 +3,22 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/dropdown/DropdownMenu";
+
+import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
 import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
+import { NavbarLink } from "@/shared/components/NavbarLink";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	DropdownMenu,
 	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
+
+import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
+import { House, LogIn } from "lucide-react";
 
 interface Props {
 	className?: string;
@@ -28,51 +34,31 @@ export function Navbar({ className }: Props) {
 		});
 	};
 	const dispatch = useAppDispatch();
+
 	return (
 		<nav
 			className={clsx(
 				className,
-				"fixed flex top-0 bg-white shadow w-full items-center",
+				"flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
 			)}
 		>
-			<img
-				alt="Canopée"
-				src="https://www.canopee.ong/wp-content/uploads/2023/08/logo-canopee.png"
-				className="h-8 w-auto px-6 "
-			/>
-			<div className="flex grow h-full">
-				<Link
-					to="/clear-cuttings/map"
-					activeProps={{
-						className: "border-green-500  text-gray-900",
-					}}
-					inactiveProps={{
-						className:
-							"border-transparent  text-gray-500 hover:border-gray-300 hover:text-gray-700",
-					}}
-					className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
-				>
-					Coupes rases
-				</Link>
-				{!user && (
-					<Link
-						to="/login"
-						activeProps={{
-							className: "border-green-500  text-gray-900",
-						}}
-						inactiveProps={{
-							className:
-								"border-transparent  text-gray-500 hover:border-gray-300 hover:text-gray-700",
-						}}
-						className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
-					>
-						Connexion
-					</Link>
-				)}
+			<div className="flex flex-col items-center gap-16 ">
+				<img
+					alt="Canopée"
+					src={canopeeWhiteIcon}
+					className="h-auto aspect-square object-cover mt-6 size-11"
+				/>
+				<div className="flex flex-col gap-10 items-center">
+					<NavbarLink to="/clear-cuttings" Icon={House} title="Carte" />
+					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
+
+					{user?.role === "administrator" && <NavbarItems />}
+				</div>
 			</div>
+
 			{user && (
 				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
+					<DropdownMenuTrigger asChild className="size-11 ">
 						{user?.avatarUrl && (
 							<Avatar>
 								<AvatarImage alt="Avatar" src={user.avatarUrl} />

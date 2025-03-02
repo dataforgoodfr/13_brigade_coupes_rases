@@ -23,3 +23,6 @@ dist-ssr
 *.sw?
 
 !src/lib
+*storybook.log
+storybook-static
+!.vscode

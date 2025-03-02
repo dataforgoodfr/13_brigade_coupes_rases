@@ -1,3 +1,4 @@
+import { departmentSchema } from "@/shared/store/referential/referential";
 import { z } from "zod";
 
 export const loginRequestSchema = z.object({
@@ -5,8 +6,8 @@ export const loginRequestSchema = z.object({
 	password: z.string(),
 });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
-
-export const roleSchema = z.enum(["visitor", "volunteer", "administrator"]);
+export const ROLES = ["volunteer", "administrator"] as const;
+export const roleSchema = z.enum(ROLES);
 
 export type Role = z.infer<typeof roleSchema>;
 export const commonUserSchema = z.object({
@@ -14,17 +15,32 @@ export const commonUserSchema = z.object({
 	email: z.string(),
 	avatarUrl: z.string().url().optional(),
 });
-
+const volunteerResponseSchema = z.object({
+	affectedDepartments: z.array(z.string().uuid()).optional(),
+	role: roleSchema.extract(["volunteer"]),
+});
+const administratorResponseSchema = z.object({
+	role: roleSchema.extract(["administrator"]),
+});
 const specificUserPropertiesSchema = z.discriminatedUnion("role", [
-	z.object({
-		departments: z.array(z.string().uuid()),
-		role: roleSchema.extract(["volunteer"]),
-	}),
-	z.object({ role: roleSchema.exclude(["volunteer"]) }),
+	volunteerResponseSchema,
+	administratorResponseSchema,
 ]);
 
-export const userSchema = commonUserSchema.and(specificUserPropertiesSchema);
-
+export const userResponseSchema = commonUserSchema.and(
+	specificUserPropertiesSchema,
+);
+const enrichedVolunteerSchema = z.object({
+	role: roleSchema.extract(["volunteer"]),
+	affectedDepartments: departmentSchema.array(),
+});
+export const userSchema = commonUserSchema.and(
+	z.discriminatedUnion("role", [
+		enrichedVolunteerSchema,
+		administratorResponseSchema,
+	]),
+);
 export type User = z.infer<typeof userSchema>;
-export type Volunteer = User & { role: "volunteer" };
-export type Administrator = User & { role: "administrator" };
+export type UserResponse = z.infer<typeof userResponseSchema>;
+export type Volunteer = UserResponse & { role: "volunteer" };
+export type Administrator = UserResponse & { role: "administrator" };

@@ -1,6 +1,5 @@
 import { Login } from "@/features/user/components/Login";
 import { selectLoggedUser } from "@/features/user/store/user.slice";
-import { AppLayout } from "@/shared/components/AppLayout";
 import { useAppSelector } from "@/shared/hooks/store";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -30,13 +29,5 @@ function RouteComponent() {
 		};
 		redirect();
 	}, [loggedUser, navigate]);
-	return (
-		<AppLayout>
-			<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-				<div className="w-full max-w-sm">
-					<Login />
-				</div>
-			</div>
-		</AppLayout>
-	);
+	return <Login />;
 }
