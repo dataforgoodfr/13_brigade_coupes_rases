@@ -1,0 +1,60 @@
+# This workflow will do a clean installation of python dependencies, cache/restore them, build the source code and run tests across different versions of python.
+# It uses Poetry to manage dependencies and pytest to run tests.
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Backend CI
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry virtualenv # Caches the Poetry virtualenv for faster subsequent runs
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        run: |
+          poetry install --with backend,dev --no-interaction
+
+      - name: Run tests
+        run: |
+          poetry run pytest backend/tests/ 
