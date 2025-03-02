@@ -6,16 +6,25 @@ name: Backend CI
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
   pull_request:
     branches: ["main"]
     paths:
       - "backend/**"
       - "pyproject.toml"
 
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
-
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository # Skip the launch if it has already been launched by the push trigger
     strategy:
       matrix:
         python-version: ["3.13"]
