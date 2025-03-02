@@ -6,7 +6,6 @@ import {
 } from "@/features/admin/store/users-schemas";
 
 import { useAppSelector } from "@/shared/hooks/store";
-import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import {
 	createApi,
 	fetchBaseQuery,
@@ -26,24 +25,9 @@ export const adminApi = createApi({
 	}),
 });
 
-export const { endpoints } = adminApi;
+export const { endpoints, useGetUsersQuery } = adminApi;
 
-export function useGetAdminQuery() {
+export function useGetFilteredUsersQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
-	const { data, ...result } = adminApi.useGetUsersQuery(filters ?? skipToken);
-	const users = useAppSelector((state) => {
-		return data?.users.map((user) => {
-			if (user.role === "volunteer") {
-				return {
-					...user,
-					affectedDepartments: selectDepartmentsByIds(
-						state,
-						user.affectedDepartments,
-					),
-				};
-			}
-			return user;
-		});
-	});
-	return { ...result, data: { users } };
+	return adminApi.useGetUsersQuery(filters ?? skipToken);
 }
