@@ -14,7 +14,6 @@ from sqlalchemy import create_engine, event  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 import pytest  # noqa: E402
 from app.database import Base  # noqa: E402
-from app.main import app 
 
 engine = create_engine(TEST_DATABASE_URL,connect_args={
         "check_same_thread": False,
