@@ -19,11 +19,12 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
-      - name: Install poetry
-        run: pip install poetry
-
-      - name: Install pre-commit
-        run: pip install pre-commit
+      - name: Install poetry and pre-commit
+        run: |
+          pip install poetry pre-commit
+          # poetry-plugin-export is required for the https://github.com/Lucas-C/pre-commit-hooks-safety pre-commit hook.
+          # See https://python-poetry.org/docs/cli/#export
+          pip install poetry-plugin-export
 
       - name: Set up caching for pre-commit hooks
         uses: actions/cache@v4
