@@ -3,9 +3,10 @@
 Install the dependencies in a virtual environment:
 
 ```bash
-python3.13 -m venv .venv
-source .venv/bin/activate
+poetry config virtualenvs.create true
+poetry config virtualenvs.in-project true
 poetry install --with analytics
+source .venv/bin/activate
 ```
 
 We also need [GDAL](https://gdal.org/en/stable/) to handle some geospatial data processing.
