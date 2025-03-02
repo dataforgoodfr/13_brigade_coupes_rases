@@ -14,7 +14,7 @@ For Ubuntu/Debian, install GDAL using your system's package manager:
 
 ```bash
 sudo apt update
-sudo apt install python3.13-dev gdal-bin libgdal-dev
+sudo apt install gdal-bin libgdal-dev
 ```
 
 Confirm that GDAL was installed successfully:
@@ -26,6 +26,7 @@ gdalinfo --version
 To use GDAL in Python, install the matching pip package:
 
 ```bash
+sudo apt install python3.13-dev
 pip install gdal==<your GDAL version>
 ```
 
