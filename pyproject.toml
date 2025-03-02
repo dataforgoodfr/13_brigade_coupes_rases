@@ -3,13 +3,18 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "python_template"
+name = "s13_brigade_coupes_rases"
 version = "0.1.0"
-description = "Template"
 authors = ["DataForGood"]
-license = " MIT"
+license = "MIT"
 readme = "README.md"
 package-mode = false
+
+
+[tool.poetry.requires-plugins]
+# Required for the https://github.com/Lucas-C/pre-commit-hooks-safety pre-commit hook.
+# See https://python-poetry.org/docs/cli/#export
+poetry-plugin-export = ">=1.8"
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -44,8 +49,6 @@ shapely = "^2.0.7"
 earthengine-api = "^1.5.1"
 geemap = "^0.35.1"
 jupyterlab = "^4.3.5"
-# jupyter = "^1.0.0"
-# ipykernel = "^5.3.4"
 requests = "^2.32.3"
 
 [tool.poetry.scripts]
@@ -55,7 +58,7 @@ docker-stop = "docker compose down"
 [tool.ruff]
 # Same as Black.
 line-length = 96
-target-version = "py310"
+target-version = "py313"
 
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
