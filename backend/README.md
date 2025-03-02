@@ -30,10 +30,14 @@ make devserver
 
 ## Run the tests
 
+We are using sqlite for tests (so that we can run tests in the CI). We are using `geoalchemy2` as well, this means we need to add a geo lib compatible with sqlite just for the unit tests (`spatialite` ). To install it in local, run:
+```
+ sudo apt-get install -y libsqlite3-mod-spatialitemeans
+```
+Then run all the tests with:
 ```bash
 poetry run python -m pytest
 ```
-
 ## Add a new backend package
 
 ```bash
