@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import { DotByStatus } from "@/features/clear-cutting/components/DotByStatus";
+import { TagBadge } from "@/features/clear-cutting/components/TagBadge";
 import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
 import { Popup } from "react-leaflet";
 
@@ -19,10 +19,8 @@ export function ClearCuttingMapPopUp({
 				</div>
 
 				<div className="flex mb-5 gap-2 font-inter">
-					{clearCutting.abusiveTags.map(({ id, type }) => (
-						<Badge key={id} className="text-sm" variant="secondary">
-							{type}
-						</Badge>
+					{clearCutting.abusiveTags.map((tag) => (
+						<TagBadge key={tag.id} {...tag} />
 					))}
 				</div>
 
