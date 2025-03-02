@@ -19,6 +19,9 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      - name: Install poetry
+        run: pip install poetry
+
       - name: Install pre-commit
         run: pip install pre-commit
 
