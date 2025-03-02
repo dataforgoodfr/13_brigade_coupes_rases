@@ -59,9 +59,6 @@ importers:
       '@reduxjs/toolkit':
         specifier: ^2.5.1
         version: 2.5.1(react-redux@9.2.0(@types/react@19.0.8)(react@19.0.0-rc.1)(redux@5.0.1))(react@19.0.0-rc.1)
-      '@tailwindcss/line-clamp':
-        specifier: ^0.4.4
-        version: 0.4.4(tailwindcss@4.0.3)
       '@tailwindcss/vite':
         specifier: ^4.0.3
         version: 4.0.3(vite@6.1.0(@types/node@18.19.75)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.39.0)(tsx@4.19.2))
@@ -2556,11 +2553,6 @@ packages:
 
   '@swc/types@0.1.17':
     resolution: {integrity: sha512-V5gRru+aD8YVyCOMAjMpWR1Ui577DD5KSJsHP8RAxopAH22jFz6GZd/qxqjO6MJHQhcsjvjOFXyDhyLQUnMveQ==}
-
-  '@tailwindcss/line-clamp@0.4.4':
-    resolution: {integrity: sha512-5U6SY5z8N42VtrCrKlsTAA35gy2VSyYtHWCsg1H87NU1SXnEfekTVlrga9fzUDrrHcGi2Lb5KenUWb4lRQT5/g==}
-    peerDependencies:
-      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
 
   '@tailwindcss/node@4.0.3':
     resolution: {integrity: sha512-QsVJokOl0pJ4AbJV33D2npvLcHGPWi5MOSZtrtE0GT3tSx+3D0JE2lokLA8yHS1x3oCY/3IyRyy7XX6tmzid7A==}
@@ -7673,10 +7665,6 @@ snapshots:
   '@swc/types@0.1.17':
     dependencies:
       '@swc/counter': 0.1.3
-
-  '@tailwindcss/line-clamp@0.4.4(tailwindcss@4.0.3)':
-    dependencies:
-      tailwindcss: 4.0.3
 
   '@tailwindcss/node@4.0.3':
     dependencies:
