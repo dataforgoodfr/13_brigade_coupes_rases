@@ -1,3 +1,40 @@
+## Setup
+
+Install the dependencies in a virtual environment:
+
+```bash
+python3.13 -m venv .venv
+source .venv/bin/activate
+poetry install --with analytics
+```
+
+We also need [GDAL](https://gdal.org/en/stable/) to handle some geospatial data processing.
+We are installing it separated from Poetry due to system-specific dependencies.
+For Ubuntu/Debian, install GDAL using your system's package manager:
+
+```bash
+sudo apt update
+sudo apt install python3.13-dev gdal-bin libgdal-dev
+```
+
+Confirm that GDAL was installed successfully:
+
+```bash
+gdalinfo --version
+```
+
+To use GDAL in Python, install the matching pip package:
+
+```bash
+pip install gdal==<your GDAL version>
+```
+
+Ensure GDAL is properly installed and can be imported:
+
+```python
+from osgeo import gdal
+```
+
 ## Preprocessed data description
 
 - `data/sufosat/sufosat_clear_cuts_2024.fgb` is a FlatGeobuf vector file containing polygons of clear-cut areas detected in France since January 2024, derived from [SUFOSAT](https://ee-sufosatclearcuts.projects.earthengine.app/view/sufosat-clearcuts-fr) data. The file includes clear-cuts larger than 0.5 hectares, with nearby clear-cuts (within 50 meters and 28 days) merged into single events. Each polygon, stored in Lambert-93 projection, includes attributes for the event's start date (`date_min`), end date (`date_max`), duration in days (`days_delta`), number of merged original polygons (`clear_cut_group_size`), and area in hectares (`area_ha`). It is generated using the `notebooks/prepare_sufosat_layer.ipynb` notebook.
