@@ -13,6 +13,9 @@
 
 [Analytics](./analytics/README.md)
 
+## Data_ingénierie 
+[Data_ingénierie](./data_pipeline/README.md)
+
 ## Doc
 
 [Documentation](./doc/README.md)

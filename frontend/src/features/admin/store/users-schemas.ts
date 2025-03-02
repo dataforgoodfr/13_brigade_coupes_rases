@@ -1,4 +1,4 @@
-import { roleSchema, userSchema } from "@/features/user/store/user";
+import { roleSchema, userResponseSchema } from "@/features/user/store/user";
 import { z } from "zod";
 
 const filtersRequestSchema = z.object({
@@ -10,7 +10,7 @@ const filtersRequestSchema = z.object({
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
 
 export const usersListResponseSchema = z.object({
-	users: z.array(userSchema),
+	users: z.array(userResponseSchema),
 });
 
 export type UsersListResponse = z.infer<typeof usersListResponseSchema>;
