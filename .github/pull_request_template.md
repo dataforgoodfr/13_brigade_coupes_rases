@@ -11,7 +11,7 @@ _Merci d'indiquer comment tester les modifications apportées._
 - [ ] Les test unitaires passent
 - [ ] Le code modifié fonctionne en local/dev
 - [ ] J'ai demandé une peer-review à un autre bénévole du projet
-- [ ] La PR est bien formattée et respecte les conventions de style
+- [ ] La PR est bien formatée et respecte les conventions de style
 - [ ] J'ai documenté les modifications apportées (dans le README.md, code ou dans un fichier spécifique si nécessaire)
 
 ### Auteur(s)
