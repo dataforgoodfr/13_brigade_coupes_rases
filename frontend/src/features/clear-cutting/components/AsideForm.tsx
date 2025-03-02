@@ -1,15 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useMapInstance } from "@/features/clear-cutting/components/map/Map.context";
-import { useGetClearCuttingQuery } from "@/features/clear-cutting/store/api";
+import { useGetClearCutting } from "@/features/clear-cutting/store/clear-cuttings-slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { Accordion } from "radix-ui";
 import { useEffect } from "react";
 
 type AsideFormProps = {
-	clearCuttingId?: string;
+	clearCuttingId: string;
 };
 
 const titleSection = [
@@ -23,14 +22,14 @@ const titleSection = [
 ];
 
 export function AsideForm({ clearCuttingId }: AsideFormProps) {
-	const { data } = useGetClearCuttingQuery(clearCuttingId ?? skipToken);
+	const { value } = useGetClearCutting(clearCuttingId);
 	const { map } = useMapInstance();
 
 	useEffect(() => {
-		if (map && data) {
-			map.flyTo(data?.geoCoordinates[0], 10, { duration: 1 });
+		if (map && value) {
+			map.flyTo(value?.geoCoordinates[0], 10, { duration: 1 });
 		}
-	}, [map, data]);
+	}, [map, value]);
 
 	return (
 		<div className="m-3 lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col px-0.5">
@@ -38,7 +37,7 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 				<Link to="/clear-cuttings">
 					<X size={40} />
 				</Link>
-				<h1 className="ml-6">{`${data?.address.city.toLocaleUpperCase()} - ${data?.cutYear}`}</h1>
+				<h1 className="ml-6">{`${value?.address.city.toLocaleUpperCase()} - ${value?.cutYear}`}</h1>
 			</div>
 			<div className="p-2 flex flex-col flex-grow overflow-auto">
 				<Accordion.Root type="multiple" className="grow">

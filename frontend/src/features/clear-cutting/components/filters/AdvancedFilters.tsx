@@ -68,18 +68,8 @@ export function AdvancedFilters({ className }: Props) {
 			<DropdownFilter filter="Superficie">
 				<div className="flex flex-col w-45">
 					<div className="flex">
-						<Input
-							id="minArea"
-							type="number"
-							placeholder="Min"
-							suffix={"Hectares"}
-						/>
-						<Input
-							id="maxArea"
-							type="number"
-							placeholder="Max"
-							suffix={"Hectares"}
-						/>
+						<Input id="minArea" type="number" placeholder="Min" />
+						<Input id="maxArea" type="number" placeholder="Max" />
 					</div>
 				</div>
 			</DropdownFilter>
