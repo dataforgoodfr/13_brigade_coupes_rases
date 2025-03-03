@@ -8,11 +8,12 @@ repos:
       - id: ruff
         args: [--fix]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: mixed-line-ending
   - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.4.0
+    rev: v1.3.3
     hooks:
       - id: python-safety-dependencies-check
+        additional_dependencies: [poetry-plugin-export]

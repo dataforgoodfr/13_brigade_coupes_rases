@@ -21,11 +21,7 @@ jobs:
           cache: pip
 
       - name: Install poetry and pre-commit
-        run: |
-          pip install poetry pre-commit
-          # poetry-plugin-export is required for the https://github.com/Lucas-C/pre-commit-hooks-safety pre-commit hook.
-          # See https://python-poetry.org/docs/cli/#export
-          pip install poetry-plugin-export
+        run: pip install poetry pre-commit
 
       - name: set PY
         run: echo "PY=$(python -c 'import hashlib, sys;print(hashlib.sha256(sys.version.encode()+sys.executable.encode()).hexdigest())')" >> $GITHUB_ENV

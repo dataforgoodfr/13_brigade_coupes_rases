@@ -10,12 +10,6 @@ license = "MIT"
 readme = "README.md"
 package-mode = false
 
-
-[tool.poetry.requires-plugins]
-# Required for the https://github.com/Lucas-C/pre-commit-hooks-safety pre-commit hook.
-# See https://python-poetry.org/docs/cli/#export
-poetry-plugin-export = ">=1.8"
-
 [tool.poetry.dependencies]
 python = "^3.13"
 
