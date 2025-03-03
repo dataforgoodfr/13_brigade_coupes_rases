@@ -19,6 +19,7 @@ Les coordonnées peuvent être
 * **géométriques**, moins précises mais permettant des calculs plus rapides.
 
 Il est possible de convertir les coordonnées d'un type à l'autre, pour bénéficier des fonctions des coordonnées géométriques, qui sont plus nombreuses que celles pour les coordonnées géographiques.
+
 ### Système de référence
 
 Le **SRS** : Spatial Reference System ou **CRS** : Coordinate Reference System définit comment la géométrie est référencée à la surface de la Terre, autrement dit quel est le système de coordonnées utilisé.
@@ -32,7 +33,7 @@ Le **SRID** (Spatial Reference Identifier) est l'identifiant numérique du syst�
 ### Géométrie
 
 Une géométrie est un ensemble de points à 2 (X, Y), 3 (X, Y, Z) ou 4 dimensions (X, Y, Z, M).
-C'est une classe abstraite, dont héritent nombreuses classes concrètes, qui sont soit des géométries, soit des collections de géométries.
+C'est une classe abstraite, dont héritent de nombreuses classes concrètes, qui sont soit des géométries, soit des collections de géométries.
 
 ![Représentation arborescentes des types abstraits et concrets de géométries et de collections de géométries](images/geometry_hierarchy.png "Hiérarchie des types géométriques")
 
@@ -67,7 +68,7 @@ La conversion éventuelle en type `geometry` doit être faite de façon explicit
 
 ### Topologie
 
-La topologie est une branche des mathématiques qui étudie les propriétés spatiales des objets et leurs relations. Dans les SIG, elle est utilisée pour décrire et analyser les relations entre des entités : comment elles sont connectées, quelles frontières (*boundaries*) elles elles partagent ou comment elles se recouvrent.
+La topologie est une branche des mathématiques qui étudie les propriétés spatiales des objets et leurs relations. Dans les SIG, elle est utilisée pour décrire et analyser les relations entre des entités : comment elles sont connectées, quelles frontières (*boundaries*) elles partagent ou comment elles se recouvrent.
 
 La topologie utilise des représentations sous forme de graphes, qui comprennent :
 * des noeuds (*nodes*) : points de jonction ;
@@ -136,7 +137,7 @@ Si les relations spatiales nommées sont insuffisantes, on peut utiliser des rel
 
 ## Utilisation des index spatiaux
 
-Pour avoir de bonnes performances lors des requêtes spatiales il faut qu'un index spatial soit utilisé. Les relations spatiales nommées le font automatiquement, tout comme les prédicats de distance :
+Pour avoir de bonnes performances lors des requêtes spatiales, il faut qu'un index spatial soit utilisé. Les relations spatiales nommées le font automatiquement, tout comme les prédicats de distance :
 * [ST_DWithin](https://postgis.net/docs/manual-3.4/fr/ST_DWithin.html "ST_DWithin")
 * [ST_DFullyWithin](https://postgis.net/docs/manual-3.4/fr/ST_DFullyWithin.html "ST_DFullyWithin")
 * [ST_3DDFullyWithin](https://postgis.net/docs/manual-3.4/fr/ST_3DDFullyWithin.html "ST_3DDFullyWithin")
@@ -152,10 +153,10 @@ Par contre, une fonction comme [ST_Distance](https://postgis.net/docs/manual-3.4
 Pour les valeurs de taille supérieure à 2 Ko, Postgres utilise un mécanisme de stockage et de compression nommé TOAST (*The Oversized-Attribute Storage Technique*). Cela peut provoquer des requêtes lentes sur les petites tables contenant de grandes géométries.  La [documentation de PostGis](https://postgis.net/docs/performance_tips.html) décrit des solutions à ce problème.
 
 ### Clustering des index
-Si les données d'une tables sont principalement écrites et rarement lues, et qu'un index unique PostGis GIST est utilisé pour la plupart des requêtes, il est recommandé d'utiliser la commande CLUSTER pour l'optimiser. Mais elle ne fonctionne que si les géométries sont non nulles. 
+Si les données d'une table sont principalement écrites et rarement lues, et qu'un index unique PostGis GIST est utilisé pour la plupart des requêtes, il est recommandé d'utiliser la commande CLUSTER pour l'optimiser. Mais elle ne fonctionne que si les géométries sont non nulles. 
 
 ### Éviter les conversions de dimension
-Les fonctions comme ST_AsText() or ST_AsBinary() peuvent convertir des données 3D ou 4D en données 2D, mais c'est coûteux sur de grands volumes. Si les dimensions supplémentaires ne sont jamais utilisées il est préférable de les abandonner définitivement :
+Les fonctions comme ST_AsText() or ST_AsBinary() peuvent convertir des données 3D ou 4D en données 2D, mais c'est coûteux sur de grands volumes. Si les dimensions supplémentaires ne sont jamais utilisées, il est préférable de les abandonner définitivement :
 
 ```SQL
 UPDATE mytable SET geom = ST_Force2D(geom);
@@ -164,7 +165,7 @@ VACUUM FULL ANALYZE mytable;
 
 ## SFCGAL
 
-**CGAL** (Computational Geometry Algorithms Library) est une librairie fonctions spatiales 2D et 3D avancées.
+**CGAL** (Computational Geometry Algorithms Library) est une bibliothèque de fonctions spatiales 2D et 3D avancées.
 
 **SFCGAL** est un wrapper autour de cette librairie.
 
