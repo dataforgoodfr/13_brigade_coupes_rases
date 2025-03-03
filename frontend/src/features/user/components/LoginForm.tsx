@@ -1,4 +1,5 @@
 import largeLogo from "@/assets/logo-lg.png";
+import { Button } from "@/components/ui/button";
 import {
 	type LoginRequest,
 	loginRequestSchema,
@@ -12,7 +13,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/shared/components/Form";
-import { Button } from "@/shared/components/button/Button";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";

@@ -1,11 +1,9 @@
-import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
-import {
-	DISPLAY_PREVIEW_ZOOM_LEVEL,
-	getClearCuttingStatusColor,
-} from "@/features/clear-cutting/store/clear-cuttings";
+import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cutting/store/clear-cuttings";
+import { selectClearCuttings } from "@/features/clear-cutting/store/clear-cuttings-slice";
 import { setGeoBounds } from "@/features/clear-cutting/store/filters.slice";
+import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cutting/store/status";
 import { useGeolocation } from "@/shared/hooks/geolocation";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
@@ -27,7 +25,7 @@ export function ClearCuttings() {
 	}, [browserLocation, map.setView]);
 
 	const dispatch = useAppDispatch();
-	const { data } = useGetClearCuttingsQuery();
+	const { value } = useAppSelector(selectClearCuttings);
 
 	const dispatchGeoBounds = useCallback(() => {
 		const bounds = map.getBounds();
@@ -61,13 +59,13 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return data?.clearCuttingPreviews.map((clearCutting) => {
+			return value?.clearCuttingPreviews.map((clearCutting) => {
 				return (
 					<Polygon
 						key={clearCutting.id}
 						className="clear-cutting-area"
 						positions={clearCutting.geoCoordinates}
-						color={getClearCuttingStatusColor(clearCutting.status)}
+						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status]})`}
 						weight={0}
 						fillOpacity={0.75}
 						eventHandlers={{
@@ -88,7 +86,7 @@ export function ClearCuttings() {
 
 	function ClearCuttingLocationPoint() {
 		if (!displayClearCuttingPreview) {
-			return data?.clearCuttingsPoints.map(([lat, lng]) => (
+			return value?.clearCuttingsPoints.map(([lat, lng]) => (
 				<Circle
 					key={`${lat},${lng}`}
 					color="#ff6467"

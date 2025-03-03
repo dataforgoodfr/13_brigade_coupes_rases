@@ -1,9 +1,9 @@
+import { Button } from "@/components/ui/button";
 import {
 	type Region,
 	selectRegions,
 	toggleRegion,
 } from "@/features/admin/store/users-filters.slice";
-import { Button } from "@/shared/components/button/Button";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
