@@ -20,8 +20,8 @@ jobs:
           python-version: "3.13"
           cache: pip
 
-      - name: Install poetry and pre-commit
-        run: pip install poetry pre-commit
+      - name: Install pre-commit
+        run: pip install pre-commit
 
       - name: set PY
         run: echo "PY=$(python -c 'import hashlib, sys;print(hashlib.sha256(sys.version.encode()+sys.executable.encode()).hexdigest())')" >> $GITHUB_ENV
