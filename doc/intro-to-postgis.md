@@ -35,7 +35,20 @@ Le **SRID** (Spatial Reference Identifier) est l'identifiant numérique du syst�
 Une géométrie est un ensemble de points à 2 (X, Y), 3 (X, Y, Z) ou 4 dimensions (X, Y, Z, M).
 C'est une classe abstraite, dont héritent de nombreuses classes concrètes, qui sont soit des géométries, soit des collections de géométries.
 
-![Représentation arborescentes des types abstraits et concrets de géométries et de collections de géométries](images/geometry_hierarchy.png "Hiérarchie des types géométriques")
+```mermaid
+classDiagram
+    Geometry <|-- Point
+    Geometry <|-- Curve
+    Geometry <|-- Surface
+    Curve  <|-- LineString
+    Surface <|-- Polygon
+    Geometry <|-- GeometryCollection
+    GeometryCollection <|-- MultiPoint
+    GeometryCollection <|-- MultiCurve
+    GeometryCollection <|-- MultiSurface
+    MultiCurve  <|-- MultiLineString
+    MultiSurface <|-- MultiPolygon
+```
 
 Il existe 2 formats pour représenter une géométrie pour un usage externe :
 * **WKT** : Well Known Text
