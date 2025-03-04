@@ -1,5 +1,5 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { ToastAction, ToastClose } from "@/components/ui/toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
@@ -29,6 +29,10 @@ export function useReloadPwa() {
 			toast({
 				title: "Nouveau contenu disponible",
 				description: "Cliquez sur Recharger l'application",
+				onClose: () => {
+					setOfflineReady(false);
+					setNeedRefresh(false);
+				},
 				action: (
 					<>
 						<ToastAction
@@ -37,14 +41,6 @@ export function useReloadPwa() {
 						>
 							Recharger l'application
 						</ToastAction>
-						<ToastClose
-							onClick={() => {
-								setOfflineReady(false);
-								setNeedRefresh(false);
-							}}
-						>
-							CLOSE
-						</ToastClose>
 					</>
 				),
 			});

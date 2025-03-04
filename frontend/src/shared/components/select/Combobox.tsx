@@ -1,3 +1,4 @@
+import type { ButtonProps } from "@/components/ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -14,7 +15,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type { ButtonProps } from "@/shared/components/button/Button";
 import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import { ResetButton } from "@/shared/components/button/ResetButton";
 import type { SelectableItemEnhanced } from "@/shared/items";

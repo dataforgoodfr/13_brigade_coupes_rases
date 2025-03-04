@@ -1,15 +1,17 @@
 import { adminApi } from "@/features/admin/store/api";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
-import { clearCuttingsApi } from "@/features/clear-cutting/store/api";
+import { clearCuttingsSlice } from "@/features/clear-cutting/store/clear-cuttings-slice";
 import { filtersSlice } from "@/features/clear-cutting/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
 import { userSlice } from "@/features/user/store/user.slice";
+import { referentialSlice } from "@/shared/store/referential/referential.slice";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
 const reducer = combineReducers({
-	[clearCuttingsApi.reducerPath]: clearCuttingsApi.reducer,
 	[filtersSlice.reducerPath]: filtersSlice.reducer,
 	[usersApi.reducerPath]: usersApi.reducer,
+	[referentialSlice.reducerPath]: referentialSlice.reducer,
+	[clearCuttingsSlice.reducerPath]: clearCuttingsSlice.reducer,
 	[userSlice.reducerPath]: userSlice.reducer,
 	// Admin reducers
 	[adminApi.reducerPath]: adminApi.reducer,
@@ -20,7 +22,6 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 		reducer,
 		middleware: (getDefaultMiddleware) =>
 			getDefaultMiddleware()
-				.concat(clearCuttingsApi.middleware)
 				.concat(usersApi.middleware)
 				.concat(adminApi.middleware),
 		preloadedState,

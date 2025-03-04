@@ -1,11 +1,11 @@
 import type {
-	ClearCutting,
 	ClearCuttingAddress,
-	ClearCuttingPreview,
-	ClearCuttingStatus,
+	ClearCuttingPreviewResponse,
+	ClearCuttingResponse,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
+import { CLEAR_CUTTING_STATUSES } from "@/features/clear-cutting/store/status";
+import { fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -69,7 +69,9 @@ export const generateAddressMock = (
 		country: "France",
 		...address,
 	}) satisfies ClearCuttingAddress;
-export const mockClearCutting = (clearCutting: Partial<ClearCutting> = {}) =>
+export const mockClearCutting = (
+	clearCutting: Partial<ClearCuttingResponse> = {},
+) =>
 	http.get("*/clear-cuttings/:id", ({ params }) => {
 		const { id } = params as { id: string };
 		const date = faker.date.anytime();
@@ -79,7 +81,7 @@ export const mockClearCutting = (clearCutting: Partial<ClearCutting> = {}) =>
 			geoCoordinates: [center],
 			address: generateAddressMock(),
 			imageUrls: [],
-			status: getRandomStatus(Date.now()),
+			status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
 			abusiveTags: [],
 			center,
 			creationDate: date.toISOString(),
@@ -87,7 +89,7 @@ export const mockClearCutting = (clearCutting: Partial<ClearCutting> = {}) =>
 			ecologicalZones: [],
 			reportDate: date.toISOString(),
 			...clearCutting,
-		} satisfies ClearCutting);
+		} satisfies ClearCuttingResponse);
 	});
 
 const francRandomPointMock = (): [number, number] => [
@@ -139,12 +141,9 @@ const createFranceRandomPoints = range<[number, number]>(
 	francRandomPointMock,
 );
 
-const getRandomStatus = (seed: number) =>
-	["validated", "toValidate", "rejected", "waitingInformation"][
-		seed % 4
-	] as ClearCuttingStatus;
-
-const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
+const createClearCutting = (
+	center: [number, number],
+): ClearCuttingPreviewResponse => {
 	const name = faker.animal.dog();
 	const city = faker.location.city();
 
@@ -156,44 +155,24 @@ const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
 			country: faker.location.country(),
 			postalCode: faker.location.zipCode(),
 		},
-		status: getRandomStatus(Math.floor(center[0] + center[1])),
+		comment: faker.lorem.paragraph(),
+		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
 		cutYear: 2021,
 		reportDate: faker.date.anytime().toLocaleDateString(),
 		creationDate: faker.date.anytime().toLocaleDateString(),
 		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
-		imageUrl: faker.image.url(),
 		naturaZone: faker.string.fromCharacters(naturaZones),
 		cadastralParcel: {
 			id: faker.string.nanoid(),
 			slope: faker.number.int({ min: 1, max: 60 }),
 			surfaceKm: faker.number.int({ min: 5, max: 500 }),
 		},
-		abusiveTags: ["PENTE >30%", "NATURA 2000", "SUP 20 HA"],
+		abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
 		ecologicalZones: [],
 		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
 	};
 };
-
-export const mockFilters = http.get("*/filters", () => {
-	return HttpResponse.json({
-		cutYears: [2021, 2022],
-		tags: [
-			{
-				isAbusive: true,
-				name: "Supérieur à 10 hectares",
-				id: faker.string.uuid(),
-			},
-		],
-		ecologicalZoning: {
-			[faker.string.uuid()]: faker.company.buzzAdjective(),
-		},
-		status: {},
-		departments: {},
-		region: {},
-		areaPresetsHectare: [0.5, 2, 5, 10],
-	} satisfies FiltersResponse);
-});
 
 const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
 
