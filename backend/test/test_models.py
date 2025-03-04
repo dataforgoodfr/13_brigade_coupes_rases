@@ -1,8 +1,15 @@
+from http import client
 import pytest
 from datetime import datetime
 from geoalchemy2.elements import WKTElement
 from app.models import User, Department, ClearCut
 
+    # assert user.id is not None
+    # assert user.created_at is not None
+    # assert user.updated_at is not None
+    # assert user.deleted_at is None
+
+    #assert response.json() == {"msg": "Hello World"}
 
 def test_user_creation(db):
     user = User(
@@ -93,3 +100,19 @@ def test_associations(db):
     assert clear_cut.department == department
     assert user in department.users
     assert clear_cut in department.clear_cuts
+
+
+def test_create_hero(test_client):
+
+
+    response = test_client.post(
+        "/user/", json={
+  "firstname": "John",
+  "lastname": "Tree",
+  "email": "john.tree2@yahoo.com",
+  "role": "viewer"
+ 
+}
+    )
+
+    assert response.status_code == 201

@@ -5,14 +5,6 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, validates
 
 
-# FIXME: This is just an example model. We should remove this and create our own models
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String, nullable=True)
-
 
 user_department = Table(
     "user_department",
@@ -68,6 +60,7 @@ class ClearCut(Base):
     boundary = Column(Geometry("Polygon"), index=True)
     status = Column(String, index=True)
     department_id = Column(Integer, ForeignKey("departments.id"), index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
