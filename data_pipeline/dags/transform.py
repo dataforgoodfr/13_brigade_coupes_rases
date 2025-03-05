@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import geopandas as gpd
-from pathlib import Path
+from disjoin_set import DisjointSet
 from osgeo import gdal, ogr, osr
 
 
@@ -33,47 +33,45 @@ def load_from_S3(bucket_name, s3_key, s3_hook, download_path):
     except Exception as e:
         logger.error(f"❌ Erreur lors du téléchargement du fichier depuis S3: {e}")
 
-
-# Regrouper par jours
-def regroup_sufosat_days(
-    input_tif_filepath: str | Path,
-    output_tif_filepath: str | Path,
-    start_day: pd.Timestamp,
-    end_day: pd.Timestamp,
-    **kwargs
-) -> None:
-    sufosat_start_day = pd.Timestamp(year=2014, month=4, day=3)
+# Filtrer la data pour le dernier mois
+def filter_raster_by_date(
+        input_tif_filepath, 
+        output_tif_filepath, 
+        start_day, 
+        end_day, 
+        sufosat_start_day=pd.Timestamp(year=2014, month=4, day=3),
+        **kwargs
+        ):
+    
+    # Calculate precise day differences
     start_days = (start_day - sufosat_start_day).days
     end_days = (end_day - sufosat_start_day).days
-
-    # Open the input TIFF file
+    
     with rasterio.open(input_tif_filepath) as src:
-        # Copy metadata
-        profile = src.profile
-        profile.update(dtype=rasterio.uint8)
-
-        # Open the output TIFF file
+        # Preserve original metadata
+        profile = src.profile.copy()
+        
+        # Consider keeping original data type if possible
+        # profile.update(dtype=rasterio.uint16)  # or another appropriate type
+        
         with rasterio.open(output_tif_filepath, "w", **profile) as dst:
-            # Read the data as a generator (window-by-window) to avoid out Of memory issues
-            # since the total grid contains billions of points
+            # Process in blocks to manage memory
             for _, window in tqdm(
-                src.block_windows(),
-                total=src.width
-                * src.height
-                // (src.block_shapes[0][0] * src.block_shapes[0][1]),
+                src.block_windows(), 
+                total=src.width * src.height // (src.block_shapes[0][0] * src.block_shapes[0][1])
             ):
-                # Read the block data for the first and only band
+                # Read block data
                 data = src.read(1, window=window)
-
-                # Apply the date filter to create binary image (0 or 1)
-                binary_data = ((data >= start_days) & (data <= end_days)).astype(np.uint8)
-
-                # Write processed block to new file
-                dst.write(binary_data, 1, window=window)
+                
+                # Create a mask preserving granular values within date range
+                mask = (data >= start_days) & (data <= end_days)
+                filtered_data = np.where(mask, data, 0)
+                
+                # Write processed block
+                dst.write(filtered_data, 1, window=window)
                 
     kwargs["ti"].xcom_push(key="regrouped_tif_path", value=output_tif_filepath)
     logger.info("✅ Fichier tif regroupé")
-
 
 # Vectorisation du raster
 def polygonize_tif(**kwargs): 
@@ -140,21 +138,89 @@ def convert_geometries_to_wkt(sufosat_2024):
     
     return geojson_str
 
-
 # Transformation du raster 
 def process_geo_data(**kwargs):
     vector_path = kwargs["ti"].xcom_pull(task_ids="transformation_pipeline.polygonize_tif", key="vector_path")
     sufosat_2024: gpd.GeoDataFrame = gpd.read_file(vector_path)
-    gdata = sufosat_2024
-    
-    # Opération géographiques sur le geodataframe sans jointure geo 
-    gdata["area_ha"] = gdata.to_crs(epsg=3395).geometry.area / 10000
-    logger.info("✅ Calcul de la surface en hectares")
-    gdata["coordonnees"] = gdata.to_crs(epsg=3395).geometry.centroid
-    logger.info("✅ Calcul des coordonnées")
-    gdata_new = convert_geometries_to_wkt(gdata)
+    clear_cut = sufosat_2024
+
+    # Gestion ajout des dates
+    clear_cut["date"] = pd.Timestamp(year=2014, month=4, day=3) + pd.to_timedelta(clear_cut["DN"], unit="D")
+    clear_cut["date"] = clear_cut["date"].dt.strftime("%Y-%m-%d")
+    clear_cut["date"] = pd.to_datetime(clear_cut["date"])
+    clear_cut.drop(["DN"], axis=1, inplace=True)
+    logger.info(f"✅ Calcul des dates - {clear_cut.date.dtype}")
+
+    # Reprojection et buffer
+    clear_cut = clear_cut.to_crs(epsg=2154)
+    MAX_METERS_BETWEEN_CLEAR_CUTS = 50
+    clear_cut["buffered"] = clear_cut.geometry.buffer(MAX_METERS_BETWEEN_CLEAR_CUTS / 2)
+    logger.info(f"✅ Buffer du polygone")
+
+    # Sjoin cluster 
+    clear_cut_buffered = clear_cut.set_geometry("buffered").drop(columns="geometry")
+    clear_cut_cluster: gpd.GeoDataFrame = clear_cut_buffered.sjoin(clear_cut_buffered, predicate="intersects").drop(
+        columns="buffered"
+    )
+    logger.info(f"✅ Spatial join")
+
+    clear_cut_cluster: gpd.GeoDataFrame = clear_cut_cluster.reset_index().rename(
+        columns={"index": "index_left"}
+    )
+    clear_cut_cluster = clear_cut_cluster[clear_cut_cluster["index_left"] != clear_cut_cluster["index_right"]]
+    clear_cut_cluster = clear_cut_cluster[clear_cut_cluster["index_left"] < clear_cut_cluster["index_right"]]
+    logger.info(f"✅ Filtre date 2")
+
+    MAX_DAYS_BETWEEN_CLEAR_CUTS = 7 * 4
+    clear_cut_cluster = clear_cut_cluster[
+        (clear_cut_cluster["date_left"] - clear_cut_cluster["date_right"]).dt.days.abs()
+        <= MAX_DAYS_BETWEEN_CLEAR_CUTS
+    ]
+    logger.info(f"✅ Filtre date 3")
+
+    # Disjoin Set
+    clear_cuts_disjoint_set = DisjointSet(clear_cut.index.tolist())
+    logger.info(f"✅ Disjoin Set")
+
+    # Then we group the clear cuts that belong together one pair at a time
+    for index_left, index_right in clear_cut_cluster[["index_left", "index_right"]].itertuples(
+        index=False
+    ):
+        clear_cuts_disjoint_set.merge(index_left, index_right)
+    logger.info(f"✅ Then we group the clear cuts that belong together one pair at a time")
+
+    subsets = clear_cuts_disjoint_set.subsets()
+    for i, subset in tqdm(enumerate(subsets), total=len(subsets)):
+        clear_cut.loc[list(subset), "clear_cut_group"] = i
+    clear_cut = clear_cut.drop(columns="buffered")
+    clear_cut["clear_cut_group"] = clear_cut["clear_cut_group"].astype(int)
+    logger.info(f"✅ clear_cut_group 1")
+
+
+    clear_cut_group = clear_cut.dissolve(by="clear_cut_group", aggfunc={"date": ["min", "max"]}).rename(
+        columns={
+            ("date", "min"): "date_min",
+            ("date", "max"): "date_max",
+        }
+    )
+    clear_cut_group["days_delta"] = (clear_cut_group["date_max"] - clear_cut_group["date_min"]).dt.days
+    clear_cut_group["clear_cut_group_size"] = clear_cut.groupby("clear_cut_group").size()
+    logger.info(f"✅ clear_cut_group 2")
+
+    clear_cut_group["geometry"] = clear_cut_group["geometry"].buffer(0.0001)
+    clear_cut_group["area_ha"] = clear_cut_group.area / 10000
+    clear_cut_group = clear_cut_group[clear_cut_group["area_ha"] >= 0.5].copy()
+    logger.info(f"✅ clear_cut area")
+
+    # # Finalisation
+    # print(clear_cut_group.columns)
+    # Créer le dossier correct avant d'écrire
+    os.makedirs(os.path.dirname("dags/temp_export/clear_cut_processed.geoparquet"), exist_ok=True)
+    # Exporter le fichier
+    clear_cut_group.to_parquet("dags/temp_export/clear_cut_processed.geoparquet", engine="pyarrow")
+    logger.info(f"✅ exported")
 
     shutil.rmtree("dags/temp_tif")
     shutil.rmtree("dags/temp_shape")
 
-    kwargs["ti"].xcom_push(key="geojson", value=gdata_new)
+    kwargs["ti"].xcom_push(key="processed_data", value="dags/temp_export/clear_cut_processed.geoparquet")
