@@ -1,4 +1,4 @@
-name: Reusable workflow example
+name: Deploy
 on:
   workflow_call:
     inputs:
@@ -13,22 +13,31 @@ on:
         default: "clear-cut"
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
-            tag_prefix: ${{inputs.app-name}}:v
-            github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: ${{inputs.app-name}}.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
         with:
-            tag: ${{ steps.tag_version.outputs.new_tag }}
-            name: Release ${{ steps.tag_version.outputs.new_tag }}
-            body: ${{ steps.tag_version.outputs.changelog }}
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+      - name: Deploy to clever cloud 
+        uses: 47ng/actions-clever-cloud@v2.0.0
+        with:
+          appID: ${{ inputs.app-id }}
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
