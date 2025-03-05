@@ -24,7 +24,7 @@ jobs:
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
-          tag_prefix: ${{inputs.app-name}}:v
+          tag_prefix: ${{inputs.app-name}}.
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
