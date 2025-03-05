@@ -1,4 +1,4 @@
-name: Reusable workflow example
+name: Deploy
 on:
   workflow_call:
     inputs:
@@ -13,7 +13,7 @@ on:
         default: "clear-cut"
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
