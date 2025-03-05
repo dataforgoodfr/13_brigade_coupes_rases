@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from "@/shared/components/button/Button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { forwardRef } from "react";
 
 export const ResetButton = forwardRef<HTMLButtonElement, ButtonProps>(

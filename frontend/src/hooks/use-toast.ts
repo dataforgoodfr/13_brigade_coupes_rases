@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
 	title?: ReactNode;
 	description?: ReactNode;
 	action?: ToastActionElement;
+	onClose?: () => void;
 };
 
 const actionTypes = {
@@ -156,7 +157,9 @@ function toast({ ...props }: Toast) {
 			id,
 			open: true,
 			onOpenChange: (open) => {
-				if (!open) dismiss();
+				if (!open) {
+					dismiss();
+				}
 			},
 		},
 	});

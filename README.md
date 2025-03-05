@@ -1,24 +1,10 @@
 # Brigade des Coupes Rases 🌳
 
-# Summary
-
-## Backend
-
-[Backend](./backend/README.md)
-## Frontend
-
-[Frontend](./frontend/README.md)
-
-## Analytics
-
-[Analytics](./analytics/README.md)
-
-## Data_ingénierie 
-[Data_ingénierie](./data_pipeline/README.md)
-
-## Doc
-
-[Documentation](./doc/README.md)
+- [Backend](./backend/README.md)
+- [Frontend](./frontend/README.md)
+- [Data_ingénierie](./data_pipeline/README.md)
+- [Analytics](./analytics/README.md)
+- [Documentation](./doc/README.md)
 
 # Contexte du Projet
 
@@ -29,12 +15,13 @@ Canopée, une association engagée pour la protection des forêts, cherche à au
 # Objectifs du Projet
 
 L’objectif est de développer une solution complète pour :
-• Automatiser le traitement des données des coupes rases détectées par l’algorithme existant (GlobEO).
-• Créer une base de données pour stocker et organiser les informations sur chaque coupe rase détectée.
-• Créer une application permettant d’interagir avec la base de données pour ajouter, modifier ou supprimer des informations sur chaque coupe rase détectée.
-• Développer une interface de visualisation pour identifier les coupes rases illégales et générer des statistiques exploitables.
-Optionellement :
-• Repliquer l'identification de coupe rases (algorithme existant fourni par GlobEO) poour reduire le temps de mise a jour du processus existant.
+
+- Automatiser le traitement des données des coupes rases détectées par l’algorithme existant (GlobEO).
+- Créer une base de données pour stocker et organiser les informations sur chaque coupe rase détectée.
+- Créer une application permettant d’interagir avec la base de données pour ajouter, modifier ou supprimer des informations sur chaque coupe rase détectée.
+- Développer une interface de visualisation pour identifier les coupes rases illégales et générer des statistiques exploitables.
+  Optionellement :
+- Repliquer l'identification de coupe rases (algorithme existant fourni par GlobEO) poour reduire le temps de mise a jour du processus existant.
 
 # Contributing
 
@@ -110,9 +97,7 @@ L'ideeèr du projet est de créer une architecture modulaire qui permet d'automa
 |
 ├── 📁 data_pipeline/ (contient les scripts pour collecter et traiter les données)
 |
-├── 📁 analytics/ (contient les scripts pour analyser et visualiser les données)
-|
-└── 📁 misc/ (contient les scripts supplémentaires ou de support, exploration de donnés, etc)
+└── 📁 analytics/ (contient les scripts pour analyser et visualiser les données)
 ```
 
 ### Installer Poetry
@@ -172,7 +157,3 @@ Mettre à jour les dépendances:
 [Installer les precommit](https://pre-commit.com/)
 
     pre-commit run --all-files
-
-### Utiliser Tox pour tester votre code
-
-    tox -v
