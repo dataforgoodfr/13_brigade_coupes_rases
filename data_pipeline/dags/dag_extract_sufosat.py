@@ -9,6 +9,7 @@ from airflow.utils.task_group import TaskGroup
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.operators.python import BranchPythonOperator
+from airflow.operators.empty import EmptyOperator 
 from airflow.operators.dummy_operator import DummyOperator
 
 
@@ -94,7 +95,10 @@ with DAG(
         )
         
         # Skip task
-        skip_task = DummyOperator(task_id="skip_task")
+        skip_task = EmptyOperator(
+            task_id="skip_task",
+            trigger_rule="all_failed"  # Marque comme "échec" si aucune tâche amont ne réussit
+        )
 
         # Update metadata task
         update_metadata = PythonOperator(
@@ -118,7 +122,7 @@ with DAG(
             python_callable=load_from_S3,
             op_args=[bucket_name, s3_key, s3_hook, download_path],
             provide_context=True,
-            trigger_rule="one_success" # IMPORTANT  
+            trigger_rule="none_failed_min_one_success" # IMPORTANT  
         )
 
         regroup_sufosat_days = PythonOperator(
