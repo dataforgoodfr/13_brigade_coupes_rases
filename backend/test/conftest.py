@@ -6,9 +6,6 @@ from app.main import app  # noqa: E402
 from app.database import get_db  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
-import pytest  # noqa: E402
-from app.database import Base  # noqa: E402
-from alembic import op
 # TEST_DATABASE_URL = "sqlite:///:memory:"
 TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 # Set the SpatiaLite path
