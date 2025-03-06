@@ -1,5 +1,4 @@
 import pytest
-
 from datetime import datetime
 from geoalchemy2.elements import WKTElement
 from app.models import User, Department, ClearCut
@@ -25,6 +24,7 @@ def test_user_creation(db):
     assert user.created_at is not None
     assert user.updated_at is not None
     assert user.deleted_at is None
+
 
 def test_department_creation(db):
     department = Department(code=75)
