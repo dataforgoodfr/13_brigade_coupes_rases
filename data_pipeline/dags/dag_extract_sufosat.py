@@ -118,12 +118,12 @@ with DAG(
             python_callable=load_from_S3,
             op_args=[bucket_name, s3_key, s3_hook, download_path],
             provide_context=True,
-            trigger_rule="none_skipped" # IMPORTANT  
+            trigger_rule="one_success" # IMPORTANT  
         )
 
         regroup_sufosat_days = PythonOperator(
             task_id="regroup_sufosat_days",
-            python_callable=regroup_sufosat_days,
+            python_callable=filter_raster_by_date,
             op_args=[
                 # SORTIR DU HARD CODE ?
                 "dags/temp_tif/mosaics_tropisco_warnings_france_date.tif",

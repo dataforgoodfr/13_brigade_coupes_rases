@@ -1,4 +1,5 @@
 import io
+import shutil
 import logging
 import geopandas as gpd
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Load files in S3
 def upload_geodataframe_to_s3(bucket_name, s3_hook, **kwargs):
-    key = "dataeng/to_api/clear_cut_processed.geojson" # ne plus hardcoder
+    key = "dataeng/to_api/clear_cut_processed.geoparquet" # ne plus hardcoder
 
     # Vérifier si le fichier existe déjà sur S3
     existing_files = s3_hook.list_keys(bucket_name, prefix=key)
@@ -24,15 +25,17 @@ def upload_geodataframe_to_s3(bucket_name, s3_hook, **kwargs):
             logger.warning(f"⚠️ Impossible de supprimer {key} de S3. Erreur : {e}")
 
     # Récupération des données GeoJSON depuis XCom
-    gdata = gpd.read_file(kwargs["ti"].xcom_pull(task_ids="transformation_pipeline.process_geo_data", key="geojson"))
-    gdata_str = gdata.to_json()
+    # gdata = gpd.read_parquet(kwargs["ti"].xcom_pull(task_ids="transformation_pipeline.process_geo_data", key="processed_data"))
 
     # Chargement du fichier sur S3
-    s3_hook.load_string(
-        string_data=gdata_str, 
+    s3_hook.load_file(
+        filename =kwargs["ti"].xcom_pull(task_ids="transformation_pipeline.process_geo_data", key="processed_data"), 
         bucket_name=bucket_name, 
-        key=key
+        key=key,
+        replace=True
     )
+
+    shutil.rmtree("dags/temp_export")
 
     logger.info(f"✅ Fichier {key} uploadé sur S3")
 
