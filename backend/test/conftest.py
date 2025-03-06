@@ -2,10 +2,9 @@ import os
 import sys
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app  # noqa: E402
-from app.database import get_db  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
+
 # TEST_DATABASE_URL = "sqlite:///:memory:"
 TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 # Set the SpatiaLite path
@@ -17,9 +16,12 @@ from alembic import command
 
 # Add parent path to get access to app imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.main import app  # noqa: E402
+from app.database import get_db  # noqa: E402
 
 
-engine = create_engine(TEST_DATABASE_URL,
+engine = create_engine(
+    TEST_DATABASE_URL,
     #                    connect_args={
     #     "check_same_thread": False,
     #     "timeout": 30,
@@ -38,6 +40,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 alembic_cfg = Config("alembic.ini")
 
+
 @pytest.fixture(scope="session")
 def db():
     # Base.metadata.create_all(bind=engine)
@@ -50,6 +53,7 @@ def db():
         db.close()
     command.downgrade(alembic_cfg, "base")
     # Base.metadata.drop_all(bind=engine)
+
 
 @pytest.fixture(scope="function")
 def client(db):
