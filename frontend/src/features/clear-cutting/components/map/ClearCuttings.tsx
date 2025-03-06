@@ -17,22 +17,35 @@ export function ClearCuttings() {
 	const [displayClearCuttingPreview, setDisplayClearCuttingPreview] =
 		useState(false);
 
+	map.attributionControl.setPosition("bottomleft");
+
 	const layers = {
-		"Standard": L.tileLayer(
+		Standard: L.tileLayer(
 			"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 			{
 				id: "OpenStreetMap.Mapnik",
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			},
 		),
-		"Terrain": L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
+		Terrain: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
 			id: "OpenTopoMap",
+
 		}),
-		"Light": L.tileLayer(
+		Light: L.tileLayer(
 			"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
 			{
 				id: "CartoDB.Positron",
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 			},
 		),
+	} as Record<string, L.TileLayer>;
+
+	const onLayerSelected = (current: string, previous: string) => {
+		const previousLayer = layers[previous];
+		const currentLayer = layers[current];
+
+		map.removeLayer(previousLayer);
+		map.addLayer(currentLayer);
 	};
 
 	useEffect(() => {
@@ -120,7 +133,9 @@ export function ClearCuttings() {
 
 	return (
 		<>
-			<ButtonGroup options={Object.keys(layers)} />
+			<div className="absolute bottom-5 right-5">
+				<ButtonGroup options={Object.keys(layers)} onSelect={onLayerSelected} />
+			</div>
 
 			<ClearCuttingPreview />
 

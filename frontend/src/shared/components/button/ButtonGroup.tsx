@@ -4,14 +4,24 @@ import { motion } from "framer-motion";
 const ButtonGroup = ({
 	options,
 	onSelect,
-}: { options: string[]; onSelect?: (options: string) => void }) => {
-	const [selected, setSelected] = useState(options[0]);
+	defaultOption,
+}: {
+	options: string[];
+	onSelect?: (currentOption: string, previousOption: string) => void;
+	defaultOption: string;
+}) => {
+	const [selected, setSelected] = useState(defaultOption ?? options[0]);
 	const widthUnit = "24";
 
 	function select(option: string) {
+		const previousOption = selected;
+		if (previousOption === option) {
+			return;
+		}
+
 		setSelected(option);
 
-		if (onSelect) onSelect(option);
+		if (onSelect) onSelect(option, previousOption);
 	}
 
 	return (
