@@ -8,12 +8,32 @@ import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
 import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
+import * as L from "leaflet";
+import ButtonGroup from "@/shared/components/button/ButtonGroup";
 
 export function ClearCuttings() {
 	const map = useMap();
 	const { browserLocation } = useGeolocation();
 	const [displayClearCuttingPreview, setDisplayClearCuttingPreview] =
 		useState(false);
+
+	const layers = {
+		"Standard": L.tileLayer(
+			"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			{
+				id: "OpenStreetMap.Mapnik",
+			},
+		),
+		"Terrain": L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
+			id: "OpenTopoMap",
+		}),
+		"Light": L.tileLayer(
+			"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+			{
+				id: "CartoDB.Positron",
+			},
+		),
+	};
 
 	useEffect(() => {
 		if (browserLocation) {
@@ -100,6 +120,8 @@ export function ClearCuttings() {
 
 	return (
 		<>
+			<ButtonGroup options={Object.keys(layers)} />
+
 			<ClearCuttingPreview />
 
 			<ClearCuttingLocationPoint />
