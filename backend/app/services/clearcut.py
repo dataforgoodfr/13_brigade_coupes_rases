@@ -40,7 +40,6 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
 
 
 def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
-    logger.info("Get clearcuts called")
     clearcuts = db.query(ClearCut).offset(skip).limit(limit).all()
     for clearcut in clearcuts:
         clearcut.location = to_shape(clearcut.location).wkt
