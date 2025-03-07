@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.1.0">
   <diagram id="8PD_7dN2QJXOPlw-Qpug" name="Analytics Brigade Coupes Rases">
-    <mxGraphModel dx="6586" dy="4188" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="4947" dy="3306" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -517,7 +517,7 @@
         <mxCell id="AJC0o_n8DlmdbKr5q591-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="AJC0o_n8DlmdbKr5q591-5" target="AJC0o_n8DlmdbKr5q591-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="AJC0o_n8DlmdbKr5q591-5" value="Keep the recent clear (e.g. &amp;gt;= 2024) cuts as the current algo doesn&#39;t scale well" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="AJC0o_n8DlmdbKr5q591-5" value="Keep the recent clear cuts (e.g. &amp;gt;= 2024) as the current algo doesn&#39;t scale well" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-228.09000000000003" y="-488" width="440" height="25" as="geometry" />
         </mxCell>
         <mxCell id="AJC0o_n8DlmdbKr5q591-8" value="&lt;div&gt;&lt;font&gt;These two steps were done in a reverse order in the last notebook but this is more efficient (saves a few minutes of compute)&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFCC,var(--ge-dark-color, #121212));" parent="1" vertex="1">
@@ -612,7 +612,7 @@
         <mxCell id="RTnzod6WU0d2oVnzE7P0-24" value="Most of these clear cuts are&#39;t abusive. If we want fewer output clear cuts, we could filter based on the abusive critierias." style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFCC,var(--ge-dark-color, #121212));" parent="1" vertex="1">
           <mxGeometry x="1781.9099999999999" y="490" width="124" height="93" as="geometry" />
         </mxCell>
-        <mxCell id="2u9_pOSW4q4WRJblDGBe-2" value="If needed, we could obtain a list of the names of the affected Natura 2000 zones." style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFCC,var(--ge-dark-color, #121212));" vertex="1" parent="1">
+        <mxCell id="2u9_pOSW4q4WRJblDGBe-2" value="If needed, we could obtain a list of the names of the affected Natura 2000 zones." style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFCC,var(--ge-dark-color, #121212));" parent="1" vertex="1">
           <mxGeometry x="974" y="-196" width="124" height="93" as="geometry" />
         </mxCell>
       </root>
