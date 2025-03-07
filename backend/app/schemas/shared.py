@@ -1,27 +1,26 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from app.models import User
 
 class DepartmentBase(BaseModel):
     id: int
     code: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 class UserBase(BaseModel):
     firstname: str = Field(
         default_factory=str,
-        example="John")
+        json_schema_extra={"example":"John"})
     lastname: str = Field(
         default_factory=str,
-        example="Tree")
+        json_schema_extra={"example":"Tree"})
     email: EmailStr = Field(
         default_factory=EmailStr,
-        example="john.tree@canope.com")
+        json_schema_extra={"example":"john.tree@canope.com"})
     role: Optional[str] = Field(
         default_factory=None,
-        example="viewer")
+        json_schema_extra={"example":"viewer"})
 
     @field_validator('role')
     def validate_role(cls, value: str) -> str:
@@ -29,5 +28,4 @@ class UserBase(BaseModel):
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)

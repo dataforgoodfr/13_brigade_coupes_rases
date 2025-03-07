@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from shapely.geometry import Point, Polygon
 from shapely.wkt import loads
 from typing import Optional
@@ -16,10 +16,10 @@ class ClearCutCreate(BaseModel):
     cut_date: datetime
     location: str = Field(
         default_factory=str,
-        example="POINT(48.8566 2.3522)")
+       json_schema_extra={"example": "POINT(48.8566 2.3522)"})
     boundary: str = Field(
         default_factory=str,
-        example="POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))")
+        json_schema_extra={"example":"POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"})
     department_id: int
 
     @field_validator('location')
@@ -71,5 +71,4 @@ class ClearCutResponse(ClearCutCreate):
     user: Optional[UserBase] = None
     department: Optional[DepartmentBase] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)

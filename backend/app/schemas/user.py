@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 class UserCreate(UserBase):
     departments: list[int] = Field(
         default_factory=list,
-        example=[1])
+        json_schema_extra={"example":[1]})
 
 
 class UserUpdate(UserCreate):
