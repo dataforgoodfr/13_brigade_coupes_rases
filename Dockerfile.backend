@@ -18,4 +18,4 @@ COPY backend /code/
 # Install dependencies (runtime only)
 RUN poetry install --without dev
 
-CMD ["poetry", "run","uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=*"]
+ENTRYPOINT ["poetry", "run","uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]
