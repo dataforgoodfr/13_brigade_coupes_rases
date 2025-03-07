@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker  # noqa: E402
 TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["ENVIRONMENT"] = "TEST"
-from alembic.config import Config  # noqa: E402
 
 # Add parent path to get access to app imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,8 +20,6 @@ engine = create_engine(
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-alembic_cfg = Config("alembic.ini")
 
 
 @pytest.fixture(scope="session")
