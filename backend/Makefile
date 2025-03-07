@@ -15,3 +15,9 @@ reset-db:
 
 seed-db:
 	poetry run python -m seed_dev
+
+test:
+	poetry run python -m pytest
+
+
+.PHONY: test
