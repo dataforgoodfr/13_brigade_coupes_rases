@@ -22,8 +22,10 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
+from app.config import settings
+
 configuration = config.get_section(config.config_ini_section)
-configuration["sqlalchemy.url"] = os.getenv("DATABASE_URL")
+configuration["sqlalchemy.url"] = os.environ["DATABASE_URL"]
 
 
 def run_migrations_offline() -> None:

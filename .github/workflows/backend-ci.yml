@@ -27,7 +27,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository # Skip the launch if it has already been launched by the push trigger
 
     services:
-      postgres:
+      db:
         image: postgis/postgis:16-3.4
         env:
           POSTGRES_USER: devuser
@@ -48,8 +48,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List files
-        run: ls -R
+      # Configure hosts b/c testing uses db but ci will run on localhost
+      - name: Configure hosts
+        run: |
+          echo "127.0.0.1 db" | sudo tee -a /etc/hosts
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -83,4 +85,5 @@ jobs:
         run: |
           poetry run pytest backend/test/
         env:
+          ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
