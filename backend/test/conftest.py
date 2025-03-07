@@ -4,8 +4,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
-from app.main import app  # noqa: E402
-from app.database import Base, get_db  # noqa: E402
 
 TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
@@ -13,6 +11,8 @@ os.environ["ENVIRONMENT"] = "TEST"
 
 # Add parent path to get access to app imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.main import app  # noqa: E402
+from app.database import Base, get_db  # noqa: E402
 
 
 engine = create_engine(TEST_DATABASE_URL)
