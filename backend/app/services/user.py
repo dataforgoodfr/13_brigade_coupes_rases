@@ -40,7 +40,6 @@ def update_user(id: int, user_in: UserUpdate, db: Session):
     if not user_db:
         raise HTTPException(status_code=404, detail="user not found")
     update_data = user_in.model_dump(exclude_unset=True)
-    print(update_data.items())
     
     for key, value in update_data.items():
         if key == 'departments':
