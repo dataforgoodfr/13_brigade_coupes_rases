@@ -124,7 +124,6 @@ celerybeat.pid
 
 # Environments
 .env
-.env.test
 .venv
 env/
 venv/
@@ -170,3 +169,4 @@ cython_debug/
 # Test db sqlite file
 backend/test.db
 
+env311

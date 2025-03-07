@@ -25,12 +25,33 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository # Skip the launch if it has already been launched by the push trigger
+
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: devuser
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       matrix:
-        python-version: ["3.13"]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v4
+
+      # Configure hosts b/c testing uses db but ci will run on localhost
+      - name: Configure hosts
+        run: |
+          echo "127.0.0.1 db" | sudo tee -a /etc/hosts
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -56,15 +77,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
-      - name: Install mod_spatialite
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libsqlite3-mod-spatialite
-
       - name: Install dependencies
         run: |
           poetry install --with backend,dev --no-interaction
 
       - name: Run tests
+        working-directory: ./backend
         run: |
-          poetry run pytest backend/test/ 
+          poetry run pytest ./test/
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: postgresql://devuser:devuser@db:5432/test
