@@ -1,3 +1,7 @@
+## Analytics data processing diagram
+
+![](./diagram/Analytics%20Brigade%20Coupes%20Rases.drawio.svg)
+
 ## Setup
 
 Install the dependencies in a virtual environment:
