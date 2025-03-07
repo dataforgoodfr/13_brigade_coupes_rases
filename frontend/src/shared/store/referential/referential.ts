@@ -8,13 +8,14 @@ const variableRuleTagSchema = z.object({
 const staticTagSchema = z.object({
 	type: z.enum(["ecologicalZoning"]),
 });
-const abusiveTagSchema = z.record(
+export const abusiveTagSchema = z.record(
 	z.string().uuid(),
 	variableRuleTagSchema.or(staticTagSchema),
 );
 
 export type TagResponse = z.infer<typeof abusiveTagSchema>;
 export type Tag = ItemFromRecord<TagResponse>;
+
 export const departmentResponseSchema = record(
 	z.string().uuid(),
 	z.object({ name: z.string() }),
