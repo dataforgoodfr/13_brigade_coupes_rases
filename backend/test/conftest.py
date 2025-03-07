@@ -22,19 +22,7 @@ from app.database import get_db  # noqa: E402
 
 engine = create_engine(
     TEST_DATABASE_URL,
-    #                    connect_args={
-    #     "check_same_thread": False,
-    #     "timeout": 30,
-    # },
 )
-
-# Load SpatiaLite extension
-# @event.listens_for(engine, "connect")
-# def load_spatialite(dbapi_conn, connection_record):
-#     dbapi_conn.enable_load_extension(True)
-#     dbapi_conn.load_extension("/usr/lib/x86_64-linux-gnu/mod_spatialite.so")
-#     dbapi_conn.execute('SELECT InitSpatialMetaData(1);')
-
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -43,7 +31,6 @@ alembic_cfg = Config("alembic.ini")
 
 @pytest.fixture(scope="session")
 def db():
-    # Base.metadata.create_all(bind=engine)
     command.upgrade(alembic_cfg, "head")
     db = TestingSessionLocal()
     try:
@@ -52,7 +39,6 @@ def db():
         db.rollback()
         db.close()
     command.downgrade(alembic_cfg, "base")
-    # Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope="function")
