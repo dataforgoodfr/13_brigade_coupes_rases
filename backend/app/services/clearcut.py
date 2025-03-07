@@ -47,7 +47,6 @@ def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
     return clearcuts
 
 def get_clearcut_by_id(id : int, db: Session):
-    logger.info(f"Get clearcuts {id}")
     clearcut = db.get(ClearCut, id)
     clearcut.location = to_shape(clearcut.location).wkt
     clearcut.boundary = to_shape(clearcut.boundary).wkt
