@@ -10,6 +10,7 @@ on:
     paths:
       - "backend/**"
       - "pyproject.toml"
+      - ".github/workflows/backend-ci.yml"
   pull_request:
     branches: ["main"]
     paths:
@@ -68,3 +69,10 @@ jobs:
       - name: Run tests
         run: |
           poetry run pytest backend/test/ 
+  deploy:
+      needs: build-test
+      uses: "./.github/workflows/deploy.yml"
+      secrets: inherit
+      with:
+        app-id: app_5292f305-0563-4fd7-b50a-56f6caf806db
+        app-name: "backend"
