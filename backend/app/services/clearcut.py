@@ -27,7 +27,6 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     return db_item
 
 def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
-    logger.info("Update clearcut")
     clearcut = db.get(ClearCut, id)
     if not clearcut:
         raise HTTPException(status_code=404, detail="Item not found")
