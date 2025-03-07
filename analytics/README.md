@@ -1,6 +1,6 @@
-## Analytics data processing diagram
+## Analytics data processing
 
-![](./diagram/Analytics%20Brigade%20Coupes%20Rases.drawio.svg)
+![](./diagram/Analytics%20Brigade%20Coupes%20Rases.drawio.png)
 
 ## Setup
 
