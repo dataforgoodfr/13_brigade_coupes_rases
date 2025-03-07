@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from app.routes import clearcut, departement, user
 
-from app.database import engine, Base
-
 app = FastAPI(
     title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
 )
