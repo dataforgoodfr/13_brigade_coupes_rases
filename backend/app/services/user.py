@@ -8,7 +8,6 @@ logger = getLogger(__name__)
 
 
 def create_user(db: Session, user: UserCreate):
-    logger.info("Creating item with name: ")
     new_user = User(
         firstname = user.firstname,
         lastname = user.lastname,
