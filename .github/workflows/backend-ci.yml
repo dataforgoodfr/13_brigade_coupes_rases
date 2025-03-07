@@ -10,6 +10,7 @@ on:
     paths:
       - "backend/**"
       - "pyproject.toml"
+      - ".github/workflows/backend-ci.yaml"
   pull_request:
     branches: ["main"]
     paths:
