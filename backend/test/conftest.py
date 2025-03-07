@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text  # noqa: E402
 from sqlalchemy.orm import sessionmaker  # noqa: E402
 
-TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
+TEST_DATABASE_URL = "postgresql://devuser:devuser@localhost:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["ENVIRONMENT"] = "TEST"
 
