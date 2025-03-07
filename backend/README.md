@@ -30,13 +30,13 @@ make devserver
 
 ## Run the tests
 
-We are using sqlite for tests (so that we can run tests in the CI). We are using `geoalchemy2` as well, this means we need to add a geo lib compatible with sqlite just for the unit tests (`spatialite` ). To install it in local, run:
-```
- sudo apt-get install -y libsqlite3-mod-spatialite
-```
-Then run all the tests with:
+local, run:
+Once the container is running
+
 ```bash
-poetry run python -m pytest
+docker compose exec backend bash
+poetry install --with dev
+make test
 ```
 ## Add a new backend package
 
