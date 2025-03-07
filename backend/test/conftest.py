@@ -8,7 +8,6 @@ from sqlalchemy.orm import sessionmaker  # noqa: E402
 # TEST_DATABASE_URL = "sqlite:///:memory:"
 TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 # Set the SpatiaLite path
-os.environ["SPATIALITE_LIBRARY_PATH"] = "/usr/lib/x86_64-linux-gnu/mod_spatialite.so"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["ENVIRONMENT"] = "TEST"
 from alembic.config import Config
@@ -18,7 +17,6 @@ from alembic import command
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import app  # noqa: E402
 from app.database import get_db  # noqa: E402
-
 
 engine = create_engine(
     TEST_DATABASE_URL,
