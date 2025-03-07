@@ -81,6 +81,6 @@ jobs:
 
       - name: Run tests
         run: |
-          poetry run pytest backend/test/
+          poetry run pytest ./test/
         env:
           DATABASE_URL: postgresql://devuser:devuser@localhost:5432/test
