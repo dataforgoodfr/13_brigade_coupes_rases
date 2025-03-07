@@ -82,8 +82,9 @@ jobs:
           poetry install --with backend,dev --no-interaction
 
       - name: Run tests
+        working-directory: ./backend
         run: |
-          poetry run pytest backend/test/
+          poetry run pytest test/
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
