@@ -15,3 +15,7 @@ reset-db:
 
 seed-db:
 	poetry run python -m seed_dev
+
+test-backend:
+	poetry run pytest backend/test/
+
