@@ -23,8 +23,3 @@ class UserResponse(UserBase):
     updated_at: datetime
     deleted_at: datetime | None
     departments: list[DepartmentBase]
-
-
-# class ClearCutResponseWithRelations(ClearCutResponse):
-#     department: Optional[Department]
-#     users: Optional[User]
