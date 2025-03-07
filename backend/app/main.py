@@ -3,10 +3,9 @@ from app.routes import clearcut, departement, user
 
 from app.database import engine, Base
 
-# Create DB tables if not using Alembic (use migrations in production)
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"})
+app = FastAPI(
+    title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
+)
 
 # Include routes
 app.include_router(clearcut.router)
