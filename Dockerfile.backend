@@ -1,4 +1,4 @@
-FROM python:3.13
+FROM python:3.13 AS BUILDER
 
 # Set working directory
 WORKDIR /code
@@ -12,7 +12,8 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Copy Poetry configuration files
 COPY ./README.md ./poetry.lock ./pyproject.toml /code/
 
-COPY ../../backend /code/
+COPY backend /code/
+
 
 # Install dependencies (runtime only)
 RUN poetry install --without dev
