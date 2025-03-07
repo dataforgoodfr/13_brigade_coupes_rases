@@ -16,7 +16,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 engine = create_engine(TEST_DATABASE_URL)
-
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
