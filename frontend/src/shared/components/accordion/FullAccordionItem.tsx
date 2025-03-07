@@ -3,26 +3,30 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 type AccordionFullItemProps = {
 	title: string;
 	children?: React.ReactNode;
+	className?: string;
 };
 
-export function AccordionFullItem({ title, children }: AccordionFullItemProps) {
+export function AccordionFullItem({ title, children, className }: AccordionFullItemProps) {
 	const val = React.useId();
 
 	return (
 		<>
 			<AccordionItem
 				value={val}
-				className="data-[state=closed]:border-b-2 data-[state=closed]:border-(--border) data-[state=open]:border-b-0"
+				className={cn(
+							"data-[state=closed]:border-b-2 data-[state=closed]:border-(--border) data-[state=open]:border-b-0 text-(--color-primary)",
+							className,
+						)}
 			>
-				<AccordionTrigger className="cursor-pointer">{title}</AccordionTrigger>
-				<AccordionContent>
-					{children ??
-						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."}
+				<AccordionTrigger className="cursor-pointer text-2xl">{title}</AccordionTrigger>
+				<AccordionContent className="text-black">
+					{children}
 				</AccordionContent>
 			</AccordionItem>
 		</>
