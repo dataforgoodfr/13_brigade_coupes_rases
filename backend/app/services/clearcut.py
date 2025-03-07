@@ -10,7 +10,6 @@ logger = getLogger(__name__)
 
 
 def create_clearcut(db: Session, clearcut: ClearCutCreate):
-    logger.info("Creating item with name: ")
     db_item = ClearCut(
         cut_date = clearcut.cut_date,
         slope_percentage = clearcut.slope_percentage,
