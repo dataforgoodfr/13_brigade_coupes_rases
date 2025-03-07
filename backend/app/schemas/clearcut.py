@@ -10,7 +10,7 @@ from app.schemas.shared import DepartmentBase, UserBase
 
 logger = getLogger(__name__)
 
-# Schéma pour la création d'une nouvelle instance de ClearCut
+# Schema for creating a new ClearCut instance
 class ClearCutCreate(BaseModel):
     slope_percentage: float
     cut_date: datetime
@@ -25,7 +25,7 @@ class ClearCutCreate(BaseModel):
     @field_validator('location')
     def validate_location(cls, value: str) -> str:
         try:
-            # Convertir la chaîne WKT en un objet géométrique
+            # Convert the WKT string into a geometric object
             point = loads(value)
             if not isinstance(point, Point):
                 raise ValueError("Location must be a valid Point geometry")
@@ -36,7 +36,7 @@ class ClearCutCreate(BaseModel):
     @field_validator('boundary')
     def validate_boundary(cls, value: str) -> str:
         try:
-            # Convertir la chaîne WKT en un objet géométrique
+            # Convert the WKT string into a geometric object
             polygon = loads(value)
             if not isinstance(polygon, Polygon):
                 raise ValueError("Boundary must be a valid Polygon geometry")
@@ -73,7 +73,3 @@ class ClearCutResponse(ClearCutCreate):
 
     class Config:
         from_attributes = True
-
-# class ClearCutResponseWithRelations(ClearCutResponse):
-#     department: Optional[Department]
-#     users: Optional[User]
