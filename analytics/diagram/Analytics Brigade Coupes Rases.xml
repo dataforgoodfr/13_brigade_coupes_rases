@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.1.0">
   <diagram id="8PD_7dN2QJXOPlw-Qpug" name="Analytics Brigade Coupes Rases">
-    <mxGraphModel dx="4947" dy="3306" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1533" dy="1468" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -597,7 +597,7 @@
         <mxCell id="RTnzod6WU0d2oVnzE7P0-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RTnzod6WU0d2oVnzE7P0-16" target="RTnzod6WU0d2oVnzE7P0-19" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="RTnzod6WU0d2oVnzE7P0-16" value="Join the clear cuts with the departments polygons.&lt;br&gt;If a clear cut joins with several department polygons,&lt;br&gt;keep the city with the largest intersection" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="RTnzod6WU0d2oVnzE7P0-16" value="Join the clear cuts with the departments polygons.&lt;br&gt;If a clear cut joins with several department polygons,&lt;br&gt;keep the department with the largest intersection" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="1749.4099999999999" y="230" width="325" height="70" as="geometry" />
         </mxCell>
         <mxCell id="RTnzod6WU0d2oVnzE7P0-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="RTnzod6WU0d2oVnzE7P0-19" target="RTnzod6WU0d2oVnzE7P0-22" edge="1">
