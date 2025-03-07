@@ -6,7 +6,7 @@ from .shared import UserBase
 
 logger = getLogger(__name__)
 
-# Schéma pour la création d'une nouvelle instance de ClearCut
+# Schema for creating a new ClearCut instance
 class UserCreate(UserBase):
     departments: list[int] = Field(
         default_factory=list,
