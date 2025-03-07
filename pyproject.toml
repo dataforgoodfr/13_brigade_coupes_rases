@@ -22,7 +22,7 @@ ipykernel = "^6.29.5"
 [tool.ruff]
 # Same as Black.
 line-length = 96
-target-version = "py313"
+target-version = "py311"
 
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
