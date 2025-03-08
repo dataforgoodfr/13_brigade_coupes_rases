@@ -6,10 +6,6 @@ name: Backend CI
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "backend/**"
-      - "pyproject.toml"
   pull_request:
     branches: ["main"]
     paths:
