@@ -20,7 +20,6 @@ concurrency:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    #if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository # Skip the launch if it has already been launched by the push trigger
 
     steps:
       - uses: actions/checkout@v4
