@@ -9,10 +9,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # Add Poetry to PATH
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Copy Poetry configuration files
-COPY ./README.md ./poetry.lock ./pyproject.toml /code/
-
-COPY ../../backend /code/
+COPY . /code/
 
 # Install dependencies (runtime only)
 RUN poetry install --without dev

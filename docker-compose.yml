@@ -21,8 +21,8 @@ services:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
     working_dir: /code/backend
     build:
-      context: .
-      dockerfile: ./docker/backend/Dockerfile
+      context: backend
+      dockerfile: ./Dockerfile
     volumes:
       - .:/code:cached
     container_name: coupes-rases-backend
