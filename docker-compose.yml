@@ -19,8 +19,8 @@ services:
 
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
-    working_dir: /code/backend
     build:
+      target: development
       context: backend
       dockerfile: ./Dockerfile
     volumes:
