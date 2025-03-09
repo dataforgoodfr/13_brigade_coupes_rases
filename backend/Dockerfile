@@ -21,4 +21,4 @@ FROM base as production
 # Install dependencies (runtime only)
 RUN poetry install --with backend
 
-CMD ["poetry", "run","uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=*"]
+CMD ["poetry", "run","uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]
