@@ -28,7 +28,7 @@ services:
     container_name: coupes-rases-backend
     command: 'tail -f /dev/null'
     ports:
-      - "8000:8000"
+      - "8080:8000"
     depends_on:
       - db
     environment:
