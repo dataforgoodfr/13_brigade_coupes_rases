@@ -88,5 +88,5 @@ jobs:
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit
     with:
-      app-id: app_ab2f14d8-10a9-454d-9a7d-92ab22a54110
-      app-name: "frontend"
+      app-id: app_5292f305-0563-4fd7-b50a-56f6caf806db
+      app-name: "backend"
