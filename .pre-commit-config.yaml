@@ -16,4 +16,5 @@ repos:
     rev: v1.3.3
     hooks:
       - id: python-safety-dependencies-check
+        files: backend/pyproject.toml
         additional_dependencies: [poetry-plugin-export]
