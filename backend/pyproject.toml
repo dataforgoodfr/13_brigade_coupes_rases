@@ -29,6 +29,7 @@ uvicorn = "^0.34.0"
 geoalchemy2 = "^0.17.1"
 alembic = "^1.14.1"
 pydantic = {extras = ["email"], version = "^2.7.1"}
+shapely = "^2.0.7"
 
 [tool.poetry.scripts]
 docker-start = "docker compose up -d --build"
