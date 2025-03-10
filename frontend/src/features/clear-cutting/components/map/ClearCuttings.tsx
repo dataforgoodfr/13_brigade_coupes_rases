@@ -8,12 +8,44 @@ import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
 import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
+import * as L from "leaflet";
+import ButtonGroup from "@/shared/components/button/ButtonGroup";
 
 export function ClearCuttings() {
 	const map = useMap();
 	const { browserLocation } = useGeolocation();
 	const [displayClearCuttingPreview, setDisplayClearCuttingPreview] =
 		useState(false);
+
+	map.attributionControl.setPosition("bottomleft");
+
+	const layers = {
+		Standard: L.tileLayer(
+			"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			{
+				id: "OpenStreetMap.Mapnik",
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			},
+		),
+		Terrain: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
+			id: "OpenTopoMap",
+
+		}),
+		Satellite: L.tileLayer(
+			"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+			{
+				id: "ArcGIS.WorldImagery",
+			},
+		),
+	} as Record<string, L.TileLayer>;
+
+	const onLayerSelected = (current: string, previous: string) => {
+		const previousLayer = layers[previous];
+		const currentLayer = layers[current];
+
+		map.removeLayer(previousLayer);
+		map.addLayer(currentLayer);
+	};
 
 	useEffect(() => {
 		if (browserLocation) {
@@ -100,6 +132,10 @@ export function ClearCuttings() {
 
 	return (
 		<>
+			<div className="absolute bottom-5 right-5">
+				<ButtonGroup options={Object.keys(layers)} onSelect={onLayerSelected} />
+			</div>
+
 			<ClearCuttingPreview />
 
 			<ClearCuttingLocationPoint />
