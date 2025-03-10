@@ -8,6 +8,7 @@ Created on Tue Feb 25 19:24:49 2025
 import os
 from pykeepass import PyKeePass
 from dotenv import load_dotenv
+from airflow.models.connection import Connection
 
 load_dotenv()
 
@@ -28,3 +29,14 @@ if not access_key or not secret_key:
     raise ValueError("Impossible de récupérer les credentials S3 depuis KeePass.")
 
 print("Access Key et Secret Key récupérés avec succès.")
+
+c = Connection(
+conn_id="keepass_aws_connection",
+    conn_type="aws",
+    login=access_key, 
+    password=secret_key, 
+   # extra={
+     #   "region_name": "eu-central-1",
+   # },
+)
+print(f"AIRFLOW_CONN_{c.conn_id.upper()}='{c.as_json()}'")
