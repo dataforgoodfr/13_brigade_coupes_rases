@@ -5,7 +5,6 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, validates
 
 
-
 user_department = Table(
     "user_department",
     Base.metadata,
