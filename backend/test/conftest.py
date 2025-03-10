@@ -1,39 +1,49 @@
 import os
 import sys
+import pytest
+from fastapi.testclient import TestClient
 
-TEST_DATABASE_URL = "sqlite:///:memory:"
-# Set the SpatiaLite path
-os.environ["SPATIALITE_LIBRARY_PATH"] = "/usr/lib/x86_64-linux-gnu/mod_spatialite.so"
-
-os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-os.environ["ENVIRONMENT"] = "TEST"
-# Add parent path to get access to app imports
+# Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.main import app  # noqa: E402
+from app.database import create_engine, get_db, sessionmaker  # noqa: E402
+from alembic.config import Config  # noqa: E402
+from alembic import command  # noqa: E402
 
-from sqlalchemy import create_engine, event  # noqa: E402
-from sqlalchemy.orm import sessionmaker  # noqa: E402
-import pytest  # noqa: E402
-from app.database import Base  # noqa: E402
+TEST_DATABASE_URL = "postgresql://devuser:devuser@localhost:5432/test"
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
-engine = create_engine(TEST_DATABASE_URL,connect_args={
-        "check_same_thread": False,
-        "timeout": 30,
-    },
+
+alembic_cfg = Config("alembic.ini")
+
+engine = create_engine(
+    TEST_DATABASE_URL,
 )
-
-# Load SpatiaLite extension
-@event.listens_for(engine, "connect")
-def load_spatialite(dbapi_conn, connection_record):
-    dbapi_conn.enable_load_extension(True)
-    dbapi_conn.load_extension("/usr/lib/x86_64-linux-gnu/mod_spatialite.so")
-    dbapi_conn.execute('SELECT InitSpatialMetaData(1);')
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+@pytest.fixture(scope="session")
+def db():
+    command.upgrade(alembic_cfg, "head")
+
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.rollback()
+        db.close()
+    command.downgrade(alembic_cfg, "base")
 
 
 @pytest.fixture(scope="function")
-def db():
-    db = TestingSessionLocal()
-    Base.metadata.create_all(bind=engine)
-    yield db
+def client(db):
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()

@@ -30,13 +30,13 @@ make devserver
 
 ## Run the tests
 
-We are using sqlite for tests (so that we can run tests in the CI). We are using `geoalchemy2` as well, this means we need to add a geo lib compatible with sqlite just for the unit tests (`spatialite` ). To install it in local, run:
-```
- sudo apt-get install -y libsqlite3-mod-spatialite
-```
-Then run all the tests with:
+local, run:
+Once the container is running
+
 ```bash
-poetry run python -m pytest
+docker compose exec backend bash
+poetry install --with dev
+make test
 ```
 ## Add a new backend package
 
@@ -59,3 +59,9 @@ make seed-db
 
 Once the server is running, you can access the API in `http://localhost:8000`.
 You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automatically generated from the code.
+
+
+## Clever cloud 
+Application URL : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)  
+Swagger UI : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs)  
+PostgreSQL Database : postgresql://u8jhjikkyhen5eq6xym9:<password in keepass>@bfy8coqxxtfuonsdwsb1-postgresql.services.clever-cloud.com:50013/bfy8coqxxtfuonsdwsb1  

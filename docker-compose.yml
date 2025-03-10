@@ -19,16 +19,16 @@ services:
 
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
-    working_dir: /code/backend
     build:
-      context: .
-      dockerfile: ./docker/backend/Dockerfile
+      target: development
+      context: backend
+      dockerfile: ./Dockerfile
     volumes:
       - .:/code:cached
     container_name: coupes-rases-backend
     command: 'tail -f /dev/null'
     ports:
-      - "8000:8000"
+      - "8080:8000"
     depends_on:
       - db
     environment:

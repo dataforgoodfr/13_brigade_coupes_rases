@@ -10,6 +10,9 @@ function create_user_and_database() {
       CREATE DATABASE $database;
       GRANT ALL PRIVILEGES ON DATABASE $database TO $POSTGRES_USER;
 EOSQL
+  psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" -d $database <<-EOSQL
+      CREATE EXTENSION postgis;
+EOSQL
 }
 
 if [ -n "$DATABASES" ]; then
