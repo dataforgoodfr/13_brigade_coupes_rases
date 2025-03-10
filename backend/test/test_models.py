@@ -93,3 +93,4 @@ def test_associations(db):
     assert clear_cut.department == department
     assert user in department.users
     assert clear_cut in department.clear_cuts
+
