@@ -4,13 +4,11 @@ import { motion } from "framer-motion";
 const ButtonGroup = ({
 	options,
 	onSelect,
-	defaultOption,
 }: {
 	options: string[];
 	onSelect?: (currentOption: string, previousOption: string) => void;
-	defaultOption: string;
 }) => {
-	const [selected, setSelected] = useState(defaultOption ?? options[0]);
+	const [selected, setSelected] = useState(options[0]);
 	const widthUnit = "24";
 
 	function select(option: string) {

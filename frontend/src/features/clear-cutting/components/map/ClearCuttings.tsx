@@ -31,11 +31,10 @@ export function ClearCuttings() {
 			id: "OpenTopoMap",
 
 		}),
-		Light: L.tileLayer(
-			"https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+		Satellite: L.tileLayer(
+			"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 			{
-				id: "CartoDB.Positron",
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+				id: "ArcGIS.WorldImagery",
 			},
 		),
 	} as Record<string, L.TileLayer>;
