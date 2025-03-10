@@ -17,7 +17,7 @@ keepass_password = os.getenv("KEEPASS_PASSWORD")
 if keepass_password is None:
     raise ValueError("La variable d'environnement KEEPASS_PASSWORD n'est pas définie.")
 
-kp = PyKeePass('data_pipeline/secrets.kdbx', password=keepass_password) #Accès à la base KeePass
+kp = PyKeePass('secrets.kdbx', password=keepass_password) #Accès à la base KeePass
 
 entry = kp.find_entries(title='SCW_ACCESS_KEY', first=True) # Récupérer la clé d'accès du bucket S3
 access_key = entry.password if entry else None 
