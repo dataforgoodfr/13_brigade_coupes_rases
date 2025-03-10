@@ -1,5 +1,9 @@
 # Brigade Coupes Rases backend
 
+## DevContainer 
+Install VsCode extension ms-vscode-remote.remote-containers. 
+Open backend in devcontainer. 
+
 ## Installation
 
 At the project root, do:
