@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "s13_brigade_coupes_rases"
+name = "bcr-backend"
 version = "0.1.0"
 authors = ["DataForGood"]
 license = "MIT"

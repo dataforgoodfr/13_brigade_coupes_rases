@@ -1,10 +1,11 @@
 [tool.poetry]
-name = "analytics"
+name = "bcr-analytics"
 version = "0.1.0"
 description = "Environment for data analysis. Explore data and test the data flow for further development."
 authors = ["DataForGood"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
