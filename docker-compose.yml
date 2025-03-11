@@ -29,9 +29,11 @@ services:
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
     build:
+      target: development
       context: backend
       dockerfile: ./Dockerfile
     container_name: coupes-rases-backend
+    command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - "8080:8080"
     depends_on:
