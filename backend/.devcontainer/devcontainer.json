@@ -1,0 +1,12 @@
+{
+	"name": "Backend",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"dockerComposeFile": "../../docker-compose.yml",
+	"service": "backend",
+	"workspaceFolder": "/app",
+	"containerEnv": {
+		"DATABASE_URL": "postgresql://devuser:devuser@host.docker.internal:5432/local",
+		"ENVIRONMENT": "development"
+	},
+	"postCreateCommand": "make devserver"
+}

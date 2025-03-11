@@ -16,6 +16,15 @@ services:
       POSTGRES_USER: devuser
       POSTGRES_PASSWORD: devuser
       DATABASES: local,test
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: devuser
+      PGADMIN_DEFAULT_PASSWORD: devuser
 
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
@@ -24,23 +33,25 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     volumes:
-      - .:/code:cached
+      - ./:/app
     container_name: coupes-rases-backend
-    command: 'tail -f /dev/null'
+    user: devuser
+    command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
-      - "8080:8000"
+      - "8080:8080"
     depends_on:
       - db
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://devuser:devuser@host.docker.internal:5432/local
+      ENVIRONMENT: development
 
   frontend:
       build:
         context: frontend
-        dockerfile: ../docker/frontend/Dockerfile
+        dockerfile: Dockerfile
       container_name: coupes-rases-frontend
       ports:
-        - "8080:8000"
+        - "8081:8000"
       depends_on:
         - backend
       environment:
