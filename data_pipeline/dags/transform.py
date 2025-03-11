@@ -56,10 +56,7 @@ def filter_raster_by_date(
         
         with rasterio.open(output_tif_filepath, "w", **profile) as dst:
             # Process in blocks to manage memory
-            for _, window in tqdm(
-                src.block_windows(), 
-                total=src.width * src.height // (src.block_shapes[0][0] * src.block_shapes[0][1])
-            ):
+            for _, window in src.block_windows():
                 # Read block data
                 data = src.read(1, window=window)
                 
@@ -190,7 +187,7 @@ def process_geo_data(**kwargs):
     logger.info(f"✅ Then we group the clear cuts that belong together one pair at a time")
 
     subsets = clear_cuts_disjoint_set.subsets()
-    for i, subset in tqdm(enumerate(subsets), total=len(subsets)):
+    for i, subset in enumerate(subsets):
         clear_cut.loc[list(subset), "clear_cut_group"] = i
     clear_cut = clear_cut.drop(columns="buffered")
     clear_cut["clear_cut_group"] = clear_cut["clear_cut_group"].astype(int)
@@ -212,8 +209,11 @@ def process_geo_data(**kwargs):
     clear_cut_group = clear_cut_group[clear_cut_group["area_ha"] >= 0.5].copy()
     logger.info(f"✅ clear_cut area")
 
-    # # Finalisation
-    # print(clear_cut_group.columns)
+    clear_cut_group["concave_hull_score"] = clear_cut_group.area / clear_cut_group.concave_hull(0.42).area
+    clear_cut_group = clear_cut_group[clear_cut_group["concave_hull_score"] >= 0.42]
+    logger.info(f"✅ Filter clear_cuts by concave_hull_score")
+
+    # Finalisation
     # Créer le dossier correct avant d'écrire
     os.makedirs(os.path.dirname("dags/temp_export/clear_cut_processed.geoparquet"), exist_ok=True)
     # Exporter le fichier
