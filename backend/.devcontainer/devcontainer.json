@@ -8,5 +8,17 @@
 		"DATABASE_URL": "postgresql://devuser:devuser@host.docker.internal:5432/local",
 		"ENVIRONMENT": "development"
 	},
-	"postCreateCommand": "make devserver"
+	"postCreateCommand": "make devserver",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.black-formatter",
+				"ms-python.debugpy",
+				"ms-python.isort",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"mhutchie.git-graph"
+			]
+		}
+	}
 }

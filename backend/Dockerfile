@@ -1,4 +1,4 @@
-FROM python:3.11-buster as builder
+FROM python:3.11 as builder
 
 RUN pip install poetry
 
@@ -16,12 +16,8 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --n
 
 FROM builder as development 
 
-RUN groupadd --gid 1000 devuser \
-    && useradd --uid 1000 --gid 1000 -m devuser \
-    && apt-get update \
-    && apt-get install -y sudo \
-    && echo devuser ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/devuser \
-    && chmod 0440 /etc/sudoers.d/devuser
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
+
 
 USER devuser
 
