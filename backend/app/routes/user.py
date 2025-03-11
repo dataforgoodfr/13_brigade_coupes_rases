@@ -18,7 +18,9 @@ def create_new_user(item: UserCreate, db: Session = db_dependency) -> UserRespon
 
 
 @router.get("/", response_model=list[UserResponse])
-def list_users(db: Session = db_dependency, skip: int = 0, limit: int = 10) -> list[UserResponse]:
+def list_users(
+    db: Session = db_dependency, skip: int = 0, limit: int = 10
+) -> list[UserResponse]:
     logger.info(db)
     return get_users(db, skip=skip, limit=limit)
 
@@ -30,7 +32,8 @@ def get_user(id: int, db: Session = db_dependency) -> UserResponse:
 
 
 @router.put("/{id}", response_model=UserResponse, status_code=200)
-def update_existing_user(id: int, item: UserUpdate, db: Session = db_dependency) -> UserResponse:
+def update_existing_user(
+    id: int, item: UserUpdate, db: Session = db_dependency
+) -> UserResponse:
     logger.info(db)
     return update_user(id, item, db)
-
