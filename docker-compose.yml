@@ -1,7 +1,8 @@
 volumes:
   coupes-rases-data:
     external: false
-
+  pgadmin-data:
+    external: false
 services:
   db:
     build:
@@ -23,9 +24,10 @@ services:
     ports:
       - "8888:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: devuser
+      PGADMIN_DEFAULT_EMAIL: devuser@devuser.com
       PGADMIN_DEFAULT_PASSWORD: devuser
-
+    volumes:
+        - pgadmin-data:/var/lib/pgadmin
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
     build:
