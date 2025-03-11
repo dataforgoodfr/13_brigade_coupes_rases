@@ -14,10 +14,16 @@ RUN touch README.md
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
-FROM builder as development
+FROM builder as development 
 
-COPY . .
+RUN groupadd --gid 1000 devuser \
+    && useradd --uid 1000 --gid 1000 -m devuser \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo devuser ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/devuser \
+    && chmod 0440 /etc/sudoers.d/devuser
 
+USER devuser
 
 FROM python:3.11-slim-buster as runtime
 

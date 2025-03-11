@@ -32,7 +32,10 @@ services:
       target: development
       context: backend
       dockerfile: ./Dockerfile
+    volumes:
+      - ./:/app
     container_name: coupes-rases-backend
+    user: devuser
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - "8080:8080"
