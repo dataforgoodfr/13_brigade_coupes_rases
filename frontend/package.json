@@ -103,8 +103,6 @@
 		"workbox-window": "^7.3.0"
 	},
 	"msw": {
-		"workerDirectory": [
-			"public"
-		]
+		"workerDirectory": ["public"]
 	}
 }
