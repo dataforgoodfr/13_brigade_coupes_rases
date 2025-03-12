@@ -102,6 +102,13 @@ export const mockClearCutting = (
 			id: id,
 			address: createAddressMock(),
 			imageUrls: [],
+			status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
+			abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
+			center,
+			creationDate: date.toISOString(),
+			cutYear: date.getFullYear(),
+			ecologicalZones: [],
+			reportDate: date.toISOString(),
 			...clearCutting,
 		} satisfies ClearCuttingResponse);
 	});

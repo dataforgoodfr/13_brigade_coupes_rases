@@ -132,5 +132,4 @@ export const useGetClearCutting = (id: string) => {
 	useEffect(() => {
 		dispatch(getClearCuttingThunk(id));
 	}, [id, dispatch]);
-	return useAppSelector(selectDetail);
 };
