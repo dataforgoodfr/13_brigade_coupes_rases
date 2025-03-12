@@ -17,6 +17,6 @@ describe("Clear cutting report", () => {
 			params: { $clearCuttingId: "ABC" },
 		});
 
-		await screen.findByText("PARIS - 2024");
+		await screen.findByText("PARIS");
 	});
 });
