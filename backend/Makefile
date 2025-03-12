@@ -6,7 +6,7 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 devserver: install-dev-dependencies upgrade-db ## Start the development server
-	poetry run python -m app.main --host='0.0.0.0' --port=8000 --reload --proxy-headers --forwarded-allow-ips='*'
+	poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
 
 install-dev-dependencies: ## Install development dependencies
 	poetry install --with backend
