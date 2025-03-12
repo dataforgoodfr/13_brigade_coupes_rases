@@ -2,7 +2,6 @@ from app.schemas.referential import ReferentialResponse
 from app.services.referential import get_referential as get_referential_response
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.schemas.department import DepartmentResponse
 from app.deps import get_db_session
 from logging import getLogger
 
