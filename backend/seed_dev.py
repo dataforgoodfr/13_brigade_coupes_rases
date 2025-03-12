@@ -216,9 +216,6 @@ def seed_database():
         ]
         db.add_all(clear_cuts)
 
-        # clear_cuts[0].users.extend([admin, volunteer])
-        # clear_cuts[1].users.extend([viewer, volunteer])
-
         db.commit()
 
         print(f"Added {len(users)} users to the database")
