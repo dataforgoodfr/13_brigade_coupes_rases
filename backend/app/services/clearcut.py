@@ -43,13 +43,19 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
 def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
     clearcuts = db.query(ClearCut).offset(skip).limit(limit).all()
     for clearcut in clearcuts:
-        clearcut.location = to_shape(clearcut.location).wkt
-        clearcut.boundary = to_shape(clearcut.boundary).wkt
+        clearcut.location = to_shape(clearcut.location)
+        clearcut.boundary = to_shape(clearcut.boundary)
+
+        clearcut.location = clearcut.location.coords[0]
+        clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcuts
 
 
 def get_clearcut_by_id(id: int, db: Session):
     clearcut = db.get(ClearCut, id)
-    clearcut.location = to_shape(clearcut.location).wkt
-    clearcut.boundary = to_shape(clearcut.boundary).wkt
+    clearcut.location = to_shape(clearcut.location)
+    clearcut.boundary = to_shape(clearcut.boundary)
+
+    clearcut.location = clearcut.location.coords[0]
+    clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcut

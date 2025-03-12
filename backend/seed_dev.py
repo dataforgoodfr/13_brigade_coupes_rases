@@ -73,6 +73,7 @@ def seed_database():
                 ),
                 status="pending",
                 department_id=paris.id,
+                user=volunteer
             ),
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=5),
@@ -96,12 +97,13 @@ def seed_database():
                 ),
                 status="validated",
                 department_id=paris.id,
+                user=admin
             ),
         ]
         db.add_all(clear_cuts)
 
-        clear_cuts[0].users.extend([admin, volunteer])
-        clear_cuts[1].users.extend([viewer, volunteer])
+        # clear_cuts[0].users.extend([admin, volunteer])
+        # clear_cuts[1].users.extend([viewer, volunteer])
 
         db.commit()
 
