@@ -1,15 +1,15 @@
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
-	Control,
+	type Control,
 	Controller,
 	type ControllerProps,
 	type FieldPath,
 	type FieldValues,
 	FormProvider,
-	Path,
+	type Path,
+	type UseFormReturn,
 	useFormContext,
-	UseFormReturn,
 } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
@@ -177,9 +177,12 @@ export const FormMessage = forwardRef<
 FormMessage.displayName = "FormMessage";
 
 export type FormProps<T extends FieldValues> = {
-	control: Control<T>,
-	name: Path<T>,
-	label: string
-}
+	control: Control<T>;
+	name: Path<T>;
+	label?: string;
+	disabled?: boolean;
+	placeholder?: string;
+};
 
-export type FormType<TFormValues extends FieldValues> = UseFormReturn<TFormValues, any, undefined>
+export type FormType<TFormValues extends FieldValues> =
+	UseFormReturn<TFormValues>;

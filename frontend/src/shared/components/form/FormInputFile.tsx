@@ -1,4 +1,4 @@
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import type { FieldValues } from "react-hook-form";
 import {
 	FormControl,
@@ -9,11 +9,12 @@ import {
 	type FormProps,
 } from "./Form";
 
-export function FormSwitch<T extends FieldValues = FieldValues>({
+export function FormInputFile<T extends FieldValues = FieldValues>({
 	control,
 	name,
 	label,
 	disabled = false,
+	placeholder,
 }: FormProps<T>) {
 	return (
 		<FormField
@@ -23,10 +24,12 @@ export function FormSwitch<T extends FieldValues = FieldValues>({
 				<FormItem className="flex gap-4 items-center">
 					{label && <FormLabel className="font-bold">{label}</FormLabel>}
 					<FormControl>
-						<Switch
+						<Input
+							type="file"
 							disabled={disabled}
-							checked={field.value}
-							onCheckedChange={field.onChange}
+							{...field}
+							placeholder={placeholder}
+							multiple
 						/>
 					</FormControl>
 					<FormMessage />

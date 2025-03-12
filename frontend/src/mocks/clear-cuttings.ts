@@ -82,7 +82,7 @@ export const mockClearCutting = (
 			address: generateAddressMock(),
 			imageUrls: [],
 			status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
-			abusiveTags: [],
+			abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
 			center,
 			creationDate: date.toISOString(),
 			cutYear: date.getFullYear(),
