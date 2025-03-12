@@ -5,8 +5,8 @@ from app.models import User
 
 class DepartmentBase(BaseModel):
     id: int
-    code: int
-
+    code: str
+    name: str
     model_config = ConfigDict(from_attributes=True)
 
 
