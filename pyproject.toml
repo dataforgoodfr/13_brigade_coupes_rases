@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "s13_brigade_coupes_rases"
+name = "bcr-root"
 version = "0.1.0"
 authors = ["DataForGood"]
 license = "MIT"
@@ -18,27 +18,6 @@ pre-commit = "^2.20.0"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
-
-[tool.poetry.group.analytics.dependencies]
-cartopy = "^0.24.1"
-geopandas = "^1.0.1"
-matplotlib = "^3.10.0"
-py7zr = "^0.22.0"
-rasterio = "^1.4.3"
-tqdm = "^4.67.1"
-contextily = "^1.6.2"
-numpy = "^2.2.2"
-rioxarray = "^0.18.2"
-shapely = "^2.0.7"
-earthengine-api = "^1.5.1"
-geemap = "^0.35.1"
-jupyterlab = "^4.3.5"
-requests = "^2.32.3"
-# gdal is required too, check the setup section in `analytics/README.md`
-
-[tool.poetry.scripts]
-docker-start = "docker compose up -d --build"
-docker-stop = "docker compose down"
 
 [tool.ruff]
 # Same as Black.

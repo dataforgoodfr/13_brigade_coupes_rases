@@ -17,5 +17,7 @@ repos:
     rev: v1.3.3
     hooks:
       - id: python-safety-dependencies-check
+      # This file is pinned because the hook doesn't support multiple pyproject files. 
+      # It's better to check partially (dependencies of backend) than eliminating the hook.
         files: backend/pyproject.toml
         additional_dependencies: [poetry-plugin-export]
