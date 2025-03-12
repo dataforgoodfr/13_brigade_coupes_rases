@@ -1,5 +1,11 @@
 # Brigade Coupes Rases backend
 
+## DevContainer 
+You should develop inside a devcontainer directly, with this feature all developers will have the same environment of development. 
+To do this :  
+* Install VsCode extension ms-vscode-remote.remote-containers.   
+* Open backend in devcontainer.  
+
 ## Installation
 
 At the project root, do:
@@ -15,13 +21,6 @@ Then customize the content of `.env` if needed.
 docker compose up -d --build
 ```
 
-## Connect to the backend container
-
-```bash
-docker compose exec backend bash
-```
-The next commands will be run from the container (invoking make or poetry for example)
-
 ## (optional) Launch the development server
 
 ```bash
@@ -30,11 +29,7 @@ make devserver
 
 ## Run the tests
 
-local, run:
-Once the container is running
-
 ```bash
-docker compose exec backend bash
 poetry install --with dev
 make test
 ```
@@ -45,11 +40,6 @@ poetry add package-name --group backend
 ```
 
 ## Seed the database
-
-```bash
-docker compose exec backend make seed-db
-```
-or directly from the container:
 
 ```bash
 make seed-db

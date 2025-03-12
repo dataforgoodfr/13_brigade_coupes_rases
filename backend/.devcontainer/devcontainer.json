@@ -1,0 +1,25 @@
+{
+	"name": "Backend",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"dockerComposeFile": "../../docker-compose.yml",
+	"service": "backend",
+	"workspaceFolder": "/app/backend",
+	"remoteUser": "devuser",
+	"containerEnv": {
+		"DATABASE_URL": "postgresql://devuser:devuser@host.docker.internal:5432/local",
+		"ENVIRONMENT": "development"
+	},
+	"postCreateCommand": "make devserver",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.black-formatter",
+				"ms-python.debugpy",
+				"ms-python.isort",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"mhutchie.git-graph"
+			]
+		}
+	}
+}

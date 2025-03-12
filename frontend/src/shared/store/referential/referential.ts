@@ -17,7 +17,7 @@ export type TagResponse = z.infer<typeof abusiveTagSchema>;
 export type Tag = ItemFromRecord<TagResponse>;
 export const departmentResponseSchema = record(
 	z.string().uuid(),
-	z.object({ name: z.string() }),
+	z.object({ code: z.string() }),
 );
 export const departmentSchema = z.object({
 	id: z.string().uuid(),
