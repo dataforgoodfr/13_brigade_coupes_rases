@@ -82,8 +82,10 @@ export const clearCuttingResponseSchema = z.object({
 	});
 
 export type ClearCuttingResponse = z.infer<typeof clearCuttingResponseSchema>;
-export const clearCuttingSchema = clearCuttingResponseSchema.omit({abusiveTags: true}).merge(clearCuttingBaseSchema)
-export type ClearCutting = z.infer<typeof clearCuttingSchema> & AbusiveTags
+export const clearCuttingSchema = clearCuttingResponseSchema
+	.omit({ abusiveTags: true })
+	.merge(clearCuttingBaseSchema);
+export type ClearCutting = z.infer<typeof clearCuttingSchema> & AbusiveTags;
 
 const waterCourseSchema = z.object({
 	id: z.string(),
@@ -125,7 +127,7 @@ const clearCuttingOnSiteFormSchema = z.object({
 	imgsTreeTrunks: z.array(z.string().url()).default([]),
 	imgsSoilState: z.array(z.string().url()).default([]),
 	imgsAccessRoad: z.array(z.string().url()).default([]),
-})
+});
 
 const clearCuttingEcologicalZoningFormSchema = z.object({
 	isNatura2000: z.boolean().default(false),
@@ -143,7 +145,7 @@ const clearCuttingEcologicalZoningFormSchema = z.object({
 const clearCuttingActorsFormSchema = z.object({
 	companyName: z.string().optional(),
 	subcontractor: z.string().optional(),
-	ownerName: z.string().optional()
+	ownerName: z.string().optional(),
 });
 
 const clearCuttingRegulationsFormSchema = z.object({
@@ -159,7 +161,7 @@ const clearCuttingLegaStrategyFormSchema = z.object({
 	isRelevantAlertSRGS: z.boolean().default(false),
 	isRelevantAlertPSG: z.boolean().default(false),
 	isRelevantRequestPSG: z.boolean().default(false),
-	isActionsUndertaken: z.string().optional()
+	isActionsUndertaken: z.string().optional(),
 });
 
 export const clearCuttingFormSchema = clearCuttingResponseSchema
@@ -168,10 +170,11 @@ export const clearCuttingFormSchema = clearCuttingResponseSchema
 	.extend(clearCuttingActorsFormSchema.shape)
 	.extend(clearCuttingRegulationsFormSchema.shape)
 	.extend(clearCuttingLegaStrategyFormSchema.shape)
-	.extend({ 
+	.extend({
 		otherInfos: z.string().optional(),
 		clearCuttingSize: z.number().optional(),
 		clearCuttingSlope: z.number().optional(),
 	})
+	.omit({ abusiveTags: true });
 
 export type ClearCuttingForm = z.infer<typeof clearCuttingFormSchema>
