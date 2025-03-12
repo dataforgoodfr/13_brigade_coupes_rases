@@ -1,3 +1,28 @@
+## ETL cron
+```bash
+#!/bin/bash
+# Structure du projet
+.
+data_pipeline/
+├── config/
+│   ├── config.yaml
+├── data_temp/
+├── logs/
+│   ├── extract.log
+│   ├── transform.log
+├── scripts/
+│   ├── utils/
+│   │   ├── .env # Temporaire le temps de mettre en place keypass
+│   │   ├── date_parser.py
+│   │   ├── disjoin_set.py
+│   │   ├── logging.py
+│   │   ├── s3.py
+│   ├── extract.py
+│   ├── main.py
+│   ├── transform.py
+
+```
+
 ## KeePass
 
 - KeePass is the password manager used to store AWS credentials. These credentials are securely stored in the project's KeePass database.

@@ -1,0 +1,16 @@
+# Configuration pour le pipeline ETL Sufosat
+
+# Paramètres extract 
+extract_sufosat:
+  s3_prefix: "dataeng/sufosat_data/"
+  s3_filename: "mosaics_tropisco_warnings_france_date.tif"
+  s3_sufosat_metadata: "mosaics_tropisco_warnings_france_date_metadata.json"
+  zendo_filename: "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
+  zendo_id: "15004634"
+
+# Paramètres transform
+transform_sufosat:
+  download_path: "data_temp/"
+  export_filename: "clear_cut_processed.geoparquet"
+  filtered_raster: "forest-clearcuts_mainland-france_sufosat_dates_v3_filtered.tif"
+  polygonized_data: "forest-clearcuts_mainland-france_sufosat_dates_v3.shp"
