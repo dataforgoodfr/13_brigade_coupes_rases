@@ -1,4 +1,22 @@
 ## ETL cron
+
+1. Ajouter les répertoires data_temp et logs
+
+```bash
+mkdir data_temp logs
+```
+
+2. Installation Docker (s'assurer d'être sur le répertoire data_pipeline)
+```bash
+    docker build -t data_pipeline . 
+```
+
+3. Lancer le docker
+```bash
+    docker run -d --name pipeline data_pipeline 
+```
+
+
 ```bash
 #!/bin/bash
 # Structure du projet
