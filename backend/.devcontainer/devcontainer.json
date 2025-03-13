@@ -5,10 +5,6 @@
 	"service": "backend",
 	"workspaceFolder": "/app/backend",
 	"remoteUser": "devuser",
-	"containerEnv": {
-		"DATABASE_URL": "postgresql://devuser:devuser@host.docker.internal:5432/local",
-		"ENVIRONMENT": "development"
-	},
 	"postCreateCommand": "make devserver",
 	"customizations": {
 		"vscode": {
