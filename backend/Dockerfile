@@ -12,12 +12,11 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 RUN touch README.md
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+RUN  poetry install --without dev --no-root
 
 FROM builder as development 
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
-
+RUN  poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
 
 USER devuser
 
