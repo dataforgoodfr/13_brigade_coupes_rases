@@ -1,5 +1,5 @@
 FROM python:3.11 as builder
-ARG APP_HOME=""
+ARG APP_HOME="."
 RUN pip install poetry
 
 ENV POETRY_NO_INTERACTION=1 \
@@ -9,7 +9,7 @@ ENV POETRY_NO_INTERACTION=1 \
 
 WORKDIR /app
 
-COPY ${APP_HOME}pyproject.toml ${APP_HOME}poetry.lock ./
+COPY "${APP_HOME}/pyproject.toml" "${APP_HOME}/poetry.lock" ./
 RUN touch README.md
 
 RUN  poetry install --without dev --no-root
@@ -22,11 +22,12 @@ USER devuser
 
 FROM python:3.11-slim-buster as runtime
 
+ARG APP_HOME="."
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 
-COPY ${APP_HOME}app ./app
+COPY "${APP_HOME}/app" ./app
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 ENTRYPOINT ["python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]
