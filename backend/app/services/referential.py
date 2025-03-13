@@ -10,6 +10,7 @@ logger = getLogger(__name__)
 
 def get_referential(db: Session):
     departments = db.query(Department).all()
+    print(departments)
     return ReferentialResponse(
         departments={
             str(department.id): ReferentialDepartment(

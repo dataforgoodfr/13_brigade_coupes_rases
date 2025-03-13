@@ -10,7 +10,7 @@ from app.database import create_engine, get_db, sessionmaker  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
 
-TEST_DATABASE_URL = "postgresql://devuser:devuser@localhost:5432/test"
+TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
 
@@ -32,7 +32,7 @@ def db():
     finally:
         db.rollback()
         db.close()
-    command.downgrade(alembic_cfg, "base")
+    # command.downgrade(alembic_cfg, "base")
 
 
 @pytest.fixture(scope="function")

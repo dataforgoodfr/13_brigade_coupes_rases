@@ -6,7 +6,10 @@ from app.models import User, Department, ClearCut
 
 def test_user_creation(db):
     user = User(
-        firstname="Tétras", lastname="Foret", email="tetras.foret@example.com", role="volunteer"
+        firstname="Tétras",
+        lastname="Foret",
+        email="tetras.foret@example.com",
+        role="volunteer",
     )
     db.add(user)
     db.commit()
@@ -27,7 +30,7 @@ def test_user_creation(db):
 
 
 def test_department_creation(db):
-    department = Department(code=75)
+    department = Department(code="75", name="Paris")
     db.add(department)
     db.commit()
 
@@ -70,7 +73,7 @@ def test_associations(db):
         email="houba.houba@marsupilami.com",
         role="volunteer",
     )
-    department = Department(code="75")
+    department = Department(code="75", name="Paris")
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=20.0,
