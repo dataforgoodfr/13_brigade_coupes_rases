@@ -14,4 +14,6 @@ db_dependency = get_db_session()
 @router.get("/", response_model=ReferentialResponse, summary="Returns referential data")
 def get_referential(db: Session = db_dependency):
     logger.info(db)
+    x = []
+    x.pop()
     return get_referential_response(db)
