@@ -8,9 +8,6 @@ help: ## Show this help message
 devserver: install-dev-dependencies upgrade-db ## Start the development server
 	poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
 
-dev: 
-	poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
-
 install-dev-dependencies: ## Install development dependencies
 	poetry install --with backend
 

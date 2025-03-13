@@ -44,7 +44,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://devuser:devuser@host.docker.internal:5432/local
+      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
       ENVIRONMENT: development
 
   frontend:

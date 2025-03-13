@@ -2,7 +2,7 @@
 
 - [Backend](./backend/README.md)
 - [Frontend](./frontend/README.md)
-- [Data_ingénierie](./data_pipeline/README.md)
+- [Data Eng](./data_pipeline/README.md)
 - [Analytics](./analytics/README.md)
 - [Documentation](./doc/README.md)
 
@@ -34,47 +34,31 @@ L’objectif est de développer une solution complète pour :
 
 ## Pour contribuer
 
-Pour contribuer, il est recommandé d'utiliser un fork du projet. Cela permet d'éviter la gestion des demandes d'accès au dépôt principal.
+Pour contribuer, vous pouvez demander un accès au projet sur github.  Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
 
-Dans un premier temps, cliquez sur Fork pour récupérer le projet dans votre espace GitHub.
-
-- Créez votre branche de travail à partir de la branche main, en respectant la nomenclature suivante:
+Essayez de respecter les conventions de code et le style d'écriture du projet:
 
   - feature/nom_de_la_feature pour une nouvelle fonctionnalité
   - chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
   - hotfix/nom_du_hotfix pour une correction rapide
 
-- Poussez votre code vers votre dépôt distant.
 
-- Chaque commit doit suivre la convention de style suivante :
+Chaque commit doit suivre la convention de style suivante :
 
-  - Complete convention cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
+  - Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
   - Structure:
     - [Type] (optional scope): [Description]
     - [Optional Body]
     - [Optional Footer]
   - Exemple : chore(readme): ajouter détails pour contribuer au repo
 
-- Créez une pull request en spécifiant :
-
-  - Base repository : dataforgood/13_brigade_coupes_rases/main
-  - Head repository : YourGithubAccount/13_brigade_coupes_rases/your_branch
+Créez une pull request.
 
 - Pour faciliter la revue de la pull request :
   - Liez la pull request à un ticket NocoDB en ajoutant le lien du ticket dans la description.
   - Rédigez une description détaillée de la pull request afin de fournir un maximum d’informations sur les modifications apportées.
 
-## Gestion des secrets
 
-Les secrets partagés entre les membres sont stockés dans une [base de données keepass](./keepass/secrets.kdbx).  
-Pour installer keepass suivez ce [lien](https://keepass.info/index.html).  
-Un mot de passe est nécessaire pour ouvrir la base de données, lire ou modifier les secrets. Pour récuperer le mot de passe contactez directement les responsables de sous-équipes.
-
-### Bonnes pratiques
-
-Considérez la base de données keepass comme étant la golden source de tous les secrets du projet.  
-Chaque secret utilisés dans le projet doit être référencés dans le keepass.  
-Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ...
 
 # Architecture du Projet (sujet à améliorer et definir selon les expertises des volonteurs)
 
@@ -100,7 +84,112 @@ L'ideeèr du projet est de créer une architecture modulaire qui permet d'automa
 └── 📁 analytics/ (contient les scripts pour analyser et visualiser les données)
 ```
 
-### Installer Poetry
+
+## Diagramme
+
+Pour visualiser ce graph sur VS Code, vous pouvez installer des plugins comme "Markdown Preview Enhanced". 
+
+Le graph est pas nécessairement complet, mais il donne une idée de l'architecture générale du projet. 
+
+```mermaid
+flowchart LR
+    %% External Entities
+    SOURCES[Public Data Sources<br>Monthly & One-Time] -->|Fetch Data| ETL
+    Users[End Users] -->|Access<br>via Browser| FRONT
+
+    %% Main Clever Cloud subgraph
+    subgraph CC["CleverCloud"]
+    
+      %% Data Engineering Subgraph
+      subgraph DE["Data Engineering"]
+      ETL[Docker-based Ingestion Jobs]
+      Cron[CleverCloud Cron Add-On]
+      AutoScale[Autoscaling<br>CleverCloud]
+      end
+
+      %% Backend Subgraph
+      subgraph BK["Backend"]
+      BE[FastAPI Backend<br> - Docker]
+      end
+
+      %% Storage Subgraph
+      subgraph ST["Storage"]
+      S3[(S3 Object Storage)]
+      DB[(PostgreSQL w/ PostGIS)]
+      end
+
+      %% Frontend Subgraph
+      subgraph FE["Frontend"]
+      FRONT[Frontend React/Vite<br>]
+      end
+
+      %% Observability Subgraph
+      subgraph OBS["Observability"]
+      Logs[CleverCloud Logs & Metrics]
+      end
+
+      %% Shared Environment Variables
+      EnvVars[Built-in Env Variables]
+
+    end
+
+    %% Connections & Data Flows
+    ETL -->|Raw/Intermediate Data| S3
+    ETL -->|Transformed Data| DB
+    Cron -->|Triggers| ETL
+    AutoScale --> |Autoscales| ETL
+    EnvVars -.-> ETL
+    EnvVars -.-> BE
+    EnvVars -.-> FRONT
+    BE -->|Reads/Writes| DB
+    BE --> |Reads/Writes Images| S3
+    FRONT -->|API Calls| BE
+    Logs -.-> ETL
+    Logs -.-> BE
+    Logs -.-> FRONT
+
+    %% Styles for Readability
+    style CC fill:#F0F9FF,stroke:#0369A1,stroke-width:2px,corner-radius:8px
+    style DE fill:#ECFEFF,stroke:#05B4FE,stroke-width:1px,corner-radius:8px
+    style BK fill:#FFF7ED,stroke:#F97316,stroke-width:1px,corner-radius:8px
+    style FE fill:#FFFBEB,stroke:#F59E0B,stroke-width:1px,corner-radius:8px
+    style OBS fill:#FAE8FF,stroke:#C026D3,stroke-width:1px,corner-radius:8px
+
+    %% Custom Component Colors
+    style DB fill:#CFFAFE,stroke:#0891B2,stroke-width:1px,color:#000000  %% Soft Teal for Storage
+    style S3 fill:#CFFAFE,stroke:#0891B2,stroke-width:1px,color:#000000  %% Soft Teal for Storage
+
+    style ETL fill:#FEE2E2,stroke:#DC2626,stroke-width:1px,color:#000000  %% Warm Coral for Docker
+    style BE fill:#FEE2E2,stroke:#DC2626,stroke-width:1px,color:#000000  %% Warm Coral for Docker
+
+    style Cron fill:#DBEAFE,stroke:#2563EB,stroke-width:1px,color:#000000  %% Cool Blue for CleverCloud
+    style AutoScale fill:#DBEAFE,stroke:#2563EB,stroke-width:1px,color:#000000  %% Cool Blue for CleverCloud
+    style Logs fill:#DBEAFE,stroke:#2563EB,stroke-width:1px,color:#000000  %% Cool Blue for CleverCloud
+
+    style FRONT fill:#FEF3C7,stroke:#D97706,stroke-width:1px,color:#000000  %% Soft Amber for Frontend
+```
+
+### Utiliser Poetry
+
+Poetry est un gestionnaire de paquets pour Python. Il permet d'installer, de mettre à jour et de gérer les dépendances.
+On utilise Poetry dans les repertoires backend, data_pipeline et analytics. Chaque repertoire a un fichier `pyproject.toml` qui contient les dépendances spécifiques à chaque subprojet.
+Il y a aussi un fichier projet `pyproject.toml` à la racine du projet qui contient les dépendances globales du projet.
+
+Installer les dépendances:
+
+  Il faut être dans le répertoire backend, data_pipeline ou analytics et exécuter la commande suivante: 
+
+    poetry install
+
+Ajouter une dépendance (par répertoire):
+
+    poetry add pandas
+
+Mettre à jour les dépendances (par répertoire):
+
+    poetry update
+
+### Installer Poetry (version 1.8.5)
 
 Plusieurs [méthodes d'installation](https://python-poetry.org/docs/#installation) sont décrites dans la documentation de poetry dont:
 
@@ -138,22 +227,20 @@ se référer à la [documentation officielle](https://python-poetry.org/docs/#in
 
     source .venv/bin/activate
 
-### Utiliser Poetry
-
-Installer les dépendances:
-
-    poetry install
-
-Ajouter une dépendance:
-
-    poetry add pandas
-
-Mettre à jour les dépendances:
-
-    poetry update
-
 ### Lancer les precommit-hook localement
 
 [Installer les precommit](https://pre-commit.com/)
 
-    pre-commit run --all-files
+    poetry run pre-commit run --all-files
+
+## Gestion des secrets
+
+Les secrets partagés entre les membres sont stockés dans une [base de données keepass](./keepass/secrets.kdbx).  
+Pour installer keepass suivez ce [lien](https://keepass.info/index.html).  
+Un mot de passe est nécessaire pour ouvrir la base de données, lire ou modifier les secrets. Pour récuperer le mot de passe contactez directement les responsables de sous-équipes.
+
+### Bonnes pratiques
+
+Considérez la base de données keepass comme étant la golden source de tous les secrets du projet.  
+Chaque secret utilisés dans le projet doit être référencés dans le keepass.  
+Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ...

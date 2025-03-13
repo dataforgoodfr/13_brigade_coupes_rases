@@ -12,7 +12,9 @@ def get_referential(db: Session):
     departments = db.query(Department).all()
     return ReferentialResponse(
         departments={
-            str(department.id): ReferentialDepartment(code=department.code, name= department.name)
+            str(department.id): ReferentialDepartment(
+                code=department.code, name=department.name
+            )
             for department in departments
         },
         ecological_zonings={},
