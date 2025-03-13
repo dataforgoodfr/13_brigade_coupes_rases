@@ -44,10 +44,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project 
+      - name: Build project
+        run: pnpm run build
         env:
           VITE_API_URL: "https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io"
-        run: pnpm run build
 
       - name: Run tests
         run: pnpm test
