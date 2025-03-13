@@ -46,8 +46,6 @@ jobs:
 
       - name: Build project
         run: pnpm run build
-        env:
-          VITE_API: "https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io"
 
       - name: Run tests
         run: pnpm test
