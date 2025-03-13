@@ -70,7 +70,7 @@ def test_associations(db):
         email="houba.houba@marsupilami.com",
         role="volunteer",
     )
-    department = Department(code="75")
+    department = Department(code="75", name="Paris")
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=20.0,

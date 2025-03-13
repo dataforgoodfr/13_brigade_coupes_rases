@@ -6,11 +6,11 @@ from fastapi.testclient import TestClient
 # Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import app  # noqa: E402
-from app.database import create_engine, get_db, sessionmaker  # noqa: E402
+from app.database import  create_engine, get_db, sessionmaker  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
 
-TEST_DATABASE_URL = "postgresql://devuser:devuser@localhost:5432/test"
+TEST_DATABASE_URL = "postgresql://devuser:devuser@host.docker.internal:5432/test"
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
 
