@@ -30,7 +30,7 @@ def test_user_creation(db):
 
 
 def test_department_creation(db):
-    department = Department(code="75", name="Paris")
+    department = Department(code="13", name="Bouches du Rhône")
     db.add(department)
     db.commit()
 
