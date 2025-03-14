@@ -1,5 +1,5 @@
 FROM python:3.11 as builder
-
+ARG SRC_DIR="."
 RUN pip install poetry
 
 ENV POETRY_NO_INTERACTION=1 \
@@ -9,25 +9,25 @@ ENV POETRY_NO_INTERACTION=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
+COPY "${SRC_DIR}/pyproject.toml" "${SRC_DIR}/poetry.lock" ./
 RUN touch README.md
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
+RUN  poetry install --without dev --no-root
 
 FROM builder as development 
 
-RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
-
+RUN  poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
 
 USER devuser
 
 FROM python:3.11-slim-buster as runtime
 
+ARG SRC_DIR="."
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY app ./app
+COPY "${SRC_DIR}/app" ./app
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 ENTRYPOINT ["python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]

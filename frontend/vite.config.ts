@@ -8,7 +8,19 @@ import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { reactClickToComponent } from "vite-plugin-react-click-to-component";
 export default defineConfig(({ mode }) => {
+	const viteEnv = Object.keys(process.env).reduce<Record<string, string>>(
+		(viteEnv, key) => {
+			if (key.startsWith("VITE_")) {
+				viteEnv[`import.meta.env.${key}`] = JSON.stringify(
+					process.env[key],
+				) as string;
+			}
+			return viteEnv;
+		},
+		{},
+	);
 	return {
+		define: mode==='production' ?  viteEnv : undefined,
 		test: {
 			environment: "jsdom",
 			setupFiles: ["src/test/setup.ts"],
