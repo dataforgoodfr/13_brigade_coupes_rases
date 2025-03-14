@@ -22,8 +22,8 @@ def test_create_user(client):
 def test_get_user(client, db):
     user = User(
         firstname="Houba",
-        lastname="Houba",
-        email="houba.houba@marsupilami.com",
+        lastname="Youba",
+        email="houba.youba@marsupilami.com",
         role="volunteer",
     )
     db.add(user)
