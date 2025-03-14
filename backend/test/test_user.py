@@ -1,3 +1,5 @@
+from app.models import User, Department, ClearCut
+
 def test_create_user(client):
     userJson = {
         "firstname": "John",
@@ -16,8 +18,18 @@ def test_create_user(client):
     assert data["deleted_at"] is None
 
 
-def test_get_user(client):
-    response = client.get("/user/1")
+def test_get_user(client, db):
+    user = User(
+        firstname="Houba",
+        lastname="Houba",
+        email="houba.houba@marsupilami.com",
+        role="volunteer",
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    response = client.get(f"/user/{user.id}")
 
     assert response.status_code == 200
     data = response.json()
@@ -38,43 +50,50 @@ def test_get_user(client):
 #     assert True is True
 
 
-def test_update_user(client):
-    # New user
-    create_response = client.post(
-        "/user/",
-        json={
-            "firstname": "Jane",
-            "lastname": "Doe",
-            "email": "jane.doe@example.com",
-            "role": "volunteer",
-        },
+def test_update_user(client, db):
+    user = User(
+        firstname="Houba",
+        lastname="Houba",
+        email="houba.houba@marsupilami.com",
+        role="volunteer",
     )
-    assert create_response.status_code == 201
-    user_id = create_response.json()["id"]
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     # Update role
     update_response = client.put(
-        f"/user/{user_id}",
+        f"/user/{user.id}",
         json={
-            "firstname": "Jane",
-            "lastname": "Smith",
-            "email": "jane.smith@example.com",
             "role": "admin",
         },
     )
     assert update_response.status_code == 200
 
     # Check updated datas
-    get_response = client.get(f"/user/{user_id}")
+    get_response = client.get(f"/user/{user.id}")
     assert get_response.status_code == 200
     data = get_response.json()
-    assert data["email"] == "jane.smith@example.com"
+
     assert data["role"] == "admin"
 
 
-def test_get_users(client):
+def test_get_users(client, db):
+    user = User(
+        firstname="Houba",
+        lastname="Houba",
+        email="houba.houba@marsupilami.com",
+        role="volunteer",
+    )
+    department = Department(code="75", name="Paris")
+    user.departments.append(department)
+    db.add_all([user, department])
+    db.commit()
+    db.refresh(user)
+
     response = client.get("/user")
     assert response.status_code == 200
 
     data = response.json()
-    assert len(data) >= 2
+    assert len(data) == 1
+    assert data[0]["id"] == user.id
