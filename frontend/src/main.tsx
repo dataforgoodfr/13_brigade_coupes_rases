@@ -6,7 +6,10 @@ import { App } from "@/App";
 import "./index.css";
 import { store } from "./shared/store/store";
 async function enableMocking() {
-	if (import.meta.env.MODE !== "development") {
+	if (
+		import.meta.env.MODE !== "development" ||
+		import.meta.env.VITE_MOCK === "false"
+	) {
 		return;
 	}
 

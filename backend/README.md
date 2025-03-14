@@ -55,3 +55,9 @@ You can see the OpenAPI docs in `http://localhost:8000/docs`. These are automati
 Application URL : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)  
 Swagger UI : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs)  
 PostgreSQL Database : postgresql://u8jhjikkyhen5eq6xym9:<password in keepass>@bfy8coqxxtfuonsdwsb1-postgresql.services.clever-cloud.com:50013/bfy8coqxxtfuonsdwsb1  
+
+## Environment variables 
+
+DATABASE_URL = Connection string to connect to postgres database.  
+ENVIRONMENT = development
+ALLOWED_ORIGINS = domain names used to allow CORS

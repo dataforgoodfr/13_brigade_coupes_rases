@@ -1,6 +1,6 @@
 FROM node:23-alpine3.21
 
-ENV VITE_API="https://localhost/api"
+ARG VITE_API
 
 COPY . . 
 RUN npm i -g pnpm &&  pnpm i && pnpm tsc -b && pnpm vite build    

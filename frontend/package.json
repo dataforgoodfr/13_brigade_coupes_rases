@@ -5,6 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
+		"dev:mock": "VITE_MOCK=true vite",
 		"cleanup": "biome check --write",
 		"cleanup:tsc": "biome check --write && tsc",
 		"build": "pnpm cleanup && tsc -b && vite build",
