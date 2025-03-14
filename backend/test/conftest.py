@@ -32,7 +32,7 @@ def migration():
 
 
 @pytest.fixture(scope="function")
-def db(migration):
+def db(migration, nuke_all_tables):
     db = SessionLocal()
     try:
         yield db
