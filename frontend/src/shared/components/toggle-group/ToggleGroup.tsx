@@ -26,9 +26,7 @@ export type ToggleGroupInputProps<TItem> = Omit<
 	);
 export function ToggleGroup<TItem>({
 	className,
-	size,
 	children,
-	variant = "outline",
 	value: items,
 	itemProps,
 	...props
