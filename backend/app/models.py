@@ -47,6 +47,12 @@ class Department(Base):
     users = relationship("User", secondary=user_department, back_populates="departments")
     clear_cuts = relationship("ClearCut", back_populates="department")
 
+    @validates("name")
+    def validate_name(self, key, value):
+        if key == "name" and value == None:
+            raise ValueError("Name cannot be None")
+        return value
+
 
 class ClearCut(Base):
     __tablename__ = "clear_cuts"

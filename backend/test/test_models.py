@@ -36,6 +36,10 @@ def test_department_creation(db):
 
     assert department.id is not None
 
+    with pytest.raises(ValueError) as exc_info:
+        Department(code="75", name=None)
+    assert str(exc_info.value) == "Name cannot be None"
+
 
 def test_clear_cut_creation(db):
     clear_cut = ClearCut(
