@@ -24,7 +24,7 @@ const clearCuttingBaseResponseSchema = z.object({
 	creationDate: z.string(),
 	cutYear: z.number(),
 	ecologicalZones: z.array(z.string()),
-	abusiveTags: z.array(z.string().uuid()),
+	abusiveTags: z.array(z.string()),
 	naturaZone: z.string().optional(),
 	comment: z.string().optional(),
 	cadastralParcel: z

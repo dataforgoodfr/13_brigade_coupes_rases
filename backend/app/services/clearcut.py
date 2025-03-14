@@ -11,19 +11,20 @@ logger = getLogger(__name__)
 
 def create_clearcut(db: Session, clearcut: ClearCutCreate):
     db_item = ClearCut(
-        cut_date = clearcut.cut_date,
-        slope_percentage = clearcut.slope_percentage,
+        cut_date=clearcut.cut_date,
+        slope_percentage=clearcut.slope_percentage,
         location=WKTElement(clearcut.location),
         boundary=WKTElement(clearcut.boundary),
-        status = 'pending',
-        department_id = clearcut.department_id
-        )
+        status="pending",
+        department_id=clearcut.department_id,
+    )
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     db_item.location = to_shape(db_item.location).wkt
     db_item.boundary = to_shape(db_item.boundary).wkt
     return db_item
+
 
 def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
     clearcut = db.get(ClearCut, id)
@@ -42,12 +43,19 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
 def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
     clearcuts = db.query(ClearCut).offset(skip).limit(limit).all()
     for clearcut in clearcuts:
-        clearcut.location = to_shape(clearcut.location).wkt
-        clearcut.boundary = to_shape(clearcut.boundary).wkt
+        clearcut.location = to_shape(clearcut.location)
+        clearcut.boundary = to_shape(clearcut.boundary)
+
+        clearcut.location = clearcut.location.coords[0]
+        clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcuts
 
-def get_clearcut_by_id(id : int, db: Session):
+
+def get_clearcut_by_id(id: int, db: Session):
     clearcut = db.get(ClearCut, id)
-    clearcut.location = to_shape(clearcut.location).wkt
-    clearcut.boundary = to_shape(clearcut.boundary).wkt
+    clearcut.location = to_shape(clearcut.location)
+    clearcut.boundary = to_shape(clearcut.boundary)
+
+    clearcut.location = clearcut.location.coords[0]
+    clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcut

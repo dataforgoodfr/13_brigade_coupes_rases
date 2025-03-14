@@ -5,7 +5,6 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, validates
 
 
-
 user_department = Table(
     "user_department",
     Base.metadata,
@@ -43,9 +42,16 @@ class Department(Base):
     __tablename__ = "departments"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(Integer, index=True)
+    code = Column(String, index=True)
+    name = Column(String)
     users = relationship("User", secondary=user_department, back_populates="departments")
     clear_cuts = relationship("ClearCut", back_populates="department")
+
+    @validates("name")
+    def validate_name(self, key, value):
+        if key == "name" and value is None:
+            raise ValueError("Name cannot be None")
+        return value
 
 
 class ClearCut(Base):

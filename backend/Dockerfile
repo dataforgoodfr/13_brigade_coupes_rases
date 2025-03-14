@@ -1,24 +1,33 @@
-FROM python:3.13 as base
+FROM python:3.11 as builder
+ARG SRC_DIR="."
+RUN pip install poetry
 
-WORKDIR /code/backend
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+WORKDIR /app
 
-# Add Poetry to PATH
-ENV PATH="/root/.local/bin:${PATH}"
+COPY "${SRC_DIR}/pyproject.toml" "${SRC_DIR}/poetry.lock" ./
+RUN touch README.md
 
-COPY . /code/
+RUN  poetry install --without dev --no-root
 
-# Activate virtual env for subsequent poetry calls
-RUN poetry config virtualenvs.in-project true
+FROM builder as development 
 
-FROM base as development
+RUN  poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
 
-RUN poetry install --with backend,dev --no-interaction
+USER devuser
 
-FROM base as production
+FROM python:3.11-slim-buster as runtime
 
-# Install dependencies (runtime only)
-RUN poetry install --with backend
+ARG SRC_DIR="."
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
 
-CMD ["poetry", "run","uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]
+
+COPY "${SRC_DIR}/app" ./app
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+
+ENTRYPOINT ["python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]

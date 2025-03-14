@@ -3,10 +3,11 @@ default_language_version:
 
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.9.9"
+    rev: v0.9.10
     hooks:
       - id: ruff
         args: [--fix]
+      - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
@@ -16,5 +17,7 @@ repos:
     rev: v1.3.3
     hooks:
       - id: python-safety-dependencies-check
+      # This file is pinned because the hook doesn't support multiple pyproject files. 
+      # It's better to check partially (dependencies of backend) than eliminating the hook.
         files: backend/pyproject.toml
         additional_dependencies: [poetry-plugin-export]

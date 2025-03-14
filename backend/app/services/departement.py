@@ -5,6 +5,7 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 def get_departments(db: Session, skip: int = 0, limit: int = 10):
-    departements = db.query(Department).offset(skip).limit(limit).all()    
-    return departements
+    departments = db.query(Department).offset(skip).limit(limit).all()
+    return departments
