@@ -1,5 +1,6 @@
 from app.models import User, Department
 
+
 def test_create_user(client):
     userJson = {
         "firstname": "John",

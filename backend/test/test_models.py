@@ -71,7 +71,6 @@ def test_clear_cut_creation(db):
 
 
 def test_associations(db):
-
     all_users = db.query(User).all()
     for user in all_users:
         print(f"User {user.id}: {user.firstname} {user.lastname} ({user.email})")
