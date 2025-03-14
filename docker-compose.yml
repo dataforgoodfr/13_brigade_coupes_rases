@@ -30,6 +30,7 @@ services:
         - pgadmin-data:/var/lib/pgadmin
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
+    working_dir: /app/backend
     build:
       target: development
       context: backend
