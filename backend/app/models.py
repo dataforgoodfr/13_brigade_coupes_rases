@@ -49,7 +49,7 @@ class Department(Base):
 
     @validates("name")
     def validate_name(self, key, value):
-        if key == "name" and value == None:
+        if key == "name" and value is None:
             raise ValueError("Name cannot be None")
         return value
 
