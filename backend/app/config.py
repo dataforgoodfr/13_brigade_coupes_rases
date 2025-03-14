@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     )
     ENVIRONMENT: str = Field(..., json_schema_extra={"env": "ENVIRONMENT"})
     ALLOWED_ORIGINS: str = Field(
-        ...,
         default="",
         json_schema_extra={"env": "ALLOWED_ORIGINS"},
         description="List of allowed origins for CORS, each origin should be separated with a comma. E.g : origin1,origin2",
