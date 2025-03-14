@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 # Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import app  # noqa: E402
-from app.database import  create_engine, get_db, sessionmaker  # noqa: E402
+from app.database import create_engine, get_db, sessionmaker  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
 
