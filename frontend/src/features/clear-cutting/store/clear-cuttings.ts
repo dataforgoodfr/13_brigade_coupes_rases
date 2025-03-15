@@ -1,6 +1,6 @@
 import { clearCuttingStatusSchema } from "@/features/clear-cutting/store/status";
 import type { Tag } from "@/shared/store/referential/referential";
-import { string, z } from "zod";
+import { z } from "zod";
 import { pointSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
@@ -27,17 +27,13 @@ const clearCuttingBaseResponseSchema = z.object({
 	abusiveTags: z.array(z.string()),
 	naturaZone: z.string().optional(),
 	comment: z.string().optional(),
-	cadastralParcel: z
-		.object({
-			id: string(),
-			slope: z.number(),
-			surfaceKm: z.number(),
-		})
-		.optional(),
-
+	surfaceHectare: z.number(),
+	slopePercent: z.number(),
 	status: clearCuttingStatusSchema,
 });
-type ClearCuttingBaseResponse = z.infer<typeof clearCuttingBaseResponseSchema>;
+export type ClearCuttingBaseResponse = z.infer<
+	typeof clearCuttingBaseResponseSchema
+>;
 type ClearCuttingBase = Omit<ClearCuttingBaseResponse, "abusiveTags"> & {
 	abusiveTags: Tag[];
 };

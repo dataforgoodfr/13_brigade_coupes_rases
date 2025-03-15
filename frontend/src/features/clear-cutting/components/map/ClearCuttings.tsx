@@ -31,7 +31,6 @@ export function ClearCuttings() {
 		const bounds = map.getBounds();
 		const northEast = bounds.getNorthEast();
 		const southWest = bounds.getSouthWest();
-
 		dispatch(
 			setGeoBounds([
 				[northEast.lat, northEast.lng],
