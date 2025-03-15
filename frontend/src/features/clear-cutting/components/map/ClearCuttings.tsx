@@ -1,11 +1,11 @@
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
+import { DISPLAY_PREVIEW_ZOOM_LEVEL, getAreaColor } from "@/features/clear-cutting/store/clear-cuttings";
 import { setGeoBounds } from "@/features/clear-cutting/store/filters.slice";
 import { useGeolocation } from "@/shared/hooks/geolocation";
 import { useAppDispatch } from "@/shared/hooks/store";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
-import { DISPLAY_PREVIEW_ZOOM_LEVEL, getAreaColor } from "@/features/clear-cutting/store/clear-cuttings";
 
 export function ClearCuttings() {
 	const map = useMap();

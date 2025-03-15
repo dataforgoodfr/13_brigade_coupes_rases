@@ -4,9 +4,9 @@ import { DisplayTypeMenu } from "@/features/clear-cutting/components/shared/Disp
 import { Filters } from "@/features/clear-cutting/components/shared/Filters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import { Camera } from "lucide-react";
+
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
-
 	return (
 		<>
 			<DisplayTypeMenu />
