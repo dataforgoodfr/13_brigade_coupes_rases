@@ -31,7 +31,7 @@ gdalinfo --version
 To use GDAL in Python, install the matching pip package:
 
 ```bash
-sudo apt install python3.13-dev
+sudo apt install python3.11-dev
 pip install gdal==<your GDAL version>
 ```
 
