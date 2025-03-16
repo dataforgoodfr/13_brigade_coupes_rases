@@ -393,6 +393,7 @@ def pair_clear_cuts_through_space_and_time(
     )
 
     # Cluster the clear-cuts that are within `max_meters_between_clear_cuts` of each other
+    # Lambert-93 CRS uses meters as its unit of measurement for distance.
     clear_cut_pairs = (
         gdf.sjoin(gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts)
         .reset_index()
