@@ -18,7 +18,7 @@ FROM builder as development
 
 RUN  useradd -ms /bin/bash devuser \
         && chown -R devuser ./ \
-        && chown -R devuser /tmp/poetry_cache 
+        && chown -R devuser ${POETRY_CACHE_DIR}
 
 USER devuser
 
