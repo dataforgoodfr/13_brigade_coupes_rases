@@ -1,0 +1,9 @@
+# Paramètres géneraux
+download_path: "/tmp/"
+
+
+# Paramètres couches statiques
+rivers:
+  download_url: "https://services.sandre.eaufrance.fr/telechargement/geo/ETH/BDTopage/2024/CoursEau/CoursEau_FXX-geojson.zip"
+  s3_prefix: "dataeng/static_layers/"
+  s3_filename: "rivers.geoparquet"
