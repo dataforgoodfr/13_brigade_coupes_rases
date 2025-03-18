@@ -3,14 +3,15 @@ import os
 import yaml
 import shutil
 import rasterio
+from rasterio.features import shapes
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from osgeo import gdal, ogr, osr
+import fiona
+
 from utils.s3 import S3Manager
 from utils.logging import etl_logger
 from utils.date_parser import parse_yyddd
-
 
 # Configuration
 s3_manager = S3Manager()
@@ -54,57 +55,68 @@ def filter_raster_by_date(
     logger.info("✅ Fichier tif regroupé")
 
 # Vectorisation du raster
-def polygonize_tif(raster_path, vector_path):   
+def polygonize_tif(raster_path, vector_path):
+    """
+    Polygonize a single-band GeoTIFF using Rasterio and Fiona.
+    Saves the result as an ESRI Shapefile.
+    """
     os.makedirs(os.path.dirname(vector_path), exist_ok=True)
 
-    # Ouvrir le raster
-    raster_ds = gdal.Open(raster_path)
-    if raster_ds is None:
-        raise ValueError(f"Échec de l'ouverture du raster : {raster_path}")
-    else:
-        print("✅ Raster ouvert avec Gdal")
+    # 1. Read the raster data
+    with rasterio.open(raster_path) as src:
+        logger.info("✅ Raster opened with Rasterio")
+        
+        band = src.read(1)
+        transform = src.transform
+        crs = src.crs  # This is a rasterio.crs.CRS object
+        mask = band != 0  # Example mask: polygonize all nonzero pixels
 
-    srs = osr.SpatialReference()
-    srs.ImportFromWkt(raster_ds.GetProjectionRef())
+        # 2. Rasterio polygonization
+        results = (
+            {"properties": {"DN": int(value)}, "geometry": geom}
+            for geom, value in shapes(band, mask=mask, transform=transform)
+        )
 
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    if driver is None:
-        raise RuntimeError("Pilote Shapefile non disponible.")
+    # 3. Define Fiona schema
+    schema = {
+        "geometry": "Polygon",
+        "properties": {"DN": "int"}
+    }
+
+    # 4. Remove existing shapefile if present
     if os.path.exists(vector_path):
-        driver.DeleteDataSource(vector_path)
-    vector_ds = driver.CreateDataSource(vector_path)
-    if vector_ds is None:
-        raise RuntimeError(f"Échec de la création du Shapefile : {vector_path}")
-    layer = vector_ds.CreateLayer("polygons", srs=srs, geom_type=ogr.wkbPolygon)
-    if layer is None:
-        raise RuntimeError("Échec de la création de la couche.")
+        os.remove(vector_path)
 
-    field_dn = ogr.FieldDefn("DN", ogr.OFTInteger)
-    layer.CreateField(field_dn)
+    # 5. Write polygons to Shapefile using Fiona
+    #    Pass the raster’s CRS as a dict
+    with fiona.open(
+        vector_path,
+        "w",
+        driver="ESRI Shapefile",
+        schema=schema,
+        crs=crs.to_dict()  # <-- Key step: supply as dict
+    ) as shp:
+        for feature in results:
+            shp.write(feature)
 
-    band = raster_ds.GetRasterBand(1)
-    mask_band = band
-
-    # Appliquer la fonction Polygonize avec la bonne configuration
-    result = gdal.Polygonize(band, mask_band, layer, 0, ["8CONNECTED=YES"])
-    if result != 0:
-        raise RuntimeError("Échec de la polygonisation.")
-
-    # Nettoyer et fermer les fichiers
-    layer = None
-    vector_ds = None
-    raster_ds = None
-
-    
-    # Afficher les logs en print 
-    logger.info("✅ Fichier shapefile créé")
-    logger.info("✅ Couche SRS créée")
-    logger.info("✅ Polygonisation du raster réussie")
+    logger.info("✅ Shapefile created")
+    logger.info("✅ Polygonization successful")
 
 def read_shape(vector_path):
     sufosat: gpd.GeoDataFrame = gpd.read_file(vector_path)
     clear_cut = sufosat
+
     return clear_cut
+
+def read_parquet(parquet_file):
+    parquet = pd.read_parquet(parquet_file)
+
+    return parquet
+
+def read_geoparquet(geoparquet_file):
+    geoparquet = gpd.read_parquet(geoparquet_file)
+    
+    return geoparquet
 
 def compute_date(clear_cut):
     clear_cut["date"] = parse_yyddd(clear_cut["DN"])
@@ -198,8 +210,3 @@ def compute_concave(clear_cut_group):
 def export_data(clear_cut_group, filepath, filename):
     clear_cut_group.to_parquet(filepath+filename, engine="pyarrow")
     logger.info(f"✅ exported")
-
-    # shutil.rmtree("dags/temp_tif")
-    # shutil.rmtree("dags/temp_shape")
-
-
