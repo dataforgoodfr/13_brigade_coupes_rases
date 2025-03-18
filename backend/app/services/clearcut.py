@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from typing import Tuple
 from sqlalchemy.orm import Session
-from app.models import ClearCut
+from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut
 from app.schemas.clearcut import (
     ClearCutCreate,
     ClearCutPatch,
@@ -92,13 +92,7 @@ def get_clearcut_preview(
 
     # Get preview for the x most relevant clearcut
     previews = (
-        db.query(
-            ClearCut.location,
-            ClearCut.boundary,
-            ClearCut.slope_percentage,
-            ClearCut.department_id,
-            ClearCut.created_at,
-        )
+        db.query(*CLEAR_CUT_PREVIEW_COLUMNS)
         .filter(ST_Contains(square, ClearCut.location))
         .order_by(ClearCut.created_at)
         .offset(skip)
