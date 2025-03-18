@@ -20,6 +20,9 @@ help:
 install-dev-deps:
 	$(POETRY) install
 
+pre-commit:
+	$(POETRY) run pre-commit run --all-files
+
 test:
 	$(PYTEST)
 

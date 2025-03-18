@@ -133,6 +133,14 @@ Use the Makefile to run tests.
 make test
 ```
 
+### 6. Running Tests
+
+Use the Makefile to run pre-commit hooks.
+
+```bash
+make pre-commit
+```
+
 ### 6. Recommendations
 
 Before any pull request, make sure you run pre-commit and the tests.

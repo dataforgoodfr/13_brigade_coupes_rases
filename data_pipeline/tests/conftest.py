@@ -4,6 +4,7 @@ import os
 from moto import mock_aws
 from dotenv import load_dotenv
 
+
 @pytest.fixture(scope="function")
 def s3_mock(monkeypatch):
     """
@@ -21,10 +22,7 @@ def s3_mock(monkeypatch):
 
     with mock_aws():
         # Create a fake S3 client
-        s3 = boto3.client(
-            "s3",
-            region_name="us-east-1"
-        )
+        s3 = boto3.client("s3", region_name="us-east-1")
 
         # Create the test bucket
         bucket_name = os.getenv("S3_BUCKET_NAME", "test-bucket")

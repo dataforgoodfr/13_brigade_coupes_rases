@@ -2,10 +2,9 @@
 import sys
 import os
 import pytest
-from io import BytesIO
 
 # Adjust path if needed
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from scripts.utils.s3 import S3Manager
 

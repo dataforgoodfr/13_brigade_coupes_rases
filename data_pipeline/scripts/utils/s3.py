@@ -1,7 +1,7 @@
 import os
 import boto3
 from dotenv import load_dotenv
-from typing import Optional
+
 
 class S3Manager:
     def __init__(self):
@@ -12,7 +12,7 @@ class S3Manager:
             "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID"),
             "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
         }
-        endpoint=os.getenv("S3_ENDPOINT")
+        endpoint = os.getenv("S3_ENDPOINT")
         if endpoint:
             kwargs["endpoint_url"] = endpoint
 
