@@ -1,12 +1,21 @@
-from http.client import HTTPException
+from fastapi import HTTPException
+from typing import Tuple
 from sqlalchemy.orm import Session
 from app.models import ClearCut
-from app.schemas.clearcut import ClearCutCreate, ClearCutPatch
+from app.schemas.clearcut import (
+    ClearCutCreate,
+    ClearCutPatch,
+    ClearCutPreview,
+    ClearCutPreviews,
+)
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
+from geoalchemy2.functions import ST_Contains, ST_SetSRID, ST_MakeEnvelope
+
 
 logger = getLogger(__name__)
+_sridDatabase = 4326
 
 
 def create_clearcut(db: Session, clearcut: ClearCutCreate):
@@ -21,22 +30,22 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
-    db_item.location = to_shape(db_item.location).wkt
-    db_item.boundary = to_shape(db_item.boundary).wkt
+    db_item.location = to_shape(db_item.location, srid=_sridDatabase).wkt
+    db_item.boundary = to_shape(db_item.boundary, srid=_sridDatabase).wkt
     return db_item
 
 
 def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
     clearcut = db.get(ClearCut, id)
     if not clearcut:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="ClearCut not found")
     update_data = clearcut_in.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(clearcut, key, value)
     db.commit()
     db.refresh(clearcut)
-    clearcut.location = to_shape(clearcut.location).wkt
-    clearcut.boundary = to_shape(clearcut.boundary).wkt
+    clearcut.location = to_shape(clearcut.location, srid=_sridDatabase).wkt
+    clearcut.boundary = to_shape(clearcut.boundary, srid=_sridDatabase).wkt
     return clearcut
 
 
@@ -59,3 +68,53 @@ def get_clearcut_by_id(id: int, db: Session):
     clearcut.location = clearcut.location.coords[0]
     clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcut
+
+
+def get_clearcut_preview(
+    db: Session,
+    geobounds: Tuple[Tuple[float, float], Tuple[float, float]],
+    incomming_data_srid,
+    skip: int = 0,
+    limit: int = 10,
+):
+    # Get coordinates
+    [[sw_x, sw_y], [ne_x, ne_y]] = geobounds
+
+    # Define area in front srid
+    envelope = ST_MakeEnvelope(sw_x, sw_y, ne_x, ne_y, incomming_data_srid)
+
+    # Convert in database srid
+    square = ST_SetSRID(envelope, _sridDatabase)
+
+    # Get location for all clearcuts located in the requested area
+    locations = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
+    locations = [to_shape(location[0]).coords[0] for location in locations]
+
+    # Get preview for the x most relevant clearcut
+    previews = (
+        db.query(
+            ClearCut.location,
+            ClearCut.boundary,
+            ClearCut.slope_percentage,
+            ClearCut.department_id,
+            ClearCut.created_at,
+        )
+        .filter(ST_Contains(square, ClearCut.location))
+        .order_by(ClearCut.created_at)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+    previews = [
+        ClearCutPreview(
+            location=to_shape(preview[0]).coords[0],
+            boundary=list(to_shape(preview[1]).exterior.coords),
+            slope_percentage=preview[2],
+            department_id=preview[3],
+            cut_date=preview[4],
+        )
+        for preview in previews
+    ]
+
+    clearcutPreview = ClearCutPreviews(location=locations, previews=previews)
+    return clearcutPreview

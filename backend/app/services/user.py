@@ -1,4 +1,4 @@
-from http.client import HTTPException
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Department, User
 from app.schemas.user import UserCreate, UserUpdate
