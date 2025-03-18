@@ -141,6 +141,9 @@ def seed_database():
         marseille = next(
             department for department in all_departments if department.code == "13"
         )
+        marseille = next(
+            department for department in all_departments if department.code == "13"
+        )
         db.add_all(all_departments)
         db.flush()
 
@@ -342,6 +345,7 @@ def seed_database():
         db.commit()
 
         print(f"Added {len(users)} users to the database")
+        print(f"Added {len(all_departments)} departments to the database")
         print(f"Added {len(clear_cuts)} clear cuts to the database")
         print("Database finished seeding!")
 
