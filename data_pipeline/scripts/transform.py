@@ -111,7 +111,7 @@ def compute_date(clear_cut):
     clear_cut.drop(["DN"], axis=1, inplace=True)
     logger.info(f"✅ Calcul des dates - {clear_cut.date.dtype}")
 
-    return clear_cut.head()
+    return clear_cut
 
 def reprojection_n_buffer(clear_cut):
     # Reprojection et buffer

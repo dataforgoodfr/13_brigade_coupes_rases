@@ -32,7 +32,7 @@ def data_update(query: str, id: str):
     else:
         raise Exception(f"Erreur lors de la requête API : {response.status_code}")
     
-    metadata_content = s3_manager.load_file_memory(s3_key="dataeng/sufosat_data/mosaics_tropisco_warnings_france_date_metadata.json")
+    metadata_content = s3_manager.load_file_memory(s3_key="dataeng/sufosat_data/forest-clearcuts_mainland-france_sufosat_dates_v3-metadata.json")
     metadata = json.loads(metadata_content)
 
     date_format = "%Y-%m-%dT%H:%M:%S"
