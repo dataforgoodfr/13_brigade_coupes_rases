@@ -5,8 +5,7 @@ import type {
 	ClearCuttingResponse,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import { CLEAR_CUTTING_STATUSES } from "@/features/clear-cutting/store/status";
-import { fakeTags } from "@/mocks/referential";
+import { fakeStatuses, fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -72,7 +71,7 @@ export const createClearCuttingBaseMock = (
 		comment: faker.lorem.paragraph(),
 		naturaZone: faker.string.fromCharacters(naturaZones),
 		slopePercent: faker.number.int({ min: 1, max: 60 }),
-		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
+		status: faker.helpers.arrayElement(Object.keys(fakeStatuses)),
 		abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
 		creationDate: date.toLocaleDateString(),
 		cutYear: date.getFullYear(),
@@ -183,19 +182,21 @@ export const mockClearCuttingsResponse = (
 ) =>
 	http.get("*/clear-cuttings", ({ request }) => {
 		const url = new URL(request.url);
-		const geoBoundsQueryString = url.searchParams.get("geoBounds");
+		const southWestLat = url.searchParams.get("swLat");
+		const southWestLng = url.searchParams.get("swLng");
+		const northEastLat = url.searchParams.get("neLat");
+		const northEastLng = url.searchParams.get("neLng");
 		let boundaries: Boundaries | undefined;
 		const previews = [
 			...(override.clearCuttingPreviews ?? []),
 			...clearCuttingPreviews,
 		];
-		if (geoBoundsQueryString) {
-			const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
+		if (southWestLat && southWestLng && northEastLat && northEastLng) {
 			boundaries = [
-				[geoBounds[0], geoBounds[1]],
-				[geoBounds[0], geoBounds[3]],
-				[geoBounds[2], geoBounds[3]],
-				[geoBounds[2], geoBounds[1]],
+				[Number.parseFloat(southWestLat), Number.parseFloat(southWestLng)],
+				[Number.parseFloat(southWestLat), Number.parseFloat(northEastLng)],
+				[Number.parseFloat(northEastLat), Number.parseFloat(northEastLng)],
+				[Number.parseFloat(northEastLat), Number.parseFloat(southWestLng)],
 			];
 		}
 

@@ -13,7 +13,7 @@ export function ClearCuttingMapPopUp({
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
-						<DotByStatus className="ml-2.5" status={clearCutting.status} />
+						<DotByStatus className="ml-2.5" status={clearCutting.status.name} />
 					</div>
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>

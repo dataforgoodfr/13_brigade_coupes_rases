@@ -32,10 +32,10 @@ export function ClearCuttings() {
 		const northEast = bounds.getNorthEast();
 		const southWest = bounds.getSouthWest();
 		dispatch(
-			setGeoBounds([
-				[northEast.lat, northEast.lng],
-				[southWest.lat, southWest.lng],
-			]),
+			setGeoBounds({
+				ne: { lat: northEast.lat, lng: northEast.lng },
+				sw: { lat: southWest.lat, lng: southWest.lng },
+			}),
 		);
 	}, [map, dispatch]);
 
@@ -64,7 +64,7 @@ export function ClearCuttings() {
 						key={clearCutting.id}
 						className="clear-cutting-area"
 						positions={clearCutting.geoCoordinates}
-						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status]})`}
+						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status.name]})`}
 						weight={0}
 						fillOpacity={0.75}
 						eventHandlers={{
