@@ -20,9 +20,6 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "ALLOWED_ORIGINS"},
         description="List of allowed origins for CORS, each origin should be separated with a comma. E.g : origin1,origin2",
     )
-    IMPORTS_TOKEN: str = Field(
-        default="", json_schema_extra={"env": "IMPORTS_TOKEN", "secret": True}
-    )
 
 
 settings = Settings()
