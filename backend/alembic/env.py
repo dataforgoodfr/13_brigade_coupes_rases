@@ -1,5 +1,4 @@
 from logging.config import fileConfig
-import os
 from app.models import Base
 
 
