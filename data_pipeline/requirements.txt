@@ -1,5 +1,5 @@
 pyarrow==19.0.1
-geopandas==0.14.4
+geopandas==1.0.1
 requests==2.32.3
 rasterio==1.4.3
 boto3==1.36.22
