@@ -13,15 +13,14 @@ from app.main import app  # noqa: E402
 from app.database import create_engine, Base, get_db, sessionmaker  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
+from app.config import settings
 
-TEST_DATABASE_URL = "postgresql://devuser:devuser@db:5432/test"
-os.environ["DATABASE_URL"] = TEST_DATABASE_URL
-
+os.environ["DATABASE_URL"] = settings.DATABASE_URL
 
 alembic_cfg = Config("alembic.ini")
 
 engine = create_engine(
-    TEST_DATABASE_URL,
+    settings.DATABASE_URL,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

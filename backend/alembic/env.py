@@ -1,5 +1,4 @@
 from logging.config import fileConfig
-import os
 from app.models import Base
 
 
@@ -7,7 +6,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
+from app.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +22,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 configuration = config.get_section(config.config_ini_section)
-configuration["sqlalchemy.url"] = os.environ["DATABASE_URL"]
+configuration["sqlalchemy.url"] = settings.DATABASE_URL
 IGNORE_TABLES = ["spatial_ref_sys"]
 
 
