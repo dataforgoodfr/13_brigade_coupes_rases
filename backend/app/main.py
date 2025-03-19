@@ -22,6 +22,7 @@ app.include_router(departments.router)
 app.include_router(clearcuts_map.router)
 app.include_router(users.router)
 app.include_router(referential.router)
+app.include_router(imports.router)
 
 
 def start_server(
