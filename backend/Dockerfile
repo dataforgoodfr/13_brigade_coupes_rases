@@ -16,9 +16,13 @@ RUN  poetry install --without dev --no-root
 
 FROM builder as development 
 
-RUN  poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
+RUN  useradd -ms /bin/bash devuser \
+        && chown -R devuser ./ \
+        && chown -R devuser ${POETRY_CACHE_DIR}
 
 USER devuser
+
+RUN  poetry install
 
 FROM python:3.11-slim-buster as runtime
 
