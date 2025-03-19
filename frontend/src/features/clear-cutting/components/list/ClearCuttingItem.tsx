@@ -1,7 +1,6 @@
-import { DotByStatus } from "@/features/clear-cutting/components/DotByStatus";
+import { StatusWithLabel } from "@/features/clear-cutting/components/StatusWithLabel";
 import { TagBadge } from "@/features/clear-cutting/components/TagBadge";
 import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
-import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cutting/store/status";
 import { useNavigate } from "@tanstack/react-router";
 
 export function ClearCuttingItem({
@@ -34,10 +33,7 @@ export function ClearCuttingItem({
 				<h3 className="me-auto text-lg font-bold text-gray-800">{city}</h3>
 				{reportDate}
 			</div>
-			<div className="flex items-center gap-2">
-				<DotByStatus status={status} />
-				{CLEAR_CUTTING_STATUS_TRANSLATIONS[status]}
-			</div>
+			<StatusWithLabel status={status.name} />
 			{comment && <p className="text-zinc-500 line-clamp-2">{comment}</p>}
 			<div className="flex gap-2 ">
 				{abusiveTags.map((tag) => (

@@ -1,7 +1,6 @@
-import { clearCuttingStatusSchema } from "@/features/clear-cutting/store/status";
-import type { Tag } from "@/shared/store/referential/referential";
-import { string, z } from "zod";
-import { pointSchema } from "./types";
+import type { Status, Tag } from "@/shared/store/referential/referential";
+import { z } from "zod";
+import { pointTupleSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 
@@ -17,9 +16,9 @@ const ecologicalZoningSchema = z.object({
 
 const clearCuttingBaseResponseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointSchema),
+	geoCoordinates: z.array(pointTupleSchema),
 	name: z.string().optional(),
-	center: pointSchema,
+	center: pointTupleSchema,
 	reportDate: z.string(),
 	creationDate: z.string(),
 	cutYear: z.number(),
@@ -27,19 +26,19 @@ const clearCuttingBaseResponseSchema = z.object({
 	abusiveTags: z.array(z.string()),
 	naturaZone: z.string().optional(),
 	comment: z.string().optional(),
-	cadastralParcel: z
-		.object({
-			id: string(),
-			slope: z.number(),
-			surfaceKm: z.number(),
-		})
-		.optional(),
-
-	status: clearCuttingStatusSchema,
+	surfaceHectare: z.number(),
+	slopePercent: z.number(),
+	status: z.string(),
 });
-type ClearCuttingBaseResponse = z.infer<typeof clearCuttingBaseResponseSchema>;
-type ClearCuttingBase = Omit<ClearCuttingBaseResponse, "abusiveTags"> & {
+export type ClearCuttingBaseResponse = z.infer<
+	typeof clearCuttingBaseResponseSchema
+>;
+type ClearCuttingBase = Omit<
+	ClearCuttingBaseResponse,
+	"abusiveTags" | "status"
+> & {
 	abusiveTags: Tag[];
+	status: Status;
 };
 
 const clearCuttingPreviewResponseSchema = clearCuttingBaseResponseSchema.and(
@@ -58,7 +57,7 @@ export type ClearCuttingPreviewResponse = z.infer<
 >;
 export type ClearCuttingPreview = Omit<
 	ClearCuttingPreviewResponse,
-	"abusiveTags"
+	"abusiveTags" | "status"
 > &
 	ClearCuttingBase;
 
@@ -74,7 +73,7 @@ export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
 export const clearCuttingResponseSchema = clearCuttingBaseResponseSchema.and(
 	z.object({
 		id: z.string(),
-		geoCoordinates: z.array(pointSchema),
+		geoCoordinates: z.array(pointTupleSchema),
 		waterCourses: z.array(z.string()).optional(),
 		address: clearCuttingAddressSchema,
 		customTags: z.array(z.string()).optional(),
@@ -83,12 +82,15 @@ export const clearCuttingResponseSchema = clearCuttingBaseResponseSchema.and(
 );
 
 export type ClearCuttingResponse = z.infer<typeof clearCuttingResponseSchema>;
-export type ClearCutting = Omit<ClearCuttingResponse, "abusiveTags"> &
+export type ClearCutting = Omit<
+	ClearCuttingResponse,
+	"abusiveTags" | "status"
+> &
 	ClearCuttingBase;
 
 const waterCourseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointSchema),
+	geoCoordinates: z.array(pointTupleSchema),
 });
 
 export const clearCuttingsResponseSchema = z.object({
