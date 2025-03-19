@@ -24,4 +24,5 @@ class Settings(BaseSettings):
         default="", json_schema_extra={"env": "IMPORTS_TOKEN", "secret": True}
     )
 
+
 settings = Settings()
