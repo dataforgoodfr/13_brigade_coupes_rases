@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.config import settings
-from app.routes import clearcut, departement, user, referential
+from app.routes import clearcut, departement, user, referential, imports
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -21,6 +21,7 @@ app.include_router(clearcut.router)
 app.include_router(departement.router)
 app.include_router(user.router)
 app.include_router(referential.router)
+app.include_router(imports.router)
 
 
 def start_server(
