@@ -23,7 +23,7 @@ export const ExpandButton = forwardRef<HTMLButtonElement, Props>(
 					props.onClick?.(e);
 					onOpenChanged?.(!open);
 				}}
-				className={clsx(className, "rounded-full text-primary border-primary")}
+				className={clsx(className)}
 				ref={forwardedRef}
 				icon={<ExpandChevron open={open} />}
 				position="end"
