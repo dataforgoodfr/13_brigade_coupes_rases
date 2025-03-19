@@ -13,7 +13,7 @@ export function ClearCuttingMapPopUp({
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
-						<DotByStatus className="ml-2.5" status={clearCutting.status} />
+						<DotByStatus className="ml-2.5" status={clearCutting.status.name} />
 					</div>
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>
@@ -30,10 +30,10 @@ export function ClearCuttingMapPopUp({
 					</div>
 					<div>
 						Taille de la coupe :
-						<strong> {clearCutting.cadastralParcel?.surfaceKm} HA</strong>
+						<strong> {clearCutting?.surfaceHectare} HA</strong>
 					</div>
 					<div>
-						Pente : <strong>{clearCutting.cadastralParcel?.slope} %</strong>
+						Pente : <strong>{clearCutting?.slopePercent} %</strong>
 					</div>
 					<div>
 						Zone Natura : <strong> {clearCutting.naturaZone} </strong>

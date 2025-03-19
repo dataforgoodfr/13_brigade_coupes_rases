@@ -1,9 +1,13 @@
 import type { FiltersRequest } from "@/features/clear-cutting/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cutting/store/filters.slice";
+import type { Bounds } from "@/features/clear-cutting/store/types";
 import { api } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { selectTagsByIds } from "@/shared/store/referential/referential.slice";
+import {
+	selectStatusesByIds,
+	selectTagsByIds,
+} from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
@@ -22,19 +26,35 @@ export const getClearCuttingThunk = createAsyncThunk<ClearCutting, string>(
 		const clearCutting = clearCuttingResponseSchema.parse(result);
 		const state = getState() as RootState;
 		const tags = selectTagsByIds(state, clearCutting.abusiveTags);
-		return { ...clearCutting, abusiveTags: tags };
+		const status = selectStatusesByIds(state, [clearCutting.status])[0];
+		return {
+			...clearCutting,
+			abusiveTags: tags,
+			status,
+		};
 	},
 );
 const getClearCuttingsThunk = createAsyncThunk<ClearCuttings, FiltersRequest>(
 	"getClearCuttings",
 	async (filters, { getState }) => {
-		const { geoBounds, ...formattedFilters } = filters;
 		const result = await api
 			.get("clear-cuttings", {
 				searchParams: new URLSearchParams(
-					Object.entries(formattedFilters).reduce(
+					Object.entries(filters).reduce(
 						(acc, [key, value]) => {
-							acc[key] = JSON.stringify(value);
+							if (key === "geoBounds") {
+								const geoBounds = value as Bounds;
+								acc.swLat = geoBounds.sw.lat.toString();
+								acc.swLng = geoBounds.sw.lng.toString();
+								acc.neLat = geoBounds.ne.lat.toString();
+								acc.neLng = geoBounds.ne.lng.toString();
+							} else if (Array.isArray(value)) {
+								if (value.length > 0) {
+									acc[key] = value.join(",");
+								}
+							} else {
+								acc[key] = JSON.stringify(value);
+							}
 							return acc;
 						},
 						{} as Record<string, string>,
@@ -48,6 +68,7 @@ const getClearCuttingsThunk = createAsyncThunk<ClearCuttings, FiltersRequest>(
 			(preview) => ({
 				...preview,
 				abusiveTags: selectTagsByIds(state, preview.abusiveTags),
+				status: selectStatusesByIds(state, [preview.status])[0],
 			}),
 		);
 		return { ...clearCuttings, clearCuttingPreviews };

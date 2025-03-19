@@ -1,9 +1,7 @@
 import { Dot } from "@/shared/components/Dot";
+import type { ClearCuttingStatus } from "@/shared/store/referential/referential";
 import clsx from "clsx";
-import {
-	CLEAR_CUTTING_STATUS_BACKGROUND_COLORS,
-	type ClearCuttingStatus,
-} from "../store/status";
+import { CLEAR_CUTTING_STATUS_BACKGROUND_COLORS } from "../store/status";
 
 interface Props {
 	className?: string;
