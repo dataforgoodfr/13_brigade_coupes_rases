@@ -3,27 +3,40 @@ import {
 	mockClearCuttingsResponse,
 } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
+import { advancedFilters } from "@/test/page-object/advanced-filters";
 import { clearCuttings } from "@/test/page-object/clear-cuttings";
 import { renderApp } from "@/test/renderApp";
+import { filtersState } from "@/test/store/filters";
 import { describe, expect, it } from "vitest";
 describe("Clear cuttings list", () => {
 	it("should render preview", async () => {
 		const preview = createClearCuttingPreviewResponse({
-			name: "TEST NAME",
+			address: {
+				city: "TEST CITY",
+				country: "TEST COUNTRY",
+				postalCode: "TEST CODE",
+			},
 			comment: "TEST COMMENT",
+			center: [15, 15],
 		});
 		server.use(
 			mockClearCuttingsResponse({
 				clearCuttingPreviews: [preview],
 			}),
 		);
-		// TODO : need to mock InteractiveMap in antoher way in order to keep the Outlet in it working
 		const { user } = renderApp({
+			preloadedState: {
+				filters: filtersState,
+			},
 			route: "/clear-cuttings",
 		});
 
-		const item = (await clearCuttings({ user })).list.item(
-			preview.name as string,
+		const filters = advancedFilters({ user });
+		await filters.open();
+		await filters.favorite.toggle();
+
+		const item = await clearCuttings({ user }).list.item(
+			preview.address.city as string,
 		);
 		expect(item.comment).toBe(preview.comment);
 	});

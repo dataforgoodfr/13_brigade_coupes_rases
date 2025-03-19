@@ -7,7 +7,7 @@ import { mockReferential } from "@/mocks/referential";
 import { mockLogin, mockUsers } from "@/mocks/users";
 
 export const handlers = [
-	mockClearCuttingsResponse(),
+	mockClearCuttingsResponse(undefined, true),
 	mockFilters,
 	mockLogin,
 	mockFilters,

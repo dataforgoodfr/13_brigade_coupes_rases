@@ -86,7 +86,7 @@ export function AdvancedFilters({ className }: Props) {
 		dispatch(getFiltersThunk());
 	}, [dispatch]);
 	return (
-		<div className={clsx("flex flex-col gap-2", className)}>
+		<div className={clsx("flex flex-col gap-2 py-3", className)}>
 			<FieldWrapper>
 				<label htmlFor={DEPARTMENTS.id}>{DEPARTMENTS.label}</label>
 				<ComboboxFilter
@@ -176,7 +176,7 @@ export function AdvancedFilters({ className }: Props) {
 						id={FAVORITE.id}
 						checked={favorite}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setFavorite(isChecked))
+							dispatch(filtersSlice.actions.setFavorite(isChecked)) 
 						}
 					/>
 				</div>

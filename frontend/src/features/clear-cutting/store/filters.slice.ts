@@ -27,7 +27,7 @@ import {
 	createAsyncThunk,
 	createSlice,
 } from "@reduxjs/toolkit";
-interface FiltersState {
+export interface FiltersState {
 	tags: SelectableItem<Tag>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
@@ -38,7 +38,7 @@ interface FiltersState {
 	ecologicalZoning: boolean;
 	favorite: boolean;
 }
-const initialState: FiltersState = {
+export const initialState: FiltersState = {
 	cutYears: [],
 	tags: [],
 	departments: [],

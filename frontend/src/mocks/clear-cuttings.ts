@@ -179,6 +179,7 @@ const clearCuttingPreviews = createFranceRandomPoints
 
 export const mockClearCuttingsResponse = (
 	override: Partial<ClearCuttingsResponse> = {},
+	filterInArea = false,
 ) =>
 	http.get("*/clear-cuttings", ({ request }) => {
 		const url = new URL(request.url);
@@ -199,11 +200,13 @@ export const mockClearCuttingsResponse = (
 				[Number.parseFloat(northEastLat), Number.parseFloat(southWestLng)],
 			];
 		}
-
 		return HttpResponse.json({
-			clearCuttingPreviews: boundaries
-				? previews.filter((ccp) => isPointInsidePolygon(boundaries, ccp.center))
-				: previews,
+			clearCuttingPreviews:
+				boundaries && filterInArea
+					? previews.filter((ccp) =>
+							isPointInsidePolygon(boundaries, ccp.center),
+						)
+					: previews,
 			clearCuttingsPoints: createFranceRandomPoints,
 			ecologicalZones: [],
 			waterCourses: [],
