@@ -176,7 +176,7 @@ export function AdvancedFilters({ className }: Props) {
 						id={FAVORITE.id}
 						checked={favorite}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setFavorite(isChecked)) 
+							dispatch(filtersSlice.actions.setFavorite(isChecked))
 						}
 					/>
 				</div>

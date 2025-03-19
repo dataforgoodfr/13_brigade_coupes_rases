@@ -23,7 +23,7 @@ export function AsideList() {
 					<CollapsibleTrigger asChild>
 						<IconButton
 							variant="outline"
-							className="border-primary text-primary"
+							className="border-black text-black"
 							icon={<Filter />}
 							position="end"
 						>
