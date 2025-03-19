@@ -6,6 +6,8 @@ from app.database import Base, SessionLocal
 from app.models import User, Department, ClearCut
 from sqlalchemy import text
 
+SRID = 4326
+
 
 def wipe_database():
     env = os.environ.get("ENVIRONMENT", "development")
@@ -172,7 +174,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=10),
                 slope_percentage=15.5,
-                location=from_shape(Point(2.380192, 48.878899)),
+                location=from_shape(Point(2.380192, 48.878899), SRID),
                 boundary=from_shape(
                     Polygon(
                         [
@@ -190,7 +192,8 @@ def seed_database():
                             (2.381372, 48.880973),
                             (2.381136, 48.881707),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="pending",
                 department_id=paris.id,
@@ -199,7 +202,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=5),
                 slope_percentage=8.3,
-                location=from_shape(Point(2.386007, 48.880959)),
+                location=from_shape(Point(2.386007, 48.880959), SRID),
                 boundary=from_shape(
                     Polygon(
                         [
@@ -214,7 +217,8 @@ def seed_database():
                             (2.385342, 48.882554),
                             (2.385342, 48.882582),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="validated",
                 department_id=paris.id,
@@ -224,7 +228,7 @@ def seed_database():
                 cut_date=datetime.now() - timedelta(days=20),
                 slope_percentage=12.7,
                 location=from_shape(
-                    Point(5.3698, 43.2965)
+                    Point(5.3698, 43.2965), SRID
                 ),  # Coordonnées approximatives de Marseille
                 boundary=from_shape(
                     Polygon(
@@ -237,7 +241,8 @@ def seed_database():
                             (5.3728, 43.2965),
                             (5.3708, 43.3005),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="pending",
                 department_id=marseille.id,  # Assurez-vous que 'marseille' est défini dans votre code
@@ -246,7 +251,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=15),
                 slope_percentage=9.2,
-                location=from_shape(Point(5.4008, 43.2865)),  # Autour de Marseille
+                location=from_shape(Point(5.4008, 43.2865), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     Polygon(
                         [
@@ -258,7 +263,8 @@ def seed_database():
                             (5.4038, 43.2865),
                             (5.4018, 43.2905),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="validated",
                 department_id=marseille.id,
@@ -267,7 +273,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=10),
                 slope_percentage=7.5,
-                location=from_shape(Point(5.3508, 43.3165)),  # Autour de Marseille
+                location=from_shape(Point(5.3508, 43.3165), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     Polygon(
                         [
@@ -279,7 +285,8 @@ def seed_database():
                             (5.3538, 43.3165),
                             (5.3518, 43.3205),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="pending",
                 department_id=marseille.id,
@@ -288,7 +295,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=5),
                 slope_percentage=14.3,
-                location=from_shape(Point(5.3808, 43.2765)),  # Autour de Marseille
+                location=from_shape(Point(5.3808, 43.2765), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     Polygon(
                         [
@@ -300,7 +307,8 @@ def seed_database():
                             (5.3838, 43.2765),
                             (5.3818, 43.2805),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="validated",
                 department_id=marseille.id,
@@ -309,7 +317,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=2),
                 slope_percentage=10.8,
-                location=from_shape(Point(5.3908, 43.2665)),  # Autour de Marseille
+                location=from_shape(Point(5.3908, 43.2665),SRID),  # Autour de Marseille
                 boundary=from_shape(
                     Polygon(
                         [
@@ -321,7 +329,8 @@ def seed_database():
                             (5.3938, 43.2665),
                             (5.3918, 43.2705),
                         ]
-                    )
+                    ),
+                    SRID
                 ),
                 status="pending",
                 department_id=marseille.id,
