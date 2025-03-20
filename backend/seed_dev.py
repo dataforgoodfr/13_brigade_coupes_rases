@@ -141,6 +141,9 @@ def seed_database():
         marseille = next(
             department for department in all_departments if department.code == "13"
         )
+        marseille = next(
+            department for department in all_departments if department.code == "13"
+        )
         db.add_all(all_departments)
         db.flush()
 
