@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 import os
 from geoalchemy2.shape import from_shape
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, MultiPolygon
 from app.database import Base, SessionLocal
 from app.models import User, Department, ClearCut
 from sqlalchemy import text
+import traceback
 
 SRID = 4326
 
@@ -179,8 +180,8 @@ def seed_database():
                 slope_percentage=15.5,
                 location=from_shape(Point(2.380192, 48.878899), SRID),
                 boundary=from_shape(
-                    Polygon(
-                        [
+                    MultiPolygon(
+                        [[[
                             (2.381136, 48.881707),
                             (2.379699, 48.880338),
                             (2.378497, 48.878687),
@@ -207,8 +208,8 @@ def seed_database():
                 slope_percentage=8.3,
                 location=from_shape(Point(2.386007, 48.880959), SRID),
                 boundary=from_shape(
-                    Polygon(
-                        [
+                    MultiPolygon(
+                        [[[
                             (2.385342, 48.882582),
                             (2.386072, 48.882286),
                             (2.386823, 48.881277),
@@ -351,6 +352,7 @@ def seed_database():
 
     except Exception as e:
         print(f"Error seeding database: {e}")
+        print(traceback.format_exc())
         db.rollback()
     finally:
         db.close()

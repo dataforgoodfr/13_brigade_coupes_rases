@@ -63,7 +63,7 @@ class ClearCut(Base):
     cut_date = Column(DateTime, index=True)
     slope_percentage = Column(Float, index=True)
     location = Column(Geometry("Point"), index=True)
-    boundary = Column(Geometry("Polygon"), index=True)
+    boundary = Column(Geometry(geometry_type="MultiPolygon", srid=4326, spatial_index=True), index=True)
     status = Column(String, index=True)
     department_id = Column(Integer, ForeignKey("departments.id"), index=True)
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
