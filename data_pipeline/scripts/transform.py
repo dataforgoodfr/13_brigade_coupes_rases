@@ -27,73 +27,94 @@ def load_from_S3(s3_prefix, zendo_filename, download_path):
         logger.error(f"❌ Erreur lors du téléchargement du fichier depuis S3: {e}")
 
 
-# Filtrer la data pour le dernier mois
-def filter_raster_by_date(
-    input_tif_filepath,
-    output_tif_filepath,
-):
+def filter_raster_by_date(input_tif_filepath, output_tif_filepath):
+    """
+    Process a large raster file with efficient memory usage by working with small blocks
+    instead of loading the entire raster into memory at once.
+    """
     with rasterio.open(input_tif_filepath) as src:
         # Preserve original metadata
         profile = src.profile.copy()
-
+        
+        # Create output file with same profile
         with rasterio.open(output_tif_filepath, "w", **profile) as dst:
-            # Process in blocks to manage memory
-            for _, window in src.block_windows():
-                # Read block data
+            # Get the optimal window size for reading blocks
+            # This uses rasterio's built-in windowing to avoid loading the whole dataset
+            windows = list(src.block_windows())
+            total_windows = len(windows)
+            
+            # Process each window/block separately
+            for idx, (window_idx, window) in enumerate(windows):
+                if idx % 100 == 0:
+                    logger.info(f"Processing block {idx+1}/{total_windows}")
+                
+                # Read only the current window data
                 data = src.read(1, window=window)
-
-                # Create a mask preserving granular values within date range
+                
+                # Apply filter on this window
                 mask = (data >= 24001) & (data <= 24366)
                 filtered_data = np.where(mask, data, 0)
-
-                # Write processed block
+                
+                # Write processed window to output
                 dst.write(filtered_data, 1, window=window)
-
+    
     logger.info("✅ Fichier tif regroupé")
 
-
-# Vectorisation du raster
 def polygonize_tif(raster_path, vector_path):
     """
-    Polygonize a single-band GeoTIFF using Rasterio and Fiona.
-    Saves the result as an ESRI Shapefile.
+    Polygonize a large GeoTIFF using a chunked approach to manage memory usage.
     """
     os.makedirs(os.path.dirname(vector_path), exist_ok=True)
-
-    # 1. Read the raster data
+    
+    # Define Fiona schema
+    schema = {"geometry": "Polygon", "properties": {"DN": "int"}}
+    
+    # Open raster to get metadata
     with rasterio.open(raster_path) as src:
         logger.info("✅ Raster opened with Rasterio")
-
-        band = src.read(1)
+        crs = src.crs
         transform = src.transform
-        crs = src.crs  # This is a rasterio.crs.CRS object
-        mask = band != 0  # Example mask: polygonize all nonzero pixels
-
-        # 2. Rasterio polygonization
-        results = (
-            {"properties": {"DN": int(value)}, "geometry": geom}
-            for geom, value in shapes(band, mask=mask, transform=transform)
-        )
-
-    # 3. Define Fiona schema
-    schema = {"geometry": "Polygon", "properties": {"DN": "int"}}
-
-    # 4. Remove existing shapefile if present
-    if os.path.exists(vector_path):
-        os.remove(vector_path)
-
-    # 5. Write polygons to Shapefile using Fiona
-    #    Pass the raster’s CRS as a dict
-    with fiona.open(
-        vector_path,
-        "w",
-        driver="ESRI Shapefile",
-        schema=schema,
-        crs=crs.to_dict(),  # <-- Key step: supply as dict
-    ) as shp:
-        for feature in results:
-            shp.write(feature)
-
+        
+        # Create output shapefile
+        if os.path.exists(vector_path):
+            os.remove(vector_path)
+            
+        with fiona.open(
+            vector_path,
+            "w",
+            driver="ESRI Shapefile",
+            schema=schema,
+            crs=crs.to_dict(),
+        ) as shp:
+            # Process in chunks using block windows
+            windows = list(src.block_windows())
+            total_windows = len(windows)
+            
+            for idx, (window_idx, window) in enumerate(windows):
+                if idx % 10 == 0:
+                    logger.info(f"Polygonizing block {idx+1}/{total_windows}")
+                
+                # Read only the data for this window
+                band = src.read(1, window=window)
+                
+                # Skip window if it's all zeros
+                if not np.any(band):
+                    continue
+                
+                # Create a window-specific transform
+                window_transform = rasterio.windows.transform(window, transform)
+                mask = band != 0
+                
+                # Polygonize this window
+                window_polygons = (
+                    {"properties": {"DN": int(value)}, "geometry": geom}
+                    for geom, value in shapes(band, mask=mask, transform=window_transform)
+                )
+                
+                # Write window polygons to shapefile
+                for feature in window_polygons:
+                    shp.write(feature)
+    
     logger.info("✅ Shapefile created")
     logger.info("✅ Polygonization successful")
 
