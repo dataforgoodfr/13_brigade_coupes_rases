@@ -196,7 +196,7 @@ def seed_database():
                             (2.381136, 48.881707),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="pending",
                 department_id=paris.id,
@@ -221,7 +221,7 @@ def seed_database():
                             (2.385342, 48.882582),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="validated",
                 department_id=paris.id,
@@ -245,7 +245,7 @@ def seed_database():
                             (5.3708, 43.3005),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="pending",
                 department_id=marseille.id,  # Assurez-vous que 'marseille' est défini dans votre code
@@ -267,7 +267,7 @@ def seed_database():
                             (5.4018, 43.2905),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="validated",
                 department_id=marseille.id,
@@ -289,7 +289,7 @@ def seed_database():
                             (5.3518, 43.3205),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="pending",
                 department_id=marseille.id,
@@ -311,7 +311,7 @@ def seed_database():
                             (5.3818, 43.2805),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="validated",
                 department_id=marseille.id,
@@ -320,7 +320,7 @@ def seed_database():
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=2),
                 slope_percentage=10.8,
-                location=from_shape(Point(5.3908, 43.2665),SRID),  # Autour de Marseille
+                location=from_shape(Point(5.3908, 43.2665), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     Polygon(
                         [
@@ -333,7 +333,7 @@ def seed_database():
                             (5.3918, 43.2705),
                         ]
                     ),
-                    SRID
+                    SRID,
                 ),
                 status="pending",
                 department_id=marseille.id,
