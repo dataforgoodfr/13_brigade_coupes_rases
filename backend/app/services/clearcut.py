@@ -71,10 +71,10 @@ def get_clearcut_by_id(id: int, db: Session):
 
 def get_clearcut_preview(
     db: Session,
-    swLat: float,
     swLon: float,
-    neLat: float,
+    swLat: float,
     neLon: float,
+    neLat: float,
     skip: int = 0,
     limit: int = 10,
 ):
