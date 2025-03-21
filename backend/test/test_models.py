@@ -47,7 +47,7 @@ def test_clear_cut_creation(db):
         slope_percentage=15.5,
         location=WKTElement("POINT(48.8566 2.3522)"),
         boundary=WKTElement(
-            "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+            "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
         ),
         status="pending",
     )
@@ -60,7 +60,7 @@ def test_clear_cut_creation(db):
             slope_percentage=15.5,
             location=WKTElement("POINT(48.8566 2.3522)"),
             boundary=WKTElement(
-                "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+                "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
             ),
             status="invalid_status",
         )
@@ -83,7 +83,7 @@ def test_associations(db):
         slope_percentage=20.0,
         location=WKTElement("POINT(48.8566 2.3522)"),
         boundary=WKTElement(
-            "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
+            "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
         ),
         status="validated",
     )
