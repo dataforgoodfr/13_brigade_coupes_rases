@@ -1,6 +1,3 @@
-import ast
-from fastapi import HTTPException
-from typing import List
 from app.services.clearcut import (
     create_clearcut,
     get_clearcut,
@@ -49,30 +46,17 @@ def list_clearcut(
 
 @router.get("/preview/", response_model=ClearCutPreviews)
 def list_clearcut_preview(
-    geobounds: str = Query(
-        ...,
-        description="List of tuples as a string, e.g., '[(43.3584, 5.3577), (43.3584, 5.3577)]'",
-        example="[(5.507318, 43.352167), (5.283674, 43.192417)]",
+    swLon: float = Query(description="South west longitude point coordinate", default=5.507318),
+    swLat: float = Query(
+        description="South west longitude point coordinate", default=43.352167
     ),
-    srid: int = Query(description="SRID code, EPSG:4326 for WGS 84", default=4326),
+    neLon: float = Query(description="North east point coordinare", default=5.283674),
+    neLat: float = Query(description="North east point coordinare", default=43.192417),
+    skip: int = 0,
+    limit: int = 10,
     db: Session = db_dependency,
 ) -> ClearCutPreviews:
-    try:
-        # Parse the string into a list of tuples
-        geobounds_list = ast.literal_eval(geobounds)
-        if not isinstance(geobounds_list, List) or not all(
-            isinstance(item, tuple) for item in geobounds_list
-        ):
-            raise ValueError("Invalid geobounds format")
-
-        clearcuts = get_clearcut_preview(db, geobounds_list, srid)
-
-    except ValueError as err:
-        raise HTTPException(
-            status_code=400, detail="Invalid input format for geobounds"
-        ) from err
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+    clearcuts = get_clearcut_preview(db, swLon, swLat, neLon, neLat)
 
     return clearcuts
 
