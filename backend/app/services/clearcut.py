@@ -105,5 +105,5 @@ def get_clearcut_preview(
         for preview in previews
     ]
 
-    clearcutPreview = ClearCutPreviews(location=locations, previews=previews)
+    clearcutPreview = ClearCutPreviews(clearCutLocations=locations, clearCutPreviews=previews)
     return clearcutPreview
