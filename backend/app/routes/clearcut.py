@@ -46,17 +46,15 @@ def list_clearcut(
 
 @router.get("/preview/", response_model=ClearCutPreviews)
 def list_clearcut_preview(
-    swLon: float = Query(description="South west longitude point coordinate", default=5.507318),
-    swLat: float = Query(
-        description="South west longitude point coordinate", default=43.352167
-    ),
-    neLon: float = Query(description="North east point coordinare", default=5.283674),
-    neLat: float = Query(description="North east point coordinare", default=43.192417),
+    swLon: float = Query(description="South west longitude point coordinate", example=5.507318),
+    swLat: float = Query(description="South west latitude point coordinate", example=43.192417),
+    neLon: float = Query(description="North east longitude point coordinare", example=5.283674),
+    neLat: float = Query(description="North east latitude point coordinare", example=43.352167),
     skip: int = 0,
     limit: int = 10,
     db: Session = db_dependency,
 ) -> ClearCutPreviews:
-    clearcuts = get_clearcut_preview(db, swLon, swLat, neLon, neLat)
+    clearcuts = get_clearcut_preview(db, swLon, swLat, neLon, neLat, skip, limit)
 
     return clearcuts
 
