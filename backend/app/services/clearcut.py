@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from typing import Tuple
 from sqlalchemy.orm import Session
 from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut
 from app.schemas.clearcut import (
@@ -11,7 +10,7 @@ from app.schemas.clearcut import (
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Contains, ST_SetSRID, ST_MakeEnvelope
+from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope
 
 
 logger = getLogger(__name__)
@@ -72,19 +71,15 @@ def get_clearcut_by_id(id: int, db: Session):
 
 def get_clearcut_preview(
     db: Session,
-    geobounds: Tuple[Tuple[float, float], Tuple[float, float]],
-    incomming_data_srid,
+    swLat: float,
+    swLon: float,
+    neLat: float,
+    neLon: float,
     skip: int = 0,
     limit: int = 10,
 ):
-    # Get coordinates
-    [[sw_x, sw_y], [ne_x, ne_y]] = geobounds
-
-    # Define area in front srid
-    envelope = ST_MakeEnvelope(sw_x, sw_y, ne_x, ne_y, incomming_data_srid)
-
-    # Convert in database srid
-    square = ST_SetSRID(envelope, _sridDatabase)
+    # Define area in database srid
+    square = ST_MakeEnvelope(swLon, swLat, neLon, neLat, _sridDatabase)
 
     # Get location for all clearcuts located in the requested area
     locations = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
