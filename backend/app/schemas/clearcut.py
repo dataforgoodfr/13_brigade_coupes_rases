@@ -111,7 +111,7 @@ class ClearCutPreview(ClearCutBase):
 
 
 class ClearCutPreviews(BaseModel):
-    location: list[tuple[float, float]]
-    previews: list[ClearCutPreview]
+    clearCutLocations: list[tuple[float, float]]
+    clearCutPreviews: list[ClearCutPreview]
 
     model_config = ConfigDict(from_attributes=True)
