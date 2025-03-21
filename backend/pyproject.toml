@@ -35,10 +35,14 @@ shapely = "^2.0.7"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
+# Go to https://docs.astral.sh/ruff/settings for more information
 [tool.ruff]
 # Same as Black.
 line-length = 96
 target-version = "py313"
+
+[tool.ruff.lint]
+mccabe.max-complexity = 7
 
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
@@ -46,23 +50,8 @@ target-version = "py313"
 select = ["E4", "E7", "E9", "F", "B"]
 ignore = ["E501"]
 
-# Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [tool.ruff.format]
-# Like Black, use double quotes for strings.
-quote-style = "double"
-
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "space"
-
-# Like Black, respect magic trailing commas.
-skip-magic-trailing-comma = false
-
-# Like Black, automatically detect the appropriate line ending.
+# Automatically detect the appropriate line ending.
 line-ending = "auto"
 
 exclude = [
@@ -93,9 +82,6 @@ exclude = [
     "site-packages",
     "venv",
 ]
-
-[tool.ruff.mccabe]
-max-complexity = 10
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
