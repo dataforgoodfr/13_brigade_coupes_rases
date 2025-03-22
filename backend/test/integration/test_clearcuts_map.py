@@ -4,5 +4,5 @@ def test_get_clearcuts_map(client):
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["previews"]  is not None
+    assert data["previews"] is not None
     assert data["points"] is not None
