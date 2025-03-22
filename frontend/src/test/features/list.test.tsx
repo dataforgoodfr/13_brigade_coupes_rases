@@ -21,7 +21,7 @@ describe("Clear cuttings list", () => {
 		});
 		server.use(
 			mockClearCuttingsResponse({
-				clearCuttingPreviews: [preview],
+				previews: [preview],
 			}),
 		);
 		const { user } = renderApp({

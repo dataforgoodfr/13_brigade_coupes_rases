@@ -1,5 +1,5 @@
 def test_get_referential(client):
-    response = client.get("/referential/")
+    response = client.get("/api/v1/referential/")
 
     assert response.status_code == 200
     data = response.json()

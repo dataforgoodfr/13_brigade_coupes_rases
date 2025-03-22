@@ -1,16 +1,17 @@
 from fastapi import HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut
 from app.schemas.clearcut import (
     ClearCutCreate,
     ClearCutPatch,
-    ClearCutPreview,
-    ClearCutPreviews,
 )
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope
+from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID
+
+from app.schemas.clearcut_map import ClearCutPreview, ClearCutMapResponse
 
 
 logger = getLogger(__name__)
@@ -69,6 +70,50 @@ def get_clearcut_by_id(id: int, db: Session):
     return clearcut
 
 
+class GeoBounds(BaseModel):
+    south_west_latitude: float
+    south_west_longitude: float
+    north_east_latitude: float
+    north_east_longitude: float
+
+
+def get_clearcuts_map(db: Session, geo_bounds: GeoBounds):
+    envelope = ST_MakeEnvelope(
+        geo_bounds.south_west_latitude,
+        geo_bounds.south_west_longitude,
+        geo_bounds.north_east_latitude,
+        geo_bounds.north_east_longitude,
+        _sridDatabase,
+    )
+    square = ST_SetSRID(envelope, _sridDatabase)
+    points = (
+        db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
+    )
+    points = [to_shape(location[0]).coords[0] for location in points]
+
+    # Get preview for the x most relevant clearcut
+    previews = (
+        db.query(*CLEAR_CUT_PREVIEW_COLUMNS)
+        .filter(ST_Contains(square, ClearCut.location))
+        .order_by(ClearCut.created_at)
+        .all()
+    )
+
+    previews = [
+        ClearCutPreview(
+            location=to_shape(preview[0]).coords[0],
+            boundary=list(to_shape(preview[1]).exterior.coords),
+            slope_percentage=preview[2],
+            department_id=preview[3],
+            cut_date=preview[4],
+        )
+        for preview in previews
+    ]
+
+    map_response = ClearCutMapResponse(points=points, previews=previews)
+    return map_response
+
+
 def get_clearcut_preview(
     db: Session,
     swLon: float,
@@ -82,7 +127,9 @@ def get_clearcut_preview(
     square = ST_MakeEnvelope(swLon, swLat, neLon, neLat, _sridDatabase)
 
     # Get location for all clearcuts located in the requested area
-    locations = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
+    locations = (
+        db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
+    )
     locations = [to_shape(location[0]).coords[0] for location in locations]
 
     # Get preview for the x most relevant clearcut
@@ -105,5 +152,5 @@ def get_clearcut_preview(
         for preview in previews
     ]
 
-    clearcutPreview = ClearCutPreviews(clearCutLocations=locations, clearCutPreviews=previews)
+    clearcutPreview = ClearCutMapResponse(points=locations, previews=previews)
     return clearcutPreview

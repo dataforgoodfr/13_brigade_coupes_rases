@@ -64,7 +64,7 @@ const getClearCuttingsThunk = createAsyncThunk<ClearCuttings, FiltersRequest>(
 			.json();
 		const clearCuttings = clearCuttingsResponseSchema.parse(result);
 		const state = getState() as RootState;
-		const clearCuttingPreviews = clearCuttings.clearCuttingPreviews.map(
+		const clearCuttingPreviews = clearCuttings.previews.map(
 			(preview) => ({
 				...preview,
 				abusiveTags: selectTagsByIds(state, preview.abusiveTags),

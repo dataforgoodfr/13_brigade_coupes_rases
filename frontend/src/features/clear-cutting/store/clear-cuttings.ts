@@ -94,8 +94,8 @@ const waterCourseSchema = z.object({
 });
 
 export const clearCuttingsResponseSchema = z.object({
-	clearCuttingsPoints: z.array(clearCuttingPointsSchema),
-	clearCuttingPreviews: z.array(clearCuttingPreviewResponseSchema),
+	points: z.array(clearCuttingPointsSchema),
+	previews: z.array(clearCuttingPreviewResponseSchema),
 	waterCourses: z.array(waterCourseSchema),
 	ecologicalZones: z.array(ecologicalZoningSchema),
 });

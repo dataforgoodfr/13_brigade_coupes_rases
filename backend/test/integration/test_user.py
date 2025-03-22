@@ -8,7 +8,7 @@ def test_create_user(client):
         "email": "john.tree2@yahoo.com",
         "role": "viewer",
     }
-    response = client.post("/user/", json=userJson)
+    response = client.post("/api/v1/users/", json=userJson)
 
     assert response.status_code == 201
     data = response.json()
@@ -30,7 +30,7 @@ def test_get_user(client, db):
     db.commit()
     db.refresh(user)
 
-    response = client.get(f"/user/{user.id}")
+    response = client.get(f"/api/v1/users/{user.id}")
 
     assert response.status_code == 200
     data = response.json()
@@ -64,7 +64,7 @@ def test_update_user(client, db):
 
     # Update role
     update_response = client.put(
-        f"/user/{user.id}",
+        f"/api/v1/users/{user.id}",
         json={
             "role": "admin",
         },
@@ -72,7 +72,7 @@ def test_update_user(client, db):
     assert update_response.status_code == 200
 
     # Check updated datas
-    get_response = client.get(f"/user/{user.id}")
+    get_response = client.get(f"/api/v1/users/{user.id}")
     assert get_response.status_code == 200
     data = get_response.json()
 
@@ -92,7 +92,7 @@ def test_get_users(client, db):
     db.commit()
     db.refresh(user)
 
-    response = client.get("/user")
+    response = client.get("/api/v1/users")
     assert response.status_code == 200
 
     data = response.json()
