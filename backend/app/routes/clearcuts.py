@@ -1,13 +1,16 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
 from app.deps import get_db_session
-from app.schemas.clearcut import (ClearCutCreate, ClearCutPatch,
-                                  ClearCutResponse)
-from app.services.clearcut import (create_clearcut, get_clearcut,
-                                   get_clearcut_by_id, update_clearcut)
+from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse
+from app.services.clearcut import (
+    create_clearcut,
+    get_clearcut,
+    get_clearcut_by_id,
+    update_clearcut,
+)
 
 logger = getLogger(__name__)
 
@@ -16,9 +19,7 @@ db_dependency = get_db_session()
 
 
 @router.post("/", response_model=ClearCutResponse, status_code=201)
-def create_new_clearcut(
-    item: ClearCutCreate, db: Session = db_dependency
-) -> ClearCutResponse:
+def create_new_clearcut(item: ClearCutCreate, db: Session = db_dependency) -> ClearCutResponse:
     logger.info(db)
     return create_clearcut(db, item)
 

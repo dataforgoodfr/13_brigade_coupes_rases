@@ -1,13 +1,8 @@
-from datetime import datetime
 from logging import getLogger
-from pydantic import BaseModel, field_validator, Field, ConfigDict
-from shapely.geometry import Point, Polygon
-from shapely.wkt import loads
-from typing import List, Optional, Tuple
-import numpy as np
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Tuple
 
 from app.schemas.clearcut import ClearCutBase
-from app.schemas.shared import DepartmentBase, UserBase
 
 logger = getLogger(__name__)
 
@@ -25,7 +20,6 @@ class ClearCutPreview(ClearCutBase):
     )
 
     model_config = ConfigDict(from_attributes=True)
-
 
 
 class ClearCutMapResponse(BaseModel):

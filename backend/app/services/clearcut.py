@@ -86,9 +86,7 @@ def get_clearcuts_map(db: Session, geo_bounds: GeoBounds):
         _sridDatabase,
     )
     square = ST_SetSRID(envelope, _sridDatabase)
-    points = (
-        db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
-    )
+    points = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
     points = [to_shape(location[0]).coords[0] for location in points]
 
     # Get preview for the x most relevant clearcut
@@ -127,9 +125,7 @@ def get_clearcut_preview(
     square = ST_MakeEnvelope(swLon, swLat, neLon, neLat, _sridDatabase)
 
     # Get location for all clearcuts located in the requested area
-    locations = (
-        db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
-    )
+    locations = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
     locations = [to_shape(location[0]).coords[0] for location in locations]
 
     # Get preview for the x most relevant clearcut
