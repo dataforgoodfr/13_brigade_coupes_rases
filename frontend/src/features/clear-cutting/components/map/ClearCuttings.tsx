@@ -136,7 +136,7 @@ export function ClearCuttings() {
 
 	function ClearCuttingLocationPoint() {
 		if (!displayClearCuttingPreview) {
-			return value?.clearCuttingsPoints.map(([lat, lng]) => (
+			return value?.points.map(([lat, lng]) => (
 				<Circle
 					key={`${lat},${lng}`}
 					color="#ff6467"

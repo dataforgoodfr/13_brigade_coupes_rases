@@ -189,7 +189,7 @@ export const mockClearCuttingsResponse = (
 		const northEastLng = url.searchParams.get("neLng");
 		let boundaries: Boundaries | undefined;
 		const previews = [
-			...(override.clearCuttingPreviews ?? []),
+			...(override.previews ?? []),
 			...clearCuttingPreviews,
 		];
 		if (southWestLat && southWestLng && northEastLat && northEastLng) {
@@ -201,13 +201,13 @@ export const mockClearCuttingsResponse = (
 			];
 		}
 		return HttpResponse.json({
-			clearCuttingPreviews:
+			previews:
 				boundaries && filterInArea
 					? previews.filter((ccp) =>
 							isPointInsidePolygon(boundaries, ccp.center),
 						)
 					: previews,
-			clearCuttingsPoints: createFranceRandomPoints,
+			points: createFranceRandomPoints,
 			ecologicalZones: [],
 			waterCourses: [],
 		} satisfies ClearCuttingsResponse);
