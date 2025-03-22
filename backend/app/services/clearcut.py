@@ -79,10 +79,10 @@ class GeoBounds(BaseModel):
 
 def get_clearcuts_map(db: Session, geo_bounds: GeoBounds):
     envelope = ST_MakeEnvelope(
-        geo_bounds.south_west_latitude,
         geo_bounds.south_west_longitude,
-        geo_bounds.north_east_latitude,
+        geo_bounds.south_west_latitude,
         geo_bounds.north_east_longitude,
+        geo_bounds.north_east_latitude,
         _sridDatabase,
     )
     square = ST_SetSRID(envelope, _sridDatabase)

@@ -21,12 +21,26 @@ def list_clearcut_preview(
     swLat: float = Query(
         ...,
         description="Sout west latitude",
-        examples=5.507318,
+        openapi_examples={"paris": {"value": 47.49308072945064}},
     ),
-    swLng: float = Query(..., description="Sout west longitude", examples=[43.352167]),
-    neLat: float = Query(..., description="North east latitude", examples=[5.283674]),
-    neLng: float = Query(..., description="North east longitude", examples=[43.192417]),
-    cutYears: list[int] = Query(..., description="Cut years", examples=[2021, 2022]),
+    swLng: float = Query(
+        ...,
+        description="Sout west longitude",
+        openapi_examples={"paris": {"value": -1.0766601562500002}},
+    ),
+    neLat: float = Query(
+        ...,
+        description="North east latitude",
+        openapi_examples={"paris": {"value": 49.79899569636492}},
+    ),
+    neLng: float = Query(
+        ...,
+        description="North east longitude",
+        openapi_examples={"paris": {"value": 4.051208496093751}},
+    ),
+    cutYears: list[int] = Query(
+        ..., description="Cut years", openapi_examples={"2025": {"value": 2025}}
+    ),
     db: Session = db_dependency,
 ) -> ClearCutMapResponse:
     try:
