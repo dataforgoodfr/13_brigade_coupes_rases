@@ -14,8 +14,8 @@ def new_user(role: str = "volunteer", password: str = "password"):
     )
 
 
-def get_admin_user_token(client: TestClient, db: Session):
-    user = new_user(role="admin")
+def get_user_token(client: TestClient, db: Session, role: str):
+    user = new_user(role=role)
     db.add(user)
     db.commit()
 
@@ -28,3 +28,11 @@ def get_admin_user_token(client: TestClient, db: Session):
     )
     data = response.json()
     return data["access_token"]
+
+
+def get_admin_user_token(client: TestClient, db: Session):
+    return get_user_token(client, db, "admin")
+
+
+def get_volunteer_user_token(client: TestClient, db: Session):
+    return get_user_token(client, db, "volunteer")

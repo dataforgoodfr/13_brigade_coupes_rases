@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from pytest import Session
 from app.models import Department
-from test.common.user import get_admin_user_token, new_user
+from test.common.user import get_admin_user_token, get_volunteer_user_token, new_user
 
 
 def test_create_user(client: TestClient, db: Session):
@@ -23,6 +23,23 @@ def test_create_user(client: TestClient, db: Session):
     assert data["created_at"] is not None
     assert data["updated_at"] is not None
     assert data["deleted_at"] is None
+
+
+def test_create_user_without_admin_right_should_return_forbidden(
+    client: TestClient, db: Session
+):
+    token = get_volunteer_user_token(client, db)
+    userJson = {
+        "firstname": "John",
+        "lastname": "Tree",
+        "email": "john.tree2@yahoo.com",
+        "role": "volunteer",
+    }
+    response = client.post(
+        "/api/v1/users/", json=userJson, headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 403
 
 
 def test_get_user(client, db):
@@ -108,3 +125,14 @@ def test_login_user(client, db):
     data = response.json()
     assert data["access_token"] is not None
     assert data["token_type"] == "bearer"
+
+
+def test_login_user_not_found_should_return_unauthorized(client):
+    response = client.post(
+        "/api/v1/token",
+        data={
+            "username": "houba.houba@marsupilami.com",
+            "password": "password",
+        },
+    )
+    assert response.status_code == 401
