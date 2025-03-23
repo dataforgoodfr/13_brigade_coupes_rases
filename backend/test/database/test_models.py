@@ -14,7 +14,7 @@ def test_user_creation(db):
     with pytest.raises(ValueError) as exc_info:
         new_user("not_a_valid_role")
 
-    assert str(exc_info.value) == "Role must be one of: admin, viewer, volunteer"
+    assert str(exc_info.value) == "Role must be one of: admin, volunteer"
 
     assert user.id is not None
     assert user.created_at is not None

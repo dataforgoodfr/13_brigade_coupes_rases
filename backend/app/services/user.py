@@ -3,14 +3,22 @@ from sqlalchemy.orm import Session
 from app.models import Department, User
 from app.schemas.user import UserCreate, UserUpdate
 from logging import getLogger
+from fastapi import HTTPException
 
 logger = getLogger(__name__)
 
 
 def create_user(db: Session, user: UserCreate):
-    new_user = User(firstname=user.firstname, lastname=user.lastname, email=user.email)
+    new_user = User(
+        firstname=user.firstname,
+        lastname=user.lastname,
+        email=user.email,
+        role=user.role,
+    )
     for department_id in user.departments:
-        department_db = db.query(Department).filter(Department.id == department_id).first()
+        department_db = (
+            db.query(Department).filter(Department.id == department_id).first()
+        )
         if department_db is None:
             raise HTTPException(
                 status_code=404, detail=f"Item with id {department_db} not found"
@@ -47,7 +55,8 @@ def update_user(id: int, user_in: UserUpdate, db: Session):
                 )
                 if department_db is None:
                     raise HTTPException(
-                        status_code=404, detail=f"Item with id {department_db} not found"
+                        status_code=404,
+                        detail=f"Item with id {department_db} not found",
                     )
                 user_db.departments.append(department_db)
         else:
@@ -55,3 +64,7 @@ def update_user(id: int, user_in: UserUpdate, db: Session):
     db.commit()
     db.refresh(user_db)
     return user_db
+
+
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter_by(email=email).first()

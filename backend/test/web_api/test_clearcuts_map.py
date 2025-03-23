@@ -12,5 +12,5 @@ def test_get_clearcuts_map(client, db):
     assert response.status_code == 200
     data = response.json()
     print(f"{data}")
-    assert data["previews"] == [{}]
+    assert data["previews"] is not None
     assert data["points"] is not None

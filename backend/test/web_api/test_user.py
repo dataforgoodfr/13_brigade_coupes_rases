@@ -1,4 +1,5 @@
 from app.models import User, Department
+from test.common.user import new_user
 
 
 def test_create_user(client):
@@ -6,7 +7,7 @@ def test_create_user(client):
         "firstname": "John",
         "lastname": "Tree",
         "email": "john.tree2@yahoo.com",
-        "role": "viewer",
+        "role": "volunteer",
     }
     response = client.post("/api/v1/users/", json=userJson)
 
@@ -20,12 +21,7 @@ def test_create_user(client):
 
 
 def test_get_user(client, db):
-    user = User(
-        firstname="Houba",
-        lastname="Youba",
-        email="houba.youba@marsupilami.com",
-        role="volunteer",
-    )
+    user = new_user()
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -52,12 +48,7 @@ def test_get_user(client, db):
 
 
 def test_update_user(client, db):
-    user = User(
-        firstname="Houba",
-        lastname="Houba",
-        email="houba.houba@marsupilami.com",
-        role="volunteer",
-    )
+    user = new_user()
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -80,12 +71,7 @@ def test_update_user(client, db):
 
 
 def test_get_users(client, db):
-    user = User(
-        firstname="Houba",
-        lastname="Houba",
-        email="houba.houba@marsupilami.com",
-        role="volunteer",
-    )
+    user = new_user()
     department = Department(code="75", name="Paris")
     user.departments.append(department)
     db.add_all([user, department])
@@ -98,3 +84,22 @@ def test_get_users(client, db):
     data = response.json()
     assert len(data) == 1
     assert data[0]["id"] == user.id
+
+
+def test_login_user(client, db):
+    user = new_user()
+    db.add(user)
+    db.commit()
+
+    response = client.post(
+        "/api/v1/users/login",
+        json={
+            "email": "houba.houba@marsupilami.com",
+            "password": "password",
+        },
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["access_token"] is not None
+    assert data["token_type"] == "bearer"

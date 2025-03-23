@@ -16,7 +16,7 @@ class UserBase(BaseModel):
     email: EmailStr = Field(
         default_factory=EmailStr, json_schema_extra={"example": "john.tree@canope.com"}
     )
-    role: Optional[str] = Field(default_factory=None, json_schema_extra={"example": "viewer"})
+    role: str = Field(default_factory=str, json_schema_extra={"example": "volunteer"})
 
     @field_validator("role")
     def validate_role(cls, value: str) -> str:

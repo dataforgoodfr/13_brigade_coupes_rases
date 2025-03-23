@@ -16,19 +16,22 @@ user_department = Table(
 class User(Base):
     __tablename__ = "users"
 
-    ROLES = ["admin", "viewer", "volunteer"]
+    ROLES = ["admin", "volunteer"]
 
     id = Column(Integer, primary_key=True, index=True)
     firstname = Column(String, index=True)
     lastname = Column(String, index=True)
     email = Column(String, unique=True, index=True)
+    password = Column(String, index=True, nullable=True)
     role = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.now)
     # TODO: updated_at is not set when departments are updated
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
 
-    departments = relationship("Department", secondary=user_department, back_populates="users")
+    departments = relationship(
+        "Department", secondary=user_department, back_populates="users"
+    )
     clear_cuts = relationship("ClearCut", back_populates="user")
 
     @validates("role")
@@ -44,7 +47,9 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String, index=True)
     name = Column(String)
-    users = relationship("User", secondary=user_department, back_populates="departments")
+    users = relationship(
+        "User", secondary=user_department, back_populates="departments"
+    )
     clear_cuts = relationship("ClearCut", back_populates="department")
 
     @validates("name")

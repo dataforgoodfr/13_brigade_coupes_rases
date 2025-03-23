@@ -1,9 +1,19 @@
-from app.services.user import create_user, get_users, get_users_by_id, update_user
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi.security import OAuth2PasswordRequestForm
+from app.services.user import (
+    create_user,
+    get_users,
+    get_users_by_id,
+    update_user,
+)
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserLogin, UserResponse, UserUpdate
 from app.deps import get_db_session
 from logging import getLogger
+
+from app.services.user_auth import Token, create_token
 
 logger = getLogger(__name__)
 
@@ -37,3 +47,14 @@ def update_existing_user(
 ) -> UserResponse:
     logger.info(db)
     return update_user(id, item, db)
+
+
+@router.post(
+    "/login",
+    response_model=Token,
+)
+def login(
+    user: UserLogin,
+    db: Session = db_dependency,
+) -> Token:
+    return create_token(db, user.email, user.password)

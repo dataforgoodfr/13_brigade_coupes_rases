@@ -6,6 +6,8 @@ from app.database import Base, SessionLocal
 from app.models import User, Department, ClearCut
 from sqlalchemy import text
 
+from app.services.user_auth import get_password_hash
+
 SRID = 4326
 
 
@@ -152,24 +154,19 @@ def seed_database():
             lastname="Faerie",
             email="admin@example.com",
             role="admin",
+            password= get_password_hash("admin")
         )
         volunteer = User(
             firstname="Pips",
             lastname="Sprite",
             email="volunteer@example.com",
             role="volunteer",
+            password= get_password_hash("volunteer")
         )
-        viewer = User(
-            firstname="Batty",
-            lastname="Koda",
-            email="viewer@example.com",
-            role="viewer",
-        )
-
+ 
         admin.departments.append(paris)
         volunteer.departments.append(paris)
-        viewer.departments.append(paris)
-        users = [admin, volunteer, viewer]
+        users = [admin, volunteer]
         db.add_all(users)
         db.flush()
 
