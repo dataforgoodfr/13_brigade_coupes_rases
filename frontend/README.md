@@ -18,6 +18,7 @@ Install [node](https://nodejs.org/fr)
 Install package manager [pnpm](https://pnpm.io/fr/installation)  
 Install dependencies : `pnpm i`  
 To run in development mode : `pnpm dev`  
+To run in development mode with mock service worker : `pnpm dev:mock`  
 To format and lint : `pnpm cleanup`
 To start storybook: `pnpm storybook`
 
@@ -73,3 +74,5 @@ Test files
 ### /mocks
 
 List of mocks and http handlers
+
+

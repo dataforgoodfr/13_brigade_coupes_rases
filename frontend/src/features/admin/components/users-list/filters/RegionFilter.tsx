@@ -1,8 +1,8 @@
+import { Button } from "@/components/ui/button";
 import {
 	selectDepartments,
 	toggleDepartment,
 } from "@/features/admin/store/users-filters.slice";
-import { Button } from "@/shared/components/button/Button";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,

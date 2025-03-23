@@ -1,9 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import {
-	type ClearCuttingPreview,
-	getClearCuttingStatusColor,
-} from "@/features/clear-cutting/store/clear-cuttings";
-import { Dot } from "@/shared/components/dot";
+import { DotByStatus } from "@/features/clear-cutting/components/DotByStatus";
+import { TagBadge } from "@/features/clear-cutting/components/TagBadge";
+import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
 import { Popup } from "react-leaflet";
 
 export function ClearCuttingMapPopUp({
@@ -16,19 +13,14 @@ export function ClearCuttingMapPopUp({
 					<div className="flex items-center">
 						<h2 className="font-semibold text-lg">{clearCutting.name}</h2>
 
-						<Dot
-							className="ml-2.5"
-							color={getClearCuttingStatusColor(clearCutting.status)}
-						/>
+						<DotByStatus className="ml-2.5" status={clearCutting.status.name} />
 					</div>
 					<div className="text-sm">{clearCutting.creationDate}</div>
 				</div>
 
 				<div className="flex mb-5 gap-2 font-inter">
 					{clearCutting.abusiveTags.map((tag) => (
-						<Badge key={tag} className="text-sm" variant="secondary">
-							{tag}
-						</Badge>
+						<TagBadge key={tag.id} {...tag} />
 					))}
 				</div>
 
@@ -38,10 +30,10 @@ export function ClearCuttingMapPopUp({
 					</div>
 					<div>
 						Taille de la coupe :
-						<strong> {clearCutting.cadastralParcel?.surfaceKm} HA</strong>
+						<strong> {clearCutting?.surfaceHectare} HA</strong>
 					</div>
 					<div>
-						Pente : <strong>{clearCutting.cadastralParcel?.slope} %</strong>
+						Pente : <strong>{clearCutting?.slopePercent} %</strong>
 					</div>
 					<div>
 						Zone Natura : <strong> {clearCutting.naturaZone} </strong>

@@ -1,8 +1,10 @@
 import { range } from "@/shared/array";
 import type {
+	ClearCuttingStatus,
 	DepartmentResponse,
 	EcologicalZoningResponse,
 	ReferentialResponse,
+	StatusResponse,
 	TagResponse,
 } from "@/shared/store/referential/referential";
 import { faker } from "@faker-js/faker";
@@ -134,10 +136,23 @@ export const fakeDepartments: DepartmentResponse = [
 	return acc;
 }, {});
 
+export const fakeStatuses = (
+	[
+		"finalValidated",
+		"legalValidated",
+		"toValidate",
+		"waitingForValidation",
+		"validated",
+	] as ClearCuttingStatus[]
+).reduce<StatusResponse>((acc, status) => {
+	acc[faker.string.uuid()] = { name: status };
+	return acc;
+}, {});
 export const mockReferential = http.get("*/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
 		ecologicalZoning: fakeEcologicalZoning,
 		tags: fakeTags,
+		statuses: fakeStatuses,
 	} satisfies ReferentialResponse);
 });

@@ -1,3 +1,4 @@
+import type { ButtonProps } from "@/components/ui/button";
 import {
 	Command,
 	CommandEmpty,
@@ -14,7 +15,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type { ButtonProps } from "@/shared/components/button/Button";
 import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import { ResetButton } from "@/shared/components/button/ResetButton";
 import type { SelectableItemEnhanced } from "@/shared/items";
@@ -34,6 +34,7 @@ export type MultiSelectComboboxProps<TItem> = {
 export type ComboboxProps<TItem> = {
 	hasReset?: boolean;
 	countPreview?: boolean;
+	id?: string;
 	changeOnClose?: (items: SelectableItemEnhanced<TItem>[]) => void;
 	commandInputProps?: Omit<CommandInputProps, "children">;
 	commandEmptyProps?: CommandEmptyProps;
@@ -51,6 +52,7 @@ export function Combobox<TItem>({
 	countPreview = false,
 	hasReset = false,
 	closeAfterToggle = false,
+	id,
 	...props
 }: ComboboxProps<TItem>) {
 	const [open, setOpen] = useState(false);
@@ -122,7 +124,7 @@ export function Combobox<TItem>({
 	};
 	return (
 		<Popover open={open} onOpenChange={handleOpenChanged}>
-			<PopoverTrigger asChild>
+			<PopoverTrigger asChild id={id}>
 				<ExpandButton open={open} {...buttonProps}>
 					{buttonProps?.children}{" "}
 					{countPreview && selectedItemsCount > 0 && (

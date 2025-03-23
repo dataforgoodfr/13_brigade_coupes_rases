@@ -1,0 +1,95 @@
+# This workflow will do a clean installation of python dependencies, cache/restore them, build the source code and run tests across different versions of python.
+# It uses Poetry to manage dependencies and pytest to run tests.
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Backend CI
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+      - "pyproject.toml"
+
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgis/postgis:15-3.5
+        env:
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: devuser
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Configure hosts b/c testing uses db but ci will run on localhost
+      - name: Configure hosts
+        run: |
+          echo "127.0.0.1 db" | sudo tee -a /etc/hosts
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry virtualenv # Caches the Poetry virtualenv for faster subsequent runs
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          poetry install --with backend,dev --no-interaction
+
+      - name: Run tests
+        working-directory: ./backend
+        run: |
+          poetry run pytest test/
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: postgresql://devuser:devuser@db:5432/test
+  deploy:
+    needs: build-test
+    uses: "./.github/workflows/deploy.yml"
+    secrets: inherit
+    with:
+      app-id: app_5292f305-0563-4fd7-b50a-56f6caf806db
+      app-name: "backend"

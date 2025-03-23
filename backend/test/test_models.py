@@ -6,7 +6,10 @@ from app.models import User, Department, ClearCut
 
 def test_user_creation(db):
     user = User(
-        firstname="Tétras", lastname="Foret", email="tetras.foret@example.com", role="volunteer"
+        firstname="Tétras",
+        lastname="Foret",
+        email="tetras.foret@example.com",
+        role="volunteer",
     )
     db.add(user)
     db.commit()
@@ -27,11 +30,15 @@ def test_user_creation(db):
 
 
 def test_department_creation(db):
-    department = Department(code=75)
+    department = Department(code="13", name="Bouches du Rhône")
     db.add(department)
     db.commit()
 
     assert department.id is not None
+
+    with pytest.raises(ValueError) as exc_info:
+        Department(code="75", name=None)
+    assert str(exc_info.value) == "Name cannot be None"
 
 
 def test_clear_cut_creation(db):
@@ -70,7 +77,7 @@ def test_associations(db):
         email="houba.houba@marsupilami.com",
         role="volunteer",
     )
-    department = Department(code="75")
+    department = Department(code="75", name="Paris")
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=20.0,

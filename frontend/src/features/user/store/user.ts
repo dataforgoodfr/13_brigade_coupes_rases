@@ -16,7 +16,7 @@ export const commonUserSchema = z.object({
 	avatarUrl: z.string().url().optional(),
 });
 const volunteerResponseSchema = z.object({
-	affectedDepartments: z.array(z.string().uuid()).optional(),
+	affectedDepartments: z.array(z.string()).optional(),
 	role: roleSchema.extract(["volunteer"]),
 });
 const administratorResponseSchema = z.object({

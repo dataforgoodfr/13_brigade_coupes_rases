@@ -1,12 +1,13 @@
-import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
-import {
-	DISPLAY_PREVIEW_ZOOM_LEVEL,
-	getClearCuttingStatusColor,
-} from "@/features/clear-cutting/store/clear-cuttings";
+import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cutting/store/clear-cuttings";
+import { selectClearCuttings } from "@/features/clear-cutting/store/clear-cuttings-slice";
 import { setGeoBounds } from "@/features/clear-cutting/store/filters.slice";
+import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cutting/store/status";
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useGeolocation } from "@/shared/hooks/geolocation";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
+import * as L from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
 import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
@@ -16,6 +17,54 @@ export function ClearCuttings() {
 	const { browserLocation } = useGeolocation();
 	const [displayClearCuttingPreview, setDisplayClearCuttingPreview] =
 		useState(false);
+
+	const [layer, layers, setLayer] = useSingleSelect<
+		L.TileLayer,
+		SelectableItemEnhanced<L.TileLayer>
+	>([
+		{
+			isSelected: true,
+			item: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				id: "OpenStreetMap.Mapnik",
+				attribution:
+					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			}),
+			label: "Standard",
+			value: "standard",
+		},
+		{
+			isSelected: false,
+			item: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
+				id: "OpenTopoMap",
+			}),
+			label: "Terrain",
+			value: "ground",
+		},
+		{
+			isSelected: false,
+			item: L.tileLayer(
+				"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+				{
+					id: "ArcGIS.WorldImagery",
+				},
+			),
+			label: "Satellite",
+			value: "satellite",
+		},
+	]);
+	map.attributionControl.setPosition("bottomleft");
+
+	const handleLayerSelected = (
+		selectableItem: SelectableItemEnhanced<L.TileLayer> | undefined,
+	) => {
+		if (layer?.item) {
+			map.removeLayer(layer?.item);
+		}
+		if (selectableItem?.item) {
+			map.addLayer(selectableItem.item);
+		}
+		setLayer(selectableItem);
+	};
 
 	useEffect(() => {
 		if (browserLocation) {
@@ -27,18 +76,17 @@ export function ClearCuttings() {
 	}, [browserLocation, map.setView]);
 
 	const dispatch = useAppDispatch();
-	const { data } = useGetClearCuttingsQuery();
+	const { value } = useAppSelector(selectClearCuttings);
 
 	const dispatchGeoBounds = useCallback(() => {
 		const bounds = map.getBounds();
 		const northEast = bounds.getNorthEast();
 		const southWest = bounds.getSouthWest();
-
 		dispatch(
-			setGeoBounds([
-				[northEast.lat, northEast.lng],
-				[southWest.lat, southWest.lng],
-			]),
+			setGeoBounds({
+				ne: { lat: northEast.lat, lng: northEast.lng },
+				sw: { lat: southWest.lat, lng: southWest.lng },
+			}),
 		);
 	}, [map, dispatch]);
 
@@ -61,13 +109,13 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return data?.clearCuttingPreviews.map((clearCutting) => {
+			return value?.clearCuttingPreviews.map((clearCutting) => {
 				return (
 					<Polygon
 						key={clearCutting.id}
 						className="clear-cutting-area"
 						positions={clearCutting.geoCoordinates}
-						color={getClearCuttingStatusColor(clearCutting.status)}
+						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status.name]})`}
 						weight={0}
 						fillOpacity={0.75}
 						eventHandlers={{
@@ -88,7 +136,7 @@ export function ClearCuttings() {
 
 	function ClearCuttingLocationPoint() {
 		if (!displayClearCuttingPreview) {
-			return data?.clearCuttingsPoints.map(([lat, lng]) => (
+			return value?.points.map(([lat, lng]) => (
 				<Circle
 					key={`${lat},${lng}`}
 					color="#ff6467"
@@ -102,6 +150,18 @@ export function ClearCuttings() {
 
 	return (
 		<>
+			<div className="leaflet-bottom leaflet-right">
+				<div className="leaflet-control bg-zinc-100 p-1 rounded-md ">
+					<ToggleGroup
+						variant="primary"
+						type="single"
+						size="xl"
+						value={layers}
+						onValueChange={handleLayerSelected}
+					/>
+				</div>
+			</div>
+
 			<ClearCuttingPreview />
 
 			<ClearCuttingLocationPoint />

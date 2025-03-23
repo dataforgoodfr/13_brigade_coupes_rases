@@ -13,11 +13,14 @@ export const toggleVariants = cva(
 				default: "bg-transparent",
 				outline:
 					"border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground",
+				primary:
+					"data-[state=on]:bg-primary data-[state=on]:text-primary-foreground bg-zinc-100 ",
 			},
 			size: {
 				default: "h-9 px-2 min-w-9",
 				sm: "h-8 px-1.5 min-w-8",
 				lg: "h-10 px-2.5 min-w-10",
+				xl: "h-11 px-3.5 min-w-16",
 			},
 		},
 		defaultVariants: {

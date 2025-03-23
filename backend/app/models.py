@@ -5,27 +5,11 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, validates
 
 
-# FIXME: This is just an example model. We should remove this and create our own models
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String, nullable=True)
-
-
 user_department = Table(
     "user_department",
     Base.metadata,
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
     Column("department_id", Integer, ForeignKey("departments.id"), primary_key=True),
-)
-
-user_clear_cut = Table(
-    "user_clear_cut",
-    Base.metadata,
-    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
-    Column("clear_cut_id", Integer, ForeignKey("clear_cuts.id"), primary_key=True),
 )
 
 
@@ -40,11 +24,12 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     role = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now)
+    # TODO: updated_at is not set when departments are updated
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
 
     departments = relationship("Department", secondary=user_department, back_populates="users")
-    clear_cuts = relationship("ClearCut", secondary=user_clear_cut, back_populates="users")
+    clear_cuts = relationship("ClearCut", back_populates="user")
 
     @validates("role")
     def validate_role(self, key, value):
@@ -57,9 +42,16 @@ class Department(Base):
     __tablename__ = "departments"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(Integer, index=True)
+    code = Column(String, index=True)
+    name = Column(String)
     users = relationship("User", secondary=user_department, back_populates="departments")
     clear_cuts = relationship("ClearCut", back_populates="department")
+
+    @validates("name")
+    def validate_name(self, key, value):
+        if key == "name" and value is None:
+            raise ValueError("Name cannot be None")
+        return value
 
 
 class ClearCut(Base):
@@ -74,14 +66,24 @@ class ClearCut(Base):
     boundary = Column(Geometry("Polygon"), index=True)
     status = Column(String, index=True)
     department_id = Column(Integer, ForeignKey("departments.id"), index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     department = relationship("Department", back_populates="clear_cuts")
-    users = relationship("User", secondary=user_clear_cut, back_populates="clear_cuts")
+    user = relationship("User", back_populates="clear_cuts")
 
     @validates("status")
     def validate_status(self, key, value):
         if value not in ClearCut.STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(ClearCut.STATUSES)}")
         return value
+
+
+CLEAR_CUT_PREVIEW_COLUMNS = [
+    ClearCut.location,
+    ClearCut.boundary,
+    ClearCut.slope_percentage,
+    ClearCut.department_id,
+    ClearCut.created_at,
+]

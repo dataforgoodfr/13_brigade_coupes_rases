@@ -1,4 +1,5 @@
-import { Button, type ButtonProps } from "@/shared/components/button/Button";
+import type { ButtonProps } from "@/components/ui/button";
+import { IconButton } from "@/shared/components/button/Button";
 import { ExpandChevron } from "@/shared/components/button/ExpandChevron";
 import clsx from "clsx";
 import { forwardRef } from "react";
@@ -14,7 +15,7 @@ export const ExpandButton = forwardRef<HTMLButtonElement, Props>(
 		forwardedRef,
 	) => {
 		return (
-			<Button
+			<IconButton
 				variant={variant ?? "outline"}
 				aria-expanded={open}
 				{...props}
@@ -22,11 +23,13 @@ export const ExpandButton = forwardRef<HTMLButtonElement, Props>(
 					props.onClick?.(e);
 					onOpenChanged?.(!open);
 				}}
-				className={clsx(className, "rounded-full text-primary border-primary")}
+				className={clsx(className)}
 				ref={forwardedRef}
+				icon={<ExpandChevron open={open} />}
+				position="end"
 			>
-				{children} <ExpandChevron open={open} />
-			</Button>
+				{children}
+			</IconButton>
 		);
 	},
 );

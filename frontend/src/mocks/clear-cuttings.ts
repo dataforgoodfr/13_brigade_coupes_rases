@@ -1,10 +1,11 @@
 import type {
-	ClearCutting,
 	ClearCuttingAddress,
-	ClearCuttingPreview,
-	ClearCuttingStatus,
+	ClearCuttingBaseResponse,
+	ClearCuttingPreviewResponse,
+	ClearCuttingResponse,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
+import { fakeStatuses, fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -57,9 +58,31 @@ const naturaZones = [
 	"Forêt d'Orient",
 ];
 
-export const generateAddressMock = (
-	address: Partial<ClearCuttingAddress> = {},
-) =>
+export const createClearCuttingBaseMock = (
+	override: Partial<ClearCuttingBaseResponse> = {},
+): ClearCuttingBaseResponse => {
+	const date = faker.date.anytime();
+	const center = override.center ?? franceRandomPointMock();
+	return {
+		id: faker.string.uuid(),
+		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
+		center,
+		name: faker.animal.dog(),
+		comment: faker.lorem.paragraph(),
+		naturaZone: faker.string.fromCharacters(naturaZones),
+		slopePercent: faker.number.int({ min: 1, max: 60 }),
+		status: faker.helpers.arrayElement(Object.keys(fakeStatuses)),
+		abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
+		creationDate: date.toLocaleDateString(),
+		cutYear: date.getFullYear(),
+		ecologicalZones: [],
+		reportDate: date.toLocaleDateString(),
+		surfaceHectare: faker.number.int({ min: 5, max: 20 }),
+		...override,
+	};
+};
+
+export const createAddressMock = (address: Partial<ClearCuttingAddress> = {}) =>
 	({
 		streetName: faker.location.street(),
 		streetNumber: faker.number.int().toString(),
@@ -68,28 +91,22 @@ export const generateAddressMock = (
 		country: "France",
 		...address,
 	}) satisfies ClearCuttingAddress;
-export const mockClearCutting = (clearCutting: Partial<ClearCutting> = {}) =>
+
+export const mockClearCutting = (
+	clearCutting: Partial<ClearCuttingResponse> = {},
+) =>
 	http.get("*/clear-cuttings/:id", ({ params }) => {
 		const { id } = params as { id: string };
-		const date = faker.date.anytime();
-		const center = francRandomPointMock();
 		return HttpResponse.json({
+			...createClearCuttingBaseMock(),
 			id: id,
-			geoCoordinates: [center],
-			address: generateAddressMock(),
+			address: createAddressMock(),
 			imageUrls: [],
-			status: getRandomStatus(Date.now()),
-			abusiveTags: [],
-			center,
-			creationDate: date.toISOString(),
-			cutYear: date.getFullYear(),
-			ecologicalZones: [],
-			reportDate: date.toISOString(),
 			...clearCutting,
-		} satisfies ClearCutting);
+		} satisfies ClearCuttingResponse);
 	});
 
-const francRandomPointMock = (): [number, number] => [
+const franceRandomPointMock = (): [number, number] => [
 	faker.location.latitude({
 		min: 43.883918307385926,
 		max: 49.33292664908802,
@@ -135,70 +152,63 @@ const randomPolygonFromLocation = (
 
 const createFranceRandomPoints = range<[number, number]>(
 	500,
-	francRandomPointMock,
+	franceRandomPointMock,
 );
 
-const getRandomStatus = (seed: number) =>
-	["validated", "toValidate", "rejected", "waitingInformation"][
-		seed % 4
-	] as ClearCuttingStatus;
-
-const createClearCutting = (center: [number, number]): ClearCuttingPreview => {
-	const name = faker.animal.dog();
+export const createClearCuttingPreviewResponse = (
+	override: Partial<ClearCuttingPreviewResponse> = {
+		center: franceRandomPointMock(),
+	},
+): ClearCuttingPreviewResponse => {
 	const city = faker.location.city();
-
 	return {
-		center,
-		name,
+		...createClearCuttingBaseMock({ center: override.center }),
 		address: {
 			city,
 			country: faker.location.country(),
 			postalCode: faker.location.zipCode(),
 		},
-		status: getRandomStatus(Math.floor(center[0] + center[1])),
-		cutYear: 2021,
-		reportDate: faker.date.anytime().toLocaleDateString(),
-		creationDate: faker.date.anytime().toLocaleDateString(),
-		id: faker.string.uuid(),
 		imagesCnt: faker.number.int() % 10,
-		imageUrl: faker.image.url(),
-		naturaZone: faker.string.fromCharacters(naturaZones),
-		cadastralParcel: {
-			id: faker.string.nanoid(),
-			slope: faker.number.int({ min: 1, max: 60 }),
-			surfaceKm: faker.number.int({ min: 5, max: 500 }),
-		},
-		abusiveTags: ["PENTE >30%", "NATURA 2000", "SUP 20 HA"],
-		ecologicalZones: [],
-		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
+		...override,
 	};
 };
 
-const clearCuttingPreviews = createFranceRandomPoints.map(createClearCutting);
+const clearCuttingPreviews = createFranceRandomPoints
+	.slice(0, 50)
+	.map((center) => createClearCuttingPreviewResponse({ center }));
 
-export const mockClearCuttings = http.get("*/clear-cuttings", ({ request }) => {
-	const url = new URL(request.url);
-	const geoBoundsQueryString = url.searchParams.get("geoBounds");
-	let boundaries: Boundaries | undefined;
-
-	if (geoBoundsQueryString) {
-		const geoBounds = geoBoundsQueryString.split(",").map(Number.parseFloat);
-		boundaries = [
-			[geoBounds[0], geoBounds[1]],
-			[geoBounds[0], geoBounds[3]],
-			[geoBounds[2], geoBounds[3]],
-			[geoBounds[2], geoBounds[1]],
+export const mockClearCuttingsResponse = (
+	override: Partial<ClearCuttingsResponse> = {},
+	filterInArea = false,
+) =>
+	http.get("*/clear-cuttings", ({ request }) => {
+		const url = new URL(request.url);
+		const southWestLat = url.searchParams.get("swLat");
+		const southWestLng = url.searchParams.get("swLng");
+		const northEastLat = url.searchParams.get("neLat");
+		const northEastLng = url.searchParams.get("neLng");
+		let boundaries: Boundaries | undefined;
+		const previews = [
+			...(override.previews ?? []),
+			...clearCuttingPreviews,
 		];
-	}
-
-	return HttpResponse.json({
-		clearCuttingPreviews: boundaries
-			? clearCuttingPreviews.filter((ccp) =>
-					isPointInsidePolygon(boundaries, ccp.center),
-				)
-			: clearCuttingPreviews,
-		clearCuttingsPoints: createFranceRandomPoints,
-		ecologicalZones: [],
-		waterCourses: [],
-	} satisfies ClearCuttingsResponse);
-});
+		if (southWestLat && southWestLng && northEastLat && northEastLng) {
+			boundaries = [
+				[Number.parseFloat(southWestLat), Number.parseFloat(southWestLng)],
+				[Number.parseFloat(southWestLat), Number.parseFloat(northEastLng)],
+				[Number.parseFloat(northEastLat), Number.parseFloat(northEastLng)],
+				[Number.parseFloat(northEastLat), Number.parseFloat(southWestLng)],
+			];
+		}
+		return HttpResponse.json({
+			previews:
+				boundaries && filterInArea
+					? previews.filter((ccp) =>
+							isPointInsidePolygon(boundaries, ccp.center),
+						)
+					: previews,
+			points: createFranceRandomPoints,
+			ecologicalZones: [],
+			waterCourses: [],
+		} satisfies ClearCuttingsResponse);
+	});

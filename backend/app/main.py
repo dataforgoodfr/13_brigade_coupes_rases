@@ -1,19 +1,27 @@
 from fastapi import FastAPI
-from app.routes import items
-from app.database import engine, Base
+from app.config import settings
+from app.routes import clearcuts, departments, users, referential, clearcuts_map
+from fastapi.middleware.cors import CORSMiddleware
 
-# Create DB tables if not using Alembic (use migrations in production)
-Base.metadata.create_all(bind=engine)
+app = FastAPI(
+    title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
+)
 
-app = FastAPI(title="Brigades Coupes Rases")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routes
-app.include_router(items.router)
-
-
-@app.get("/")
-async def home():
-    return {"message": "Hello, World!"}
+app.include_router(clearcuts.router)
+app.include_router(departments.router)
+app.include_router(clearcuts_map.router)
+app.include_router(users.router)
+app.include_router(referential.router)
 
 
 def start_server(

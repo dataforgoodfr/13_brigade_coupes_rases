@@ -1,16 +1,8 @@
-import { string, z } from "zod";
-import { pointSchema } from "./types";
+import type { Status, Tag } from "@/shared/store/referential/referential";
+import { z } from "zod";
+import { pointTupleSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
-
-export const clearCuttingStatusSchema = z.enum([
-	"toValidate",
-	"validated",
-	"rejected",
-	"waitingInformation",
-]);
-
-export type ClearCuttingStatus = z.infer<typeof clearCuttingStatusSchema>;
 
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
@@ -22,41 +14,52 @@ const ecologicalZoningSchema = z.object({
 	logo: z.string().url(),
 });
 
-const clearCuttingBaseSchema = z.object({
+const clearCuttingBaseResponseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointSchema),
+	geoCoordinates: z.array(pointTupleSchema),
 	name: z.string().optional(),
-	center: pointSchema,
+	center: pointTupleSchema,
 	reportDate: z.string(),
 	creationDate: z.string(),
 	cutYear: z.number(),
 	ecologicalZones: z.array(z.string()),
 	abusiveTags: z.array(z.string()),
 	naturaZone: z.string().optional(),
-	cadastralParcel: z
-		.object({
-			id: string(),
-			slope: z.number(),
-			surfaceKm: z.number(),
-		})
-		.optional(),
-
-	status: clearCuttingStatusSchema,
+	comment: z.string().optional(),
+	surfaceHectare: z.number(),
+	slopePercent: z.number(),
+	status: z.string(),
 });
+export type ClearCuttingBaseResponse = z.infer<
+	typeof clearCuttingBaseResponseSchema
+>;
+type ClearCuttingBase = Omit<
+	ClearCuttingBaseResponse,
+	"abusiveTags" | "status"
+> & {
+	abusiveTags: Tag[];
+	status: Status;
+};
 
-const clearCuttingPreviewSchema = clearCuttingBaseSchema.and(
+const clearCuttingPreviewResponseSchema = clearCuttingBaseResponseSchema.and(
 	z.object({
 		address: z.object({
 			postalCode: z.string(),
 			city: z.string(),
 			country: z.string(),
 		}),
-		imageUrl: z.string().url().optional(),
 		imagesCnt: z.number().optional(),
 	}),
 );
 
-export type ClearCuttingPreview = z.infer<typeof clearCuttingPreviewSchema>;
+export type ClearCuttingPreviewResponse = z.infer<
+	typeof clearCuttingPreviewResponseSchema
+>;
+export type ClearCuttingPreview = Omit<
+	ClearCuttingPreviewResponse,
+	"abusiveTags" | "status"
+> &
+	ClearCuttingBase;
 
 const clearCuttingAddressSchema = z.object({
 	streetName: z.string(),
@@ -67,10 +70,10 @@ const clearCuttingAddressSchema = z.object({
 	country: z.string(),
 });
 export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
-export const clearCuttingSchema = clearCuttingBaseSchema.and(
+export const clearCuttingResponseSchema = clearCuttingBaseResponseSchema.and(
 	z.object({
 		id: z.string(),
-		geoCoordinates: z.array(pointSchema),
+		geoCoordinates: z.array(pointTupleSchema),
 		waterCourses: z.array(z.string()).optional(),
 		address: clearCuttingAddressSchema,
 		customTags: z.array(z.string()).optional(),
@@ -78,29 +81,29 @@ export const clearCuttingSchema = clearCuttingBaseSchema.and(
 	}),
 );
 
-export type ClearCutting = z.infer<typeof clearCuttingSchema>;
+export type ClearCuttingResponse = z.infer<typeof clearCuttingResponseSchema>;
+export type ClearCutting = Omit<
+	ClearCuttingResponse,
+	"abusiveTags" | "status"
+> &
+	ClearCuttingBase;
 
 const waterCourseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointSchema),
+	geoCoordinates: z.array(pointTupleSchema),
 });
 
 export const clearCuttingsResponseSchema = z.object({
-	clearCuttingsPoints: z.array(clearCuttingPointsSchema),
-	clearCuttingPreviews: z.array(clearCuttingPreviewSchema),
+	points: z.array(clearCuttingPointsSchema),
+	previews: z.array(clearCuttingPreviewResponseSchema),
 	waterCourses: z.array(waterCourseSchema),
 	ecologicalZones: z.array(ecologicalZoningSchema),
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
-
-export const CLEAR_CUTTING_STATUS_COLORS: Record<ClearCuttingStatus, string> = {
-	toValidate: "#FCAD02",
-	rejected: "#FF3300",
-	validated: "#204933",
-	waitingInformation: "#FCAD02",
+export type ClearCuttings = Omit<
+	ClearCuttingsResponse,
+	"clearCuttingPreviews"
+> & {
+	clearCuttingPreviews: ClearCuttingPreview[];
 };
-
-export function getClearCuttingStatusColor(status: ClearCuttingStatus) {
-	return CLEAR_CUTTING_STATUS_COLORS[status];
-}
