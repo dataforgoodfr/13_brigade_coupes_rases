@@ -20,7 +20,7 @@ from transform import (
     export_data,
 )
 from utils.disjoin_set import DisjointSet
-from utils.logging import etl_logger
+from utils.logging_etl import etl_logger
 
 # Configurer le logger
 logger = etl_logger("logs/main.log")

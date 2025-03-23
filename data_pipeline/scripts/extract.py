@@ -2,7 +2,7 @@ import json
 import requests
 from datetime import datetime
 from utils.s3 import S3Manager
-from utils.logging import etl_logger
+from utils.logging_etl import etl_logger
 
 # Configuration
 s3_manager = S3Manager()
