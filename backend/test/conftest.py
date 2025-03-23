@@ -28,6 +28,17 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 SETTINGS_TABLES = ["departments"]
 
 
+def pytest_collection_modifyitems(session, config, items):
+    # Check if any tests are marked with 'focus'
+    focused_items = [item for item in items if item.get_closest_marker("focus")]
+
+    # If there are focused tests, skip all others
+    if focused_items:
+        for item in items:
+            if item not in focused_items:
+                item.add_marker(pytest.mark.skip(reason="focusing on other tests"))
+
+
 @pytest.fixture(scope="session")
 def migration():
     print("Running migrations")
