@@ -1,17 +1,15 @@
 from datetime import datetime, timedelta, timezone
-from logging import getLogger
 from typing import Annotated
 
 import bcrypt
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.models import Department, User
-from app.schemas.user import UserCreate, UserUpdate
+from app.models import User
 from app.services.user import get_user_by_email
 
 
@@ -84,7 +82,7 @@ async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_sch
             raise credentials_exception
         token_data = TokenData(email=email)
     except InvalidTokenError:
-        raise credentials_exception
+        raise credentials_exception from InvalidTokenError
     user = get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception

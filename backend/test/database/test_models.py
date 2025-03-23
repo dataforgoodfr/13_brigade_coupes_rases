@@ -1,7 +1,5 @@
 import pytest
-from datetime import datetime
-from geoalchemy2.elements import WKTElement
-from app.models import User, Department, ClearCut
+from app.models import Department
 from test.common.clear_cut import new_clear_cut
 from test.common.user import new_user
 

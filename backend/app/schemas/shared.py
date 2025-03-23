@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from app.models import User
 

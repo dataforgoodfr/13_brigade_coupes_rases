@@ -4,7 +4,7 @@ from geoalchemy2 import WKTElement
 from app.models import ClearCut
 
 
-def new_clear_cut(status: str= "pending"):
+def new_clear_cut(status: str = "pending"):
     return ClearCut(
         cut_date=datetime.now(),
         slope_percentage=15.5,

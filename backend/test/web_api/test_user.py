@@ -1,4 +1,4 @@
-from app.models import User, Department
+from app.models import Department
 from test.common.user import new_user
 
 

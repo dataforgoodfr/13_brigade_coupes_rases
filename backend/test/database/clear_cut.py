@@ -1,7 +1,4 @@
-from datetime import datetime
-from geoalchemy2 import WKTElement
 import pytest
-from app.models import ClearCut
 from test.common.clear_cut import new_clear_cut
 
 

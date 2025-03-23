@@ -154,16 +154,16 @@ def seed_database():
             lastname="Faerie",
             email="admin@example.com",
             role="admin",
-            password= get_password_hash("admin")
+            password=get_password_hash("admin"),
         )
         volunteer = User(
             firstname="Pips",
             lastname="Sprite",
             email="volunteer@example.com",
             role="volunteer",
-            password= get_password_hash("volunteer")
+            password=get_password_hash("volunteer"),
         )
- 
+
         admin.departments.append(paris)
         volunteer.departments.append(paris)
         users = [admin, volunteer]

@@ -5,16 +5,13 @@ Revises: d5d86941d29e
 Create Date: 2025-03-23 14:36:55.549158
 
 """
-from typing import Sequence, Union
 
-from alembic import op
-import sqlalchemy as sa
-import geoalchemy2
+from typing import Sequence, Union
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9fb464d00159'
-down_revision: Union[str, None] = 'd5d86941d29e'
+revision: str = "9fb464d00159"
+down_revision: Union[str, None] = "d5d86941d29e"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

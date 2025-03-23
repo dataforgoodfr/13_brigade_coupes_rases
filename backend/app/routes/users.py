@@ -1,13 +1,10 @@
-from typing import Annotated
-
-from fastapi.security import OAuth2PasswordRequestForm
 from app.services.user import (
     create_user,
     get_users,
     get_users_by_id,
     update_user,
 )
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserLogin, UserResponse, UserUpdate
 from app.deps import get_db_session

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from app.models import Department, User
 from app.schemas.user import UserCreate, UserUpdate
 from logging import getLogger
-from fastapi import HTTPException
 
 logger = getLogger(__name__)
 
@@ -16,9 +15,7 @@ def create_user(db: Session, user: UserCreate):
         role=user.role,
     )
     for department_id in user.departments:
-        department_db = (
-            db.query(Department).filter(Department.id == department_id).first()
-        )
+        department_db = db.query(Department).filter(Department.id == department_id).first()
         if department_db is None:
             raise HTTPException(
                 status_code=404, detail=f"Item with id {department_db} not found"
