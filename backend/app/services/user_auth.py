@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
 
 import bcrypt
 import jwt
@@ -9,7 +8,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.models import User
+from app.deps import db_session
 from app.services.user import get_user_by_email
 
 
@@ -38,7 +37,7 @@ class TokenData(BaseModel):
     email: str | None = None
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
 
 app = FastAPI()
 
@@ -69,7 +68,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -89,11 +88,11 @@ async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_sch
     return user
 
 
-async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
+async def get_admin_user(
+    current_user=Depends(get_current_user),
 ):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="User should be have admin role")
     return current_user
 
 

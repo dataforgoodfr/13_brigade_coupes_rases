@@ -1,15 +1,20 @@
+from fastapi.testclient import TestClient
+from pytest import Session
 from app.models import Department
-from test.common.user import new_user
+from test.common.user import get_admin_user_token, new_user
 
 
-def test_create_user(client):
+def test_create_user(client: TestClient, db: Session):
+    token = get_admin_user_token(client, db)
     userJson = {
         "firstname": "John",
         "lastname": "Tree",
         "email": "john.tree2@yahoo.com",
         "role": "volunteer",
     }
-    response = client.post("/api/v1/users/", json=userJson)
+    response = client.post(
+        "/api/v1/users/", json=userJson, headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == 201
     data = response.json()
@@ -92,9 +97,9 @@ def test_login_user(client, db):
     db.commit()
 
     response = client.post(
-        "/api/v1/users/login",
-        json={
-            "email": "houba.houba@marsupilami.com",
+        "/api/v1/token",
+        data={
+            "username": "houba.houba@marsupilami.com",
             "password": "password",
         },
     )

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.config import settings
-from app.routes import clearcuts, departments, users, referential, clearcuts_map
+from app.routes import clearcuts, departments, users, referential, clearcuts_map, token
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -19,6 +19,7 @@ app.add_middleware(
 # Include routes
 app.include_router(clearcuts.router)
 app.include_router(departments.router)
+app.include_router(token.router)
 app.include_router(clearcuts_map.router)
 app.include_router(users.router)
 app.include_router(referential.router)
