@@ -1,5 +1,5 @@
 import pytest
-from test.common.clear_cut import new_clear_cut
+from common.clear_cut import new_clear_cut
 
 
 def test_clear_cut_creation(db):

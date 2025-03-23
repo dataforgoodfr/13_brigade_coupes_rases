@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from pytest import Session
 from app.models import Department
-from test.common.user import get_admin_user_token, get_volunteer_user_token, new_user
+from common.user import get_admin_user_token, get_volunteer_user_token, new_user
 
 
 def test_create_user(client: TestClient, db: Session):

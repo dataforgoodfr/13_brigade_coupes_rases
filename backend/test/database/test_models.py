@@ -1,7 +1,7 @@
 import pytest
 from app.models import Department
-from test.common.clear_cut import new_clear_cut
-from test.common.user import new_user
+from common.clear_cut import new_clear_cut
+from common.user import new_user
 
 
 def test_user_creation(db):
