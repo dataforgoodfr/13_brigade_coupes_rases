@@ -24,9 +24,13 @@ engine = create_engine(
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Settings tables are not truncated as their data is generated in a migration.
+SETTINGS_TABLES = ["departments"]
+
 
 @pytest.fixture(scope="session")
 def migration():
+    print("Running migrations")
     command.upgrade(alembic_cfg, "head")
 
 
@@ -45,7 +49,9 @@ def nuke_all_tables():
     db = SessionLocal()
     try:
         metadata = Base.metadata
-        tables = ", ".join(table.name for table in metadata.sorted_tables)
+        tables = ", ".join(
+            table.name for table in metadata.sorted_tables if table.name not in SETTINGS_TABLES
+        )
         db.execute(text(f"TRUNCATE TABLE {tables} CASCADE"))
         db.commit()
     except Exception as e:
