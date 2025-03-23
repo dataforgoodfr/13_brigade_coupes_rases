@@ -71,6 +71,9 @@ class ClearCut(Base):
     user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    address = Column(String, nullable=False)
+    name_natura = Column(String, nullable=True)
+    number_natura = Column(String, nullable=True)
 
     department = relationship("Department", back_populates="clear_cuts")
     user = relationship("User", back_populates="clear_cuts")
