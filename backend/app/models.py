@@ -1,3 +1,4 @@
+from enum import Enum
 from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey, Float
 from geoalchemy2 import Geometry
 from app.database import Base
@@ -57,7 +58,9 @@ class Department(Base):
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
 
-    STATUSES = ["pending", "validated"]
+    class Status(str, Enum):
+        PENDING = "pending"
+        VALIDATED = "validated"
 
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
@@ -80,8 +83,8 @@ class ClearCut(Base):
 
     @validates("status")
     def validate_status(self, key, value):
-        if value not in ClearCut.STATUSES:
-            raise ValueError(f"Status must be one of: {', '.join(ClearCut.STATUSES)}")
+        if value not in ClearCut.Status:
+            raise ValueError(f"Status must be one of: {', '.join(ClearCut.Status)}")
         return value
 
 
