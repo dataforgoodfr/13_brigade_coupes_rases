@@ -1,9 +1,7 @@
 import os
 import boto3
 from dotenv import load_dotenv
-import os
 from pykeepass import PyKeePass
-from dotenv import load_dotenv
 
 class S3Manager:
     def __init__(self):
