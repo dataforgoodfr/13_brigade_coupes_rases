@@ -177,6 +177,7 @@ def seed_database():
         clear_cuts = [
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=10),
+                address="123 Main St, Paris, France",
                 slope_percentage=15.5,
                 location=from_shape(Point(2.380192, 48.878899), SRID),
                 boundary=from_shape(
@@ -205,6 +206,7 @@ def seed_database():
             ),
             ClearCut(
                 cut_date=datetime.now() - timedelta(days=5),
+                address="83 Rue des Rosiers, Paris, France",
                 slope_percentage=8.3,
                 location=from_shape(Point(2.386007, 48.880959), SRID),
                 boundary=from_shape(
