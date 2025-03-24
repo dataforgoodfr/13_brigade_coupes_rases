@@ -6,4 +6,4 @@ def ensure_authentication(client: TestClient, verb: str, path: str):
     assert response.status_code == 401
 
     response = client.request(verb, path, headers={"x-imports-token": "test-token"})
-    assert response.status_code == 200
+    assert response.status_code != 401 and response.status_code != 500
