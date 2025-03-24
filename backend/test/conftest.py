@@ -82,3 +82,17 @@ def client(nuke_all_tables, db):
     client = TestClient(app)
     yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+def imports_client(nuke_all_tables, db):
+    def override_get_db():
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    client = TestClient(app, headers={"x-imports-token": "test-token"})
+    yield client
+    app.dependency_overrides.clear()

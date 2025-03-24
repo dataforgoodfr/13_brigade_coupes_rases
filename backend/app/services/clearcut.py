@@ -1,14 +1,15 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut
+from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut, Department
 from app.schemas.clearcut import (
     ClearCutCreate,
     ClearCutPatch,
 )
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
-from geoalchemy2.shape import to_shape
+from geoalchemy2.shape import to_shape, from_shape
+from shapely.geometry import Point, MultiPolygon
 from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID
 
 from app.schemas.clearcut_map import ClearCutPreview, ClearCutMapResponse
@@ -19,13 +20,37 @@ _sridDatabase = 4326
 
 
 def create_clearcut(db: Session, clearcut: ClearCutCreate):
+    department = (
+        db.query(Department).filter(Department.code == clearcut.department_code).first()
+    )
+    if not department:
+        raise ValueError(f"Department with code {clearcut.department_code} not found")
+
+    intersecting_clearcut = (
+        db.query(ClearCut)
+        .filter(
+            ClearCut.boundary.ST_Intersects(
+                from_shape(MultiPolygon(clearcut.boundary), srid=4326)
+            )
+        )
+        .first()
+    )
+
+    if intersecting_clearcut:
+        raise ValueError(
+            f"New clearcut boundary intersects with existing clearcut ID {intersecting_clearcut.id}"
+        )
+
     db_item = ClearCut(
         cut_date=clearcut.cut_date,
         slope_percentage=clearcut.slope_percentage,
-        location=WKTElement(clearcut.location),
-        boundary=WKTElement(clearcut.boundary),
-        status="pending",
-        department_id=clearcut.department_id,
+        location=from_shape(Point(clearcut.location)),
+        boundary=from_shape(MultiPolygon(clearcut.boundary)),
+        status=ClearCut.Status.PENDING,
+        department_id=department.id,
+        address=clearcut.address,
+        name_natura=clearcut.name_natura,
+        number_natura=clearcut.number_natura,
     )
     db.add(db_item)
     db.commit()

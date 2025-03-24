@@ -1,64 +1,70 @@
 from datetime import datetime
 from logging import getLogger
 from pydantic import BaseModel, field_validator, Field, ConfigDict
-from shapely.geometry import Point, Polygon
-from shapely.wkt import loads
+from shapely.geometry import Point, MultiPolygon
 from typing import List, Optional, Tuple
-import numpy as np
+from pydantic import BeforeValidator
+from typing import Annotated
 
 from app.schemas.shared import DepartmentBase, UserBase
 
 logger = getLogger(__name__)
 
 
-# Schema for creating a new ClearCut instance
+def validate_boundary(value: List[List[List[Tuple[float, float]]]]):
+    try:
+        MultiPolygon(value)
+        return value
+    except Exception as exception:
+        print(exception)
+        raise ValueError("Invalid geometry format for boundary") from exception
 
 
-class ClearCutBase(BaseModel):
+def validate_location(value: Tuple[float, float]):
+    try:
+        Point(value)
+        return value
+    except Exception as exception:
+        print(exception)
+        raise ValueError("Invalid point format for location") from exception
+
+
+MultiPolygonType = Annotated[
+    List[List[List[Tuple[float, float]]]], BeforeValidator(validate_boundary)
+]
+
+LocationType = Annotated[Tuple[float, float], BeforeValidator(validate_location)]
+
+
+class ClearCutCreate(BaseModel):
     slope_percentage: float
     cut_date: datetime
-    department_id: int
+    location: LocationType
+    boundary: MultiPolygonType
+    department_code: str
+    name_natura: str
+    number_natura: str
+    address: str
 
 
-class ClearCutCreate(ClearCutBase):
-    location: str = Field(
-        default_factory=str, json_schema_extra={"example": "POINT(48.8566 2.3522)"}
+class ImportsClearCutResponse(BaseModel):
+    id: int
+    department_code: str
+    slope_percentage: float
+    cut_date: datetime
+    created_at: datetime
+    updated_at: datetime
+    department_code: str
+    location: Tuple[float, float] = Field(
+        ...,
+        json_schema_extra={"example": "[2.380192, 48.878899]"},
     )
-    boundary: str = Field(
-        default_factory=str,
-        json_schema_extra={
-            "example": "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
-        },
+    boundary: List[List[List[Tuple[float, float]]]] = Field(
+        ...,
+        json_schema_extra={"example": "[[[[2.381136, 48.881707], [2.381136, 48.881707]]]]"},
     )
-    department_id: int
 
-    @field_validator("location")
-    def validate_location(cls, value: str) -> str:
-        try:
-            # Convert the WKT string into a geometric object
-            point = loads(value)
-            if not isinstance(point, Point):
-                raise ValueError("Location must be a valid Point geometry")
-        except Exception as e:
-            raise ValueError("Invalid geometry format for location") from e
-        return value
-
-    @field_validator("boundary")
-    def validate_boundary(cls, value: str) -> str:
-        try:
-            # Convert the WKT string into a geometric object
-            polygon = loads(value)
-            if not isinstance(polygon, Polygon):
-                raise ValueError("Boundary must be a valid Polygon geometry")
-
-            coordinates = np.array(polygon.exterior.coords)
-            # TODO Improove code efficiency
-            if np.isnan(coordinates).any():
-                raise ValueError("NaN values detected in coordinates.")
-
-        except Exception as e:
-            raise ValueError("Invalid geometry format for boundary") from e
-        return value
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ClearCutPatch(BaseModel):
@@ -72,8 +78,10 @@ class ClearCutPatch(BaseModel):
         return value
 
 
-class ClearCutResponse(ClearCutBase):
+class ClearCutResponse(BaseModel):
     id: int
+    slope_percentage: float
+    cut_date: datetime
     status: str
     user_id: Optional[int]
     created_at: datetime
