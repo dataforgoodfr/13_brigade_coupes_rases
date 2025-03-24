@@ -65,7 +65,9 @@ class ClearCut(Base):
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
     slope_percentage = Column(Float, index=True)
-    location = Column(Geometry("Point"), index=True)
+    location = Column(
+        Geometry(geometry_type="Point", srid=4326, spatial_index=True), index=True
+    )
     boundary = Column(
         Geometry(geometry_type="MultiPolygon", srid=4326, spatial_index=True), index=True
     )

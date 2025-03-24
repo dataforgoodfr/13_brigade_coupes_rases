@@ -44,6 +44,7 @@ def test_department_creation(db):
 def test_clear_cut_creation(db):
     clear_cut = ClearCut(
         cut_date=datetime.now(),
+        address="42 Main St, Paris, France",
         slope_percentage=15.5,
         location=WKTElement("POINT(48.8566 2.3522)"),
         boundary=WKTElement(
@@ -80,6 +81,7 @@ def test_associations(db):
     department = Department(code="75", name="Paris")
     clear_cut = ClearCut(
         cut_date=datetime.now(),
+        address="42 Main St, Paris, France",
         slope_percentage=20.0,
         location=WKTElement("POINT(48.8566 2.3522)"),
         boundary=WKTElement(
