@@ -8,6 +8,7 @@ def new_user(role: str = "volunteer", password: str = "password"):
     return User(
         firstname="Houba",
         lastname="Houba",
+        login="HoubaHouba",
         email="houba.houba@marsupilami.com",
         role=role,
         password=get_password_hash(password),

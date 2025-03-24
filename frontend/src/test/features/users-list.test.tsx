@@ -8,19 +8,5 @@ describe("Users list", () => {
 		const { user } = renderApp({ route: "/login" });
 		await loginForm({ user }).logAdministrator();
 		await user.click(await screen.findByTitle("Utilisateurs"));
-
-		//const currentPathname = window.location.pathname;
-
-		// TODO: tests
-		//expect(currentPathname).toEqual("/users");
-		//expect(screen.getByText("Liste des utilisateurs")).toBeDefined();
 	});
-
-	// it("should not see users list if volunteer", async () => {
-	//   const { user, router } = renderApp({ route: "/login" });
-	//   await loginForm({ user }).logVolunteer();
-	//   await router.navigate({ to: "/users" });
-	//   const currentPathname = window.location.pathname;
-	//   expect(currentPathname).toEqual("/login");
-	// });
 });

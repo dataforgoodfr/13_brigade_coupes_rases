@@ -9,6 +9,7 @@ def test_create_user(client: TestClient, db: Session):
     userJson = {
         "firstname": "John",
         "lastname": "Tree",
+        "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
         "role": "volunteer",
     }
@@ -32,6 +33,7 @@ def test_create_user_without_admin_right_should_return_forbidden(
     userJson = {
         "firstname": "John",
         "lastname": "Tree",
+        "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
         "role": "volunteer",
     }
@@ -136,3 +138,12 @@ def test_login_user_not_found_should_return_unauthorized(client):
         },
     )
     assert response.status_code == 401
+
+
+def test_get_me(client, db):
+    token = get_admin_user_token(client, db)
+    response = client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["email"] == "houba.houba@marsupilami.com"

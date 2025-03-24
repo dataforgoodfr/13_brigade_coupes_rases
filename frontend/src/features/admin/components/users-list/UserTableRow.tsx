@@ -17,7 +17,7 @@ export const UserTableRow: React.FC<UserTableRowProps> = ({ user }) => {
 			<TableCell>{user.role}</TableCell>
 			{user.role === "volunteer" && (
 				<TableCell>
-					{user.affectedDepartments.map(({ name }) => name).join(",")}
+					{user.departments.map(({ name }) => name).join(",")}
 				</TableCell>
 			)}
 		</TableRow>

@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from app.deps import db_session
 from app.services.user import get_user_by_email
 
+from app.config import settings
+
 
 def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
@@ -21,11 +23,9 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60
 
 
 class Token(BaseModel):

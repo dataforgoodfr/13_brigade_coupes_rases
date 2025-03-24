@@ -1,16 +1,32 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Department, User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from logging import getLogger
 
 logger = getLogger(__name__)
+
+
+def map_user(user: User) -> UserResponse:
+    return UserResponse(
+        id=user.id,
+        deleted_at=user.deleted_at,
+        created_at=user.created_at,
+        role=user.role,
+        updated_at=user.updated_at,
+        firstname=user.firstname,
+        lastname=user.lastname,
+        login=user.login,
+        email=user.email,
+        departments=[str(department.id) for department in user.departments],
+    )
 
 
 def create_user(db: Session, user: UserCreate):
     new_user = User(
         firstname=user.firstname,
         lastname=user.lastname,
+        login=user.login,
         email=user.email,
         role=user.role,
     )
@@ -29,6 +45,7 @@ def create_user(db: Session, user: UserCreate):
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     users = db.query(User).offset(skip).limit(limit).all()
+    print(f"{users}")
     return users
 
 
