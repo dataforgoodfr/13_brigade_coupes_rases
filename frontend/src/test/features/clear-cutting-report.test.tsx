@@ -1,4 +1,4 @@
-import { generateAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { renderApp } from "@/test/renderApp";
 import { screen } from "@testing-library/react";
@@ -8,7 +8,7 @@ describe("Clear cutting report", () => {
 	it("should display title", async () => {
 		server.use(
 			mockClearCutting({
-				address: generateAddressMock({ city: "Paris" }),
+				address: createAddressMock({ city: "Paris" }),
 				cutYear: 2024,
 			}),
 		);

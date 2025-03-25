@@ -44,14 +44,10 @@ services:
       - "8080:8080"
     depends_on:
       - db
-    environment:
-      ALLOWED_ORIGINS: "*"
-      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
-      ENVIRONMENT: development
 
   frontend:
       build:
-        args: 
+        args:
           VITE_API: http://localhost:8080
         context: frontend
         dockerfile: Dockerfile

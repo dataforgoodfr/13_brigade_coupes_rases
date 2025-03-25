@@ -24,6 +24,6 @@ seed-db: ## Seed the database
 	poetry run python -m seed_dev
 
 test: ## Run the tests
-	poetry run pytest test/
+	ENVIRONMENT=test poetry run pytest test/
 
 .PHONY: test help

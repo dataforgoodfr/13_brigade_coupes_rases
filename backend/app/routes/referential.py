@@ -7,7 +7,7 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
-router = APIRouter(prefix="/referential", tags=["Referential"])
+router = APIRouter(prefix="/api/v1/referential", tags=["Referential"])
 db_dependency = get_db_session()
 
 

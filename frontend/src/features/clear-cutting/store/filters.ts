@@ -3,10 +3,13 @@ import { boundsSchema } from "./types";
 
 const filtersRequestSchema = z.object({
 	cutYears: z.array(z.number()),
-	areaMeters: z.number().optional(),
+	areas: z.number().array().optional(),
 	geoBounds: boundsSchema,
-	ecologicalZoning: z.array(z.string()).optional(),
 	departments: z.array(z.string()).optional(),
+	statuses: z.array(z.string()).optional(),
+	excessiveSlop: z.boolean().optional(),
+	favorite: z.boolean().optional(),
+	ecologicalZoning: z.boolean().optional(),
 });
 
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
@@ -14,10 +17,12 @@ export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
 export const filtersResponseSchema = z.object({
 	tags: z.array(z.string()).optional(),
 	cutYears: z.array(z.number()),
-	ecologicalZoning: z.string().array().optional(),
 	departments: z.string().array().optional(),
-	status: z.string().array().optional(),
+	statuses: z.string().array().optional(),
 	areaPresetsHectare: z.array(z.number()),
+	excessiveSlop: z.boolean().optional(),
+	favorite: z.boolean().optional(),
+	ecologicalZoning: z.boolean().optional(),
 });
 
 export type FiltersResponse = z.infer<typeof filtersResponseSchema>;
