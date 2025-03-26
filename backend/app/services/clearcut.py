@@ -8,8 +8,7 @@ from app.schemas.clearcut import (
 )
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
-from geoalchemy2.shape import to_shape, from_shape
-from shapely.geometry import Point, MultiPolygon
+from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID
 
 from app.schemas.clearcut_map import ClearCutPreview, ClearCutMapResponse
@@ -51,8 +50,8 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
-    db_item.location = to_shape(db_item.location, srid=_sridDatabase).wkt
-    db_item.boundary = to_shape(db_item.boundary, srid=_sridDatabase).wkt
+    db_item.location = to_shape(db_item.location).wkt
+    db_item.boundary = to_shape(db_item.boundary).wkt
     return db_item
 
 

@@ -7,7 +7,7 @@ from datetime import datetime
 logger = getLogger(__name__)
 
 
-class ClearCutPreview(ClearCutBase):
+class ClearCutPreview(BaseModel):
     slope_percentage: float
     cut_date: datetime
     department_id: int
