@@ -12,8 +12,8 @@ def test_create_clearcut_invalid_department(db):
         department_code="1024",
         cut_date=date.today(),
         slope_percentage=10,
-        location=[45.0, 25.0],
-        boundary=[[[[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]]],
+        location="POINT(45.0 25.0)",
+        boundary="MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)))",
         address="Test Address",
         name_natura="Test Nature",
         number_natura="123",
@@ -32,7 +32,7 @@ def test_create_clearcut_with_intersection(db):
         address="42 Main St, Paris, France",
         location=from_shape(Point(1.0, 1.0), srid=4326),
         boundary=from_shape(
-            MultiPolygon([[[[0.0, 0.0], [0.0, 2.0], [2.0, 2.0], [2.0, 0.0], [0.0, 0.0]]]]),
+            MultiPolygon([[[[0.0, 48.0], [0.0, 50.0], [2.0, 50.0], [2.0, 48.0], [0.0, 48.0]]]]),
             srid=4326,
         ),
         status=ClearCut.Status.PENDING,
@@ -47,8 +47,8 @@ def test_create_clearcut_with_intersection(db):
         department_code=department.code,
         cut_date=date.today(),
         slope_percentage=10,
-        location=(1.5, 1.5),
-        boundary=[[[(1.0, 1.0), (1.0, 3.0), (3.0, 3.0), (3.0, 1.0), (1.0, 1.0)]]],
+        location="POINT (1.5 1.5)",
+        boundary="MULTIPOLYGON(((1.0 49.0, 1.0 49.5, 1.5 49.5, 1.5 49.0, 1.0 49.0)))",
         address="Test Address",
         name_natura="Test Nature",
         number_natura="123",
@@ -67,8 +67,8 @@ def test_create_clearcut_success(db):
         department_code=department.code,
         cut_date=date.today(),
         slope_percentage=10,
-        location=(45.0, 25.0),
-        boundary=[[[(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]]],
+        location="POINT (45 25)",
+        boundary="MULTIPOLYGON(((0 0, 0 1, 1 1, 1 0, 0 0)))",
         address="Test Address",
         name_natura="Test Nature",
         number_natura="123",
@@ -79,8 +79,8 @@ def test_create_clearcut_success(db):
     assert created_clearcut.department_id == department.id
     assert created_clearcut.cut_date == clearcut.cut_date
     assert created_clearcut.slope_percentage == clearcut.slope_percentage
-    assert created_clearcut.location == Point(clearcut.location)
-    assert created_clearcut.boundary == MultiPolygon(clearcut.boundary)
+    assert created_clearcut.location == "POINT (45 25)"
+    assert created_clearcut.boundary == "MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)))"
     assert created_clearcut.address == clearcut.address
     assert created_clearcut.name_natura == clearcut.name_natura
     assert created_clearcut.number_natura == clearcut.number_natura

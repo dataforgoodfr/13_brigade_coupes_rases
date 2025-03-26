@@ -28,11 +28,7 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
 
     intersecting_clearcut = (
         db.query(ClearCut)
-        .filter(
-            ClearCut.boundary.ST_Intersects(
-                from_shape(MultiPolygon(clearcut.boundary), srid=4326)
-            )
-        )
+        .filter(ClearCut.boundary.ST_Intersects(WKTElement(clearcut.boundary, srid=4326)))
         .first()
     )
 
@@ -44,8 +40,8 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     db_item = ClearCut(
         cut_date=clearcut.cut_date,
         slope_percentage=clearcut.slope_percentage,
-        location=from_shape(Point(clearcut.location)),
-        boundary=from_shape(MultiPolygon(clearcut.boundary)),
+        location=WKTElement(clearcut.location),
+        boundary=WKTElement(clearcut.boundary),
         status=ClearCut.Status.PENDING,
         department_id=department.id,
         address=clearcut.address,

@@ -19,8 +19,6 @@ def post_clearcut(params: ClearCutCreate, db: Session = db_dependency):
     clearcut = create_clearcut(db, params)
 
     clearcut.department_code = clearcut.department.code
-    clearcut.location = clearcut.location.coords[0]
-    clearcut.boundary = [[list(polygon.exterior.coords)] for polygon in clearcut.boundary.geoms]
 
     return clearcut
 

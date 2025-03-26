@@ -1,46 +1,66 @@
 from datetime import datetime
 from logging import getLogger
-from pydantic import BaseModel, field_validator, Field, ConfigDict
+from pydantic import (
+    BaseModel,
+    field_validator,
+    Field,
+    ConfigDict,
+)
+
 from shapely.geometry import Point, MultiPolygon
 from typing import List, Optional, Tuple
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, field_validator
 from typing import Annotated
+from shapely import wkt
+
 
 from app.schemas.shared import DepartmentBase, UserBase
 
 logger = getLogger(__name__)
 
 
-def validate_boundary(value: List[List[List[Tuple[float, float]]]]):
+def validate_boundary(value: str) -> MultiPolygon:
     try:
-        MultiPolygon(value)
+        multi_polygon = wkt.loads(value)
+        if not isinstance(multi_polygon, MultiPolygon):
+            raise ValueError("Invalid geometry format for boundary. Expected a WKT format.")
         return value
     except Exception as exception:
         print(exception)
-        raise ValueError("Invalid geometry format for boundary") from exception
+        raise ValueError(
+            "Invalid geometry format for boundary. Expected a WKT format."
+        ) from exception
 
 
-def validate_location(value: Tuple[float, float]):
+def validate_location(value: str) -> Point:
     try:
-        Point(value)
+        point = wkt.loads(value)
+        if not isinstance(point, Point):
+            raise ValueError("Invalid point format for location. Expected a WKT format.")
         return value
     except Exception as exception:
         print(exception)
-        raise ValueError("Invalid point format for location") from exception
+        raise ValueError(
+            "Invalid point format for location. Expected a WKT format."
+        ) from exception
 
 
-MultiPolygonType = Annotated[
-    List[List[List[Tuple[float, float]]]], BeforeValidator(validate_boundary)
+BoundaryType = Annotated[
+    str,
+    BeforeValidator(validate_boundary),
 ]
 
-LocationType = Annotated[Tuple[float, float], BeforeValidator(validate_location)]
+LocationType = Annotated[
+    str,
+    BeforeValidator(validate_location),
+]
 
 
 class ClearCutCreate(BaseModel):
     slope_percentage: float
     cut_date: datetime
     location: LocationType
-    boundary: MultiPolygonType
+    boundary: BoundaryType
     department_code: str
     name_natura: str
     number_natura: str
@@ -55,13 +75,15 @@ class ImportsClearCutResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     department_code: str
-    location: Tuple[float, float] = Field(
+    location: str = Field(
         ...,
-        json_schema_extra={"example": "[2.380192, 48.878899]"},
+        json_schema_extra={"example": "POINT(2.380192, 48.878899)"},
     )
-    boundary: List[List[List[Tuple[float, float]]]] = Field(
+    boundary: str = Field(
         ...,
-        json_schema_extra={"example": "[[[[2.381136, 48.881707], [2.381136, 48.881707]]]]"},
+        json_schema_extra={
+            "example": "MULTIPOLYGON((((2.381136, 48.881707), (2.381136, 48.881707)))"
+        },
     )
 
     model_config = ConfigDict(from_attributes=True)
@@ -90,12 +112,12 @@ class ClearCutResponse(BaseModel):
     department: Optional[DepartmentBase] = None
     location: Tuple[float, float] = Field(
         default_factory=Tuple[float, float],
-        json_schema_extra={"example": "[2.380192, 48.878899]"},
+        json_schema_extra={"example": "POINT(2.380192 48.878899)"},
     )
     boundary: List[Tuple[float, float]] = Field(
         default_factory=str,
         json_schema_extra={
-            "example": "[[2.381136, 48.881707], [2.379699, 48.880338], [2.378497, 48.878687], [2.378561, 48.877615], [2.379162, 48.876825], [2.381094, 48.876175], [2.380879, 48.877573], [2.382145, 48.8788], [2.384012, 48.879407], [2.383454, 48.880127], [2.381694, 48.880042], [2.381372, 48.880973], [2.381136, 48.881707]]"
+            "example": "MULTIPOLYGON(((2.381136 48.881707, 2.379699 48.880338, 2.378497 48.878687, 2.378561 48.877615, 2.379162 48.876825, 2.381094 48.876175, 2.380879 48.877573, 2.382145 48.8788, 2.384012 48.879407, 2.383454 48.880127, 2.381694 48.880042, 2.381372 48.880973, 2.381136 48.881707)))"
         },
     )
     department_id: int
