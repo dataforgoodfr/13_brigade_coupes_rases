@@ -2,6 +2,7 @@
 	"name": "Backend",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"dockerComposeFile": "../../docker-compose.yml",
+	"runServices": ["backend"],
 	"service": "backend",
 	"workspaceFolder": "/app/backend",
 	"remoteUser": "devuser",

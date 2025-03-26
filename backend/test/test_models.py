@@ -30,11 +30,15 @@ def test_user_creation(db):
 
 
 def test_department_creation(db):
-    department = Department(code="75", name="Paris")
+    department = Department(code="13", name="Bouches du Rhône")
     db.add(department)
     db.commit()
 
     assert department.id is not None
+
+    with pytest.raises(ValueError) as exc_info:
+        Department(code="75", name=None)
+    assert str(exc_info.value) == "Name cannot be None"
 
 
 def test_clear_cut_creation(db):

@@ -1,8 +1,17 @@
-FROM node:23-alpine3.21
+FROM node:23-alpine3.21 as build-step
 
-ENV VITE_API="https://localhost/api"
+ARG VITE_API
 
 COPY . . 
-RUN npm i -g pnpm &&  pnpm i && pnpm tsc -b && pnpm vite build    
+RUN npm i -g pnpm &&  pnpm i && pnpm  build    
 
-ENTRYPOINT [ "pnpm", "vite", "preview", "--host", "0.0.0.0" ]
+
+#stage2
+FROM nginx
+COPY --from=build-step /app/public /usr/share/nginx/html
+
+EXPOSE 80
+
+STOPSIGNAL SIGTERM
+
+CMD ["nginx", "-g", "daemon off;"]

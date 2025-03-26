@@ -2,7 +2,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import { cn } from "@/lib/utils";
 import { type ComponentProps, useMemo } from "react";
-
+export type SliderProps = ComponentProps<typeof SliderPrimitive.Root>;
 export function Slider({
 	className,
 	defaultValue,
@@ -11,7 +11,7 @@ export function Slider({
 	max = 100,
 
 	...props
-}: ComponentProps<typeof SliderPrimitive.Root>) {
+}: SliderProps) {
 	const _values = useMemo(
 		() =>
 			Array.isArray(value)

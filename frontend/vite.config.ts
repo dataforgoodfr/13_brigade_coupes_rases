@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
 		{},
 	);
 	return {
-		define: mode==='production' ?  viteEnv : undefined,
+		define: mode === "production" ? viteEnv : undefined,
 		test: {
 			environment: "jsdom",
 			setupFiles: ["src/test/setup.ts"],

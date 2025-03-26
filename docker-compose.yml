@@ -30,6 +30,7 @@ services:
         - pgadmin-data:/var/lib/pgadmin
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
+    working_dir: /app/backend
     build:
       target: development
       context: backend
@@ -43,12 +44,11 @@ services:
       - "8080:8080"
     depends_on:
       - db
-    environment:
-      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
-      ENVIRONMENT: development
 
   frontend:
       build:
+        args:
+          VITE_API: http://localhost:8080
         context: frontend
         dockerfile: Dockerfile
       container_name: coupes-rases-frontend
@@ -56,6 +56,3 @@ services:
         - "8081:8000"
       depends_on:
         - backend
-      environment:
-        # Base url of backend api
-        VITE_API: http://localhost:8000/api

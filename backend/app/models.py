@@ -47,6 +47,12 @@ class Department(Base):
     users = relationship("User", secondary=user_department, back_populates="departments")
     clear_cuts = relationship("ClearCut", back_populates="department")
 
+    @validates("name")
+    def validate_name(self, key, value):
+        if key == "name" and value is None:
+            raise ValueError("Name cannot be None")
+        return value
+
 
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
@@ -72,3 +78,12 @@ class ClearCut(Base):
         if value not in ClearCut.STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(ClearCut.STATUSES)}")
         return value
+
+
+CLEAR_CUT_PREVIEW_COLUMNS = [
+    ClearCut.location,
+    ClearCut.boundary,
+    ClearCut.slope_percentage,
+    ClearCut.department_id,
+    ClearCut.created_at,
+]

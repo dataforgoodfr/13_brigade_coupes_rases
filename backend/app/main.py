@@ -1,15 +1,26 @@
 from fastapi import FastAPI
-from app.routes import clearcut, departement, user, referential
+from app.config import settings
+from app.routes import clearcuts, departments, users, referential, clearcuts_map
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
 )
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS.split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Include routes
-app.include_router(clearcut.router)
-app.include_router(departement.router)
-app.include_router(user.router)
+app.include_router(clearcuts.router)
+app.include_router(departments.router)
+app.include_router(clearcuts_map.router)
+app.include_router(users.router)
 app.include_router(referential.router)
 
 

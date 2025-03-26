@@ -1,4 +1,4 @@
-FROM python:3.11 as builder
+FROM python:3.13 as builder
 ARG SRC_DIR="."
 RUN pip install poetry
 
@@ -16,11 +16,15 @@ RUN  poetry install --without dev --no-root
 
 FROM builder as development 
 
-RUN  poetry install && useradd -ms /bin/bash devuser && chown -R devuser ./ 
+RUN  useradd -ms /bin/bash devuser \
+        && chown -R devuser ./ \
+        && chown -R devuser ${POETRY_CACHE_DIR}
 
 USER devuser
 
-FROM python:3.11-slim-buster as runtime
+RUN  poetry install
+
+FROM python:3.13-slim-buster as runtime
 
 ARG SRC_DIR="."
 ENV VIRTUAL_ENV=/app/.venv \
