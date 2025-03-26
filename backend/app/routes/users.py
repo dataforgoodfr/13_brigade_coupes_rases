@@ -26,7 +26,7 @@ def create_new_user(
     admin=Depends(get_admin_user),
 ) -> UserResponse:
     logger.info(db)
-    return create_user(db, item)
+    return map_user(create_user(db, item))
 
 
 @router.get("/", response_model=list[UserResponse])
@@ -44,4 +44,4 @@ def get_user(id: int, db: Session = db_session) -> UserResponse:
 @router.put("/{id}", response_model=UserResponse, status_code=200)
 def update_existing_user(id: int, item: UserUpdate, db: Session = db_session) -> UserResponse:
     logger.info(db)
-    return update_user(id, item, db)
+    return map_user(update_user(id, item, db))

@@ -22,7 +22,7 @@ def map_user(user: User) -> UserResponse:
     )
 
 
-def create_user(db: Session, user: UserCreate):
+def create_user(db: Session, user: UserCreate) -> User:
     new_user = User(
         firstname=user.firstname,
         lastname=user.lastname,
@@ -54,7 +54,7 @@ def get_users_by_id(id: int, db: Session):
     return user
 
 
-def update_user(id: int, user_in: UserUpdate, db: Session):
+def update_user(id: int, user_in: UserUpdate, db: Session) -> User:
     user_db = db.get(User, id)
     if not user_db:
         raise HTTPException(status_code=404, detail="user not found")
