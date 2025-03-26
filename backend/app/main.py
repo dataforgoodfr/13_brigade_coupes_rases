@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.config import settings
-from app.routes import clearcuts, departments, users, referential, clearcuts_map
+from app.routes import clearcuts, departments, users, referential, clearcuts_map, imports
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
