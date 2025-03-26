@@ -4,9 +4,8 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
 from app.deps import get_db_session
-from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse
+from app.schemas.clearcut import ClearCutPatch, ClearCutResponse
 from app.services.clearcut import (
-    create_clearcut,
     get_clearcut,
     get_clearcut_by_id,
     update_clearcut,
@@ -16,12 +15,6 @@ logger = getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/clearcuts", tags=["Clearcuts"])
 db_dependency = get_db_session()
-
-
-@router.post("/", response_model=ClearCutResponse, status_code=201)
-def create_new_clearcut(item: ClearCutCreate, db: Session = db_dependency) -> ClearCutResponse:
-    logger.info(db)
-    return create_clearcut(db, item)
 
 
 @router.patch("/{id}", response_model=ClearCutResponse, status_code=201)
