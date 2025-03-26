@@ -7,7 +7,6 @@ import geopandas as gpd
 from utils.s3 import S3Manager
 from rasterio.features import shapes
 from utils.logging import etl_logger
-from utils.date_parser import parse_yyddd
 from utils.disjoin_set import DisjointSet
 from tqdm import tqdm
 
@@ -46,11 +45,7 @@ def load_from_S3(s3_prefix, zendo_filename, download_path):
         logger.error(f"❌ Error while downloading the file from S3: {e}")
 
 
-def filter_raster_by_date(
-    input_tif_filepath, 
-    output_tif_filepath,
-    start_date,
-    end_date):
+def filter_raster_by_date(input_tif_filepath, output_tif_filepath, start_date, end_date):
     """
     Filters a raster image by date range.
 
@@ -82,11 +77,12 @@ def filter_raster_by_date(
             # Get the optimal window size for reading blocks
             # This uses rasterio's built-in windowing to avoid loading the whole dataset
             windows = list(src.block_windows())
-            total_windows = len(windows)
+            # total_windows = len(windows)
 
             # Process each window/block separately
-            for idx, (window_idx, window) in enumerate(tqdm(windows, desc="Processing blocks", unit="block")):
-
+            for idx, (window_idx, window) in enumerate(
+                tqdm(windows, desc="Processing blocks", unit="block")
+            ):
                 # Read only the current window data
                 data = src.read(1, window=window)
 
@@ -144,9 +140,11 @@ def polygonize_tif(raster_path, vector_path):
         ) as shp:
             # Process in chunks using block windows
             windows = list(src.block_windows())
-            total_windows = len(windows)
+            # total_windows = len(windows)
 
-            for idx, (window_idx, window) in enumerate(tqdm(windows, desc="Polygonizing blocks", unit="block")):
+            for idx, (window_idx, window) in enumerate(
+                tqdm(windows, desc="Polygonizing blocks", unit="block")
+            ):
                 # Read only the data for this window
                 band = src.read(1, window=window)
 
@@ -201,9 +199,8 @@ def parse_sufosat_date(sufosat_date: float) -> pd.Timestamp:
 
 
 def pair_clear_cuts_through_space_and_time(
-    gdf: gpd.GeoDataFrame, 
-    max_meters_between_clear_cuts: int, 
-    max_days_between_clear_cuts: int) -> pd.DataFrame:
+    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+) -> pd.DataFrame:
     """
     Identifies pairs of clear-cuts that are within a specified distance and a
     specified number of days of each other.
@@ -323,9 +320,8 @@ def regroup_clear_cut_pairs(clear_cut_pairs: pd.DataFrame) -> list[set[int]]:
 
 
 def cluster_clear_cuts(
-    gdf: gpd.GeoDataFrame, 
-    max_meters_between_clear_cuts: int, 
-    max_days_between_clear_cuts: int) -> gpd.GeoDataFrame:
+    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+) -> gpd.GeoDataFrame:
     """
     Clusters individual clear-cuts based on spatial and temporal proximity.
     Parameters
@@ -413,9 +409,8 @@ def union_clear_cut_clusters(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def filter_out_clear_cuts_with_complex_shapes(
-    gdf: gpd.GeoDataFrame, 
-    concave_hull_ratio: float, 
-    concave_hull_score_threshold: float) -> gpd.GeoDataFrame:
+    gdf: gpd.GeoDataFrame, concave_hull_ratio: float, concave_hull_score_threshold: float
+) -> gpd.GeoDataFrame:
     """
     Filters out clear-cuts with overly complex shapes that may represent false positives.
 
@@ -460,7 +455,9 @@ def filter_out_clear_cuts_with_complex_shapes(
 
     return gdf
 
+
 # Generalized tools for validating data
+
 
 def save_data(data, filepath):
     """

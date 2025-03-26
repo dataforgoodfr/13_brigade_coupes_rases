@@ -97,4 +97,3 @@ class S3Manager:
             print(f"✅ File uploaded successfully: {s3_key}")
         except Exception as e:
             print(f"❌ Error uploading file to S3: {e}")
-            

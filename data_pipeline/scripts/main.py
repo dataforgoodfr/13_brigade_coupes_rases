@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 import yaml
 import os
-import sys
 import geopandas as gpd
 from utils.logging_etl import etl_logger
 from extract import check_tif_in_s3, data_update, extract_tif_data_and_upload, update_metadata
 from transform import (
     # Loading and transforming part
     load_from_S3,
-    filter_raster_by_date, 
-    parse_sufosat_date, 
-    polygonize_tif, 
+    filter_raster_by_date,
+    parse_sufosat_date,
+    polygonize_tif,
     # Clustering part
-    pair_clear_cuts_through_space_and_time,
-    regroup_clear_cut_pairs,
     cluster_clear_cuts,
     union_clear_cut_clusters,
     filter_out_clear_cuts_with_complex_shapes,
     # Export
-    save_data)
+    save_data,
+)
 
 # Configurer le logger
 logger = etl_logger("logs/main.log")
@@ -60,15 +58,16 @@ def extract_and_upload_data(update_info):
 
 
 def prepare_sufosat_v3(
-    s3_prefix:str,
-    zendo_filename:str,
-    download_path:str,
-    start_date:int,
-    end_date:int,
-    input_tif_filepath:str,
-    output_tif_filepath:str,
-    raster_path:str,
-    vector_path:str):
+    s3_prefix: str,
+    zendo_filename: str,
+    download_path: str,
+    start_date: int,
+    end_date: int,
+    input_tif_filepath: str,
+    output_tif_filepath: str,
+    raster_path: str,
+    vector_path: str,
+):
     # Load and transform the sufosat layer to a vector layer
     load_from_S3(s3_prefix, zendo_filename, download_path)
     filter_raster_by_date(input_tif_filepath, output_tif_filepath, start_date, end_date)
@@ -81,9 +80,8 @@ def prepare_sufosat_v3(
     save_data(
         gdf,
         os.path.join(
-            configs["transform_sufosat"]["download_path"], 
-            "processed_vector_data.geoparquet"
-        )
+            configs["transform_sufosat"]["download_path"], "processed_vector_data.geoparquet"
+        ),
     )
 
     # Transform the SUFOSAT date numbers into actual python dates
@@ -94,23 +92,25 @@ def prepare_sufosat_v3(
     save_data(
         gdf,
         os.path.join(
-            configs["transform_sufosat"]["download_path"], 
-            "clear_cuts_with_date.geoparquet"
-        )
+            configs["transform_sufosat"]["download_path"], "clear_cuts_with_date.geoparquet"
+        ),
     )
 
     gdf = cluster_clear_cuts(
-        gdf=gdf, 
-        max_meters_between_clear_cuts=configs["transform_sufosat"]["max_meters_between_clear_cuts"], 
-        max_days_between_clear_cuts=configs["transform_sufosat"]["max_meters_between_clear_cuts"]
+        gdf=gdf,
+        max_meters_between_clear_cuts=configs["transform_sufosat"][
+            "max_meters_between_clear_cuts"
+        ],
+        max_days_between_clear_cuts=configs["transform_sufosat"][
+            "max_meters_between_clear_cuts"
+        ],
     )
 
     save_data(
         gdf,
         os.path.join(
-            configs["transform_sufosat"]["download_path"], 
-            "clear_cuts_clustered.geoparquet"
-        )
+            configs["transform_sufosat"]["download_path"], "clear_cuts_clustered.geoparquet"
+        ),
     )
 
     gdf = union_clear_cut_clusters(gdf)
@@ -118,23 +118,22 @@ def prepare_sufosat_v3(
     save_data(
         gdf,
         os.path.join(
-            configs["transform_sufosat"]["download_path"], 
-            "clear_cuts_cluster_unioned.geoparquet"
-        )
+            configs["transform_sufosat"]["download_path"],
+            "clear_cuts_cluster_unioned.geoparquet",
+        ),
     )
 
     filter_out_clear_cuts_with_complex_shapes(
-        gdf=gdf, 
-        concave_hull_ratio=configs["transform_sufosat"]["magic_number"], 
-        concave_hull_score_threshold=configs["transform_sufosat"]["magic_number"]
+        gdf=gdf,
+        concave_hull_ratio=configs["transform_sufosat"]["magic_number"],
+        concave_hull_score_threshold=configs["transform_sufosat"]["magic_number"],
     )
 
     save_data(
         gdf,
         os.path.join(
-            configs["transform_sufosat"]["download_path"], 
-            "clear_cuts_processed.geoparquet"
-        )
+            configs["transform_sufosat"]["download_path"], "clear_cuts_processed.geoparquet"
+        ),
     )
 
     logger.info("✅ Preparation of the sufosat layer completed")
@@ -151,16 +150,20 @@ def run_pipeline():
 
         # Step 2: Prepare sufosat layer
         prepare_sufosat_v3(
-            s3_prefix= configs["extract_sufosat"]["s3_prefix"],
-            zendo_filename= configs["extract_sufosat"]["zendo_filename"],
-            download_path= configs["transform_sufosat"]["download_path"],
-            start_date= configs["transform_sufosat"]["start_date"],
-            end_date= configs["transform_sufosat"]["end_date"],
-            input_tif_filepath= configs["transform_sufosat"]["download_path"] + configs["extract_sufosat"]["zendo_filename"],
-            output_tif_filepath= configs["transform_sufosat"]["download_path"] + configs["transform_sufosat"]["filtered_raster"],
-            raster_path= configs["transform_sufosat"]["download_path"] + configs["transform_sufosat"]["filtered_raster"],
-            vector_path= configs["transform_sufosat"]["download_path"] + configs["transform_sufosat"]["polygonized_data"]
-            )
+            s3_prefix=configs["extract_sufosat"]["s3_prefix"],
+            zendo_filename=configs["extract_sufosat"]["zendo_filename"],
+            download_path=configs["transform_sufosat"]["download_path"],
+            start_date=configs["transform_sufosat"]["start_date"],
+            end_date=configs["transform_sufosat"]["end_date"],
+            input_tif_filepath=configs["transform_sufosat"]["download_path"]
+            + configs["extract_sufosat"]["zendo_filename"],
+            output_tif_filepath=configs["transform_sufosat"]["download_path"]
+            + configs["transform_sufosat"]["filtered_raster"],
+            raster_path=configs["transform_sufosat"]["download_path"]
+            + configs["transform_sufosat"]["filtered_raster"],
+            vector_path=configs["transform_sufosat"]["download_path"]
+            + configs["transform_sufosat"]["polygonized_data"],
+        )
 
         logger.info("✅ Pipeline ETL terminé avec succès")
     except Exception as e:
@@ -245,4 +248,3 @@ if __name__ == "__main__":
     #         logger.error(f"Erreur lors de l'exécution de la tâche '{task}': {str(e)}")
     # else:
     run_pipeline()
-
