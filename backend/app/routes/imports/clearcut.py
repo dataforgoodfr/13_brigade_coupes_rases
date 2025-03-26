@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from . import authenticate, router
@@ -16,11 +17,14 @@ from app.schemas.clearcut import ClearCutCreate, ImportsClearCutResponse
     "/clearcuts", response_model=ImportsClearCutResponse, dependencies=[Depends(authenticate)]
 )
 def post_clearcut(params: ClearCutCreate, db: Session = db_dependency):
-    clearcut = create_clearcut(db, params)
+    try:
+        clearcut = create_clearcut(db, params)
 
-    clearcut.department_code = clearcut.department.code
+        clearcut.department_code = clearcut.department.code
 
-    return clearcut
+        return clearcut
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err)) from err
 
 
 @router.put("/clearcuts/{id}", dependencies=[Depends(authenticate)])

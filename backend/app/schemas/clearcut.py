@@ -23,12 +23,14 @@ def validate_boundary(value: str) -> MultiPolygon:
     try:
         multi_polygon = wkt.loads(value)
         if not isinstance(multi_polygon, MultiPolygon):
-            raise ValueError("Invalid geometry format for boundary. Expected a WKT format.")
+            raise ValueError(
+                "Invalid geometry format for boundary. Expected a MULTIPOLYGON WKT format."
+            )
         return value
     except Exception as exception:
         print(exception)
         raise ValueError(
-            "Invalid geometry format for boundary. Expected a WKT format."
+            "Invalid geometry format for boundary. Expected a MULTIPOLYGON WKT format."
         ) from exception
 
 
@@ -36,12 +38,12 @@ def validate_location(value: str) -> Point:
     try:
         point = wkt.loads(value)
         if not isinstance(point, Point):
-            raise ValueError("Invalid point format for location. Expected a WKT format.")
+            raise ValueError("Invalid point format for location. Expected a POINT WKT format.")
         return value
     except Exception as exception:
         print(exception)
         raise ValueError(
-            "Invalid point format for location. Expected a WKT format."
+            "Invalid point format for location. Expected a POINT WKT format."
         ) from exception
 
 
