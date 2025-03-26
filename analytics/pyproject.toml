@@ -30,6 +30,12 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
+
+
+[tool.poetry.group.analytics.dependencies]
+gdal = "^3.10.2"
+geocube = "^0.7.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
