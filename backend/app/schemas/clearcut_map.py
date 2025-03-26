@@ -1,13 +1,16 @@
 from logging import getLogger
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Tuple
+from datetime import datetime
 
-from app.schemas.clearcut import ClearCutBase
 
 logger = getLogger(__name__)
 
 
 class ClearCutPreview(ClearCutBase):
+    slope_percentage: float
+    cut_date: datetime
+    department_id: int
     location: Tuple[float, float] = Field(
         default_factory=Tuple[float, float],
         json_schema_extra={"example": "[2.380192, 48.878899]"},
