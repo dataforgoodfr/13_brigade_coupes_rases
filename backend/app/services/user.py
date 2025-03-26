@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Department, User
@@ -43,13 +44,12 @@ def create_user(db: Session, user: UserCreate) -> User:
     return new_user
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 10):
+def get_users(db: Session, skip: int = 0, limit: int = 10) -> list[User]:
     users = db.query(User).offset(skip).limit(limit).all()
-    print(f"{users}")
     return users
 
 
-def get_users_by_id(id: int, db: Session):
+def get_user_by_id(id: int, db: Session) -> Optional[User]:
     user = db.get(User, id)
     return user
 
@@ -80,5 +80,5 @@ def update_user(id: int, user_in: UserUpdate, db: Session) -> User:
     return user_db
 
 
-def get_user_by_email(db: Session, email: str):
+def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter_by(email=email).first()

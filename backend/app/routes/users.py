@@ -8,7 +8,7 @@ from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.user import (
     create_user,
     get_users,
-    get_users_by_id,
+    get_user_by_id,
     map_user,
     update_user,
 )
@@ -38,7 +38,7 @@ def list_users(db: Session = db_session, skip: int = 0, limit: int = 10) -> list
 @router.get("/{id}", response_model=UserResponse)
 def get_user(id: int, db: Session = db_session) -> UserResponse:
     logger.info(db)
-    return map_user(get_users_by_id(id, db))
+    return map_user(get_user_by_id(id, db))
 
 
 @router.put("/{id}", response_model=UserResponse, status_code=200)
