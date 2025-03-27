@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import bcrypt
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
@@ -38,8 +38,6 @@ class TokenData(BaseModel):
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
-
-app = FastAPI()
 
 
 def verify_password(plain_password: str, hashed_password: str):
