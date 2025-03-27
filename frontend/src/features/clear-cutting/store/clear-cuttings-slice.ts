@@ -13,7 +13,8 @@ import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
-	type ClearCutting,
+	ClearCutting,
+	ClearCuttingResponse,
 	type ClearCuttings,
 	clearCuttingResponseSchema,
 	clearCuttingsResponseSchema,
@@ -130,4 +131,6 @@ export const useGetClearCutting = (id: string) => {
 	useEffect(() => {
 		dispatch(getClearCuttingThunk(id));
 	}, [id, dispatch]);
+
+	return useAppSelector(selectDetail);
 };

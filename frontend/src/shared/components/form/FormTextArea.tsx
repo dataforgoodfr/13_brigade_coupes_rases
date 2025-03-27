@@ -27,7 +27,7 @@ export function FormTextArea<T extends FieldValues = FieldValues>({
 						<Textarea
 							{...field}
 							disabled={disabled}
-							className="mt-2"
+							className="mt-2 max-w-[98%] mx-auto"
 							placeholder={placeholder}
 						/>
 					</FormControl>
