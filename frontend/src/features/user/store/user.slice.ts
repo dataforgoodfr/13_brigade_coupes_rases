@@ -1,54 +1,65 @@
 import {
 	type LoginRequest,
+	type TokenResponse,
 	type User,
 	type UserResponse,
+	tokenSchema,
 	userResponseSchema,
 	userSchema,
 } from "@/features/user/store/user";
-import { api } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import {
-	type PayloadAction,
-	createAsyncThunk,
-	createSlice,
-} from "@reduxjs/toolkit";
-const USER_KEY = "user";
+import { createAppAsyncThunk } from "@/shared/store/thunk";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+const TOKEN_KEY = "token";
 
-function setStoredUser(user: User | undefined) {
-	if (user) {
-		localStorage.setItem(USER_KEY, JSON.stringify(user));
+export function setStoredToken(token: TokenResponse | undefined) {
+	if (token) {
+		localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
 	} else {
-		localStorage.removeItem(USER_KEY);
+		localStorage.removeItem(TOKEN_KEY);
 	}
 }
-export function getStoredUser(): User | undefined {
-	const user = localStorage.getItem(USER_KEY);
-	if (user !== null) {
-		return userSchema.safeParse(JSON.parse(user)).data;
+export function getStoredToken(): TokenResponse | undefined {
+	const token = localStorage.getItem(TOKEN_KEY);
+	if (token !== null) {
+		return tokenSchema.safeParse(JSON.parse(token)).data;
 	}
 }
-export const loginThunk = createAsyncThunk(
+
+export const loginThunk = createAppAsyncThunk(
 	"users/login",
-	async (loginRequest: LoginRequest, { getState }) => {
-		const result = await api
-			.post<UserResponse>("login", { json: loginRequest })
+	async (loginRequest: LoginRequest, { extra: { api }, dispatch }) => {
+		const formData = new FormData();
+		formData.append("username", loginRequest.email);
+		formData.append("password", loginRequest.password);
+		setStoredToken(undefined);
+
+		const tokenResult = await api()
+			.post<TokenResponse>("api/v1/token", { body: formData })
 			.json();
-		const user = userResponseSchema.parse(result);
-		if (user.role === "volunteer") {
-			const affectedDepartments = selectDepartmentsByIds(
-				getState() as RootState,
-				user.affectedDepartments ?? [],
-			);
-			const volunteer = userSchema.parse({ ...user, affectedDepartments });
-			setStoredUser(volunteer);
-			return volunteer;
-		}
-		return userSchema.parse(user);
+		const tokenResponse = tokenSchema.parse(tokenResult);
+
+		setStoredToken(tokenResponse);
+		dispatch(getMeThunk());
 	},
 );
+
+export const getMeThunk = createAppAsyncThunk(
+	"users/getMe",
+	async (_, { getState, extra: { api } }) => {
+		const userResult = await api().get<UserResponse>("api/v1/me").json();
+		const user = userResponseSchema.parse(userResult);
+		const departments = selectDepartmentsByIds(
+			getState(),
+			user.departments ?? [],
+		);
+		return userSchema.parse({ ...user, departments });
+	},
+);
+
 export const userSlice = createSlice({
 	name: "user",
 	initialState: { status: "idle" } as RequestedContent<User>,
@@ -60,20 +71,20 @@ export const userSlice = createSlice({
 		logoutUser: (state) => {
 			state.value = undefined;
 			state.status = "idle";
-			setStoredUser(undefined);
+			setStoredToken(undefined);
 		},
 	},
 	extraReducers: (builder) => {
-		builder.addCase(loginThunk.fulfilled, (state, { payload: user }) => {
+		builder.addCase(getMeThunk.fulfilled, (state, { payload: user }) => {
 			state.status = "success";
 			state.value = user;
 		});
-		builder.addCase(loginThunk.rejected, (state, { error }) => {
+		builder.addCase(getMeThunk.rejected, (state, { error }) => {
 			console.error(error);
 			state.status = "error";
 			state.error = error;
 		});
-		builder.addCase(loginThunk.pending, (state) => {
+		builder.addCase(getMeThunk.pending, (state) => {
 			state.status = "loading";
 		});
 	},

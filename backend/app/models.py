@@ -17,12 +17,14 @@ user_department = Table(
 class User(Base):
     __tablename__ = "users"
 
-    ROLES = ["admin", "viewer", "volunteer"]
+    ROLES = ["admin", "volunteer"]
 
     id = Column(Integer, primary_key=True, index=True)
     firstname = Column(String, index=True)
     lastname = Column(String, index=True)
+    login = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
+    password = Column(String, index=True, nullable=True)
     role = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.now)
     # TODO: updated_at is not set when departments are updated

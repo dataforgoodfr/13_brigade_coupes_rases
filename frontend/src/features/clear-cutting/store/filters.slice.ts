@@ -4,7 +4,6 @@ import {
 	filtersResponseSchema,
 } from "@/features/clear-cutting/store/filters";
 import type { Bounds } from "@/features/clear-cutting/store/types";
-import { api } from "@/shared/api/api";
 import {
 	type NamedId,
 	type SelectableItem,
@@ -22,11 +21,8 @@ import {
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import {
-	type PayloadAction,
-	createAsyncThunk,
-	createSlice,
-} from "@reduxjs/toolkit";
+import { createAppAsyncThunk } from "@/shared/store/thunk";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	tags: SelectableItem<Tag>[];
 	cutYears: SelectableItem<number>[];
@@ -49,13 +45,13 @@ export const initialState: FiltersState = {
 	favorite: false,
 };
 
-export const getFiltersThunk = createAsyncThunk(
+export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
-	async (_arg, { getState }) => {
-		const result = await api.get<FiltersResponse>("filters").json();
+	async (_arg, { getState, extra: { api } }) => {
+		const result = await api().get<FiltersResponse>("filters").json();
 		const { departments, tags, statuses, ...response } =
 			filtersResponseSchema.parse(result);
-		const state = getState() as RootState;
+		const state = getState();
 		return {
 			...response,
 			departments: selectDepartmentsByIds(state, departments ?? []),

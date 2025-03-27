@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.deps import get_db_session
+from app.deps import db_session
 from app.schemas.clearcut_map import ClearCutMapResponse
 from app.services.clearcut import (
     GeoBounds,
@@ -13,7 +13,6 @@ from app.services.clearcut import (
 logger = getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/clearcuts-map", tags=["Clearcut map"])
-db_dependency = get_db_session()
 
 
 @router.get("/", response_model=ClearCutMapResponse)
@@ -41,7 +40,7 @@ def list_clearcut_preview(
     cutYears: list[int] = Query(
         ..., description="Cut years", openapi_examples={"2025": {"value": 2025}}
     ),
-    db: Session = db_dependency,
+    db: Session = db_session,
 ) -> ClearCutMapResponse:
     try:
         clearcuts = get_clearcuts_map(

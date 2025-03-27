@@ -7,6 +7,8 @@ from app.models import User, Department, ClearCut
 from sqlalchemy import text
 import traceback
 
+from app.services.user_auth import get_password_hash
+
 SRID = 4326
 
 
@@ -33,42 +35,31 @@ def seed_database():
     db = SessionLocal()
     try:
         wipe_database()
+        paris = db.query(Department).filter_by(code="75").first()
+        marseille = db.query(Department).filter_by(code="13").first()
 
-        all_departments = db.query(Department).all()
-
-        paris = next(department for department in all_departments if department.code == "75")
-        marseille = next(
-            department for department in all_departments if department.code == "13"
-        )
-        marseille = next(
-            department for department in all_departments if department.code == "13"
-        )
-        db.add_all(all_departments)
         db.flush()
 
         admin = User(
             firstname="Crysta",
             lastname="Faerie",
+            login="CrystaFaerie",
             email="admin@example.com",
             role="admin",
+            password=get_password_hash("admin"),
         )
         volunteer = User(
             firstname="Pips",
             lastname="Sprite",
+            login="PipsSprite",
             email="volunteer@example.com",
             role="volunteer",
-        )
-        viewer = User(
-            firstname="Batty",
-            lastname="Koda",
-            email="viewer@example.com",
-            role="viewer",
+            password=get_password_hash("volunteer"),
         )
 
         admin.departments.append(paris)
         volunteer.departments.append(paris)
-        viewer.departments.append(paris)
-        users = [admin, volunteer, viewer]
+        users = [admin, volunteer]
         db.add_all(users)
         db.flush()
 
@@ -260,7 +251,6 @@ def seed_database():
         db.commit()
 
         print(f"Added {len(users)} users to the database")
-        print(f"Added {len(all_departments)} departments to the database")
         print(f"Added {len(clear_cuts)} clear cuts to the database")
         print("Database finished seeding!")
 

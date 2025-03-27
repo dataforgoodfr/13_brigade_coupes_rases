@@ -1,4 +1,3 @@
-import { api } from "@/shared/api/api";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
 import {
@@ -7,16 +6,15 @@ import {
 } from "@/shared/store/referential/referential";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import {
-	createAsyncThunk,
-	createSelector,
-	createSlice,
-} from "@reduxjs/toolkit";
+import { createAppAsyncThunk } from "@/shared/store/thunk";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 
-export const getReferentialThunk = createAsyncThunk(
+export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
-	async () => {
-		const result = await api.get<ReferentialResponse>("referential").json();
+	async (_, { extra: { api } }) => {
+		const result = await api()
+			.get<ReferentialResponse>("api/v1/referential")
+			.json();
 		return referentialSchemaResponse.parse(result);
 	},
 );

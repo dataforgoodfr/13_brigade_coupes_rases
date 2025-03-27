@@ -188,10 +188,7 @@ export const mockClearCuttingsResponse = (
 		const northEastLat = url.searchParams.get("neLat");
 		const northEastLng = url.searchParams.get("neLng");
 		let boundaries: Boundaries | undefined;
-		const previews = [
-			...(override.previews ?? []),
-			...clearCuttingPreviews,
-		];
+		const previews = [...(override.previews ?? []), ...clearCuttingPreviews];
 		if (southWestLat && southWestLng && northEastLat && northEastLng) {
 			boundaries = [
 				[Number.parseFloat(southWestLat), Number.parseFloat(southWestLng)],
