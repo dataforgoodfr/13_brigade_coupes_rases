@@ -3,11 +3,13 @@ import type {
 	ClearCuttingBaseResponse,
 	ClearCuttingPreviewResponse,
 	ClearCuttingResponse,
+	ClearCutting,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { fakeStatuses, fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
+import { Tag } from "@/shared/store/referential/referential";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
@@ -93,7 +95,7 @@ export const createAddressMock = (address: Partial<ClearCuttingAddress> = {}) =>
 	}) satisfies ClearCuttingAddress;
 
 export const mockClearCutting = (
-	clearCutting: Partial<ClearCuttingResponse> = {},
+	clearCutting: Partial<ClearCutting> = {},
 ) =>
 	http.get("*/clear-cuttings/:id", ({ params }) => {
 		const { id } = params as { id: string };
@@ -109,6 +111,35 @@ export const mockClearCutting = (
 			cutYear: date.getFullYear(),
 			ecologicalZones: [],
 			reportDate: date.toISOString(),
+			clearCuttingSize: faker.number.int(200),
+			clearCuttingSlope: faker.number.int(100),
+			imgSatelliteCC:faker.image.url(),
+
+			onSiteDate: faker.date.anytime().toISOString(),
+			assignedUser: null,
+			isPlantationPresentACC: false,
+			imgsPlantation: [],
+			isWorksiteSignPresent: false,
+			imgsTreeTrunks: [],
+			imgsSoilState: [],
+			imgsAccessRoad: [],
+
+			isNatura2000: false,
+			isOtherEcoZone: false,
+			isNearEcoZone: false,
+			isDDT: false,
+
+			isCCOrCompanyCertified: null,
+			isMoreThan20ha: null,
+			isSubjectToPSG: null,
+			
+			isRelevantComplaintPEFC: false,
+			isRelevantComplaintREDIII: false,
+			isRelevantComplaintOFB: false,
+			isRelevantAlertSRGS: false,
+			isRelevantAlertPSG: false,
+			isRelevantRequestPSG: false,
+			
 			...clearCutting,
 		} satisfies ClearCuttingResponse);
 	});

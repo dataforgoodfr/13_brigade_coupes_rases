@@ -77,6 +77,7 @@
 		"@tanstack/router-devtools": "^1.99.6",
 		"@tanstack/router-plugin": "^1.99.6",
 		"@testing-library/dom": "^10.4.0",
+		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.2.0",
 		"@testing-library/user-event": "^14.6.1",
 		"@types/leaflet": "^1.9.16",
@@ -102,6 +103,8 @@
 		"workbox-window": "^7.3.0"
 	},
 	"msw": {
-		"workerDirectory": ["public"]
+		"workerDirectory": [
+			"public"
+		]
 	}
 }

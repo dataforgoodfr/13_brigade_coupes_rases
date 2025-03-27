@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import type { FieldValues } from "react-hook-form";
+import { useFormContext, type FieldValues } from "react-hook-form";
 import {
 	FormControl,
 	FormField,
@@ -21,11 +21,12 @@ export function FormInputFile<T extends FieldValues = FieldValues>({
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormItem className="flex gap-4 items-center">
+				<FormItem>
 					{label && <FormLabel className="font-bold">{label}</FormLabel>}
 					<FormControl>
 						<Input
 							type="file"
+							className="max-w-fit mt-2"
 							disabled={disabled}
 							{...field}
 							placeholder={placeholder}
