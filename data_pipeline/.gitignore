@@ -1,2 +1,2 @@
-*.kdbx
 .env
+data_temp/
