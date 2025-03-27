@@ -9,7 +9,8 @@ import type { RootState } from "@/shared/store/store";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
-	type ClearCutting,
+	ClearCutting,
+	ClearCuttingResponse,
 	type ClearCuttings,
 	clearCuttingResponseSchema,
 	clearCuttingsResponseSchema,
@@ -18,11 +19,11 @@ import {
 export const getClearCuttingThunk = createAsyncThunk<ClearCutting, string>(
 	"getClearCutting",
 	async (id, { getState }) => {
-		const result = await api.get(`clear-cuttings/${id}`).json();
+		const result = await api.get<ClearCuttingResponse>(`clear-cuttings/${id}`).json();
 		const clearCutting = clearCuttingResponseSchema.parse(result);
 		const state = getState() as RootState;
 		const tags = selectTagsByIds(state, clearCutting.abusiveTags);
-		return { ...clearCutting, abusiveTags: tags };
+		return { ...clearCutting, abusiveTags: tags};
 	},
 );
 const getClearCuttingsThunk = createAsyncThunk<ClearCuttings, FiltersRequest>(
@@ -111,4 +112,6 @@ export const useGetClearCutting = (id: string) => {
 	useEffect(() => {
 		dispatch(getClearCuttingThunk(id));
 	}, [id, dispatch]);
+
+	return useAppSelector(selectDetail);
 };

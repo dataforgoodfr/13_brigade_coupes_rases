@@ -1,5 +1,4 @@
-import { AsideForm } from "@/features/clear-cutting/components/AsideForm";
-import { useGetClearCutting } from "@/features/clear-cutting/store/clear-cuttings-slice";
+import { AsideForm } from "@/features/clear-cutting/components/form/AsideForm";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute(
@@ -10,6 +9,5 @@ export const Route = createLazyFileRoute(
 
 function RouteComponent() {
 	const params = Route.useParams();
-	useGetClearCutting(params.clearCuttingId);
-	return <AsideForm />;
+	return <AsideForm clearCuttingId={params.clearCuttingId} />;
 }
