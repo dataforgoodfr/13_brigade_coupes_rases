@@ -1,10 +1,11 @@
 from logging import getLogger
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 
+from app.config import Settings
 from app.deps import db_session
-from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse
+from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse, ImportsClearCutResponse
 from app.services.clearcut import (
     create_clearcut,
     get_clearcut,
@@ -17,11 +18,23 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/clearcuts", tags=["Clearcuts"])
 
 
-@router.post("/", response_model=ClearCutResponse, status_code=201)
-def create_new_clearcut(item: ClearCutCreate, db: Session = db_session) -> ClearCutResponse:
-    logger.info(db)
-    return create_clearcut(db, item)
+def authenticate(x_imports_token: str = Header(default="")):
+    if x_imports_token != Settings.IMPORTS_TOKEN or x_imports_token == "":
+        raise HTTPException(status_code=401, detail="Invalid token")
 
+
+@router.post(
+    "/", response_model=ImportsClearCutResponse, dependencies=[Depends(authenticate)]
+)
+def post_clearcut(params: ClearCutCreate, db: Session = db_session):
+    try:
+        clearcut = create_clearcut(db, params)
+
+        clearcut.department_code = clearcut.department.code
+
+        return clearcut
+    except ValueError as err:
+        raise HTTPException(status_code=400, detail=str(err)) from err
 
 @router.patch("/{id}", response_model=ClearCutResponse, status_code=201)
 def update_existing_clearcut(

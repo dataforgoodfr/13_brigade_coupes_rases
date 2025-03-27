@@ -63,6 +63,7 @@ class ClearCut(Base):
     class Status(str, Enum):
         PENDING = "pending"
         VALIDATED = "validated"
+        
 
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
