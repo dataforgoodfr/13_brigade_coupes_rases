@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from app.models import User
 
@@ -13,10 +12,11 @@ class DepartmentBase(BaseModel):
 class UserBase(BaseModel):
     firstname: str = Field(default_factory=str, json_schema_extra={"example": "John"})
     lastname: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
+    login: str = Field(default_factory=str, json_schema_extra={"example": "JognTree78"})
     email: EmailStr = Field(
         default_factory=EmailStr, json_schema_extra={"example": "john.tree@canope.com"}
     )
-    role: Optional[str] = Field(default_factory=None, json_schema_extra={"example": "viewer"})
+    role: str = Field(default_factory=str, json_schema_extra={"example": "volunteer"})
 
     @field_validator("role")
     def validate_role(cls, value: str) -> str:

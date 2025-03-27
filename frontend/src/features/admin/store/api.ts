@@ -32,18 +32,10 @@ export function useGetAdminQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
 	const { data, ...result } = adminApi.useGetUsersQuery(filters ?? skipToken);
 	const users = useAppSelector((state) => {
-		return data?.users.map((user) => {
-			if (user.role === "volunteer") {
-				return {
-					...user,
-					affectedDepartments: selectDepartmentsByIds(
-						state,
-						user.affectedDepartments,
-					),
-				};
-			}
-			return user;
-		});
+		return data?.users.map((user) => ({
+			...user,
+			departments: selectDepartmentsByIds(state, user.departments),
+		}));
 	});
 	return { ...result, data: { users } };
 }

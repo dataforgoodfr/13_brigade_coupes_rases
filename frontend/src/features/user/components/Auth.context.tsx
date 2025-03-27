@@ -1,7 +1,7 @@
 import {
-	getStoredUser,
+	getMeThunk,
+	getStoredToken,
 	selectLoggedUser,
-	userSlice,
 } from "@/features/user/store/user.slice";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type ReactNode, createContext, useContext, useEffect } from "react";
@@ -25,9 +25,9 @@ export function AuthProvider({ children }: Props) {
 		if (user !== undefined) {
 			return;
 		}
-		const storedUser = getStoredUser();
-		if (storedUser) {
-			dispatch(userSlice.actions.setUser(storedUser));
+		const storedToken = getStoredToken();
+		if (storedToken) {
+			dispatch(getMeThunk());
 		}
 	}, [user, dispatch]);
 
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: Props) {
 		<AuthCtx.Provider
 			value={{
 				isAuthenticated: user !== undefined,
-				isAdmin: user?.role === "administrator",
+				isAdmin: user?.role === "admin",
 			}}
 		>
 			{children}

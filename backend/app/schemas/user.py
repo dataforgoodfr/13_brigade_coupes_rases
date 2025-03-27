@@ -1,6 +1,5 @@
 from datetime import datetime
 from logging import getLogger
-from app.schemas.department import DepartmentBase
 from pydantic import Field
 from .shared import UserBase
 
@@ -21,4 +20,4 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
     deleted_at: datetime | None
-    departments: list[DepartmentBase]
+    departments: list[str]
