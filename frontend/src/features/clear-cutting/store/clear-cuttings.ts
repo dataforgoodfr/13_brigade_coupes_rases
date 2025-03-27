@@ -1,7 +1,8 @@
+import { clearCuttingStatusSchema } from "@/features/clear-cutting/store/status";
 import { userSchema } from "@/features/user/store/user";
-import { type Status, Tag } from "@/shared/store/referential/referential";
-import { z } from "zod";
-import { pointTupleSchema } from "./types";
+import { type Tag } from "@/shared/store/referential/referential";
+import { string, z } from "zod";
+import { pointSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 
