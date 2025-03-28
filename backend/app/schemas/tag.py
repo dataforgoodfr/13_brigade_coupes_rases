@@ -6,9 +6,7 @@ TAG_TYPES = ["excessive_slop", "excessive_area", "ecological_zoning"]
 
 class Tag(BaseModel):
     type: str = Field(json_schema_extra={"example": "excessive_slop"})
-    value: Optional[float] = Field(
-        default=None, json_schema_extra={"example": "42"}
-    )
+    value: Optional[float] = Field(default=None, json_schema_extra={"example": "42"})
 
     @field_validator("type")
     def validate_type(cls, value: str) -> str:

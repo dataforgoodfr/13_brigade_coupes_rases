@@ -7,7 +7,7 @@ from app.deps import db_session
 from app.schemas.clearcut_map import ClearCutMapResponse
 from app.services.clearcut import (
     GeoBounds,
-    get_clearcuts_map,
+    build_clearcuts_map,
 )
 
 logger = getLogger(__name__)
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/v1/clearcuts-map", tags=["Clearcut map"])
 
 
 @router.get("/", response_model=ClearCutMapResponse)
-def list_clearcut_preview(
+def get_clearcuts_map(
     swLat: float = Query(
         ...,
         description="Sout west latitude",
@@ -38,12 +38,15 @@ def list_clearcut_preview(
         openapi_examples={"paris": {"value": 4.051208496093751}},
     ),
     cutYears: list[int] = Query(
-        ..., description="Cut years", openapi_examples={"2025": {"value": 2025}}
+        ...,
+        description="Cut years",
+        openapi_examples={"2025": {"value": 2025}},
+        default_factory=list[int],
     ),
     db: Session = db_session,
 ) -> ClearCutMapResponse:
     try:
-        clearcuts = get_clearcuts_map(
+        clearcuts = build_clearcuts_map(
             db,
             GeoBounds(
                 south_west_latitude=swLat,
@@ -52,12 +55,9 @@ def list_clearcut_preview(
                 north_east_longitude=neLng,
             ),
         )
+        print(f"CLEARCUTS : {clearcuts}")
 
-    except ValueError as err:
-        raise HTTPException(
-            status_code=400, detail="Invalid input format for geobounds"
-        ) from err
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
     return clearcuts

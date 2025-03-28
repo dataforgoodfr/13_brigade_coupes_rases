@@ -1,17 +1,17 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Response, status
 from sqlalchemy.orm import Session
 
-from app.config import Settings
 from app.deps import db_session
-from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse, ImportsClearCutResponse
+from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse
 from app.services.clearcut import (
     create_clearcut,
     get_clearcut,
     get_clearcut_by_id,
     update_clearcut,
 )
+from app.config import settings
 
 logger = getLogger(__name__)
 
@@ -19,29 +19,25 @@ router = APIRouter(prefix="/api/v1/clearcuts", tags=["Clearcuts"])
 
 
 def authenticate(x_imports_token: str = Header(default="")):
-    if x_imports_token != Settings.IMPORTS_TOKEN or x_imports_token == "":
+    if x_imports_token != settings.IMPORTS_TOKEN or x_imports_token == "":
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.post(
-    "/", response_model=ImportsClearCutResponse, dependencies=[Depends(authenticate)]
-)
-def post_clearcut(params: ClearCutCreate, db: Session = db_session):
+@router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
+def post_clearcut(response: Response, params: ClearCutCreate, db: Session = db_session):
     try:
         clearcut = create_clearcut(db, params)
-
-        clearcut.department_code = clearcut.department.code
-
-        return clearcut
+        response.headers["location"] = f"/api/v1/clearcuts/{clearcut.id}"
     except ValueError as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
 
-@router.patch("/{id}", response_model=ClearCutResponse, status_code=201)
+
+@router.patch("/{id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
 def update_existing_clearcut(
     id: int, item: ClearCutPatch, db: Session = db_session
 ) -> ClearCutResponse:
     logger.info(db)
-    return update_clearcut(id, db, item)
+    update_clearcut(id, db, item)
 
 
 @router.get("/", response_model=list[ClearCutResponse])

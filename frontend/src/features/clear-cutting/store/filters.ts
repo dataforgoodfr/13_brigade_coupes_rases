@@ -7,9 +7,9 @@ const filtersRequestSchema = z.object({
 	geoBounds: boundsSchema,
 	departments: z.array(z.string()).optional(),
 	statuses: z.array(z.string()).optional(),
-	excessiveSlop: z.boolean().optional(),
+	excessive_slop: z.boolean().optional(),
 	favorite: z.boolean().optional(),
-	ecologicalZoning: z.boolean().optional(),
+	ecological_zoning: z.boolean().optional(),
 });
 
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
@@ -20,9 +20,9 @@ export const filtersResponseSchema = z.object({
 	departments: z.string().array().optional(),
 	statuses: z.string().array().optional(),
 	areaPresetsHectare: z.array(z.number()),
-	excessiveSlop: z.boolean().optional(),
+	excessive_slop: z.boolean().optional(),
 	favorite: z.boolean().optional(),
-	ecologicalZoning: z.boolean().optional(),
+	ecological_zoning: z.boolean().optional(),
 });
 
 export type FiltersResponse = z.infer<typeof filtersResponseSchema>;

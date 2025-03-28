@@ -7,7 +7,7 @@ export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
 
-const ecologicalZoningSchema = z.object({
+const ecological_zoningSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	link: z.string().url(),
@@ -16,18 +16,17 @@ const ecologicalZoningSchema = z.object({
 
 const clearCuttingBaseResponseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointTupleSchema),
+	boundary: z.array(pointTupleSchema),
 	name: z.string().optional(),
-	center: pointTupleSchema,
-	reportDate: z.string(),
-	creationDate: z.string(),
-	cutYear: z.number(),
-	ecologicalZones: z.array(z.string()),
-	abusiveTags: z.array(z.string()),
+	location: pointTupleSchema,
+	department_id: z.string(),
+	cut_date: z.string().date(),
+	ecologicalZones: z.array(z.string()).optional(),
+	tags: z.array(z.string()),
 	naturaZone: z.string().optional(),
 	comment: z.string().optional(),
-	surfaceHectare: z.number(),
-	slopePercent: z.number(),
+	area_hectare: z.number().optional(),
+	slope_percentage: z.number().optional(),
 	status: z.string(),
 });
 export type ClearCuttingBaseResponse = z.infer<
@@ -73,7 +72,7 @@ export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
 export const clearCuttingResponseSchema = clearCuttingBaseResponseSchema.and(
 	z.object({
 		id: z.string(),
-		geoCoordinates: z.array(pointTupleSchema),
+		boundary: z.array(pointTupleSchema),
 		waterCourses: z.array(z.string()).optional(),
 		address: clearCuttingAddressSchema,
 		customTags: z.array(z.string()).optional(),
@@ -96,8 +95,8 @@ const waterCourseSchema = z.object({
 export const clearCuttingsResponseSchema = z.object({
 	points: z.array(clearCuttingPointsSchema),
 	previews: z.array(clearCuttingPreviewResponseSchema),
-	waterCourses: z.array(waterCourseSchema),
-	ecologicalZones: z.array(ecologicalZoningSchema),
+	waterCourses: z.array(waterCourseSchema).optional(),
+	ecologicalZones: z.array(ecological_zoningSchema).optional(),
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;

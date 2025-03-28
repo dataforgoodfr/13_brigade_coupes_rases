@@ -25,7 +25,7 @@ export const getClearCuttingThunk = createAppAsyncThunk<ClearCutting, string>(
 		const result = await api().get(`clear-cuttings/${id}`).json();
 		const clearCutting = clearCuttingResponseSchema.parse(result);
 		const state = getState();
-		const tags = selectTagsByIds(state, clearCutting.abusiveTags);
+		const tags = selectTagsByIds(state, clearCutting.tags);
 		const status = selectStatusesByIds(state, [clearCutting.status])[0];
 		return {
 			...clearCutting,
@@ -39,7 +39,7 @@ const getClearCuttingsThunk = createAppAsyncThunk<
 	FiltersRequest
 >("getClearCuttings", async (filters, { getState, extra: { api } }) => {
 	const result = await api()
-		.get("clear-cuttings", {
+		.get("api/v1/clearcuts-map", {
 			searchParams: new URLSearchParams(
 				Object.entries(filters).reduce(
 					(acc, [key, value]) => {
@@ -63,11 +63,13 @@ const getClearCuttingsThunk = createAppAsyncThunk<
 			),
 		})
 		.json();
+	console.log(result);
 	const clearCuttings = clearCuttingsResponseSchema.parse(result);
+	console.log(clearCuttings);
 	const state = getState();
 	const clearCuttingPreviews = clearCuttings.previews.map((preview) => ({
 		...preview,
-		abusiveTags: selectTagsByIds(state, preview.abusiveTags),
+		abusiveTags: selectTagsByIds(state, preview.tags),
 		status: selectStatusesByIds(state, [preview.status])[0],
 	}));
 	return { ...clearCuttings, clearCuttingPreviews };

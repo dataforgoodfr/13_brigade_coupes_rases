@@ -9,7 +9,7 @@ describe("Clear cutting report", () => {
 		server.use(
 			mockClearCutting({
 				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
+				cut_date: 2024,
 			}),
 		);
 		renderApp({

@@ -10,7 +10,7 @@ logger = getLogger(__name__)
 
 def map_user(user: User) -> UserResponse:
     return UserResponse(
-        id=user.id,
+        id=str(user.id),
         deleted_at=user.deleted_at,
         created_at=user.created_at,
         role=user.role,

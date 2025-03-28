@@ -1,9 +1,8 @@
-from enum import Enum
 from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey, Float
 from geoalchemy2 import Geometry
 from app.database import Base
 from datetime import datetime
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import relationship, validates, mapped_column, Mapped
 
 
 user_department = Table(
@@ -48,7 +47,7 @@ class Department(Base):
     code = Column(String, index=True)
     name = Column(String)
     users = relationship("User", secondary=user_department, back_populates="departments")
-    clear_cuts = relationship("ClearCut", back_populates="department")
+    cities: Mapped[list["City"]] = relationship()
 
     @validates("name")
     def validate_name(self, key, value):
@@ -57,46 +56,47 @@ class Department(Base):
         return value
 
 
+class City(Base):
+    __tablename__ = "cities"
+    id = Column(Integer, primary_key=True, index=True)
+    zip_code = Column(String, index=True)
+    name = Column(String)
+    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+    department: Mapped["Department"] = relationship(back_populates="cities")
+    clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="city")
+
+
+CLEARCUT_STATUSES = [
+    "to_validate",
+    "waiting_for_validation",
+    "legal_validated",
+    "validated",
+    "final_validated",
+]
+
+
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
-
-    class Status(str, Enum):
-        PENDING = "pending"
-        VALIDATED = "validated"
-        
 
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
     slope_percentage = Column(Float, index=True)
-    location = Column(
-        Geometry(geometry_type="Point", srid=4326, spatial_index=True), index=True
-    )
-    boundary = Column(
-        Geometry(geometry_type="MultiPolygon", srid=4326, spatial_index=True), index=True
-    )
+    location = Column(Geometry(geometry_type="Point", srid=4326))
+    boundary = Column(Geometry(geometry_type="MultiPolygon", srid=4326))
     status = Column(String, index=True)
-    department_id = Column(Integer, ForeignKey("departments.id"), index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    address = Column(String, nullable=False)
-    name_natura = Column(String, nullable=True)
-    number_natura = Column(String, nullable=True)
+    natura_name = Column(String, nullable=True)
+    natura_code = Column(String, nullable=True)
 
-    department = relationship("Department", back_populates="clear_cuts")
-    user = relationship("User", back_populates="clear_cuts")
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
+    city: Mapped["City"] = relationship(back_populates="clear_cuts")
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user: Mapped["User"] = relationship(back_populates="clear_cuts")
 
     @validates("status")
     def validate_status(self, key, value):
-        if value not in ClearCut.Status:
-            raise ValueError(f"Status must be one of: {', '.join(ClearCut.Status)}")
+        if value not in CLEARCUT_STATUSES:
+            raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
-
-
-CLEAR_CUT_PREVIEW_COLUMNS = [
-    ClearCut.location,
-    ClearCut.boundary,
-    ClearCut.slope_percentage,
-    ClearCut.department_id,
-    ClearCut.created_at,
-]

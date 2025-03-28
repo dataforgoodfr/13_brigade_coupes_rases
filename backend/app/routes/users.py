@@ -23,14 +23,16 @@ router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 def create_new_user(
     item: UserCreate,
     db=db_session,
-    admin=Depends(get_admin_user),
+    _=Depends(get_admin_user),
 ) -> UserResponse:
     logger.info(db)
     return map_user(create_user(db, item))
 
 
 @router.get("/", response_model=list[UserResponse])
-def list_users(db: Session = db_session, skip: int = 0, limit: int = 10) -> list[UserResponse]:
+def list_users(
+    db: Session = db_session, skip: int = 0, limit: int = 10, _=Depends(get_admin_user)
+) -> list[UserResponse]:
     logger.info(db)
     return [map_user(user) for user in get_users(db, skip=skip, limit=limit)]
 

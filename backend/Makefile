@@ -15,15 +15,18 @@ generate-migration: ## Generate a new migration
 	poetry run alembic revision --autogenerate -m "migration"
 
 upgrade-db: ## Upgrade the database
-	poetry run alembic upgrade head
+	poetry run alembic upgrade head	
 
 reset-db: ## Reset the database
 	poetry run alembic downgrade base
 
-seed-db: ## Seed the database
+seed-prd-db: ## Seed the database
+	poetry run python -m seed_prd
+
+seed-dev-db: ## Seed the database
 	poetry run python -m seed_dev
 
 test: ## Run the tests
-	ENVIRONMENT=test poetry run pytest test/
+	poetry run pytest test/
 
 .PHONY: test help

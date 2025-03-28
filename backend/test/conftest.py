@@ -1,9 +1,11 @@
 import os
+
+os.environ["ENVIRONMENT"] = "test"
+
 import sys
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
-
 
 # Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -13,6 +15,8 @@ from app.main import app  # noqa: E402
 from app.database import create_engine, Base, get_db, sessionmaker  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
+from seed_dev import seed_database
+
 from app.config import settings
 
 os.environ["DATABASE_URL"] = settings.DATABASE_URL
@@ -47,6 +51,7 @@ def migration():
 @pytest.fixture(scope="function")
 def db(migration, nuke_all_tables):
     db = SessionLocal()
+    seed_database()
     try:
         yield db
     finally:

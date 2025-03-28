@@ -3,14 +3,10 @@ from typing import Dict
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.tag import Tag
+
 
 logger = getLogger(__name__)
-
-
-class ReferentialTag(BaseModel):
-    type: str
-    value: float
-    model_config = ConfigDict(from_attributes=True)
 
 
 class ReferentialDepartment(BaseModel):
@@ -22,6 +18,6 @@ class ReferentialDepartment(BaseModel):
 class ReferentialResponse(BaseModel):
     departments: Dict[str, ReferentialDepartment]
     ecological_zonings: Dict[str, str]
-    tags: Dict[str, ReferentialTag]
+    tags: Dict[str, Tag]
 
     model_config = ConfigDict(from_attributes=True)

@@ -9,8 +9,8 @@ export function advancedFilters({ user }: Options) {
 			await user.click(await screen.findByText("Filtres"));
 		},
 		favorite: switchInput({ user, label: "Favoris" }),
-		excessiveSlop: switchInput({ user, label: "Pente excessive" }),
-		ecologicalZoning: switchInput({ user, label: "Zone protégée" }),
+		excessive_slop: switchInput({ user, label: "Pente excessive" }),
+		ecological_zoning: switchInput({ user, label: "Zone protégée" }),
 	};
 }
 type SwitchOptions = Options & { label: SwitchLabel };

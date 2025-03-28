@@ -1,33 +1,35 @@
 from fastapi import HTTPException
+from geojson_pydantic import Point
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut, Department
+from app.models import ClearCut
 from app.schemas.clearcut import (
     ClearCutCreate,
     ClearCutPatch,
+    ClearCutResponse,
+    clearcut_to_response,
 )
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID
+from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID, ST_AsGeoJSON
 
-from app.schemas.clearcut_map import ClearCutPreview, ClearCutMapResponse
-
+from app.schemas.clearcut_map import (
+    ClearCutMapResponse,
+    clearcut_to_preview,
+)
+from app.services.city import get_or_add_city
 
 logger = getLogger(__name__)
 _sridDatabase = 4326
 
 
-def create_clearcut(db: Session, clearcut: ClearCutCreate):
-    department = (
-        db.query(Department).filter(Department.code == clearcut.department_code).first()
-    )
-    if not department:
-        raise ValueError(f"Department with code {clearcut.department_code} not found")
+def create_clearcut(db: Session, clearcut: ClearCutCreate) -> ClearCut:
+    city = get_or_add_city(db, clearcut.city)
 
     intersecting_clearcut = (
         db.query(ClearCut)
-        .filter(ClearCut.boundary.ST_Intersects(WKTElement(clearcut.boundary, srid=4326)))
+        .filter(ClearCut.boundary.ST_Intersects(WKTElement(clearcut.boundary.wkt, srid=4326)))
         .first()
     )
 
@@ -39,19 +41,17 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate):
     db_item = ClearCut(
         cut_date=clearcut.cut_date,
         slope_percentage=clearcut.slope_percentage,
-        location=WKTElement(clearcut.location),
-        boundary=WKTElement(clearcut.boundary),
-        status=ClearCut.Status.PENDING,
-        department_id=department.id,
-        address=clearcut.address,
-        name_natura=clearcut.name_natura,
-        number_natura=clearcut.number_natura,
+        location=WKTElement(clearcut.location.wkt),
+        boundary=WKTElement(clearcut.boundary.wkt),
+        status="to_validate",
+        city=city,
+        natura_name=clearcut.natura_name,
+        natura_code=clearcut.natura_code,
     )
+
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
-    db_item.location = to_shape(db_item.location).wkt
-    db_item.boundary = to_shape(db_item.boundary).wkt
     return db_item
 
 
@@ -75,19 +75,20 @@ def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
         clearcut.location = to_shape(clearcut.location)
         clearcut.boundary = to_shape(clearcut.boundary)
 
-        clearcut.location = clearcut.location.coords[0]
+        clearcut.reversed(location=clearcut.location.coords[0])
         clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcuts
 
 
-def get_clearcut_by_id(id: int, db: Session):
-    clearcut = db.get(ClearCut, id)
-    clearcut.location = to_shape(clearcut.location)
-    clearcut.boundary = to_shape(clearcut.boundary)
-
-    clearcut.location = clearcut.location.coords[0]
-    clearcut.boundary = list(clearcut.boundary.exterior.coords)
-    return clearcut
+def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponse:
+    [clearcut, boundary, location] = (
+        db.query(ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location))
+        .filter(ClearCut.id == id)
+        .first()
+    )
+    clearcut.boundary = boundary
+    clearcut.location = location
+    return clearcut_to_response(clearcut)
 
 
 class GeoBounds(BaseModel):
@@ -97,7 +98,7 @@ class GeoBounds(BaseModel):
     north_east_longitude: float
 
 
-def get_clearcuts_map(db: Session, geo_bounds: GeoBounds):
+def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapResponse:
     envelope = ST_MakeEnvelope(
         geo_bounds.south_west_longitude,
         geo_bounds.south_west_latitude,
@@ -106,67 +107,26 @@ def get_clearcuts_map(db: Session, geo_bounds: GeoBounds):
         _sridDatabase,
     )
     square = ST_SetSRID(envelope, _sridDatabase)
-    points = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
-    points = [to_shape(location[0]).coords[0] for location in points]
+    points = (
+        db.query(ST_AsGeoJSON(ClearCut.location))
+        .filter(ST_Contains(square, ClearCut.location))
+        .all()
+    )
 
     # Get preview for the x most relevant clearcut
-    previews = (
-        db.query(*CLEAR_CUT_PREVIEW_COLUMNS)
+    clearcuts = (
+        db.query(ClearCut, ST_AsGeoJSON(ClearCut.location), ST_AsGeoJSON(ClearCut.boundary))
         .filter(ST_Contains(square, ClearCut.location))
         .order_by(ClearCut.created_at)
         .all()
     )
+    for [clearcut, location, boundary] in clearcuts:
+        clearcut.location = location
+        clearcut.boundary = boundary
 
-    previews = [
-        ClearCutPreview(
-            location=to_shape(preview[0]).coords[0],
-            boundary=list(to_shape(preview[1]).exterior.coords),
-            slope_percentage=preview[2],
-            department_id=preview[3],
-            cut_date=preview[4],
-        )
-        for preview in previews
-    ]
+    previews = [clearcut_to_preview(row[0]) for row in clearcuts]
 
-    map_response = ClearCutMapResponse(points=points, previews=previews)
+    map_response = ClearCutMapResponse(
+        points=[Point.model_validate_json(point[0]) for point in points], previews=previews
+    )
     return map_response
-
-
-def get_clearcut_preview(
-    db: Session,
-    swLon: float,
-    swLat: float,
-    neLon: float,
-    neLat: float,
-    skip: int = 0,
-    limit: int = 10,
-):
-    # Define area in database srid
-    square = ST_MakeEnvelope(swLon, swLat, neLon, neLat, _sridDatabase)
-
-    # Get location for all clearcuts located in the requested area
-    locations = db.query(ClearCut.location).filter(ST_Contains(square, ClearCut.location)).all()
-    locations = [to_shape(location[0]).coords[0] for location in locations]
-
-    # Get preview for the x most relevant clearcut
-    previews = (
-        db.query(*CLEAR_CUT_PREVIEW_COLUMNS)
-        .filter(ST_Contains(square, ClearCut.location))
-        .order_by(ClearCut.created_at)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
-    previews = [
-        ClearCutPreview(
-            location=to_shape(preview[0]).coords[0],
-            boundary=list(to_shape(preview[1]).exterior.coords),
-            slope_percentage=preview[2],
-            department_id=preview[3],
-            cut_date=preview[4],
-        )
-        for preview in previews
-    ]
-
-    clearcutPreview = ClearCutMapResponse(points=locations, previews=previews)
-    return clearcutPreview

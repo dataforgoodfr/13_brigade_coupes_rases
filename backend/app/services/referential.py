@@ -3,6 +3,7 @@ from app.models import Department
 from logging import getLogger
 
 from app.schemas.referential import ReferentialDepartment, ReferentialResponse
+from app.services.tags import get_tags
 
 
 logger = getLogger(__name__)
@@ -19,5 +20,5 @@ def get_referential(db: Session):
             for department in departments
         },
         ecological_zonings={},
-        tags={},
+        tags=get_tags(),
     )

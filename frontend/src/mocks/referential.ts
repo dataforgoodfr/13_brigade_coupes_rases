@@ -2,7 +2,7 @@ import { range } from "@/shared/array";
 import type {
 	ClearCuttingStatus,
 	DepartmentResponse,
-	EcologicalZoningResponse,
+	ecological_zoningResponse,
 	ReferentialResponse,
 	StatusResponse,
 	TagResponse,
@@ -11,18 +11,18 @@ import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
 export const fakeTags: TagResponse = {
-	[faker.string.uuid()]: { type: "ecologicalZoning" },
+	[faker.string.uuid()]: { type: "ecological_zoning" },
 	[faker.string.uuid()]: {
-		type: "excessiveArea",
+		type: "excessive_area",
 		value: faker.number.int({ min: 0, max: 100 }),
 	},
 	[faker.string.uuid()]: {
-		type: "excessiveSlop",
+		type: "excessive_slop",
 		value: faker.number.int({ min: 0, max: 100 }),
 	},
 };
 
-export const fakeEcologicalZoning: EcologicalZoningResponse =
+export const fakeecological_zoning: ecological_zoningResponse =
 	Object.fromEntries(
 		range(5, () => [
 			faker.string.uuid(),
@@ -138,10 +138,10 @@ export const fakeDepartments: DepartmentResponse = [
 
 export const fakeStatuses = (
 	[
-		"finalValidated",
-		"legalValidated",
-		"toValidate",
-		"waitingForValidation",
+		"final_validated",
+		"legal_validated",
+		"to_validate",
+		"waiting_for_validation",
 		"validated",
 	] as ClearCuttingStatus[]
 ).reduce<StatusResponse>((acc, status) => {
@@ -151,7 +151,7 @@ export const fakeStatuses = (
 export const mockReferential = http.get("*/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
-		ecologicalZoning: fakeEcologicalZoning,
+		ecological_zoning: fakeecological_zoning,
 		tags: fakeTags,
 		statuses: fakeStatuses,
 	} satisfies ReferentialResponse);

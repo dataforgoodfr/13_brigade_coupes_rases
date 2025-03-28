@@ -4,7 +4,7 @@ from geoalchemy2 import WKTElement
 from app.models import ClearCut
 
 
-def new_clear_cut(status: str = "pending"):
+def new_clear_cut(status: str = "to_validate", city_id: int = 1):
     return ClearCut(
         cut_date=datetime.now(),
         slope_percentage=15.5,
@@ -12,5 +12,6 @@ def new_clear_cut(status: str = "pending"):
         boundary=WKTElement(
             "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
         ),
+        city_id=city_id,
         status=status,
     )

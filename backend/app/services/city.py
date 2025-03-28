@@ -2,9 +2,9 @@ from typing import Optional
 from fastapi import HTTPException
 from pytest import Session
 
-from app.models import City, ClearCut
+from app.models import City
 
-from app.schemas.city import City as CitySchema
+from app.schemas.city import CreateCity as CitySchema
 from app.services.departement import get_department_by_id
 
 

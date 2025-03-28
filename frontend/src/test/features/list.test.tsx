@@ -17,7 +17,7 @@ describe("Clear cuttings list", () => {
 				postalCode: "TEST CODE",
 			},
 			comment: "TEST COMMENT",
-			center: [15, 15],
+			location: [15, 15],
 		});
 		server.use(
 			mockClearCuttingsResponse({
