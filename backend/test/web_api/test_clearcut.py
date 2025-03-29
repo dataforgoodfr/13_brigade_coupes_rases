@@ -34,7 +34,13 @@ def test_post_clearcut_success(client: TestClient):
             ],
         },
         "registries": [
-            {"number": "0089", "sheet": 1, "section": "0H", "zip_code": "13055", "district_code":"123"}
+            {
+                "number": "0089",
+                "sheet": 1,
+                "section": "0H",
+                "zip_code": "13055",
+                "district_code": "123",
+            }
         ],
         "ecological_zonings": [{"type": "Natura2000", "code": "ABC", "name": "DEF"}],
     }

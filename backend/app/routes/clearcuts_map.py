@@ -37,11 +37,10 @@ def get_clearcuts_map(
         description="North east longitude",
         openapi_examples={"paris": {"value": 4.051208496093751}},
     ),
-   
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
-        print('GET CLEARCUTS')
+        print("GET CLEARCUTS")
         clearcuts = build_clearcuts_map(
             db,
             GeoBounds(

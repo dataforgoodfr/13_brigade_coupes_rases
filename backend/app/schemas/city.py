@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from app.models import City
 from app.schemas.department import DepartmentBaseSchema
 
+
 class CitySchema(BaseModel):
     id: str
     name: str = Field(json_schema_extra={"example": "Paris"})
@@ -26,5 +27,3 @@ def city_to_preview_schema(city: City) -> CityPreviewSchema:
 
 def cities_to_preview_schemas(cities: list[City]) -> dict[str, CityPreviewSchema]:
     return {str(city.id): city_to_preview_schema(city) for city in cities}
-
-

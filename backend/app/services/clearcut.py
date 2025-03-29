@@ -18,7 +18,7 @@ from app.schemas.clearcut_map import (
     ClearCutMapResponseSchema,
     clearcut_to_preview_schema,
 )
-from app.schemas.hateoas import PaginationMetadata, PaginationResponseSchema
+from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.services.ecological_zoning import find_or_add_ecological_zonings
 from app.services.registries import find_or_add_registries
 
@@ -27,14 +27,9 @@ _sridDatabase = 4326
 
 
 def create_clearcut(db: Session, clearcut: ClearCutCreateSchema) -> ClearCut:
-
     intersecting_clearcut = (
         db.query(ClearCut)
-        .filter(
-            ClearCut.boundary.ST_Intersects(
-                WKTElement(clearcut.boundary.wkt, srid=4326)
-            )
-        )
+        .filter(ClearCut.boundary.ST_Intersects(WKTElement(clearcut.boundary.wkt, srid=4326)))
         .first()
     )
 
@@ -50,9 +45,7 @@ def create_clearcut(db: Session, clearcut: ClearCutCreateSchema) -> ClearCut:
         location=WKTElement(clearcut.location.wkt),
         boundary=WKTElement(clearcut.boundary.wkt),
         status="to_validate",
-        ecological_zonings=find_or_add_ecological_zonings(
-            db, clearcut.ecological_zonings
-        ),
+        ecological_zonings=find_or_add_ecological_zonings(db, clearcut.ecological_zonings),
         registries=find_or_add_registries(db, clearcut.registries),
     )
 
@@ -86,9 +79,7 @@ def find_clearcuts(
     db: Session, url: str, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     clearcuts = (
-        db.query(
-            ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location)
-        )
+        db.query(ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location))
         .offset(page * size)
         .limit(size)
         .all()
@@ -102,7 +93,7 @@ def find_clearcuts(
     )
     return PaginationResponseSchema(
         content=list(clearcuts),
-        metadata=PaginationMetadata(
+        metadata=PaginationMetadataSchema(
             page=page, size=size, total_count=clearcuts_count, url=url
         ),
     )
@@ -110,9 +101,7 @@ def find_clearcuts(
 
 def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponseSchema:
     [clearcut, boundary, location] = (
-        db.query(
-            ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location)
-        )
+        db.query(ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location))
         .filter(ClearCut.id == id)
         .first()
     )
@@ -126,9 +115,7 @@ class GeoBounds(BaseModel):
     north_east_longitude: float
 
 
-def build_clearcuts_map(
-    db: Session, geo_bounds: GeoBounds
-) -> ClearCutMapResponseSchema:
+def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapResponseSchema:
     envelope = ST_MakeEnvelope(
         geo_bounds.south_west_longitude,
         geo_bounds.south_west_latitude,
@@ -145,9 +132,7 @@ def build_clearcuts_map(
 
     # Get preview for the x most relevant clearcut
     clearcuts = (
-        db.query(
-            ClearCut, ST_AsGeoJSON(ClearCut.location), ST_AsGeoJSON(ClearCut.boundary)
-        )
+        db.query(ClearCut, ST_AsGeoJSON(ClearCut.location), ST_AsGeoJSON(ClearCut.boundary))
         .filter(ST_Contains(square, ClearCut.location))
         .order_by(ClearCut.created_at)
         .all()

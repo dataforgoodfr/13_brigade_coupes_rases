@@ -17,7 +17,7 @@ class Metadata(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PaginationMetadata(Metadata):
+class PaginationMetadataSchema(Metadata):
     page: int
     size: int
     pages_count: int
@@ -28,9 +28,9 @@ class PaginationMetadata(Metadata):
             "self": f"{url}?page={page}&size={size}",
         }
         if page * size + size < total_count:
-            links["next"] = f"{url}?page={page+1}&size={size}"
+            links["next"] = f"{url}?page={page + 1}&size={size}"
         if page > 0:
-            links["previous"] = f"{url}?page={page-1}&size={size}"
+            links["previous"] = f"{url}?page={page - 1}&size={size}"
 
         super().__init__(
             pages_count=math.ceil(total_count / size),
@@ -41,7 +41,5 @@ class PaginationMetadata(Metadata):
         )
 
 
-class PaginationResponseSchema(
-    HateaosResponse[PaginationMetadata, list[C]], Generic[C]
-):
+class PaginationResponseSchema(HateaosResponse[PaginationMetadataSchema, list[C]], Generic[C]):
     pass

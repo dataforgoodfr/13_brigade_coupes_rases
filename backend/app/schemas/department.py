@@ -3,7 +3,6 @@ from logging import getLogger
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import Department
-from app.schemas.shared import UserBaseSchema
 
 logger = getLogger(__name__)
 

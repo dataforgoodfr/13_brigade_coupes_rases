@@ -24,12 +24,8 @@ def authenticate(x_imports_token: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.post(
-    "/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED
-)
-def post_clearcut(
-    response: Response, params: ClearCutCreateSchema, db: Session = db_session
-):
+@router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
+def post_clearcut(response: Response, params: ClearCutCreateSchema, db: Session = db_session):
     try:
         clearcut = create_clearcut(db, params)
         response.headers["location"] = f"/api/v1/clearcuts/{clearcut.id}"

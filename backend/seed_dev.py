@@ -3,7 +3,7 @@ import os
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point, MultiPolygon
 from app.database import Base, SessionLocal
-from app.models import User, Department, ClearCut, City
+from app.models import User, ClearCut
 from sqlalchemy import text
 import traceback
 
@@ -24,7 +24,7 @@ def wipe_database():
     db = SessionLocal()
 
     db_tables = Base.metadata.tables.keys()
-    truncate_stmt = f"TRUNCATE TABLE {', '.join(db_tables - ['departments', 'cities'] )} RESTART IDENTITY CASCADE"
+    truncate_stmt = f"TRUNCATE TABLE {', '.join(db_tables - ['departments', 'cities'])} RESTART IDENTITY CASCADE"
     db.execute(text(truncate_stmt))
     db.commit()
 
@@ -156,9 +156,7 @@ def seed_database():
                 cut_date=datetime.now() - timedelta(days=15),
                 slope_percentage=9.2,
                 area_hectare=10,
-                location=from_shape(
-                    Point(5.4008, 43.2865), SRID
-                ),  # Autour de Marseille
+                location=from_shape(Point(5.4008, 43.2865), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     MultiPolygon(
                         [
@@ -185,9 +183,7 @@ def seed_database():
                 cut_date=datetime.now() - timedelta(days=10),
                 slope_percentage=7.5,
                 area_hectare=10,
-                location=from_shape(
-                    Point(5.3508, 43.3165), SRID
-                ),  # Autour de Marseille
+                location=from_shape(Point(5.3508, 43.3165), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     MultiPolygon(
                         [
@@ -214,9 +210,7 @@ def seed_database():
                 cut_date=datetime.now() - timedelta(days=5),
                 slope_percentage=14.3,
                 area_hectare=10,
-                location=from_shape(
-                    Point(5.3808, 43.2765), SRID
-                ),  # Autour de Marseille
+                location=from_shape(Point(5.3808, 43.2765), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     MultiPolygon(
                         [
@@ -243,9 +237,7 @@ def seed_database():
                 cut_date=datetime.now() - timedelta(days=2),
                 slope_percentage=10.8,
                 area_hectare=10,
-                location=from_shape(
-                    Point(5.3908, 43.2665), SRID
-                ),  # Autour de Marseille
+                location=from_shape(Point(5.3908, 43.2665), SRID),  # Autour de Marseille
                 boundary=from_shape(
                     MultiPolygon(
                         [

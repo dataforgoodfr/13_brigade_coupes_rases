@@ -1,7 +1,7 @@
 from datetime import datetime
 from geoalchemy2 import WKTElement
 import pytest
-from app.models import City, Department, ClearCut, EcologicalZoning, Registry
+from app.models import Department, ClearCut, EcologicalZoning, Registry
 from common.clear_cut import new_clear_cut
 from common.user import new_user
 
@@ -97,8 +97,9 @@ def test_clear_cut_creation(db):
 def test_ecological_zoning_create_without_duplicate(db):
     db.add(EcologicalZoning(code="ABC", type="Natura2000", name="ABC"))
     db.commit()
-    created_ecological_zoning =  db.query(EcologicalZoning).filter(EcologicalZoning.code == "ABC").first()
-    assert  created_ecological_zoning.code  == "ABC"
-    assert  created_ecological_zoning.type  == "Natura2000"
-    assert  created_ecological_zoning.name  == "ABC"
-    
+    created_ecological_zoning = (
+        db.query(EcologicalZoning).filter(EcologicalZoning.code == "ABC").first()
+    )
+    assert created_ecological_zoning.code == "ABC"
+    assert created_ecological_zoning.type == "Natura2000"
+    assert created_ecological_zoning.name == "ABC"

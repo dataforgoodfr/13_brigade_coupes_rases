@@ -50,9 +50,7 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
 
-    departments = relationship(
-        "Department", secondary=user_department, back_populates="users"
-    )
+    departments = relationship("Department", secondary=user_department, back_populates="users")
     clear_cuts = relationship("ClearCut", back_populates="user")
 
     @validates("role")
@@ -68,9 +66,7 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String, index=True)
     name = Column(String)
-    users = relationship(
-        "User", secondary=user_department, back_populates="departments"
-    )
+    users = relationship("User", secondary=user_department, back_populates="departments")
     cities: Mapped[list["City"]] = relationship()
 
     @validates("name")

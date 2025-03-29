@@ -15,5 +15,5 @@ def get_city_by_zip_code(db: Session, zip_code: str) -> City:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"City not found by zip code {zip_code}",
-        )   
+        )
     return city

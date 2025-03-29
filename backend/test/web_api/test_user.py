@@ -108,8 +108,8 @@ def test_get_users(client, db):
     assert response.status_code == 200
 
     data = response.json()
-    assert len(data) == 4
-    assert data[3]["id"] == str(user.id)
+    assert len(data["content"]) == 4
+    assert data["content"][3]["id"] == str(user.id)
 
 
 def test_login_user(client, db):

@@ -1,21 +1,15 @@
-from typing import Optional
-from app.models import NATURA_2000, EcologicalZoning
+from app.models import EcologicalZoning
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from sqlalchemy.orm import Session
 
-from app.services.city import get_city_by_zip_code
 
-
-def find_ecological_zonings_by_codes(
-    db: Session, codes: list[str]
-) -> list[EcologicalZoning]:
+def find_ecological_zonings_by_codes(db: Session, codes: list[str]) -> list[EcologicalZoning]:
     return db.query(EcologicalZoning).filter(EcologicalZoning.code.in_(codes)).all()
 
 
 def find_or_add_ecological_zonings(
     db: Session, ecological_zonings: list[EcologicalZoningSchema]
 ) -> EcologicalZoning:
-
     found_ecological_zonings = find_ecological_zonings_by_codes(
         db, codes=[ecological_zoning.code for ecological_zoning in ecological_zonings]
     )

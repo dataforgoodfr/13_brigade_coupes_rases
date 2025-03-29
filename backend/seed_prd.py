@@ -1,11 +1,5 @@
-import csv
-from datetime import datetime, timedelta
-import os
-from geoalchemy2.shape import from_shape
-from shapely.geometry import Point, MultiPolygon
-from app.database import Base, SessionLocal
-from app.models import User, Department, ClearCut, City
-from sqlalchemy import text
+from app.database import SessionLocal
+from app.models import User, Department
 import traceback
 
 from app.services.user_auth import get_password_hash

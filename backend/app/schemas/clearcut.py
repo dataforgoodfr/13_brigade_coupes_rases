@@ -62,8 +62,7 @@ def clearcut_to_response_schema(clearcut: ClearCut) -> ClearCutResponseSchema:
         boundary=MultiPolygon.model_validate_json(clearcut.boundary),
         location=Point.model_validate_json(clearcut.location),
         ecological_zonings_ids=[
-            str(ecological_zoning.id)
-            for ecological_zoning in clearcut.ecological_zonings
+            str(ecological_zoning.id) for ecological_zoning in clearcut.ecological_zonings
         ],
         registries_ids=[str(registry.id) for registry in clearcut.registries],
         created_at=clearcut.created_at,

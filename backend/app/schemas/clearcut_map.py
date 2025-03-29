@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Optional
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -7,7 +6,6 @@ from app.models import ClearCut
 from app.schemas.city import (
     CityPreviewSchema,
     cities_to_preview_schemas,
-    city_to_preview_schema,
 )
 from app.schemas.clearcut import ClearCutBaseSchema
 from app.schemas.tag import TAGS
@@ -40,13 +38,10 @@ def clearcut_to_preview_schema(clearcut: ClearCut) -> ClearCutPreviewSchema:
         status=clearcut.status,
         slope_percentage=clearcut.slope_percentage,
         area_hectare=clearcut.area_hectare,
-        cities=cities_to_preview_schemas(
-            [registry.city for registry in clearcut.registries]
-        ),
+        cities=cities_to_preview_schemas([registry.city for registry in clearcut.registries]),
         cut_date=clearcut.cut_date.date(),
         ecological_zoning_ids=[
-            str(ecological_zoning.id)
-            for ecological_zoning in clearcut.ecological_zonings
+            str(ecological_zoning.id) for ecological_zoning in clearcut.ecological_zonings
         ],
     )
 

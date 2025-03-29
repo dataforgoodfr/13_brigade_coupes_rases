@@ -9,7 +9,6 @@ def seed_cities_departments(db: Session):
         return db.query(Department).all()
     with open("data/departments_2024.csv") as department_file:
         with open("data/cities_2024.csv") as cities_file:
-
             departments_reader = csv.DictReader(department_file)
             cities_reader = csv.DictReader(cities_file)
             departments_reader.__next__()
