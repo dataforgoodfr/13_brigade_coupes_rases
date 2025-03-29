@@ -2,14 +2,14 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models import Department, User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
 from logging import getLogger
 
 logger = getLogger(__name__)
 
 
-def map_user(user: User) -> UserResponse:
-    return UserResponse(
+def map_user(user: User) -> UserResponseSchema:
+    return UserResponseSchema(
         id=str(user.id),
         deleted_at=user.deleted_at,
         created_at=user.created_at,
@@ -23,7 +23,7 @@ def map_user(user: User) -> UserResponse:
     )
 
 
-def create_user(db: Session, user: UserCreate) -> User:
+def create_user(db: Session, user: UserCreateSchema) -> User:
     new_user = User(
         firstname=user.firstname,
         lastname=user.lastname,
@@ -54,7 +54,7 @@ def get_user_by_id(id: int, db: Session) -> Optional[User]:
     return user
 
 
-def update_user(id: int, user_in: UserUpdate, db: Session) -> User:
+def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
     if not user_db:
         raise HTTPException(status_code=404, detail="user not found")

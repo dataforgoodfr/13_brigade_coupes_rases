@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 TAG_TYPES = ["excessive_slop", "excessive_area", "ecological_zoning"]
 
 
-class Tag(BaseModel):
+class TagSchema(BaseModel):
     type: str = Field(json_schema_extra={"example": "excessive_slop"})
     value: Optional[float] = Field(default=None, json_schema_extra={"example": "42"})
 
@@ -18,7 +18,7 @@ class Tag(BaseModel):
 
 
 TAGS = {
-    "1": Tag(type="excessive_slop", value=42),
-    "2": Tag(type="excessive_area", value=42),
-    "3": Tag(type="ecological_zoning"),
+    "1": TagSchema(type="excessive_slop", value=42),
+    "2": TagSchema(type="excessive_area", value=42),
+    "3": TagSchema(type="ecological_zoning"),
 }

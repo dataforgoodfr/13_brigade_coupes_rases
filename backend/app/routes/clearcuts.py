@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, Header, Response, status
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.clearcut import ClearCutCreate, ClearCutPatch, ClearCutResponse
+from app.schemas.clearcut import ClearCutCreateSchema, ClearCutPatch, ClearCutResponse
 from app.services.clearcut import (
     create_clearcut,
-    get_clearcut,
+    find_clearcuts,
     get_clearcut_by_id,
     update_clearcut,
 )
@@ -24,7 +24,7 @@ def authenticate(x_imports_token: str = Header(default="")):
 
 
 @router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
-def post_clearcut(response: Response, params: ClearCutCreate, db: Session = db_session):
+def post_clearcut(response: Response, params: ClearCutCreateSchema, db: Session = db_session):
     try:
         clearcut = create_clearcut(db, params)
         response.headers["location"] = f"/api/v1/clearcuts/{clearcut.id}"
@@ -45,7 +45,7 @@ def list_clearcut(
     db: Session = db_session, skip: int = 0, limit: int = 10
 ) -> list[ClearCutResponse]:
     logger.info(db)
-    return get_clearcut(db, skip=skip, limit=limit)
+    return find_clearcuts(db, skip=skip, limit=limit)
 
 
 @router.get("/{id}", response_model=ClearCutResponse)

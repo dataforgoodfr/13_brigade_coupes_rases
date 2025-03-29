@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.clearcut_map import ClearCutMapResponse
+from app.schemas.clearcut_map import ClearCutMapResponseSchema
 from app.services.clearcut import (
     GeoBounds,
     build_clearcuts_map,
@@ -15,7 +15,7 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/clearcuts-map", tags=["Clearcut map"])
 
 
-@router.get("/", response_model=ClearCutMapResponse)
+@router.get("/", response_model=ClearCutMapResponseSchema)
 def get_clearcuts_map(
     swLat: float = Query(
         ...,
@@ -37,15 +37,11 @@ def get_clearcuts_map(
         description="North east longitude",
         openapi_examples={"paris": {"value": 4.051208496093751}},
     ),
-    cutYears: list[int] = Query(
-        ...,
-        description="Cut years",
-        openapi_examples={"2025": {"value": 2025}},
-        default_factory=list[int],
-    ),
+   
     db: Session = db_session,
-) -> ClearCutMapResponse:
+) -> ClearCutMapResponseSchema:
     try:
+        print('GET CLEARCUTS')
         clearcuts = build_clearcuts_map(
             db,
             GeoBounds(

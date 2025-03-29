@@ -16,10 +16,9 @@ def test_endpoint_authentication(client: TestClient):
 
 def test_post_clearcut_success(client: TestClient):
     clearcut_data = {
-        "department_code": "75",
         "cut_date": "2024-01-01",
         "slope_percentage": 15,
-        "city": {"department_id": "1", "name": "Test", "zip_code": "00001"},
+        "area_hectare": 15,
         "location": {"type": "Point", "coordinates": [2.3522, 48.8566]},
         "boundary": {
             "type": "MultiPolygon",
@@ -34,8 +33,10 @@ def test_post_clearcut_success(client: TestClient):
                 ]
             ],
         },
-        "natura_name": "Test Nature",
-        "natura_code": "123",
+        "registries": [
+            {"number": "0089", "sheet": 1, "section": "0H", "zip_code": "13055", "district_code":"123"}
+        ],
+        "ecological_zonings": [{"type": "Natura2000", "code": "ABC", "name": "DEF"}],
     }
 
     response = client.post(
@@ -43,6 +44,7 @@ def test_post_clearcut_success(client: TestClient):
         json=clearcut_data,
         headers={"x-imports-token": "test-token"},
     )
+    print(response)
     assert response.status_code == status.HTTP_201_CREATED
 
     location = response.headers["location"]

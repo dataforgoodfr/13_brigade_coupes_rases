@@ -1,21 +1,21 @@
 from datetime import datetime
 from logging import getLogger
 from pydantic import Field
-from .shared import UserBase
+from .shared import UserBaseSchema
 
 logger = getLogger(__name__)
 
 
 # Schema for creating a new User instance
-class UserCreate(UserBase):
+class UserCreateSchema(UserBaseSchema):
     departments: list[int] = Field(default_factory=list, json_schema_extra={"example": [1]})
 
 
-class UserUpdate(UserCreate):
+class UserUpdateSchema(UserCreateSchema):
     pass
 
 
-class UserResponse(UserBase):
+class UserResponseSchema(UserBaseSchema):
     id: str
     created_at: datetime
     updated_at: datetime

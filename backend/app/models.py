@@ -13,6 +13,26 @@ user_department = Table(
 )
 
 
+ecological_zoning_clear_cut = Table(
+    "ecological_zoning_clear_cut",
+    Base.metadata,
+    Column(
+        "ecological_zoning_id",
+        Integer,
+        ForeignKey("ecological_zonings.id"),
+        primary_key=True,
+    ),
+    Column("clear_cut_id", Integer, ForeignKey("clear_cuts.id"), primary_key=True),
+)
+
+registry_clear_cut = Table(
+    "registry_clear_cut",
+    Base.metadata,
+    Column("registry_id", Integer, ForeignKey("registries.id"), primary_key=True),
+    Column("clear_cut_id", Integer, ForeignKey("clear_cuts.id"), primary_key=True),
+)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -30,7 +50,9 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     deleted_at = Column(DateTime, nullable=True)
 
-    departments = relationship("Department", secondary=user_department, back_populates="users")
+    departments = relationship(
+        "Department", secondary=user_department, back_populates="users"
+    )
     clear_cuts = relationship("ClearCut", back_populates="user")
 
     @validates("role")
@@ -46,7 +68,9 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String, index=True)
     name = Column(String)
-    users = relationship("User", secondary=user_department, back_populates="departments")
+    users = relationship(
+        "User", secondary=user_department, back_populates="departments"
+    )
     cities: Mapped[list["City"]] = relationship()
 
     @validates("name")
@@ -63,7 +87,36 @@ class City(Base):
     name = Column(String)
     department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
     department: Mapped["Department"] = relationship(back_populates="cities")
-    clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="city")
+    registries: Mapped[list["Registry"]] = relationship(back_populates="city")
+
+
+class Registry(Base):
+    __tablename__ = "registries"
+    id = Column(Integer, primary_key=True, index=True)
+    number = Column(String, index=True)
+    sheet = Column(Integer, index=True)
+    section = Column(String, index=True)
+    district_code = Column(String, index=True)
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
+    city: Mapped["City"] = relationship(back_populates="registries")
+    clear_cuts: Mapped[list["ClearCut"]] = relationship(
+        secondary=registry_clear_cut, back_populates="registries"
+    )
+
+
+NATURA_2000 = "Natura2000"
+
+
+class EcologicalZoning(Base):
+    __tablename__ = "ecological_zonings"
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String, index=True)
+    sub_type = Column(String, index=True, nullable=True)
+    name = Column(String, index=True)
+    code = Column(String, index=True)
+    clear_cuts: Mapped[list["ClearCut"]] = relationship(
+        secondary=ecological_zoning_clear_cut, back_populates="ecological_zonings"
+    )
 
 
 CLEARCUT_STATUSES = [
@@ -81,6 +134,7 @@ class ClearCut(Base):
     id = Column(Integer, primary_key=True, index=True)
     cut_date = Column(DateTime, index=True)
     slope_percentage = Column(Float, index=True)
+    area_hectare = Column(Float, index=True)
     location = Column(Geometry(geometry_type="Point", srid=4326))
     boundary = Column(Geometry(geometry_type="MultiPolygon", srid=4326))
     status = Column(String, index=True)
@@ -89,8 +143,12 @@ class ClearCut(Base):
     natura_name = Column(String, nullable=True)
     natura_code = Column(String, nullable=True)
 
-    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
-    city: Mapped["City"] = relationship(back_populates="clear_cuts")
+    ecological_zonings: Mapped[list["EcologicalZoning"]] = relationship(
+        secondary=ecological_zoning_clear_cut, back_populates="clear_cuts"
+    )
+    registries: Mapped[list["Registry"]] = relationship(
+        secondary=registry_clear_cut, back_populates="clear_cuts"
+    )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="clear_cuts")

@@ -28,9 +28,6 @@ engine = create_engine(
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Settings tables are not truncated as their data is generated in a migration.
-SETTINGS_TABLES = ["departments"]
-
 
 def pytest_collection_modifyitems(session, config, items):
     focused_items = [item for item in items if item.get_closest_marker("focus")]
@@ -49,7 +46,7 @@ def migration():
 
 
 @pytest.fixture(scope="function")
-def db(migration, nuke_all_tables):
+def db():
     db = SessionLocal()
     seed_database()
     try:
@@ -60,23 +57,7 @@ def db(migration, nuke_all_tables):
 
 
 @pytest.fixture(scope="function")
-def nuke_all_tables():
-    db = SessionLocal()
-    try:
-        metadata = Base.metadata
-        tables = ", ".join(
-            table.name for table in metadata.sorted_tables if table.name not in SETTINGS_TABLES
-        )
-        db.execute(text(f"TRUNCATE TABLE {tables} CASCADE"))
-        db.commit()
-    except Exception as e:
-        print(f"Error occurred: {e}")
-    finally:
-        db.close()
-
-
-@pytest.fixture(scope="function")
-def client(nuke_all_tables, db):
+def client(db):
     def override_get_db():
         try:
             yield db
@@ -90,7 +71,7 @@ def client(nuke_all_tables, db):
 
 
 @pytest.fixture(scope="function")
-def imports_client(nuke_all_tables, db):
+def imports_client(db):
     def override_get_db():
         try:
             yield db

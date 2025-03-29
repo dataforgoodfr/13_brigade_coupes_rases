@@ -4,8 +4,17 @@ import { pointTupleSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 
-const clearCuttingPointsSchema = z.array(z.number());
-export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
+const geoJsonTypeSchema = z.enum(["Point", "MultiPolygon"]);
+const pointSchema = z.object({
+	type: geoJsonTypeSchema.extract(["Point"]),
+	coordinates: z.tuple([z.number(), z.number()]),
+});
+const multiPolygonSchema = z.object({
+	type: geoJsonTypeSchema.extract(["MultiPolygon"]),
+	coordinates: z.array(
+		z.array(z.array(z.array(z.tuple([z.number(), z.number()])))),
+	),
+});
 
 const ecological_zoningSchema = z.object({
 	id: z.string(),
@@ -14,12 +23,18 @@ const ecological_zoningSchema = z.object({
 	logo: z.string().url(),
 });
 
+const citySchema = z.object({
+	id: z.string(),
+	department_id: z.string(),
+	zip_code: z.string(),
+	name: z.string(),
+});
 const clearCuttingBaseResponseSchema = z.object({
 	id: z.string(),
-	boundary: z.array(pointTupleSchema),
+	boundary: multiPolygonSchema,
 	name: z.string().optional(),
-	location: pointTupleSchema,
-	department_id: z.string(),
+	location: pointSchema,
+	city: citySchema,
 	cut_date: z.string().date(),
 	ecologicalZones: z.array(z.string()).optional(),
 	tags: z.array(z.string()),

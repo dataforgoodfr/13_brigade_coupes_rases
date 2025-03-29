@@ -3,26 +3,28 @@ from logging import getLogger
 from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import CLEARCUT_STATUSES, ClearCut
-from app.schemas.city import CreateCity
+from app.schemas.ecological_zoning import EcologicalZoningSchema
+from app.schemas.registry import CreateRegistrySchema
 
 logger = getLogger(__name__)
 
 
-class ClearCutCreate(BaseModel):
-    slope_percentage: float
+class ClearCutCreateSchema(BaseModel):
+    ecological_zonings: list[EcologicalZoningSchema] = Field(default=[])
+    slope_percentage: float = Field(json_schema_extra={"example": "10"})
+    area_hectare: float = Field(json_schema_extra={"example": "10"})
     cut_date: datetime
     location: Point
     boundary: MultiPolygon
-    natura_name: Optional[str]
-    natura_code: Optional[str]
-    city: CreateCity
+    registries: list[CreateRegistrySchema]
 
 
-class ClearCutBase(BaseModel):
+class ClearCutBaseSchema(BaseModel):
     slope_percentage: float
+    area_hectare: float
     cut_date: date
 
 
@@ -39,29 +41,36 @@ class ClearCutPatch(BaseModel):
 
 class ClearCutResponse(BaseModel):
     id: str
+    area_hectare: float
     slope_percentage: float
     cut_date: datetime
     status: str
     user_id: Optional[str]
+    ecological_zonings_ids: list[str]
     created_at: datetime
     updated_at: datetime
     user_id: Optional[str]
-    city_id: str
     location: Point
     boundary: MultiPolygon
+    registries_ids: list[str]
     model_config = ConfigDict(from_attributes=True)
 
 
-def clearcut_to_response(clearcut: ClearCut) -> ClearCutResponse:
+def clearcut_to_response_schema(clearcut: ClearCut) -> ClearCutResponse:
     return ClearCutResponse(
         id=str(clearcut.id),
         boundary=MultiPolygon.model_validate_json(clearcut.boundary),
         location=Point.model_validate_json(clearcut.location),
+        ecological_zonings_ids=[
+            str(ecological_zoning.id)
+            for ecological_zoning in clearcut.ecological_zonings
+        ],
+        registries_ids=[str(registry.id) for registry in clearcut.registries],
         created_at=clearcut.created_at,
         cut_date=clearcut.cut_date,
         status=clearcut.status,
         slope_percentage=clearcut.slope_percentage,
+        area_hectare=clearcut.area_hectare,
         updated_at=clearcut.updated_at,
         user_id=clearcut.user_id and str(clearcut.user_id),
-        city_id=str(clearcut.city.id),
     )

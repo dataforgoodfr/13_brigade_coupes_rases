@@ -1,7 +1,7 @@
 from datetime import datetime
 from geoalchemy2 import WKTElement
 import pytest
-from app.models import City, Department, ClearCut
+from app.models import City, Department, ClearCut, EcologicalZoning, Registry
 from common.clear_cut import new_clear_cut
 from common.user import new_user
 
@@ -36,24 +36,31 @@ def test_department_creation(db):
 
 def test_associations(db):
     user = new_user()
-    city = db.query(City).first()
-    clear_cut = new_clear_cut(status="validated", city_id=city.id)
+    registry = db.query(Registry).first()
+    ecological_zoning = db.query(EcologicalZoning).first()
+    clear_cut = new_clear_cut(
+        status="validated",
+        registries=[registry],
+        ecological_zonings=[ecological_zoning],
+    )
 
-    user.departments.append(city.department)
+    user.departments.append(registry.city.department)
     user.clear_cuts.append(clear_cut)
 
     db.add_all([user, clear_cut])
     db.commit()
 
-    assert city.department in user.departments
+    assert registry.city.department in user.departments
     assert clear_cut in user.clear_cuts
-    assert clear_cut.city == city
-    assert user in city.department.users
-    assert clear_cut in city.clear_cuts
+    assert clear_cut.registries[0] == registry
+    assert user in registry.city.department.users
+    assert clear_cut in registry.clear_cuts
+    assert clear_cut in ecological_zoning.clear_cuts
 
 
 def test_clear_cut_creation(db):
-    city = db.query(City).first()
+    registry = db.query(Registry).first()
+    ecological_zoning = db.query(EcologicalZoning).first()
     clear_cut = ClearCut(
         cut_date=datetime.now(),
         slope_percentage=15.5,
@@ -62,7 +69,8 @@ def test_clear_cut_creation(db):
             "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
         ),
         status="to_validate",
-        city_id=city.id,
+        ecological_zonings=[ecological_zoning],
+        registries=[registry],
     )
     db.add(clear_cut)
     db.commit()
@@ -84,3 +92,13 @@ def test_clear_cut_creation(db):
 
     assert clear_cut.id is not None
     assert clear_cut.created_at is not None
+
+
+def test_ecological_zoning_create_without_duplicate(db):
+    db.add(EcologicalZoning(code="ABC", type="Natura2000", name="ABC"))
+    db.commit()
+    created_ecological_zoning =  db.query(EcologicalZoning).filter(EcologicalZoning.code == "ABC").first()
+    assert  created_ecological_zoning.code  == "ABC"
+    assert  created_ecological_zoning.type  == "Natura2000"
+    assert  created_ecological_zoning.name  == "ABC"
+    

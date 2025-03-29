@@ -4,10 +4,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.models import ClearCut
 from app.schemas.clearcut import (
-    ClearCutCreate,
+    ClearCutCreateSchema,
     ClearCutPatch,
     ClearCutResponse,
-    clearcut_to_response,
+    clearcut_to_response_schema,
 )
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
@@ -15,21 +15,25 @@ from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID, ST_AsGeoJSON
 
 from app.schemas.clearcut_map import (
-    ClearCutMapResponse,
-    clearcut_to_preview,
+    ClearCutMapResponseSchema,
+    clearcut_to_preview_schema,
 )
-from app.services.city import get_or_add_city
+from app.services.ecological_zoning import find_or_add_ecological_zonings
+from app.services.registries import find_or_add_registries
 
 logger = getLogger(__name__)
 _sridDatabase = 4326
 
 
-def create_clearcut(db: Session, clearcut: ClearCutCreate) -> ClearCut:
-    city = get_or_add_city(db, clearcut.city)
+def create_clearcut(db: Session, clearcut: ClearCutCreateSchema) -> ClearCut:
 
     intersecting_clearcut = (
         db.query(ClearCut)
-        .filter(ClearCut.boundary.ST_Intersects(WKTElement(clearcut.boundary.wkt, srid=4326)))
+        .filter(
+            ClearCut.boundary.ST_Intersects(
+                WKTElement(clearcut.boundary.wkt, srid=4326)
+            )
+        )
         .first()
     )
 
@@ -41,12 +45,14 @@ def create_clearcut(db: Session, clearcut: ClearCutCreate) -> ClearCut:
     db_item = ClearCut(
         cut_date=clearcut.cut_date,
         slope_percentage=clearcut.slope_percentage,
+        area_hectare=clearcut.area_hectare,
         location=WKTElement(clearcut.location.wkt),
         boundary=WKTElement(clearcut.boundary.wkt),
         status="to_validate",
-        city=city,
-        natura_name=clearcut.natura_name,
-        natura_code=clearcut.natura_code,
+        ecological_zonings=find_or_add_ecological_zonings(
+            db, clearcut.ecological_zonings
+        ),
+        registries=find_or_add_registries(db, clearcut.registries),
     )
 
     db.add(db_item)
@@ -69,7 +75,7 @@ def update_clearcut(id: int, db: Session, clearcut_in: ClearCutPatch):
     return clearcut
 
 
-def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
+def find_clearcuts(db: Session, skip: int = 0, limit: int = 10):
     clearcuts = db.query(ClearCut).offset(skip).limit(limit).all()
     for clearcut in clearcuts:
         clearcut.location = to_shape(clearcut.location)
@@ -82,13 +88,15 @@ def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
 
 def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponse:
     [clearcut, boundary, location] = (
-        db.query(ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location))
+        db.query(
+            ClearCut, ST_AsGeoJSON(ClearCut.boundary), ST_AsGeoJSON(ClearCut.location)
+        )
         .filter(ClearCut.id == id)
         .first()
     )
     clearcut.boundary = boundary
     clearcut.location = location
-    return clearcut_to_response(clearcut)
+    return clearcut_to_response_schema(clearcut)
 
 
 class GeoBounds(BaseModel):
@@ -98,7 +106,7 @@ class GeoBounds(BaseModel):
     north_east_longitude: float
 
 
-def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapResponse:
+def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapResponseSchema:
     envelope = ST_MakeEnvelope(
         geo_bounds.south_west_longitude,
         geo_bounds.south_west_latitude,
@@ -115,7 +123,9 @@ def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapRespon
 
     # Get preview for the x most relevant clearcut
     clearcuts = (
-        db.query(ClearCut, ST_AsGeoJSON(ClearCut.location), ST_AsGeoJSON(ClearCut.boundary))
+        db.query(
+            ClearCut, ST_AsGeoJSON(ClearCut.location), ST_AsGeoJSON(ClearCut.boundary)
+        )
         .filter(ST_Contains(square, ClearCut.location))
         .order_by(ClearCut.created_at)
         .all()
@@ -124,9 +134,10 @@ def build_clearcuts_map(db: Session, geo_bounds: GeoBounds) -> ClearCutMapRespon
         clearcut.location = location
         clearcut.boundary = boundary
 
-    previews = [clearcut_to_preview(row[0]) for row in clearcuts]
+    previews = [clearcut_to_preview_schema(row[0]) for row in clearcuts]
 
-    map_response = ClearCutMapResponse(
-        points=[Point.model_validate_json(point[0]) for point in points], previews=previews
+    map_response = ClearCutMapResponseSchema(
+        points=[Point.model_validate_json(point[0]) for point in points],
+        previews=previews,
     )
     return map_response

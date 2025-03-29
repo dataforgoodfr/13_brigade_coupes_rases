@@ -1,5 +1,5 @@
-from app.schemas.tag import TAGS, Tag
+from app.schemas.tag import TAGS, TagSchema
 
 
-def get_tags() -> dict[str, Tag]:
+def get_tags() -> dict[str, TagSchema]:
     return TAGS
