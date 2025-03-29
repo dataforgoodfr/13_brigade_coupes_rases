@@ -30,10 +30,10 @@ export function ClearCuttingMapPopUp({
 					</div>
 					<div>
 						Taille de la coupe :
-						<strong> {clearCutting?.surfaceHectare} HA</strong>
+						<strong> {clearCutting?.area_hectare} HA</strong>
 					</div>
 					<div>
-						Pente : <strong>{clearCutting?.slopePercent} %</strong>
+						Pente : <strong>{clearCutting?.slope_percentage} %</strong>
 					</div>
 					<div>
 						Zone Natura : <strong> {clearCutting.naturaZone} </strong>

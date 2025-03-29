@@ -468,6 +468,26 @@ SQLAlchemy = ">=1.4"
 shapely = ["Shapely (>=1.7)"]
 
 [[package]]
+name = "geojson-pydantic"
+version = "1.2.0"
+description = "Pydantic data models for the GeoJSON spec."
+optional = false
+python-versions = ">=3.9"
+groups = ["backend"]
+files = [
+    {file = "geojson_pydantic-1.2.0-py3-none-any.whl", hash = "sha256:30f469d05f7f73dcac5f995579209d1ae74a148c0724018fa9492675e05eebf6"},
+    {file = "geojson_pydantic-1.2.0.tar.gz", hash = "sha256:eb5c61d3106a28bc71c936ef4cb44f36025db314059217063fee87d82e50cc81"},
+]
+
+[package.dependencies]
+pydantic = ">=2.0,<3.0"
+
+[package.extras]
+dev = ["bump-my-version", "pre-commit"]
+docs = ["mkdocs", "mkdocs-material", "pygments"]
+test = ["pytest", "pytest-cov", "shapely"]
+
+[[package]]
 name = "greenlet"
 version = "3.1.1"
 description = "Lightweight in-process concurrent programming"
@@ -2035,4 +2055,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "889670ceecb979fc49d9cb851f37b59f7c7a18d7763782e0637f73846f045114"
+content-hash = "5dd7c53e9205e6624a03a1035ad9e363d9ed36785947753e97ae47342da7db8d"

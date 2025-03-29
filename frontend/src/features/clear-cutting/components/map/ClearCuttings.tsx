@@ -114,7 +114,7 @@ export function ClearCuttings() {
 					<Polygon
 						key={clearCutting.id}
 						className="clear-cutting-area"
-						positions={clearCutting.geoCoordinates}
+						positions={clearCutting.boundary}
 						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status.name]})`}
 						weight={0}
 						fillOpacity={0.75}

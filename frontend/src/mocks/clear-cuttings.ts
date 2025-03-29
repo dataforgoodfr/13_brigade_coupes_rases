@@ -5,7 +5,7 @@ import type {
 	ClearCuttingResponse,
 	ClearCuttingsResponse,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import { fakeStatuses, fakeTags } from "@/mocks/referential";
+import { fakeDepartments, fakeStatuses, fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -62,22 +62,21 @@ export const createClearCuttingBaseMock = (
 	override: Partial<ClearCuttingBaseResponse> = {},
 ): ClearCuttingBaseResponse => {
 	const date = faker.date.anytime();
-	const center = override.center ?? franceRandomPointMock();
+	const center = override.location ?? franceRandomPointMock();
 	return {
 		id: faker.string.uuid(),
-		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
-		center,
+		boundary: randomPolygonFromLocation(center, 3.5, 7),
+		location: center,
 		name: faker.animal.dog(),
 		comment: faker.lorem.paragraph(),
 		naturaZone: faker.string.fromCharacters(naturaZones),
-		slopePercent: faker.number.int({ min: 1, max: 60 }),
+		slope_percentage: faker.number.int({ min: 1, max: 60 }),
 		status: faker.helpers.arrayElement(Object.keys(fakeStatuses)),
-		abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
-		creationDate: date.toLocaleDateString(),
-		cutYear: date.getFullYear(),
+		tags: faker.helpers.arrayElements(Object.keys(fakeTags)),
 		ecologicalZones: [],
-		reportDate: date.toLocaleDateString(),
-		surfaceHectare: faker.number.int({ min: 5, max: 20 }),
+		cut_date: date.toLocaleDateString(),
+		department_id: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
+		area_hectare: faker.number.int({ min: 5, max: 20 }),
 		...override,
 	};
 };
@@ -157,12 +156,12 @@ const createFranceRandomPoints = range<[number, number]>(
 
 export const createClearCuttingPreviewResponse = (
 	override: Partial<ClearCuttingPreviewResponse> = {
-		center: franceRandomPointMock(),
+		location: franceRandomPointMock(),
 	},
 ): ClearCuttingPreviewResponse => {
 	const city = faker.location.city();
 	return {
-		...createClearCuttingBaseMock({ center: override.center }),
+		...createClearCuttingBaseMock({ location: override.location }),
 		address: {
 			city,
 			country: faker.location.country(),
@@ -175,7 +174,7 @@ export const createClearCuttingPreviewResponse = (
 
 const clearCuttingPreviews = createFranceRandomPoints
 	.slice(0, 50)
-	.map((center) => createClearCuttingPreviewResponse({ center }));
+	.map((center) => createClearCuttingPreviewResponse({ location: center }));
 
 export const mockClearCuttingsResponse = (
 	override: Partial<ClearCuttingsResponse> = {},
@@ -201,7 +200,7 @@ export const mockClearCuttingsResponse = (
 			previews:
 				boundaries && filterInArea
 					? previews.filter((ccp) =>
-							isPointInsidePolygon(boundaries, ccp.center),
+							isPointInsidePolygon(boundaries, ccp.location),
 						)
 					: previews,
 			points: createFranceRandomPoints,

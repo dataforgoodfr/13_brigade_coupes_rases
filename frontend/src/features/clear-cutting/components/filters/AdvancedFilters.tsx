@@ -6,8 +6,8 @@ import {
 	selectAreaPresetsHectare,
 	selectCutYears,
 	selectDepartments,
-	selectEcologicalZoning,
-	selectExcessiveSlop,
+	selectecological_zoning,
+	selectexcessive_slop,
 	selectFavorite,
 	selectStatuses,
 } from "@/features/clear-cutting/store/filters.slice";
@@ -45,11 +45,11 @@ const STATUS = {
 	label: "Etat",
 };
 const ECOLOGICAL_ZONING = {
-	id: "ecologicalZoning",
+	id: "ecological_zoning",
 	label: "Zone protégée",
 };
 const EXCESSIVE_SLOP = {
-	id: "excessiveSlop",
+	id: "excessive_slop",
 	label: "Pente excessive",
 };
 const FAVORITE = {
@@ -78,9 +78,9 @@ export function AdvancedFilters({ className }: Props) {
 		(status) => <StatusWithLabel status={status.item.name} />,
 		selectableItemToString,
 	);
-	const excessiveSlop = useAppSelector(selectExcessiveSlop);
+	const excessive_slop = useAppSelector(selectexcessive_slop);
 	const favorite = useAppSelector(selectFavorite);
-	const ecologicalZoning = useAppSelector(selectEcologicalZoning);
+	const ecological_zoning = useAppSelector(selectecological_zoning);
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());
@@ -154,9 +154,9 @@ export function AdvancedFilters({ className }: Props) {
 					</label>
 					<Switch
 						id={ECOLOGICAL_ZONING.id}
-						checked={ecologicalZoning}
+						checked={ecological_zoning}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setEcologicalZoning(isChecked))
+							dispatch(filtersSlice.actions.setecological_zoning(isChecked))
 						}
 					/>
 				</div>
@@ -164,9 +164,9 @@ export function AdvancedFilters({ className }: Props) {
 					<label htmlFor={EXCESSIVE_SLOP.id}>{EXCESSIVE_SLOP.label}</label>
 					<Switch
 						id={EXCESSIVE_SLOP.id}
-						checked={excessiveSlop}
+						checked={excessive_slop}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setExcessiveSlop(isChecked))
+							dispatch(filtersSlice.actions.setexcessive_slop(isChecked))
 						}
 					/>
 				</div>

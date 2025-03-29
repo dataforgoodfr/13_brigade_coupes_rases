@@ -1,29 +1,53 @@
 from logging import getLogger
+from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Tuple
 
-from app.schemas.clearcut import ClearCutBase
+from app.models import ClearCut
+from app.schemas.city import (
+    CityPreviewSchema,
+    cities_to_preview_schemas,
+)
+from app.schemas.clearcut import ClearCutBaseSchema
+from app.schemas.tag import TAGS
+
 
 logger = getLogger(__name__)
 
 
-class ClearCutPreview(ClearCutBase):
-    location: Tuple[float, float] = Field(
-        default_factory=Tuple[float, float],
-        json_schema_extra={"example": "[2.380192, 48.878899]"},
+class ClearCutPreviewSchema(ClearCutBaseSchema):
+    id: str = Field(json_schema_extra={"example": "1"})
+    location: Point
+    boundary: MultiPolygon
+    tags: list[str] = Field(
+        json_schema_extra={"example": "[1,2,3]"},
     )
-    boundary: List[Tuple[float, float]] = Field(
-        default_factory=str,
-        json_schema_extra={
-            "example": "[[2.381136, 48.881707], [2.379699, 48.880338], [2.378497, 48.878687], [2.378561, 48.877615], [2.379162, 48.876825], [2.381094, 48.876175], [2.380879, 48.877573], [2.382145, 48.8788], [2.384012, 48.879407], [2.383454, 48.880127], [2.381694, 48.880042], [2.381372, 48.880973], [2.381136, 48.881707]]"
-        },
+    status: str = Field(
+        json_schema_extra={"example": "validated"},
     )
-
+    ecological_zoning_ids: list[str]
+    cities: dict[str, CityPreviewSchema]
     model_config = ConfigDict(from_attributes=True)
 
 
-class ClearCutMapResponse(BaseModel):
-    points: list[tuple[float, float]]
-    previews: list[ClearCutPreview]
+def clearcut_to_preview_schema(clearcut: ClearCut) -> ClearCutPreviewSchema:
+    return ClearCutPreviewSchema(
+        id=str(clearcut.id),
+        boundary=MultiPolygon.model_validate_json(clearcut.boundary),
+        location=Point.model_validate_json(clearcut.location),
+        tags=[tag for tag in TAGS],
+        status=clearcut.status,
+        slope_percentage=clearcut.slope_percentage,
+        area_hectare=clearcut.area_hectare,
+        cities=cities_to_preview_schemas([registry.city for registry in clearcut.registries]),
+        cut_date=clearcut.cut_date.date(),
+        ecological_zoning_ids=[
+            str(ecological_zoning.id) for ecological_zoning in clearcut.ecological_zonings
+        ],
+    )
+
+
+class ClearCutMapResponseSchema(BaseModel):
+    points: list[Point]
+    previews: list[ClearCutPreviewSchema]
 
     model_config = ConfigDict(from_attributes=True)

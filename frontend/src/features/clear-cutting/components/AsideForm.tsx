@@ -27,7 +27,7 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 
 	useEffect(() => {
 		if (map && value) {
-			map.flyTo(value?.geoCoordinates[0], 10, { duration: 1 });
+			map.flyTo(value?.boundary[0], 10, { duration: 1 });
 		}
 	}, [map, value]);
 
@@ -37,7 +37,7 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 				<Link to="/clear-cuttings">
 					<X size={40} />
 				</Link>
-				<h1 className="ml-6">{`${value?.address.city.toLocaleUpperCase()} - ${value?.cutYear}`}</h1>
+				<h1 className="ml-6">{`${value?.address.city.toLocaleUpperCase()} - ${value?.cut_date}`}</h1>
 			</div>
 			<div className="p-2 flex flex-col flex-grow overflow-auto">
 				<Accordion.Root type="multiple" className="grow">
