@@ -39,7 +39,7 @@ class ClearCutPatch(BaseModel):
         return value
 
 
-class ClearCutResponse(BaseModel):
+class ClearCutResponseSchema(BaseModel):
     id: str
     area_hectare: float
     slope_percentage: float
@@ -56,8 +56,8 @@ class ClearCutResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-def clearcut_to_response_schema(clearcut: ClearCut) -> ClearCutResponse:
-    return ClearCutResponse(
+def clearcut_to_response_schema(clearcut: ClearCut) -> ClearCutResponseSchema:
+    return ClearCutResponseSchema(
         id=str(clearcut.id),
         boundary=MultiPolygon.model_validate_json(clearcut.boundary),
         location=Point.model_validate_json(clearcut.location),
