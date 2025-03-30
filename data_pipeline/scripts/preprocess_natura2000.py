@@ -4,9 +4,10 @@ import geopandas as gpd
 import pandas as pd
 
 from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf, log_execution
+from scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
 
 NATURA_2000_DIR = DATA_DIR / "natura2000"
+RESULT_FILEPATH = NATURA_2000_DIR / "natura2000.fgb"
 
 
 def download_layers() -> None:
@@ -38,18 +39,12 @@ def union_explode_layers(zps: gpd.GeoDataFrame, sic: gpd.GeoDataFrame) -> gpd.Ge
     return natura2000
 
 
-def save_result(natura2000: gpd.GeoDataFrame) -> None:
-    output_filepath = NATURA_2000_DIR / "natura2000.fgb"
-    logging.info(f"Saving the result to disk in {output_filepath}")
-    natura2000.to_file(output_filepath, index=False)
-
-
-@log_execution
+@log_execution(RESULT_FILEPATH)
 def main() -> None:
     download_layers()
     zps, sic = load_layers()
     natura2000 = union_explode_layers(zps, sic)
-    save_result(natura2000)
+    save_gdf(natura2000, RESULT_FILEPATH)
 
 
 if __name__ == "__main__":
