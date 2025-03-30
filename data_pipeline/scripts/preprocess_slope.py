@@ -13,7 +13,7 @@ from rasterio.merge import merge
 from tqdm import tqdm
 
 from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf
+from scripts.utils import display_df, download_file, load_gdf, log_execution, polygonize_raster
 
 SLOPE_DIR = DATA_DIR / "slope"
 RESULT_FILEPATH = SLOPE_DIR / "slope_gte_30.fgb"
@@ -353,26 +353,26 @@ def polygonize_slope_raster() -> None:
     our current slope raster. Although the polygon layer requires significantly more
     storage (~600MB vs. ~30MB for the raster), we are vectorizing it now for convenience.
     """
-    # logging.info("Polygonize the slope raster")
-    # polygonize_raster(
-    #     input_raster=str(SLOPE_DIR / "slope_gte_30.tif"),
-    #     output_layer_file=str(RESULT_FILEPATH),
-    #     src_crs_epsg=2154,  # Lambert 93
-    # )
+    logging.info("Polygonize the slope raster")
+    polygonize_raster(
+        input_raster=str(SLOPE_DIR / "slope_gte_30.tif"),
+        output_layer_file=str(RESULT_FILEPATH),
+        src_crs_epsg=2154,  # Lambert 93
+    )
 
     logging.info("Final slope geodataframe")
     load_gdf(RESULT_FILEPATH)
 
 
-# @log_execution(RESULT_FILEPATH)
+@log_execution(RESULT_FILEPATH)
 def main() -> None:
-    # assembly_map = get_dem_assembly_map()
-    # download_dem_tiles()
-    # decompress_dem_tiles()
-    # downloaded_tiles_sanity_check(assembly_map)
-    # compute_slope_from_elevation()
-    # binarize_slope_gte_30()
-    # merge_raster_tiles()
+    assembly_map = get_dem_assembly_map()
+    download_dem_tiles()
+    decompress_dem_tiles()
+    downloaded_tiles_sanity_check(assembly_map)
+    compute_slope_from_elevation()
+    binarize_slope_gte_30()
+    merge_raster_tiles()
     polygonize_slope_raster()
 
 
