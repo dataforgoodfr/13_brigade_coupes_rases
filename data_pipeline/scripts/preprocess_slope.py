@@ -357,7 +357,8 @@ def polygonize_slope_raster() -> None:
     polygonize_raster(
         input_raster=str(SLOPE_DIR / "slope_gte_30.tif"),
         output_layer_file=str(RESULT_FILEPATH),
-        src_crs_epsg=2154,  # Lambert 93
+        # We need to explicitely set Lambert-93 because the info is not present in the tif file
+        src_crs_epsg=2154,
     )
 
     logging.info("Final slope geodataframe")

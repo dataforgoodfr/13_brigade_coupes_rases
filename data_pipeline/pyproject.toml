@@ -16,3 +16,19 @@ py7zr = "^0.22.0"
 rasterio = "^1.4.3"
 gdal = "3.4.3"
 tqdm = "^4.67.1"
+pykeepass = "^4.1.1.post1"
+python-dotenv = "^1.1.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+types-psutil = "^7.0.0.20250218"
+types-requests = "^2.32.0.20250328"
+pandas-stubs = "^2.2.3.250308"
+types-tqdm = "^4.67.0.20250319"
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["geopandas.*", "rasterio.*", "osgeo.*", "pykeepass.*"]
+ignore_missing_imports = true

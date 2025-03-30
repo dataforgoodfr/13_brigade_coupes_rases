@@ -6,8 +6,11 @@ import os
 import sys
 import time
 from pathlib import Path
+from typing import Any, Callable, Optional, TypeVar
 
 import psutil
+
+T = TypeVar("T")
 
 
 def _format_time(timespan: float, precision: int = 3) -> str:
@@ -20,16 +23,16 @@ def _format_time(timespan: float, precision: int = 3) -> str:
         # we have more than a minute, format that in a human readable form
         # Idea from http://snipplr.com/view/5713/
         parts = [("d", 60 * 60 * 24), ("h", 60 * 60), ("min", 60), ("s", 1)]
-        time = []
+        time_parts: list[str] = []
         leftover = timespan
         for suffix, length in parts:
             value = int(leftover / length)
             if value > 0:
                 leftover = leftover % length
-                time.append("%s%s" % (str(value), suffix))
+                time_parts.append("%s%s" % (str(value), suffix))
             if leftover < 1:
                 break
-        return " ".join(time)
+        return " ".join(time_parts)
 
     # Unfortunately characters outside of range(128) can cause problems in
     # certain terminals.
@@ -52,14 +55,18 @@ def _format_time(timespan: float, precision: int = 3) -> str:
     return "%.*g %s" % (precision, timespan * scaling[order], units[order])
 
 
-def log_execution(result_filepath: str | Path):
+def log_execution(
+    result_filepath: str | Path,
+) -> Callable[[Callable[..., T]], Callable[..., Optional[T]]]:
     """
     Decorator for logging start, end, memory usage, and duration
     """
+    if isinstance(result_filepath, str):
+        result_filepath = Path(result_filepath)
 
-    def decorator(func):
+    def decorator(func: Callable[..., T]) -> Callable[..., Optional[T]]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Optional[T]:
             # Get the script filename
             caller_frame = inspect.stack()[1]
             caller_script = os.path.basename(caller_frame.filename)
@@ -84,6 +91,7 @@ def log_execution(result_filepath: str | Path):
             # Record end time
             end_time = time.perf_counter()
 
+            # TODO: This max memory usage is not accurate at all!
             # Memory usage
             process = psutil.Process()
             memory_info = process.memory_info()

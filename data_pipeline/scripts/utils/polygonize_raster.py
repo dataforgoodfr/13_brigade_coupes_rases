@@ -6,7 +6,7 @@ def polygonize_raster(
     output_layer_file: str,
     fieldname: str | None = None,
     src_crs_epsg: int | None = None,
-):
+) -> None:
     """
     Polygonize a raster to a shapefile using 8-connectivity
 
