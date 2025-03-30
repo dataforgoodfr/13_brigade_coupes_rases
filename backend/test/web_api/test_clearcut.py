@@ -84,3 +84,21 @@ def test_post_clearcut_invalid_data(client: TestClient):
     )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_get_clearcuts(client: TestClient):
+    response = client.get(
+        "/api/v1/clearcuts",
+    )
+    data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert len(data["content"]) == 7
+
+
+def test_get_clearcut(client: TestClient):
+    response = client.get(
+        "/api/v1/clearcuts/1",
+    )
+    data = response.json()
+    assert response.status_code == status.HTTP_200_OK
+    assert data["id"] == "1"

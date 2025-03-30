@@ -4,7 +4,7 @@ import type { Bounds } from "@/features/clear-cutting/store/types";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
-	selectStatusesByIds,
+	selectEcologicalZoningByIds,
 	selectTagsByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
@@ -14,23 +14,25 @@ import { createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
 	type ClearCutting,
+	type ClearCuttingPreview,
 	type ClearCuttings,
-	clearCuttingResponseSchema,
+	clearCuttingBaseResponseSchema,
 	clearCuttingsResponseSchema,
 } from "./clear-cuttings";
 
 export const getClearCuttingThunk = createAppAsyncThunk<ClearCutting, string>(
 	"getClearCutting",
 	async (id, { getState, extra: { api } }) => {
-		const result = await api().get(`clear-cuttings/${id}`).json();
-		const clearCutting = clearCuttingResponseSchema.parse(result);
+		const result = await api().get(`api/v1/clearcuts/reports/${id}`).json();
+		const clearCutting = clearCuttingBaseResponseSchema.parse(result);
 		const state = getState();
-		const tags = selectTagsByIds(state, clearCutting.tags);
-		const status = selectStatusesByIds(state, [clearCutting.status])[0];
 		return {
 			...clearCutting,
-			abusiveTags: tags,
-			status,
+			ecologicalZonings: selectEcologicalZoningByIds(
+				state,
+				clearCutting.ecological_zoning_ids,
+			),
+			tags: selectTagsByIds(state, clearCutting.tags_ids),
 		};
 	},
 );
@@ -63,16 +65,17 @@ const getClearCuttingsThunk = createAppAsyncThunk<
 			),
 		})
 		.json();
-	console.log(result);
 	const clearCuttings = clearCuttingsResponseSchema.parse(result);
-	console.log(clearCuttings);
 	const state = getState();
 	const clearCuttingPreviews = clearCuttings.previews.map((preview) => ({
 		...preview,
-		abusiveTags: selectTagsByIds(state, preview.tags),
-		status: selectStatusesByIds(state, [preview.status])[0],
-	}));
-	return { ...clearCuttings, clearCuttingPreviews };
+		tags: selectTagsByIds(state, preview.tags_ids),
+		ecologicalZonings: selectEcologicalZoningByIds(
+			state,
+			preview.ecological_zoning_ids,
+		),
+	})) satisfies ClearCuttingPreview[];
+	return { ...clearCuttings, previews: clearCuttingPreviews };
 });
 type State = {
 	clearCuttings: RequestedContent<ClearCuttings>;

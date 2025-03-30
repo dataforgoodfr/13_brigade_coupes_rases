@@ -11,13 +11,9 @@ import { describe, expect, it } from "vitest";
 describe("Clear cuttings list", () => {
 	it("should render preview", async () => {
 		const preview = createClearCuttingPreviewResponse({
-			address: {
-				city: "TEST CITY",
-				country: "TEST COUNTRY",
-				postalCode: "TEST CODE",
-			},
+			cities: ["TEST CITY"],
 			comment: "TEST COMMENT",
-			location: [15, 15],
+			location: { type: "Point", coordinates: [15, 15] },
 		});
 		server.use(
 			mockClearCuttingsResponse({
@@ -35,9 +31,7 @@ describe("Clear cuttings list", () => {
 		await filters.open();
 		await filters.favorite.toggle();
 
-		const item = await clearCuttings({ user }).list.item(
-			preview.address.city as string,
-		);
+		const item = await clearCuttings({ user }).list.item(preview.cities[0]);
 		expect(item.comment).toBe(preview.comment);
 	});
 });

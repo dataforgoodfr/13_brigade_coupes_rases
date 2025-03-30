@@ -1,3 +1,4 @@
+import type { ClearCuttingStatus } from "@/features/clear-cutting/store/clear-cuttings";
 import {
 	type FiltersRequest,
 	type FiltersResponse,
@@ -9,14 +10,9 @@ import {
 	type SelectableItem,
 	listToSelectableItems,
 } from "@/shared/items";
-import type {
-	Department,
-	Status,
-	Tag,
-} from "@/shared/store/referential/referential";
+import type { Department, Tag } from "@/shared/store/referential/referential";
 import {
 	selectDepartmentsByIds,
-	selectStatusesByIds,
 	selectTagsByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
@@ -28,7 +24,7 @@ export interface FiltersState {
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
 	departments: SelectableItem<Department>[];
-	statuses: SelectableItem<Status>[];
+	statuses: SelectableItem<ClearCuttingStatus>[];
 	areas: SelectableItem<number>[];
 	excessive_slop: boolean;
 	ecological_zoning: boolean;
@@ -48,15 +44,14 @@ export const initialState: FiltersState = {
 export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
 	async (_arg, { getState, extra: { api } }) => {
-		const result = await api().get<FiltersResponse>("filters").json();
-		const { departments, tags, statuses, ...response } =
+		const result = await api().get<FiltersResponse>("api/v1/filters").json();
+		const { departments, tags, ...response } =
 			filtersResponseSchema.parse(result);
 		const state = getState();
 		return {
 			...response,
 			departments: selectDepartmentsByIds(state, departments ?? []),
 			tags: selectTagsByIds(state, tags ?? []),
-			statuses: selectStatusesByIds(state, statuses ?? []),
 		};
 	},
 );
@@ -97,7 +92,7 @@ export const filtersSlice = createSlice({
 		},
 		setStatuses: (
 			state,
-			{ payload }: PayloadAction<SelectableItem<Status>[]>,
+			{ payload }: PayloadAction<SelectableItem<ClearCuttingStatus>[]>,
 		) => {
 			state.statuses = payload;
 		},
@@ -171,7 +166,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 						.filter((d) => d.isSelected)
 						.map((d) => d.item.id),
 					areas: areas.filter((a) => a.isSelected).map((a) => a.item),
-					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item.id),
+					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
 					ecological_zoning,
 					excessive_slop,
 					favorite,

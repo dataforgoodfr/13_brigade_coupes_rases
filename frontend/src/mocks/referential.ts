@@ -1,10 +1,7 @@
-import { range } from "@/shared/array";
 import type {
-	ClearCuttingStatus,
 	DepartmentResponse,
-	ecological_zoningResponse,
+	EcologicalZoningResponse,
 	ReferentialResponse,
-	StatusResponse,
 	TagResponse,
 } from "@/shared/store/referential/referential";
 import { faker } from "@faker-js/faker";
@@ -22,13 +19,20 @@ export const fakeTags: TagResponse = {
 	},
 };
 
-export const fakeecological_zoning: ecological_zoningResponse =
-	Object.fromEntries(
-		range(5, () => [
-			faker.string.uuid(),
-			{ name: faker.company.buzzAdjective() },
-		]),
-	);
+export const fakeEcologicalZonings: EcologicalZoningResponse = {
+	"1": {
+		type: "Natura2000",
+		sub_type: "ZSC",
+		name: "Forêt de Rambouillet",
+		code: "FR1100796",
+	},
+	"2": {
+		type: "Natura2000",
+		sub_type: null,
+		name: "Etands de canal d'Ille et Rance",
+		code: "FR5300050",
+	},
+};
 export const fakeDepartments: DepartmentResponse = [
 	"Ain",
 	"Aisne",
@@ -136,23 +140,10 @@ export const fakeDepartments: DepartmentResponse = [
 	return acc;
 }, {});
 
-export const fakeStatuses = (
-	[
-		"final_validated",
-		"legal_validated",
-		"to_validate",
-		"waiting_for_validation",
-		"validated",
-	] as ClearCuttingStatus[]
-).reduce<StatusResponse>((acc, status) => {
-	acc[faker.string.uuid()] = { name: status };
-	return acc;
-}, {});
-export const mockReferential = http.get("*/referential", () => {
+export const mockReferential = http.get("*/api/v1/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
-		ecological_zoning: fakeecological_zoning,
+		ecological_zonings: fakeEcologicalZonings,
 		tags: fakeTags,
-		statuses: fakeStatuses,
 	} satisfies ReferentialResponse);
 });

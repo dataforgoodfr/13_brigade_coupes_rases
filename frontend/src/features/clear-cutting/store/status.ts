@@ -1,4 +1,4 @@
-import type { ClearCuttingStatus } from "@/shared/store/referential/referential";
+import type { ClearCuttingStatus } from "@/features/clear-cutting/store/clear-cuttings";
 
 export const CLEAR_CUTTING_STATUS_COLORS = {
 	to_validate: "red-500",

@@ -8,6 +8,7 @@ from app.routes import (
     clearcuts_map,
     token,
     me,
+    ecological_zonings,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,6 +32,7 @@ app.include_router(token.router)
 app.include_router(clearcuts_map.router)
 app.include_router(users.router)
 app.include_router(me.router)
+app.include_router(ecological_zonings.router)
 app.include_router(referential.router)
 
 

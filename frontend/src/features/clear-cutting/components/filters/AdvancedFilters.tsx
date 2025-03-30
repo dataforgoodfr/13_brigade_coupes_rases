@@ -6,10 +6,10 @@ import {
 	selectAreaPresetsHectare,
 	selectCutYears,
 	selectDepartments,
-	selectecological_zoning,
-	selectexcessive_slop,
 	selectFavorite,
 	selectStatuses,
+	selectecological_zoning,
+	selectexcessive_slop,
 } from "@/features/clear-cutting/store/filters.slice";
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -75,7 +75,7 @@ export function AdvancedFilters({ className }: Props) {
 	);
 	const statuses = useEnhancedItems(
 		useAppSelector(selectStatuses),
-		(status) => <StatusWithLabel status={status.item.name} />,
+		(status) => <StatusWithLabel status={status.item} />,
 		selectableItemToString,
 	);
 	const excessive_slop = useAppSelector(selectexcessive_slop);

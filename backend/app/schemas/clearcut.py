@@ -26,6 +26,7 @@ class ClearCutBaseSchema(BaseModel):
     slope_percentage: float
     area_hectare: float
     cut_date: date
+    created_at: datetime
 
 
 class ClearCutPatch(BaseModel):
@@ -49,7 +50,6 @@ class ClearCutResponseSchema(BaseModel):
     ecological_zonings_ids: list[str]
     created_at: datetime
     updated_at: datetime
-    user_id: Optional[str]
     location: Point
     boundary: MultiPolygon
     registries_ids: list[str]

@@ -21,7 +21,7 @@ export const getReferentialThunk = createAppAsyncThunk(
 type State = RequiredRequestedContent<Required<ReferentialResponse>>;
 const initialState: State = {
 	status: "idle",
-	value: { departments: {}, tags: {}, ecological_zoning: {}, statuses: {} },
+	value: { departments: {}, tags: {}, ecological_zonings: {} },
 };
 export const referentialSlice = createSlice({
 	name: "referential",
@@ -32,8 +32,7 @@ export const referentialSlice = createSlice({
 			state.value = {
 				departments: payload.departments ?? {},
 				tags: payload.tags ?? {},
-				ecological_zoning: payload.ecological_zoning ?? {},
-				statuses: payload.statuses ?? {},
+				ecological_zonings: payload.ecological_zonings ?? {},
 			};
 		});
 		builder.addCase(getReferentialThunk.rejected, (state, error) => {
@@ -74,5 +73,4 @@ function selectByIds<
 
 export const selectDepartmentsByIds = selectByIds("departments");
 export const selectTagsByIds = selectByIds("tags");
-export const selectecological_zoningByIds = selectByIds("ecological_zoning");
-export const selectStatusesByIds = selectByIds("statuses");
+export const selectEcologicalZoningByIds = selectByIds("ecological_zonings");
