@@ -101,9 +101,7 @@ def prepare_sufosat_v3(
         max_meters_between_clear_cuts=configs["transform_sufosat"][
             "max_meters_between_clear_cuts"
         ],
-        max_days_between_clear_cuts=configs["transform_sufosat"][
-            "max_meters_between_clear_cuts"
-        ],
+        max_days_between_clear_cuts=configs["transform_sufosat"]["max_days_between_clear_cuts"],
     )
 
     save_data(

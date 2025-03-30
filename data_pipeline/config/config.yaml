@@ -14,8 +14,8 @@ transform_sufosat:
   export_filename: "sufosat_clear_cuts_v3.geoparquet"
   filtered_raster: "forest-clearcuts_mainland-france_sufosat_dates_v3_filtered.tif"
   polygonized_data: "forest-clearcuts_mainland-france_sufosat_dates_v3"
-  start_date: 25001
-  end_date: 25366
+  start_date: 24001
+  end_date: 24365
   max_meters_between_clear_cuts: 100
   max_days_between_clear_cuts: 365
   magic_number: 0.42

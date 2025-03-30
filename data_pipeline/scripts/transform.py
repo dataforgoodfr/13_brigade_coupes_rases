@@ -237,11 +237,40 @@ def pair_clear_cuts_through_space_and_time(
 
     # Cluster the clear-cuts that are within `max_meters_between_clear_cuts` of each other
     # Lambert-93 CRS uses meters as its unit of measurement for distance.
-    clear_cut_pairs = (
-        gdf.sjoin(gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts)
-        .reset_index()
-        .rename(columns={"index": "index_left"})
-    )
+    def batch_sjoin(gdf, batch_size=100, distance=max_meters_between_clear_cuts):
+        """
+        Performs a batched spatial join to find clear-cuts within a specified distance.
+
+        This function divides the input GeoDataFrame into smaller batches to reduce memory usage
+        and performs a spatial join for each batch to find clear-cuts within the given distance.
+
+        Parameters
+        ----------
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame containing clear-cut polygons with a 'geometry' column.
+        batch_size : int, optional
+            Number of rows to process in each batch (default is 100).
+        distance : int
+            Maximum distance in meters to consider two clear-cuts as neighbors.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the results of the spatial join, with columns:
+            - index_left: Index of the clear-cut in the batch.
+            - index_right: Index of the neighboring clear-cut.
+        """
+        results = []
+        total_batches = len(gdf) // batch_size + (1 if len(gdf) % batch_size > 0 else 0)
+
+        for i in tqdm(range(0, len(gdf), batch_size), total=total_batches):
+            batch = gdf.iloc[i : i + batch_size]
+            batch_join = batch.sjoin(gdf, how="left", predicate="dwithin", distance=distance)
+            results.append(batch_join)
+
+        return pd.concat(results).reset_index().rename(columns={"index": "index_left"})
+
+    clear_cut_pairs = batch_sjoin(gdf, batch_size=100)
 
     # Ignore clear-cuts that intersect with themselves
     clear_cut_pairs = clear_cut_pairs[
