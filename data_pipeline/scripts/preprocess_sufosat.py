@@ -377,7 +377,7 @@ def add_area_ha_and_filter_tiny_clear_cuts(
 
 
 @log_execution(RESULT_FILEPATH)
-def prepare_sufosat_v3_layer(
+def preprocess_sufosat(
     input_raster_dates: str,
     polygonized_raster_output_layer: str,
     output_layer: str,
@@ -439,7 +439,7 @@ def prepare_sufosat_v3_layer(
 
 
 if __name__ == "__main__":
-    prepare_sufosat_v3_layer(
+    preprocess_sufosat(
         input_raster_dates=str(
             SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
         ),

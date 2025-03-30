@@ -45,7 +45,7 @@ def convert_crs_to_lambert93(cities: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 @log_execution(RESULT_FILEPATH)
-def main() -> None:
+def preprocess_cadastre_cities() -> None:
     cities = download_etalab_cities_cadastre()
     cities = remove_overseas_cities(cities)
     cities = convert_crs_to_lambert93(cities)
@@ -56,4 +56,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    preprocess_cadastre_cities()

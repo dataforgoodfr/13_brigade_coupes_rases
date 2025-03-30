@@ -40,7 +40,7 @@ def union_explode_layers(zps: gpd.GeoDataFrame, sic: gpd.GeoDataFrame) -> gpd.Ge
 
 
 @log_execution(RESULT_FILEPATH)
-def main() -> None:
+def preprocess_natura2000() -> None:
     download_layers()
     zps, sic = load_layers()
     natura2000 = union_explode_layers(zps, sic)
@@ -48,4 +48,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    preprocess_natura2000()

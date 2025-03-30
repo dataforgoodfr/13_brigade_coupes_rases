@@ -40,7 +40,7 @@ def convert_crs_to_lambert93(departments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 @log_execution(RESULT_FILEPATH)
-def main() -> None:
+def preprocess_cadastre_departments() -> None:
     departments = download_osm_departments_cadastre()
     departments = remove_overseas_departments(departments)
     departments = convert_crs_to_lambert93(departments)
@@ -49,4 +49,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    preprocess_cadastre_departments()

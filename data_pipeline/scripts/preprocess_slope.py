@@ -366,7 +366,7 @@ def polygonize_slope_raster() -> None:
 
 
 @log_execution(RESULT_FILEPATH)
-def main() -> None:
+def preprocess_slope() -> None:
     assembly_map = get_dem_assembly_map()
     download_dem_tiles()
     decompress_dem_tiles()
@@ -378,4 +378,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    preprocess_slope()
