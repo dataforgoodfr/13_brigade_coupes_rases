@@ -1,9 +1,7 @@
 from app.schemas.ecological_zoning import IdentifiedEcologicalZoningSchema
 from app.schemas.hateoas import PaginationResponseSchema
-from app.services.departement import find_departments
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.schemas.department import DepartmentResponseSchema
 from app.deps import db_session
 from logging import getLogger
 
