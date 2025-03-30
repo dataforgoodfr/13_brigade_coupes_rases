@@ -82,7 +82,7 @@ jobs:
       - name: Run tests
         working-directory: ./backend
         run: |
-          make test
+          make upgrade-test-db && make test
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
