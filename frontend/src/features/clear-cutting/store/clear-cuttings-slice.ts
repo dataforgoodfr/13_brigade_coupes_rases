@@ -13,8 +13,7 @@ import type { RootState } from "@/shared/store/store";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
-	ClearCutting,
-	ClearCuttingResponse,
+	type ClearCutting,
 	type ClearCuttings,
 	clearCuttingResponseSchema,
 	clearCuttingsResponseSchema,
@@ -23,7 +22,7 @@ import {
 export const getClearCuttingThunk = createAsyncThunk<ClearCutting, string>(
 	"getClearCutting",
 	async (id, { getState }) => {
-		const result = await api.get<ClearCuttingResponse>(`clear-cuttings/${id}`).json();
+		const result = await api.get(`clear-cuttings/${id}`).json();
 		const clearCutting = clearCuttingResponseSchema.parse(result);
 		const state = getState() as RootState;
 		const tags = selectTagsByIds(state, clearCutting.abusiveTags);
@@ -65,13 +64,11 @@ const getClearCuttingsThunk = createAsyncThunk<ClearCuttings, FiltersRequest>(
 			.json();
 		const clearCuttings = clearCuttingsResponseSchema.parse(result);
 		const state = getState() as RootState;
-		const clearCuttingPreviews = clearCuttings.previews.map(
-			(preview) => ({
-				...preview,
-				abusiveTags: selectTagsByIds(state, preview.abusiveTags),
-				status: selectStatusesByIds(state, [preview.status])[0],
-			}),
-		);
+		const clearCuttingPreviews = clearCuttings.previews.map((preview) => ({
+			...preview,
+			abusiveTags: selectTagsByIds(state, preview.abusiveTags),
+			status: selectStatusesByIds(state, [preview.status])[0],
+		}));
 		return { ...clearCuttings, clearCuttingPreviews };
 	},
 );

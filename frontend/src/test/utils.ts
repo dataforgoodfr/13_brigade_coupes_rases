@@ -1,3 +1,3 @@
-export function ic(val: string) {
-	return new RegExp(`${val}`, 'i');
+export function ic(val?: string) {
+	return new RegExp(`${val}`, "i");
 }

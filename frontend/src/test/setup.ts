@@ -21,4 +21,3 @@ global.ResizeObserver = class {
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
-
