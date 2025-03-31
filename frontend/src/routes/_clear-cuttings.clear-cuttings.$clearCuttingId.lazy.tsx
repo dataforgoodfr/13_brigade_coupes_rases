@@ -1,4 +1,4 @@
-import { AsideForm } from "@/features/clear-cutting/components/AsideForm";
+import { AsideForm } from "@/features/clear-cutting/components/form/AsideForm";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute(

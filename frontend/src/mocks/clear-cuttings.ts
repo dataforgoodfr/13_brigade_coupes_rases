@@ -102,6 +102,39 @@ export const mockClearCutting = (
 			id: id,
 			address: createAddressMock(),
 			imageUrls: [],
+			creationDate: faker.date.anytime().toISOString(),
+			cutYear: faker.date.anytime().getFullYear(),
+			ecologicalZones: [],
+			reportDate: faker.date.anytime().toISOString(),
+			clearCuttingSize: faker.number.int(200),
+			clearCuttingSlope: faker.number.int(100),
+			imgSatelliteCC: faker.image.url(),
+
+			onSiteDate: faker.date.anytime().toISOString(),
+			assignedUser: null,
+			isPlantationPresentACC: false,
+			imgsPlantation: [],
+			isWorksiteSignPresent: false,
+			imgsTreeTrunks: [],
+			imgsSoilState: [],
+			imgsAccessRoad: [],
+
+			isNatura2000: false,
+			isOtherEcoZone: false,
+			isNearEcoZone: false,
+			isDDT: false,
+
+			isCCOrCompanyCertified: null,
+			isMoreThan20ha: null,
+			isSubjectToPSG: null,
+
+			isRelevantComplaintPEFC: false,
+			isRelevantComplaintREDIII: false,
+			isRelevantComplaintOFB: false,
+			isRelevantAlertSRGS: false,
+			isRelevantAlertPSG: false,
+			isRelevantRequestPSG: false,
+
 			...clearCutting,
 		} satisfies ClearCuttingResponse);
 	});

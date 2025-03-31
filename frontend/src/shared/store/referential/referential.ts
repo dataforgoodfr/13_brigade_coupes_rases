@@ -26,6 +26,7 @@ const abusiveTagSchema = z.record(
 
 export type TagResponse = z.infer<typeof abusiveTagSchema>;
 export type Tag = ItemFromRecord<TagResponse>;
+
 export const departmentResponseSchema = record(
 	z.string(),
 	z.object({ name: z.string() }),
