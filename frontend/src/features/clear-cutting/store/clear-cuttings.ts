@@ -98,7 +98,7 @@ const clearCuttingOnSiteFormSchema = z.object({
 	imgSatelliteCC: z.string().url().optional(),
 	assignedUser: userSchema.nullable().default(null),
 	onSiteDate: z.string().optional(),
-	wheater: z.string().optional(),
+	weather: z.string().optional(),
 	// BCC : before clear-cutting
 	standTypeAndSilviculturalSystemBCC: z.string().optional(),
 	//ACC : after clear-cutting
@@ -163,6 +163,13 @@ export const clearCuttingResponseSchema = z
 		otherInfos: z.string().optional(),
 		clearCuttingSize: z.number(),
 		clearCuttingSlope: z.number(),
+		cadastralParcel: z
+			.object({
+				id: z.string(),
+				slope: z.number(),
+				surfaceKm: z.number(),
+			})
+			.optional(),
 	})
 	.extend(clearCuttingOnSiteFormSchema.shape)
 	.extend(clearCuttingEcologicalZoningFormSchema.shape)
