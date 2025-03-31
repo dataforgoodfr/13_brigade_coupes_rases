@@ -1,4 +1,3 @@
-import { clearCuttingStatusSchema } from "@/features/clear-cutting/store/status";
 import { userSchema } from "@/features/user/store/user";
 import { type Tag } from "@/shared/store/referential/referential";
 import { string, z } from "zod";
@@ -13,7 +12,7 @@ export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 const clearCuttingPointsSchema = z.array(z.number());
 export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
 
-export type AbusiveTags = { 
+export type ClearCuttingExtend = {
 	abusiveTags: Tag[];
 	status: Status;
 };
@@ -48,7 +47,8 @@ type ClearCuttingBase = z.infer<typeof clearCuttingBaseSchema> & AbusiveTags
 const clearCuttingBaseSchema = clearCuttingBaseResponseSchema.omit({
 	abusiveTags: true,
 });
-type ClearCuttingBase = z.infer<typeof clearCuttingBaseSchema> & AbusiveTags;
+type ClearCuttingBase = z.infer<typeof clearCuttingBaseSchema> &
+	ClearCuttingExtend;
 
 const clearCuttingPreviewResponseSchema = clearCuttingBaseResponseSchema.and(
 	z.object({

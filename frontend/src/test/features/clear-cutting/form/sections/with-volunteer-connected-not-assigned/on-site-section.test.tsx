@@ -1,191 +1,227 @@
-import { generateAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import {
+	onSiteKey,
+	onSiteValue,
+} from "@/features/clear-cutting/components/form/sections/OnSiteSection";
+import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
-import { renderApp } from "@/test/renderApp";
-import { fireEvent, screen, within } from "@testing-library/react";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { ic } from "@/test/utils";
-import { onSiteKey, onSiteValue } from "@/features/clear-cutting/components/form/sections/OnSiteSection";
 import { volunteerMock } from "@/test/mocks/user";
+import { renderApp } from "@/test/renderApp";
+import { ic } from "@/test/utils";
+import { fireEvent, screen, within } from "@testing-library/react";
+import { beforeAll, describe, expect, it } from "vitest";
 
 describe("On Site section form when there is a volunteer connected but not assigned to the cc", () => {
-    let accordion: HTMLElement;
+	let accordion: HTMLElement;
 
 	beforeAll(async () => {
 		server.use(
 			mockClearCutting({
-                address: generateAddressMock({ city: "Paris"}),
-                cutYear: 2024,
-                onSiteDate: '2024-03-19T14:26:30.789Z',
-                weather: "Nuageux",
-                standTypeAndSilviculturalSystemBCC: "Epicéa",
-                waterCourseOrWetlandPresence: "Présence de cours d'eau",
-                soilState: "Sol en mauvais état"
+				address: createAddressMock({ city: "Paris" }),
+				cutYear: 2024,
+				onSiteDate: "2024-03-19T14:26:30.789Z",
+				weather: "Nuageux",
+				standTypeAndSilviculturalSystemBCC: "Epicéa",
+				waterCourseOrWetlandPresence: "Présence de cours d'eau",
+				soilState: "Sol en mauvais état",
 			}),
 		);
 		renderApp({
 			route: "/clear-cuttings/$clearCuttingId",
 			params: { $clearCuttingId: "ABC" },
-            user: volunteerMock
+			user: volunteerMock,
 		});
 
-        const buttons = await screen.findAllByText(ic(onSiteKey.name));
-        const accordionButton = buttons.filter(el => el.tagName === 'BUTTON')[0]
-        fireEvent.click(accordionButton);
-        accordion = accordionButton.parentElement!.parentElement!;
-	});
-
-
-	it(`should display "${onSiteKey.name}" section`,async () => {
 		const buttons = await screen.findAllByText(ic(onSiteKey.name));
-        expect(buttons.filter(el => el.tagName === 'BUTTON')[0])
-            .toBeInTheDocument();
+		const accordionButton = buttons.filter((el) => el.tagName === "BUTTON")[0];
+		fireEvent.click(accordionButton);
+		
+		accordion = accordionButton.parentElement?.parentElement!;
 	});
 
-    it(`should display the on site date date picker, its label, and it should be disabled`, async () => {
-        const onSiteDate = onSiteValue.find((val) => val.name === "onSiteDate");
-        
-        const onSiteDatepicker= await within(accordion).findByLabelText(ic(onSiteDate!.label!));
-        expect(onSiteDatepicker)
-            .toBeInTheDocument();
-        expect(await within(onSiteDatepicker).findByText(ic('19 mars 2024')))
-            .toBeInTheDocument();
-        expect(onSiteDatepicker)
-            .toBeDisabled();
-    });
+	it(`should display "${onSiteKey.name}" section`, async () => {
+		const buttons = await screen.findAllByText(ic(onSiteKey.name));
+		expect(
+			buttons.filter((el) => el.tagName === "BUTTON")[0],
+		).toBeInTheDocument();
+	});
 
-    it(`should display the weather text area, its label, and it should be disabled`, async () => {
-        const weather = onSiteValue.find((val) => val.name === "weather");
+	it("should display the on site date date picker, its label, and it should be disabled", async () => {
+		const onSiteDate = onSiteValue.find((val) => val.name === "onSiteDate");
 
-        const weatherTextArea = await within(accordion).findByLabelText(ic(weather!.label!));
-        expect(weatherTextArea)
-            .toBeInTheDocument();
-        expect(weatherTextArea)
-            .toHaveValue('Nuageux');
-        expect(weatherTextArea)
-            .toBeDisabled();
-    });
+		const onSiteDatepicker = await within(accordion).findByLabelText(
+			
+			ic(onSiteDate?.label!),
+		);
+		expect(onSiteDatepicker).toBeInTheDocument();
+		expect(
+			await within(onSiteDatepicker).findByText(ic("19 mars 2024")),
+		).toBeInTheDocument();
+		expect(onSiteDatepicker).toBeDisabled();
+	});
 
-    it(`should display the stand type and silvicultural system before cc text area, its label, and it should be disabled`, async () => {
-        const standTypeAndSilviculturalSystemBCC = onSiteValue.find((val) => val.name === "standTypeAndSilviculturalSystemBCC");
-        
-        const standTypeAndSilviculturalSystemBCCTextArea = await within(accordion).findByLabelText(ic(standTypeAndSilviculturalSystemBCC!.label!));
-        expect(standTypeAndSilviculturalSystemBCCTextArea)
-            .toBeInTheDocument();
-        expect(standTypeAndSilviculturalSystemBCCTextArea)
-            .toHaveValue('Epicéa');
-        expect(standTypeAndSilviculturalSystemBCCTextArea)
-            .toBeDisabled();
-    });
+	it("should display the weather text area, its label, and it should be disabled", async () => {
+		const weather = onSiteValue.find((val) => val.name === "weather");
 
-    it(`should display the switch for the presence of plantation after cc, its label, and it should be disabled`, async () => {
-        const isPlantationPresentACC = onSiteValue.find((val) => val.name === "isPlantationPresentACC");
-        
-        const isPlantationPresentACCSwitch = await within(accordion).findByLabelText(ic(isPlantationPresentACC!.label!));
-        expect(isPlantationPresentACCSwitch)
-            .toBeInTheDocument();
-        expect(isPlantationPresentACCSwitch)
-            .not.toBeChecked();
-        expect(isPlantationPresentACCSwitch)
-            .toBeDisabled();
-    });
+		const weatherTextArea = await within(accordion).findByLabelText(
+			
+			ic(weather?.label!),
+		);
+		expect(weatherTextArea).toBeInTheDocument();
+		expect(weatherTextArea).toHaveValue("Nuageux");
+		expect(weatherTextArea).toBeDisabled();
+	});
 
+	it("should display the stand type and silvicultural system before cc text area, its label, and it should be disabled", async () => {
+		const standTypeAndSilviculturalSystemBCC = onSiteValue.find(
+			(val) => val.name === "standTypeAndSilviculturalSystemBCC",
+		);
 
-    it(`should not display the new tree spicies field when isPlantationPresentACC is false`, async () => {
-        const newTreeSpicies = onSiteValue.find((val) => val.name === "newTreeSpicies");
+		const standTypeAndSilviculturalSystemBCCTextArea = await within(
+			accordion,
+			
+		).findByLabelText(ic(standTypeAndSilviculturalSystemBCC?.label!));
+		expect(standTypeAndSilviculturalSystemBCCTextArea).toBeInTheDocument();
+		expect(standTypeAndSilviculturalSystemBCCTextArea).toHaveValue("Epicéa");
+		expect(standTypeAndSilviculturalSystemBCCTextArea).toBeDisabled();
+	});
 
-        expect(await screen.queryByText(newTreeSpicies!.label!))
-            .not.toBeInTheDocument();
-    })
- 
-    it(`should not display the plantation images input when isPlantationPresentACC is false`, async () => {
-        const imgsPlantation = onSiteValue.find((val) => val.name === "imgsPlantation");
+	it("should display the switch for the presence of plantation after cc, its label, and it should be disabled", async () => {
+		const isPlantationPresentACC = onSiteValue.find(
+			(val) => val.name === "isPlantationPresentACC",
+		);
 
-        expect(await screen.queryByText(imgsPlantation!.label!))
-            .not.toBeInTheDocument();
-    })
+		const isPlantationPresentACCSwitch = await within(
+			accordion,
+			
+		).findByLabelText(ic(isPlantationPresentACC?.label!));
+		expect(isPlantationPresentACCSwitch).toBeInTheDocument();
+		expect(isPlantationPresentACCSwitch).not.toBeChecked();
+		expect(isPlantationPresentACCSwitch).toBeDisabled();
+	});
 
-    it(`should display the switch for the presence of the working sign, its label, and it should be disabled`, async () => {
-        const isWorksiteSignPresent = onSiteValue.find((val) => val.name === "isWorksiteSignPresent");
-        
-        const isWorksiteSignPresentSwitch = await within(accordion).findByLabelText(ic(isWorksiteSignPresent!.label!));
-        expect(isWorksiteSignPresentSwitch)
-            .toBeInTheDocument();
-        expect(isWorksiteSignPresentSwitch)
-            .not.toBeChecked();
-        expect(isWorksiteSignPresentSwitch)
-            .toBeDisabled();
-    });
+	it("should not display the new tree spicies field when isPlantationPresentACC is false", async () => {
+		const newTreeSpicies = onSiteValue.find(
+			(val) => val.name === "newTreeSpicies",
+		);
 
-    it(`should not display the worksign images input when isWorksiteSignPresent is false`, async () => {
-        const imgWorksiteSign = onSiteValue.find((val) => val.name === "imgWorksiteSign");
+		expect(
+			
+			await screen.queryByText(newTreeSpicies?.label!),
+		).not.toBeInTheDocument();
+	});
 
-        expect(await screen.queryByText(imgWorksiteSign!.label!))
-            .not.toBeInTheDocument();
-    });
+	it("should not display the plantation images input when isPlantationPresentACC is false", async () => {
+		const imgsPlantation = onSiteValue.find(
+			(val) => val.name === "imgsPlantation",
+		);
 
-    it(`should display the water courses or wetland presence text area, its label, and it should be disabled`, async () => {
-        const waterCourseOrWetlandPresence = onSiteValue.find((val) => val.name === "waterCourseOrWetlandPresence");
-        
-        const waterCourseOrWetlandPresenceTextArea = await within(accordion).findByLabelText(ic(waterCourseOrWetlandPresence!.label!));
-        expect(waterCourseOrWetlandPresenceTextArea)
-            .toBeInTheDocument();
-        expect(waterCourseOrWetlandPresenceTextArea)
-            .toHaveValue("Présence de cours d'eau");
-        expect(waterCourseOrWetlandPresenceTextArea)
-            .toBeDisabled();
-    });
+		expect(
+			
+			await screen.queryByText(imgsPlantation?.label!),
+		).not.toBeInTheDocument();
+	});
 
-    it(`should display the soil state text area, its label, and it should be disabled`, async () => {
-        const soilState = onSiteValue.find((val) => val.name === "soilState");
-        
-        const soilStateTextArea = await within(accordion).findByLabelText(ic(soilState!.label!));
-        expect(soilStateTextArea)
-            .toBeInTheDocument();
-        expect(soilStateTextArea)
-            .toHaveValue("Sol en mauvais état");
-        expect(soilStateTextArea)
-            .toBeDisabled();
-    });
+	it("should display the switch for the presence of the working sign, its label, and it should be disabled", async () => {
+		const isWorksiteSignPresent = onSiteValue.find(
+			(val) => val.name === "isWorksiteSignPresent",
+		);
 
-    it(`should display the input image clear cutting, its label, and it should be disabled`, async () => {
-        const soilState = onSiteValue.find((val) => val.name === "soilState");
-        
-        const soilStateTextArea = await within(accordion).findByLabelText(ic(soilState!.label!));
-        expect(soilStateTextArea)
-            .toBeInTheDocument();
-        expect(soilStateTextArea)
-            .toHaveValue("Sol en mauvais état");
-        expect(soilStateTextArea)
-            .toBeDisabled();
-    });
+		const isWorksiteSignPresentSwitch = await within(accordion).findByLabelText(
+			
+			ic(isWorksiteSignPresent?.label!),
+		);
+		expect(isWorksiteSignPresentSwitch).toBeInTheDocument();
+		expect(isWorksiteSignPresentSwitch).not.toBeChecked();
+		expect(isWorksiteSignPresentSwitch).toBeDisabled();
+	});
 
-    it(`should display the input image tree trunks, its label, and it should be disabled`, async () => {
-        const imgsTreeTrunks = onSiteValue.find((val) => val.name === "imgsTreeTrunks");
-        
-        const imgsTreeTrunksInputFile = await within(accordion).findByLabelText(imgsTreeTrunks!.label!);
-        expect(imgsTreeTrunksInputFile)
-            .toBeInTheDocument();
-        expect(imgsTreeTrunksInputFile)
-            .toBeDisabled();
-    });
+	it("should not display the worksign images input when isWorksiteSignPresent is false", async () => {
+		const imgWorksiteSign = onSiteValue.find(
+			(val) => val.name === "imgWorksiteSign",
+		);
 
-    it(`should display the input image soil state, its label, and it should be disabled`, async () => {
-        const imgsSoilState = onSiteValue.find((val) => val.name === "imgsSoilState");
-        
-        const imgsSoilStateInputFile = await within(accordion).findByLabelText(ic(imgsSoilState!.label!));
-        expect(imgsSoilStateInputFile)
-            .toBeInTheDocument();
-        expect(imgsSoilStateInputFile)
-            .toBeDisabled();
-    });
+		expect(
+			
+			await screen.queryByText(imgWorksiteSign?.label!),
+		).not.toBeInTheDocument();
+	});
 
-    it(`should display the input image access road, its label, and it should be disabled`, async () => {
-        const imgsAccessRoad = onSiteValue.find((val) => val.name === "imgsAccessRoad");
-        
-        const imgsAccessRoadInputFile = await within(accordion).findByLabelText(ic(imgsAccessRoad!.label!));
-        expect(imgsAccessRoadInputFile)
-            .toBeInTheDocument();
-        expect(imgsAccessRoadInputFile)
-            .toBeDisabled();
-    });
+	it("should display the water courses or wetland presence text area, its label, and it should be disabled", async () => {
+		const waterCourseOrWetlandPresence = onSiteValue.find(
+			(val) => val.name === "waterCourseOrWetlandPresence",
+		);
+
+		const waterCourseOrWetlandPresenceTextArea = await within(
+			accordion,
+			
+		).findByLabelText(ic(waterCourseOrWetlandPresence?.label!));
+		expect(waterCourseOrWetlandPresenceTextArea).toBeInTheDocument();
+		expect(waterCourseOrWetlandPresenceTextArea).toHaveValue(
+			"Présence de cours d'eau",
+		);
+		expect(waterCourseOrWetlandPresenceTextArea).toBeDisabled();
+	});
+
+	it("should display the soil state text area, its label, and it should be disabled", async () => {
+		const soilState = onSiteValue.find((val) => val.name === "soilState");
+
+		const soilStateTextArea = await within(accordion).findByLabelText(
+			
+			ic(soilState?.label!),
+		);
+		expect(soilStateTextArea).toBeInTheDocument();
+		expect(soilStateTextArea).toHaveValue("Sol en mauvais état");
+		expect(soilStateTextArea).toBeDisabled();
+	});
+
+	it("should display the input image clear cutting, its label, and it should be disabled", async () => {
+		const soilState = onSiteValue.find((val) => val.name === "soilState");
+
+		const soilStateTextArea = await within(accordion).findByLabelText(
+			
+			ic(soilState?.label!),
+		);
+		expect(soilStateTextArea).toBeInTheDocument();
+		expect(soilStateTextArea).toHaveValue("Sol en mauvais état");
+		expect(soilStateTextArea).toBeDisabled();
+	});
+
+	it("should display the input image tree trunks, its label, and it should be disabled", async () => {
+		const imgsTreeTrunks = onSiteValue.find(
+			(val) => val.name === "imgsTreeTrunks",
+		);
+
+		const imgsTreeTrunksInputFile = await within(accordion).findByLabelText(
+			
+			imgsTreeTrunks?.label!,
+		);
+		expect(imgsTreeTrunksInputFile).toBeInTheDocument();
+		expect(imgsTreeTrunksInputFile).toBeDisabled();
+	});
+
+	it("should display the input image soil state, its label, and it should be disabled", async () => {
+		const imgsSoilState = onSiteValue.find(
+			(val) => val.name === "imgsSoilState",
+		);
+
+		const imgsSoilStateInputFile = await within(accordion).findByLabelText(
+			
+			ic(imgsSoilState?.label!),
+		);
+		expect(imgsSoilStateInputFile).toBeInTheDocument();
+		expect(imgsSoilStateInputFile).toBeDisabled();
+	});
+
+	it("should display the input image access road, its label, and it should be disabled", async () => {
+		const imgsAccessRoad = onSiteValue.find(
+			(val) => val.name === "imgsAccessRoad",
+		);
+
+		const imgsAccessRoadInputFile = await within(accordion).findByLabelText(
+			
+			ic(imgsAccessRoad?.label!),
+		);
+		expect(imgsAccessRoadInputFile).toBeInTheDocument();
+		expect(imgsAccessRoadInputFile).toBeDisabled();
+	});
 });

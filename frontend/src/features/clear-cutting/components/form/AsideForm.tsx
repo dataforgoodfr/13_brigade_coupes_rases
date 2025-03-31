@@ -1,15 +1,14 @@
 import { useMapInstance } from "@/features/clear-cutting/components/map/Map.context";
-import {useGetClearCutting } from "@/features/clear-cutting/store/clear-cuttings-slice";
+import { useGetClearCutting } from "@/features/clear-cutting/store/clear-cuttings-slice";
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect } from "react";
 import ClearCuttingFullForm from "./ClearCuttingFullForm";
 
-export function AsideForm({clearCuttingId} : {clearCuttingId: string}) {
+export function AsideForm({ clearCuttingId }: { clearCuttingId: string }) {
 	const { value } = useGetClearCutting(clearCuttingId);
 	const { map } = useMapInstance();
 
-	
 	useEffect(() => {
 		if (map && value) {
 			map.flyTo(value?.geoCoordinates[0], 10, { duration: 1 });
@@ -28,7 +27,7 @@ export function AsideForm({clearCuttingId} : {clearCuttingId: string}) {
 						{new Date(value.reportDate).toLocaleDateString()}
 					</span>
 				</div>
-				<ClearCuttingFullForm clearCutting={value}/>
+				<ClearCuttingFullForm clearCutting={value} />
 			</div>
 		)
 	);

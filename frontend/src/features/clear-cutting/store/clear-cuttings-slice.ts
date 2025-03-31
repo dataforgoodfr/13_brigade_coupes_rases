@@ -13,8 +13,7 @@ import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
-	ClearCutting,
-	ClearCuttingResponse,
+	type ClearCutting,
 	type ClearCuttings,
 	clearCuttingResponseSchema,
 	clearCuttingsResponseSchema,

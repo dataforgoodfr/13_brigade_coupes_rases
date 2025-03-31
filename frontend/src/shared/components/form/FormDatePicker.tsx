@@ -31,7 +31,6 @@ export function FormDatePicker<T extends FieldValues = FieldValues>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="flex flex-col">
-					
 					{label && <FormLabel className="font-bold">{label}</FormLabel>}
 					<Popover>
 						<PopoverTrigger asChild disabled={disabled}>

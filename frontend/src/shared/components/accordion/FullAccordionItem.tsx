@@ -4,13 +4,11 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 import React from "react";
 
 type AccordionFullItemProps = {
 	title: string;
 	children?: React.ReactNode;
-	className?: string;
 	className?: string;
 };
 
