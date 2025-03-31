@@ -40,7 +40,7 @@ export default function AccordionContent({
 	const user = useAppSelector(selectLoggedUser);
 
 	useEffect(() => {
-		if (user && user.role === "administrator") {
+		if (user && user.role === "admin") {
 			ccForm.set(legalKey, legalValue);
 		} else {
 			ccForm.delete(legalKey);

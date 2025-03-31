@@ -6,8 +6,10 @@ import { useEffect } from "react";
 import ClearCuttingFullForm from "./ClearCuttingFullForm";
 
 export function AsideForm({ clearCuttingId }: { clearCuttingId: string }) {
-	const { value } = useGetClearCutting(clearCuttingId);
+	const { value, error } = useGetClearCutting(clearCuttingId);
 	const { map } = useMapInstance();
+
+	if (error) console.error(error);
 
 	useEffect(() => {
 		if (map && value) {
