@@ -23,7 +23,6 @@ export const getClearCuttingThunk = createAppAsyncThunk<ClearCutting, string>(
 	"getClearCutting",
 	async (id, { getState, extra: { api } }) => {
 		const result = await api().get(`clear-cuttings/${id}`).json();
-		console.log(result);
 		const clearCutting = clearCuttingResponseSchema.parse(result);
 		const state = getState();
 		const tags = selectTagsByIds(state, clearCutting.abusiveTags);
