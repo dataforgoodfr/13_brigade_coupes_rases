@@ -37,6 +37,10 @@ const clearCuttingBaseResponseSchema = z.object({
 	status: z.string(),
 });
 
+export type ClearCuttingBaseResponse = z.infer<
+	typeof clearCuttingBaseResponseSchema
+>;
+
 const clearCuttingBaseSchema = clearCuttingBaseResponseSchema.omit({
 	abusiveTags: true,
 	status: true,
