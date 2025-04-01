@@ -3,34 +3,24 @@
 ## Project Structure
 
 ```bash
-# Structure du projet
-
 data_pipeline/
 ├── config/
 │   ├── config.yaml
 ├── data_temp/
 ├── logs/
-│   ├── extract.log
-│   ├── transform.log
+│   ├── main.log
 ├── scripts/
 │   ├── utils/
-│   │   ├── .env # Copy the env.example file
-│   │   ├── date_parser.py
-│   │   ├── disjoin_set.py
-│   │   ├── logging.py
-│   │   ├── s3.py
 │   ├── extract.py
 │   ├── main.py
 │   ├── transform.py
 ├── tests/
 │   ├── test_s3.py
-│   ├── test_utils.py
 ├── .env
 ├── Makefile
 ├── .gitignore
 ├── Dockerfile
 └── README.md
-
 ```
 
 ## Setup

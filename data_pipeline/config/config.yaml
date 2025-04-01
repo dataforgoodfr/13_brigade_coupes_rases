@@ -1,5 +1,4 @@
 # Configuration pour le pipeline ETL Sufosat
-
 # Paramètres extract 
 extract_sufosat:
   s3_prefix: "dataeng/sufosat_data/"
