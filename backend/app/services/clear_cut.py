@@ -1,0 +1,94 @@
+from geoalchemy2.functions import ST_AsGeoJSON
+from sqlalchemy.orm import Session
+
+from app.models import ClearCut, ClearCutEcologicalZoning
+from app.schemas.clear_cut import (
+    ClearCutResponseSchema,
+    clear_cut_to_clear_cut_response_schema,
+)
+from app.schemas.clear_cut_report import (
+    ClearCutReportResponseSchema,
+    report_to_response_schema,
+)
+from app.schemas.ecological_zoning import (
+    ClearCutEcologicalZoningResponseSchema,
+    clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema,
+)
+from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+
+
+def map_geo_clearcut(clearcut: ClearCut, boundary: str, location: str) -> ClearCut:
+    clearcut.boundary = boundary
+    clearcut.location = location
+    return clearcut
+
+
+def get_clearcut_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
+    [clearcut, boundary, location] = (
+        db.query(
+            ClearCut,
+            ST_AsGeoJSON(ClearCut.boundary),
+            ST_AsGeoJSON(ClearCut.location),
+        )
+        .filter(ClearCut.id == id)
+        .first()
+    )
+    return report_to_response_schema(map_geo_clearcut(clearcut, boundary, location))
+
+
+def find_clearcuts_by_report(
+    db: Session, report_id: int, url: str, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutResponseSchema]:
+    clear_cuts = (
+        db.query(
+            ClearCut,
+            ST_AsGeoJSON(ClearCut.boundary),
+            ST_AsGeoJSON(ClearCut.location),
+        )
+        .filter(ClearCut.report_id == report_id)
+        .offset(page * size)
+        .limit(size)
+        .all()
+    )
+    clear_cuts_count = (
+        db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
+    )
+    clear_cuts = map(
+        lambda row: clear_cut_to_clear_cut_response_schema(
+            map_geo_clearcut(row[0], row[1], row[2])
+        ),
+        clear_cuts,
+    )
+    return PaginationResponseSchema(
+        content=list(clear_cuts),
+        metadata=PaginationMetadataSchema(
+            page=page, size=size, total_count=clear_cuts_count, url=url
+        ),
+    )
+
+
+def find_ecological_zonings_by_clear_cut(
+    db: Session, clear_cut_id: int, url: str, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutEcologicalZoningResponseSchema]:
+    ecological_zonings = (
+        db.query(ClearCutEcologicalZoning)
+        .filter(ClearCutEcologicalZoning.clear_cut_id == clear_cut_id)
+        .offset(page * size)
+        .limit(size)
+        .all()
+    )
+    ecological_zonings_count = (
+        db.query(ClearCutEcologicalZoning.clear_cut_id)
+        .filter(ClearCutEcologicalZoning.clear_cut_id == clear_cut_id)
+        .count()
+    )
+    ecological_zonings = map(
+        clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema,
+        ecological_zonings,
+    )
+    return PaginationResponseSchema(
+        content=list(ecological_zonings),
+        metadata=PaginationMetadataSchema(
+            page=page, size=size, total_count=ecological_zonings_count, url=url
+        ),
+    )

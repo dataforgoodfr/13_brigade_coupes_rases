@@ -5,22 +5,22 @@ from datetime import date
 from geoalchemy2.shape import from_shape
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.schemas.registry import CreateRegistrySchema
-from app.services.clearcut import create_clearcut
-from app.schemas.clearcut import ClearCutCreateSchema
-from app.models import ClearCut
+from app.services.clear_cut_report import create_clear_cut_report
+from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
+from app.models import ClearCutReport
 from shapely.geometry import Point as DbPoint, MultiPolygon as DbMultiPolygon
 from geoalchemy2.shape import to_shape
 
 
 def test_create_clearcut_invalid_registry_city(db):
-    clearcut = ClearCutCreateSchema(
+    clearcut = CreateClearCutsReportCreateSchema(
         registries=[
             CreateRegistrySchema(
                 zip_code="invalid", sheet=1, number="AB", section="AZ", district_code="123"
             )
         ],
         cut_date=date.today(),
-        slope_percentage=10,
+        slope_area_ratio_percentage=10,
         area_hectare=10,
         ecological_zonings=[],
         location=Point(type="Point", coordinates=[45.0, 25.0]),
@@ -33,13 +33,13 @@ def test_create_clearcut_invalid_registry_city(db):
     )
 
     with pytest.raises(HTTPException, match="404: City not found by zip code invalid"):
-        create_clearcut(db, clearcut)
+        create_clear_cut_report(db, clearcut)
 
 
 def test_create_clearcut_with_intersection(db):
-    existing_clearcut = ClearCut(
+    existing_clearcut = ClearCutReport(
         cut_date=date.today(),
-        slope_percentage=15,
+        slope_area_ratio_percentage=15,
         area_hectare=10,
         location=from_shape(DbPoint(1.0, 1.0), srid=4326),
         boundary=from_shape(
@@ -55,9 +55,9 @@ def test_create_clearcut_with_intersection(db):
     db.add(existing_clearcut)
     db.commit()
 
-    intersecting_clearcut = ClearCutCreateSchema(
+    intersecting_clearcut = CreateClearCutsReportCreateSchema(
         cut_date=date.today(),
-        slope_percentage=10,
+        slope_area_ratio_percentage=10,
         area_hectare=10,
         ecological_zonings=[],
         registries=[],
@@ -71,11 +71,11 @@ def test_create_clearcut_with_intersection(db):
     with pytest.raises(
         ValueError, match="New clearcut boundary intersects with existing clearcut ID"
     ):
-        create_clearcut(db, intersecting_clearcut)
+        create_clear_cut_report(db, intersecting_clearcut)
 
 
 def test_create_clearcut_success(db):
-    clearcut = ClearCutCreateSchema(
+    clearcut = CreateClearCutsReportCreateSchema(
         registries=[
             CreateRegistrySchema(
                 zip_code="01005",
@@ -94,7 +94,7 @@ def test_create_clearcut_success(db):
             )
         ],
         cut_date=date.today(),
-        slope_percentage=10,
+        slope_area_ratio_percentage=10,
         area_hectare=10,
         location=Point(type="Point", coordinates=[45.0, 25.0]),
         boundary=MultiPolygon(
@@ -103,10 +103,10 @@ def test_create_clearcut_success(db):
         ),
     )
 
-    created_clearcut = create_clearcut(db, clearcut)
+    created_clearcut = create_clear_cut_report(db, clearcut)
 
     assert created_clearcut.cut_date == clearcut.cut_date
-    assert created_clearcut.slope_percentage == clearcut.slope_percentage
+    assert created_clearcut.slope_area_ratio_percentage == clearcut.slope_area_ratio_percentage
     assert to_shape(created_clearcut.location).wkt == "POINT (45 25)"
     assert (
         to_shape(created_clearcut.boundary).wkt == "MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)))"

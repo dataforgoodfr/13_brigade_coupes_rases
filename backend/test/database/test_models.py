@@ -1,7 +1,7 @@
 from datetime import datetime
 from geoalchemy2 import WKTElement
 import pytest
-from app.models import Department, ClearCut, EcologicalZoning, Registry
+from app.models import Department, ClearCutReport, EcologicalZoning, Registry
 from common.clear_cut import new_clear_cut
 from common.user import new_user
 
@@ -45,13 +45,13 @@ def test_associations(db):
     )
 
     user.departments.append(registry.city.department)
-    user.clear_cuts.append(clear_cut)
+    user.reports.append(clear_cut)
 
     db.add_all([user, clear_cut])
     db.commit()
 
     assert registry.city.department in user.departments
-    assert clear_cut in user.clear_cuts
+    assert clear_cut in user.reports
     assert clear_cut.registries[0] == registry
     assert user in registry.city.department.users
     assert clear_cut in registry.clear_cuts
@@ -61,9 +61,9 @@ def test_associations(db):
 def test_clear_cut_creation(db):
     registry = db.query(Registry).first()
     ecological_zoning = db.query(EcologicalZoning).first()
-    clear_cut = ClearCut(
+    clear_cut = ClearCutReport(
         cut_date=datetime.now(),
-        slope_percentage=15.5,
+        slope_area_ratio_percentage=15.5,
         location=WKTElement("POINT(48.8566 2.3522)"),
         boundary=WKTElement(
             "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
@@ -76,9 +76,9 @@ def test_clear_cut_creation(db):
     db.commit()
 
     with pytest.raises(ValueError) as exc_info:
-        ClearCut(
+        ClearCutReport(
             cut_date=datetime.now(),
-            slope_percentage=15.5,
+            slope_area_ratio_percentage=15.5,
             location=WKTElement("POINT(48.8566 2.3522)"),
             boundary=WKTElement(
                 "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"

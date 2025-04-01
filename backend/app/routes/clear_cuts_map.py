@@ -4,15 +4,15 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.clearcut_map import ClearCutMapResponseSchema
-from app.services.clearcut import (
+from app.schemas.clear_cut_map import ClearCutMapResponseSchema
+from app.services.clear_cut_report import (
     GeoBounds,
     build_clearcuts_map,
 )
 
 logger = getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/clearcuts-map", tags=["Clearcut map"])
+router = APIRouter(prefix="/api/v1/clear-cuts-map", tags=["Clearcut map"])
 
 
 @router.get("/", response_model=ClearCutMapResponseSchema)

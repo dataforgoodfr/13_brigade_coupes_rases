@@ -11,13 +11,13 @@ def ensure_authentication(client: TestClient, verb: str, path: str):
 
 
 def test_endpoint_authentication(client: TestClient):
-    ensure_authentication(client, "post", "/api/v1/clearcuts")
+    ensure_authentication(client, "post", "/api/v1/clear-cuts-reports")
 
 
 def test_post_clearcut_success(client: TestClient):
     clearcut_data = {
         "cut_date": "2024-01-01",
-        "slope_percentage": 15,
+        "slope_area_ratio_percentage": 15,
         "area_hectare": 15,
         "location": {"type": "Point", "coordinates": [2.3522, 48.8566]},
         "boundary": {
@@ -46,7 +46,7 @@ def test_post_clearcut_success(client: TestClient):
     }
 
     response = client.post(
-        "/api/v1/clearcuts",
+        "/api/v1/clear-cuts-reports",
         json=clearcut_data,
         headers={"x-imports-token": "test-token"},
     )
@@ -60,7 +60,7 @@ def test_post_clearcut_success(client: TestClient):
 
     assert "id" in data
     assert isinstance(data["cut_date"], str)
-    assert isinstance(data["slope_percentage"], float)
+    assert isinstance(data["slope_area_ratio_percentage"], float)
     assert data["location"]["coordinates"] == [2.3522, 48.8566]
     assert data["boundary"]["coordinates"] == [
         [
@@ -78,7 +78,7 @@ def test_post_clearcut_invalid_data(client: TestClient):
     invalid_data = {}
 
     response = client.post(
-        "/api/v1/clearcuts",
+        "/api/v1/clear-cuts-reports",
         json=invalid_data,
         headers={"x-imports-token": "test-token"},
     )
@@ -88,7 +88,7 @@ def test_post_clearcut_invalid_data(client: TestClient):
 
 def test_get_clearcuts(client: TestClient):
     response = client.get(
-        "/api/v1/clearcuts",
+        "/api/v1/clear-cuts-reports",
     )
     data = response.json()
     assert response.status_code == status.HTTP_200_OK
@@ -97,7 +97,7 @@ def test_get_clearcuts(client: TestClient):
 
 def test_get_clearcut(client: TestClient):
     response = client.get(
-        "/api/v1/clearcuts/1",
+        "/api/v1/clear-cuts-reports/1",
     )
     data = response.json()
     assert response.status_code == status.HTTP_200_OK

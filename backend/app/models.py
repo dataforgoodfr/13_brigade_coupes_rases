@@ -4,25 +4,14 @@ from app.database import Base
 from datetime import datetime
 from sqlalchemy.orm import relationship, validates, mapped_column, Mapped
 
+SRID = 4326
+
 
 user_department = Table(
     "user_department",
     Base.metadata,
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
     Column("department_id", Integer, ForeignKey("departments.id"), primary_key=True),
-)
-
-
-ecological_zoning_clear_cut = Table(
-    "ecological_zoning_clear_cut",
-    Base.metadata,
-    Column(
-        "ecological_zoning_id",
-        Integer,
-        ForeignKey("ecological_zonings.id"),
-        primary_key=True,
-    ),
-    Column("clear_cut_id", Integer, ForeignKey("clear_cuts.id"), primary_key=True),
 )
 
 registry_clear_cut = Table(
@@ -33,25 +22,36 @@ registry_clear_cut = Table(
 )
 
 
+class ClearCutEcologicalZoning(Base):
+    __tablename__ = "clear_cut_ecological_zoning"
+    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), primary_key=True)
+    ecological_zoning_id = Column(
+        Integer, ForeignKey("ecological_zonings.id"), primary_key=True
+    )
+    clear_cut: Mapped["ClearCut"] = relationship(back_populates="ecological_zonings")
+    ecological_zoning: Mapped["EcologicalZoning"] = relationship(back_populates="clear_cuts")
+    area_hectare = Column(Float, nullable=False)
+
+
 class User(Base):
     __tablename__ = "users"
 
     ROLES = ["admin", "volunteer"]
 
     id = Column(Integer, primary_key=True, index=True)
-    firstname = Column(String, index=True)
-    lastname = Column(String, index=True)
-    login = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    password = Column(String, index=True, nullable=True)
-    role = Column(String, index=True)
-    created_at = Column(DateTime, default=datetime.now)
+    firstname = Column(String, nullable=False)
+    lastname = Column(String, nullable=False)
+    login = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=True)
+    role = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
     # TODO: updated_at is not set when departments are updated
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     deleted_at = Column(DateTime, nullable=True)
 
     departments = relationship("Department", secondary=user_department, back_populates="users")
-    clear_cuts = relationship("ClearCut", back_populates="user")
+    reports = relationship("ClearCutReport", back_populates="user")
 
     @validates("role")
     def validate_role(self, key, value):
@@ -64,10 +64,10 @@ class Department(Base):
     __tablename__ = "departments"
 
     id = Column(Integer, primary_key=True, index=True)
-    code = Column(String, index=True)
-    name = Column(String)
+    code = Column(String, nullable=False)
+    name = Column(String, nullable=False)
     users = relationship("User", secondary=user_department, back_populates="departments")
-    cities: Mapped[list["City"]] = relationship()
+    cities: Mapped[list["City"]] = relationship(back_populates="department")
 
     @validates("name")
     def validate_name(self, key, value):
@@ -79,9 +79,9 @@ class Department(Base):
 class City(Base):
     __tablename__ = "cities"
     id = Column(Integer, primary_key=True, index=True)
-    zip_code = Column(String, index=True)
-    name = Column(String)
-    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
+    zip_code = Column(String, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"), nullable=False)
     department: Mapped["Department"] = relationship(back_populates="cities")
     registries: Mapped[list["Registry"]] = relationship(back_populates="city")
 
@@ -89,11 +89,11 @@ class City(Base):
 class Registry(Base):
     __tablename__ = "registries"
     id = Column(Integer, primary_key=True, index=True)
-    number = Column(String, index=True)
-    sheet = Column(Integer, index=True)
-    section = Column(String, index=True)
-    district_code = Column(String, index=True)
-    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"))
+    number = Column(String, nullable=False)
+    sheet = Column(Integer, nullable=False)
+    section = Column(String, nullable=False)
+    district_code = Column(String, nullable=False)
+    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(back_populates="registries")
     clear_cuts: Mapped[list["ClearCut"]] = relationship(
         secondary=registry_clear_cut, back_populates="registries"
@@ -106,12 +106,12 @@ NATURA_2000 = "Natura2000"
 class EcologicalZoning(Base):
     __tablename__ = "ecological_zonings"
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, index=True)
-    sub_type = Column(String, index=True, nullable=True)
-    name = Column(String, index=True)
-    code = Column(String, index=True)
-    clear_cuts: Mapped[list["ClearCut"]] = relationship(
-        secondary=ecological_zoning_clear_cut, back_populates="ecological_zonings"
+    type = Column(String, nullable=False)
+    sub_type = Column(String, nullable=True)
+    name = Column(String, nullable=False)
+    code = Column(String, nullable=False)
+    clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
+        back_populates="ecological_zoning"
     )
 
 
@@ -126,28 +126,38 @@ CLEARCUT_STATUSES = [
 
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
-
     id = Column(Integer, primary_key=True, index=True)
-    cut_date = Column(DateTime, index=True)
-    slope_percentage = Column(Float, index=True)
-    area_hectare = Column(Float, index=True)
-    location = Column(Geometry(geometry_type="Point", srid=4326))
-    boundary = Column(Geometry(geometry_type="MultiPolygon", srid=4326))
-    status = Column(String, index=True)
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    natura_name = Column(String, nullable=True)
-    natura_code = Column(String, nullable=True)
+    area_hectare = Column(Float, nullable=False)
+    location = Column(Geometry(geometry_type="Point", srid=SRID), nullable=False)
+    boundary = Column(Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    observation_start_date = Column(DateTime, nullable=False)
+    observation_end_date = Column(DateTime, nullable=False)
 
-    ecological_zonings: Mapped[list["EcologicalZoning"]] = relationship(
-        secondary=ecological_zoning_clear_cut, back_populates="clear_cuts"
+    report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
+    report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
+
+    ecological_zonings: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
+        back_populates="clear_cut"
     )
     registries: Mapped[list["Registry"]] = relationship(
         secondary=registry_clear_cut, back_populates="clear_cuts"
     )
 
+
+class ClearCutReport(Base):
+    __tablename__ = "clear_cuts_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    slope_area_ratio_percentage = Column(Float, index=True)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
+    status = Column(String, nullable=False)
+
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    user: Mapped["User"] = relationship(back_populates="clear_cuts")
+    user: Mapped["User"] = relationship(back_populates="reports")
 
     @validates("status")
     def validate_status(self, key, value):

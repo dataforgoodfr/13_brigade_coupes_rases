@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-from app.models import NATURA_2000, EcologicalZoning
+from app.models import NATURA_2000, ClearCutEcologicalZoning, EcologicalZoning
 
 
 class EcologicalZoningSchema(BaseModel):
@@ -26,14 +26,38 @@ def ecological_zoning_to_ecological_zoning_schema(
     )
 
 
-class IdentifiedEcologicalZoningSchema(EcologicalZoningSchema):
+class CreateEcologicalZoningSchema(EcologicalZoningSchema):
+    area_hectare: float = Field(json_schema_extra={"example": 15})
+
+
+class ClearCutEcologicalZoningResponseSchema(EcologicalZoningSchema):
+    id: str = Field(json_schema_extra={"example": "1"})
+    area_hectare: float = Field(json_schema_extra={"example": 15})
+    clear_cut_id: str = Field(json_schema_extra={"example": "1"})
+
+
+def clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema(
+    ecological_zoning: ClearCutEcologicalZoning,
+) -> ClearCutEcologicalZoningResponseSchema:
+    return ClearCutEcologicalZoningResponseSchema(
+        id=str(ecological_zoning.ecological_zoning_id),
+        clear_cut_id=str(ecological_zoning.clear_cut_id),
+        area_hectare=ecological_zoning.area_hectare,
+        code=ecological_zoning.ecological_zoning.code,
+        type=ecological_zoning.ecological_zoning.type,
+        sub_type=ecological_zoning.ecological_zoning.sub_type,
+        name=ecological_zoning.ecological_zoning.name,
+    )
+
+
+class EcologicalZoningResponseSchema(EcologicalZoningSchema):
     id: str
 
 
-def ecological_zoning_to_identified_ecological_zoning_schema(
+def ecological_zoning_to_ecological_zoning_response_schema(
     ecological_zoning: EcologicalZoning,
-) -> IdentifiedEcologicalZoningSchema:
-    return IdentifiedEcologicalZoningSchema(
+) -> EcologicalZoningResponseSchema:
+    return EcologicalZoningResponseSchema(
         id=str(ecological_zoning.id),
         code=ecological_zoning.code,
         type=ecological_zoning.type,

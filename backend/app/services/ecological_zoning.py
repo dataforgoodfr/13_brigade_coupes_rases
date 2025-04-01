@@ -1,8 +1,8 @@
 from app.models import EcologicalZoning
 from app.schemas.ecological_zoning import (
     EcologicalZoningSchema,
-    IdentifiedEcologicalZoningSchema,
-    ecological_zoning_to_identified_ecological_zoning_schema,
+    EcologicalZoningResponseSchema,
+    ecological_zoning_to_ecological_zoning_response_schema,
 )
 from sqlalchemy.orm import Session
 
@@ -41,7 +41,7 @@ def find_or_add_ecological_zonings(
 
 def find_paginated_ecological_zonings(
     db: Session, url: str, page: int = 0, size: int = 10
-) -> PaginationResponseSchema[IdentifiedEcologicalZoningSchema]:
+) -> PaginationResponseSchema[EcologicalZoningResponseSchema]:
     ecological_zonings = db.query(EcologicalZoning).offset(page * size).limit(size).all()
     ecolgocial_zonings_count = db.query(EcologicalZoning.id).count()
     return PaginationResponseSchema(
@@ -49,7 +49,7 @@ def find_paginated_ecological_zonings(
             page=page, size=size, total_count=ecolgocial_zonings_count, url=url
         ),
         content=[
-            ecological_zoning_to_identified_ecological_zoning_schema(ecological_zoning)
+            ecological_zoning_to_ecological_zoning_response_schema(ecological_zoning)
             for ecological_zoning in ecological_zonings
         ],
     )

@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from app.config import settings
 from app.routes import (
-    clearcuts,
+    clear_cuts_map,
+    clear_cuts_reports,
     departments,
     users,
     referential,
-    clearcuts_map,
     token,
     me,
+    clear_cuts,
     ecological_zonings,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,12 +27,13 @@ app.add_middleware(
 )
 
 # Include routes
-app.include_router(clearcuts.router)
+app.include_router(clear_cuts_reports.router)
 app.include_router(departments.router)
 app.include_router(token.router)
-app.include_router(clearcuts_map.router)
+app.include_router(clear_cuts_map.router)
 app.include_router(users.router)
 app.include_router(me.router)
+app.include_router(clear_cuts.router)
 app.include_router(ecological_zonings.router)
 app.include_router(referential.router)
 
