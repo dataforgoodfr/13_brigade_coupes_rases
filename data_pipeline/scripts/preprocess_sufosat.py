@@ -12,6 +12,7 @@ from scripts.utils import (
     download_file,
     load_gdf,
     log_execution,
+    polygonize_raster,
 )
 from scripts.utils.df_utils import save_gdf
 
@@ -33,11 +34,11 @@ def polygonize_sufosat(
 ) -> gpd.GeoDataFrame:
     logging.info(f"Polygonize {input_raster_dates}")
 
-    # polygonize_raster(
-    #     input_raster=input_raster_dates,
-    #     output_layer_file=polygonized_raster_output_layer,
-    #     fieldname="sufosat_date",
-    # )
+    polygonize_raster(
+        input_raster=input_raster_dates,
+        output_layer_file=polygonized_raster_output_layer,
+        fieldname="sufosat_date",
+    )
 
     # Read the SUFOSAT vectorized data
     gdf: gpd.GeoDataFrame = load_gdf(polygonized_raster_output_layer)
