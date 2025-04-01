@@ -12,19 +12,17 @@ def extract_tif_data():
         configs = yaml.safe_load(stream)
 
     file_exists = extract_sufosat.check_tif_in_s3(
-        configs["extract_sufosat"]["s3_prefix"], 
-        configs["extract_sufosat"]["s3_filename"]
+        configs["extract_sufosat"]["s3_prefix"], configs["extract_sufosat"]["s3_filename"]
     )
 
     update_info = extract_sufosat.check_for_updates(
-        configs["extract_sufosat"]["zendo_filename"], 
-        configs["extract_sufosat"]["zendo_id"]
+        configs["extract_sufosat"]["zendo_filename"], configs["extract_sufosat"]["zendo_id"]
     )
 
     # Conditionnaly download the file
-    if update_info["do_update"]:
+    if not file_exists or update_info["do_update"]:
         logger.info("Extract the data from Zendo...")
-        extract_tif_data_and_upload(
+        extract_sufosat.extract_tif_data_and_upload(
             configs["extract_sufosat"]["zendo_id"],
             configs["extract_sufosat"]["zendo_filename"],
             configs["extract_sufosat"]["s3_prefix"]
@@ -32,18 +30,18 @@ def extract_tif_data():
         )
 
         logger.info("Update metadata...")
-        update_metadata(
+        extract_sufosat.update_metadata(
             configs["extract_sufosat"]["s3_prefix"],
             configs["extract_sufosat"]["s3_sufosat_metadata"],
             update_info,
         )
 
     # Download the file from S3
-    else: 
+    else:
         logger.info("Download from S3...")
         s3_manager.download_from_s3(
-            s3_key=configs["extract_sufosat"]["s3_prefix"] 
-            + configs["extract_sufosat"]["zendo_filename"], 
+            s3_key=configs["extract_sufosat"]["s3_prefix"]
+            + configs["extract_sufosat"]["zendo_filename"],
             download_path=configs["transform_sufosat"]["download_path"]
             + configs["extract_sufosat"]["zendo_filename"],
         )

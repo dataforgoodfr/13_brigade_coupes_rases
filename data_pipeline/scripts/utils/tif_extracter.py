@@ -11,29 +11,29 @@ class ExtractFromSufosat:
 
     Attributes
     ----------
-    s3_manager (S3Manager): 
+    s3_manager (S3Manager):
         Instance of S3Manager to handle S3 operations.
-    logger (Logger): 
+    logger (Logger):
         Logger instance for logging messages.
     """
+
     def __init__(self):
         self.s3_manager = S3Manager()
         self.logger = etl_logger("logs/extract.log")
-
 
     def check_tif_in_s3(self, s3_prefix, s3_filename) -> bool:
         """
         Check if a file exists in S3.
         parameters
         -----------
-        s3_prefix: str 
+        s3_prefix: str
             The S3 prefix to search within
         s3_filename: str
             The filename to check for
 
         returns
         --------
-        bool 
+        bool
             False if the file is not found in S3, True otherwise.
         """
         self.logger.info("Checking file in S3...")
@@ -50,23 +50,22 @@ class ExtractFromSufosat:
 
         return in_s3
 
-
     def check_for_updates(self, query: str, id: str):
         """
         Check if the metadata has been updated by comparing dates.
         parameters
         -----------
-        query: str 
+        query: str
             The filename to check for
         id: str
             The ID of the record to check
         returns
         --------
-        dict 
+        dict
             A dictionary containing the update status and metadata.
         """
         self.logger.info("Checking for updates...")
-        
+
         url = f"https://zenodo.org/api/records/{id}/files/{query}"
         response = requests.get(url, stream=True)
         if response.status_code == 200:
@@ -75,7 +74,7 @@ class ExtractFromSufosat:
             raise Exception(f"Error during API request: {response.status_code}")
 
         metadata_content = self.s3_manager.load_file_memory(
-            s3_key="dataeng/sufosat_data/forest-clearcuts_mainland-france_sufosat_dates_v3-metadata.json" # supose to be the same 
+            s3_key="dataeng/sufosat_data/forest-clearcuts_mainland-france_sufosat_dates_v3-metadata.json"  # supose to be the same
         )
         metadata = json.loads(metadata_content)
 
@@ -88,36 +87,34 @@ class ExtractFromSufosat:
 
         return {"do_update": do_update, "metadata": data, "mymetadata": metadata}
 
-
     def extract_tif_data_and_upload(self, id: str, query: str, s3_key: str):
         """
         Extract the data from Zenodo and upload it to S3.
         parameters
         -----------
-        id: str 
+        id: str
             The ID of the record to extract
         query: str
             The filename to extract
         s3_key: str
-            The S3 key where the file will be uploaded    
+            The S3 key where the file will be uploaded
         """
-        logger.info("Extract the data from Zendo...")
+        self.logger.info("Extract the data from Zendo...")
 
         with requests.get(
             f"https://zenodo.org/records/{id}/files/{query}?download=1", stream=True
         ) as r:
             r.raise_for_status()
-            s3_manager.s3.upload_fileobj(r.raw, s3_manager.bucket_name, s3_key)
-            
-        self.logger.info(f"✅ File loaded successfully {s3_key}")
+            self.s3_manager.s3.upload_fileobj(r.raw, self.s3_manager.bucket_name, s3_key)
 
+        self.logger.info(f"✅ File loaded successfully {s3_key}")
 
     def update_metadata(self, s3_prefix, filename, update: dict):
         """
         Update the metadata file in S3.
         parameters
         -----------
-        s3_prefix: str 
+        s3_prefix: str
             The S3 prefix to search within
         filename: str
             The filename to check for
@@ -135,7 +132,7 @@ class ExtractFromSufosat:
         meta_data = {
             "version": version,
             "s3_key": s3_prefix + filename,
-            "bucket_name": s3_manager.bucket_name,
+            "bucket_name": self.s3_manager.bucket_name,
             "data_source_link": metadata["links"]["self"],
             "date_source": metadata["updated"],
             "file_name": metadata["key"],
@@ -148,10 +145,10 @@ class ExtractFromSufosat:
         meta_data_json = json.dumps(meta_data)
         existing_keys = self.s3_manager.file_check(s3_prefix, filename)
         if existing_keys:
-            s3_manager.delete_from_s3(s3_prefix + filename)
+            self.s3_manager.delete_from_s3(s3_prefix + filename)
 
         self.s3_manager.s3.put_object(
-            Body=meta_data_json, Bucket=s3_manager.bucket_name, Key=s3_prefix + filename
+            Body=meta_data_json, Bucket=self.s3_manager.bucket_name, Key=s3_prefix + filename
         )
-        
+
         self.logger.info("✅ The metadata was been update !")

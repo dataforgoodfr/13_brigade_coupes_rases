@@ -1,13 +1,9 @@
 # Custom code derived from Yoann Crouin's written code.
 # link --> https://github.com/dataforgoodfr/13_brigade_coupes_rases/blob/main/analytics/notebooks/prepare_sufosat_v3_layer.py
 # # -*- coding: utf-8 -*-
-import os
-import rasterio
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import geopandas as gpd
-from rasterio.features import shapes
 from utils.logging_etl import etl_logger
 from utils.disjoin_set import DisjointSet
 
@@ -17,7 +13,6 @@ class PreparePolygon:
         self.logger = etl_logger("logs/transform.log")
         self.disjoin_set = DisjointSet
 
-    
     def parse_sufosat_date(self, sufosat_date: float) -> pd.Timestamp:
         """
         Converts SUFOSAT date format to a pandas Timestamp.
@@ -46,13 +41,12 @@ class PreparePolygon:
             days=(sufosat_date % 1000) - 1
         )
 
-
     def pair_clear_cuts_through_space_and_time(
         self,
-        gdf: gpd.GeoDataFrame, 
-        max_meters_between_clear_cuts: int, 
-        max_days_between_clear_cuts: int
-        ) -> pd.DataFrame:
+        gdf: gpd.GeoDataFrame,
+        max_meters_between_clear_cuts: int,
+        max_days_between_clear_cuts: int,
+    ) -> pd.DataFrame:
         """
         Identifies pairs of clear-cuts that are within a specified distance and a
         specified number of days of each other.
@@ -117,7 +111,9 @@ class PreparePolygon:
 
             for i in tqdm(range(0, len(gdf), batch_size), total=total_batches):
                 batch = gdf.iloc[i : i + batch_size]
-                batch_join = batch.sjoin(gdf, how="left", predicate="dwithin", distance=distance)
+                batch_join = batch.sjoin(
+                    gdf, how="left", predicate="dwithin", distance=distance
+                )
                 results.append(batch_join)
 
             return pd.concat(results).reset_index().rename(columns={"index": "index_left"})
@@ -145,7 +141,6 @@ class PreparePolygon:
         )
 
         return clear_cut_pairs
-
 
     def regroup_clear_cut_pairs(self, clear_cut_pairs: pd.DataFrame) -> list[set[int]]:
         """
@@ -199,13 +194,12 @@ class PreparePolygon:
 
         return subsets
 
-    
     def cluster_clear_cuts(
         self,
-        gdf: gpd.GeoDataFrame, 
-        max_meters_between_clear_cuts: int, 
-        max_days_between_clear_cuts: int
-        ) -> gpd.GeoDataFrame:
+        gdf: gpd.GeoDataFrame,
+        max_meters_between_clear_cuts: int,
+        max_days_between_clear_cuts: int,
+    ) -> gpd.GeoDataFrame:
         """
         Clusters individual clear-cuts based on spatial and temporal proximity.
         Parameters
@@ -238,14 +232,17 @@ class PreparePolygon:
         # Assign a clear cut group id to each clear cut polygon
         self.logger.info("Assigning cluster IDs to clear-cuts")
         for i, subset in tqdm(
-            enumerate(clear_cut_groups), total=len(clear_cut_groups), desc="Assigning cluster IDs"
+            enumerate(clear_cut_groups),
+            total=len(clear_cut_groups),
+            desc="Assigning cluster IDs",
         ):
             gdf.loc[list(subset), "clear_cut_group"] = i
 
-        self.logger.info(f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters")
+        self.logger.info(
+            f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters"
+        )
 
         return gdf
-
 
     def union_clear_cut_clusters(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         """
@@ -290,4 +287,3 @@ class PreparePolygon:
         self.logger.info(f"Successfully created {len(gdf)} merged clear-cut clusters")
 
         return gdf
-

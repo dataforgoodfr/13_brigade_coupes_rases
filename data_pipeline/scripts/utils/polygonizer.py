@@ -11,13 +11,9 @@ class Polygonizer:
     def __init__(self):
         self.logger = etl_logger("logs/transform.log")
 
-
     def filter_raster_by_date(
-        self, 
-        input_tif_filepath, 
-        output_tif_filepath, 
-        start_date, 
-        end_date):
+        self, input_tif_filepath, output_tif_filepath, start_date, end_date
+    ):
         """
         Filters a raster image by date range.
 
@@ -66,7 +62,6 @@ class Polygonizer:
                     dst.write(filtered_data, 1, window=window)
 
         self.logger.info("✅ Raster data filtered by date range")
-
 
     def polygonize_tif(self, raster_path, vector_path):
         """
@@ -140,4 +135,3 @@ class Polygonizer:
 
         self.logger.info("✅ Shapefile created")
         self.logger.info("✅ Polygonization successful")
-        

@@ -1,9 +1,9 @@
-from extract import extract_tif_data
-from transform import filter_and_polygonize, cluster_clear_cuts_by_time_and_space
+from transform import cluster_clear_cuts_by_time_and_space
 from utils.logging_etl import etl_logger
 
 
 logger = etl_logger("logs/main.log")
+
 
 def run_pipeline():
     try:
@@ -17,9 +17,8 @@ def run_pipeline():
 
         # STEP 3: CLUTER CLEAR CUTS
         cluster_clear_cuts_by_time_and_space()
-        
-        
-        # State success log 
+
+        # State success log
         logger.info("✅ ETL pipeline completed successfully")
     except Exception as e:
         logger.error(f"❌ Error in the ETL pipeline: {str(e)}")
