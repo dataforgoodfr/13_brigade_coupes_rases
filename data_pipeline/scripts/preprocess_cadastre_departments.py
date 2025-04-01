@@ -44,7 +44,7 @@ def preprocess_cadastre_departments() -> None:
     departments = download_osm_departments_cadastre()
     departments = remove_overseas_departments(departments)
     departments = convert_crs_to_lambert93(departments)
-    departments[["code_insee", "nom", "geometry"]].rename(columns={"nom": "name"})
+    departments = departments[["code_insee", "nom", "geometry"]].rename(columns={"nom": "name"})
     save_gdf(departments, RESULT_FILEPATH)
 
 

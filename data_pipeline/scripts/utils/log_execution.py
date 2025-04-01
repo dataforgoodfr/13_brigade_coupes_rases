@@ -56,13 +56,13 @@ def _format_time(timespan: float, precision: int = 3) -> str:
 
 
 def log_execution(
-    result_filepath: str | Path,
+    result_filepath: str | Path | list[str | Path],
 ) -> Callable[[Callable[..., T]], Callable[..., Optional[T]]]:
     """
     Decorator for logging start, end, memory usage, and duration
     """
-    if isinstance(result_filepath, str):
-        result_filepath = Path(result_filepath)
+    if not isinstance(result_filepath, list):
+        result_filepath = [result_filepath]
 
     def decorator(func: Callable[..., T]) -> Callable[..., Optional[T]]:
         @functools.wraps(func)
@@ -72,9 +72,9 @@ def log_execution(
             caller_script = os.path.basename(caller_frame.filename)
 
             # Check if we can skip the job
-            if result_filepath.exists():
+            if sum([Path(fp).exists() for fp in result_filepath]) == len(result_filepath):
                 logging.info(
-                    f"The result filepath {result_filepath} for the {caller_script} "
+                    f"The result filepath {' & '.join([str(fp) for fp in result_filepath])} for the {caller_script} "
                     "script already exist, we're skipping this job."
                 )
                 return None

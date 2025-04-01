@@ -20,9 +20,13 @@ def load_gdf(input_filepath: str | Path) -> gpd.GeoDataFrame:
     return gdf
 
 
-def save_gdf(gdf: gpd.GeoDataFrame, output_filepath: str | Path) -> gpd.GeoDataFrame:
+def save_gdf(
+    gdf: gpd.GeoDataFrame, output_filepath: str | Path, index: bool = False
+) -> gpd.GeoDataFrame:
+    display_df(gdf)
+
     # Save the GeoDataFrame to the specified file
-    gdf.to_file(output_filepath, index=False)
+    gdf.to_file(output_filepath, index=index)
 
     # Get the file size
     file_size = os.path.getsize(output_filepath)
