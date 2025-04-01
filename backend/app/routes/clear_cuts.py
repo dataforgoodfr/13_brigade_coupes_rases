@@ -8,10 +8,6 @@ from app.schemas.clear_cut_map import ClearCutMapResponseSchema
 from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import find_ecological_zonings_by_clear_cut
-from app.services.clear_cut_report import (
-    GeoBounds,
-    build_clearcuts_map,
-)
 
 logger = getLogger(__name__)
 

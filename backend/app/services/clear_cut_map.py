@@ -14,7 +14,15 @@ from app.schemas.clear_cut_report import (
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID, ST_AsGeoJSON
+from geoalchemy2.functions import (
+    ST_Contains,
+    ST_MakeEnvelope,
+    ST_SetSRID,
+    ST_AsGeoJSON,
+    ST_Union,
+    ST_Centroid,
+    ST_Multi,
+)
 
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
@@ -26,6 +34,7 @@ from app.services.registries import find_or_add_registries
 from fastapi import status
 
 logger = getLogger(__name__)
+
 
 class GeoBounds(BaseModel):
     south_west_latitude: float
@@ -45,12 +54,21 @@ def build_clearcuts_map(
         SRID,
     )
     square = ST_SetSRID(envelope, SRID)
+    average_locations = (
+        db.query(
+            ClearCut.report_id,
+            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
+                "average_location"
+            ),
+        )
+        .group_by(ClearCut.report_id)
+        .subquery()
+    )
     points = (
-        db.query(ST_AsGeoJSON(ClearCut.location))
-        .filter(ST_Contains(square, ClearCut.location))
+        db.query(ST_AsGeoJSON(average_locations.c.average_location))
+        .filter(ST_Contains(square, average_locations.c.average_location))
         .all()
     )
-
 
     # clearcuts = (
     #     db.query(

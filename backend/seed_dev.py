@@ -101,7 +101,7 @@ def seed_database():
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
-                        location=from_shape(Point(2.380192, 48.878899), SRID),
+                        location=from_shape(Point(1.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
                                 [

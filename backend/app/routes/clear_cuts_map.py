@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.clear_cut_map import ClearCutMapResponseSchema
-from app.services.clear_cut_report import (
+from app.services.clear_cut_map import (
     GeoBounds,
     build_clearcuts_map,
 )
