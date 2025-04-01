@@ -12,12 +12,12 @@ from scripts.utils import (
     download_file,
     load_gdf,
     log_execution,
-    polygonize_raster,
-    save_gdf,
 )
+from scripts.utils.df_utils import save_gdf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
-RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
+DETECTIONS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_detections.fgb"
+CLUSTERS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
 
 
 def download_sufosat_raster_dates(input_raster_dates: str) -> None:
@@ -33,11 +33,11 @@ def polygonize_sufosat(
 ) -> gpd.GeoDataFrame:
     logging.info(f"Polygonize {input_raster_dates}")
 
-    polygonize_raster(
-        input_raster=input_raster_dates,
-        output_layer_file=polygonized_raster_output_layer,
-        fieldname="sufosat_date",
-    )
+    # polygonize_raster(
+    #     input_raster=input_raster_dates,
+    #     output_layer_file=polygonized_raster_output_layer,
+    #     fieldname="sufosat_date",
+    # )
 
     # Read the SUFOSAT vectorized data
     gdf: gpd.GeoDataFrame = load_gdf(polygonized_raster_output_layer)
@@ -149,9 +149,7 @@ def pair_clear_cuts_through_space_and_time(
         <= max_days_between_clear_cuts
     ]
 
-    logging.info(
-        f"Found {len(clear_cut_pairs)} potential clear-cut pairs (before shape complexity filtering)"
-    )
+    logging.info(f"Found {len(clear_cut_pairs)} clear-cut pairs")
 
     display_df(clear_cut_pairs)
 
@@ -250,9 +248,22 @@ def cluster_clear_cuts(
     ):
         gdf.loc[list(subset), "clear_cut_group"] = i
 
-    logging.info(f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters")
+    # Assign a cluster ID to the pixels that weren't grouped,
+    # auto-incrementing from the last cluster ID
+    gdf["clear_cut_group"] = gdf["clear_cut_group"].fillna(
+        gdf["clear_cut_group"].max() + gdf["clear_cut_group"].isna().cumsum()
+    )
+    gdf["clear_cut_group"] = gdf["clear_cut_group"].astype(int)
 
-    display_df(gdf)
+    pixels_per_cluster = gdf.groupby("clear_cut_group").size()
+    logging.info(
+        "Clustering complete:\n"
+        f"- Number of clusters: {gdf['clear_cut_group'].nunique()}\n"
+        f"- Number of clusters with more than one pixel: {(pixels_per_cluster > 1).sum()}\n"
+        f"- Number of clusters with a single pixel: {(pixels_per_cluster == 1).sum()}\n"
+        f"- Min cluster ID: {gdf['clear_cut_group'].min()}\n"
+        f"- Max cluster ID: {gdf['clear_cut_group'].max()}"
+    )
 
     return gdf
 
@@ -304,14 +315,14 @@ def union_clear_cut_clusters(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
-def filter_out_clear_cuts_with_complex_shapes(
-    gdf: gpd.GeoDataFrame, concave_hull_ratio: float, concave_hull_score_threshold: float
+def add_concave_hull_score(
+    gdf: gpd.GeoDataFrame, concave_hull_ratio: float
 ) -> gpd.GeoDataFrame:
     """
-    Filters out clear-cuts with overly complex shapes that may represent false positives.
+    Help identify the clear-cuts with complex shapes that may represent false positives.
 
     This function uses the concave hull score (ratio of the area of the shape to the
-    area of its concave hull) to identify and remove shapes that are too complex.
+    area of its concave hull) to identify shapes that are too complex.
 
     Parameters
     ----------
@@ -320,82 +331,65 @@ def filter_out_clear_cuts_with_complex_shapes(
     concave_hull_ratio : float
         Ratio parameter for the concave hull calculation (1.0 = convex hull).
         Lower values create tighter hulls that follow the shape more closely.
-    concave_hull_score_threshold : float
-        Minimum acceptable concave hull score. Polygons with scores below this
-        threshold will be removed.
 
     Returns
     -------
     gpd.GeoDataFrame
-        Filtered GeoDataFrame with complex shapes removed.
+        GeoDataFrame with complex shapes tagged.
 
     Notes
     -----
     The concave hull score (area of polygon / area of concave hull) provides a measure
     of shape complexity. Values close to 0 indicate more complex, irregular shapes,
-    while large values indicate simpler shapes. The score can be greater than 1.
+    while large values indicate simpler shapes. We clip the max score to 1.
     """
-    logging.info("Filtering out clear-cuts with complex shapes")
+    logging.info('Adding the "concave_hull_score" column')
 
     # concave_hull(ratio=1) would be the same as convex_hull
     gdf["concave_hull_score"] = gdf.area / gdf.concave_hull(concave_hull_ratio).area
 
-    logging.info(
-        f"Dropping {(gdf['concave_hull_score'] < concave_hull_score_threshold).sum() / len(gdf):.1%} of the clear-cut clusters because their concave hull score is too low, meaning their shape is too complex."
-    )
-
-    # Filter out clear cuts that are too complex, and get rid of the score since it won't be useful later
-    gdf = gdf[gdf["concave_hull_score"] >= concave_hull_score_threshold].drop(
-        columns="concave_hull_score"
-    )
+    # The score can be greater than 1 but we can clip it to [0, 1] for simplicity
+    gdf["concave_hull_score"] = gdf["concave_hull_score"].clip(upper=1)
 
     display_df(gdf)
 
     return gdf
 
 
-def add_area_ha_and_filter_tiny_clear_cuts(
-    gdf: gpd.GeoDataFrame, min_clear_cut_area_ha: float
-) -> gpd.GeoDataFrame:
+def add_area_ha(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Add clear cut area, with 1 hectare = 10,000 m²
     logging.info("Adding clear-cut clusters area")
     gdf["area_ha"] = gdf.area / 10000
 
-    # Only keep clear cuts >= min_clear_cut_area_ha ha
-    logging.info(f"Only keeping clear-cuts if area >= {min_clear_cut_area_ha} ha")
-    gdf = gdf[gdf["area_ha"] >= min_clear_cut_area_ha]
-
     # Let's sort the clear-cut clusters by their area
     gdf = gdf.sort_values("area_ha")
 
-    logging.info(
-        f"We identified {len(gdf)} clear-cut clusters >= {min_clear_cut_area_ha} ha"
-        f" and {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha"
-    )
+    logging.info(f"We identified {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha")
 
     return gdf
 
 
-@log_execution(RESULT_FILEPATH)
+@log_execution([DETECTIONS_RESULT_FILEPATH, CLUSTERS_RESULT_FILEPATH])
 def preprocess_sufosat(
-    input_raster_dates: str,
-    polygonized_raster_output_layer: str,
-    output_layer: str,
-    max_meters_between_clear_cuts: int,
-    max_days_between_clear_cuts: int,
-    min_clear_cut_area_ha: float,
-    concave_hull_ratio: float,
-    concave_hull_threshold: float,
+    input_raster_dates: str = str(
+        SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
+    ),
+    polygonized_raster_output_layer: str = str(
+        SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.fgb"
+    ),
+    max_meters_between_clear_cuts: int = 100,
+    max_days_between_clear_cuts: int = 365,
+    concave_hull_ratio: float = 0.42,
 ) -> None:
     """
-    Process forest clear-cut raster data into a filtered vector layer of clear-cut clusters.
+    Process forest clear-cut raster data into a vector layer of clear-cut clusters.
 
     This function orchestrates a complete workflow for processing forest clear-cut data:
     1. Converts raster clear-cut data to vector polygons
     2. Processes the dates associated with each clear-cut
-    3. Clusters nearby clear-cuts in space and time
+    3. Clusters nearby clear-cuts in space and time, and saves the result
     4. Merges clear-cuts within each cluster
-    5. Filters the results based on shape complexity and area
+    5. Add shape complexity and area attributes
     6. Saves the final vector dataset
 
     Parameters
@@ -404,20 +398,13 @@ def preprocess_sufosat(
         Path to the input raster file containing clear-cut dates in SUFOSAT format.
     polygonized_raster_output_layer : str
         Path for the temporary vector file created during polygonization.
-    output_layer : str
-        Path where the final processed clear-cut clusters will be saved.
     max_meters_between_clear_cuts : int
         Maximum distance in meters between clear-cuts to consider them spatially related.
     max_days_between_clear_cuts : int
         Maximum time difference in days between clear-cuts to consider them temporally related.
-    min_clear_cut_area_ha : float
-        Minimum area in hectares for a clear-cut cluster to be included in the final output.
     concave_hull_ratio : float
         Ratio parameter for the concave hull calculation (1.0 = convex hull).
         Lower values create tighter hulls that follow the shape more closely.
-    concave_hull_threshold : float
-        Minimum acceptable concave hull score. Polygons with scores below this
-        threshold will be removed as they represent overly complex shapes.
 
     Returns
     -------
@@ -428,28 +415,12 @@ def preprocess_sufosat(
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
     gdf = cluster_clear_cuts(gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts)
+    save_gdf(gdf, DETECTIONS_RESULT_FILEPATH)
     gdf = union_clear_cut_clusters(gdf)
-    gdf = filter_out_clear_cuts_with_complex_shapes(
-        gdf, concave_hull_ratio, concave_hull_threshold
-    )
-    gdf = add_area_ha_and_filter_tiny_clear_cuts(gdf, min_clear_cut_area_ha)
-
-    # Finally, save the result to disk
-    save_gdf(gdf, output_layer)
+    gdf = add_concave_hull_score(gdf, concave_hull_ratio)
+    gdf = add_area_ha(gdf)
+    save_gdf(gdf, CLUSTERS_RESULT_FILEPATH, index=True)
 
 
 if __name__ == "__main__":
-    preprocess_sufosat(
-        input_raster_dates=str(
-            SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
-        ),
-        polygonized_raster_output_layer=str(
-            SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.fgb"
-        ),
-        output_layer=str(RESULT_FILEPATH),
-        max_meters_between_clear_cuts=100,
-        max_days_between_clear_cuts=365,
-        min_clear_cut_area_ha=0.5,
-        concave_hull_ratio=0.42,
-        concave_hull_threshold=0.42,
-    )
+    preprocess_sufosat()
