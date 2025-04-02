@@ -28,10 +28,8 @@ def load_gdf(input_filepath: str | Path) -> gpd.GeoDataFrame:
 
 # modified --> export on geoparquet
 def save_gdf(
-    gdf: gpd.GeoDataFrame, 
-    output_filepath: str | Path, 
-    index: bool = False
-    ) -> gpd.GeoDataFrame:
+    gdf: gpd.GeoDataFrame, output_filepath: str | Path, index: bool = False
+) -> gpd.GeoDataFrame:
     display_df(gdf)
 
     # Save the GeoDataFrame to the specified file
