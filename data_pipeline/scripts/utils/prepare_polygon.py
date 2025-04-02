@@ -238,8 +238,21 @@ class PreparePolygon:
         ):
             gdf.loc[list(subset), "clear_cut_group"] = i
 
+        # Assign a cluster ID to the pixels that weren't grouped,
+        # auto-incrementing from the last cluster ID
+        gdf["clear_cut_group"] = gdf["clear_cut_group"].fillna(
+            gdf["clear_cut_group"].max() + gdf["clear_cut_group"].isna().cumsum()
+        )
+        gdf["clear_cut_group"] = gdf["clear_cut_group"].astype(int)
+
+        pixels_per_cluster = gdf.groupby("clear_cut_group").size()
         self.logger.info(
-            f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters"
+            "Clustering complete:\n"
+            f"- Number of clusters: {gdf['clear_cut_group'].nunique()}\n"
+            f"- Number of clusters with more than one pixel: {(pixels_per_cluster > 1).sum()}\n"
+            f"- Number of clusters with a single pixel: {(pixels_per_cluster == 1).sum()}\n"
+            f"- Min cluster ID: {gdf['clear_cut_group'].min()}\n"
+            f"- Max cluster ID: {gdf['clear_cut_group'].max()}"
         )
 
         return gdf
@@ -285,5 +298,58 @@ class PreparePolygon:
         gdf["geometry"] = gdf["geometry"].buffer(0.0001)
 
         self.logger.info(f"Successfully created {len(gdf)} merged clear-cut clusters")
+
+        return gdf
+
+    def add_concave_hull_score(
+        self, gdf: gpd.GeoDataFrame, concave_hull_ratio: float
+    ) -> gpd.GeoDataFrame:
+        """
+        Help identify the clear-cuts with complex shapes that may represent false positives.
+
+        This function uses the concave hull score (ratio of the area of the shape to the
+        area of its concave hull) to identify shapes that are too complex.
+
+        Parameters
+        ----------
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame containing clear-cut polygons.
+        concave_hull_ratio : float
+            Ratio parameter for the concave hull calculation (1.0 = convex hull).
+            Lower values create tighter hulls that follow the shape more closely.
+
+        Returns
+        -------
+        gpd.GeoDataFrame
+            GeoDataFrame with complex shapes tagged.
+
+        Notes
+        -----
+        The concave hull score (area of polygon / area of concave hull) provides a measure
+        of shape complexity. Values close to 0 indicate more complex, irregular shapes,
+        while large values indicate simpler shapes. We clip the max score to 1.
+        """
+        self.logger.info('Adding the "concave_hull_score" column')
+
+        # concave_hull(ratio=1) would be the same as convex_hull
+        gdf["concave_hull_score"] = gdf.area / gdf.concave_hull(concave_hull_ratio).area
+        # The score can be greater than 1 but we can clip it to [0, 1] for simplicity
+        gdf["concave_hull_score"] = gdf["concave_hull_score"].clip(upper=1)
+
+        # display_df(gdf)
+
+        return gdf
+
+    def add_area_ha(self, gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+        # Add clear cut area, with 1 hectare = 10,000 m²
+        self.logger.info("Adding clear-cut clusters area")
+        gdf["area_ha"] = gdf.area / 10000
+
+        # Let's sort the clear-cut clusters by their area
+        gdf = gdf.sort_values("area_ha")
+
+        self.logger.info(
+            f"We identified {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha"
+        )
 
         return gdf

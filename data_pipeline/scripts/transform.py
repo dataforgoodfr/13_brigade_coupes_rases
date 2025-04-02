@@ -1,5 +1,6 @@
 import yaml
 import geopandas as gpd
+from utils.df_utils import save_gdf
 from utils.logging_etl import etl_logger
 from utils.polygonizer import Polygonizer
 from utils.prepare_polygon import PreparePolygon
@@ -59,3 +60,18 @@ def cluster_clear_cuts_by_time_and_space():
 
     logger.info("Union clear cut clusters...")
     gdf = prepare_polygon.union_clear_cut_clusters(gdf)
+
+    logger.info("Add concave hull score...")
+    gdf = prepare_polygon.add_concave_hull_score(
+        gdf=gdf, concave_hull_ratio=configs["transform_sufosat"]["magic_number"]
+    )
+
+    logger.info("add area ha...")
+    gdf = prepare_polygon.add_area_ha(gdf)
+
+    logger.info("Saving GeodataFrame to geoparquet...")
+    save_gdf(
+        gdf=gdf,
+        output_filepath=configs["transform_sufosat"]["download_path"]
+        + "clear_cuts_clustered.geoparquet",
+    )
