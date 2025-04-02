@@ -1,18 +1,25 @@
 import yaml
 import geopandas as gpd
 from utils.df_utils import save_gdf
+from utils.s3 import S3Manager
 from utils.logging_etl import etl_logger
 from utils.polygonizer import Polygonizer
+from utils.cuts_update import cutsUpdateRules
 from utils.prepare_polygon import PreparePolygon
+
+# Configs
+updater = cutsUpdateRules()
+s3_manager = S3Manager()
+polygonizer = Polygonizer()
+prepare_polygon = PreparePolygon()
+updater = cutsUpdateRules()
+logger = etl_logger("logs/transform.log")
+
+with open("config/config.yaml") as stream:
+    configs = yaml.safe_load(stream)
 
 
 def filter_and_polygonize():
-    polygonizer = Polygonizer()
-    logger = etl_logger("logs/transform.log")
-
-    with open("config/config.yaml") as stream:
-        configs = yaml.safe_load(stream)
-
     logger.info("Filter raster date...")
     polygonizer.filter_raster_by_date(
         input_tif_filepath=configs["transform_sufosat"]["download_path"]
@@ -33,12 +40,6 @@ def filter_and_polygonize():
 
 
 def cluster_clear_cuts_by_time_and_space():
-    prepare_polygon = PreparePolygon()
-    logger = etl_logger("logs/transform.log")
-
-    with open("config/config.yaml") as stream:
-        configs = yaml.safe_load(stream)
-
     logger.info("Openning the polygonized data...")
     gdf: gpd.GeoDataFrame = gpd.read_file(
         configs["transform_sufosat"]["download_path"]
@@ -75,3 +76,29 @@ def cluster_clear_cuts_by_time_and_space():
         output_filepath=configs["transform_sufosat"]["download_path"]
         + "clear_cuts_clustered.geoparquet",
     )
+
+
+def update_clusters():
+    logger.info("Load previous data...")
+    s3_manager.download_from_s3(
+        s3_key="dataeng/bootstrap/sufosat/sufosat_clusters_2018_2024.fgb",
+        download_path=configs["transform_sufosat"]["download_path"]
+        + "sufosat_clusters_2018_2024.fgb",
+    )
+
+    logger.info("Loading the two files...")
+    gdf_filtered: gpd.GeoDataFrame = gpd.read_file(
+        configs["transform_sufosat"]["download_path"] + "sufosat_clusters_2018_2024.fgb"
+    )
+    gdf_new: gpd.GeoDataFrame = gpd.read_parquet(
+        configs["transform_sufosat"]["download_path"] + "clear_cuts_clustered.geoparquet"
+    )
+
+    logger.info("Clustering by space and time...")
+    clear_cut_pairs = updater.cluster_by_space(gdf_filtered=gdf_filtered, gdf_new=gdf_new)
+
+    logger.info("Updating clusters...")
+    updater.update_clusters(clear_cut_pairs)
+
+    logger.info("Reveal new clusters...")
+    updater.find_new_clusters(gdf_new, clear_cut_pairs)
