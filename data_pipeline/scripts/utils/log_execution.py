@@ -1,8 +1,6 @@
 import functools
-import inspect
 import logging
 import math
-import os
 import sys
 import time
 from pathlib import Path
@@ -67,20 +65,21 @@ def log_execution(
     def decorator(func: Callable[..., T]) -> Callable[..., Optional[T]]:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Optional[T]:
-            # Get the script filename
-            caller_frame = inspect.stack()[1]
-            caller_script = os.path.basename(caller_frame.filename)
+            # Get the function name
+            decorated_function_name = func.__name__
 
             # Check if we can skip the job
             if sum([Path(fp).exists() for fp in result_filepath]) == len(result_filepath):
                 logging.info(
-                    f"The result filepath {' & '.join([str(fp) for fp in result_filepath])} for the {caller_script} "
+                    f"The result filepath {' & '.join([str(fp) for fp in result_filepath])} for the {decorated_function_name} "
                     "script already exist, we're skipping this job."
                 )
                 return None
 
             # Log start time and message
-            logging.info(f"[============  Start of the {caller_script} script ============]")
+            logging.info(
+                f"[============  Start of the {decorated_function_name} script ============]"
+            )
 
             # Record start time
             start_time = time.perf_counter()
@@ -99,7 +98,7 @@ def log_execution(
 
             # Log end time, memory usage, and duration
             logging.info(
-                f"[============  End of the {caller_script} script. "
+                f"[============  End of the {decorated_function_name} script. "
                 f"Max memory usage: {max_memory:,.0f} MB. "
                 f"Total duration: {_format_time(end_time - start_time)} ============]"
             )

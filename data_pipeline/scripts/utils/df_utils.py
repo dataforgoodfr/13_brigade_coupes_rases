@@ -12,9 +12,9 @@ def display_df(df: pd.DataFrame) -> None:
     )
 
 
-def load_gdf(input_filepath: str | Path) -> gpd.GeoDataFrame:
+def load_gdf(input_filepath: str | Path, rows: int | None = None) -> gpd.GeoDataFrame:
     logging.info(f"Loading {input_filepath} as a gpd.GeoDataFrame")
-    gdf = gpd.read_file(input_filepath)
+    gdf = gpd.read_file(input_filepath, rows=rows)
     logging.info(f"Coordinate Reference System (CRS) of the GeoDataFrame: {gdf.crs}")
     display_df(gdf)
     return gdf
