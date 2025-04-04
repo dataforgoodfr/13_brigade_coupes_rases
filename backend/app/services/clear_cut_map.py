@@ -59,7 +59,7 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             func.min(ClearCut.observation_start_date).label("cut_start"),
             func.max(ClearCut.observation_end_date).label("cut_end"),
             func.max(ClearCut.updated_at).label("last_update"),
-            func.sum(case((ClearCutEcologicalZoning.clear_cut_id == None, 0), else_=1)).label(
+            func.sum(case((ClearCutEcologicalZoning.clear_cut_id is None, 0), else_=1)).label(
                 "ecological_zonings_count"
             ),
             func.count(ClearCutEcologicalZoning.clear_cut_id).label(

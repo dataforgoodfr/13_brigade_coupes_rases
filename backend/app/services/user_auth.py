@@ -40,9 +40,7 @@ class TokenData(BaseModel):
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/token",
 )
-optional_oauth2_schema = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/token", auto_error=False
-)
+optional_oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/token", auto_error=False)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -74,7 +72,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def get_optional_current_user(
     db: Session = db_session, token=Depends(optional_oauth2_schema)
 ):
-    if token is None :
+    if token is None:
         return None
     return get_current_user(db, token)
 

@@ -31,7 +31,7 @@ def authenticate(x_imports_token: str = Header(default="")):
 
 
 @router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
-def post_clearcut(
+def post_report(
     response: Response,
     params: CreateClearCutsReportCreateSchema,
     db: Session = db_session,
@@ -44,7 +44,7 @@ def post_clearcut(
 
 
 @router.get("/", response_model=PaginationResponseSchema[ClearCutReportResponseSchema])
-def list_clearcuts_reports(
+def list_clear_cuts_reports(
     db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
     logger.info(db)
@@ -52,7 +52,7 @@ def list_clearcuts_reports(
 
 
 @router.patch("/{report_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
-def update_existing_clearcut_report(
+def update_existing_clear_cut_report(
     report_id: int, item: ClearCutReportPatchSchema, db: Session = db_session
 ) -> ClearCutReportResponseSchema:
     logger.info(db)
@@ -68,7 +68,7 @@ def get_by_id(report_id: int, db: Session = db_session) -> ClearCutReportRespons
 @router.get(
     "/{report_id}/clear-cuts", response_model=PaginationResponseSchema[ClearCutResponseSchema]
 )
-def list_clearcuts_reports(
+def list_clear_cuts(
     report_id: int, db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     logger.info(db)

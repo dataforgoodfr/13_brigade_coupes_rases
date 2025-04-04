@@ -7,9 +7,7 @@ from app.schemas.filters import FiltersResponseSchema
 
 
 def build_filters(db: Session, connected_user: Optional[User]) -> FiltersResponseSchema:
-    cut_years = (
-        db.query(extract("year", ClearCut.observation_end_date)).distinct().all()
-    )
+    cut_years = db.query(extract("year", ClearCut.observation_end_date)).distinct().all()
     departments_query = db.query(Department.id).join(City).join(ClearCutReport)
     if connected_user is not None and len(connected_user.departments) > 0:
         departments_query.join(connected_user.departments)
