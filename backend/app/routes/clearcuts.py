@@ -9,8 +9,10 @@ from app.services.clearcut import (
     create_clearcut,
     get_clearcut,
     get_clearcut_by_id,
+    get_clearcut_report,
     update_clearcut,
 )
+from app.schemas.clearcut_report import ClearCutReportResponse
 
 logger = getLogger(__name__)
 
@@ -38,6 +40,12 @@ def list_clearcut(
 ) -> list[ClearCutResponse]:
     logger.info(db)
     return get_clearcut(db, skip=skip, limit=limit)
+
+
+@router.get("/{id}/Report", response_model=ClearCutReportResponse)
+def get_report_by_id(id: int, db: Session = db_dependency) -> ClearCutReportResponse:
+    logger.info(db)
+    return get_clearcut_report(db, id)
 
 
 @router.get("/{id}", response_model=ClearCutResponse)

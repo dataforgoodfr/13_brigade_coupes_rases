@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut
+from sqlalchemy.orm import Session, aliased
+from app.models import CLEAR_CUT_PREVIEW_COLUMNS, ClearCut, ClearCutReport
 from app.schemas.clearcut import (
     ClearCutCreate,
     ClearCutPatch,
@@ -58,6 +58,60 @@ def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
         clearcut.location = clearcut.location.coords[0]
         clearcut.boundary = list(clearcut.boundary.exterior.coords)
     return clearcuts
+
+
+def get_clearcut_report(db: Session, id: int):
+    # clearcut = db.query(ClearCut).options(
+    #     joinedload(ClearCut.clear_cut_report)  # Charge les rapports en jointure
+    # ).get(id)
+
+    # print(clearcut.clear_cut_report.forest_description)
+
+    # clearcut.location = to_shape(clearcut.location)
+    # clearcut.boundary = to_shape(clearcut.boundary)
+
+    # clearcut.location = clearcut.location.coords[0]
+    # clearcut.boundary = list(clearcut.boundary.exterior.coords)
+    # return clearcut
+
+    clearcut_report_alias = aliased(ClearCutReport)
+
+    # Récupère toutes les colonnes des deux tables de façon dynamique
+    clearcut_columns = [getattr(ClearCut, col.name) for col in ClearCut.__table__.columns]
+    report_columns = [
+        getattr(clearcut_report_alias, col.name)
+        for col in ClearCutReport.__table__.columns
+        if col.name != "id"
+    ]
+    columns = [*clearcut_columns, *report_columns]
+
+    result = (
+        db.query(*columns)  # Décompose les listes en arguments
+        .select_from(ClearCut)
+        .outerjoin(clearcut_report_alias, ClearCut.id == clearcut_report_alias.clear_cut_id)
+        .filter(ClearCut.id == id)
+        .first()
+    )
+    # x = dict(clearcut._mapping) if clearcut else None
+    data = dict(result._mapping)  # Convertit le résultat SQLAlchemy en dictionnaire
+
+    # Séparer les données pour ClearCut et ClearCutReport
+    clearcut_data_report = {}
+    for col in ClearCut.__table__.columns:
+        clearcut_data_report[col.name] = data[col.name]
+
+    for col in ClearCutReport.__table__.columns:
+        if data[col.name] is not None:
+            clearcut_data_report[col.name] = data[col.name]
+
+    clearcut_data_report["location"] = to_shape(clearcut_data_report["location"])
+    clearcut_data_report["boundary"] = to_shape(clearcut_data_report["boundary"])
+
+    clearcut_data_report["location"] = clearcut_data_report["location"].coords[0]
+    clearcut_data_report["boundary"] = list(clearcut_data_report["boundary"].exterior.coords)
+
+    print(clearcut_data_report)
+    return clearcut_data_report
 
 
 def get_clearcut_by_id(id: int, db: Session):
