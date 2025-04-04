@@ -1,10 +1,7 @@
 from fastapi import HTTPException
-from geojson_pydantic import Point
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models import SRID, City, ClearCut, ClearCutEcologicalZoning, ClearCutReport
-from app.schemas.clear_cut import ClearCutResponseSchema
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
 from app.schemas.clear_cut_report import (
     CreateClearCutsReportCreateSchema,
     ClearCutReportPatchSchema,
@@ -14,12 +11,7 @@ from app.schemas.clear_cut_report import (
 from logging import getLogger
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID, ST_AsGeoJSON
 
-from app.schemas.clear_cut_map import (
-    ClearCutMapResponseSchema,
-    row_to_report_preview_schema,
-)
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
@@ -63,9 +55,7 @@ def create_clear_cut_report(
                     ClearCutEcologicalZoning(
                         ecological_zoning_id=zoning.id,
                         area_hectare=next(
-                            z
-                            for z in clear_cut.ecological_zonings
-                            if z.code == zoning.code
+                            z for z in clear_cut.ecological_zonings if z.code == zoning.code
                         ).area_hectare,
                     )
                     for zoning in find_or_add_ecological_zonings(

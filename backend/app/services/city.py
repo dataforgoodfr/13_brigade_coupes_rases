@@ -18,6 +18,7 @@ def get_city_by_zip_code(db: Session, zip_code: str) -> City:
         )
     return city
 
+
 def get_city_by_zip_code(db: Session, zip_code: str) -> City:
     city = db.query(City).filter(City.zip_code == zip_code).first()
     if city is None:

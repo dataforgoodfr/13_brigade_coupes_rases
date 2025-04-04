@@ -8,7 +8,6 @@ from app.schemas.clear_cut import (
 )
 from app.schemas.clear_cut_report import (
     ClearCutReportResponseSchema,
-    report_to_response_schema,
 )
 from app.schemas.ecological_zoning import (
     ClearCutEcologicalZoningResponseSchema,
@@ -33,7 +32,9 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
         .filter(ClearCut.id == id)
         .first()
     )
-    return clear_cut_to_clear_cut_response_schema(map_geo_clearcut(clearcut, boundary, location))
+    return clear_cut_to_clear_cut_response_schema(
+        map_geo_clearcut(clearcut, boundary, location)
+    )
 
 
 def paginated_clear_cuts_query(db: Session, page: int = 0, size: int = 10):
@@ -74,25 +75,17 @@ def find_clear_cuts(
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     clear_cuts = paginated_clear_cuts_query(db, page, size).all()
     clear_cuts_count = db.query(ClearCut.id).count()
-    return clear_cuts_to_paginated_response(
-        clear_cuts, clear_cuts_count, url, page, size
-    )
+    return clear_cuts_to_paginated_response(clear_cuts, clear_cuts_count, url, page, size)
 
 
 def find_clearcuts_by_report(
     db: Session, report_id: int, url: str, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     clear_cuts = (
-        paginated_clear_cuts_query(db, page, size)
-        .filter(ClearCut.report_id == report_id)
-        .all()
+        paginated_clear_cuts_query(db, page, size).filter(ClearCut.report_id == report_id).all()
     )
-    clear_cuts_count = (
-        db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
-    )
-    return clear_cuts_to_paginated_response(
-        clear_cuts, clear_cuts_count, url, page, size
-    )
+    clear_cuts_count = db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
+    return clear_cuts_to_paginated_response(clear_cuts, clear_cuts_count, url, page, size)
 
 
 def find_ecological_zonings_by_clear_cut(

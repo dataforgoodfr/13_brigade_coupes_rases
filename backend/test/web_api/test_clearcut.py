@@ -57,10 +57,10 @@ def test_post_report_success(client: TestClient):
 
     print(data)
 
-    assert data['id'] == location.split("/")[-1]
+    assert data["id"] == location.split("/")[-1]
     assert data["slope_area_ratio_percentage"] == 15
 
-    response = client.get(f'/api/v1/clear-cuts/{data["clear_cuts_ids"][0]}')
+    response = client.get(f"/api/v1/clear-cuts/{data['clear_cuts_ids'][0]}")
     assert response.status_code == status.HTTP_200_OK
     clear_cut_data = response.json()
 

@@ -1,18 +1,16 @@
 from logging import getLogger
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.clear_cut import ClearCutResponseSchema
-from app.schemas.clear_cut_map import ClearCutMapResponseSchema
 from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import (
-    find_clearcuts_by_report,
     find_ecological_zonings_by_clear_cut,
     get_clearcut_by_id,
-    find_clear_cuts
+    find_clear_cuts,
 )
 
 logger = getLogger(__name__)
@@ -41,14 +39,9 @@ def list_clear_cuts_reports(
     "/{clear_cut_id}",
     response_model=ClearCutResponseSchema,
 )
-def get_clear_cut(
-    clear_cut_id: int, db: Session = db_session
-) -> ClearCutResponseSchema:
+def get_clear_cut(clear_cut_id: int, db: Session = db_session) -> ClearCutResponseSchema:
     logger.info(db)
-    return get_clearcut_by_id(
-        id=clear_cut_id,
-        db=db
-    )
+    return get_clearcut_by_id(id=clear_cut_id, db=db)
 
 
 @router.get("/", response_model=PaginationResponseSchema[ClearCutResponseSchema])
@@ -58,7 +51,7 @@ def list_clear_cuts(
     logger.info(db)
     return find_clear_cuts(
         db,
-        url=f"/api/v1/clear-cuts",
+        url="/api/v1/clear-cuts",
         page=page,
         size=size,
     )

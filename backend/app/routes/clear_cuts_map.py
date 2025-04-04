@@ -7,10 +7,12 @@ from sqlalchemy.orm import Session
 from app.deps import db_session
 from app.models import CLEARCUT_STATUSES
 from app.schemas.clear_cut_map import ClearCutMapResponseSchema
+from app.schemas.filters import FiltersResponseSchema
 from app.services.clear_cut_map import (
     Filters,
     build_clearcuts_map,
 )
+from app.services.filters import build_filters
 
 logger = getLogger(__name__)
 

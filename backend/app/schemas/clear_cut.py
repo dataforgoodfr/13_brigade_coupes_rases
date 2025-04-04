@@ -1,14 +1,11 @@
-from datetime import date, datetime
-from logging import getLogger
-from typing import Optional
+from datetime import datetime
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Field
 
-from app.models import CLEARCUT_STATUSES, ClearCut, ClearCutReport
+from app.models import ClearCut
 from app.schemas.ecological_zoning import (
     CreateEcologicalZoningSchema,
-    EcologicalZoningSchema,
 )
 
 
@@ -55,6 +52,7 @@ class ClearCutBaseSchema(BaseModel):
 class ClearCutCreateSchema(ClearCutBaseSchema):
     ecological_zonings: list[CreateEcologicalZoningSchema] = Field(default=[])
 
+
 class ClearCutResponseSchema(ClearCutBaseSchema):
     id: str = Field(
         json_schema_extra={
@@ -65,7 +63,7 @@ class ClearCutResponseSchema(ClearCutBaseSchema):
         json_schema_extra={
             "example": "1",
         }
-    )   
+    )
     ecological_zonings_ids: list[str] = Field(
         json_schema_extra={
             "example": "[1,2,3]",
@@ -81,7 +79,6 @@ class ClearCutResponseSchema(ClearCutBaseSchema):
             "example": "2023-01-01T00:00:00Z",
         }
     )
-
 
 
 def clear_cut_to_clear_cut_response_schema(

@@ -37,7 +37,7 @@ def get_cities(db: Session) -> list[City]:
     return [marseille, paris]
 
 
-def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning,EcologicalZoning]:
+def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning, EcologicalZoning]:
     ecological_zonings = [
         EcologicalZoning(
             type="Natura2000",
@@ -51,4 +51,4 @@ def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning,EcologicalZon
     ]
     db.add_all(ecological_zonings)
     db.flush()
-    return (ecological_zonings[0], ecological_zonings[1]) 
+    return (ecological_zonings[0], ecological_zonings[1])

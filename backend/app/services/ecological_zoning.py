@@ -1,4 +1,4 @@
-from app.models import ClearCutEcologicalZoning, EcologicalZoning
+from app.models import EcologicalZoning
 from app.schemas.ecological_zoning import (
     EcologicalZoningSchema,
     EcologicalZoningResponseSchema,

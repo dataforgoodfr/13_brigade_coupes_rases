@@ -1,13 +1,11 @@
-from datetime import date, datetime
+from datetime import datetime
 from logging import getLogger
 from typing import Optional
 
-from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import CLEARCUT_STATUSES, ClearCutReport
 from app.schemas.clear_cut import ClearCutCreateSchema
-from app.schemas.ecological_zoning import EcologicalZoningSchema
 
 logger = getLogger(__name__)
 
@@ -63,5 +61,5 @@ def report_to_response_schema(report: ClearCutReport) -> ClearCutReportResponseS
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
         updated_at=report.updated_at,
         user_id=report.user_id and str(report.user_id),
-        city_id= str(report.city_id)
+        city_id=str(report.city_id),
     )

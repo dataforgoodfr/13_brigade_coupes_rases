@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header, Response, status
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.clear_cut import ClearCutCreateSchema, ClearCutResponseSchema
+from app.schemas.clear_cut import ClearCutResponseSchema
 from app.schemas.clear_cut_report import (
     CreateClearCutsReportCreateSchema,
     ClearCutReportPatchSchema,
@@ -30,9 +30,7 @@ def authenticate(x_imports_token: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.post(
-    "/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED
-)
+@router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
 def post_clearcut(
     response: Response,
     params: CreateClearCutsReportCreateSchema,
@@ -44,14 +42,13 @@ def post_clearcut(
     except ValueError as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
 
+
 @router.get("/", response_model=PaginationResponseSchema[ClearCutReportResponseSchema])
 def list_clearcuts_reports(
     db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
     logger.info(db)
-    return find_clearcuts_reports(
-        db, url="/api/v1/clear-cuts-reports", page=page, size=size
-    )
+    return find_clearcuts_reports(db, url="/api/v1/clear-cuts-reports", page=page, size=size)
 
 
 @router.patch("/{report_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
@@ -60,7 +57,6 @@ def update_existing_clearcut_report(
 ) -> ClearCutReportResponseSchema:
     logger.info(db)
     update_clear_cut_report(report_id, db, item)
-
 
 
 @router.get("/{report_id}", response_model=ClearCutReportResponseSchema)
@@ -83,4 +79,3 @@ def list_clearcuts_reports(
         page=page,
         size=size,
     )
-    

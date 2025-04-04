@@ -1,7 +1,5 @@
-from datetime import datetime
-from geoalchemy2 import WKTElement
 import pytest
-from app.models import City, Department, ClearCutReport, EcologicalZoning
+from app.models import City, Department, EcologicalZoning
 from common.clear_cut import new_clear_cut_report
 from common.user import new_user
 

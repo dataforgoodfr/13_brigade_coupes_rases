@@ -1,13 +1,11 @@
 from datetime import datetime, timedelta
 
-from geoalchemy2 import WKTElement
 from geoalchemy2.shape import from_shape
 from app.models import (
     SRID,
     ClearCut,
     ClearCutEcologicalZoning,
     ClearCutReport,
-    EcologicalZoning,
 )
 from shapely.geometry import Point, MultiPolygon
 

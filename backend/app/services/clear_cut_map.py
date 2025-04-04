@@ -1,9 +1,8 @@
 from typing import Optional
-from fastapi import HTTPException
 from geojson_pydantic import Point
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, case, and_, between
+from sqlalchemy import or_, func, case, and_
 from app.models import (
     SRID,
     City,
@@ -12,16 +11,7 @@ from app.models import (
     ClearCutReport,
     Department,
 )
-from app.schemas.clear_cut import ClearCutResponseSchema
-from app.schemas.clear_cut_report import (
-    CreateClearCutsReportCreateSchema,
-    ClearCutReportPatchSchema,
-    ClearCutReportResponseSchema,
-    report_to_response_schema,
-)
 from logging import getLogger
-from geoalchemy2.elements import WKTElement
-from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import (
     ST_Contains,
     ST_MakeEnvelope,
@@ -36,9 +26,6 @@ from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     row_to_report_preview_schema,
 )
-from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
-from app.services.ecological_zoning import find_or_add_ecological_zonings
-from fastapi import status
 
 logger = getLogger(__name__)
 
@@ -72,15 +59,13 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             func.min(ClearCut.observation_start_date).label("cut_start"),
             func.max(ClearCut.observation_end_date).label("cut_end"),
             func.max(ClearCut.updated_at).label("last_update"),
-            func.sum(
-                case((ClearCutEcologicalZoning.clear_cut_id == None, 0), else_=1)
-            ).label("ecological_zonings_count"),
+            func.sum(case((ClearCutEcologicalZoning.clear_cut_id == None, 0), else_=1)).label(
+                "ecological_zonings_count"
+            ),
             func.count(ClearCutEcologicalZoning.clear_cut_id).label(
                 "clear_cuts_ecological_zonings_count"
             ),
-            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
-                "average_location"
-            ),
+            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label("average_location"),
         )
         .join(
             ClearCutEcologicalZoning,
@@ -111,9 +96,7 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             == aggregated_cuts_in_boundary.c.clear_cuts_ecological_zonings_count
         )
     else:
-        reports = reports.filter(
-            aggregated_cuts_in_boundary.c.ecological_zonings_count == 0
-        )
+        reports = reports.filter(aggregated_cuts_in_boundary.c.ecological_zonings_count == 0)
     if len(filters.cut_years) > 0:
         cut_years_intervals = [
             and_(

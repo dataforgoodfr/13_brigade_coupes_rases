@@ -37,7 +37,12 @@ class TokenData(BaseModel):
     email: str | None = None
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/token",
+)
+optional_oauth2_schema = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/token", auto_error=False
+)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -64,6 +69,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+async def get_optional_current_user(
+    db: Session = db_session, token=Depends(optional_oauth2_schema)
+):
+    if token is None :
+        return None
+    return get_current_user(db, token)
 
 
 async def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
