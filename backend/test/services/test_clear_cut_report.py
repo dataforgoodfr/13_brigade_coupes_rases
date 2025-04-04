@@ -11,7 +11,7 @@ from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
 from app.models import ClearCut
 from shapely.geometry import Point as DbPoint, MultiPolygon as DbMultiPolygon
 
-from test.common.clear_cut import new_clear_cut_report
+from common.clear_cut import new_clear_cut_report
 
 
 def test_create_report_with_intersection(db):
