@@ -1,13 +1,13 @@
-from common.clear_cut import new_clear_cut
+from common.clear_cut import new_clear_cut_report
 
 
 def test_get_clearcuts_map(client, db):
-    clear_cut = new_clear_cut()
+    clear_cut = new_clear_cut_report()
     db.add(clear_cut)
     db.commit()
 
     response = client.get(
-        "/api/v1/clear-cuts-reports-map?swLat=47.49308072945064&swLng=-1.0766601562500002&neLat=49.79899569636492&neLng=4.051208496093751&cutYears=2025"
+        "/api/v1/clear-cuts-map?sw_lat=47.49308072945064&sw_lng=-1.0766601562500002&ne_lat=49.79899569636492&ne_lng=4.051208496093751&cut_years=2025"
     )
     assert response.status_code == 200
     data = response.json()

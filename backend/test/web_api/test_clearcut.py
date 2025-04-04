@@ -14,40 +14,39 @@ def test_endpoint_authentication(client: TestClient):
     ensure_authentication(client, "post", "/api/v1/clear-cuts-reports")
 
 
-def test_post_clearcut_success(client: TestClient):
-    clearcut_data = {
-        "cut_date": "2024-01-01",
+def test_post_report_success(client: TestClient):
+    report_data = {
         "slope_area_ratio_percentage": 15,
-        "area_hectare": 15,
-        "location": {"type": "Point", "coordinates": [2.3522, 48.8566]},
-        "boundary": {
-            "type": "MultiPolygon",
-            "coordinates": [
-                [
-                    [
-                        [2.3522, 48.8566],
-                        [2.3622, 48.8566],
-                        [2.3622, 48.8666],
-                        [2.3522, 48.8566],
-                    ]
-                ]
-            ],
-        },
-        "registries": [
+        "city_zip_code": "75056",
+        "clear_cuts": [
             {
-                "number": "0089",
-                "sheet": 1,
-                "section": "0H",
-                "zip_code": "13055",
-                "district_code": "123",
+                "observation_start_date": "2023-01-01T00:00:00Z",
+                "observation_end_date": "2023-12-31T00:00:00Z",
+                "area_hectare": 10,
+                "location": {"type": "Point", "coordinates": [2.3522, 48.8566]},
+                "boundary": {
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [
+                            [
+                                [2.3522, 48.8566],
+                                [2.3622, 48.8566],
+                                [2.3622, 48.8666],
+                                [2.3522, 48.8566],
+                            ]
+                        ]
+                    ],
+                },
+                "ecological_zonings": [
+                    {"type": "Natura2000", "code": "ABC", "name": "DEF", "area_hectare": 5},
+                ],
             }
         ],
-        "ecological_zonings": [{"type": "Natura2000", "code": "ABC", "name": "DEF"}],
     }
 
     response = client.post(
         "/api/v1/clear-cuts-reports",
-        json=clearcut_data,
+        json=report_data,
         headers={"x-imports-token": "test-token"},
     )
     print(response)
@@ -58,11 +57,15 @@ def test_post_clearcut_success(client: TestClient):
 
     print(data)
 
-    assert "id" in data
-    assert isinstance(data["cut_date"], str)
-    assert isinstance(data["slope_area_ratio_percentage"], float)
-    assert data["location"]["coordinates"] == [2.3522, 48.8566]
-    assert data["boundary"]["coordinates"] == [
+    assert data['id'] == location.split("/")[-1]
+    assert data["slope_area_ratio_percentage"] == 15
+
+    response = client.get(f'/api/v1/clear-cuts/{data["clear_cuts_ids"][0]}')
+    assert response.status_code == status.HTTP_200_OK
+    clear_cut_data = response.json()
+
+    assert clear_cut_data["location"]["coordinates"] == [2.3522, 48.8566]
+    assert clear_cut_data["boundary"]["coordinates"] == [
         [
             [
                 [2.3522, 48.8566],
@@ -74,7 +77,7 @@ def test_post_clearcut_success(client: TestClient):
     ]
 
 
-def test_post_clearcut_invalid_data(client: TestClient):
+def test_post_report_invalid_data(client: TestClient):
     invalid_data = {}
 
     response = client.post(
@@ -86,7 +89,7 @@ def test_post_clearcut_invalid_data(client: TestClient):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_clearcuts(client: TestClient):
+def test_get_reports(client: TestClient):
     response = client.get(
         "/api/v1/clear-cuts-reports",
     )
@@ -95,7 +98,7 @@ def test_get_clearcuts(client: TestClient):
     assert len(data["content"]) == 7
 
 
-def test_get_clearcut(client: TestClient):
+def test_get_report(client: TestClient):
     response = client.get(
         "/api/v1/clear-cuts-reports/1",
     )

@@ -33,26 +33,28 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
         .filter(ClearCut.id == id)
         .first()
     )
-    return report_to_response_schema(map_geo_clearcut(clearcut, boundary, location))
+    return clear_cut_to_clear_cut_response_schema(map_geo_clearcut(clearcut, boundary, location))
 
 
-def find_clearcuts_by_report(
-    db: Session, report_id: int, url: str, page: int = 0, size: int = 10
-) -> PaginationResponseSchema[ClearCutResponseSchema]:
-    clear_cuts = (
+def paginated_clear_cuts_query(db: Session, page: int = 0, size: int = 10):
+    return (
         db.query(
             ClearCut,
             ST_AsGeoJSON(ClearCut.boundary),
             ST_AsGeoJSON(ClearCut.location),
         )
-        .filter(ClearCut.report_id == report_id)
         .offset(page * size)
         .limit(size)
-        .all()
     )
-    clear_cuts_count = (
-        db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
-    )
+
+
+def clear_cuts_to_paginated_response(
+    clear_cuts: list[ClearCut],
+    clear_cuts_count: int,
+    url: str,
+    page: int,
+    size: int,
+):
     clear_cuts = map(
         lambda row: clear_cut_to_clear_cut_response_schema(
             map_geo_clearcut(row[0], row[1], row[2])
@@ -64,6 +66,32 @@ def find_clearcuts_by_report(
         metadata=PaginationMetadataSchema(
             page=page, size=size, total_count=clear_cuts_count, url=url
         ),
+    )
+
+
+def find_clear_cuts(
+    db: Session, url: str, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutResponseSchema]:
+    clear_cuts = paginated_clear_cuts_query(db, page, size).all()
+    clear_cuts_count = db.query(ClearCut.id).count()
+    return clear_cuts_to_paginated_response(
+        clear_cuts, clear_cuts_count, url, page, size
+    )
+
+
+def find_clearcuts_by_report(
+    db: Session, report_id: int, url: str, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutResponseSchema]:
+    clear_cuts = (
+        paginated_clear_cuts_query(db, page, size)
+        .filter(ClearCut.report_id == report_id)
+        .all()
+    )
+    clear_cuts_count = (
+        db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
+    )
+    return clear_cuts_to_paginated_response(
+        clear_cuts, clear_cuts_count, url, page, size
     )
 
 

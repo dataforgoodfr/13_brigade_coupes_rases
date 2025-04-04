@@ -93,7 +93,7 @@ def clear_cut_to_clear_cut_response_schema(
         boundary=MultiPolygon.model_validate_json(clear_cut.boundary),
         location=Point.model_validate_json(clear_cut.location),
         ecological_zonings_ids=[
-            str(ecological_zoning.id)
+            str(ecological_zoning.ecological_zoning_id)
             for ecological_zoning in clear_cut.ecological_zonings
         ],
         created_at=clear_cut.created_at,

@@ -1,8 +1,8 @@
 from datetime import datetime
 from geoalchemy2 import WKTElement
 import pytest
-from app.models import Department, ClearCutReport, EcologicalZoning, Registry
-from common.clear_cut import new_clear_cut
+from app.models import City, Department, ClearCutReport, EcologicalZoning
+from common.clear_cut import new_clear_cut_report
 from common.user import new_user
 
 
@@ -36,62 +36,44 @@ def test_department_creation(db):
 
 def test_associations(db):
     user = new_user()
-    registry = db.query(Registry).first()
     ecological_zoning = db.query(EcologicalZoning).first()
-    clear_cut = new_clear_cut(
-        status="validated",
-        registries=[registry],
-        ecological_zonings=[ecological_zoning],
+    city = db.query(City).first()
+    report = new_clear_cut_report(
+        status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
     )
 
-    user.departments.append(registry.city.department)
-    user.reports.append(clear_cut)
+    user.departments.append(city.department)
+    user.reports.append(report)
 
-    db.add_all([user, clear_cut])
+    db.add_all([user, report])
     db.commit()
 
-    assert registry.city.department in user.departments
-    assert clear_cut in user.reports
-    assert clear_cut.registries[0] == registry
-    assert user in registry.city.department.users
-    assert clear_cut in registry.clear_cuts
-    assert clear_cut in ecological_zoning.clear_cuts
+    assert city.department in user.departments
+    assert report in user.reports
+    assert user in city.department.users
+    assert report.clear_cuts[0].ecological_zonings[0] in ecological_zoning.clear_cuts
 
 
-def test_clear_cut_creation(db):
-    registry = db.query(Registry).first()
+def test_report_creation(db):
     ecological_zoning = db.query(EcologicalZoning).first()
-    clear_cut = ClearCutReport(
-        cut_date=datetime.now(),
-        slope_area_ratio_percentage=15.5,
-        location=WKTElement("POINT(48.8566 2.3522)"),
-        boundary=WKTElement(
-            "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
-        ),
-        status="to_validate",
-        ecological_zonings=[ecological_zoning],
-        registries=[registry],
+    city = db.query(City).first()
+    report = new_clear_cut_report(
+        status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
     )
-    db.add(clear_cut)
+    db.add(report)
     db.commit()
 
     with pytest.raises(ValueError) as exc_info:
-        ClearCutReport(
-            cut_date=datetime.now(),
-            slope_area_ratio_percentage=15.5,
-            location=WKTElement("POINT(48.8566 2.3522)"),
-            boundary=WKTElement(
-                "MultiPolygon(((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156)))"
-            ),
-            status="invalid_status",
+        new_clear_cut_report(
+            status="invalid_status", city_id=city.id, ecological_zoning_id=ecological_zoning.id
         )
     assert (
         str(exc_info.value)
         == "Status must be one of: to_validate, waiting_for_validation, legal_validated, validated, final_validated"
     )
 
-    assert clear_cut.id is not None
-    assert clear_cut.created_at is not None
+    assert report.id is not None
+    assert report.created_at is not None
 
 
 def test_ecological_zoning_create_without_duplicate(db):

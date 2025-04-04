@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -38,37 +39,33 @@ def get_clearcuts_map(
         description="North east longitude",
         openapi_examples={"default": {"value": 4.051208496093751}},
     ),
-    min_area_hectare: float = Query(
-        ...,
+    min_area_hectare: Optional[float] = Query(
+        None,
         description="Minimum area in hectare",
         openapi_examples={"default": {"value": 1.0}},
     ),
-    max_area_hectare: float = Query(
-        ...,
+    max_area_hectare: Optional[float] = Query(
+        None,
         description="Maximum area in hectare",
         openapi_examples={"default": {"value": 100.0}},
     ),
     cut_years: list[int] = Query(
-        ...,
-        default_factory=[],
+        [],
         description="List of cut years",
         openapi_examples={"default": {"value": [2024, 2025, 2026]}},
     ),
     statuses: list[str] = Query(
-        ...,
-        default_factory=[],
+        [],
         description="List of statuses",
         openapi_examples={"default": {"value": CLEARCUT_STATUSES}},
     ),
-    departments_ids: list[str] =Query(
-        ...,
-        default_factory=[],
+    departments_ids: list[str] = Query(
+        [],
         description="List of department ids",
         openapi_examples={"default": {"value": ["1"]}},
     ),
     has_ecological_zonings: bool = Query(
-        ...,
-        default_factory=False,
+        False,
         description="Has ecological zonings",
         openapi_examples={"default": {"value": False}},
     ),
@@ -87,7 +84,7 @@ def get_clearcuts_map(
                 cut_years=cut_years,
                 statuses=statuses,
                 departments_ids=departments_ids,
-                has_ecological_zonings=has_ecological_zonings
+                has_ecological_zonings=has_ecological_zonings,
             ),
         )
         print(f"CLEARCUTS : {clearcuts}")

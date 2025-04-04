@@ -1,4 +1,4 @@
-from app.models import EcologicalZoning
+from app.models import ClearCutEcologicalZoning, EcologicalZoning
 from app.schemas.ecological_zoning import (
     EcologicalZoningSchema,
     EcologicalZoningResponseSchema,
@@ -15,7 +15,7 @@ def find_ecological_zonings_by_codes(db: Session, codes: list[str]) -> list[Ecol
 
 def find_or_add_ecological_zonings(
     db: Session, ecological_zonings: list[EcologicalZoningSchema]
-) -> EcologicalZoning:
+) -> list[EcologicalZoning]:
     found_ecological_zonings = find_ecological_zonings_by_codes(
         db, codes=[ecological_zoning.code for ecological_zoning in ecological_zonings]
     )

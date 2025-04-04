@@ -3,7 +3,7 @@ from geojson_pydantic import Point
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models import SRID, City, ClearCut, ClearCutReport
+from app.models import SRID, City, ClearCut, ClearCutEcologicalZoning, ClearCutReport
 from app.schemas.clear_cut import ClearCutResponseSchema
 from app.schemas.clear_cut_report import (
     CreateClearCutsReportCreateSchema,
@@ -49,7 +49,7 @@ def create_clear_cut_report(
         raise ValueError(
             f"New clearcut boundary intersects with existing clearcut ID {intersecting_clearcut.id}"
         )
-    city = get_city_by_zip_code( db,report.city_zip_code)
+    city = get_city_by_zip_code(db, report.city_zip_code)
     db_item = ClearCutReport(
         city=city,
         clear_cuts=[
@@ -59,9 +59,19 @@ def create_clear_cut_report(
                 observation_start_date=clear_cut.observation_start_date,
                 observation_end_date=clear_cut.observation_end_date,
                 area_hectare=clear_cut.area_hectare,
-                ecological_zonings=find_or_add_ecological_zonings(
-                    db, clear_cut.ecological_zonings
-                ),
+                ecological_zonings=[
+                    ClearCutEcologicalZoning(
+                        ecological_zoning_id=zoning.id,
+                        area_hectare=next(
+                            z
+                            for z in clear_cut.ecological_zonings
+                            if z.code == zoning.code
+                        ).area_hectare,
+                    )
+                    for zoning in find_or_add_ecological_zonings(
+                        db, clear_cut.ecological_zonings
+                    )
+                ],
             )
             for clear_cut in report.clear_cuts
         ],
@@ -115,8 +125,5 @@ def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
     return report
 
 
-
-
 def get_report_response_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
     return report_to_response_schema(get_report_by_id(db, id))
-
