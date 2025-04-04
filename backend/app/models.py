@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey, Float
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Table, ForeignKey, Float
 from geoalchemy2 import Geometry, functions
 from app.database import Base
 from datetime import datetime
@@ -142,9 +142,94 @@ class ClearCutReport(Base):
     city: Mapped["City"] = relationship(back_populates="clear_cuts_reports", lazy="joined")
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="reports")
+    clear_cut_report = relationship("ClearCutReport", uselist=False)
+    clear_cut_report_pictures = relationship("ClearCutPicture")
 
     @validates("status")
     def validate_status(self, key, value):
         if value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
+
+
+CLEAR_CUT_PREVIEW_COLUMNS = [
+    ClearCut.location,
+    ClearCut.boundary,
+    ClearCut.slope_percentage,
+    ClearCut.department_id,
+    ClearCut.created_at,
+]
+
+
+class ClearCutReport(Base):
+    __tablename__ = "clear_cut_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
+
+    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
+    editor_id = Column(Integer, index=True, nullable=True)
+    report_updated_at = Column(DateTime, nullable=True)
+
+    # Ground datas
+    inspection_date = Column(DateTime, nullable=True)
+    weather = Column(String, index=True)
+    forest_description = Column(String, index=True)
+    remainingTrees = Column(Boolean)
+    species = Column(String, index=True)
+    workSignVisible = Column(Boolean)
+    waterzone_description = Column(String)
+    protected_zone_description = Column(String)
+    soil_state = Column(String)
+
+    # Ecological informations
+    ecological_zone = Column(Boolean)
+    ecological_zone_type = Column(String)
+    nearby_zone = Column(String)
+    nearby_zone_type = Column(String)
+    protected_species = Column(String)
+    protected_habitats = Column(String)
+    ddt_request = Column(Boolean)
+    ddt_request_owner = Column(String)
+
+    # Stakeholders
+    compagny = Column(String)
+    subcontractor = Column(String)
+    landlord = Column(String)
+
+    # Reglementation
+    pefc_fsc_certified = Column(Boolean, nullable=True)
+    over_20_ha = Column(Boolean, nullable=True)
+    psg_required_plot = Column(Boolean, nullable=True)
+
+    # Legal strategy
+    relevant_for_pefc_complaint = Column(Boolean, nullable=True)
+    relevant_for_rediii_complaint = Column(Boolean, nullable=True)
+    relevant_for_ofb_complaint = Column(Boolean, nullable=True)
+    relevant_for_alert_cnpf_ddt_srgs = Column(Boolean, nullable=True)
+    relevant_for_alert_cnpf_ddt_psg_thresholds = Column(Boolean, nullable=True)
+    relevant_for_psg_request = Column(Boolean, nullable=True)
+    relevant_for_psg_request = Column(Boolean, nullable=True)
+    request_engaged = Column(String, nullable=True)
+
+    # Miscellaneous
+    other = Column(String)
+
+
+class ClearCutPicture(Base):
+    __tablename__ = "clear_cut_pictures"
+
+    TAGS = ["plantation", "workSign", "clearcut", "wooden_logs", "access_ways", None]
+
+    id = Column(Integer, primary_key=True, index=True)
+    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
+    link = Column(String)
+    tag = Column(String, index=True)
+
+    @validates("tag")
+    def validate_status(self, key, value):
+        if value not in ClearCutPicture.TAGS:
+            raise ValueError(f"tag must be one of: {', '.join(ClearCut.STATUSES)}")
+        return value
+
+    # Tags : plantation, workSign, clearcut, wooden_logs, access_ways
+    # clear_cut_report = relationship("ClearCutReport", back_populates="clear_cut_report_pictures")
