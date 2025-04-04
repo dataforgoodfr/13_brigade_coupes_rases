@@ -6,8 +6,10 @@ from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import CLEARCUT_STATUSES, ClearCut, ClearCutReport
-from app.schemas.ecological_zoning import CreateEcologicalZoningSchema, EcologicalZoningSchema
-from app.schemas.registry import CreateRegistrySchema
+from app.schemas.ecological_zoning import (
+    CreateEcologicalZoningSchema,
+    EcologicalZoningSchema,
+)
 
 
 class ClearCutBaseSchema(BaseModel):
@@ -52,16 +54,33 @@ class ClearCutBaseSchema(BaseModel):
 
 class ClearCutCreateSchema(ClearCutBaseSchema):
     ecological_zonings: list[CreateEcologicalZoningSchema] = Field(default=[])
-    registries: list[CreateRegistrySchema]
-
 
 class ClearCutResponseSchema(ClearCutBaseSchema):
-    id: str
-    report_id: str
-    ecological_zonings_ids: list[str]
-    created_at: datetime
-    updated_at: datetime
-    registries_ids: list[str]
+    id: str = Field(
+        json_schema_extra={
+            "example": "1",
+        }
+    )
+    report_id: str = Field(
+        json_schema_extra={
+            "example": "1",
+        }
+    )   
+    ecological_zonings_ids: list[str] = Field(
+        json_schema_extra={
+            "example": "[1,2,3]",
+        }
+    )
+    created_at: datetime = Field(
+        json_schema_extra={
+            "example": "2023-01-01T00:00:00Z",
+        }
+    )
+    updated_at: datetime = Field(
+        json_schema_extra={
+            "example": "2023-01-01T00:00:00Z",
+        }
+    )
 
 
 
@@ -77,7 +96,6 @@ def clear_cut_to_clear_cut_response_schema(
             str(ecological_zoning.id)
             for ecological_zoning in clear_cut.ecological_zonings
         ],
-        registries_ids=[str(registry.id) for registry in clear_cut.registries],
         created_at=clear_cut.created_at,
         observation_start_date=clear_cut.observation_start_date,
         observation_end_date=clear_cut.observation_end_date,

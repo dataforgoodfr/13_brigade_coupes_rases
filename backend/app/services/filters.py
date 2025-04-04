@@ -1,19 +1,14 @@
 from typing import Optional
 from sqlalchemy import extract
-from app.models import City, ClearCutReport, Department, Registry, User
-from app.schemas.filters import FiltersResponseSchema
+from app.models import City, ClearCutReport, Department, User
 from sqlalchemy.orm import Session
 
 from app.schemas.tag import TAGS
 
 
 def build_filters(db: Session, connected_user: Optional[User]) -> FiltersResponseSchema:
-    cut_years = (
-        db.query(extract("year", ClearCutReport.cut_date))
-        .distinct()
-        .all()
-    )
-    departments = db.query(Department.id).join(City).join(Registry).join(ClearCutReport).all()
+    cut_years = db.query(extract("year", ClearCutReport.cut_date)).distinct().all()
+    departments = db.query(Department.id).join(City).join(ClearCutReport).all()
     statuses = db.query(ClearCutReport.status).distinct().all()
     # if connected_user is not None and len(connected_user.departments)>0 :
     # departments = [any(connected_user) for row in departments]

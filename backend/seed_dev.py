@@ -3,7 +3,7 @@ import os
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point, MultiPolygon
 from app.database import Base, SessionLocal
-from app.models import ClearCut, User, ClearCutReport
+from app.models import ClearCut, ClearCutEcologicalZoning, User, ClearCutReport
 from sqlalchemy import text
 import traceback
 
@@ -11,7 +11,7 @@ from app.services.user_auth import get_password_hash
 from common_seed import (
     seed_cities_departments,
     seed_ecological_zonings,
-    seed_registries,
+    get_cities,
 )
 
 SRID = 4326
@@ -38,8 +38,8 @@ def seed_database():
     try:
         wipe_database()
         seed_cities_departments(db)
-        [marseille, paris] = seed_registries(db)
-        seed_ecological_zonings(db)
+        [marseille, paris] = get_cities(db)
+        [natura1, natura2] = seed_ecological_zonings(db)
         admin = User(
             firstname="Crysta",
             lastname="Faerie",
@@ -65,6 +65,7 @@ def seed_database():
 
         clear_cuts = [
             ClearCutReport(
+                city=paris,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -95,7 +96,14 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=paris.registries,
+                        ecological_zonings=[
+                            ClearCutEcologicalZoning(
+                                ecological_zoning_id=natura1.id, area_hectare=10
+                            ),
+                            ClearCutEcologicalZoning(
+                                ecological_zoning_id=natura2.id, area_hectare=20
+                            ),
+                        ],
                     ),
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -126,7 +134,11 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=paris.registries,
+                        ecological_zonings=[
+                            ClearCutEcologicalZoning(
+                                ecological_zoning_id=natura1.id, area_hectare=10
+                            ),
+                        ],
                     ),
                 ],
                 slope_area_ratio_percentage=15.5,
@@ -134,6 +146,7 @@ def seed_database():
                 user=volunteer,
             ),
             ClearCutReport(
+                city=paris,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -161,14 +174,43 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=paris.registries,
-                    )
+                        ecological_zonings=[],
+                    ),
+                    ClearCut(
+                        observation_start_date=datetime.now() - timedelta(days=15),
+                        observation_end_date=datetime.now() - timedelta(days=2),
+                        area_hectare=13,
+                        location=from_shape(Point(2.381101, 48.839001), SRID),
+                        boundary=from_shape(
+                            MultiPolygon(
+                                [
+                                    (
+                                        [
+                                            (2.385342, 48.842582),
+                                            (2.386072, 48.842286),
+                                            (2.386823, 48.841277),
+                                            (2.386898, 48.840677),
+                                            (2.386308, 48.84012),
+                                            (2.385921, 48.840134),
+                                            (2.385331, 48.840748),
+                                            (2.385514, 48.84175),
+                                            (2.385342, 48.842554),
+                                            (2.385342, 48.842582),
+                                        ],
+                                    )
+                                ]
+                            ),
+                            srid=SRID,
+                        ),
+                        ecological_zonings=[],
+                    ),
                 ],
                 slope_area_ratio_percentage=8.3,
                 status="validated",
                 user=admin,
             ),
             ClearCutReport(
+                city=paris,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -195,7 +237,6 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=marseille.registries,
                     )
                 ],
                 slope_area_ratio_percentage=12.7,
@@ -203,6 +244,7 @@ def seed_database():
                 user=admin,
             ),
             ClearCutReport(
+                city=marseille,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=15),
@@ -229,7 +271,6 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=marseille.registries,
                     )
                 ],
                 slope_area_ratio_percentage=9.2,
@@ -237,6 +278,7 @@ def seed_database():
                 user=admin,
             ),
             ClearCutReport(
+                city=marseille,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -263,7 +305,6 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=marseille.registries,
                     )
                 ],
                 slope_area_ratio_percentage=7.5,
@@ -271,6 +312,7 @@ def seed_database():
                 user=volunteer,
             ),
             ClearCutReport(
+                city=marseille,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=30),
@@ -297,7 +339,6 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=marseille.registries,
                     )
                 ],
                 slope_area_ratio_percentage=14.3,
@@ -305,6 +346,7 @@ def seed_database():
                 user=admin,
             ),
             ClearCutReport(
+                city=marseille,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=2),
@@ -331,7 +373,6 @@ def seed_database():
                             ),
                             srid=SRID,
                         ),
-                        registries=marseille.registries,
                     )
                 ],
                 slope_area_ratio_percentage=10.8,

@@ -1,7 +1,7 @@
 import csv
 from sqlalchemy.orm import Session
 
-from app.models import City, Department, EcologicalZoning, Registry
+from app.models import City, Department, EcologicalZoning
 
 
 def seed_cities_departments(db: Session):
@@ -30,30 +30,14 @@ def seed_cities_departments(db: Session):
             return departments
 
 
-def seed_registries(db: Session) -> list[Registry]:
+def get_cities(db: Session) -> list[City]:
     marseille = db.query(City).filter(City.zip_code == "13055").first()
-    marseille.registries.append(
-        Registry(
-            number="0089",
-            sheet=1,
-            section="0H",
-            district_code="208",
-        )
-    )
     paris = db.query(City).filter(City.zip_code == "75056").first()
-    paris.registries.append(
-        Registry(
-            number="0008",
-            sheet=1,
-            section="BT",
-            district_code="110",
-        )
-    )
-    db.flush()
+
     return [marseille, paris]
 
 
-def seed_ecological_zonings(db: Session) -> list[EcologicalZoning]:
+def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning,EcologicalZoning]:
     ecological_zonings = [
         EcologicalZoning(
             type="Natura2000",
@@ -67,4 +51,4 @@ def seed_ecological_zonings(db: Session) -> list[EcologicalZoning]:
     ]
     db.add_all(ecological_zonings)
     db.flush()
-    return ecological_zonings
+    return (ecological_zonings[0], ecological_zonings[1]) 

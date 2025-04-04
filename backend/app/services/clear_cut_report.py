@@ -3,7 +3,7 @@ from geojson_pydantic import Point
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models import SRID, ClearCut, ClearCutReport
+from app.models import SRID, City, ClearCut, ClearCutReport
 from app.schemas.clear_cut import ClearCutResponseSchema
 from app.schemas.clear_cut_report import (
     CreateClearCutsReportCreateSchema,
@@ -18,11 +18,11 @@ from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID, ST_A
 
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
-    clearcut_to_preview_schema,
+    row_to_report_preview_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
-from app.services.registries import find_or_add_registries
 from fastapi import status
 
 logger = getLogger(__name__)
@@ -45,13 +45,13 @@ def create_clear_cut_report(
         )
         .first()
     )
-
     if intersecting_clearcut:
         raise ValueError(
             f"New clearcut boundary intersects with existing clearcut ID {intersecting_clearcut.id}"
         )
-
+    city = get_city_by_zip_code( db,report.city_zip_code)
     db_item = ClearCutReport(
+        city=city,
         clear_cuts=[
             ClearCut(
                 location=WKTElement(clear_cut.location.wkt),
@@ -62,7 +62,6 @@ def create_clear_cut_report(
                 ecological_zonings=find_or_add_ecological_zonings(
                     db, clear_cut.ecological_zonings
                 ),
-                registries=find_or_add_registries(db, clear_cut.registries),
             )
             for clear_cut in report.clear_cuts
         ],

@@ -10,36 +10,80 @@ from app.schemas.tag import TAGS
 logger = getLogger(__name__)
 
 
-class ClearCutReportPreviewSchema(BaseModel):
+class ClearCutPreviewSchema(BaseModel):
     id: str = Field(json_schema_extra={"example": "1"})
     location: Point
     boundary: MultiPolygon
-    tags_ids: list[str] = Field(
+    observation_start_date: datetime.date = Field(
+        json_schema_extra={"example": "2023-10-10"},
+    )
+    observation_end_date: datetime.date = Field(
+        json_schema_extra={"example": "2023-10-01"},
+    )
+    area_hectare: float = Field(
+        json_schema_extra={"example": 10.0},
+    )
+    ecological_zoning_ids: list[str] = Field(
         json_schema_extra={"example": "[1,2,3]"},
     )
-    status: str = Field(
-        json_schema_extra={"example": "validated"},
-    )
-    ecological_zoning_ids: list[str]
-    cities: set[str]
+
     model_config = ConfigDict(from_attributes=True)
 
 
-def clearcut_to_preview_schema(report: ClearCutReport) -> ClearCutReportPreviewSchema:
+class ClearCutReportPreviewSchema(BaseModel):
+    id: str = Field(json_schema_extra={"example": "1"})
+    clear_cuts: list[ClearCutPreviewSchema]
+    tags_ids: list[str] = Field(
+        json_schema_extra={"example": "[1,2,3]"},
+    )
+    average_location: Point
+    status: str = Field(
+        json_schema_extra={"example": "validated"},
+    )
+    city: str = Field(
+        json_schema_extra={"example": "Paris"},
+    )
+    model_config = ConfigDict(from_attributes=True)
+
+
+def row_to_report_preview_schema(
+    row: tuple[Point, ClearCutReport],
+) -> ClearCutReportPreviewSchema:
+    [
+        point,
+        report,
+        report_id,
+        area_hectare,
+        observation_start_date,
+        observation_end_date,
+        last_update,
+        ecological_zonings_count,
+        clear_cuts_ecological_zoning_count,
+        average_location,
+    ] = row
     return ClearCutReportPreviewSchema(
         id=str(report.id),
-        boundary=MultiPolygon.model_validate_json(report.boundary),
-        location=Point.model_validate_json(report.location),
+        clear_cuts=[
+            ClearCutPreviewSchema(
+                id=str(clear_cut.id),
+                area_hectare=clear_cut.area_hectare,
+                boundary=MultiPolygon.model_validate_json(clear_cut.boundary_json),
+                observation_start_date=clear_cut.observation_start_date.date(),
+                observation_end_date=clear_cut.observation_end_date.date(),
+                ecological_zoning_ids=[
+                    str(ecological_zoning.ecological_zoning_id)
+                    for ecological_zoning in clear_cut.ecological_zonings
+                ],
+                location=Point.model_validate_json(clear_cut.location_json),
+            )
+            for clear_cut in report.clear_cuts
+        ],
+        average_location=Point.model_validate_json(point),
         tags_ids=[tag for tag in TAGS],
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
-        area_hectare=report.area_hectare,
         created_at=report.created_at,
-        cities={registry.city.name for registry in report.registries},
-        cut_date=report.cut_date.date(),
-        ecological_zoning_ids=[
-            str(ecological_zoning.id) for ecological_zoning in report.ecological_zonings
-        ],
+        city=report.city.name,
     )
 
 

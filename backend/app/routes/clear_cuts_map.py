@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
+from app.models import CLEARCUT_STATUSES
 from app.schemas.clear_cut_map import ClearCutMapResponseSchema
 from app.services.clear_cut_map import (
-    GeoBounds,
+    Filters,
     build_clearcuts_map,
 )
 
@@ -17,37 +18,76 @@ router = APIRouter(prefix="/api/v1/clear-cuts-map", tags=["Clearcut map"])
 
 @router.get("/", response_model=ClearCutMapResponseSchema)
 def get_clearcuts_map(
-    swLat: float = Query(
+    sw_lat: float = Query(
         ...,
         description="Sout west latitude",
-        openapi_examples={"paris": {"value": 47.49308072945064}},
+        openapi_examples={"default": {"value": 47.49308072945064}},
     ),
-    swLng: float = Query(
+    sw_lng: float = Query(
         ...,
         description="Sout west longitude",
-        openapi_examples={"paris": {"value": -1.0766601562500002}},
+        openapi_examples={"default": {"value": -1.0766601562500002}},
     ),
-    neLat: float = Query(
+    ne_lat: float = Query(
         ...,
         description="North east latitude",
-        openapi_examples={"paris": {"value": 49.79899569636492}},
+        openapi_examples={"default": {"value": 49.79899569636492}},
     ),
-    neLng: float = Query(
+    ne_lng: float = Query(
         ...,
         description="North east longitude",
-        openapi_examples={"paris": {"value": 4.051208496093751}},
+        openapi_examples={"default": {"value": 4.051208496093751}},
+    ),
+    min_area_hectare: float = Query(
+        ...,
+        description="Minimum area in hectare",
+        openapi_examples={"default": {"value": 1.0}},
+    ),
+    max_area_hectare: float = Query(
+        ...,
+        description="Maximum area in hectare",
+        openapi_examples={"default": {"value": 100.0}},
+    ),
+    cut_years: list[int] = Query(
+        ...,
+        default_factory=[],
+        description="List of cut years",
+        openapi_examples={"default": {"value": [2024, 2025, 2026]}},
+    ),
+    statuses: list[str] = Query(
+        ...,
+        default_factory=[],
+        description="List of statuses",
+        openapi_examples={"default": {"value": CLEARCUT_STATUSES}},
+    ),
+    departments_ids: list[str] =Query(
+        ...,
+        default_factory=[],
+        description="List of department ids",
+        openapi_examples={"default": {"value": ["1"]}},
+    ),
+    has_ecological_zonings: bool = Query(
+        ...,
+        default_factory=False,
+        description="Has ecological zonings",
+        openapi_examples={"default": {"value": False}},
     ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
-        print("GET CLEARCUTS")
         clearcuts = build_clearcuts_map(
             db,
-            GeoBounds(
-                south_west_latitude=swLat,
-                south_west_longitude=swLng,
-                north_east_latitude=neLat,
-                north_east_longitude=neLng,
+            Filters(
+                south_west_latitude=sw_lat,
+                south_west_longitude=sw_lng,
+                north_east_latitude=ne_lat,
+                north_east_longitude=ne_lng,
+                min_area_hectare=min_area_hectare,
+                max_area_hectare=max_area_hectare,
+                cut_years=cut_years,
+                statuses=statuses,
+                departments_ids=departments_ids,
+                has_ecological_zonings=has_ecological_zonings
             ),
         )
         print(f"CLEARCUTS : {clearcuts}")

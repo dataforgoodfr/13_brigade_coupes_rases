@@ -1,13 +1,12 @@
 from datetime import datetime
 
 from geoalchemy2 import WKTElement
-from app.models import ClearCutReport, EcologicalZoning, Registry
+from app.models import ClearCutReport, EcologicalZoning
 
 
 def new_clear_cut(
     status: str = "to_validate",
-    registries: list[Registry] = None,
-    ecological_zonings: list[EcologicalZoning] = None,
+    city_id: int = 31482
 ):
     return ClearCutReport(
         cut_date=datetime.now(),
@@ -16,7 +15,6 @@ def new_clear_cut(
         boundary=WKTElement(
             "POLYGON((2.2241 48.8156, 2.4699 48.8156, 2.4699 48.9021, 2.2241 48.9021, 2.2241 48.8156))"
         ),
-        registries=[] if registries is None else registries,
-        ecological_zonings=[] if ecological_zonings is None else ecological_zonings,
+        city_id=city_id,
         status=status,
     )
