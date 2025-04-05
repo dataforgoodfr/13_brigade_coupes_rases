@@ -45,6 +45,7 @@ jobs:
           pip install poetry
       - name: Install development dependencies
         run: make install-dev-dependencies
+        working-directory: backend
         
       - name: Setup and seed database
         working-directory: backend
