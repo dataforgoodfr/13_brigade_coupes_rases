@@ -114,7 +114,7 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             aggregated_cuts_in_boundary.c.ecological_zonings_count
             == aggregated_cuts_in_boundary.c.clear_cuts_ecological_zonings_count
         )
-    elif not filters.has_ecological_zonings:
+    elif filters.has_ecological_zonings is not None:
         reports = reports.filter(aggregated_cuts_in_boundary.c.ecological_zonings_count == 0)
     if len(filters.cut_years) > 0:
         cut_years_intervals = [
