@@ -27,9 +27,12 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 	const { map } = useMapInstance();
 	const { formatDate } = useIntl();
 	useEffect(() => {
-		if (map && value?.location.coordinates) {
+		if (map && value?.average_location.coordinates) {
 			map.flyTo(
-				[value.location.coordinates[1], value.location.coordinates[0]],
+				[
+					value.average_location.coordinates[1],
+					value.average_location.coordinates[0],
+				],
 				10,
 				{ duration: 1 },
 			);
@@ -43,7 +46,7 @@ export function AsideForm({ clearCuttingId }: AsideFormProps) {
 					<Link to="/clear-cuttings">
 						<X size={40} />
 					</Link>
-					<h1 className="ml-6">{`${value.cities.map((city) => city.toLocaleUpperCase()).join(",")} - ${formatDate(value.cut_date, {})}`}</h1>
+					<h1 className="ml-6">{`${value.city.toLocaleUpperCase()} - ${formatDate(value.last_cut_date, {})}`}</h1>
 				</div>
 				<div className="p-2 flex flex-col flex-grow overflow-auto">
 					<Accordion.Root type="multiple" className="grow">

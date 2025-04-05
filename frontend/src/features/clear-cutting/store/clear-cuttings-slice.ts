@@ -13,73 +13,72 @@ import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
-	type ClearCutting,
-	type ClearCuttingPreview,
+	type ClearCutReport,
+	type ClearCutReportResponse,
 	type ClearCuttings,
-	clearCuttingBaseResponseSchema,
+	clearCutReportResponseSchema,
 	clearCuttingsResponseSchema,
 } from "./clear-cuttings";
 
-export const getClearCuttingThunk = createAppAsyncThunk<ClearCutting, string>(
+const mapReport = (
+	state: RootState,
+	report: ClearCutReportResponse,
+): ClearCutReport => ({
+	...report,
+	tags: selectTagsByIds(state, report.tags_ids),
+	clear_cuts: report.clear_cuts.map((cut) => ({
+		...cut,
+		ecologicalZonings: selectEcologicalZoningByIds(
+			state,
+			cut.ecological_zoning_ids,
+		),
+	})),
+});
+export const getClearCuttingThunk = createAppAsyncThunk<ClearCutReport, string>(
 	"getClearCutting",
 	async (id, { getState, extra: { api } }) => {
-		const result = await api().get(`api/v1/clearcuts/reports/${id}`).json();
-		const clearCutting = clearCuttingBaseResponseSchema.parse(result);
+		const result = await api().get(`api/v1/clear-cuts-map/${id}`).json();
+		const report = clearCutReportResponseSchema.parse(result);
 		const state = getState();
-		return {
-			...clearCutting,
-			ecologicalZonings: selectEcologicalZoningByIds(
-				state,
-				clearCutting.ecological_zoning_ids,
-			),
-			tags: selectTagsByIds(state, clearCutting.tags_ids),
-		};
+		return mapReport(state, report);
 	},
 );
 const getClearCuttingsThunk = createAppAsyncThunk<
 	ClearCuttings,
 	FiltersRequest
 >("getClearCuttings", async (filters, { getState, extra: { api } }) => {
+	const searchParams = new URLSearchParams();
+	for (const filter in filters) {
+		const value = filters[filter as keyof FiltersRequest];
+		if (filter === "geoBounds") {
+			const geoBounds = filters[filter] as Bounds;
+			searchParams.append("sw_lat", geoBounds.sw.lat.toString());
+			searchParams.append("sw_lng", geoBounds.sw.lng.toString());
+			searchParams.append("ne_lat", geoBounds.ne.lat.toString());
+			searchParams.append("ne_lng", geoBounds.ne.lng.toString());
+		} else if (Array.isArray(value)) {
+			for (const v of value) {
+				searchParams.append(filter, v.toString());
+			}
+		} else if (value !== undefined) {
+			searchParams.append(filter, JSON.stringify(value));
+		}
+	}
 	const result = await api()
-		.get("api/v1/clearcuts-map", {
-			searchParams: new URLSearchParams(
-				Object.entries(filters).reduce(
-					(acc, [key, value]) => {
-						if (key === "geoBounds") {
-							const geoBounds = value as Bounds;
-							acc.swLat = geoBounds.sw.lat.toString();
-							acc.swLng = geoBounds.sw.lng.toString();
-							acc.neLat = geoBounds.ne.lat.toString();
-							acc.neLng = geoBounds.ne.lng.toString();
-						} else if (Array.isArray(value)) {
-							if (value.length > 0) {
-								acc[key] = value.join(",");
-							}
-						} else {
-							acc[key] = JSON.stringify(value);
-						}
-						return acc;
-					},
-					{} as Record<string, string>,
-				),
-			),
+		.get("api/v1/clear-cuts-map", {
+			searchParams,
 		})
 		.json();
 	const clearCuttings = clearCuttingsResponseSchema.parse(result);
 	const state = getState();
-	const clearCuttingPreviews = clearCuttings.previews.map((preview) => ({
-		...preview,
-		tags: selectTagsByIds(state, preview.tags_ids),
-		ecologicalZonings: selectEcologicalZoningByIds(
-			state,
-			preview.ecological_zoning_ids,
-		),
-	})) satisfies ClearCuttingPreview[];
-	return { ...clearCuttings, previews: clearCuttingPreviews };
+	const previews = clearCuttings.previews.map((report) =>
+		mapReport(state, report),
+	) satisfies ClearCutReport[];
+	return { ...clearCuttings, previews };
 });
 type State = {
 	clearCuttings: RequestedContent<ClearCuttings>;
-	detail: RequestedContent<ClearCutting>;
+	detail: RequestedContent<ClearCutReport>;
 };
 const initialState: State = {
 	clearCuttings: { status: "idle" },

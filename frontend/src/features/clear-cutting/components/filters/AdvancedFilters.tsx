@@ -6,10 +6,10 @@ import {
 	selectAreaPresetsHectare,
 	selectCutYears,
 	selectDepartments,
+	selectEcologicalZoning,
+	selectExcessiveSlop,
 	selectFavorite,
 	selectStatuses,
-	selectecological_zoning,
-	selectexcessive_slop,
 } from "@/features/clear-cutting/store/filters.slice";
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -78,9 +78,9 @@ export function AdvancedFilters({ className }: Props) {
 		(status) => <StatusWithLabel status={status.item} />,
 		selectableItemToString,
 	);
-	const excessive_slop = useAppSelector(selectexcessive_slop);
+	const excessive_slop = useAppSelector(selectExcessiveSlop);
 	const favorite = useAppSelector(selectFavorite);
-	const ecological_zoning = useAppSelector(selectecological_zoning);
+	const ecological_zoning = useAppSelector(selectEcologicalZoning);
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());
@@ -156,7 +156,7 @@ export function AdvancedFilters({ className }: Props) {
 						id={ECOLOGICAL_ZONING.id}
 						checked={ecological_zoning}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setecological_zoning(isChecked))
+							dispatch(filtersSlice.actions.setHasEcologicalZoning(isChecked))
 						}
 					/>
 				</div>
@@ -166,7 +166,7 @@ export function AdvancedFilters({ className }: Props) {
 						id={EXCESSIVE_SLOP.id}
 						checked={excessive_slop}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setexcessive_slop(isChecked))
+							dispatch(filtersSlice.actions.setExcessiveSlop(isChecked))
 						}
 					/>
 				</div>

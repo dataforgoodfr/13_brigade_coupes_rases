@@ -66,6 +66,7 @@ def seed_database():
         clear_cuts = [
             ClearCutReport(
                 city=paris,
+                slope_area_ratio_percentage=10.5,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -141,12 +142,12 @@ def seed_database():
                         ],
                     ),
                 ],
-                slope_area_ratio_percentage=15.5,
                 status="to_validate",
                 user=volunteer,
             ),
             ClearCutReport(
                 city=paris,
+                slope_area_ratio_percentage=10.5,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -205,12 +206,12 @@ def seed_database():
                         ecological_zonings=[],
                     ),
                 ],
-                slope_area_ratio_percentage=8.3,
                 status="validated",
                 user=admin,
             ),
             ClearCutReport(
                 city=paris,
+                slope_area_ratio_percentage=10.5,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -239,12 +240,12 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=12.7,
                 status="validated",
                 user=admin,
             ),
             ClearCutReport(
                 city=marseille,
+                slope_area_ratio_percentage=10.5,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=15),
@@ -273,12 +274,12 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=9.2,
                 status="validated",
                 user=admin,
             ),
             ClearCutReport(
                 city=marseille,
+                slope_area_ratio_percentage=10.5,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -307,7 +308,6 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=7.5,
                 status="to_validate",
                 user=volunteer,
             ),

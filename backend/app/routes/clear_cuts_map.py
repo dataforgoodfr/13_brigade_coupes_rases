@@ -6,15 +6,29 @@ from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.models import CLEARCUT_STATUSES
-from app.schemas.clear_cut_map import ClearCutMapResponseSchema
+from app.schemas.clear_cut_map import (
+    ClearCutMapResponseSchema,
+    ClearCutReportPreviewSchema,
+)
 from app.services.clear_cut_map import (
     Filters,
     build_clearcuts_map,
+    get_report_preview_by_id,
 )
 
 logger = getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/clear-cuts-map", tags=["Clearcut map"])
+
+
+@router.get("/{report_id}", response_model=ClearCutReportPreviewSchema)
+def get_clearcuts_report_by_id(
+    report_id: int, db: Session = db_session
+) -> ClearCutReportPreviewSchema:
+    try:
+        return get_report_preview_by_id(db, report_id=report_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/", response_model=ClearCutMapResponseSchema)
@@ -64,8 +78,8 @@ def get_clearcuts_map(
         description="List of department ids",
         openapi_examples={"default": {"value": ["1"]}},
     ),
-    has_ecological_zonings: bool = Query(
-        False,
+    has_ecological_zonings: Optional[bool] = Query(
+        None,
         description="Has ecological zonings",
         openapi_examples={"default": {"value": False}},
     ),

@@ -8,8 +8,8 @@ describe("Clear cutting report", () => {
 	it("should display title", async () => {
 		server.use(
 			mockClearCutting({
-				cities: ["Paris"],
-				cut_date: "2025-03-19",
+				city: "Paris",
+				last_cut_date: "2025-03-19",
 			}),
 		);
 		renderApp({

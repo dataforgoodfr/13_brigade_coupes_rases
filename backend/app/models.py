@@ -133,7 +133,7 @@ class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
     id = Column(Integer, primary_key=True, index=True)
-    slope_area_ratio_percentage = Column(Float, index=True)
+    slope_area_ratio_percentage = Column(Float, index=True, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")

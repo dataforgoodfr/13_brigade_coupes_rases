@@ -33,8 +33,17 @@ class ClearCutPreviewSchema(BaseModel):
 class ClearCutReportPreviewSchema(BaseModel):
     id: str = Field(json_schema_extra={"example": "1"})
     clear_cuts: list[ClearCutPreviewSchema]
+    created_at: datetime.date = Field(
+        json_schema_extra={"example": "2023-10-10"},
+    )
+    updated_at: datetime.date = Field(
+        json_schema_extra={"example": "2023-10-01"},
+    )
     tags_ids: list[str] = Field(
         json_schema_extra={"example": "[1,2,3]"},
+    )
+    total_area_hectare: float = Field(
+        json_schema_extra={"example": 10.0},
     )
     average_location: Point
     status: str = Field(
@@ -42,6 +51,12 @@ class ClearCutReportPreviewSchema(BaseModel):
     )
     city: str = Field(
         json_schema_extra={"example": "Paris"},
+    )
+    last_cut_date: datetime.date = Field(
+        json_schema_extra={"example": "2023-10-01"},
+    )
+    slope_area_ratio_percentage: float = Field(
+        json_schema_extra={"example": 10.0},
     )
     model_config = ConfigDict(from_attributes=True)
 
@@ -82,8 +97,13 @@ def row_to_report_preview_schema(
         tags_ids=[tag for tag in TAGS],
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
-        created_at=report.created_at,
+        created_at=report.created_at.date(),
+        updated_at=report.updated_at.date(),
         city=report.city.name,
+        total_area_hectare=sum(clear_cut.area_hectare for clear_cut in report.clear_cuts),
+        last_cut_date=max(
+            clear_cut.observation_end_date for clear_cut in report.clear_cuts
+        ).date(),
     )
 
 

@@ -109,11 +109,11 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return value?.previews.map((clearCutting) => {
-				return (
+			return value?.previews.flatMap((clearCutting) =>
+				clearCutting.clear_cuts.map((cut) => (
 					<GeoJSON
-						key={clearCutting.id}
-						data={clearCutting.boundary}
+						key={cut.id}
+						data={cut.boundary}
 						style={{
 							color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status]})`,
 							weight: 0,
@@ -128,10 +128,10 @@ export function ClearCuttings() {
 							},
 						}}
 					>
-						<ClearCuttingMapPopUp clearCutting={clearCutting} />
+						<ClearCuttingMapPopUp report={clearCutting} />
 					</GeoJSON>
-				);
-			});
+				)),
+			);
 		}
 	}
 

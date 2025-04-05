@@ -30,42 +30,60 @@ const multiPolygonSchema = z.object({
 export type Point = z.infer<typeof pointSchema>;
 export type MultiPolygon = z.infer<typeof multiPolygonSchema>;
 
-export const clearCuttingBaseResponseSchema = z.object({
+export const clearCutResponseSchema = z.object({
 	id: z.string(),
 	boundary: multiPolygonSchema,
-	name: z.string().optional(),
 	location: pointSchema,
-	cities: z.array(z.string()),
-	cut_date: z.string().date(),
-	created_at: z.string().datetime({ local: true }),
-	tags_ids: z.array(z.string()),
+	observation_start_date: z.string().date(),
+	observation_end_date: z.string().date(),
 	ecological_zoning_ids: z.string().array(),
-	comment: z.string().optional(),
 	area_hectare: z.number(),
-	slope_percentage: z.number(),
-	status: clearCuttingStatusSchema,
 });
-export type ClearCuttingBaseResponse = z.infer<
-	typeof clearCuttingBaseResponseSchema
->;
-export type ClearCuttingPreviewResponse = ClearCuttingBaseResponse;
-const clearCuttingBaseSchema = clearCuttingBaseResponseSchema
+export type ClearCutResponse = z.infer<typeof clearCutResponseSchema>;
+const clearCutSchema = clearCutResponseSchema
 	.omit({
 		ecological_zoning_ids: true,
-		tags_ids: true,
 	})
 	.and(
 		z.object({
 			ecologicalZonings: ecologicalZoningSchema.array(),
-			tags: tagSchema.array(),
 		}),
 	);
-export type ClearCuttingPreview = z.infer<typeof clearCuttingBaseSchema>;
-export type ClearCutting = ClearCuttingPreview;
+export type ClearCut = z.infer<typeof clearCutSchema>;
+
+export const clearCutReportResponseSchema = z.object({
+	id: z.string(),
+	clear_cuts: z.array(clearCutResponseSchema),
+	city: z.string(),
+	comment: z.string().optional(),
+	name: z.string().optional(),
+	status: clearCuttingStatusSchema,
+	average_location: pointSchema,
+	slope_area_ratio_percentage: z.number(),
+	created_at: z.string().date(),
+	updated_at: z.string().date(),
+	total_area_hectare: z.number(),
+	last_cut_date: z.string().date(),
+	tags_ids: z.array(z.string()),
+});
+export type ClearCutReportResponse = z.infer<
+	typeof clearCutReportResponseSchema
+>;
+
+export const clearCutReportSchema = clearCutReportResponseSchema
+	.omit({ tags_ids: true, clear_cuts: true })
+	.and(
+		z.object({
+			tags: tagSchema.array(),
+			clear_cuts: z.array(clearCutSchema),
+		}),
+	);
+
+export type ClearCutReport = z.infer<typeof clearCutReportSchema>;
 
 export const clearCuttingsResponseSchema = z.object({
 	points: z.array(pointSchema),
-	previews: z.array(clearCuttingBaseResponseSchema),
+	previews: z.array(clearCutReportResponseSchema),
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
@@ -73,7 +91,7 @@ const clearCuttingsSchema = clearCuttingsResponseSchema
 	.omit({ previews: true })
 	.and(
 		z.object({
-			previews: z.array(clearCuttingBaseSchema),
+			previews: z.array(clearCutReportSchema),
 		}),
 	);
 export type ClearCuttings = z.infer<typeof clearCuttingsSchema>;

@@ -26,9 +26,9 @@ export interface FiltersState {
 	departments: SelectableItem<Department>[];
 	statuses: SelectableItem<ClearCuttingStatus>[];
 	areas: SelectableItem<number>[];
-	excessive_slop: boolean;
-	ecological_zoning: boolean;
-	favorite: boolean;
+	excessive_slop?: boolean;
+	ecological_zoning?: boolean;
+	favorite?: boolean;
 }
 export const initialState: FiltersState = {
 	cutYears: [],
@@ -36,22 +36,19 @@ export const initialState: FiltersState = {
 	departments: [],
 	areas: [],
 	statuses: [],
-	ecological_zoning: false,
-	excessive_slop: false,
-	favorite: false,
 };
 
 export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
 	async (_arg, { getState, extra: { api } }) => {
 		const result = await api().get<FiltersResponse>("api/v1/filters").json();
-		const { departments, tags, ...response } =
+		const { departments_ids, tags_ids, ...response } =
 			filtersResponseSchema.parse(result);
 		const state = getState();
 		return {
 			...response,
-			departments: selectDepartmentsByIds(state, departments ?? []),
-			tags: selectTagsByIds(state, tags ?? []),
+			departments: selectDepartmentsByIds(state, departments_ids ?? []),
+			tags: selectTagsByIds(state, tags_ids ?? []),
 		};
 	},
 );
@@ -99,10 +96,10 @@ export const filtersSlice = createSlice({
 		setGeoBounds: (state, { payload }: PayloadAction<Bounds>) => {
 			state.geoBounds = payload;
 		},
-		setecological_zoning: (state, { payload }: PayloadAction<boolean>) => {
+		setHasEcologicalZoning: (state, { payload }: PayloadAction<boolean>) => {
 			state.ecological_zoning = payload;
 		},
-		setexcessive_slop: (state, { payload }: PayloadAction<boolean>) => {
+		setExcessiveSlop: (state, { payload }: PayloadAction<boolean>) => {
 			state.excessive_slop = payload;
 		},
 		setFavorite: (state, { payload }: PayloadAction<boolean>) => {
@@ -116,13 +113,13 @@ export const filtersSlice = createSlice({
 				state,
 				{
 					payload: {
-						cutYears,
+						cut_years: cutYears,
 						tags,
 						departments,
-						areaPresetsHectare,
+						area_preset_hectare: areaPresetsHectare,
 						statuses,
 						excessive_slop,
-						ecological_zoning,
+						has_ecological_zonings: ecological_zoning,
 						favorite,
 					},
 				},
@@ -161,13 +158,13 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 			? undefined
 			: {
 					geoBounds,
-					cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-					departments: departments
+					cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+					departments_ids: departments
 						.filter((d) => d.isSelected)
 						.map((d) => d.item.id),
 					areas: areas.filter((a) => a.isSelected).map((a) => a.item),
 					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-					ecological_zoning,
+					has_ecological_zonings: ecological_zoning,
 					excessive_slop,
 					favorite,
 				},
@@ -195,11 +192,11 @@ export const selectAreaPresetsHectare = createTypedDraftSafeSelector(
 	(state) => state.areas,
 );
 
-export const selectecological_zoning = createTypedDraftSafeSelector(
+export const selectEcologicalZoning = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.ecological_zoning,
 );
-export const selectexcessive_slop = createTypedDraftSafeSelector(
+export const selectExcessiveSlop = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.excessive_slop,
 );

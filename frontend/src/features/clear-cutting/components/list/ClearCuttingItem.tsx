@@ -1,6 +1,6 @@
 import { StatusWithLabel } from "@/features/clear-cutting/components/StatusWithLabel";
 import { TagBadge } from "@/features/clear-cutting/components/TagBadge";
-import type { ClearCuttingPreview } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutReport } from "@/features/clear-cutting/store/clear-cuttings";
 import { useNavigate } from "@tanstack/react-router";
 import { FormattedDate } from "react-intl";
 
@@ -10,8 +10,8 @@ export function ClearCuttingItem({
 	status,
 	comment,
 	tags,
-	cities,
-}: ClearCuttingPreview) {
+	city,
+}: ClearCutReport) {
 	const navigate = useNavigate();
 	const handleCardClick = () => {
 		navigate({
@@ -31,9 +31,7 @@ export function ClearCuttingItem({
 			className="flex flex-col cursor-pointer gap-2"
 		>
 			<div className="flex justify-between">
-				<h3 className="me-auto text-lg font-bold text-gray-800">
-					{cities.join(",")}
-				</h3>
+				<h3 className="me-auto text-lg font-bold text-gray-800">{city}</h3>
 				<FormattedDate value={created_at} />
 			</div>
 			<StatusWithLabel status={status} />

@@ -24,6 +24,7 @@ from geoalchemy2.functions import (
 
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
+    ClearCutReportPreviewSchema,
     row_to_report_preview_schema,
 )
 
@@ -40,19 +41,11 @@ class Filters(BaseModel):
     cut_years: list[int] = None
     departments_ids: list[int]
     statuses: list[str]
-    has_ecological_zonings: bool
+    has_ecological_zonings: Optional[bool] = None
 
 
-def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
-    envelope = ST_MakeEnvelope(
-        filters.south_west_longitude,
-        filters.south_west_latitude,
-        filters.north_east_longitude,
-        filters.north_east_latitude,
-        SRID,
-    )
-    square = ST_SetSRID(envelope, SRID)
-    aggregated_cuts_in_boundary = (
+def query_aggregated_clear_cuts(db: Session):
+    return (
         db.query(
             ClearCut.report_id,
             func.sum(ClearCut.area_hectare).label("total_area_hectare"),
@@ -72,30 +65,56 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             ClearCutEcologicalZoning.clear_cut_id == ClearCut.id,
             isouter=True,
         )
-        .filter(ST_Contains(square, ClearCut.location))
         .group_by(ClearCut.report_id)
-        .subquery()
     )
 
-    reports = (
+
+def query_reports(db: Session, aggregated_cuts):
+    return (
         db.query(
-            ST_AsGeoJSON(aggregated_cuts_in_boundary.c.average_location),
+            ST_AsGeoJSON(aggregated_cuts.c.average_location),
             ClearCutReport,
-            aggregated_cuts_in_boundary,
+            aggregated_cuts,
         )
         .join(
-            aggregated_cuts_in_boundary,
-            aggregated_cuts_in_boundary.c.report_id == ClearCutReport.id,
+            aggregated_cuts,
+            aggregated_cuts.c.report_id == ClearCutReport.id,
         )
         .join(City, ClearCutReport.city)
         .join(Department, City.department)
     )
+
+
+def get_report_preview_by_id(db: Session, report_id: int) -> ClearCutReportPreviewSchema:
+    aggregated_cuts = (
+        query_aggregated_clear_cuts(db).filter(ClearCut.report_id == report_id).subquery()
+    )
+    report = query_reports(db, aggregated_cuts).filter(ClearCutReport.id == report_id).first()
+    return row_to_report_preview_schema(report)
+
+
+def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
+    envelope = ST_MakeEnvelope(
+        filters.south_west_longitude,
+        filters.south_west_latitude,
+        filters.north_east_longitude,
+        filters.north_east_latitude,
+        SRID,
+    )
+    square = ST_SetSRID(envelope, SRID)
+    aggregated_cuts_in_boundary = (
+        query_aggregated_clear_cuts(db)
+        .filter(ST_Contains(square, ClearCut.location))
+        .subquery()
+    )
+
+    reports = query_reports(db, aggregated_cuts_in_boundary)
     if filters.has_ecological_zonings:
         reports = reports.filter(
             aggregated_cuts_in_boundary.c.ecological_zonings_count
             == aggregated_cuts_in_boundary.c.clear_cuts_ecological_zonings_count
         )
-    else:
+    elif not filters.has_ecological_zonings:
         reports = reports.filter(aggregated_cuts_in_boundary.c.ecological_zonings_count == 0)
     if len(filters.cut_years) > 0:
         cut_years_intervals = [
