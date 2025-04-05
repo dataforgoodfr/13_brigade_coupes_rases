@@ -38,4 +38,4 @@ jobs:
             pip install poetry
         - name: Run action ${{inputs.database-action}}
           working-directory: backend
-          run: make install-dev-dependencies && ${{inputs.database-action == 'setup-database' &&  'make upgrade-db && make seed-dev-db' ||  'make reset-dev-db'}} 
+          run: make install-dev-dependencies && ${{inputs.database-action == 'setup-database' &&  'make upgrade-db && make seed-db' ||  'make reset-db'}} 
