@@ -2,14 +2,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from app.models import User
 
 
-class DepartmentBase(BaseModel):
-    id: int
-    code: str
-    name: str
-    model_config = ConfigDict(from_attributes=True)
-
-
-class UserBase(BaseModel):
+class UserBaseSchema(BaseModel):
     firstname: str = Field(default_factory=str, json_schema_extra={"example": "John"})
     lastname: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
     login: str = Field(default_factory=str, json_schema_extra={"example": "JognTree78"})

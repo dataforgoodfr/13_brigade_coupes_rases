@@ -1,8 +1,8 @@
+import { App } from "@/App";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { IntlProvider } from "react-intl";
 import { Provider } from "react-redux";
-
-import { App } from "@/App";
 import "./index.css";
 import { store } from "./shared/store/store";
 async function enableMocking() {
@@ -23,9 +23,11 @@ async function enableMocking() {
 enableMocking().then(() => {
 	createRoot(document.getElementById("root") as HTMLElement).render(
 		<StrictMode>
-			<Provider store={store}>
-				<App />
-			</Provider>
+			<IntlProvider locale={"fr"} messages={{}}>
+				<Provider store={store}>
+					<App />
+				</Provider>
+			</IntlProvider>
 		</StrictMode>,
 	);
 });

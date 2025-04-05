@@ -19,6 +19,7 @@ import {
 } from "@tanstack/react-router";
 import { type RenderOptions, render } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
+import { IntlProvider } from "react-intl";
 import { Provider } from "react-redux";
 type Split<S extends string, D extends string> = string extends S
 	? string[]
@@ -87,9 +88,11 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 	}
 
 	const Wrapper = () => (
-		<Provider store={store}>
-			<TestApp />
-		</Provider>
+		<IntlProvider locale="fr">
+			<Provider store={store}>
+				<TestApp />
+			</Provider>
+		</IntlProvider>
 	);
 	return {
 		...render(<Wrapper />, renderOptions),

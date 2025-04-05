@@ -1,4 +1,4 @@
-import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { renderApp } from "@/test/renderApp";
 import { screen } from "@testing-library/react";
@@ -8,8 +8,8 @@ describe("Clear cutting report", () => {
 	it("should display title", async () => {
 		server.use(
 			mockClearCutting({
-				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
+				city: "Paris",
+				last_cut_date: "2025-03-19",
 			}),
 		);
 		renderApp({
@@ -17,6 +17,6 @@ describe("Clear cutting report", () => {
 			params: { $clearCuttingId: "ABC" },
 		});
 
-		await screen.findByText("PARIS - 2024");
+		await screen.findByText("PARIS - 19/03/2025");
 	});
 });

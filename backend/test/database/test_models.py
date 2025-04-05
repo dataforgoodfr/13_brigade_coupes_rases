@@ -1,6 +1,6 @@
 import pytest
-from app.models import Department
-from common.clear_cut import new_clear_cut
+from app.models import City, Department, EcologicalZoning
+from common.clear_cut import new_clear_cut_report
 from common.user import new_user
 
 
@@ -34,18 +34,52 @@ def test_department_creation(db):
 
 def test_associations(db):
     user = new_user()
-    department = Department(code="75", name="Paris")
-    clear_cut = new_clear_cut(status="validated")
+    ecological_zoning = db.query(EcologicalZoning).first()
+    city = db.query(City).first()
+    report = new_clear_cut_report(
+        status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
+    )
 
-    user.departments.append(department)
-    user.clear_cuts.append(clear_cut)
-    clear_cut.department = department
+    user.departments.append(city.department)
+    user.reports.append(report)
 
-    db.add_all([user, department, clear_cut])
+    db.add_all([user, report])
     db.commit()
 
-    assert department in user.departments
-    assert clear_cut in user.clear_cuts
-    assert clear_cut.department == department
-    assert user in department.users
-    assert clear_cut in department.clear_cuts
+    assert city.department in user.departments
+    assert report in user.reports
+    assert user in city.department.users
+    assert report.clear_cuts[0].ecological_zonings[0] in ecological_zoning.clear_cuts
+
+
+def test_report_creation(db):
+    ecological_zoning = db.query(EcologicalZoning).first()
+    city = db.query(City).first()
+    report = new_clear_cut_report(
+        status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
+    )
+    db.add(report)
+    db.commit()
+
+    with pytest.raises(ValueError) as exc_info:
+        new_clear_cut_report(
+            status="invalid_status", city_id=city.id, ecological_zoning_id=ecological_zoning.id
+        )
+    assert (
+        str(exc_info.value)
+        == "Status must be one of: to_validate, waiting_for_validation, legal_validated, validated, final_validated"
+    )
+
+    assert report.id is not None
+    assert report.created_at is not None
+
+
+def test_ecological_zoning_create_without_duplicate(db):
+    db.add(EcologicalZoning(code="ABC", type="Natura2000", name="ABC"))
+    db.commit()
+    created_ecological_zoning = (
+        db.query(EcologicalZoning).filter(EcologicalZoning.code == "ABC").first()
+    )
+    assert created_ecological_zoning.code == "ABC"
+    assert created_ecological_zoning.type == "Natura2000"
+    assert created_ecological_zoning.name == "ABC"
