@@ -1,16 +1,23 @@
-name: Backend Database actions 
+name: Backend Database actions
 description: Enable database actions based on Makefile commands
 
 on:
   workflow_dispatch:
     inputs:
+      env:
+        required: true
+        options:
+          - dev
+          - prd
+        type: choice
+        description: "Environment to run the action"
       database-action:
         required: true
         options:
           - setup-database
           - reset-database
         type: choice
-        description: 'Seed the database with test data'
+        description: "Seed the database with test data"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -19,23 +26,35 @@ concurrency:
 jobs:
   seed-database:
     env:
-        DATABASE_URL: ${{secrets.DATABASE_URL}}
-        ENVIRONMENT: development
-        
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      ENVIRONMENT: development
+
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.13"]
     steps:
-        - uses: actions/checkout@v4
-        - name: Set up Python ${{ matrix.python-version }}
-          uses: actions/setup-python@v5
-          with:
-            python-version: ${{ matrix.python-version }}
-        - name : Install Poetry
-          run: |
-            python -m pip install --upgrade pip
-            pip install poetry
-        - name: Run action ${{inputs.database-action}}
-          working-directory: backend
-          run: make install-dev-dependencies && ${{inputs.database-action == 'setup-database' &&  'make upgrade-db && make seed-db' ||  'make reset-db'}} 
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+      - name: Install development dependencies
+        run: make install-dev-dependencies
+        working-directory: backend
+        
+      - name: Setup and seed database
+        working-directory: backend
+        if: ${{ inputs.database-action == 'setup-database' }}
+        run: |
+          make upgrade-db
+          make seed-${{ inputs.env }}-db
+
+      - name: Reset database
+        working-directory: backend
+        if: ${{ inputs.database-action == 'reset-database' }}
+        run: make reset-db

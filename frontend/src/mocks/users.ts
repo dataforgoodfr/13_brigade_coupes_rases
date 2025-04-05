@@ -6,7 +6,7 @@ const adminToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTc0Mjc2NjQxMn0.-rl7wbmum8v5kmbeW2l67K6hxas62Y8N9UpHAC0-A58";
 const volunteerToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXJAZXhhbXBsZS5jb20iLCJleHAiOjE3NDI4MDA0MDh9.eXwl9kBRFRxb_OjzfUkU2_jZwBJ23vFkYWKhXql2n24";
-export const mockMe = http.get("*/me", async ({ request }) => {
+export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
 	const token = request.headers.get("Authorization");
 	const avatarUrl = faker.image.avatar();
 	if (token?.includes(adminToken)) {
@@ -26,7 +26,7 @@ export const mockMe = http.get("*/me", async ({ request }) => {
 	} satisfies UserResponse);
 });
 
-export const mockToken = http.post("*/token", async ({ request }) => {
+export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 	const formData = await request.formData();
 	const email = formData.get("username")?.toString();
 	let token = volunteerToken;
@@ -48,7 +48,7 @@ const fakeUsers: UserResponse[] = range(10, () => ({
 	avatarUrl: faker.image.avatar(),
 }));
 
-export const mockUsers = http.get("*/users", ({ request }) => {
+export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
 	const role = url.searchParams.get("role");

@@ -95,19 +95,21 @@ def test_update_user(client, db):
 
 
 def test_get_users(client, db):
-    user = new_user()
+    token = get_admin_user_token(client, db)
+    user = new_user(login="ABC", email="ABC@ABC.com")
+
     department = Department(code="75", name="Paris")
     user.departments.append(department)
     db.add_all([user, department])
     db.commit()
     db.refresh(user)
 
-    response = client.get("/api/v1/users")
+    response = client.get("/api/v1/users", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["id"] == user.id
+    assert len(data["content"]) == 4
+    assert data["content"][3]["id"] == str(user.id)
 
 
 def test_login_user(client, db):

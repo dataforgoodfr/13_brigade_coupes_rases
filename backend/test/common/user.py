@@ -4,12 +4,17 @@ from app.models import User
 from app.services.user_auth import get_password_hash
 
 
-def new_user(role: str = "volunteer", password: str = "password"):
+def new_user(
+    role: str = "volunteer",
+    password: str = "password",
+    email: str = "houba.houba@marsupilami.com",
+    login="HoubaHouba",
+):
     return User(
         firstname="Houba",
         lastname="Houba",
-        login="HoubaHouba",
-        email="houba.houba@marsupilami.com",
+        login=login,
+        email=email,
         role=role,
         password=get_password_hash(password),
     )

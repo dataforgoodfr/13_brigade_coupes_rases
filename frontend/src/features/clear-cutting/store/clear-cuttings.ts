@@ -1,109 +1,97 @@
-import type { Status, Tag } from "@/shared/store/referential/referential";
+import {
+	ecologicalZoningSchema,
+	tagSchema,
+} from "@/shared/store/referential/referential";
 import { z } from "zod";
-import { pointTupleSchema } from "./types";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 
-const clearCuttingPointsSchema = z.array(z.number());
-export type ClearCuttingPoint = z.infer<typeof clearCuttingPointsSchema>;
+export const CLEAR_CUTTING_STATUSES = [
+	"to_validate",
+	"waiting_for_validation",
+	"validated",
+	"legal_validated",
+	"final_validated",
+] as const;
 
-const ecologicalZoningSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	link: z.string().url(),
-	logo: z.string().url(),
+export const clearCuttingStatusSchema = z.enum(CLEAR_CUTTING_STATUSES);
+
+export type ClearCuttingStatus = z.infer<typeof clearCuttingStatusSchema>;
+
+const geoJsonTypeSchema = z.enum(["Point", "MultiPolygon"]);
+const pointSchema = z.object({
+	type: geoJsonTypeSchema.extract(["Point"]),
+	coordinates: z.tuple([z.number(), z.number()]),
 });
-
-const clearCuttingBaseResponseSchema = z.object({
-	id: z.string(),
-	geoCoordinates: z.array(pointTupleSchema),
-	name: z.string().optional(),
-	center: pointTupleSchema,
-	reportDate: z.string(),
-	creationDate: z.string(),
-	cutYear: z.number(),
-	ecologicalZones: z.array(z.string()),
-	abusiveTags: z.array(z.string()),
-	naturaZone: z.string().optional(),
-	comment: z.string().optional(),
-	surfaceHectare: z.number(),
-	slopePercent: z.number(),
-	status: z.string(),
+const multiPolygonSchema = z.object({
+	type: geoJsonTypeSchema.extract(["MultiPolygon"]),
+	coordinates: z.array(z.array(z.array(z.tuple([z.number(), z.number()])))),
 });
-export type ClearCuttingBaseResponse = z.infer<
-	typeof clearCuttingBaseResponseSchema
->;
-type ClearCuttingBase = Omit<
-	ClearCuttingBaseResponse,
-	"abusiveTags" | "status"
-> & {
-	abusiveTags: Tag[];
-	status: Status;
-};
+export type Point = z.infer<typeof pointSchema>;
+export type MultiPolygon = z.infer<typeof multiPolygonSchema>;
 
-const clearCuttingPreviewResponseSchema = clearCuttingBaseResponseSchema.and(
-	z.object({
-		address: z.object({
-			postalCode: z.string(),
-			city: z.string(),
-			country: z.string(),
+export const clearCutResponseSchema = z.object({
+	id: z.string(),
+	boundary: multiPolygonSchema,
+	location: pointSchema,
+	observation_start_date: z.string().date(),
+	observation_end_date: z.string().date(),
+	ecological_zoning_ids: z.string().array(),
+	area_hectare: z.number(),
+});
+export type ClearCutResponse = z.infer<typeof clearCutResponseSchema>;
+const clearCutSchema = clearCutResponseSchema
+	.omit({
+		ecological_zoning_ids: true,
+	})
+	.and(
+		z.object({
+			ecologicalZonings: ecologicalZoningSchema.array(),
 		}),
-		imagesCnt: z.number().optional(),
-	}),
-);
+	);
+export type ClearCut = z.infer<typeof clearCutSchema>;
 
-export type ClearCuttingPreviewResponse = z.infer<
-	typeof clearCuttingPreviewResponseSchema
->;
-export type ClearCuttingPreview = Omit<
-	ClearCuttingPreviewResponse,
-	"abusiveTags" | "status"
-> &
-	ClearCuttingBase;
-
-const clearCuttingAddressSchema = z.object({
-	streetName: z.string(),
-	streetNumber: z.string(),
-	postalCode: z.string(),
-	city: z.string(),
-	state: z.string().optional(),
-	country: z.string(),
-});
-export type ClearCuttingAddress = z.infer<typeof clearCuttingAddressSchema>;
-export const clearCuttingResponseSchema = clearCuttingBaseResponseSchema.and(
-	z.object({
-		id: z.string(),
-		geoCoordinates: z.array(pointTupleSchema),
-		waterCourses: z.array(z.string()).optional(),
-		address: clearCuttingAddressSchema,
-		customTags: z.array(z.string()).optional(),
-		imageUrls: z.array(z.string().url()),
-	}),
-);
-
-export type ClearCuttingResponse = z.infer<typeof clearCuttingResponseSchema>;
-export type ClearCutting = Omit<
-	ClearCuttingResponse,
-	"abusiveTags" | "status"
-> &
-	ClearCuttingBase;
-
-const waterCourseSchema = z.object({
+export const clearCutReportResponseSchema = z.object({
 	id: z.string(),
-	geoCoordinates: z.array(pointTupleSchema),
+	clear_cuts: z.array(clearCutResponseSchema),
+	city: z.string(),
+	comment: z.string().optional(),
+	name: z.string().optional(),
+	status: clearCuttingStatusSchema,
+	average_location: pointSchema,
+	slope_area_ratio_percentage: z.number(),
+	created_at: z.string().date(),
+	updated_at: z.string().date(),
+	total_area_hectare: z.number(),
+	last_cut_date: z.string().date(),
+	tags_ids: z.array(z.string()),
 });
+export type ClearCutReportResponse = z.infer<
+	typeof clearCutReportResponseSchema
+>;
+
+export const clearCutReportSchema = clearCutReportResponseSchema
+	.omit({ tags_ids: true, clear_cuts: true })
+	.and(
+		z.object({
+			tags: tagSchema.array(),
+			clear_cuts: z.array(clearCutSchema),
+		}),
+	);
+
+export type ClearCutReport = z.infer<typeof clearCutReportSchema>;
 
 export const clearCuttingsResponseSchema = z.object({
-	points: z.array(clearCuttingPointsSchema),
-	previews: z.array(clearCuttingPreviewResponseSchema),
-	waterCourses: z.array(waterCourseSchema),
-	ecologicalZones: z.array(ecologicalZoningSchema),
+	points: z.array(pointSchema),
+	previews: z.array(clearCutReportResponseSchema),
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
-export type ClearCuttings = Omit<
-	ClearCuttingsResponse,
-	"clearCuttingPreviews"
-> & {
-	clearCuttingPreviews: ClearCuttingPreview[];
-};
+const clearCuttingsSchema = clearCuttingsResponseSchema
+	.omit({ previews: true })
+	.and(
+		z.object({
+			previews: z.array(clearCutReportSchema),
+		}),
+	);
+export type ClearCuttings = z.infer<typeof clearCuttingsSchema>;
