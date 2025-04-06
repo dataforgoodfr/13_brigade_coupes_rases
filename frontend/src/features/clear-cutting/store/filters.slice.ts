@@ -1,42 +1,34 @@
+import type { ClearCuttingStatus } from "@/features/clear-cutting/store/clear-cuttings";
 import {
 	type FiltersRequest,
 	type FiltersResponse,
 	filtersResponseSchema,
 } from "@/features/clear-cutting/store/filters";
 import type { Bounds } from "@/features/clear-cutting/store/types";
-import { api } from "@/shared/api/api";
 import {
 	type NamedId,
 	type SelectableItem,
 	listToSelectableItems,
 } from "@/shared/items";
-import type {
-	Department,
-	Status,
-	Tag,
-} from "@/shared/store/referential/referential";
+import type { Department, Tag } from "@/shared/store/referential/referential";
 import {
 	selectDepartmentsByIds,
-	selectStatusesByIds,
 	selectTagsByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import {
-	type PayloadAction,
-	createAsyncThunk,
-	createSlice,
-} from "@reduxjs/toolkit";
+import { createAppAsyncThunk } from "@/shared/store/thunk";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	tags: SelectableItem<Tag>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
 	departments: SelectableItem<Department>[];
-	statuses: SelectableItem<Status>[];
+	statuses: SelectableItem<ClearCuttingStatus>[];
 	areas: SelectableItem<number>[];
-	excessiveSlop: boolean;
-	ecologicalZoning: boolean;
-	favorite: boolean;
+	excessive_slop?: boolean;
+	ecological_zoning?: boolean;
+	favorite?: boolean;
 }
 export const initialState: FiltersState = {
 	cutYears: [],
@@ -44,23 +36,19 @@ export const initialState: FiltersState = {
 	departments: [],
 	areas: [],
 	statuses: [],
-	ecologicalZoning: false,
-	excessiveSlop: false,
-	favorite: false,
 };
 
-export const getFiltersThunk = createAsyncThunk(
+export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
-	async (_arg, { getState }) => {
-		const result = await api.get<FiltersResponse>("filters").json();
-		const { departments, tags, statuses, ...response } =
+	async (_arg, { getState, extra: { api } }) => {
+		const result = await api().get<FiltersResponse>("api/v1/filters").json();
+		const { departments_ids, tags_ids, ...response } =
 			filtersResponseSchema.parse(result);
-		const state = getState() as RootState;
+		const state = getState();
 		return {
 			...response,
-			departments: selectDepartmentsByIds(state, departments ?? []),
-			tags: selectTagsByIds(state, tags ?? []),
-			statuses: selectStatusesByIds(state, statuses ?? []),
+			departments: selectDepartmentsByIds(state, departments_ids ?? []),
+			tags: selectTagsByIds(state, tags_ids ?? []),
 		};
 	},
 );
@@ -101,18 +89,18 @@ export const filtersSlice = createSlice({
 		},
 		setStatuses: (
 			state,
-			{ payload }: PayloadAction<SelectableItem<Status>[]>,
+			{ payload }: PayloadAction<SelectableItem<ClearCuttingStatus>[]>,
 		) => {
 			state.statuses = payload;
 		},
 		setGeoBounds: (state, { payload }: PayloadAction<Bounds>) => {
 			state.geoBounds = payload;
 		},
-		setEcologicalZoning: (state, { payload }: PayloadAction<boolean>) => {
-			state.ecologicalZoning = payload;
+		setHasEcologicalZoning: (state, { payload }: PayloadAction<boolean>) => {
+			state.ecological_zoning = payload;
 		},
 		setExcessiveSlop: (state, { payload }: PayloadAction<boolean>) => {
-			state.excessiveSlop = payload;
+			state.excessive_slop = payload;
 		},
 		setFavorite: (state, { payload }: PayloadAction<boolean>) => {
 			state.favorite = payload;
@@ -125,21 +113,21 @@ export const filtersSlice = createSlice({
 				state,
 				{
 					payload: {
-						cutYears,
+						cut_years: cutYears,
 						tags,
 						departments,
-						areaPresetsHectare,
+						area_preset_hectare: areaPresetsHectare,
 						statuses,
-						excessiveSlop,
-						ecologicalZoning,
+						excessive_slop,
+						has_ecological_zonings: ecological_zoning,
 						favorite,
 					},
 				},
 			) => {
 				state.cutYears = listToSelectableItems(cutYears);
 				state.tags = listToSelectableItems(tags);
-				state.ecologicalZoning = ecologicalZoning ?? false;
-				state.excessiveSlop = excessiveSlop ?? false;
+				state.ecological_zoning = ecological_zoning ?? false;
+				state.excessive_slop = excessive_slop ?? false;
 				state.favorite = favorite ?? false;
 				state.departments = listToSelectableItems(departments);
 				state.areas = listToSelectableItems(areaPresetsHectare);
@@ -159,25 +147,25 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 	({
 		cutYears,
 		geoBounds,
-		ecologicalZoning,
+		ecological_zoning,
 		statuses,
 		areas,
 		departments,
-		excessiveSlop,
+		excessive_slop,
 		favorite,
 	}): FiltersRequest | undefined =>
 		geoBounds === undefined
 			? undefined
 			: {
 					geoBounds,
-					cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-					departments: departments
+					cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+					departments_ids: departments
 						.filter((d) => d.isSelected)
 						.map((d) => d.item.id),
 					areas: areas.filter((a) => a.isSelected).map((a) => a.item),
-					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item.id),
-					ecologicalZoning,
-					excessiveSlop,
+					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
+					has_ecological_zonings: ecological_zoning,
+					excessive_slop,
 					favorite,
 				},
 );
@@ -206,11 +194,11 @@ export const selectAreaPresetsHectare = createTypedDraftSafeSelector(
 
 export const selectEcologicalZoning = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.ecologicalZoning,
+	(state) => state.ecological_zoning,
 );
 export const selectExcessiveSlop = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.excessiveSlop,
+	(state) => state.excessive_slop,
 );
 export const selectFavorite = createTypedDraftSafeSelector(
 	selectState,

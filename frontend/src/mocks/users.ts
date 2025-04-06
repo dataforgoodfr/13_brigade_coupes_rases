@@ -1,47 +1,54 @@
-import type {
-	LoginRequest,
-	Role,
-	UserResponse,
-} from "@/features/user/store/user";
+import type { TokenResponse, UserResponse } from "@/features/user/store/user";
 import { range } from "@/shared/array";
 import { fakerFR as faker } from "@faker-js/faker";
-
 import { http, HttpResponse } from "msw";
-export const mockLogin = http.post("*/login", async ({ request }) => {
-	const { email } = (await request.json()) as LoginRequest;
-	const login = email.split("@")[0];
+const adminToken =
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTc0Mjc2NjQxMn0.-rl7wbmum8v5kmbeW2l67K6hxas62Y8N9UpHAC0-A58";
+const volunteerToken =
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXJAZXhhbXBsZS5jb20iLCJleHAiOjE3NDI4MDA0MDh9.eXwl9kBRFRxb_OjzfUkU2_jZwBJ23vFkYWKhXql2n24";
+export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
+	const token = request.headers.get("Authorization");
 	const avatarUrl = faker.image.avatar();
-	if (email.includes("administrator" satisfies Role)) {
+	if (token?.includes(adminToken)) {
 		return HttpResponse.json({
-			role: "administrator",
-			email,
-			login,
+			role: "admin",
+			email: "admin@example.com",
+			login: "adminAdmin",
 			avatarUrl,
 		} satisfies UserResponse);
 	}
 	return HttpResponse.json({
 		role: "volunteer",
-		affectedDepartments: [],
-		email,
-		login,
+		departments: [],
+		email: "volunteer@example.com",
+		login: "volunteerVolunteers",
 		avatarUrl,
 	} satisfies UserResponse);
 });
 
-const fakeUsers: UserResponse[] = range(100, () => ({
+export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
+	const formData = await request.formData();
+	const email = formData.get("username")?.toString();
+	let token = volunteerToken;
+	if (email?.includes("admin")) {
+		token = adminToken;
+	}
+	return HttpResponse.json({
+		access_token: token,
+	} satisfies TokenResponse);
+});
+
+const fakeUsers: UserResponse[] = range(10, () => ({
 	login: faker.internet.username(),
 	email: faker.internet.email(),
 	...faker.helpers.arrayElement([
-		{
-			role: "volunteer",
-			affectedDepartments: range(2, () => faker.location.state()),
-		},
-		{ role: "administrator" },
+		{ role: "volunteer", affectedDepartments: [] },
+		{ role: "admin" },
 	]),
 	avatarUrl: faker.image.avatar(),
 }));
 
-export const mockUsers = http.get("*/users", ({ request }) => {
+export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
 	const role = url.searchParams.get("role");
@@ -67,9 +74,7 @@ export const mockUsers = http.get("*/users", ({ request }) => {
 
 		if (departments?.length)
 			isValidUser =
-				isValidUser &&
-				user.role === "volunteer" &&
-				departments.some((r) => user?.affectedDepartments?.includes(r));
+				isValidUser && departments.some((r) => user?.departments?.includes(r));
 
 		return isValidUser;
 	});

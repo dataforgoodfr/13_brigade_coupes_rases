@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { useGetFilteredUsersQuery } from "@/features/admin/store/api";
 import { UserAvatar } from "@/features/user/components/UserAvatar";
-import type { FullUser } from "@/features/user/store/user";
+
 import SortingButton from "@/shared/components/button/SortingButton";
 import Pagination from "@/shared/components/pagination/Pagination";
 import {} from "@/shared/hooks/store";
@@ -22,8 +22,8 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-
-const columnHelper = createColumnHelper<FullUser>();
+// biome-ignore lint/suspicious/noExplicitAny: TODO: fix type
+const columnHelper = createColumnHelper<any>();
 
 const columns = [
 	columnHelper.accessor("avatarUrl", {

@@ -2,7 +2,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 } from "@/shared/components/dropdown/DropdownMenu";
 
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
@@ -11,14 +10,13 @@ import { NavbarLink } from "@/shared/components/NavbarLink";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	DropdownMenu,
-	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
-import { House, LogIn } from "lucide-react";
+import { House, LogIn, SettingsIcon } from "lucide-react";
 
 interface Props {
 	className?: string;
@@ -34,7 +32,6 @@ export function Navbar({ className }: Props) {
 		});
 	};
 	const dispatch = useAppDispatch();
-
 	return (
 		<nav
 			className={clsx(
@@ -52,23 +49,21 @@ export function Navbar({ className }: Props) {
 					<NavbarLink to="/clear-cuttings" Icon={House} title="Carte" />
 					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
 
-					{user?.role === "administrator" && <NavbarItems />}
+					{user?.role === "admin" && <NavbarItems />}
 				</div>
 			</div>
 
 			{user && (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild className="size-11 ">
-						{user?.avatarUrl && (
-							<Avatar>
-								<AvatarImage alt="Avatar" src={user.avatarUrl} />
-								<AvatarFallback>{user.login}</AvatarFallback>
-							</Avatar>
-						)}
+						<Avatar>
+							<AvatarImage alt="Avatar" src={user.avatarUrl} />
+							<AvatarFallback>
+								<SettingsIcon />
+							</AvatarFallback>
+						</Avatar>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className="w-56">
-						<DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={handleLogout}>
 							Déconnexion
 						</DropdownMenuItem>

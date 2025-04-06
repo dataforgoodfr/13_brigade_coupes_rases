@@ -1,6 +1,6 @@
 import { DotByStatus } from "@/features/clear-cutting/components/DotByStatus";
+import type { ClearCuttingStatus } from "@/features/clear-cutting/store/clear-cuttings";
 import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cutting/store/status";
-import type { ClearCuttingStatus } from "@/shared/store/referential/referential";
 
 interface Props {
 	status: ClearCuttingStatus;

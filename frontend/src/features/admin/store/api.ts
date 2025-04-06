@@ -6,6 +6,7 @@ import {
 } from "@/features/admin/store/users-schemas";
 
 import { useAppSelector } from "@/shared/hooks/store";
+import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import {
 	createApi,
 	fetchBaseQuery,
@@ -29,5 +30,12 @@ export const { endpoints, useGetUsersQuery } = adminApi;
 
 export function useGetFilteredUsersQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
-	return adminApi.useGetUsersQuery(filters ?? skipToken);
+	const { data, ...result } = adminApi.useGetUsersQuery(filters ?? skipToken);
+	const users = useAppSelector((state) => {
+		return data?.users.map((user) => ({
+			...user,
+			departments: selectDepartmentsByIds(state, user.departments),
+		}));
+	});
+	return { ...result, data: { users } };
 }

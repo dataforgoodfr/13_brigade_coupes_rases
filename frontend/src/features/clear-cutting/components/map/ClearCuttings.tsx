@@ -9,7 +9,7 @@ import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import * as L from "leaflet";
 import { useCallback, useEffect, useState } from "react";
-import { Circle, Polygon, useMap, useMapEvents } from "react-leaflet";
+import { Circle, GeoJSON, useMap, useMapEvents } from "react-leaflet";
 import { ClearCuttingMapPopUp } from "./ClearCuttingMapPopUp";
 
 export function ClearCuttings() {
@@ -109,15 +109,16 @@ export function ClearCuttings() {
 
 	function ClearCuttingPreview() {
 		if (displayClearCuttingPreview) {
-			return value?.clearCuttingPreviews.map((clearCutting) => {
-				return (
-					<Polygon
-						key={clearCutting.id}
-						className="clear-cutting-area"
-						positions={clearCutting.geoCoordinates}
-						color={`var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status.name]})`}
-						weight={0}
-						fillOpacity={0.75}
+			return value?.previews.flatMap((clearCutting) =>
+				clearCutting.clear_cuts.map((cut) => (
+					<GeoJSON
+						key={cut.id}
+						data={cut.boundary}
+						style={{
+							color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCutting.status]})`,
+							weight: 0,
+							fillOpacity: 0.75,
+						}}
 						eventHandlers={{
 							mouseover: (event) => {
 								event.target.openPopup();
@@ -127,20 +128,23 @@ export function ClearCuttings() {
 							},
 						}}
 					>
-						<ClearCuttingMapPopUp clearCutting={clearCutting} />
-					</Polygon>
-				);
-			});
+						<ClearCuttingMapPopUp report={clearCutting} />
+					</GeoJSON>
+				)),
+			);
 		}
 	}
 
 	function ClearCuttingLocationPoint() {
 		if (!displayClearCuttingPreview) {
-			return value?.points.map(([lat, lng]) => (
+			return value?.points.map((location) => (
 				<Circle
-					key={`${lat},${lng}`}
+					key={`${location.coordinates[0]},${location.coordinates[1]}`}
 					color="#ff6467"
-					center={{ lat, lng }}
+					center={{
+						lat: location.coordinates[1],
+						lng: location.coordinates[0],
+					}}
 					radius={200}
 					fillOpacity={0.7}
 				/>

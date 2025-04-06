@@ -1,127 +1,102 @@
-import type {
-	ClearCuttingAddress,
-	ClearCuttingBaseResponse,
-	ClearCuttingPreviewResponse,
-	ClearCuttingResponse,
-	ClearCuttingsResponse,
+import {
+	CLEAR_CUTTING_STATUSES,
+	type ClearCutReportResponse,
+	type ClearCutResponse,
+	type ClearCuttingsResponse,
+	type MultiPolygon,
+	type Point,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import { fakeStatuses, fakeTags } from "@/mocks/referential";
+import { fakeEcologicalZonings, fakeTags } from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
-const naturaZones = [
-	"",
-	"",
-	"",
-	"",
-	"DES_SITE",
-	"Les grands prés",
-	"Site classé de la Haute Vallée de l'Essonne",
-	"Gâtinais français",
-	"Vallée du Fusain",
-	"ETANG DE SAINT QUENTIN",
-	"MARAIS DITTEVILLE ET DE FONTENAY LE VICOMTE",
-	"Charmentray - Trilbardou",
-	"Massif de Rambouillet",
-	"Vallée de Chevreuse",
-	"Cinq étangs et leurs abords",
-	"Vallée de Chevreuse",
-	"Haute vallée de Chevreuse",
-	"Boucle de Guerne",
-	"Boucle de la Seine",
-	"Forêt de Rosny",
-	"Falaises de la Roche-Guyon et forêt de Moisson",
-	"Vexin français",
-	"Parc forestier de Sevran et ses abords ",
-	"Alisiers du plateau d'Avron",
-	"Bois de Bernouille",
-	"Mares du plateau d'Avron",
-	"Pointe de Givet",
-	"Roche à Wagne",
-	"Rochers du petit Chooz",
-	"Rochers et falaises de Charlemont",
-	"Etangs de la Champagne humide",
-	"Forêt d'Orient",
-	"Rièze de la croix Sainte-Anne",
-	"Marais de la Vanne",
-	"Montagne de Reims",
-	"Forêt d'Orient",
-	"Etangs de la Champagne humide",
-	"Forêt d'Orient",
-	"Etangs de la Champagne humide",
-	"Forêt d'Orient",
-	"Montagne de Reims",
-	"Etangs de la Champagne humide",
-	"Fontaine couverte et perte de l'Andousoir",
-	"Forêt d'Orient",
-];
-
-export const createClearCuttingBaseMock = (
-	override: Partial<ClearCuttingBaseResponse> = {},
-): ClearCuttingBaseResponse => {
-	const date = faker.date.anytime();
-	const center = override.center ?? franceRandomPointMock();
+export const createClearCutResponseMock = (
+	override: Partial<ClearCutResponse> = {},
+): ClearCutResponse => {
+	const startDate = faker.date.anytime();
+	const location = franceRandomPointMock();
+	const endDate = new Date(startDate);
+	endDate.setMonth(
+		startDate.getMonth() + faker.number.int({ min: 1, max: 12 }),
+	);
 	return {
 		id: faker.string.uuid(),
-		geoCoordinates: randomPolygonFromLocation(center, 3.5, 7),
-		center,
+		boundary: randomMultiPolygonFromLocation(location.coordinates, 3.5, 7),
+		ecological_zoning_ids: faker.helpers.arrayElements(
+			Object.keys(fakeEcologicalZonings),
+		),
+		observation_start_date: startDate.toJSON().split("T")[0],
+		observation_end_date: endDate.toJSON().split("T")[0],
+		area_hectare: faker.number.int({ min: 5, max: 20 }),
+		location,
+		...override,
+	};
+};
+export const createClearCutReportBaseMock = (
+	override: Partial<ClearCutReportResponse> = {},
+): ClearCutReportResponse => {
+	const date = faker.date.anytime();
+	const clear_cuts = [
+		...range<ClearCutResponse>(5, createClearCutResponseMock),
+		...(override.clear_cuts ?? []),
+	];
+	return {
+		id: faker.string.uuid(),
+		average_location: override.average_location ?? franceRandomPointMock(),
 		name: faker.animal.dog(),
 		comment: faker.lorem.paragraph(),
-		naturaZone: faker.string.fromCharacters(naturaZones),
-		slopePercent: faker.number.int({ min: 1, max: 60 }),
-		status: faker.helpers.arrayElement(Object.keys(fakeStatuses)),
-		abusiveTags: faker.helpers.arrayElements(Object.keys(fakeTags)),
-		creationDate: date.toLocaleDateString(),
-		cutYear: date.getFullYear(),
-		ecologicalZones: [],
-		reportDate: date.toLocaleDateString(),
-		surfaceHectare: faker.number.int({ min: 5, max: 20 }),
+		city: faker.location.city(),
+		created_at: faker.date.past().toJSON().split("T")[0],
+		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
+		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
+		tags_ids: faker.helpers.arrayElements(Object.keys(fakeTags)),
+		total_area_hectare: clear_cuts.reduce(
+			(acc, cut) => acc + cut.area_hectare,
+			0,
+		),
+		clear_cuts,
+		last_cut_date: clear_cuts.reduce(
+			(acc, cut) =>
+				cut.observation_end_date > acc ? cut.observation_end_date : acc,
+			clear_cuts[0].observation_end_date,
+		),
+		updated_at: date.toJSON().split("T")[0],
 		...override,
 	};
 };
 
-export const createAddressMock = (address: Partial<ClearCuttingAddress> = {}) =>
-	({
-		streetName: faker.location.street(),
-		streetNumber: faker.number.int().toString(),
-		postalCode: faker.location.zipCode(),
-		city: faker.location.city(),
-		country: "France",
-		...address,
-	}) satisfies ClearCuttingAddress;
-
 export const mockClearCutting = (
-	clearCutting: Partial<ClearCuttingResponse> = {},
+	override: Partial<ClearCutReportResponse> = {},
 ) =>
-	http.get("*/clear-cuttings/:id", ({ params }) => {
+	http.get("*/api/v1/clear-cuts-map/:id", ({ params }) => {
 		const { id } = params as { id: string };
 		return HttpResponse.json({
-			...createClearCuttingBaseMock(),
+			...createClearCutReportBaseMock(),
 			id: id,
-			address: createAddressMock(),
-			imageUrls: [],
-			...clearCutting,
-		} satisfies ClearCuttingResponse);
+			...override,
+		} satisfies ClearCutReportResponse);
 	});
 
-const franceRandomPointMock = (): [number, number] => [
-	faker.location.latitude({
-		min: 43.883918307385926,
-		max: 49.33292664908802,
-	}),
-	faker.location.longitude({
-		min: -0.3899356021470268,
-		max: 5.666435865557435,
-	}),
-];
-
-const randomPolygonFromLocation = (
+const franceRandomPointMock = (): Point => ({
+	type: "Point",
+	coordinates: [
+		faker.location.longitude({
+			min: -0.3899356021470268,
+			max: 5.666435865557435,
+		}),
+		faker.location.latitude({
+			min: 43.883918307385926,
+			max: 49.33292664908802,
+		}),
+	],
+});
+const randomMultiPolygonFromLocation = (
 	point: [number, number],
 	radius = 10,
 	size = 10,
-): [number, number][] => {
+): MultiPolygon => {
 	if (size < 3) {
 		throw new Error(
 			"Invalid polygon size: maximum polygon size can not be less than 3",
@@ -133,7 +108,7 @@ const randomPolygonFromLocation = (
 	}
 
 	const earthRadius = 6371; // Earth radius
-	const polygon: [number, number][] = [];
+	const coordinates: [number, number][] = [];
 	const angleStep = (2 * Math.PI) / size;
 
 	for (let i = 0; i < size; i++) {
@@ -144,71 +119,48 @@ const randomPolygonFromLocation = (
 			((radius / earthRadius) * (180 / Math.PI) * Math.cos(angle)) /
 			Math.cos((point[0] * Math.PI) / 180);
 
-		polygon.push([point[0] + deltaLat, point[1] + deltaLng]);
+		coordinates.push([point[1] + deltaLng, point[0] + deltaLat]);
 	}
 
-	return polygon;
+	return { type: "MultiPolygon", coordinates: [[coordinates]] };
 };
 
-const createFranceRandomPoints = range<[number, number]>(
-	500,
-	franceRandomPointMock,
-);
-
-export const createClearCuttingPreviewResponse = (
-	override: Partial<ClearCuttingPreviewResponse> = {
-		center: franceRandomPointMock(),
-	},
-): ClearCuttingPreviewResponse => {
-	const city = faker.location.city();
-	return {
-		...createClearCuttingBaseMock({ center: override.center }),
-		address: {
-			city,
-			country: faker.location.country(),
-			postalCode: faker.location.zipCode(),
-		},
-		imagesCnt: faker.number.int() % 10,
-		...override,
-	};
-};
+const createFranceRandomPoints = range<Point>(500, franceRandomPointMock);
 
 const clearCuttingPreviews = createFranceRandomPoints
 	.slice(0, 50)
-	.map((center) => createClearCuttingPreviewResponse({ center }));
+	.map((center) => createClearCutReportBaseMock({ average_location: center }));
 
 export const mockClearCuttingsResponse = (
 	override: Partial<ClearCuttingsResponse> = {},
 	filterInArea = false,
 ) =>
-	http.get("*/clear-cuttings", ({ request }) => {
+	http.get("*/api/v1/clear-cuts-map", ({ request }) => {
 		const url = new URL(request.url);
-		const southWestLat = url.searchParams.get("swLat");
-		const southWestLng = url.searchParams.get("swLng");
-		const northEastLat = url.searchParams.get("neLat");
-		const northEastLng = url.searchParams.get("neLng");
+		const southWestLat = url.searchParams.get("sw_lat");
+		const southWestLng = url.searchParams.get("sw_lng");
+		const northEastLat = url.searchParams.get("ne_lat");
+		const northEastLng = url.searchParams.get("ne_lng");
 		let boundaries: Boundaries | undefined;
-		const previews = [
-			...(override.previews ?? []),
-			...clearCuttingPreviews,
-		];
+		const previews = [...(override.previews ?? []), ...clearCuttingPreviews];
 		if (southWestLat && southWestLng && northEastLat && northEastLng) {
 			boundaries = [
-				[Number.parseFloat(southWestLat), Number.parseFloat(southWestLng)],
-				[Number.parseFloat(southWestLat), Number.parseFloat(northEastLng)],
-				[Number.parseFloat(northEastLat), Number.parseFloat(northEastLng)],
-				[Number.parseFloat(northEastLat), Number.parseFloat(southWestLng)],
+				[Number.parseFloat(southWestLng), Number.parseFloat(southWestLat)],
+				[Number.parseFloat(northEastLng), Number.parseFloat(southWestLat)],
+				[Number.parseFloat(northEastLng), Number.parseFloat(northEastLat)],
+				[Number.parseFloat(southWestLng), Number.parseFloat(northEastLat)],
 			];
 		}
 		return HttpResponse.json({
 			previews:
 				boundaries && filterInArea
 					? previews.filter((ccp) =>
-							isPointInsidePolygon(boundaries, ccp.center),
+							isPointInsidePolygon(
+								boundaries,
+								ccp.average_location.coordinates,
+							),
 						)
 					: previews,
 			points: createFranceRandomPoints,
-			ecologicalZones: [],
-			waterCourses: [],
 		} satisfies ClearCuttingsResponse);
 	});

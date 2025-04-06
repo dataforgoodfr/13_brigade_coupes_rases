@@ -1,5 +1,5 @@
+import type { ClearCuttingStatus } from "@/features/clear-cutting/store/clear-cuttings";
 import { Dot } from "@/shared/components/Dot";
-import type { ClearCuttingStatus } from "@/shared/store/referential/referential";
 import clsx from "clsx";
 import { CLEAR_CUTTING_STATUS_BACKGROUND_COLORS } from "../store/status";
 
