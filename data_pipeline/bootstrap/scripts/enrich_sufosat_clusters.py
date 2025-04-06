@@ -92,16 +92,17 @@ def enrich_with_cities(
     return sufosat
 
 
-def enrich_with_natura2000(
+def enrich_with_natura2000_area(
     sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
 ) -> gpd.GeoDataFrame:
-    logging.info("Enriching SUFOSAT clusters with Natura 2000 information")
+    logging.info("Enriching SUFOSAT clusters with Natura 2000 area information")
 
     # Load Natura 2000 data
-    natura2000 = load_gdf(DATA_DIR / "natura2000/natura2000.fgb")
+    # It is important to use the unioned Natura2000 geodataframe to avoid counting the same area multiple times
+    natura2000_union = load_gdf(DATA_DIR / "natura2000/natura2000_union.fgb")
 
     # Calculate intersection area in hectares (1 hectare = 10,000 m²)
-    natura2000_area_ha = overlay(sufosat_dask, natura2000).area.compute() / 10000
+    natura2000_area_ha = overlay(sufosat_dask, natura2000_union).area.compute() / 10000
 
     # Add Natura 2000 area to the SUFOSAT DataFrame
     sufosat.loc[natura2000_area_ha.index, "natura2000_area_ha"] = natura2000_area_ha
@@ -110,6 +111,29 @@ def enrich_with_natura2000(
     sufosat["natura2000_area_ha"] = sufosat["natura2000_area_ha"].fillna(0)
 
     logging.info(f"{len(natura2000_area_ha)} clusters intersect with Natura 2000 areas")
+
+    display_df(sufosat)
+
+    return sufosat
+
+
+def enrich_with_natura2000_codes(
+    sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    logging.info("Enriching SUFOSAT clusters with Natura 2000 codes information")
+
+    # Load Natura 2000 data
+    # It is important to use the unioned Natura2000 geodataframe to avoid counting the same area multiple times
+    natura2000_concat = load_gdf(DATA_DIR / "natura2000/natura2000_concat.fgb")
+
+    # Find the Natura2000 codes that intersect with the clear-cuts
+    natura2000_codes = overlay(sufosat_dask, natura2000_concat)
+    natura2000_codes = (
+        natura2000_codes.groupby(natura2000_codes.index)["code"].agg(list).compute()
+    )
+
+    # Add Natura 2000 area to the SUFOSAT DataFrame
+    sufosat.loc[natura2000_codes.index, "natura2000_codes"] = natura2000_codes
 
     display_df(sufosat)
 
@@ -165,21 +189,19 @@ def enrich_sufosat_clusters() -> None:
     ProgressBar().register()
 
     # Load SUFOSAT clusters
-    # TODO: 10,000 rows for dev
-    # TODO: figure out the sorting of this file...
-    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb", rows=10000).set_index(
-        "clear_cut_group"
-    )
+    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index("clear_cut_group")
 
     # Convert to dask_geopandas for parallel processing
     # TODO: What's the ideal number of partitions???
     sufosat_dask = dask_geopandas.from_geopandas(sufosat, npartitions=12)
 
     sufosat = enrich_with_cities(sufosat, sufosat_dask)
-    sufosat = enrich_with_natura2000(sufosat, sufosat_dask)
+    sufosat = enrich_with_natura2000_area(sufosat, sufosat_dask)
+    sufosat = enrich_with_natura2000_codes(sufosat, sufosat_dask)
     sufosat = enrich_with_slope_information(sufosat, sufosat_dask)
 
     # Save the enriched SUFOSAT clusters
+    sufosat = sufosat.sort_values("area_ha")
     save_gdf(sufosat, ENRICHED_CLUSTERS_RESULT_FILEPATH, index=True)
 
 
