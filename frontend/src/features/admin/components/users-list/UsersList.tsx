@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { useGetFilteredUsersQuery } from "@/features/admin/store/api";
 import { UserAvatar } from "@/features/user/components/UserAvatar";
+import type { FullUser } from "@/features/user/store/user";
 
 import SortingButton from "@/shared/components/button/SortingButton";
 import Pagination from "@/shared/components/pagination/Pagination";
@@ -22,8 +23,8 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-// biome-ignore lint/suspicious/noExplicitAny: TODO: fix type
-const columnHelper = createColumnHelper<any>();
+
+const columnHelper = createColumnHelper<FullUser>();
 
 const columns = [
 	columnHelper.accessor("avatarUrl", {
@@ -102,11 +103,11 @@ export const UsersList: React.FC = () => {
 	const { data } = useGetFilteredUsersQuery();
 
 	const usersList = useMemo(() => {
-		// TODO: Fix type issue on affectedDepartments being string or object array
-		return (data?.users as FullUser[]) ?? [];
+		return (data?.users) ?? [];
 	}, [data]);
 
 	const table = useReactTable({
+		// @ts-ignore TODO: fix type
 		data: usersList,
 		columns,
 		getCoreRowModel: getCoreRowModel(),

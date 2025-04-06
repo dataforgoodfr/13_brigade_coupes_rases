@@ -1,4 +1,5 @@
-import { Button } from "@/shared/components/button/Button";
+
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
 type SortingButtonProps = {
