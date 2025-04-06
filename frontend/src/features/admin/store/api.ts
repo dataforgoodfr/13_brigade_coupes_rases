@@ -26,9 +26,9 @@ export const adminApi = createApi({
 	}),
 });
 
-export const { endpoints } = adminApi;
+export const { endpoints, useGetUsersQuery } = adminApi;
 
-export function useGetAdminQuery() {
+export function useGetFilteredUsersQuery() {
 	const filters = useAppSelector(selectFiltersRequest);
 	const { data, ...result } = adminApi.useGetUsersQuery(filters ?? skipToken);
 	const users = useAppSelector((state) => {

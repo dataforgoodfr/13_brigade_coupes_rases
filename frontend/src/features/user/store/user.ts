@@ -34,6 +34,13 @@ const enrichedVolunteerSchema = z.object({
 	role: roleSchema.extract(["volunteer"]),
 });
 
+export const fullUserSchema = commonUserSchema.and(
+	z.object({
+		affectedDepartments: z.array(z.string()).optional(),
+		role: roleSchema,
+	}),
+);
+
 export const userSchema = commonUserSchema
 	.omit({ departments: true })
 	.and(z.object({ departments: departmentSchema.array() }))
@@ -49,4 +56,5 @@ export type User = z.infer<typeof userSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 export type TokenResponse = z.infer<typeof tokenSchema>;
 export type Volunteer = UserResponse & { role: "volunteer" };
+export type FullUser = z.infer<typeof fullUserSchema>;
 export type Administrator = UserResponse & { role: "admin" };
