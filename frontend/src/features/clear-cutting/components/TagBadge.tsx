@@ -3,11 +3,11 @@ import type { Tag } from "@/shared/store/referential/referential";
 
 function translateTag(tag: Tag) {
 	switch (tag.type) {
-		case "ecologicalZoning":
+		case "ecological_zoning":
 			return "Natura 2000";
-		case "excessiveArea":
+		case "excessive_area":
 			return `Sup ${tag.value} HA`;
-		case "excessiveSlop":
+		case "excessive_slop":
 			return `Pente > ${tag.value} %`;
 	}
 }

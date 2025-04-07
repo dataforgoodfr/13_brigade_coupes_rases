@@ -38,7 +38,7 @@ export function AsideList() {
 
 			<div className=" px-5 overflow-auto">
 				<ul className="flex flex-col gap-6  mt-6 ">
-					{value?.clearCuttingPreviews.map((preview) => (
+					{value?.previews.map((preview) => (
 						<ClearCuttingItem key={preview.id} {...preview} />
 					))}
 				</ul>

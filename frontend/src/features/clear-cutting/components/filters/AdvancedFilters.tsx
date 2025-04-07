@@ -45,11 +45,11 @@ const STATUS = {
 	label: "Etat",
 };
 const ECOLOGICAL_ZONING = {
-	id: "ecologicalZoning",
+	id: "ecological_zoning",
 	label: "Zone protégée",
 };
 const EXCESSIVE_SLOP = {
-	id: "excessiveSlop",
+	id: "excessive_slop",
 	label: "Pente excessive",
 };
 const FAVORITE = {
@@ -75,12 +75,12 @@ export function AdvancedFilters({ className }: Props) {
 	);
 	const statuses = useEnhancedItems(
 		useAppSelector(selectStatuses),
-		(status) => <StatusWithLabel status={status.item.name} />,
+		(status) => <StatusWithLabel status={status.item} />,
 		selectableItemToString,
 	);
-	const excessiveSlop = useAppSelector(selectExcessiveSlop);
+	const excessive_slop = useAppSelector(selectExcessiveSlop);
 	const favorite = useAppSelector(selectFavorite);
-	const ecologicalZoning = useAppSelector(selectEcologicalZoning);
+	const ecological_zoning = useAppSelector(selectEcologicalZoning);
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());
@@ -154,9 +154,9 @@ export function AdvancedFilters({ className }: Props) {
 					</label>
 					<Switch
 						id={ECOLOGICAL_ZONING.id}
-						checked={ecologicalZoning}
+						checked={ecological_zoning}
 						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setEcologicalZoning(isChecked))
+							dispatch(filtersSlice.actions.setHasEcologicalZoning(isChecked))
 						}
 					/>
 				</div>
@@ -164,7 +164,7 @@ export function AdvancedFilters({ className }: Props) {
 					<label htmlFor={EXCESSIVE_SLOP.id}>{EXCESSIVE_SLOP.label}</label>
 					<Switch
 						id={EXCESSIVE_SLOP.id}
-						checked={excessiveSlop}
+						checked={excessive_slop}
 						onCheckedChange={(isChecked) =>
 							dispatch(filtersSlice.actions.setExcessiveSlop(isChecked))
 						}
