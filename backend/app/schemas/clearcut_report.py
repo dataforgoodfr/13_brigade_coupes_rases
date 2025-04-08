@@ -14,12 +14,10 @@ class ClearCutPicture(BaseModel):
     tag: Optional[str] = None
 
 
-class ClearCutReportResponse(ClearCutResponse):
+class ClearCutReportBase(BaseModel):
     id: int
-    editor_id: Optional[int] = None
-    updated_at: Optional[datetime] = None
     inspection_date: Optional[datetime] = None
-    weather: Optional[str] = None
+    weather: Optional[str]
     forest_description: Optional[str] = None
     remainingTrees: Optional[bool] = None
     species: Optional[str] = None
@@ -42,6 +40,9 @@ class ClearCutReportResponse(ClearCutResponse):
     pefc_fsc_certified: Optional[bool] = None
     over_20_ha: Optional[bool] = None
     psg_required_plot: Optional[bool] = None
+
+
+class ClearcutReportStrategy(BaseModel):
     relevant_for_pefc_complaint: Optional[bool] = None
     relevant_for_rediii_complaint: Optional[bool] = None
     relevant_for_ofb_complaint: Optional[bool] = None
@@ -49,3 +50,19 @@ class ClearCutReportResponse(ClearCutResponse):
     relevant_for_alert_cnpf_ddt_psg_thresholds: Optional[bool] = None
     relevant_for_psg_request: Optional[bool] = None
     request_engaged: Optional[str] = None
+
+
+class ClearCutReportResponse(ClearCutResponse, ClearCutReportBase):
+    report_updated_at: datetime
+
+
+class ClearCutReportWithStrategy(ClearcutReportStrategy, ClearCutReportBase):
+    _ = None
+
+
+class ClearCutReportWithStrategyResponse(ClearcutReportStrategy, ClearCutReportResponse):
+    _ = None
+
+
+class ClearCutReporCreate(ClearCutReportBase):
+    editor_id: Optional[int] = None

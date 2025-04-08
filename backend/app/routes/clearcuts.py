@@ -11,8 +11,14 @@ from app.services.clearcut import (
     get_clearcut_by_id,
     get_clearcut_report,
     update_clearcut,
+    update_clearcut_report,
 )
-from app.schemas.clearcut_report import ClearCutReportResponse
+from app.schemas.clearcut_report import (
+    ClearCutReportBase,
+    ClearCutReportResponse,
+    ClearCutReportWithStrategy,
+    ClearCutReportWithStrategyResponse,
+)
 
 logger = getLogger(__name__)
 
@@ -46,6 +52,22 @@ def list_clearcut(
 def get_report_by_id(id: int, db: Session = db_dependency) -> ClearCutReportResponse:
     logger.info(db)
     return get_clearcut_report(db, id)
+
+
+@router.put("/{id}/Report", response_model=ClearCutReportResponse)
+def update_report(
+    id: int, clearcutReportIn: ClearCutReportBase, db: Session = db_dependency
+) -> ClearCutReportResponse:
+    logger.info(db)
+    return update_clearcut_report(db, id, clearcutReportIn)
+
+
+@router.put("/{id}/ReportWithStrategy", response_model=ClearCutReportWithStrategyResponse)
+def update_legal_strategy(
+    id: int, clearcutReportIn: ClearCutReportWithStrategy, db: Session = db_dependency
+) -> ClearCutReportWithStrategyResponse:
+    logger.info(db)
+    return update_clearcut_report(db, id, clearcutReportIn)
 
 
 @router.get("/{id}", response_model=ClearCutResponse)

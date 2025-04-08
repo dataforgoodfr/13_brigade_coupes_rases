@@ -99,7 +99,7 @@ class ClearCutReport(Base):
 
     clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
     editor_id = Column(Integer, index=True, nullable=True)
-    report_updated_at = Column(DateTime, nullable=True)
+    report_updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Ground datas
     inspection_date = Column(DateTime, nullable=True)
