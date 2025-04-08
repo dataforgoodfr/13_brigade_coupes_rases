@@ -12,6 +12,7 @@ from geoalchemy2.shape import to_shape
 from geoalchemy2.functions import ST_Contains, ST_MakeEnvelope, ST_SetSRID
 
 from app.schemas.clearcut_map import ClearCutPreview, ClearCutMapResponse
+from app.schemas.clearcut_report import ClearCutReportBase
 
 
 logger = getLogger(__name__)
@@ -61,22 +62,9 @@ def get_clearcut(db: Session, skip: int = 0, limit: int = 10):
 
 
 def get_clearcut_report(db: Session, id: int):
-    # clearcut = db.query(ClearCut).options(
-    #     joinedload(ClearCut.clear_cut_report)  # Charge les rapports en jointure
-    # ).get(id)
-
-    # print(clearcut.clear_cut_report.forest_description)
-
-    # clearcut.location = to_shape(clearcut.location)
-    # clearcut.boundary = to_shape(clearcut.boundary)
-
-    # clearcut.location = clearcut.location.coords[0]
-    # clearcut.boundary = list(clearcut.boundary.exterior.coords)
-    # return clearcut
-
     clearcut_report_alias = aliased(ClearCutReport)
 
-    # Récupère toutes les colonnes des deux tables de façon dynamique
+    # Get dynamicaly ClearCutReport and ClearCut columns, except id for clearcutreport
     clearcut_columns = [getattr(ClearCut, col.name) for col in ClearCut.__table__.columns]
     report_columns = [
         getattr(clearcut_report_alias, col.name)
@@ -85,17 +73,19 @@ def get_clearcut_report(db: Session, id: int):
     ]
     columns = [*clearcut_columns, *report_columns]
 
+    # Request all columns
     result = (
-        db.query(*columns)  # Décompose les listes en arguments
+        db.query(*columns)
         .select_from(ClearCut)
         .outerjoin(clearcut_report_alias, ClearCut.id == clearcut_report_alias.clear_cut_id)
         .filter(ClearCut.id == id)
         .first()
     )
-    # x = dict(clearcut._mapping) if clearcut else None
-    data = dict(result._mapping)  # Convertit le résultat SQLAlchemy en dictionnaire
 
-    # Séparer les données pour ClearCut et ClearCutReport
+    # Convert SQLAlchemy result in dict
+    data = dict(result._mapping)
+
+    # TODO: Iterate over columns
     clearcut_data_report = {}
     for col in ClearCut.__table__.columns:
         clearcut_data_report[col.name] = data[col.name]
@@ -110,8 +100,19 @@ def get_clearcut_report(db: Session, id: int):
     clearcut_data_report["location"] = clearcut_data_report["location"].coords[0]
     clearcut_data_report["boundary"] = list(clearcut_data_report["boundary"].exterior.coords)
 
-    print(clearcut_data_report)
     return clearcut_data_report
+
+
+def update_clearcut_report(db: Session, id: int, clearcutReportIn: ClearCutReportBase):
+    clearcutReport = db.query(ClearCutReport).filter(ClearCutReport.clear_cut_id == id).first()
+    if not clearcutReport:
+        raise HTTPException(status_code=404, detail="ClearCut not found")
+    update_data = clearcutReportIn.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(clearcutReport, key, value)
+    db.commit()
+    db.refresh(clearcutReport)
+    return get_clearcut_report(db, id)
 
 
 def get_clearcut_by_id(id: int, db: Session):
