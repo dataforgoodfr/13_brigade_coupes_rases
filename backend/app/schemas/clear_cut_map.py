@@ -51,6 +51,9 @@ class ClearCutReportPreviewSchema(BaseModel):
     )
     city: str = Field(
         json_schema_extra={"example": "Paris"},
+    ),
+    department_id:str = Field(
+        json_schema_extra={"example": "1"},
     )
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
@@ -93,6 +96,7 @@ def row_to_report_preview_schema(
             )
             for clear_cut in report.clear_cuts
         ],
+        department_id=str(report.city.department.id),   
         average_location=Point.model_validate_json(point),
         tags_ids=[tag for tag in TAGS],
         status=report.status,

@@ -1,4 +1,6 @@
+import { userSchema } from "@/features/user/store/user";
 import {
+	departmentSchema,
 	ecologicalZoningSchema,
 	tagSchema,
 } from "@/shared/store/referential/referential";
@@ -27,6 +29,7 @@ const multiPolygonSchema = z.object({
 	type: geoJsonTypeSchema.extract(["MultiPolygon"]),
 	coordinates: z.array(z.array(z.array(z.tuple([z.number(), z.number()])))),
 });
+
 export type Point = z.infer<typeof pointSchema>;
 export type MultiPolygon = z.infer<typeof multiPolygonSchema>;
 
@@ -60,6 +63,7 @@ export const clearCutReportResponseSchema = z.object({
 	status: clearCuttingStatusSchema,
 	average_location: pointSchema,
 	slope_area_ratio_percentage: z.number(),
+	department_id: z.string(),
 	created_at: z.string().date(),
 	updated_at: z.string().date(),
 	total_area_hectare: z.number(),
@@ -71,9 +75,10 @@ export type ClearCutReportResponse = z.infer<
 >;
 
 export const clearCutReportSchema = clearCutReportResponseSchema
-	.omit({ tags_ids: true, clear_cuts: true })
+	.omit({ tags_ids: true, clear_cuts: true, department_id: true })
 	.and(
 		z.object({
+			department: departmentSchema,
 			tags: tagSchema.array(),
 			clear_cuts: z.array(clearCutSchema),
 		}),
@@ -87,6 +92,7 @@ export const clearCuttingsResponseSchema = z.object({
 });
 
 export type ClearCuttingsResponse = z.infer<typeof clearCuttingsResponseSchema>;
+
 const clearCuttingsSchema = clearCuttingsResponseSchema
 	.omit({ previews: true })
 	.and(
@@ -95,3 +101,83 @@ const clearCuttingsSchema = clearCuttingsResponseSchema
 		}),
 	);
 export type ClearCuttings = z.infer<typeof clearCuttingsSchema>;
+
+const clearCutFormOnSiteResponseSchema = z.object({
+	imgSatelliteCC: z.string().url().optional(),
+	assignedUser: userSchema.nullable().default(null),
+	onSiteDate: z.string().optional(),
+	weather: z.string().optional(),
+	// BCC : before clear-cutting
+	standTypeAndSilviculturalSystemBCC: z.string().optional(),
+	//ACC : after clear-cutting
+	isPlantationPresentACC: z.boolean().default(false),
+	newTreeSpicies: z.string().optional(),
+	imgsPlantation: z.array(z.string().url()).default([]),
+	isWorksiteSignPresent: z.boolean().default(false),
+	imgWorksiteSign: z.string().url().optional(),
+	waterCourseOrWetlandPresence: z.string().optional(),
+	protectedSpeciesDestructionIndex: z.string().optional(),
+	soilState: z.string().optional(),
+	imgsClearCutting: z.array(z.string().url()).optional(),
+	imgsTreeTrunks: z.array(z.string().url()).default([]),
+	imgsSoilState: z.array(z.string().url()).default([]),
+	imgsAccessRoad: z.array(z.string().url()).default([]),
+});
+
+const clearCutFormEcologicalZoningFormResponseSchema = z.object({
+	isNatura2000: z.boolean().default(false),
+	natura2000Zone: ecologicalZoningSchema.optional(),
+	isOtherEcoZone: z.boolean().default(false),
+	ecoZoneType: z.string().optional(),
+	isNearEcoZone: z.boolean().default(false),
+	nearEcoZoneType: z.string().optional(),
+	protectedSpeciesOnZone: z.string().optional(),
+	protectedSpeciesHabitatOnZone: z.string().optional(),
+	isDDT: z.boolean().default(false),
+	byWho: z.string().optional(),
+});
+
+const clearCutFormActorsFormResponseSchema = z.object({
+	companyName: z.string().optional(),
+	subcontractor: z.string().optional(),
+	ownerName: z.string().optional(),
+});
+
+const clearCutFormRegulationsFormResponseSchema = z.object({
+	isCCOrCompanyCertified: z.boolean().nullable().default(null),
+	isMoreThan20ha: z.boolean().nullable().default(null),
+	isSubjectToPSG: z.boolean().nullable().default(null),
+});
+
+const clearCutFormLegalStrategyFormResponseSchema = z.object({
+	isRelevantComplaintPEFC: z.boolean().default(false),
+	isRelevantComplaintREDIII: z.boolean().default(false),
+	isRelevantComplaintOFB: z.boolean().default(false),
+	isRelevantAlertSRGS: z.boolean().default(false),
+	isRelevantAlertPSG: z.boolean().default(false),
+	isRelevantRequestPSG: z.boolean().default(false),
+	actionsUndertaken: z.string().optional(),
+});
+
+const clearCutFormOtherResponseSchema = z.object({
+	imageUrls: z.array(z.string().url()).optional(),
+	otherInfos: z.string().optional(),
+});
+const clearCutFormSectionsResponseSchema = clearCutFormOtherResponseSchema
+	.and(clearCutFormOnSiteResponseSchema)
+	.and(clearCutFormEcologicalZoningFormResponseSchema)
+	.and(clearCutFormActorsFormResponseSchema)
+	.and(clearCutFormRegulationsFormResponseSchema)
+	.and(clearCutFormLegalStrategyFormResponseSchema);
+
+export const clearCutFormResponseSchema = clearCutReportResponseSchema.and(
+	clearCutFormSectionsResponseSchema,
+);
+
+export type ClearCutFormResponse = z.infer<typeof clearCutFormResponseSchema>;
+
+export const clearCutFormSchema = clearCutReportSchema.and(
+	clearCutFormSectionsResponseSchema,
+);
+
+export type ClearCutForm = z.infer<typeof clearCutFormSchema>;

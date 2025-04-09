@@ -11,6 +11,10 @@ function translateTag(tag: Tag) {
 			return `Pente > ${tag.value} %`;
 	}
 }
-export function TagBadge(tag: Tag) {
-	return <Badge variant="default">{translateTag(tag)}</Badge>;
+export function TagBadge(tag: Tag & { className?: string }) {
+	return (
+		<Badge className={tag.className} variant="default">
+			{translateTag(tag)}
+		</Badge>
+	);
 }
