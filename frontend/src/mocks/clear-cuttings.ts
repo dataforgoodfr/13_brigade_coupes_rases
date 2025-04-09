@@ -1,12 +1,17 @@
 import {
 	CLEAR_CUTTING_STATUSES,
+	type ClearCutFormResponse,
 	type ClearCutReportResponse,
 	type ClearCutResponse,
 	type ClearCuttingsResponse,
 	type MultiPolygon,
 	type Point,
 } from "@/features/clear-cutting/store/clear-cuttings";
-import { fakeEcologicalZonings, fakeTags } from "@/mocks/referential";
+import {
+	fakeDepartments,
+	fakeEcologicalZonings,
+	fakeTags,
+} from "@/mocks/referential";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 import { faker } from "@faker-js/faker";
@@ -47,6 +52,7 @@ export const createClearCutReportBaseMock = (
 		average_location: override.average_location ?? franceRandomPointMock(),
 		name: faker.animal.dog(),
 		comment: faker.lorem.paragraph(),
+		department_id: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
 		city: faker.location.city(),
 		created_at: faker.date.past().toJSON().split("T")[0],
 		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
@@ -68,21 +74,14 @@ export const createClearCutReportBaseMock = (
 };
 
 export const mockClearCutting = (
-	override: Partial<ClearCutReportResponse> = {},
+	override: Partial<ClearCutFormResponse> = {},
 ) =>
 	http.get("*/api/v1/clear-cuts-map/:id", ({ params }) => {
 		const { id } = params as { id: string };
 		return HttpResponse.json({
 			...createClearCutReportBaseMock(),
 			id: id,
-			address: createAddressMock(),
 			imageUrls: [],
-			creationDate: faker.date.anytime().toISOString(),
-			cutYear: faker.date.anytime().getFullYear(),
-			ecologicalZones: [],
-			reportDate: faker.date.anytime().toISOString(),
-			clearCuttingSize: faker.number.int(200),
-			clearCuttingSlope: faker.number.int(100),
 			imgSatelliteCC: faker.image.url(),
 
 			onSiteDate: faker.date.anytime().toISOString(),
@@ -110,10 +109,8 @@ export const mockClearCutting = (
 			isRelevantAlertPSG: false,
 			isRelevantRequestPSG: false,
 
-			...clearCutting,
-		} satisfies ClearCuttingResponse);
 			...override,
-		} satisfies ClearCutReportResponse);
+		} satisfies ClearCutFormResponse);
 	});
 
 const franceRandomPointMock = (): Point => ({

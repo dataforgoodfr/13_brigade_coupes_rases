@@ -1,15 +1,18 @@
 import { Separator } from "@/components/ui/separator";
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type {
+	ClearCutForm,
+	ClearCuttingStatus as ClearCutStatus,
+} from "@/features/clear-cutting/store/clear-cuttings";
 import type { FormType } from "@/shared/components/form/Form";
-import type { Status, Tag } from "@/shared/store/referential/referential";
+import type { Tag } from "@/shared/store/referential/referential";
 import { StatusWithLabel } from "../StatusWithLabel";
 import { TagBadge } from "../TagBadge";
 
 export default function AccordionHeader({
 	form,
-	abusiveTags,
+	tags: abusiveTags,
 	status,
-}: { form: FormType<ClearCuttingForm>; abusiveTags: Tag[]; status: Status }) {
+}: { form: FormType<ClearCutForm>; tags: Tag[]; status: ClearCutStatus }) {
 	return (
 		<div className="flex items-center mt-4 gap-6 text-sm">
 			<img
@@ -20,7 +23,7 @@ export default function AccordionHeader({
 			/>
 			<div className="flex-1">
 				<div className="flex items-center gap-2 mb-4">
-					<StatusWithLabel status={status.name} />
+					<StatusWithLabel status={status} />
 				</div>
 				<div className="flex flex-col gap-2 flex-wrap mb-4">
 					{abusiveTags.map((tag) => (
@@ -29,7 +32,8 @@ export default function AccordionHeader({
 				</div>
 				<Separator className="mb-4" />
 				<p>
-					Superficie de la coupe : {`${form.getValues("clearCuttingSize")} ha`}
+					Superficie de la coupe :{" "}
+					{`${form.getValues("total_area_hectare")} ha`}
 				</p>
 				<p>Zone natura 2000 : {form.getValues("natura2000Zone.name")}</p>
 			</div>

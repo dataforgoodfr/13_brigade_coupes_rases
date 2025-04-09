@@ -2,7 +2,7 @@ import {
 	onSiteKey,
 	onSiteValue,
 } from "@/features/clear-cutting/components/form/sections/OnSiteSection";
-import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { volunteerMock } from "@/test/mocks/user";
 import { renderApp } from "@/test/renderApp";
@@ -16,8 +16,8 @@ describe("On Site section form when there is a volunteer connected but not assig
 	beforeAll(async () => {
 		server.use(
 			mockClearCutting({
-				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
+				city: "Paris",
+				last_cut_date: "2024-03-19",
 				onSiteDate: "2024-03-19T14:26:30.789Z",
 				weather: "Nuageux",
 				standTypeAndSilviculturalSystemBCC: "Epicéa",
@@ -34,8 +34,8 @@ describe("On Site section form when there is a volunteer connected but not assig
 		const buttons = await screen.findAllByText(ic(onSiteKey.name));
 		const accordionButton = buttons.filter((el) => el.tagName === "BUTTON")[0];
 		fireEvent.click(accordionButton);
-		
-		accordion = accordionButton.parentElement?.parentElement!;
+
+		accordion = accordionButton.parentElement?.parentElement as HTMLElement;
 	});
 
 	it(`should display "${onSiteKey.name}" section`, async () => {
@@ -49,8 +49,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		const onSiteDate = onSiteValue.find((val) => val.name === "onSiteDate");
 
 		const onSiteDatepicker = await within(accordion).findByLabelText(
-			
-			ic(onSiteDate?.label!),
+			ic(onSiteDate?.label as string),
 		);
 		expect(onSiteDatepicker).toBeInTheDocument();
 		expect(
@@ -63,8 +62,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		const weather = onSiteValue.find((val) => val.name === "weather");
 
 		const weatherTextArea = await within(accordion).findByLabelText(
-			
-			ic(weather?.label!),
+			ic(weather?.label as string),
 		);
 		expect(weatherTextArea).toBeInTheDocument();
 		expect(weatherTextArea).toHaveValue("Nuageux");
@@ -78,8 +76,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 
 		const standTypeAndSilviculturalSystemBCCTextArea = await within(
 			accordion,
-			
-		).findByLabelText(ic(standTypeAndSilviculturalSystemBCC?.label!));
+		).findByLabelText(ic(standTypeAndSilviculturalSystemBCC?.label as string));
 		expect(standTypeAndSilviculturalSystemBCCTextArea).toBeInTheDocument();
 		expect(standTypeAndSilviculturalSystemBCCTextArea).toHaveValue("Epicéa");
 		expect(standTypeAndSilviculturalSystemBCCTextArea).toBeDisabled();
@@ -92,8 +89,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 
 		const isPlantationPresentACCSwitch = await within(
 			accordion,
-			
-		).findByLabelText(ic(isPlantationPresentACC?.label!));
+		).findByLabelText(ic(isPlantationPresentACC?.label as string));
 		expect(isPlantationPresentACCSwitch).toBeInTheDocument();
 		expect(isPlantationPresentACCSwitch).not.toBeChecked();
 		expect(isPlantationPresentACCSwitch).toBeDisabled();
@@ -105,8 +101,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		expect(
-			
-			await screen.queryByText(newTreeSpicies?.label!),
+			screen.queryByText(newTreeSpicies?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -116,8 +111,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		expect(
-			
-			await screen.queryByText(imgsPlantation?.label!),
+			screen.queryByText(imgsPlantation?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -127,8 +121,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		const isWorksiteSignPresentSwitch = await within(accordion).findByLabelText(
-			
-			ic(isWorksiteSignPresent?.label!),
+			ic(isWorksiteSignPresent?.label as string),
 		);
 		expect(isWorksiteSignPresentSwitch).toBeInTheDocument();
 		expect(isWorksiteSignPresentSwitch).not.toBeChecked();
@@ -141,8 +134,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		expect(
-			
-			await screen.queryByText(imgWorksiteSign?.label!),
+			screen.queryByText(imgWorksiteSign?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -153,8 +145,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 
 		const waterCourseOrWetlandPresenceTextArea = await within(
 			accordion,
-			
-		).findByLabelText(ic(waterCourseOrWetlandPresence?.label!));
+		).findByLabelText(ic(waterCourseOrWetlandPresence?.label as string));
 		expect(waterCourseOrWetlandPresenceTextArea).toBeInTheDocument();
 		expect(waterCourseOrWetlandPresenceTextArea).toHaveValue(
 			"Présence de cours d'eau",
@@ -166,8 +157,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		const soilState = onSiteValue.find((val) => val.name === "soilState");
 
 		const soilStateTextArea = await within(accordion).findByLabelText(
-			
-			ic(soilState?.label!),
+			ic(soilState?.label as string),
 		);
 		expect(soilStateTextArea).toBeInTheDocument();
 		expect(soilStateTextArea).toHaveValue("Sol en mauvais état");
@@ -178,8 +168,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		const soilState = onSiteValue.find((val) => val.name === "soilState");
 
 		const soilStateTextArea = await within(accordion).findByLabelText(
-			
-			ic(soilState?.label!),
+			ic(soilState?.label as string),
 		);
 		expect(soilStateTextArea).toBeInTheDocument();
 		expect(soilStateTextArea).toHaveValue("Sol en mauvais état");
@@ -192,8 +181,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		const imgsTreeTrunksInputFile = await within(accordion).findByLabelText(
-			
-			imgsTreeTrunks?.label!,
+			imgsTreeTrunks?.label as string,
 		);
 		expect(imgsTreeTrunksInputFile).toBeInTheDocument();
 		expect(imgsTreeTrunksInputFile).toBeDisabled();
@@ -205,8 +193,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		const imgsSoilStateInputFile = await within(accordion).findByLabelText(
-			
-			ic(imgsSoilState?.label!),
+			ic(imgsSoilState?.label as string),
 		);
 		expect(imgsSoilStateInputFile).toBeInTheDocument();
 		expect(imgsSoilStateInputFile).toBeDisabled();
@@ -218,8 +205,7 @@ describe("On Site section form when there is a volunteer connected but not assig
 		);
 
 		const imgsAccessRoadInputFile = await within(accordion).findByLabelText(
-			
-			ic(imgsAccessRoad?.label!),
+			ic(imgsAccessRoad?.label as string),
 		);
 		expect(imgsAccessRoadInputFile).toBeInTheDocument();
 		expect(imgsAccessRoadInputFile).toBeDisabled();

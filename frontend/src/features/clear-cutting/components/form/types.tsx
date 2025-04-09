@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import type { FormType } from "@/shared/components/form/Form";
 import type { Path } from "react-hook-form";
 
@@ -22,7 +22,7 @@ export type SectionFormItem<T> = {
 	fallBack?: (key: string | number) => React.ReactNode;
 	className?: string;
 	customizeRender?: (
-		form: FormType<ClearCuttingForm>,
+		form: FormType<ClearCutForm>,
 		key: string | number,
 	) => React.ReactNode;
 };

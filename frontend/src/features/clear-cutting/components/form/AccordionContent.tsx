@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import { selectLoggedUser } from "@/features/user/store/user.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
 import type { FormType } from "@/shared/components/form/Form";
@@ -26,7 +26,7 @@ import {
 } from "./sections/RegulationsSection";
 import { FormItemType, type SectionForm, type SectionFormItem } from "./types";
 
-const ccForm: Map<SectionForm, SectionFormItem<ClearCuttingForm>[]> = new Map();
+const ccForm: Map<SectionForm, SectionFormItem<ClearCutForm>[]> = new Map();
 ccForm.set(generalInfoKey, generalInfoValue);
 ccForm.set(onSiteKey, onSiteValue);
 ccForm.set(ecoZoneKey, ecoZoneValue);
@@ -36,7 +36,7 @@ ccForm.set(otherInfoKey, otherInfoValue);
 
 export default function AccordionContent({
 	form,
-}: { form: FormType<ClearCuttingForm> }) {
+}: { form: FormType<ClearCutForm> }) {
 	const user = useAppSelector(selectLoggedUser);
 
 	useEffect(() => {

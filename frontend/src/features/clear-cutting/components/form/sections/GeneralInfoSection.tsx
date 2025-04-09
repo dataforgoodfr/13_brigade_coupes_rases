@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import { FormItemType, type SectionForm, type SectionFormItem } from "../types";
 
 export const generalInfoKey: SectionForm = {
@@ -6,9 +6,9 @@ export const generalInfoKey: SectionForm = {
 	className: "grid grid-cols-2 gap-2",
 };
 
-export const generalInfoValue: SectionFormItem<ClearCuttingForm>[] = [
+export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "reportDate",
+		name: "updated_at",
 		transformValue: (val: unknown) =>
 			new Date(val as string).toLocaleDateString(),
 		label: "Date de signalement",
@@ -16,50 +16,44 @@ export const generalInfoValue: SectionFormItem<ClearCuttingForm>[] = [
 		renderConditions: [],
 	},
 	{
-		name: "address.city",
+		name: "city",
 		label: "Commune",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 	},
 	{
-		name: "address.postalCode",
+		name: "department.name",
 		label: "Département",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 	},
 	{
-		name: "center.0",
+		name: "average_location.coordinates.0",
 		label: "Latitude",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 	},
 	{
-		name: "center.1",
+		name: "average_location.coordinates.1",
 		label: "Longitude",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 	},
 	{
-		name: "cadastralParcel.id",
-		label: "Parcelle cadastrale",
-		type: FormItemType.Fixed,
-		renderConditions: [],
-	},
-	{
-		name: "cutYear",
+		name: "last_cut_date",
 		label: "Date de la coupe",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 	},
 	{
-		name: "clearCuttingSize",
+		name: "total_area_hectare",
 		label: "Taille de la coupe",
 		type: FormItemType.Fixed,
 		renderConditions: [],
 		transformValue: (val: unknown) => `${val} ha`,
 	},
 	{
-		name: "clearCuttingSlope",
+		name: "slope_area_ratio_percentage",
 		label: "Pourcentage de pente",
 		type: FormItemType.Fixed,
 		renderConditions: [],

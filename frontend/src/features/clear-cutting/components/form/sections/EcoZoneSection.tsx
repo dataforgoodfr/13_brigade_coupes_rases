@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import type { FormType } from "@/shared/components/form/Form";
 import { FormItemType, type SectionForm, type SectionFormItem } from "../types";
 
@@ -7,7 +7,7 @@ export const ecoZoneKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const ecoZoneValue: SectionFormItem<ClearCuttingForm>[] = [
+export const ecoZoneValue: SectionFormItem<ClearCutForm>[] = [
 	{
 		name: "isNatura2000",
 		label: "Coupe au sein d'une zone Natura 2000 ?",
@@ -18,10 +18,7 @@ export const ecoZoneValue: SectionFormItem<ClearCuttingForm>[] = [
 		name: "natura2000Zone",
 		type: FormItemType.Customized,
 		renderConditions: ["isNatura2000"],
-		customizeRender: (
-			form: FormType<ClearCuttingForm>,
-			key: string | number,
-		) => {
+		customizeRender: (form: FormType<ClearCutForm>, key: string | number) => {
 			return (
 				<p key={key}>
 					{`${form.getValues("natura2000Zone.id")} ${form.getValues("natura2000Zone.name")}`}

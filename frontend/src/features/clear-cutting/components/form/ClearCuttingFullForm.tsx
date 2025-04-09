@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
-	type ClearCutting,
-	type ClearCuttingForm,
-	clearCuttingFormSchema,
+	type ClearCutForm,
+	clearCutFormSchema,
 } from "@/features/clear-cutting/store/clear-cuttings";
 import { Form } from "@/shared/components/form/Form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,13 +11,13 @@ import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
 
 export default function ClearCuttingFullForm({
-	clearCutting,
-}: { clearCutting: ClearCutting }) {
-	const form = useForm<ClearCuttingForm>({
-		resolver: zodResolver(clearCuttingFormSchema),
-		defaultValues: clearCuttingFormSchema.parse({
-			...clearCutting,
-			status: clearCutting.status.name,
+	clearCutting: clearCut,
+}: { clearCutting: ClearCutForm }) {
+	const form = useForm<ClearCutForm>({
+		resolver: zodResolver(clearCutFormSchema),
+		defaultValues: clearCutFormSchema.parse({
+			...clearCut,
+			status: clearCut.status,
 		}),
 	});
 
@@ -30,8 +29,8 @@ export default function ClearCuttingFullForm({
 			>
 				<AccordionHeader
 					form={form}
-					abusiveTags={clearCutting.abusiveTags}
-					status={clearCutting.status}
+					tags={clearCut.tags}
+					status={clearCut.status}
 				/>
 				<Accordion.Root type="multiple" className="grow">
 					<AccordionContent form={form} />

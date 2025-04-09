@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import { FormItemType, type SectionForm, type SectionFormItem } from "../types";
 
 export const legalKey: SectionForm = {
@@ -6,7 +6,7 @@ export const legalKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const legalValue: SectionFormItem<ClearCuttingForm>[] = [
+export const legalValue: SectionFormItem<ClearCutForm>[] = [
 	{
 		name: "isRelevantComplaintPEFC",
 		label: "Pertinent pour plainte PEFC",

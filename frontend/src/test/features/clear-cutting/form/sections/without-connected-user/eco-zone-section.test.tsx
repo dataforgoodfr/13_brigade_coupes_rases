@@ -1,9 +1,8 @@
-
 import {
 	ecoZoneKey,
 	ecoZoneValue,
 } from "@/features/clear-cutting/components/form/sections/EcoZoneSection";
-import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { renderApp } from "@/test/renderApp";
 import { ic } from "@/test/utils";
@@ -16,8 +15,8 @@ describe("On Site section form when there isn't a user connected", () => {
 	beforeAll(async () => {
 		server.use(
 			mockClearCutting({
-				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
+				city: "Paris",
+				last_cut_date: "2024-03-19",
 				onSiteDate: "2024-03-19T14:26:30.789Z",
 				weather: "Nuageux",
 				standTypeAndSilviculturalSystemBCC: "Epicéa",
@@ -33,7 +32,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		const buttons = await screen.findAllByText(ic(ecoZoneKey.name));
 		const accordionButton = buttons.filter((el) => el.tagName === "BUTTON")[0];
 		fireEvent.click(accordionButton);
-		accordion = accordionButton.parentElement?.parentElement!;
+		accordion = accordionButton.parentElement?.parentElement as HTMLElement;
 	});
 
 	it(`should display "${ecoZoneKey.name}" section`, async () => {
@@ -49,7 +48,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		const isNatura2000Switch = await within(accordion).findByLabelText(
-			ic(isNatura2000?.label!),
+			ic(isNatura2000?.label as string),
 		);
 		expect(isNatura2000Switch).toBeInTheDocument();
 		expect(isNatura2000Switch).not.toBeChecked();
@@ -62,7 +61,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		const isNatura2000Switch = await within(accordion).findByLabelText(
-			ic(isNatura2000?.label!),
+			ic(isNatura2000?.label as string),
 		);
 		expect(isNatura2000Switch).toBeInTheDocument();
 		expect(isNatura2000Switch).not.toBeChecked();

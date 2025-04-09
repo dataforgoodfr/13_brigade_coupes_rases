@@ -1,5 +1,5 @@
 import { legalKey } from "@/features/clear-cutting/components/form/sections/LegalSection";
-import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { renderApp } from "@/test/renderApp";
 import { ic } from "@/test/utils";
@@ -10,9 +10,13 @@ describe("Clear cutting report", () => {
 	beforeAll(() => {
 		server.use(
 			mockClearCutting({
-				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
-				reportDate: new Date().toISOString(),
+				city: "Paris",
+				last_cut_date: "2024-03-19",
+				onSiteDate: "2024-03-19T14:26:30.789Z",
+				weather: "Nuageux",
+				standTypeAndSilviculturalSystemBCC: "Epicéa",
+				waterCourseOrWetlandPresence: "Présence de cours d'eau",
+				soilState: "Sol en mauvais état",
 			}),
 		);
 		renderApp({

@@ -1,4 +1,4 @@
-import type { ClearCuttingForm } from "@/features/clear-cutting/store/clear-cuttings";
+import type { ClearCutForm } from "@/features/clear-cutting/store/clear-cuttings";
 import { FormItemType, type SectionForm, type SectionFormItem } from "../types";
 
 export const otherInfoKey: SectionForm = {
@@ -6,7 +6,7 @@ export const otherInfoKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const otherInfoValue: SectionFormItem<ClearCuttingForm>[] = [
+export const otherInfoValue: SectionFormItem<ClearCutForm>[] = [
 	{
 		name: "otherInfos",
 		label: "Informations complémentaires",

@@ -4,6 +4,7 @@ import type { Bounds } from "@/features/clear-cutting/store/types";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
+	selectDepartmentsByIds,
 	selectEcologicalZoningByIds,
 	selectTagsByIds,
 } from "@/shared/store/referential/referential.slice";
@@ -13,10 +14,11 @@ import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
 import { useEffect } from "react";
 import {
+	type ClearCutForm,
 	type ClearCutReport,
 	type ClearCutReportResponse,
 	type ClearCuttings,
-	clearCutReportResponseSchema,
+	clearCutFormResponseSchema,
 	clearCuttingsResponseSchema,
 } from "./clear-cuttings";
 
@@ -26,6 +28,7 @@ const mapReport = (
 ): ClearCutReport => ({
 	...report,
 	tags: selectTagsByIds(state, report.tags_ids),
+	department: selectDepartmentsByIds(state, [report.department_id])[0],
 	clear_cuts: report.clear_cuts.map((cut) => ({
 		...cut,
 		ecologicalZonings: selectEcologicalZoningByIds(
@@ -34,13 +37,13 @@ const mapReport = (
 		),
 	})),
 });
-export const getClearCuttingThunk = createAppAsyncThunk<ClearCutReport, string>(
-	"getClearCutting",
+export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
+	"getClearCutForm",
 	async (id, { getState, extra: { api } }) => {
 		const result = await api().get(`api/v1/clear-cuts-map/${id}`).json();
-		const report = clearCutReportResponseSchema.parse(result);
+		const report = clearCutFormResponseSchema.parse(result);
 		const state = getState();
-		return mapReport(state, report);
+		return mapReport(state, report) as ClearCutForm;
 	},
 );
 const getClearCuttingsThunk = createAppAsyncThunk<
@@ -78,7 +81,7 @@ const getClearCuttingsThunk = createAppAsyncThunk<
 });
 type State = {
 	clearCuttings: RequestedContent<ClearCuttings>;
-	detail: RequestedContent<ClearCutReport>;
+	detail: RequestedContent<ClearCutForm>;
 };
 const initialState: State = {
 	clearCuttings: { status: "idle" },
@@ -89,13 +92,13 @@ export const clearCuttingsSlice = createSlice({
 	initialState,
 	reducers: {},
 	extraReducers: (builder) => {
-		builder.addCase(getClearCuttingThunk.fulfilled, (state, { payload }) => {
+		builder.addCase(getClearCutFormThunk.fulfilled, (state, { payload }) => {
 			state.detail = { status: "success", value: payload };
 		});
-		builder.addCase(getClearCuttingThunk.rejected, (state, error) => {
+		builder.addCase(getClearCutFormThunk.rejected, (state, error) => {
 			state.detail = { status: "error", error };
 		});
-		builder.addCase(getClearCuttingThunk.pending, (state) => {
+		builder.addCase(getClearCutFormThunk.pending, (state) => {
 			state.detail = { status: "loading" };
 		});
 		builder.addCase(getClearCuttingsThunk.fulfilled, (state, { payload }) => {
@@ -132,7 +135,7 @@ export const useGetClearCuttings = () => {
 export const useGetClearCutting = (id: string) => {
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		dispatch(getClearCuttingThunk(id));
+		dispatch(getClearCutFormThunk(id));
 	}, [id, dispatch]);
 	return useAppSelector(selectDetail);
 };

@@ -1,9 +1,8 @@
-
 import {
 	onSiteKey,
 	onSiteValue,
 } from "@/features/clear-cutting/components/form/sections/OnSiteSection";
-import { createAddressMock, mockClearCutting } from "@/mocks/clear-cuttings";
+import { mockClearCutting } from "@/mocks/clear-cuttings";
 import { server } from "@/test/mocks/server";
 import { renderApp } from "@/test/renderApp";
 import { ic } from "@/test/utils";
@@ -16,8 +15,8 @@ describe("On Site section form when there isn't a user connected", () => {
 	beforeAll(async () => {
 		server.use(
 			mockClearCutting({
-				address: createAddressMock({ city: "Paris" }),
-				cutYear: 2024,
+				city: "Paris",
+				last_cut_date: "2024-03-19",
 				onSiteDate: "2024-03-19T14:26:30.789Z",
 				weather: "Nuageux",
 				standTypeAndSilviculturalSystemBCC: "Epicéa",
@@ -33,7 +32,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		const buttons = await screen.findAllByText(ic(onSiteKey.name));
 		const accordionButton = buttons.filter((el) => el.tagName === "BUTTON")[0];
 		fireEvent.click(accordionButton);
-		accordion = accordionButton.parentElement?.parentElement!;
+		accordion = accordionButton.parentElement?.parentElement as HTMLElement;
 	});
 
 	it(`should display "${onSiteKey.name}" section`, async () => {
@@ -99,7 +98,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		expect(
-			await screen.queryByText(newTreeSpicies?.label!),
+			screen.queryByText(newTreeSpicies?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -109,7 +108,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		expect(
-			await screen.queryByText(imgsPlantation?.label!),
+			screen.queryByText(imgsPlantation?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -132,7 +131,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		expect(
-			await screen.queryByText(imgWorksiteSign?.label!),
+			screen.queryByText(imgWorksiteSign?.label as string),
 		).not.toBeInTheDocument();
 	});
 
@@ -179,7 +178,7 @@ describe("On Site section form when there isn't a user connected", () => {
 		);
 
 		const imgsTreeTrunksInputFile = await within(accordion).findByLabelText(
-			imgsTreeTrunks?.label!,
+			imgsTreeTrunks?.label as string,
 		);
 		expect(imgsTreeTrunksInputFile).toBeInTheDocument();
 		expect(imgsTreeTrunksInputFile).toBeDisabled();
