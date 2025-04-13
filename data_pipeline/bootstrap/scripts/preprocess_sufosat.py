@@ -17,8 +17,7 @@ from scripts.utils import (
 from scripts.utils.df_utils import save_gdf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
-DETECTIONS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_detections.fgb"
-CLUSTERS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
+RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
 
 
 def download_sufosat_raster_dates(input_raster_dates: str) -> None:
@@ -370,7 +369,7 @@ def add_area_ha(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
-@log_execution([DETECTIONS_RESULT_FILEPATH, CLUSTERS_RESULT_FILEPATH])
+@log_execution([RESULT_FILEPATH])
 def preprocess_sufosat(
     input_raster_dates: str = str(
         SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
@@ -415,12 +414,17 @@ def preprocess_sufosat(
     download_sufosat_raster_dates(input_raster_dates)
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
+
+    # To develop the update mechanism, we'll truncate the data up to 2025
+    # To test the mechanism, we can consider 2025+ data as new detections
+    # This is temporary
+    gdf = gdf[gdf["date"] < pd.Timestamp(2025, 1, 1)]
+
     gdf = cluster_clear_cuts(gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts)
-    save_gdf(gdf, DETECTIONS_RESULT_FILEPATH)
     gdf = union_clear_cut_clusters(gdf)
     gdf = add_concave_hull_score(gdf, concave_hull_ratio)
     gdf = add_area_ha(gdf)
-    save_gdf(gdf, CLUSTERS_RESULT_FILEPATH, index=True)
+    save_gdf(gdf, RESULT_FILEPATH, index=True)
 
 
 if __name__ == "__main__":
