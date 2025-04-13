@@ -1,4 +1,4 @@
-import { MapProvider } from "@/features/clear-cutting/components/map/Map.context";
+import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import {
 	type AuthContext,
 	AuthProvider,
