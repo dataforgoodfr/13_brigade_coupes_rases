@@ -3,11 +3,10 @@ import logging
 import dask_geopandas
 import geopandas as gpd
 import pandas as pd
-from dask.diagnostics import ProgressBar
+from dask.diagnostics.progress import ProgressBar
 
 from scripts import DATA_DIR
-from scripts.utils import display_df, log_execution
-from scripts.utils.df_utils import load_gdf, save_gdf
+from scripts.utils import display_df, load_gdf, log_execution, save_gdf
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
 
@@ -219,7 +218,7 @@ def enrich_sufosat_clusters() -> None:
     - Slope information (largest area with slopes ≥ 30% in hectares)
     """
     # Register progress bar for dask operations
-    ProgressBar().register()
+    ProgressBar().register()  # type: ignore
 
     # Load SUFOSAT clusters
     sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index("clear_cut_group")
