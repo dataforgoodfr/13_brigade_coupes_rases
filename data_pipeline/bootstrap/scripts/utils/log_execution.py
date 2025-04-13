@@ -6,8 +6,6 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Optional, TypeVar
 
-import psutil
-
 T = TypeVar("T")
 
 
@@ -57,7 +55,7 @@ def log_execution(
     result_filepath: str | Path | list[str | Path],
 ) -> Callable[[Callable[..., T]], Callable[..., Optional[T]]]:
     """
-    Decorator for logging start, end, memory usage, and duration
+    Decorator for logging start, end, and duration
     """
     if not isinstance(result_filepath, list):
         result_filepath = [result_filepath]
@@ -90,16 +88,9 @@ def log_execution(
             # Record end time
             end_time = time.perf_counter()
 
-            # TODO: This max memory usage is not accurate at all!
-            # Memory usage
-            process = psutil.Process()
-            memory_info = process.memory_info()
-            max_memory = memory_info.rss / (1024 * 1024)  # Convert to MB
-
             # Log end time, memory usage, and duration
             logging.info(
                 f"[============  End of the {decorated_function_name} script. "
-                f"Max memory usage: {max_memory:,.0f} MB. "
                 f"Total duration: {_format_time(end_time - start_time)} ============]"
             )
 
