@@ -14,7 +14,8 @@
 			".storybook",
 			"storybook-static",
 			"dist",
-			"public/mockServiceWorker.js"
+			"public/mockServiceWorker.js",
+			"test/features/clear-cutting/form"
 		]
 	},
 	"formatter": {

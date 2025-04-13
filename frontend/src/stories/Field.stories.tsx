@@ -6,7 +6,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/shared/components/Form";
+} from "@/shared/components/form/Form";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { zodResolver } from "@hookform/resolvers/zod";

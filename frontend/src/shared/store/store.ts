@@ -1,7 +1,7 @@
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
-import { clearCuttingsSlice } from "@/features/clear-cutting/store/clear-cuttings-slice";
-import { filtersSlice } from "@/features/clear-cutting/store/filters.slice";
+import { clearCutsSlice } from "@/features/clear-cut/store/clear-cuts-slice";
+import { filtersSlice } from "@/features/clear-cut/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
 import {
 	getStoredToken,
@@ -30,7 +30,7 @@ const reducer = combineReducers({
 	[filtersSlice.reducerPath]: filtersSlice.reducer,
 	[usersApi.reducerPath]: usersApi.reducer,
 	[referentialSlice.reducerPath]: referentialSlice.reducer,
-	[clearCuttingsSlice.reducerPath]: clearCuttingsSlice.reducer,
+	[clearCutsSlice.reducerPath]: clearCutsSlice.reducer,
 	[userSlice.reducerPath]: userSlice.reducer,
 	// Admin reducers
 	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
