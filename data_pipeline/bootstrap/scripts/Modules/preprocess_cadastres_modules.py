@@ -50,5 +50,3 @@ def convert_crs_to_lambert93(cad_type: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     logging.info("Convert CRS to Lambert93 like the other project layers")
     cad_type = cad_type.to_crs(epsg=2154)
     return cad_type
-
-

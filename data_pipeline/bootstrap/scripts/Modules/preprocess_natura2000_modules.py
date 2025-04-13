@@ -28,9 +28,6 @@ def load_layers(input_dir) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
 
 def union_module(input_file: gpd.GeoDataFrame, crs) -> gpd.GeoDataFrame:
     logging.info("Starts unioning")
-    union = gpd.GeoDataFrame(
-        geometry=[input_file.union_all()], crs=crs
-    )
+    union = gpd.GeoDataFrame(geometry=[input_file.union_all()], crs=crs)
     display_df(union)
     return union
-
