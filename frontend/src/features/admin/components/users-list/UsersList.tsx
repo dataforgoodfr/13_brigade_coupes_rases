@@ -2,43 +2,27 @@ import { Badge } from "@/components/ui/badge";
 import {} from "@/components/ui/pagination";
 import {
 	Table,
+	TableBody,
 	TableCell,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useGetFilteredUsersQuery } from "@/features/admin/store/api";
-import { UserAvatar } from "@/features/user/components/UserAvatar";
-import type { FullUser } from "@/features/user/store/user";
-
+import type { Users } from "@/features/admin/store/users-schemas";
+import { selectUsers, useGetUsers } from "@/features/admin/store/users.slice";
 import SortingButton from "@/shared/components/button/SortingButton";
-import Pagination from "@/shared/components/pagination/Pagination";
-import {} from "@/shared/hooks/store";
+import { useAppSelector } from "@/shared/hooks/store";
 import {
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
-	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useMemo } from "react";
 
-const columnHelper = createColumnHelper<FullUser>();
+const columnHelper = createColumnHelper<Users>();
 
 const columns = [
-	columnHelper.accessor("avatarUrl", {
-		id: "avatar",
-		header: () => <span />,
-		cell: (info) => {
-			return (
-				<UserAvatar
-					url={info.getValue()}
-					fallbackName={info.row.getValue("login")}
-				/>
-			);
-		},
-	}),
 	columnHelper.accessor("login", {
 		id: "login",
 		header: ({ column }) => (
@@ -46,6 +30,30 @@ const columns = [
 				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
 			>
 				Login
+			</SortingButton>
+		),
+		sortingFn: "alphanumeric",
+		enableSorting: true,
+	}),
+	columnHelper.accessor("firstname", {
+		id: "first_name",
+		header: ({ column }) => (
+			<SortingButton
+				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+			>
+				Prénom
+			</SortingButton>
+		),
+		sortingFn: "alphanumeric",
+		enableSorting: true,
+	}),
+	columnHelper.accessor("lastname", {
+		id: "last_name",
+		header: ({ column }) => (
+			<SortingButton
+				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+			>
+				Nom
 			</SortingButton>
 		),
 		sortingFn: "alphanumeric",
@@ -75,16 +83,13 @@ const columns = [
 		sortingFn: "alphanumeric",
 		enableSorting: true,
 	}),
-	columnHelper.accessor("affectedDepartments", {
-		id: "departements",
+	columnHelper.accessor("departments", {
+		id: "departments",
 		header: () => <span>Départements</span>,
 		cell: (info) => {
-			const departments: FullUser["affectedDepartments"] = info.getValue();
+			const departments = info.getValue();
 
-			if (
-				!departments?.length ||
-				info.row.getValue("role") === "administrator"
-			) {
+			if (!departments?.length) {
 				return null;
 			}
 
@@ -100,26 +105,15 @@ const columns = [
 ];
 
 export const UsersList: React.FC = () => {
-	const { data } = useGetFilteredUsersQuery();
-
-	const usersList = useMemo(() => {
-		return (data?.users) ?? [];
-	}, [data]);
+	useGetUsers();
+	const users = useAppSelector(selectUsers);
 
 	const table = useReactTable({
-		// @ts-ignore TODO: fix type
-		data: usersList,
+		data: users,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
-		// TODO: Implement sorting backend ?
+		// TODO: Implement sorting backend
 		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		initialState: {
-			pagination: {
-				pageSize: 8,
-				pageIndex: 1,
-			},
-		},
 	});
 
 	return (
@@ -141,26 +135,25 @@ export const UsersList: React.FC = () => {
 						</TableRow>
 					))}
 				</TableHeader>
-				<TableHeader>
-					{table.getRowModel().rows.map((row) => (
-						<TableRow key={row.id}>
-							{row.getVisibleCells().map((cell) => (
-								<TableCell key={cell.id}>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</TableCell>
-							))}
-						</TableRow>
-					))}
-				</TableHeader>
+				<TableBody>
+					{table.getRowModel().rows.map((row) => {
+						return (
+							<TableRow key={row.id}>
+								{row.getVisibleCells().map((cell) => {
+									return (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									);
+								})}
+							</TableRow>
+						);
+					})}
+				</TableBody>
 			</Table>
-
-			<Pagination
-				currentPage={table.getState().pagination.pageIndex}
-				setCurrentPage={(newPage) => {
-					table.setPageIndex(newPage);
-				}}
-				totalPages={table.getPageCount()}
-			/>
 		</div>
 	);
 };
