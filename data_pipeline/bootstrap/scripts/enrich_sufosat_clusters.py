@@ -2,6 +2,7 @@ import logging
 
 import dask_geopandas
 import geopandas as gpd
+import pandas as pd
 from dask.diagnostics import ProgressBar
 
 from scripts import DATA_DIR
@@ -107,9 +108,6 @@ def enrich_with_natura2000_area(
     # Add Natura 2000 area to the SUFOSAT DataFrame
     sufosat.loc[natura2000_area_ha.index, "natura2000_area_ha"] = natura2000_area_ha
 
-    # Fill NA values with 0 (no intersection with Natura 2000)
-    sufosat["natura2000_area_ha"] = sufosat["natura2000_area_ha"].fillna(0)
-
     logging.info(f"{len(natura2000_area_ha)} clusters intersect with Natura 2000 areas")
 
     display_df(sufosat)
@@ -165,10 +163,45 @@ def enrich_with_slope_information(
     # Add slope area to the SUFOSAT DataFrame
     sufosat.loc[slope_area_ha.index, "slope_area_ha"] = slope_area_ha
 
-    # Fill NA values with 0 (no intersection with slopes ≥ 30%)
-    sufosat["slope_area_ha"] = sufosat["slope_area_ha"].fillna(0)
-
     logging.info(f"{len(slope_area_ha)} clusters intersect with steep slopes")
+
+    display_df(sufosat)
+
+    return sufosat
+
+
+def enrich_with_bdforet(
+    sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    logging.info("Enriching SUFOSAT clusters with the BDFORET information")
+
+    # Load BDFORET
+    bdforet_dask = dask_geopandas.read_file(DATA_DIR / "bdforet/bdforet.fgb", npartitions=12)
+
+    # Calculate intersection area in hectares (1 hectare = 10,000 m²)
+    sufosat_bdf = overlay(sufosat_dask, bdforet_dask)
+    sufosat_bdf["area_ha"] = sufosat_bdf.area / 10000
+
+    # Select only the required columns and compute the intersections
+    sufosat_bdf_intersections: pd.DataFrame = sufosat_bdf[["bdf_type", "area_ha"]].compute()
+
+    # Pivot from "bdft_type", "area_ha" columns to
+    # "bdf_deciduous_area_ha", "bdf_mixed_area_ha", "bdf_poplar_area_ha", "bdf_resinous_area_ha"
+    # with "clear_cut_group" as index
+    sufosat_bdf_areas = (
+        sufosat_bdf_intersections.reset_index()
+        .pivot_table(
+            index="clear_cut_group",
+            columns="bdf_type",
+            values="area_ha",
+            aggfunc="sum",
+        )
+        .add_suffix("_area_ha")
+        .add_prefix("bdf_")
+    )
+
+    # Join SUFOSAT with BDFORET intersection areas on the "clear_cut_group" index
+    sufosat = sufosat.join(sufosat_bdf_areas)
 
     display_df(sufosat)
 
@@ -198,6 +231,7 @@ def enrich_sufosat_clusters() -> None:
     sufosat = enrich_with_cities(sufosat, sufosat_dask)
     sufosat = enrich_with_natura2000_area(sufosat, sufosat_dask)
     sufosat = enrich_with_natura2000_codes(sufosat, sufosat_dask)
+    sufosat = enrich_with_bdforet(sufosat, sufosat_dask)
     sufosat = enrich_with_slope_information(sufosat, sufosat_dask)
 
     # Save the enriched SUFOSAT clusters
