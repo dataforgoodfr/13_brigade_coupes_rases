@@ -9,7 +9,7 @@ export type FixedFieldProps = {
 export function FixedField({ title, value, className }: FixedFieldProps) {
 	return (
 		<div className={cn("flex gap-2", className)}>
-			{title && <p className="font-bold">{title} :</p>}
+			{title && <span className="font-bold">{title} :</span>}
 			{value && <p>{value}</p>}
 		</div>
 	);

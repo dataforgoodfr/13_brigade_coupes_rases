@@ -6,10 +6,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import type { FieldValues } from "react-hook-form";
+import { FormattedDate } from "react-intl";
 import {
 	FormControl,
 	FormField,
@@ -44,7 +44,7 @@ export function FormDatePicker<T extends FieldValues = FieldValues>({
 									)}
 								>
 									{field.value ? (
-										format(field.value, "PPP", { locale: fr })
+										<FormattedDate value={field.value} />
 									) : (
 										<span>Sélectionner une date</span>
 									)}
