@@ -42,6 +42,10 @@ types-requests = "^2.32.0.20250328"
 pandas-stubs = "^2.2.3.250308"
 types-tqdm = "^4.67.0.20250319"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.mypy]
 strict = true
 
