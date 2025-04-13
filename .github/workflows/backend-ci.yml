@@ -40,7 +40,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +82,7 @@ jobs:
       - name: Run tests
         working-directory: ./backend
         run: |
-          poetry run pytest test/
+          make upgrade-test-db && make test
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test

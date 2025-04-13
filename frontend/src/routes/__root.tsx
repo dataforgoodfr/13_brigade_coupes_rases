@@ -9,7 +9,6 @@ import {
 	selectReferentialStatus,
 } from "@/shared/store/referential/referential.slice";
 import { Navigate, createRootRouteWithContext } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useEffect } from "react";
 
 interface RouterContext {
@@ -32,7 +31,6 @@ function RootComponent() {
 		<>
 			<AppLayout />
 			<Toaster />
-			<TanStackRouterDevtools />
 		</>
 	) : (
 		<div className="h-screen  justify-center flex  items-center">

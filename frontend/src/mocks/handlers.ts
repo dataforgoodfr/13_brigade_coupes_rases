@@ -1,14 +1,15 @@
-import { mockClearCutting, mockClearCuttings } from "@/mocks/clear-cuttings";
+import { mockClearCut, mockClearCutsResponse } from "@/mocks/clear-cuts";
 import { mockFilters } from "@/mocks/filters";
 import { mockReferential } from "@/mocks/referential";
-import { mockLogin, mockUsers } from "@/mocks/users";
+import { mockMe, mockToken, mockUsers } from "@/mocks/users";
 
 export const handlers = [
-	mockClearCuttings,
+	mockClearCutsResponse(undefined, true),
 	mockFilters,
-	mockLogin,
+	mockMe,
+	mockToken,
 	mockFilters,
 	mockUsers,
 	mockReferential,
-	mockClearCutting(),
+	mockClearCut().handler,
 ];

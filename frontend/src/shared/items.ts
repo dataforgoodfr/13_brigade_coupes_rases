@@ -1,3 +1,4 @@
+import type { ReactNode } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 export interface NamedId<
@@ -36,7 +37,8 @@ export function recordToSelectableItemsTransformed<TItem, TTransformed = TItem>(
 			}));
 }
 export type SelectableItemEnhanced<T> = SelectableItem<T> & {
-	label: string;
+	prefix?: ReactNode;
+	label: ReactNode;
 	value: string;
 };
 export function recordToNamedId(record?: Record<string, string>): NamedId[] {
@@ -47,7 +49,7 @@ export function recordToNamedId(record?: Record<string, string>): NamedId[] {
 
 export const useEnhancedItems = <
 	TItem,
-	TLabel extends string = string,
+	TLabel extends ReactNode,
 	TValue extends string = string,
 >(
 	items: readonly SelectableItem<TItem>[],
