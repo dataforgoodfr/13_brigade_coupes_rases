@@ -5,13 +5,6 @@ Created on Sat Apr 12 20:20:22 2025
 @author: cindy
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr 12 20:20:22 2025
-
-@author: cindy
-"""
-
 import logging
 import gzip
 import shutil
@@ -28,13 +21,8 @@ RESULT_FILEPATH = CADASTRE_DEPARTMENTS_DIR / "cadastre_departments.fgb"
 def download_cadastre(cad_type, url, cad_dir) -> gpd.GeoDataFrame:
     logging.info(f"Downloading the cadastre for {cad_type}")
 
-    download_file(
-        url,
-        cad_dir,
-    )
-
+    download_file(url, cad_dir)
     result = load_gdf(cad_dir)
-
     return result
 
 
@@ -62,4 +50,5 @@ def convert_crs_to_lambert93(cad_type: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     logging.info("Convert CRS to Lambert93 like the other project layers")
     cad_type = cad_type.to_crs(epsg=2154)
     return cad_type
+
 
