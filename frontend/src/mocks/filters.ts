@@ -1,5 +1,5 @@
-import { CLEAR_CUTTING_STATUSES } from "@/features/clear-cutting/store/clear-cuttings";
-import type { FiltersResponse } from "@/features/clear-cutting/store/filters";
+import { CLEAR_CUTTING_STATUSES } from "@/features/clear-cut/store/clear-cuts";
+import type { FiltersResponse } from "@/features/clear-cut/store/filters";
 import { fakeDepartments, fakeTags } from "@/mocks/referential";
 import { http, HttpResponse } from "msw";
 export const mockFilters = http.get("*/api/v1/filters", () => {
