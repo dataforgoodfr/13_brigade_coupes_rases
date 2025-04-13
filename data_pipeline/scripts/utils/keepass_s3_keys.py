@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 25 19:24:49 2025
+Created on Sun Mar 23 13:19:34 2025
 
 @author: cindy
 """
@@ -17,7 +17,7 @@ if keepass_password is None:
     raise ValueError("La variable d'environnement KEEPASS_PASSWORD n'est pas définie.")
 
 kp = PyKeePass(
-    "data_pipeline/secrets.kdbx", password=keepass_password
+    "../../../keepass/secrets.kdbx", password=keepass_password
 )  # Accès à la base KeePass
 
 entry = kp.find_entries(
