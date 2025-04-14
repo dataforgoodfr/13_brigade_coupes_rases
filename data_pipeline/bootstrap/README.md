@@ -52,3 +52,4 @@ python -m bootstrap.scripts.seed_database \
 ```
 
 This will populate the database with a sample of 1000 historical clear-cut detections from 2018 to 2025.
+The `--sample` parameter is optional.
