@@ -5,7 +5,7 @@ import { boundsSchema } from "./types";
 const filtersRequestSchema = z.object({
 	cut_years: z.array(z.number()),
 	areas: z.number().array().optional(),
-	geoBounds: boundsSchema,
+	geoBounds: boundsSchema.optional(),
 	departments_ids: z.array(z.string()).optional(),
 	statuses: clearCutStatusSchema.array().optional(),
 	excessive_slop: z.boolean().optional(),

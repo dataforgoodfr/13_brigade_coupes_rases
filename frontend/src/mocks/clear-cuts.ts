@@ -167,9 +167,9 @@ const randomMultiPolygonFromLocation = (
 	return { type: "MultiPolygon", coordinates: [[coordinates]] };
 };
 
-const createFranceRandomPoints = range<Point>(500, franceRandomPointMock);
+const randomPoints = range<Point>(500, franceRandomPointMock);
 
-const clearCutPreviews = createFranceRandomPoints
+const clearCutPreviews = randomPoints
 	.slice(0, 50)
 	.map((center) => createClearCutReportBaseMock({ average_location: center }));
 
@@ -203,6 +203,11 @@ export const mockClearCutsResponse = (
 							),
 						)
 					: previews,
-			points: createFranceRandomPoints,
+			points:
+				boundaries && filterInArea
+					? randomPoints.filter((point) =>
+							isPointInsidePolygon(boundaries, point.coordinates),
+						)
+					: randomPoints,
 		} satisfies ClearCutsResponse);
 	});

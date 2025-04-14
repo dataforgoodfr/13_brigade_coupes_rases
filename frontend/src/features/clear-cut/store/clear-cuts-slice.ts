@@ -52,7 +52,7 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 		const searchParams = new URLSearchParams();
 		for (const filter in filters) {
 			const value = filters[filter as keyof FiltersRequest];
-			if (filter === "geoBounds") {
+			if (filter === "geoBounds" && filters[filter] !== undefined) {
 				const geoBounds = filters[filter] as Bounds;
 				searchParams.append("sw_lat", geoBounds.sw.lat.toString());
 				searchParams.append("sw_lng", geoBounds.sw.lng.toString());

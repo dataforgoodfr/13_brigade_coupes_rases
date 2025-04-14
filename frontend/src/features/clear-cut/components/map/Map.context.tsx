@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef } from "react";
 
 export type MapContext = {
 	map: L.Map | null;
@@ -14,7 +14,19 @@ export const useMapInstance = () => {
 };
 
 export const MapProvider = ({ children }: { children: React.ReactNode }) => {
-	const [map, setMap] = useState<L.Map | null>(null);
+	const mapRef = useRef<L.Map | null>(null);
 
-	return <MapCtx.Provider value={{ map, setMap }}>{children}</MapCtx.Provider>;
+	return (
+		<MapCtx.Provider
+			value={{
+				map: mapRef.current,
+				setMap: (map) => {
+					console.log(map);
+					mapRef.current = map;
+				},
+			}}
+		>
+			{children}
+		</MapCtx.Provider>
+	);
 };

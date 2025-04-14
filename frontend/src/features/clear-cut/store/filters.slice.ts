@@ -94,7 +94,14 @@ export const filtersSlice = createSlice({
 			state.statuses = payload;
 		},
 		setGeoBounds: (state, { payload }: PayloadAction<Bounds>) => {
-			state.geoBounds = payload;
+			if (
+				payload.ne.lat === payload.sw.lat &&
+				payload.ne.lng === payload.sw.lng
+			) {
+				state.geoBounds = undefined;
+			} else {
+				state.geoBounds = payload;
+			}
 		},
 		setHasEcologicalZoning: (state, { payload }: PayloadAction<boolean>) => {
 			state.ecological_zoning = payload;
@@ -153,21 +160,18 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		departments,
 		excessive_slop,
 		favorite,
-	}): FiltersRequest | undefined =>
-		geoBounds === undefined
-			? undefined
-			: {
-					geoBounds,
-					cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-					departments_ids: departments
-						.filter((d) => d.isSelected)
-						.map((d) => d.item.id),
-					areas: areas.filter((a) => a.isSelected).map((a) => a.item),
-					statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-					has_ecological_zonings: ecological_zoning,
-					excessive_slop,
-					favorite,
-				},
+	}): FiltersRequest | undefined => ({
+		geoBounds,
+		cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+		departments_ids: departments
+			.filter((d) => d.isSelected)
+			.map((d) => d.item.id),
+		areas: areas.filter((a) => a.isSelected).map((a) => a.item),
+		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
+		has_ecological_zonings: ecological_zoning,
+		excessive_slop,
+		favorite,
+	}),
 );
 
 export const selectCutYears = createTypedDraftSafeSelector(

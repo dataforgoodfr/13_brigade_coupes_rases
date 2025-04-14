@@ -11,6 +11,7 @@ import * as L from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, GeoJSON, useMap, useMapEvents } from "react-leaflet";
 import { ClearCutMapPopUp } from "./ClearCutMapPopUp";
+import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
 
 export function ClearCuts() {
 	const map = useMap();
@@ -153,6 +154,11 @@ export function ClearCuts() {
 
 	return (
 		<>
+			<div className="sm:hidden leaflet-top flex w-full">
+				<div className="leaflet-control flex grow p-1 rounded-md justify-end">
+					<MobileControl />
+				</div>
+			</div>
 			<div className="leaflet-bottom leaflet-right">
 				<div className="leaflet-control bg-zinc-100 p-1 rounded-md ">
 					<ToggleGroup

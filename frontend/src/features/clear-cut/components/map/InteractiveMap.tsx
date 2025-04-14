@@ -8,7 +8,7 @@ import { useMapInstance } from "./Map.context";
 
 export function InteractiveMap() {
 	const { setMap } = useMapInstance();
-
+	
 	return (
 		<MapContainer
 			className="h-screen w-full z-0"
