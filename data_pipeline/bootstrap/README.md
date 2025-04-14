@@ -53,4 +53,4 @@ python -m bootstrap.scripts.seed_database \
 
 This will populate the database with a sample of 1000 historical clear-cut detections from 2018 to 2025.
 The `--sample` parameter is optional.
-If you want to seed the database with all the clear-cuts, you need a machine with 32GB of RAM.
+If you want to seed the database with all the clear-cuts, you'll need a machine with 32GB of RAM. (_The insertion process could likely be optimized to use less memory_)
