@@ -11,7 +11,13 @@ configure({
 	asyncUtilTimeout: 5_000,
 });
 window.scrollTo = vi.fn();
-
+vi.mock("@/shared/hooks/breakpoint", () => {
+	return {
+		useBreakpoint: () => ({
+			breakpoint: "all",
+		}),
+	};
+});
 global.ResizeObserver = class {
 	observe() {}
 	unobserve() {}

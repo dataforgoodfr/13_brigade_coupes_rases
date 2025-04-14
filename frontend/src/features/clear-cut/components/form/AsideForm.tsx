@@ -40,15 +40,17 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 
 	return (
 		value && (
-			<div className="lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col">
-				<div className="relative pt-6 px-4 pb-1 border-b-1">
-					<Link to="/clear-cuts" className="absolute right-2 top-1">
+			<div className="flex flex-col w-full">
+				<div className=" pt-6 px-4 pb-1 border-b-1 flex align-middle justify-between">
+					<div className="flex flex-col">
+						<h1 className="text-2xl font-extrabold font-[Manrope]">{`${value?.city.toLocaleUpperCase()}`}</h1>
+						<span className="font-[Roboto]">
+							<FormattedDate value={value.last_cut_date} />
+						</span>
+					</div>
+					<Link to="/clear-cuts">
 						<X size={30} />
 					</Link>
-					<h1 className="text-2xl font-extrabold font-[Manrope]">{`${value?.city.toLocaleUpperCase()}`}</h1>
-					<span className="font-[Roboto]">
-						<FormattedDate value={value.last_cut_date} />
-					</span>
 				</div>
 				<ClearCutFullForm clearCut={value} />
 			</div>

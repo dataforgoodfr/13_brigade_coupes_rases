@@ -1,3 +1,4 @@
+import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
 import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cut/store/clear-cuts";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { setGeoBounds } from "@/features/clear-cut/store/filters.slice";
@@ -16,7 +17,7 @@ export function ClearCuts() {
 	const map = useMap();
 	const { browserLocation } = useGeolocation();
 	const [displayClearCutPreview, setDisplayClearCutPreview] = useState(false);
-
+	const [popupClearCutId, setPopupClearCutId] = useState<string>();
 	const [layer, layers, setLayer] = useSingleSelect<
 		L.TileLayer,
 		SelectableItemEnhanced<L.TileLayer>
@@ -76,7 +77,6 @@ export function ClearCuts() {
 
 	const dispatch = useAppDispatch();
 	const { value } = useAppSelector(selectClearCuts);
-
 	const dispatchGeoBounds = useCallback(() => {
 		const bounds = map.getBounds();
 		const northEast = bounds.getNorthEast();
@@ -125,6 +125,15 @@ export function ClearCuts() {
 							mouseout: (event) => {
 								event.target.closePopup();
 							},
+							click: (event) => {
+								event.target.openPopup();
+							},
+							popupopen: () => {
+								setPopupClearCutId(clearCut.id);
+							},
+							popupclose: () => {
+								setPopupClearCutId(undefined);
+							},
 						}}
 					>
 						<ClearCutMapPopUp report={clearCut} />
@@ -153,6 +162,11 @@ export function ClearCuts() {
 
 	return (
 		<>
+			<div className="sm:hidden leaflet-top flex w-full z-10">
+				<div className="leaflet-control flex grow p-1 rounded-md justify-end  z-10">
+					<MobileControl clearCutId={popupClearCutId} />
+				</div>
+			</div>
 			<div className="leaflet-bottom leaflet-right">
 				<div className="leaflet-control bg-zinc-100 p-1 rounded-md ">
 					<ToggleGroup

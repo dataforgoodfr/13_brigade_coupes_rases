@@ -14,7 +14,7 @@ export default function AccordionHeader({
 	status,
 }: { form: FormType<ClearCutForm>; tags: Tag[]; status: ClearCutStatus }) {
 	return (
-		<div className="flex items-center mt-4 gap-6 text-sm">
+		<div className="flex items-center mx-4 mt-4 gap-6 text-sm">
 			<img
 				alt="Vue satellite de le coupe rase"
 				src={form.getValues("imgSatelliteCC")}

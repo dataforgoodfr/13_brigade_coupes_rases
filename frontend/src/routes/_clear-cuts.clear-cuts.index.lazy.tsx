@@ -1,4 +1,7 @@
+import { LayoutProvider } from "@/features/clear-cut/components/Layout.context";
+import { MobileLayout } from "@/features/clear-cut/components/MobileLayout";
 import { AsideList } from "@/features/clear-cut/components/list/AsideList";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/")({
@@ -6,5 +9,16 @@ export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/")({
 });
 
 function RouteComponent() {
-	return <AsideList />;
+	const { breakpoint } = useBreakpoint();
+	return (
+		<LayoutProvider>
+			{breakpoint === "mobile" ? (
+				<MobileLayout />
+			) : (
+				<div className="sm:flex hidden w-1/4">
+					<AsideList />
+				</div>
+			)}
+		</LayoutProvider>
+	);
 }

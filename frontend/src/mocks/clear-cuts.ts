@@ -22,7 +22,7 @@ export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},
 ): ClearCutResponse => {
 	const startDate = faker.date.anytime();
-	const location = franceRandomPointMock();
+	const location = override.location ?? franceRandomPointMock();
 	const endDate = new Date(startDate);
 	endDate.setMonth(
 		startDate.getMonth() + faker.number.int({ min: 1, max: 12 }),
@@ -44,13 +44,18 @@ export const createClearCutReportBaseMock = (
 	override: Partial<ClearCutReportResponse> = {},
 ): ClearCutReportResponse => {
 	const date = faker.date.anytime();
+	const randomLocation = franceRandomPointMock();
 	const clear_cuts = [
-		...range<ClearCutResponse>(5, createClearCutResponseMock),
+		...range<ClearCutResponse>(5, () =>
+			createClearCutResponseMock({
+				location: override.average_location ?? randomLocation,
+			}),
+		),
 		...(override.clear_cuts ?? []),
 	];
 	return {
 		id: faker.string.uuid(),
-		average_location: override.average_location ?? franceRandomPointMock(),
+		average_location: override.average_location ?? randomLocation,
 		name: faker.animal.dog(),
 		comment: faker.lorem.paragraph(),
 		department_id: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
@@ -159,19 +164,19 @@ const randomMultiPolygonFromLocation = (
 		const deltaLat = (radius / earthRadius) * (180 / Math.PI) * Math.sin(angle);
 		const deltaLng =
 			((radius / earthRadius) * (180 / Math.PI) * Math.cos(angle)) /
-			Math.cos((point[0] * Math.PI) / 180);
+			Math.cos((point[1] * Math.PI) / 180);
 
-		coordinates.push([point[1] + deltaLng, point[0] + deltaLat]);
+		coordinates.push([point[0] + deltaLng, point[1] + deltaLat]);
 	}
 
 	return { type: "MultiPolygon", coordinates: [[coordinates]] };
 };
 
-const createFranceRandomPoints = range<Point>(500, franceRandomPointMock);
+const randomPoints = range<Point>(100, franceRandomPointMock);
 
-const clearCutPreviews = createFranceRandomPoints
-	.slice(0, 50)
-	.map((center) => createClearCutReportBaseMock({ average_location: center }));
+const clearCutPreviews = randomPoints.map((center) =>
+	createClearCutReportBaseMock({ average_location: center }),
+);
 
 export const mockClearCutsResponse = (
 	override: Partial<ClearCutsResponse> = {},
@@ -203,6 +208,11 @@ export const mockClearCutsResponse = (
 							),
 						)
 					: previews,
-			points: createFranceRandomPoints,
+			points:
+				boundaries && filterInArea
+					? randomPoints.filter((point) =>
+							isPointInsidePolygon(boundaries, point.coordinates),
+						)
+					: randomPoints,
 		} satisfies ClearCutsResponse);
 	});
