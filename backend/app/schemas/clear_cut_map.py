@@ -1,5 +1,6 @@
 import datetime
 from logging import getLogger
+from typing import Optional
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -60,7 +61,7 @@ class ClearCutReportPreviewSchema(BaseModel):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    slope_area_ratio_percentage: float = Field(
+    slope_area_ratio_percentage: Optional[float] = Field(
         json_schema_extra={"example": 10.0},
     )
     model_config = ConfigDict(from_attributes=True)

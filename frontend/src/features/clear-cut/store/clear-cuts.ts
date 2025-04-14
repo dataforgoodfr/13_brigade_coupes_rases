@@ -61,7 +61,7 @@ export const clearCutReportResponseSchema = z.object({
 	name: z.string().optional(),
 	status: clearCutStatusSchema,
 	average_location: pointSchema,
-	slope_area_ratio_percentage: z.number(),
+	slope_area_ratio_percentage: z.number().nullable(),
 	department_id: z.string(),
 	created_at: z.string().date(),
 	updated_at: z.string().date(),
