@@ -71,6 +71,7 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 
 	let users = fakeUsers;
 
+	// TODO: all filters and pagination from backend
 	users = users.filter((user) => {
 		let isValidUser = true;
 
@@ -85,7 +86,7 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 
 		if (role) isValidUser = isValidUser && user.role === role;
 
-		if (departments?.length && user.role === "volunteer")
+		if (departments?.length)
 			isValidUser =
 				isValidUser && departments.some((r) => user?.departments?.includes(r));
 
