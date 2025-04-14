@@ -11,7 +11,7 @@ logger = getLogger(__name__)
 
 
 class CreateClearCutsReportCreateSchema(BaseModel):
-    slope_area_ratio_percentage: float = Field(json_schema_extra={"example": "10"})
+    slope_area_ratio_percentage: Optional[float] = Field(json_schema_extra={"example": "10"})
     clear_cuts: list[ClearCutCreateSchema]
     city_zip_code: str = Field(
         json_schema_extra={"example": "1"},
@@ -31,7 +31,7 @@ class ClearCutReportPatchSchema(BaseModel):
 
 class ClearCutReportResponseSchema(BaseModel):
     id: str = Field(json_schema_extra={"example": "1"})
-    slope_area_ratio_percentage: float = Field(
+    slope_area_ratio_percentage: Optional[float] = Field(
         json_schema_extra={"example": "10"},
     )
     status: str = Field(

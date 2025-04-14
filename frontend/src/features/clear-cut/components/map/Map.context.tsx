@@ -21,7 +21,6 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
 			value={{
 				map: mapRef.current,
 				setMap: (map) => {
-					console.log(map);
 					mapRef.current = map;
 				},
 			}}

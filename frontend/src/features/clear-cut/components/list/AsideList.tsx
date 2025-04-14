@@ -3,8 +3,8 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
 import { useLayout } from "@/features/clear-cut/components/Layout.context";
+import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
 import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { IconButton } from "@/shared/components/button/Button";
@@ -15,10 +15,7 @@ export function AsideList() {
 	const { value } = useAppSelector(selectClearCuts);
 	const { setLayout } = useLayout();
 	return (
-		<div
-			id="aside-list"
-			className="flex flex-col  w-full inset-y-0 z-50   bg-white border-r-1 border-zinc-200 shadow-sm"
-		>
+		<div id="aside-list" className="flex flex-col w-full">
 			<Collapsible>
 				<div className="flex justify-between  items-center mt-5 sm:mt-14 border-b-1 border-zinc-200 px-3 py-2">
 					<h1 className="text-2xl 2xl:text-4xl/6  text-secondary text-start font-semibold font-poppins  ">

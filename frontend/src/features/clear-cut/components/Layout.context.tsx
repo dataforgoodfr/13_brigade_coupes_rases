@@ -5,9 +5,10 @@ export type LayoutContext = {
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 };
-const LayoutCtx = createContext<LayoutContext>(
-	{layout: 'list', setLayout: () => undefined}
-);
+const LayoutCtx = createContext<LayoutContext>({
+	layout: "list",
+	setLayout: () => undefined,
+});
 
 export const useLayout = () => {
 	return useContext<LayoutContext>(LayoutCtx);

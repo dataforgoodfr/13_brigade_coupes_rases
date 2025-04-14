@@ -1,9 +1,9 @@
-import  useBp from 'use-breakpoint'
+import useBp from "use-breakpoint";
 
-const BREAKPOINTS= {
-    mobile: 0,
-    all: 640
+const BREAKPOINTS = {
+	mobile: 0,
+	all: 640,
+};
+export function useBreakpoint() {
+	return useBp(BREAKPOINTS);
 }
-export function useBreakpoint() { 
-    return useBp(BREAKPOINTS)
-    }
