@@ -5,8 +5,8 @@ import geopandas as gpd
 import pandas as pd
 from dask.diagnostics.progress import ProgressBar
 
-from scripts import DATA_DIR
-from scripts.utils import display_df, load_gdf, log_execution, save_gdf
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import display_df, load_gdf, log_execution, save_gdf
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
 

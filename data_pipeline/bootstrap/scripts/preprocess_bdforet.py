@@ -6,8 +6,8 @@ import pandas as pd
 import py7zr
 from tqdm import tqdm
 
-from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, log_execution, save_gdf
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import display_df, download_file, log_execution, save_gdf
 
 BDFORET_DIR = DATA_DIR / "bdforet"
 RESULT_FILEPATH = BDFORET_DIR / "bdforet.fgb"

@@ -3,8 +3,8 @@ import logging
 import geopandas as gpd
 import pandas as pd
 
-from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
 
 NATURA_2000_DIR = DATA_DIR / "natura2000"
 CONCAT_RESULT_FILEPATH = NATURA_2000_DIR / "natura2000_concat.fgb"

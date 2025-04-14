@@ -41,7 +41,6 @@ types-psutil = "^7.0.0.20250218"
 types-requests = "^2.32.0.20250328"
 pandas-stubs = "^2.2.3.250308"
 types-tqdm = "^4.67.0.20250319"
-ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]

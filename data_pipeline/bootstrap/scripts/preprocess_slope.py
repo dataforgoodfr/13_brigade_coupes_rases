@@ -12,8 +12,14 @@ from osgeo import gdal
 from rasterio.merge import merge
 from tqdm import tqdm
 
-from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf, log_execution, polygonize_raster
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import (
+    display_df,
+    download_file,
+    load_gdf,
+    log_execution,
+    polygonize_raster,
+)
 
 SLOPE_DIR = DATA_DIR / "slope"
 RESULT_FILEPATH = SLOPE_DIR / "slope_gte_30.fgb"

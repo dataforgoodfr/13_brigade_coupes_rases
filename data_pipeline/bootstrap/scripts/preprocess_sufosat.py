@@ -5,8 +5,8 @@ import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
 
-from scripts import DATA_DIR
-from scripts.utils import (
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import (
     DisjointSet,
     display_df,
     download_file,
@@ -14,7 +14,7 @@ from scripts.utils import (
     log_execution,
     polygonize_raster,
 )
-from scripts.utils.df_utils import save_gdf
+from bootstrap.scripts.utils.df_utils import save_gdf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
 RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"

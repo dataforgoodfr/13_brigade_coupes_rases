@@ -4,8 +4,8 @@ import shutil
 
 import geopandas as gpd
 
-from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
 
 CADASTRE_CITIES_DIR = DATA_DIR / "cadastre_cities"
 RESULT_FILEPATH = CADASTRE_CITIES_DIR / "cadastre_cities.fgb"
