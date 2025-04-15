@@ -11,7 +11,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^2.20.0"
@@ -19,20 +19,6 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
-
-[tool.poetry.group.analytics.dependencies]
-jupyterlab = "^4.3.6"
-ipyleaflet = "^0.19.2"
-rasterio = "^1.4.3"
-geopandas = "^1.0.1"
-matplotlib = "^3.10.1"
-gdal = "^3.10.2"
-tqdm = "^4.67.1"
-rioxarray = "^0.18.2"
-geocube = "^0.7.1"
-earthengine-api = "^1.5.7"
-geemap = "^0.35.3"
-localtileserver = "^0.10.6"
 
 [tool.ruff]
 # Same as Black.
