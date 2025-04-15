@@ -3,12 +3,14 @@ import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cut/store/clear-cut
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { setGeoBounds } from "@/features/clear-cut/store/filters.slice";
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status";
+import { IconButton } from "@/shared/components/button/Button";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useGeolocation } from "@/shared/hooks/geolocation";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import * as L from "leaflet";
+import { Locate } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Circle, GeoJSON, useMap, useMapEvents } from "react-leaflet";
 import { ClearCutMapPopUp } from "./ClearCutMapPopUp";
@@ -66,7 +68,7 @@ export function ClearCuts() {
 		setLayer(selectableItem);
 	};
 
-	useEffect(() => {
+	const centerOnUserLocation = useCallback(() => {
 		if (browserLocation) {
 			map.setView({
 				lat: browserLocation.coords.latitude,
@@ -162,9 +164,23 @@ export function ClearCuts() {
 
 	return (
 		<>
-			<div className="sm:hidden leaflet-top flex w-full z-10">
+			<div className="sm:p-1  leaflet-top flex w-full z-10">
 				<div className="leaflet-control flex grow p-1 rounded-md justify-end  z-10">
-					<MobileControl clearCutId={popupClearCutId} />
+					<IconButton
+						icon={<Locate />}
+						className="hidden sm:flex"
+						onClick={centerOnUserLocation}
+						position={"end"}
+					>
+						Centrer sur ma position
+					</IconButton>
+					<MobileControl clearCutId={popupClearCutId}>
+						<IconButton
+							icon={<Locate />}
+							onClick={centerOnUserLocation}
+							position={"end"}
+						/>
+					</MobileControl>
 				</div>
 			</div>
 			<div className="leaflet-bottom leaflet-right">

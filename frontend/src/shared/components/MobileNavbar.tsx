@@ -1,9 +1,16 @@
 import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink";
+import clsx from "clsx";
 import { Bookmark, House, Settings } from "lucide-react";
 
-export function MobileNavbar() {
+type Props = { className: string };
+export function MobileNavbar({ className }: Props) {
 	return (
-		<nav className="flex sm:hidden py-1 items-center shadow justify-around ">
+		<nav
+			className={clsx(
+				"flex h-10 sm:hidden py-1 items-center shadow justify-around ",
+				className,
+			)}
+		>
 			<div className="flex  items-center gap-16 ">
 				<MobileNavbarLink
 					to="/clear-cuts"

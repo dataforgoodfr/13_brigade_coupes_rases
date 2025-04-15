@@ -11,7 +11,7 @@ export function InteractiveMap() {
 
 	return (
 		<MapContainer
-			className="h-screen w-full z-0"
+			className="h-full w-full z-0"
 			center={franceCenter}
 			zoom={wholeFranceZoom}
 			scrollWheelZoom={true}

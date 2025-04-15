@@ -9,13 +9,15 @@ import {
 } from "@radix-ui/react-collapsible";
 import { useNavigate } from "@tanstack/react-router";
 import { Filter, ListIcon } from "lucide-react";
-type Props = { clearCutId?: string };
-export function MobileControl({ clearCutId }: Props) {
+import type { PropsWithChildren } from "react";
+type Props = PropsWithChildren<{ clearCutId?: string }>;
+export function MobileControl({ clearCutId, children }: Props) {
 	const { setLayout } = useLayout();
 	const navigate = useNavigate();
 	return (
 		<Collapsible>
-			<div className="flex justify-end">
+			<div className="flex justify-end sm:hidden">
+				{children}
 				{clearCutId && (
 					<Button
 						variant="default"
