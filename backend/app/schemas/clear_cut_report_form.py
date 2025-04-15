@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-from app.schemas.clearcut import ClearCutResponse
+# from app.schemas.clear_cut import ClearCutResponse
 
 logger = getLogger(__name__)
 
@@ -14,7 +14,7 @@ class ClearCutPicture(BaseModel):
     tag: Optional[str] = None
 
 
-class ClearCutReportBase(BaseModel):
+class ClearCutReportFormBase(BaseModel):
     id: int
     inspection_date: Optional[datetime] = None
     weather: Optional[str]
@@ -52,17 +52,19 @@ class ClearcutReportStrategy(BaseModel):
     request_engaged: Optional[str] = None
 
 
-class ClearCutReportResponse(ClearCutResponse, ClearCutReportBase):
+class ClearCutReportFormResponse(ClearCutReportFormBase):
     report_updated_at: datetime
 
 
-class ClearCutReportWithStrategy(ClearcutReportStrategy, ClearCutReportBase):
+class ClearCutReportFormWithStrategy(ClearcutReportStrategy, ClearCutReportFormBase):
     _ = None
 
 
-class ClearCutReportWithStrategyResponse(ClearcutReportStrategy, ClearCutReportResponse):
+class ClearCutReportFormWithStrategyResponse(
+    ClearcutReportStrategy, ClearCutReportFormResponse
+):
     _ = None
 
 
-class ClearCutReporCreate(ClearCutReportBase):
+class ClearCutReporCreate(ClearCutReportFormBase):
     editor_id: Optional[int] = None

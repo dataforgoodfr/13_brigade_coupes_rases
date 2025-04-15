@@ -137,13 +137,12 @@ class ClearCutReport(Base):
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
+    clear_cut_forms: Mapped[list["ClearCutReportForm"]] = relationship(back_populates="report")
     status = Column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(back_populates="clear_cuts_reports", lazy="joined")
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="reports")
-    clear_cut_report = relationship("ClearCutReport", uselist=False)
-    clear_cut_report_pictures = relationship("ClearCutPicture")
 
     @validates("status")
     def validate_status(self, key, value):
@@ -152,21 +151,12 @@ class ClearCutReport(Base):
         return value
 
 
-CLEAR_CUT_PREVIEW_COLUMNS = [
-    ClearCut.location,
-    ClearCut.boundary,
-    ClearCut.slope_percentage,
-    ClearCut.department_id,
-    ClearCut.created_at,
-]
-
-
-class ClearCutReport(Base):
-    __tablename__ = "clear_cut_reports"
+class ClearCutReportForm(Base):
+    __tablename__ = "clear_cut_report_forms"
     id = Column(Integer, primary_key=True, index=True)
-    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
 
-    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
+    report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
     editor_id = Column(Integer, index=True, nullable=True)
     report_updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -215,21 +205,21 @@ class ClearCutReport(Base):
     other = Column(String)
 
 
-class ClearCutPicture(Base):
-    __tablename__ = "clear_cut_pictures"
+# class ClearCutPicture(Base):
+#     __tablename__ = "clear_cut_pictures"
 
-    TAGS = ["plantation", "workSign", "clearcut", "wooden_logs", "access_ways", None]
+#     TAGS = ["plantation", "workSign", "clearcut", "wooden_logs", "access_ways", None]
 
-    id = Column(Integer, primary_key=True, index=True)
-    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
-    link = Column(String)
-    tag = Column(String, index=True)
+#     id = Column(Integer, primary_key=True, index=True)
+#     clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
+#     link = Column(String)
+#     tag = Column(String, index=True)
 
-    @validates("tag")
-    def validate_status(self, key, value):
-        if value not in ClearCutPicture.TAGS:
-            raise ValueError(f"tag must be one of: {', '.join(ClearCut.STATUSES)}")
-        return value
+#     @validates("tag")
+#     def validate_status(self, key, value):
+#         if value not in ClearCutPicture.TAGS:
+#             raise ValueError(f"tag must be one of: {', '.join(ClearCut.STATUSES)}")
+#         return value
 
-    # Tags : plantation, workSign, clearcut, wooden_logs, access_ways
-    # clear_cut_report = relationship("ClearCutReport", back_populates="clear_cut_report_pictures")
+#     # Tags : plantation, workSign, clearcut, wooden_logs, access_ways
+#     # clear_cut_report = relationship("ClearCutReport", back_populates="clear_cut_report_pictures")
