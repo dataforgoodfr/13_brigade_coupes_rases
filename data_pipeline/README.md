@@ -1,17 +1,137 @@
-## KeePass
+# ETL Cron
 
-- KeePass is the password manager used to store AWS credentials. These credentials are securely stored in the project's KeePass database.
+## Project Structure
 
-- To use it, ensure that you have:
+```bash
+data_pipeline/
+├── config/
+│   ├── config.yaml
+├── data_temp/
+├── logs/
+│   ├── main.log
+├── scripts/
+│   ├── utils/
+│   ├── extract.py
+│   ├── main.py
+│   ├── transform.py
+├── tests/
+│   ├── test_s3.py
+├── .env
+├── Makefile
+├── .gitignore
+├── Dockerfile
+└── README.md
+```
 
-### The password for the KeePass file, stored in the `data_pipeline/.env` file locally  
-Template of file to follow :  
-````sh
-KEEPASS_PASSWORD= votre_mot_de_passe # À compléter localement par chaque utilisateur
-````
+## Setup
 
-### The KeePass file, stored locally  
+### 1. Create Directories
 
-- Once these requirements are met, launch the `PyKeePass.py` file. The variables `access_key` and `secret_key` will contain the AWS S3 bucket access and secret keys.  
+Create the necessary directories `data_temp` and `logs`.
+
+```bash
+mkdir data_temp logs
+```
+
+### 2. Environment Variables (.env file)
+
+Create a .env file in the root directory (data_pipeline/.env) to store environment variables.
+
+Template for .env:
+
+```python
+# General Configuration
+S3_BUCKET_NAME = "s3-bucket-name"
+S3_REGION = "S3_REGION"
+S3_ENDPOINT = "S3_ENDPOINT"
+S3_BUCKET_NAME = "S3_BUCKET_NAME"
+
+KEEPASS_PASSWORD= "KEEPASS_PASSWORD"
+```
+KeePass Configuration:
+You can find the password in the Vaultwarden of the project, and you will find the S3 credentials to work with the project locally.
+
+### 3. Install Dependencies
+Ensure you have Python 3.11 installed.
+
+```bash
+# Install Poetry
+# Follow the instructions in the main README.md to install Poetry.
+
+# Navigate to the project directory
+cd data_pipeline
+
+# Install dependencies using Poetry
+make install-dev-deps
+```
+
+### 4. Set Up Docker (Optional)
+If you prefer using Docker for running the pipeline, follow these steps:
+
+```bash
+# Build Docker Image
+docker build -t data_pipeline .
+``` 
+
+# Running the ETL Pipeline
+## Using Poetry
+
+### Run the full ETL pipeline.
+
+```bash
+make run-pipeline
+```
+
+### Run Individual Tasks
+
+To run specific tasks, use the run-task-poetry target and specify the task name.
+
+Example:
+
+```bash
+make run-task-poetry task=verify_file_in_s3
+```
+
+## Using Docker
+In order to use the Makefile commands, you need to have Docker installed on your machine. You also need to export USER_PROJECT_PATH before running, for the script to identify your path correctly. You can do this by running:
+```bash
+export USER_PROJECT_PATH=~/path/to/the/project/13_brigade_coupes_rases/data_pipeline
+``` 
+### Run the full ETL pipeline inside a Docker container.
 
 
+
+Then, you can run the following command:
+
+```bash
+make run-pipeline-docker
+```
+
+### Run Individual Tasks Inside a Docker Container
+To run specific tasks, use the run-task-docker target and specify the task name.
+
+Example:
+
+```bash
+make run-task-docker task=verify_file_in_s3
+```
+
+### 5. Running Tests
+
+Use the Makefile to run tests.
+
+```bash
+make test
+```
+
+### 6. Running Tests
+
+Use the Makefile to run pre-commit hooks.
+
+```bash
+make pre-commit
+```
+
+### 6. Recommendations
+
+Before any pull request, make sure you run pre-commit and the tests.

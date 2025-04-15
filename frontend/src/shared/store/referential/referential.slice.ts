@@ -1,4 +1,3 @@
-import { api } from "@/shared/api/api";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
 import {
@@ -7,23 +6,22 @@ import {
 } from "@/shared/store/referential/referential";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import {
-	createAsyncThunk,
-	createSelector,
-	createSlice,
-} from "@reduxjs/toolkit";
+import { createAppAsyncThunk } from "@/shared/store/thunk";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 
-export const getReferentialThunk = createAsyncThunk(
+export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
-	async () => {
-		const result = await api.get<ReferentialResponse>("referential").json();
+	async (_, { extra: { api } }) => {
+		const result = await api()
+			.get<ReferentialResponse>("api/v1/referential")
+			.json();
 		return referentialSchemaResponse.parse(result);
 	},
 );
 type State = RequiredRequestedContent<Required<ReferentialResponse>>;
 const initialState: State = {
 	status: "idle",
-	value: { departments: {}, tags: {}, ecologicalZoning: {}, statuses: {} },
+	value: { departments: {}, tags: {}, ecological_zonings: {} },
 };
 export const referentialSlice = createSlice({
 	name: "referential",
@@ -34,8 +32,7 @@ export const referentialSlice = createSlice({
 			state.value = {
 				departments: payload.departments ?? {},
 				tags: payload.tags ?? {},
-				ecologicalZoning: payload.ecologicalZoning ?? {},
-				statuses: payload.statuses ?? {},
+				ecological_zonings: payload.ecological_zonings ?? {},
 			};
 		});
 		builder.addCase(getReferentialThunk.rejected, (state, error) => {
@@ -76,5 +73,4 @@ function selectByIds<
 
 export const selectDepartmentsByIds = selectByIds("departments");
 export const selectTagsByIds = selectByIds("tags");
-export const selectEcologicalZoningByIds = selectByIds("ecologicalZoning");
-export const selectStatusesByIds = selectByIds("statuses");
+export const selectEcologicalZoningByIds = selectByIds("ecological_zonings");

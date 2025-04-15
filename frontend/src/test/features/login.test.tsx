@@ -7,6 +7,6 @@ describe("Login", () => {
 	it("should log user", async () => {
 		const { user } = renderApp({ route: "/login" });
 		await loginForm({ user }).logVolunteer();
-		await screen.findByText("volunteer");
+		await screen.findByText("COUPES RASES");
 	});
 });
