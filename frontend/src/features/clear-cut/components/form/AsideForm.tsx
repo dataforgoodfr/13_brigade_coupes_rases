@@ -2,6 +2,7 @@ import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutF
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { useGetClearCut } from "@/features/clear-cut/store/clear-cuts-slice";
 import { useToast } from "@/hooks/use-toast";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect } from "react";
@@ -12,7 +13,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	const { map } = useMapInstance();
 	const { toast } = useToast();
 	const navigate = useNavigate();
-
+	const { breakpoint } = useBreakpoint();
 	useEffect(() => {
 		if (status === "error") {
 			toast({
@@ -26,7 +27,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	}, [status, navigate, toast]);
 
 	useEffect(() => {
-		if (map && value?.average_location.coordinates) {
+		if (map && breakpoint === "all" && value?.average_location.coordinates) {
 			map.flyTo(
 				[
 					value.average_location.coordinates[1],
@@ -36,7 +37,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 				{ duration: 1 },
 			);
 		}
-	}, [map, value]);
+	}, [breakpoint, map, value]);
 
 	return (
 		value && (

@@ -3,11 +3,11 @@ import { Outlet } from "@tanstack/react-router";
 
 export function AppMobileLayout() {
 	return (
-		<div className="sm:hidden flex flex-col justify-content-between">
-			<div className="h-[calc(100vh-60px)] flex">
+		<div className="sm:hidden h-[100dvh] flex flex-col justify-content-between">
+			<div className="flex grow">
 				<Outlet />
 			</div>
-			<MobileNavbar className="h-15" />
+			<MobileNavbar />
 		</div>
 	);
 }
