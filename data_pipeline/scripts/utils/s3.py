@@ -12,20 +12,13 @@ class S3Manager:
         keepass_password = os.getenv("KEEPASS_PASSWORD")
         if keepass_password is None:
             raise ValueError("The environment variable KEEPASS_PASSWORD is not defined.")
-        kp = PyKeePass(
-            "../keepass/secrets.kdbx", password=keepass_password
-        )  # Accès à la base KeePass
-        entry = kp.find_entries(
-            title="SCW_ACCESS_KEY", first=True
-        )  # Récupérer la clé d'accès du bucket S3
+        kp = PyKeePass("../keepass/secrets.kdbx", password=keepass_password)
+        entry = kp.find_entries(title="SCW_ACCESS_KEY", first=True)
         access_key = entry.password if entry else None
-        entry = kp.find_entries(
-            title="SCW_SECRET_KEY", first=True
-        )  # Récupérer la clé secrète du bucket S3
+        entry = kp.find_entries(title="SCW_SECRET_KEY", first=True)
         secret_key = entry.password if entry else None
         if not access_key or not secret_key:
             raise ValueError("Unable to retrieve S3 credentials from KeePass.")
-        print("Access Key and Secret Key successfully retrieved.")
 
         kwargs = {
             "service_name": "s3",

@@ -80,8 +80,10 @@ def cluster_clear_cuts_by_time_and_space():
 
 def update_clusters():
     logger.info("Load previous data...")
+    s3_manager = S3Manager()
     s3_manager.download_from_s3(
-        s3_key="dataeng/bootstrap/sufosat/sufosat_clusters_2018_2024.fgb",
+        # s3_key="dataeng/bootstrap/sufosat/sufosat_clusters_2018_2024.fgb",
+        s3_key="analytics/data/sufosat/sufosat_clear_cuts_v3.fgb",  # temp wainting for Yoan's run
         download_path=configs["transform_sufosat"]["download_path"]
         + "sufosat_clusters_2018_2024.fgb",
     )
@@ -95,10 +97,46 @@ def update_clusters():
     )
 
     logger.info("Clustering by space and time...")
-    clear_cut_pairs = updater.cluster_by_space(gdf_filtered=gdf_filtered, gdf_new=gdf_new)
+    update_rules = cutsUpdateRules()
 
-    logger.info("Updating clusters...")
-    updater.update_clusters(clear_cut_pairs)
+    # Identify spatial relationships between existing and new polygons
+    clear_cut_pairs = update_rules.cluster_by_space(
+        gdf_filtered=gdf_filtered, gdf_new=gdf_new, lookback_days=365, max_distance=100
+    )
 
-    logger.info("Reveal new clusters...")
-    updater.find_new_clusters(gdf_new, clear_cut_pairs)
+    # Process grow clusters - update existing geometries
+    logger.info("Updating existing clusters...")
+    modified_clusters = update_rules.update_clusters(
+        gdf_filtered=gdf_filtered, gdf_new=gdf_new, clear_cut_pairs=clear_cut_pairs
+    )
+
+    # Process new clusters - add with incremental indices
+    logger.info("Processing new clusters...")
+    new_clusters = update_rules.find_new_clusters(
+        gdf_filtered=gdf_filtered, gdf_new=gdf_new, clear_cut_pairs=clear_cut_pairs
+    )
+
+    # Combine results
+    logger.info("Combining results...")
+    final_results = update_rules.combine_results(
+        modified_clusters=modified_clusters, new_clusters=new_clusters
+    )
+
+    # Save the results
+    if not final_results.empty:
+        output_path = configs["transform_sufosat"]["download_path"] + "updated_clusters.fgb"
+        logger.info(f"Saving updated clusters to {output_path}...")
+        final_results.to_file(output_path, driver="FlatGeobuf")
+
+        # Upload to S3
+        # s3_manager.upload_to_s3(
+        #     file_path=output_path,
+        #     s3_key="dataeng/bootstrap/sufosat/updated_clusters.fgb"
+        # )
+        logger.info(
+            f"Successfully processed {len(final_results)} clusters ({len(modified_clusters)} modified, {len(new_clusters)} new)"
+        )
+    else:
+        logger.info("No updates to save")
+
+    return final_results
