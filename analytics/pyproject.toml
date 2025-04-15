@@ -26,7 +26,6 @@ requests = "^2.32.3"
 ipyleaflet = "^0.19.2"
 gdal = "^3.10.2"
 geocube = "^0.7.1"
-geemap = "^0.35.3"
 localtileserver = "^0.10.6"
 
 
