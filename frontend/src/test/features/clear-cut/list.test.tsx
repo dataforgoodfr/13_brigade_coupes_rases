@@ -29,7 +29,7 @@ describe("Clear cuts list", () => {
 
 		const filters = advancedFilters({ user });
 		await filters.open();
-		await filters.favorite.toggle();
+		await filters.favorite.toggle(true);
 
 		const item = await clearCuts({ user }).list.item(report.city);
 		expect(item.comment).toBe(report.comment);

@@ -58,14 +58,12 @@ export function ClearCuts() {
 	map.attributionControl.setPosition("bottomleft");
 
 	const handleLayerSelected = (
-		selectableItem: SelectableItemEnhanced<L.TileLayer> | undefined,
+		selectableItem: SelectableItemEnhanced<L.TileLayer>,
 	) => {
 		if (layer?.item) {
 			map.removeLayer(layer?.item);
 		}
-		if (selectableItem?.item) {
-			map.addLayer(selectableItem.item);
-		}
+		map.addLayer(selectableItem.item);
 		setLayer(selectableItem);
 	};
 
@@ -170,6 +168,7 @@ export function ClearCuts() {
 					<ToggleGroup
 						variant="primary"
 						type="single"
+						allowEmptyValue={false}
 						size="xl"
 						value={layers}
 						onValueChange={handleLayerSelected}

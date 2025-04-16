@@ -36,7 +36,7 @@ export function AsideList() {
 					</CollapsibleTrigger>
 				</div>
 				<CollapsibleContent>
-					<AdvancedFilters className="mt-6 px-5" />
+					<AdvancedFilters className="mt-6 sm:px-5 px-1" />
 				</CollapsibleContent>
 			</Collapsible>
 

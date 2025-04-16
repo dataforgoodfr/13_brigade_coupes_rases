@@ -6,9 +6,13 @@ import {
 } from "@/features/clear-cut/store/filters";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import {
+	DEFAULT_EVENTUALLY_BOOLEAN,
+	type EventuallyBooleanSelectableItems,
 	type NamedId,
 	type SelectableItem,
+	booleanToSelectableItem,
 	listToSelectableItems,
+	updateEventuallyBooleanSelectableItem,
 } from "@/shared/items";
 import type { Department, Tag } from "@/shared/store/referential/referential";
 import {
@@ -26,9 +30,9 @@ export interface FiltersState {
 	departments: SelectableItem<Department>[];
 	statuses: SelectableItem<ClearCutStatus>[];
 	areas: SelectableItem<number>[];
-	excessive_slop?: boolean;
-	ecological_zoning?: boolean;
-	favorite?: boolean;
+	excessive_slop: EventuallyBooleanSelectableItems;
+	ecological_zoning: EventuallyBooleanSelectableItems;
+	favorite: EventuallyBooleanSelectableItems;
 }
 export const initialState: FiltersState = {
 	cutYears: [],
@@ -36,6 +40,9 @@ export const initialState: FiltersState = {
 	departments: [],
 	areas: [],
 	statuses: [],
+	excessive_slop: DEFAULT_EVENTUALLY_BOOLEAN,
+	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
+	favorite: DEFAULT_EVENTUALLY_BOOLEAN,
 };
 
 export const getFiltersThunk = createAppAsyncThunk(
@@ -103,14 +110,32 @@ export const filtersSlice = createSlice({
 				state.geoBounds = payload;
 			}
 		},
-		setHasEcologicalZoning: (state, { payload }: PayloadAction<boolean>) => {
-			state.ecological_zoning = payload;
+		setHasEcologicalZoning: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>,
+		) => {
+			state.ecological_zoning = updateEventuallyBooleanSelectableItem(
+				payload,
+				state.ecological_zoning,
+			);
 		},
-		setExcessiveSlop: (state, { payload }: PayloadAction<boolean>) => {
-			state.excessive_slop = payload;
+		setExcessiveSlop: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>,
+		) => {
+			state.excessive_slop = updateEventuallyBooleanSelectableItem(
+				payload,
+				state.excessive_slop,
+			);
 		},
-		setFavorite: (state, { payload }: PayloadAction<boolean>) => {
-			state.favorite = payload;
+		setFavorite: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>,
+		) => {
+			state.favorite = updateEventuallyBooleanSelectableItem(
+				payload,
+				state.favorite,
+			);
 		},
 	},
 	extraReducers: (builder) => {
@@ -133,9 +158,9 @@ export const filtersSlice = createSlice({
 			) => {
 				state.cutYears = listToSelectableItems(cutYears);
 				state.tags = listToSelectableItems(tags);
-				state.ecological_zoning = ecological_zoning ?? false;
-				state.excessive_slop = excessive_slop ?? false;
-				state.favorite = favorite ?? false;
+				state.ecological_zoning = booleanToSelectableItem(ecological_zoning);
+				state.excessive_slop = booleanToSelectableItem(excessive_slop);
+				state.favorite = booleanToSelectableItem(favorite);
 				state.departments = listToSelectableItems(departments);
 				state.areas = listToSelectableItems(areaPresetsHectare);
 				state.statuses = listToSelectableItems(statuses);
@@ -168,9 +193,10 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 			.map((d) => d.item.id),
 		areas: areas.filter((a) => a.isSelected).map((a) => a.item),
 		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-		has_ecological_zonings: ecological_zoning,
-		excessive_slop,
-		favorite,
+		has_ecological_zonings: ecological_zoning.find((item) => item.isSelected)
+			?.item,
+		excessive_slop: excessive_slop.find((item) => item.isSelected)?.item,
+		favorite: favorite.find((item) => item.isSelected)?.item,
 	}),
 );
 

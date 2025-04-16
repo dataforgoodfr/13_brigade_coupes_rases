@@ -1,4 +1,3 @@
-import { Switch } from "@/components/ui/switch";
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
 import {
 	filtersSlice,
@@ -12,10 +11,12 @@ import {
 	selectStatuses,
 } from "@/features/clear-cut/store/filters.slice";
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	type NamedId,
 	type SelectableItem,
+	booleanSelectableToString,
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
@@ -78,105 +79,126 @@ export function AdvancedFilters({ className }: Props) {
 		(status) => <StatusWithLabel status={status.item} />,
 		selectableItemToString,
 	);
-	const excessive_slop = useAppSelector(selectExcessiveSlop);
-	const favorite = useAppSelector(selectFavorite);
-	const ecological_zoning = useAppSelector(selectEcologicalZoning);
+	const excessive_slop = useEnhancedItems(
+		useAppSelector(selectExcessiveSlop),
+		booleanSelectableToString,
+		booleanSelectableToString,
+	);
+	const favorite = useEnhancedItems(
+		useAppSelector(selectFavorite),
+		booleanSelectableToString,
+		booleanSelectableToString,
+	);
+	const ecological_zoning = useEnhancedItems(
+		useAppSelector(selectEcologicalZoning),
+		booleanSelectableToString,
+		booleanSelectableToString,
+	);
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());
 	}, [dispatch]);
 	return (
 		<div className={clsx("flex flex-col gap-2 py-3", className)}>
-			<FieldWrapper>
-				<label htmlFor={DEPARTMENTS.id}>{DEPARTMENTS.label}</label>
-				<ComboboxFilter
-					type="multiple"
-					countPreview
-					hasInput
-					hasReset
-					label={DEPARTMENTS.label}
-					items={departments}
-					changeOnClose={(departments) =>
-						dispatch(filtersSlice.actions.setDepartments(departments))
-					}
-				/>
-			</FieldWrapper>
-			<FieldWrapper>
-				<label htmlFor={CUT_YEARS.id}>{CUT_YEARS.label}</label>
-				<ComboboxFilter
-					type="multiple"
-					countPreview
-					hasInput
-					hasReset
-					id={CUT_YEARS.id}
-					label={CUT_YEARS.label}
-					items={cutYears}
-					changeOnClose={(cutYears) =>
-						dispatch(filtersSlice.actions.setCutYears(cutYears))
-					}
-				/>
-			</FieldWrapper>
-
-			<FieldWrapper>
-				<label htmlFor={AREA.id}>{AREA.label}</label>
-				<ComboboxFilter
-					type="multiple"
-					countPreview
-					hasInput
-					hasReset
-					id={AREA.id}
-					label={AREA.label}
-					items={areaPresets}
-					changeOnClose={(areaPresets) =>
-						dispatch(filtersSlice.actions.setAreas(areaPresets))
-					}
-				/>
-			</FieldWrapper>
-			<FieldWrapper>
-				<label htmlFor={STATUS.id}>{STATUS.label}</label>
-				<ComboboxFilter
-					type="multiple"
-					countPreview
-					hasInput
-					hasReset
-					id={STATUS.id}
-					label={STATUS.label}
-					items={statuses}
-					changeOnClose={(statuses) =>
-						dispatch(filtersSlice.actions.setStatuses(statuses))
-					}
-				/>
-			</FieldWrapper>
+			<div className="flex gap-2">
+				<FieldWrapper>
+					<label htmlFor={DEPARTMENTS.id}>{DEPARTMENTS.label}</label>
+					<ComboboxFilter
+						type="multiple"
+						countPreview
+						hasInput
+						hasReset
+						label={DEPARTMENTS.label}
+						items={departments}
+						changeOnClose={(departments) =>
+							dispatch(filtersSlice.actions.setDepartments(departments))
+						}
+					/>
+				</FieldWrapper>
+				<FieldWrapper>
+					<label htmlFor={CUT_YEARS.id}>{CUT_YEARS.label}</label>
+					<ComboboxFilter
+						type="multiple"
+						countPreview
+						hasInput
+						hasReset
+						id={CUT_YEARS.id}
+						label={CUT_YEARS.label}
+						items={cutYears}
+						changeOnClose={(cutYears) =>
+							dispatch(filtersSlice.actions.setCutYears(cutYears))
+						}
+					/>
+				</FieldWrapper>
+			</div>
+			<div className="flex gap-2">
+				<FieldWrapper>
+					<label htmlFor={AREA.id}>{AREA.label}</label>
+					<ComboboxFilter
+						type="multiple"
+						countPreview
+						hasInput
+						hasReset
+						id={AREA.id}
+						label={AREA.label}
+						items={areaPresets}
+						changeOnClose={(areaPresets) =>
+							dispatch(filtersSlice.actions.setAreas(areaPresets))
+						}
+					/>
+				</FieldWrapper>
+				<FieldWrapper>
+					<label htmlFor={STATUS.id}>{STATUS.label}</label>
+					<ComboboxFilter
+						type="multiple"
+						countPreview
+						hasInput
+						hasReset
+						id={STATUS.id}
+						label={STATUS.label}
+						items={statuses}
+						changeOnClose={(statuses) =>
+							dispatch(filtersSlice.actions.setStatuses(statuses))
+						}
+					/>
+				</FieldWrapper>
+			</div>
 			<div className="flex gap-4">
 				<div className=" flex flex-col gap-1">
 					<label htmlFor={ECOLOGICAL_ZONING.id}>
 						{ECOLOGICAL_ZONING.label}
 					</label>
-					<Switch
+					<ToggleGroup
 						id={ECOLOGICAL_ZONING.id}
-						checked={ecological_zoning}
-						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setHasEcologicalZoning(isChecked))
+						value={ecological_zoning}
+						type="single"
+						allowEmptyValue={false}
+						onValueChange={(item) =>
+							dispatch(filtersSlice.actions.setHasEcologicalZoning(item))
 						}
 					/>
 				</div>
 				<div className=" flex flex-col gap-1">
 					<label htmlFor={EXCESSIVE_SLOP.id}>{EXCESSIVE_SLOP.label}</label>
-					<Switch
+					<ToggleGroup
 						id={EXCESSIVE_SLOP.id}
-						checked={excessive_slop}
-						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setExcessiveSlop(isChecked))
+						value={excessive_slop}
+						type="single"
+						allowEmptyValue={false}
+						onValueChange={(item) =>
+							dispatch(filtersSlice.actions.setExcessiveSlop(item))
 						}
 					/>
 				</div>
 				<div className=" flex flex-col gap-1">
 					<label htmlFor={FAVORITE.id}>{FAVORITE.label}</label>
-					<Switch
+					<ToggleGroup
 						id={FAVORITE.id}
-						checked={favorite}
-						onCheckedChange={(isChecked) =>
-							dispatch(filtersSlice.actions.setFavorite(isChecked))
+						value={favorite}
+						type="single"
+						allowEmptyValue={false}
+						onValueChange={(item) =>
+							dispatch(filtersSlice.actions.setFavorite(item))
 						}
 					/>
 				</div>
@@ -186,5 +208,5 @@ export function AdvancedFilters({ className }: Props) {
 }
 
 const FieldWrapper: FC<PropsWithChildren> = ({ children }) => {
-	return <div className="flex w-2/3 flex-col gap-1"> {children}</div>;
+	return <div className="flex w-1/2 flex-col gap-1"> {children}</div>;
 };
