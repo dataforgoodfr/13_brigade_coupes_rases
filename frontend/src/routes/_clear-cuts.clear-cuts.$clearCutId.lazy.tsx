@@ -17,7 +17,7 @@ function RouteComponent() {
 			{breakpoint === "mobile" ? (
 				<AsideForm clearCutId={params.clearCutId} />
 			) : (
-				<div className="sm:flex hidden w-1/4">
+				<div className="sm:flex hidden xxl:w-1/4 w-3/4 lg:w-1/3">
 					<AsideForm clearCutId={params.clearCutId} />
 				</div>
 			)}

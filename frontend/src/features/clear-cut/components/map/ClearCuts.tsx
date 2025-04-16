@@ -1,8 +1,9 @@
+import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview";
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
 import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cut/store/clear-cuts";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { setGeoBounds } from "@/features/clear-cut/store/filters.slice";
-import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status";
 import { IconButton } from "@/shared/components/button/Button";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useGeolocation } from "@/shared/hooks/geolocation";
@@ -11,49 +12,49 @@ import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import * as L from "leaflet";
 import { Locate } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { Circle, GeoJSON, useMap, useMapEvents } from "react-leaflet";
-import { ClearCutMapPopUp } from "./ClearCutMapPopUp";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Circle, useMap, useMapEvents } from "react-leaflet";
 
+const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
+	{
+		isSelected: true,
+		item: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+			id: "OpenStreetMap.Mapnik",
+			attribution:
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		}),
+		label: "Standard",
+		value: "standard",
+	},
+	{
+		isSelected: false,
+		item: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
+			id: "OpenTopoMap",
+		}),
+		label: "Terrain",
+		value: "ground",
+	},
+	{
+		isSelected: false,
+		item: L.tileLayer(
+			"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+			{
+				id: "ArcGIS.WorldImagery",
+			},
+		),
+		label: "Satellite",
+		value: "satellite",
+	},
+];
 export function ClearCuts() {
 	const map = useMap();
+	const { setFocusedClearCutId, focusedClearCutId } = useMapInstance();
 	const { browserLocation } = useGeolocation();
 	const [displayClearCutPreview, setDisplayClearCutPreview] = useState(false);
-	const [popupClearCutId, setPopupClearCutId] = useState<string>();
 	const [layer, layers, setLayer] = useSingleSelect<
 		L.TileLayer,
 		SelectableItemEnhanced<L.TileLayer>
-	>([
-		{
-			isSelected: true,
-			item: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-				id: "OpenStreetMap.Mapnik",
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-			}),
-			label: "Standard",
-			value: "standard",
-		},
-		{
-			isSelected: false,
-			item: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
-				id: "OpenTopoMap",
-			}),
-			label: "Terrain",
-			value: "ground",
-		},
-		{
-			isSelected: false,
-			item: L.tileLayer(
-				"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-				{
-					id: "ArcGIS.WorldImagery",
-				},
-			),
-			label: "Satellite",
-			value: "satellite",
-		},
-	]);
+	>(LAYERS);
 	map.attributionControl.setPosition("bottomleft");
 
 	const handleLayerSelected = (
@@ -101,51 +102,32 @@ export function ClearCuts() {
 
 	useMapEvents({
 		zoomanim: onZoomChanged,
-		zoomend: dispatchGeoBounds,
-		moveend: dispatchGeoBounds,
-		resize: dispatchGeoBounds,
+		zoomend: () => {
+			dispatchGeoBounds();
+		},
+		dragend: () => {
+			dispatchGeoBounds();
+		},
+		resize: () => {
+			dispatchGeoBounds();
+		},
+		popupclose: () => {
+			setFocusedClearCutId(undefined);
+		},
 	});
 
 	useEffect(() => dispatchGeoBounds(), [dispatchGeoBounds]);
 
-	function ClearCutPreview() {
+	const previews = useMemo(() => {
 		if (displayClearCutPreview) {
 			return value?.previews.flatMap((clearCut) =>
 				clearCut.clear_cuts.map((cut) => (
-					<GeoJSON
-						key={cut.id}
-						data={cut.boundary}
-						style={{
-							color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[clearCut.status]})`,
-							weight: 0,
-							fillOpacity: 0.75,
-						}}
-						eventHandlers={{
-							mouseover: (event) => {
-								event.target.openPopup();
-							},
-							mouseout: (event) => {
-								event.target.closePopup();
-							},
-							click: (event) => {
-								event.target.openPopup();
-							},
-							popupopen: () => {
-								setPopupClearCutId(clearCut.id);
-							},
-							popupclose: () => {
-								setPopupClearCutId(undefined);
-							},
-						}}
-					>
-						<ClearCutMapPopUp report={clearCut} />
-					</GeoJSON>
+					<ClearCutPreview key={cut.id} report={clearCut} clearCut={cut} />
 				)),
 			);
 		}
-	}
-
-	function ClearCutLocationPoint() {
+	}, [displayClearCutPreview, value?.previews]);
+	const points = useMemo(() => {
 		if (!displayClearCutPreview) {
 			return value?.points.map((location) => (
 				<Circle
@@ -160,7 +142,7 @@ export function ClearCuts() {
 				/>
 			));
 		}
-	}
+	}, [displayClearCutPreview, value?.points]);
 
 	return (
 		<>
@@ -174,7 +156,7 @@ export function ClearCuts() {
 					>
 						Centrer sur ma position
 					</IconButton>
-					<MobileControl clearCutId={popupClearCutId}>
+					<MobileControl clearCutId={focusedClearCutId}>
 						<IconButton
 							icon={<Locate />}
 							onClick={centerOnUserLocation}
@@ -194,10 +176,8 @@ export function ClearCuts() {
 					/>
 				</div>
 			</div>
-
-			<ClearCutPreview />
-
-			<ClearCutLocationPoint />
+			{previews}
+			{points}
 		</>
 	);
 }

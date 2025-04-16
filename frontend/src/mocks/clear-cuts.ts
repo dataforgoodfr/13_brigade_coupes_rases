@@ -46,7 +46,7 @@ export const createClearCutReportBaseMock = (
 	const date = faker.date.anytime();
 	const randomLocation = franceRandomPointMock();
 	const clear_cuts = [
-		...range<ClearCutResponse>(5, () =>
+		...range<ClearCutResponse>(1, () =>
 			createClearCutResponseMock({
 				location: override.average_location ?? randomLocation,
 			}),

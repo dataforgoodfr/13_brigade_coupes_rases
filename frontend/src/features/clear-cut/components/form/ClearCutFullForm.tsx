@@ -37,7 +37,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 				</form>
 				<Button
 					type="submit"
-					className="mx-auto text-xl font-bold  cursor-pointer"
+					className="mx-auto my-1 text-xl font-bold  cursor-pointer"
 					size="lg"
 				>
 					Valider

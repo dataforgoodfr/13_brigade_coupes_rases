@@ -40,7 +40,7 @@ export function AsideList() {
 				</CollapsibleContent>
 			</Collapsible>
 
-			<div className=" px-5 overflow-auto">
+			<div className="overflow-auto">
 				<ul className="flex flex-col gap-6  mt-6 ">
 					{value?.previews.map((preview) => (
 						<ClearCutItem key={preview.id} {...preview} />
