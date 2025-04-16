@@ -82,8 +82,7 @@ def update_clusters():
     logger.info("Load previous data...")
     s3_manager = S3Manager()
     s3_manager.download_from_s3(
-        # s3_key="dataeng/bootstrap/sufosat/sufosat_clusters_2018_2024.fgb",
-        s3_key="analytics/data/sufosat/sufosat_clear_cuts_v3.fgb",  # temp wainting for Yoan's run
+        s3_key="dataeng/bootstrap/sufosat/sufosat_clusters_enriched.fgb",  # temp wainting for Yoan's run
         download_path=configs["transform_sufosat"]["download_path"]
         + "sufosat_clusters_2018_2024.fgb",
     )

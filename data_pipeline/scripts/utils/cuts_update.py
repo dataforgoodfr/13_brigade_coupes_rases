@@ -1,4 +1,5 @@
 import pandas as pd
+import geopandas as gpd
 from utils.s3 import S3Manager
 from utils.logging_etl import etl_logger
 
@@ -77,7 +78,6 @@ class cutsUpdateRules:
             growth_idx = row["index_left"]
 
             try:
-                # Make sure we're accessing single values and not Series
                 if isinstance(original_idx, pd.Series):
                     original_idx = original_idx.iloc[0]
 
@@ -95,6 +95,7 @@ class cutsUpdateRules:
                 if isinstance(growth_geom, pd.Series):
                     growth_geom = growth_geom.iloc[0]
 
+                # Update geometry
                 modified_polygons.loc[original_idx, "geometry"] = original_geom.union(
                     growth_geom
                 )
@@ -112,6 +113,63 @@ class cutsUpdateRules:
 
                 if new_date_max > orig_date_max:
                     modified_polygons.loc[original_idx, "date_max"] = new_date_max
+
+                # 1 - Recalculate days_delta
+                orig_date_min = modified_polygons.loc[original_idx, "date_min"]
+                if isinstance(orig_date_min, pd.Series):
+                    orig_date_min = orig_date_min.iloc[0]
+
+                # Now use the updated date_max
+                updated_date_max = modified_polygons.loc[original_idx, "date_max"]
+                if isinstance(updated_date_max, pd.Series):
+                    updated_date_max = updated_date_max.iloc[0]
+
+                # Calculate days_delta
+                days_delta = (updated_date_max - orig_date_min).days
+                modified_polygons.loc[original_idx, "days_delta"] = days_delta
+
+                # 2 - Recalculate clear_cut_group_size
+                orig_size = modified_polygons.loc[original_idx, "clear_cut_group_size"]
+                new_size = gdf_new.loc[growth_idx, "clear_cut_group_size"]
+
+                if isinstance(orig_size, pd.Series):
+                    orig_size = orig_size.iloc[0]
+                if isinstance(new_size, pd.Series):
+                    new_size = new_size.iloc[0]
+
+                # Handle potential string values
+                if isinstance(orig_size, str):
+                    orig_size = float(orig_size)
+                if isinstance(new_size, str):
+                    new_size = float(new_size)
+
+                modified_polygons.loc[original_idx, "clear_cut_group_size"] = (
+                    orig_size + new_size
+                )
+
+                # 3 - Recalculate area_ha
+                new_geom = modified_polygons.loc[original_idx, "geometry"]
+                area_ha = new_geom.area / 10000
+                modified_polygons.loc[original_idx, "area_ha"] = area_ha
+
+                # 4 - Recalculate concave_hull_score
+                try:
+                    geom = new_geom.iloc[0] if isinstance(new_geom, pd.Series) else new_geom
+
+                    hull = gpd.GeoSeries([geom], crs=self.data_crs).concave_hull(0.42).iloc[0]
+
+                    if hull.area > 0:
+                        score = geom.area / hull.area
+                        score = min(score, 1.0)
+                    else:
+                        score = 0
+
+                    modified_polygons.loc[original_idx, "concave_hull_score"] = score
+
+                except Exception as e:
+                    self.logger.warning(
+                        f"Error calculating concave hull for cluster {original_idx}: {e}"
+                    )
 
                 update_count += 1
             except Exception as e:
@@ -146,11 +204,21 @@ class cutsUpdateRules:
         new_polygons_to_add["status"] = "new"
 
         # Find the maximum index of existing polygons for incremental indexing
-        max_idx = gdf_filtered.index.max() if not gdf_filtered.empty else -1
+        # Ensure clear_cut_group is numeric
+        if not gdf_filtered.empty:
+            if isinstance(gdf_filtered.clear_cut_group.iloc[0], str):
+                gdf_filtered["clear_cut_group"] = gdf_filtered["clear_cut_group"].astype(int)
+
+            max_idx = gdf_filtered.clear_cut_group.max()
+        else:
+            max_idx = -1
+
+        # Ensure max_idx is an integer
+        max_idx = int(max_idx) if not pd.isna(max_idx) else -1
 
         # Reindex new polygons with indices that follow those of gdf_filtered
         new_indices = range(max_idx + 1, max_idx + 1 + len(new_polygons_to_add))
-        new_polygons_to_add.index = new_indices
+        new_polygons_to_add["clear_cut_group"] = new_indices
 
         self.logger.info(
             f"Processed {len(new_polygons_to_add)} new clusters with index range {max_idx + 1} to {max_idx + len(new_polygons_to_add)}"
