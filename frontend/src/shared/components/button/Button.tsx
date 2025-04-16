@@ -4,9 +4,9 @@ import type { ReactNode } from "@tanstack/react-router";
 
 interface Props extends ButtonProps {
 	icon: ReactNode;
-	position: Position;
+	position?: Position;
 }
-export function IconButton({ icon, position, ...props }: Props) {
+export function IconButton({ icon, position = "end", ...props }: Props) {
 	return (
 		<Button {...props}>
 			{position === "start" && icon}

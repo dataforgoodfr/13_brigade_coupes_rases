@@ -24,7 +24,7 @@ USER devuser
 
 RUN  poetry install
 
-FROM python:3.13-slim-buster as runtime
+FROM python:3.13-slim as runtime
 
 ARG SRC_DIR="."
 ENV VIRTUAL_ENV=/app/.venv \

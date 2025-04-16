@@ -1,4 +1,6 @@
 from logging.config import fileConfig
+
+from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
 from app.models import Base
 
 
@@ -26,10 +28,30 @@ configuration["sqlalchemy.url"] = settings.DATABASE_URL
 IGNORE_TABLES = ["spatial_ref_sys"]
 
 
+def render_item(obj_type, obj, autogen_context):
+    """Apply custom rendering for selected items."""
+    if obj_type == "type" and isinstance(obj, (Geometry, Geography, Raster)):
+        import_name = obj.__class__.__name__
+        autogen_context.imports.add(f"from geoalchemy2 import {import_name}")
+        return "%r" % obj
+
+    # default rendering for other objects
+    return False
+
+
 def include_object(object, name, type_, reflected, compare_to):
-    """
-    Should you include this table or not?
-    """
+    """Do not include spatial indexes if they are automatically created by GeoAlchemy2."""
+    if type_ == "index":
+        if len(object.expressions) == 1:
+            try:
+                col = object.expressions[0]
+                if (
+                    alembic_helpers._check_spatial_type(col.type, (Geometry, Geography, Raster))
+                    and col.type.spatial_index
+                ):
+                    return False
+            except AttributeError:
+                pass
 
     if type_ == "table" and (
         name in IGNORE_TABLES or object.info.get("skip_autogenerate", False)
