@@ -11,6 +11,7 @@ from app.routes import (
     clear_cuts,
     ecological_zonings,
     filters,
+    clear_cuts_forms,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,6 +30,7 @@ app.add_middleware(
 
 # Include routes
 app.include_router(clear_cuts_reports.router)
+app.include_router(clear_cuts_forms.router)
 app.include_router(departments.router)
 app.include_router(token.router)
 app.include_router(clear_cuts_map.router)
