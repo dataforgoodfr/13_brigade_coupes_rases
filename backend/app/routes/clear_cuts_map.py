@@ -12,6 +12,7 @@ from app.schemas.clear_cut_map import (
 )
 from app.services.clear_cut_map import (
     Filters,
+    GeoBounds,
     build_clearcuts_map,
     get_report_preview_by_id,
 )
@@ -33,23 +34,23 @@ def get_clearcuts_report_by_id(
 
 @router.get("/", response_model=ClearCutMapResponseSchema)
 def get_clearcuts_map(
-    sw_lat: float = Query(
-        ...,
+    sw_lat: Optional[float] = Query(
+        None,
         description="Sout west latitude",
         openapi_examples={"default": {"value": 47.49308072945064}},
     ),
-    sw_lng: float = Query(
-        ...,
+    sw_lng: Optional[float] = Query(
+        None,
         description="Sout west longitude",
         openapi_examples={"default": {"value": -1.0766601562500002}},
     ),
-    ne_lat: float = Query(
-        ...,
+    ne_lat: Optional[float] = Query(
+        None,
         description="North east latitude",
         openapi_examples={"default": {"value": 49.79899569636492}},
     ),
-    ne_lng: float = Query(
-        ...,
+    ne_lng: Optional[float] = Query(
+        None,
         description="North east longitude",
         openapi_examples={"default": {"value": 4.051208496093751}},
     ),
@@ -86,13 +87,23 @@ def get_clearcuts_map(
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
+        bounds = None
+        if (
+            sw_lat is not None
+            and sw_lng is not None
+            and ne_lat is not None
+            and ne_lng is not None
+        ):
+            bounds = GeoBounds(
+                north_east_latitude=ne_lat,
+                north_east_longitude=ne_lng,
+                south_west_latitude=sw_lat,
+                south_west_longitude=sw_lng,
+            )
         clearcuts = build_clearcuts_map(
             db,
             Filters(
-                south_west_latitude=sw_lat,
-                south_west_longitude=sw_lng,
-                north_east_latitude=ne_lat,
-                north_east_longitude=ne_lng,
+                bounds=bounds,
                 min_area_hectare=min_area_hectare,
                 max_area_hectare=max_area_hectare,
                 cut_years=cut_years,
