@@ -27,8 +27,33 @@ class ClearCutEcologicalZoning(Base):
         Integer, ForeignKey("ecological_zonings.id"), primary_key=True
     )
     clear_cut: Mapped["ClearCut"] = relationship(back_populates="ecological_zonings")
-    ecological_zoning: Mapped["EcologicalZoning"] = relationship(back_populates="clear_cuts")
-    area_hectare = Column(Float, nullable=False)
+    ecological_zoning: Mapped["EcologicalZoning"] = relationship(
+        back_populates="clear_cuts"
+    )
+
+
+rules_ecological_zoning = Table(
+    "rules_ecological_zonings",
+    Base.metadata,
+    Column("rule_id", Integer, ForeignKey("rules.id"), primary_key=True),
+    Column(
+        "ecological_zoning_id",
+        Integer,
+        ForeignKey("ecological_zonings.id"),
+        primary_key=True,
+    ),
+)
+
+
+class Rules(Base):
+    __tablename__ = "rules"
+    RULES = ["slope", "area", "ecological_zoning"]
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String, nullable=False)
+    ecological_zonings = relationship(
+        "EcologicalZoning", secondary=rules_ecological_zoning, back_populates="rules"
+    )
+    threshold = Column(Float, nullable=True)
 
 
 class User(Base):
@@ -45,10 +70,14 @@ class User(Base):
     role = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     # TODO: updated_at is not set when departments are updated
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
+    )
     deleted_at = Column(DateTime, nullable=True)
 
-    departments = relationship("Department", secondary=user_department, back_populates="users")
+    departments = relationship(
+        "Department", secondary=user_department, back_populates="users"
+    )
     reports = relationship("ClearCutReport", back_populates="user")
 
     @validates("role")
@@ -64,7 +93,9 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String, nullable=False)
     name = Column(String, nullable=False)
-    users = relationship("User", secondary=user_department, back_populates="departments")
+    users = relationship(
+        "User", secondary=user_department, back_populates="departments"
+    )
     cities: Mapped[list["City"]] = relationship(back_populates="department")
 
     @validates("name")
@@ -79,9 +110,13 @@ class City(Base):
     id = Column(Integer, primary_key=True, index=True)
     zip_code = Column(String, index=True, nullable=False)
     name = Column(String, nullable=False)
-    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"), nullable=False)
+    department_id: Mapped[int] = mapped_column(
+        ForeignKey("departments.id"), nullable=False
+    )
     department: Mapped["Department"] = relationship(back_populates="cities")
-    clear_cuts_reports: Mapped[list["ClearCutReport"]] = relationship(back_populates="city")
+    clear_cuts_reports: Mapped[list["ClearCutReport"]] = relationship(
+        back_populates="city"
+    )
 
 
 NATURA_2000 = "Natura2000"
@@ -96,6 +131,9 @@ class EcologicalZoning(Base):
     code = Column(String, nullable=False)
     clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
         back_populates="ecological_zoning"
+    )
+    rules = relationship(
+        "Rules", secondary=rules_ecological_zoning, back_populates="ecological_zonings"
     )
 
 
@@ -115,11 +153,19 @@ class ClearCut(Base):
     location = Column(Geometry(geometry_type="Point", srid=SRID), nullable=False)
     boundary = Column(Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
+    )
     observation_start_date = Column(DateTime, nullable=False)
     observation_end_date = Column(DateTime, nullable=False)
-
-    report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
+    bdf_resinous_area_hectare = Column(Float, nullable=True)
+    bdf_decidous_area_hectare = Column(Float, nullable=True)
+    bdf_mixed_area_hectare = Column(Float, nullable=True)
+    bdf_poplar_area_hectare = Column(Float, nullable=True)
+    ecological_zoning_area_hectare = Column(Float, nullable=True)
+    report_id: Mapped[int] = mapped_column(
+        ForeignKey("clear_cuts_reports.id"), nullable=False
+    )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
 
     ecological_zonings: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
@@ -133,13 +179,17 @@ class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
     id = Column(Integer, primary_key=True, index=True)
-    slope_area_ratio_percentage = Column(Float, index=True, nullable=False)
+    slope_area_ratio_percentage = Column(Float, index=True, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    updated_at = Column(
+        DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
+    )
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
     status = Column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
-    city: Mapped["City"] = relationship(back_populates="clear_cuts_reports", lazy="joined")
+    city: Mapped["City"] = relationship(
+        back_populates="clear_cuts_reports", lazy="joined"
+    )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="reports")
 

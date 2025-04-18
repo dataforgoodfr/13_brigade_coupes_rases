@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/v1/clear-cuts", tags=["Clearcuts"])
     "/{clear_cut_id}/ecological-zonings",
     response_model=PaginationResponseSchema[EcologicalZoningResponseSchema],
 )
-def list_clear_cuts_reports(
+def list_ecological_zonings(
     clear_cut_id: int, db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[EcologicalZoningResponseSchema]:
     logger.info(db)

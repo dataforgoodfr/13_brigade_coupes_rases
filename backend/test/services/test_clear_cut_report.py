@@ -113,7 +113,6 @@ def test_create_report_success(db):
                 ecological_zonings=[
                     CreateEcologicalZoningSchema(
                         type="Natura2000",
-                        area_hectare=10,
                         sub_type="Test subtype",
                         name="Test name",
                         code="TestCode",

@@ -51,12 +51,14 @@ def create_clear_cut_report(
                 observation_start_date=clear_cut.observation_start_date,
                 observation_end_date=clear_cut.observation_end_date,
                 area_hectare=clear_cut.area_hectare,
+                bdf_resinous_area_hectare=clear_cut.bdf_resinous_area_hectare,
+                bdf_decidous_area_hectare=clear_cut.bdf_decidous_area_hectare,
+                bdf_mixed_area_hectare=clear_cut.bdf_mixed_area_hectare,
+                bdf_poplar_area_hectare=clear_cut.bdf_poplar_area_hectare,
+                ecological_zoning_area_hectare=clear_cut.ecological_zoning_area_hectare,
                 ecological_zonings=[
                     ClearCutEcologicalZoning(
                         ecological_zoning_id=zoning.id,
-                        area_hectare=next(
-                            z for z in clear_cut.ecological_zonings if z.code == zoning.code
-                        ).area_hectare,
                     )
                     for zoning in find_or_add_ecological_zonings(
                         db, clear_cut.ecological_zonings

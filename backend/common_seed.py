@@ -1,7 +1,7 @@
 import csv
 from sqlalchemy.orm import Session
 
-from app.models import City, Department, EcologicalZoning
+from app.models import City, Department, EcologicalZoning, Rules
 
 
 def seed_cities_departments(db: Session):
@@ -50,5 +50,26 @@ def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning, EcologicalZo
         ),
     ]
     db.add_all(ecological_zonings)
+    db.flush()
+    return (ecological_zonings[0], ecological_zonings[1])
+
+
+def seed_rules(db: Session, ecological_zonings: list[EcologicalZoning]):
+    rules = [
+        Rules(
+            type="area",
+            threshold=10.0,
+        ),
+        Rules(
+            type="slop",
+            threshold=30.0,
+        ),
+        Rules(
+            type="ecological_zoning",
+            threshold=0.5,
+            ecological_zonings=ecological_zonings,
+        ),
+    ]
+    db.add_all(rules)
     db.flush()
     return (ecological_zonings[0], ecological_zonings[1])
