@@ -9,13 +9,13 @@ class RuleBaseSchema(BaseModel):
     ecological_zonings_ids: list[str] = Field(
         default=[], json_schema_extra={"example": ["1", "2", "3"]}
     )
+    type: str = Field(json_schema_extra={"example": "slope"})
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class RuleResponseSchema(RuleBaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
-    type: str = Field(json_schema_extra={"example": "slope"})
 
     @field_validator("type")
     def validate_type(cls, value: str) -> str:
