@@ -28,7 +28,7 @@ pydantic-settings = "^2.7.1"
 uvicorn = "^0.34.0"
 geoalchemy2 = "^0.17.1"
 alembic = "^1.14.1"
-pydantic = {extras = ["email"], version = "^2.7.1"}
+pydantic = { extras = ["email"], version = "^2.7.1" }
 shapely = "^2.0.7"
 pyjwt = "^2.10.1"
 bcrypt = "^4.3.0"
@@ -53,6 +53,7 @@ mccabe.max-complexity = 7
 # McCabe complexity (`C901`) by default.
 select = ["E4", "E7", "E9", "F", "B"]
 ignore = ["E501"]
+fixable = ["ALL"]
 
 [tool.ruff.format]
 # Automatically detect the appropriate line ending.
@@ -91,6 +92,4 @@ exclude = [
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 
 [tool.pytest.ini_options]
-markers = [
-    "focus: run only these tests"
-]
+markers = ["focus: run only these tests"]
