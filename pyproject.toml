@@ -19,9 +19,9 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
+# See https://docs.astral.sh/ruff/settings
 [tool.ruff]
 target-version = "py313"
 
 [tool.ruff.lint]
-# Enable imports sorting
-extend-select = ["I"]
+extend-select = ["I"] # Enable sorting imports

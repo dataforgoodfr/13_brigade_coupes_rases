@@ -39,13 +39,12 @@ geojson-pydantic = "^1.2.0"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
-# Go to https://docs.astral.sh/ruff/settings for more information
+# See https://docs.astral.sh/ruff/settings
 [tool.ruff]
 target-version = "py313"
 
 [tool.ruff.lint]
-# Enable imports sorting
-extend-select = ["I"]
+extend-select = ["I"] # Enable sorting imports
 
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
