@@ -10,6 +10,7 @@ from sqlalchemy.orm import (
     column_property,
 )
 
+# Second test
 SRID = 4326
 
 user_department = Table(
