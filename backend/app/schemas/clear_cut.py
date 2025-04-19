@@ -47,29 +47,34 @@ class ClearCutBaseSchema(BaseModel):
         }
     )
     bdf_resinous_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_decidous_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_mixed_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_poplar_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     ecological_zoning_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
 
 

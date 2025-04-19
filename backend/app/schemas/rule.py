@@ -9,13 +9,23 @@ class RuleBaseSchema(BaseModel):
     ecological_zonings_ids: list[str] = Field(
         default=[], json_schema_extra={"example": ["1", "2", "3"]}
     )
-    type: str = Field(json_schema_extra={"example": "slope"})
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class RuleResponseSchemaWithoutIdSchema(RuleBaseSchema):
+    type: str = Field(json_schema_extra={"example": "slope"})
+
+    @field_validator("type")
+    def validate_type(cls, value: str) -> str:
+        if value is not None and value not in Rules.RULES:
+            raise ValueError(f"Type must be one of : {', '.join(Rules.RULES)}")
+        return value
+
+
 class RuleResponseSchema(RuleBaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
+    type: str = Field(json_schema_extra={"example": "slope"})
 
     @field_validator("type")
     def validate_type(cls, value: str) -> str:
@@ -25,6 +35,7 @@ class RuleResponseSchema(RuleBaseSchema):
 
 
 def rule_to_rule_response(rule: Rules) -> RuleResponseSchema:
+    print(f"TYPE {rule.type}")
     return RuleResponseSchema(
         id=str(rule.id),
         ecological_zonings_ids=[

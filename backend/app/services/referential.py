@@ -9,7 +9,7 @@ from app.schemas.referential import (
     ReferentialDepartmentSchema,
     ReferentialResponseSchema,
 )
-from app.schemas.rule import RuleBaseSchema
+from app.schemas.rule import RuleResponseSchemaWithoutIdSchema
 from app.services.rules import get_rules
 
 
@@ -34,7 +34,7 @@ def get_referential(db: Session):
             for ecological_zoning in ecological_zonings
         },
         rules={
-            str(rule.id): RuleBaseSchema(
+            str(rule.id): RuleResponseSchemaWithoutIdSchema(
                 ecological_zonings_ids=rule.ecological_zonings_ids,
                 threshold=rule.threshold,
                 type=rule.type,
