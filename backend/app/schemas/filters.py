@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -18,11 +19,11 @@ class FiltersResponseSchema(BaseModel):
         json_schema_extra={"example": ["1", "2", "3"]},
     )
 
-    ecological_zoning: bool = Field(
+    ecological_zoning: Optional[bool] = Field(
         json_schema_extra={"example": False},
     )
 
-    excessive_slop: bool = Field(
+    excessive_slop: Optional[bool] = Field(
         json_schema_extra={"example": False},
     )
 

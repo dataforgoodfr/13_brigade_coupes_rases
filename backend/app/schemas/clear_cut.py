@@ -1,12 +1,12 @@
 from datetime import datetime
+from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field
 
 from app.models import ClearCut
-from app.schemas.ecological_zoning import (
-    CreateEcologicalZoningSchema,
-)
+from app.schemas.ecological_zoning import EcologicalZoningSchema
+
 
 
 class ClearCutBaseSchema(BaseModel):
@@ -47,11 +47,36 @@ class ClearCutBaseSchema(BaseModel):
             "example": "2023-01-01T00:00:00Z",
         }
     )
+    bdf_resinous_area_hectare: Optional[float] = Field(
+        json_schema_extra={
+            "example": 15,
+        }
+    )
+    bdf_decidous_area_hectare: Optional[float] = Field(
+        json_schema_extra={
+            "example": 15,
+        }
+    )
+    bdf_mixed_area_hectare: Optional[float] = Field(
+        json_schema_extra={
+            "example": 15,
+        }
+    )
+    bdf_poplar_area_hectare: Optional[float] = Field(
+        json_schema_extra={
+            "example": 15,
+        }
+    )
+    ecological_zoning_area_hectare: Optional[float] = Field(
+        json_schema_extra={
+            "example": 15,
+        }
+    )
+
 
 
 class ClearCutCreateSchema(ClearCutBaseSchema):
-    ecological_zonings: list[CreateEcologicalZoningSchema] = Field(default=[])
-
+    ecological_zonings: list[EcologicalZoningSchema] = Field(default=[])
 
 class ClearCutResponseSchema(ClearCutBaseSchema):
     id: str = Field(
@@ -62,11 +87,6 @@ class ClearCutResponseSchema(ClearCutBaseSchema):
     report_id: str = Field(
         json_schema_extra={
             "example": "1",
-        }
-    )
-    ecological_zonings_ids: list[str] = Field(
-        json_schema_extra={
-            "example": "[1,2,3]",
         }
     )
     created_at: datetime = Field(
@@ -98,4 +118,9 @@ def clear_cut_to_clear_cut_response_schema(
         observation_end_date=clear_cut.observation_end_date,
         area_hectare=clear_cut.area_hectare,
         updated_at=clear_cut.updated_at,
+        bdf_decidous_area_hectare=clear_cut.bdf_decidous_area_hectare,
+        bdf_resinous_area_hectare=clear_cut.bdf_resinous_area_hectare,
+        bdf_mixed_area_hectare=clear_cut.bdf_mixed_area_hectare,
+        bdf_poplar_area_hectare=clear_cut.bdf_poplar_area_hectare,
+        ecological_zoning_area_hectare=clear_cut.ecological_zoning_area_hectare,
     )
