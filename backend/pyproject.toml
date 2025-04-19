@@ -41,55 +41,11 @@ docker-stop = "docker compose down"
 
 # Go to https://docs.astral.sh/ruff/settings for more information
 [tool.ruff]
-# Same as Black.
-line-length = 96
 target-version = "py313"
 
 [tool.ruff.lint]
-mccabe.max-complexity = 7
-
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F", "B"]
-ignore = ["E501"]
-fixable = ["ALL"]
-
-[tool.ruff.format]
-# Automatically detect the appropriate line ending.
-line-ending = "auto"
-
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "venv",
-]
-
-[tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+# Enable imports sorting
+extend-select = ["I"]
 
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
