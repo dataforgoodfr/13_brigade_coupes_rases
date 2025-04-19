@@ -149,3 +149,7 @@ class ClearCutReport(Base):
         if value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
+
+print(123)
+
+
