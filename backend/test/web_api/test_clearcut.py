@@ -70,12 +70,12 @@ def test_post_report_success(client: TestClient):
     clear_cut_data = response.json()
 
     assert clear_cut_data["location"]["coordinates"] == [2.3522, 48.8566]
-    assert clear_cut_data["bdf_resinous_area_hectare"] ==  0.5
-    assert clear_cut_data["bdf_decidous_area_hectare"] ==  0.6
-    assert clear_cut_data["bdf_mixed_area_hectare"] ==  0.7
-    assert clear_cut_data["bdf_poplar_area_hectare"] ==  0.8
-    assert clear_cut_data["ecological_zoning_area_hectare"] ==  0.9
-  
+    assert clear_cut_data["bdf_resinous_area_hectare"] == 0.5
+    assert clear_cut_data["bdf_decidous_area_hectare"] == 0.6
+    assert clear_cut_data["bdf_mixed_area_hectare"] == 0.7
+    assert clear_cut_data["bdf_poplar_area_hectare"] == 0.8
+    assert clear_cut_data["ecological_zoning_area_hectare"] == 0.9
+
     assert clear_cut_data["boundary"]["coordinates"] == [
         [
             [

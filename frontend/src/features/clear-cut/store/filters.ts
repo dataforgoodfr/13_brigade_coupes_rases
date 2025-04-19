@@ -16,7 +16,7 @@ const filtersRequestSchema = z.object({
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
 
 export const filtersResponseSchema = z.object({
-	tags_ids: z.array(z.string()).optional(),
+	rules_ids: z.array(z.string()).optional(),
 	cut_years: z.array(z.number()),
 	departments_ids: z.string().array().optional(),
 	statuses: clearCutStatusSchema.array().optional(),

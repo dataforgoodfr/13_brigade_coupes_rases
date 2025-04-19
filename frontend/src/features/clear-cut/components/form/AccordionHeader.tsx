@@ -4,15 +4,15 @@ import type {
 	ClearCutStatus,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { FormType } from "@/shared/components/form/Form";
-import type { Tag } from "@/shared/store/referential/referential";
+import type { Rule } from "@/shared/store/referential/referential";
+import { RuleBadge } from "../RuleBadge";
 import { StatusWithLabel } from "../StatusWithLabel";
-import { TagBadge } from "../TagBadge";
 
 export default function AccordionHeader({
 	form,
 	tags: abusiveTags,
 	status,
-}: { form: FormType<ClearCutForm>; tags: Tag[]; status: ClearCutStatus }) {
+}: { form: FormType<ClearCutForm>; tags: Rule[]; status: ClearCutStatus }) {
 	return (
 		<div className="flex items-center mx-4 mt-4 gap-6 text-sm">
 			<img
@@ -27,7 +27,7 @@ export default function AccordionHeader({
 				</div>
 				<div className="flex flex-col gap-2 flex-wrap mb-4">
 					{abusiveTags.map((tag) => (
-						<TagBadge className="max-w-fit" key={tag.id} {...tag} />
+						<RuleBadge className="max-w-fit" key={tag.id} {...tag} />
 					))}
 				</div>
 				<Separator className="mb-4" />

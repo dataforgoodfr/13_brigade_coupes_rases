@@ -5,7 +5,6 @@ from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.models import ClearCutReport
-from app.schemas.tag import TAGS
 
 
 logger = getLogger(__name__)
@@ -40,7 +39,7 @@ class ClearCutReportPreviewSchema(BaseModel):
     updated_at: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    tags_ids: list[str] = Field(
+    rules_ids: list[str] = Field(
         json_schema_extra={"example": "[1,2,3]"},
     )
     total_area_hectare: float = Field(
@@ -101,7 +100,7 @@ def row_to_report_preview_schema(
         ],
         department_id=str(report.city.department.id),
         average_location=Point.model_validate_json(point),
-        tags_ids=[tag for tag in TAGS],
+        rules_ids=[],
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
         created_at=report.created_at.date(),

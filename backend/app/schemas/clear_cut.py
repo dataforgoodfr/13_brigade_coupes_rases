@@ -8,7 +8,6 @@ from app.models import ClearCut
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 
 
-
 class ClearCutBaseSchema(BaseModel):
     location: Point = Field(
         json_schema_extra={
@@ -74,9 +73,9 @@ class ClearCutBaseSchema(BaseModel):
     )
 
 
-
 class ClearCutCreateSchema(ClearCutBaseSchema):
     ecological_zonings: list[EcologicalZoningSchema] = Field(default=[])
+
 
 class ClearCutResponseSchema(ClearCutBaseSchema):
     id: str = Field(
