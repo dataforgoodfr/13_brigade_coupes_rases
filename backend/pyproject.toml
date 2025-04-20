@@ -47,5 +47,8 @@ target-version = "py313"
 # Enable flake8-bugbear and isort on top of the defaults
 extend-select = ["I", "B"]
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
