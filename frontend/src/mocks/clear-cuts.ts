@@ -68,6 +68,10 @@ export const createClearCutReportBaseMock = (
 			(acc, cut) => acc + cut.area_hectare,
 			0,
 		),
+		total_bdf_deciduous_area_hectare: faker.number.float({ max: 1 }),
+		total_bdf_mixed_area_hectare: faker.number.float({ max: 1 }),
+		total_bdf_poplar_area_hectare: faker.number.float({ max: 1 }),
+		total_bdf_resinous_area_hectare: faker.number.float({ max: 1 }),
 		clear_cuts,
 		last_cut_date: clear_cuts.reduce(
 			(acc, cut) =>
@@ -206,13 +210,13 @@ export const mockClearCutsResponse = (
 								boundaries,
 								ccp.average_location.coordinates,
 							),
-						)
+					  )
 					: previews,
 			points:
 				boundaries && filterInArea
 					? randomPoints.filter((point) =>
 							isPointInsidePolygon(boundaries, point.coordinates),
-						)
+					  )
 					: randomPoints,
 		} satisfies ClearCutsResponse);
 	});
