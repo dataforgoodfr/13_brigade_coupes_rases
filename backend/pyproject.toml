@@ -44,7 +44,8 @@ docker-stop = "docker compose down"
 target-version = "py313"
 
 [tool.ruff.lint]
-extend-select = ["I"] # Enable sorting imports
+# Enable flake8-bugbear and isort on top of the defaults
+extend-select = ["I", "B"]
 
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
