@@ -1,16 +1,17 @@
-from geojson_pydantic import Point, MultiPolygon
-import pytest
 from datetime import date
-from geoalchemy2.shape import from_shape
-from app.schemas.clear_cut import ClearCutCreateSchema
 
+import pytest
+from common.clear_cut import new_clear_cut_report
+from geoalchemy2.shape import from_shape
+from geojson_pydantic import MultiPolygon, Point
+from shapely.geometry import MultiPolygon as DbMultiPolygon
+from shapely.geometry import Point as DbPoint
+
+from app.models import ClearCut
+from app.schemas.clear_cut import ClearCutCreateSchema
+from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.services.clear_cut_report import create_clear_cut_report
-from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
-from app.models import ClearCut
-from shapely.geometry import Point as DbPoint, MultiPolygon as DbMultiPolygon
-
-from common.clear_cut import new_clear_cut_report
 
 
 def test_create_report_with_intersection(db):
@@ -22,7 +23,7 @@ def test_create_report_with_intersection(db):
             area_hectare=10,
             ecological_zonings=[],
             bdf_resinous_area_hectare=0.5,
-            bdf_decidous_area_hectare=0.5,
+            bdf_deciduous_area_hectare=0.5,
             bdf_mixed_area_hectare=0.5,
             bdf_poplar_area_hectare=0.5,
             ecological_zoning_area_hectare=0.5,

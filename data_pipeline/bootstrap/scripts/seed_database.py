@@ -201,7 +201,6 @@ class DatabaseSeeder:
 
         # Add the "slope_area_ratio_percentage" field
         # TODO: This field is a bit confusing, maybe we could use slope_area_ha instead
-        # TODO: "1 validation error for ClearCutReportPreviewSchema\nslope_area_ratio_percentage\n  Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/float_type"
         logging.info("Calculating slope_area_ratio_percentage")
         sufosat["slope_area_ratio_percentage"] = sufosat["slope_area_ha"] / sufosat["area_ha"]
 
@@ -235,8 +234,49 @@ class DatabaseSeeder:
 
         return sufosat
 
+    def fix_bdforet_data_quality_issues(self, sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+        # TODO: There is an issue with the BDFORET joins
+        # Some clear-cuts overlap with several BDFORET polygons of the same or different wood types
+        # This can lead to a BDFORET coverage > 100%, which doesn't make sense.
+        # See `analytics/notebooks/stats_bdforet.ipynb` for details.
+        # For now, as a quick workaround, we simply normalize the areas to avoid a coverage > 100%
+        # Eventually, this should be handled in:
+        # - `data_pipeline/bootstrap/scripts/preprocess_bdforet.py` (for deduplicating polygons of the same wood type)
+        # - `data_pipeline/bootstrap/scripts/enrich_sufosat_clusters.py` (for handling overlaps between different wood types)
+
+        # Calculate the total BDFORET area for each clear-cut by summing all forest type area columns
+        bdf_area_ha = (
+            sufosat["bdf_deciduous_area_ha"].fillna(0)
+            + sufosat["bdf_mixed_area_ha"].fillna(0)
+            + sufosat["bdf_poplar_area_ha"].fillna(0)
+            + sufosat["bdf_resinous_area_ha"].fillna(0)
+        )
+
+        # Compute BDFORET coverage as the ratio of total BDFORET area to the actual feature area
+        bdf_coverage = bdf_area_ha / sufosat["area_ha"]
+
+        # Identify rows where the BDFORET coverage is greater than 100%
+        needs_to_be_normalized = bdf_coverage > 1
+
+        # Normalize each BDFORET area column proportionally so that total coverage does not exceed 100%
+        for bdf_col in [
+            "bdf_deciduous_area_ha",
+            "bdf_mixed_area_ha",
+            "bdf_poplar_area_ha",
+            "bdf_resinous_area_ha",
+        ]:
+            sufosat.loc[needs_to_be_normalized, bdf_col] = (
+                sufosat.loc[needs_to_be_normalized, bdf_col]
+                / bdf_coverage.loc[needs_to_be_normalized]
+            )
+
+        return sufosat
+
     def seed_clear_cuts(self, sufosat: gpd.GeoDataFrame) -> None:
         logging.info("Starting to seed clear_cuts table")
+
+        # Fix the BDF areas
+        sufosat = self.fix_bdforet_data_quality_issues(sufosat)
 
         # Transform CRS
         logging.info(f"Transforming CRS from {sufosat.crs} to EPSG:{self.crs}")
@@ -260,24 +300,31 @@ class DatabaseSeeder:
                 "geometry": "boundary",
                 "date_min": "observation_start_date",
                 "date_max": "observation_end_date",
-                # TODO: Fields to add:
-                # - ecological_zonings_area_ha
-                # - concave_hull_score
-                # - bdf_*_area_ha (4 fields)
+                "natura2000_area_ha": "ecological_zoning_area_hectare",
+                "bdf_deciduous_area_ha": "bdf_deciduous_area_hectare",
+                "bdf_mixed_area_ha": "bdf_mixed_area_hectare",
+                "bdf_poplar_area_ha": "bdf_poplar_area_hectare",
+                "bdf_resinous_area_ha": "bdf_resinous_area_hectare",
+                # TODO: Add the "concave_hull_score" field?
             }
         ).set_geometry("boundary")
 
         clear_cuts = clear_cuts[
             [
                 "id",
-                "area_hectare",
+                "report_id",
                 "location",
                 "boundary",
-                "created_at",
-                "updated_at",
                 "observation_start_date",
                 "observation_end_date",
-                "report_id",
+                "area_hectare",
+                "ecological_zoning_area_hectare",
+                "bdf_deciduous_area_hectare",
+                "bdf_mixed_area_hectare",
+                "bdf_poplar_area_hectare",
+                "bdf_resinous_area_hectare",
+                "created_at",
+                "updated_at",
             ]
         ]
 
@@ -323,12 +370,6 @@ class DatabaseSeeder:
 
         logging.info(f"After join: {len(clear_cut_ecological_zoning)} relationships remaining")
         display_df(clear_cut_ecological_zoning)
-
-        # TODO: we don't have "area_hectare" for each zone in the dataeng model
-        # Anyways this field wouldn't be useful as we cannot sum it since some ecological zones overlap
-        # Add area_hectare placeholder
-        logging.info("Adding placeholder area_hectare values")
-        clear_cut_ecological_zoning["area_hectare"] = 0
 
         # INSERT
         self.insert_records_in_database(

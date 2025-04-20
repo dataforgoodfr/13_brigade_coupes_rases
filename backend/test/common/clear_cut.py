@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 
 from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, Point
+
 from app.models import (
     SRID,
     ClearCut,
     ClearCutEcologicalZoning,
     ClearCutReport,
 )
-from shapely.geometry import Point, MultiPolygon
 
 
 def new_clear_cut_report(
@@ -24,7 +25,7 @@ def new_clear_cut_report(
                 area_hectare=10,
                 ecological_zoning_area_hectare=0.3,
                 bdf_resinous_area_hectare=0.5,
-                bdf_decidous_area_hectare=0.5,
+                bdf_deciduous_area_hectare=0.5,
                 bdf_mixed_area_hectare=0.5,
                 bdf_poplar_area_hectare=0.5,
                 location=from_shape(Point(2.380192, 48.878899), srid=SRID),

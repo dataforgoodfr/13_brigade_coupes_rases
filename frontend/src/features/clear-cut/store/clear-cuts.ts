@@ -66,6 +66,10 @@ export const clearCutReportResponseSchema = z.object({
 	created_at: z.string().date(),
 	updated_at: z.string().date(),
 	total_area_hectare: z.number(),
+	total_bdf_resinous_area_hectare: z.number(),
+	total_bdf_deciduous_area_hectare: z.number(),
+	total_bdf_mixed_area_hectare: z.number(),
+	total_bdf_poplar_area_hectare: z.number(),
 	last_cut_date: z.string().date(),
 	rules_ids: z.array(z.string()),
 });
