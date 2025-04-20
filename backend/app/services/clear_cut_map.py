@@ -31,11 +31,15 @@ from app.schemas.clear_cut_map import (
 logger = getLogger(__name__)
 
 
-class Filters(BaseModel):
+class GeoBounds(BaseModel):
     south_west_latitude: float
     south_west_longitude: float
     north_east_latitude: float
     north_east_longitude: float
+
+
+class Filters(BaseModel):
+    bounds: Optional[GeoBounds]
     min_area_hectare: Optional[float] = None
     max_area_hectare: Optional[float] = None
     cut_years: list[int] = None
@@ -94,20 +98,18 @@ def get_report_preview_by_id(db: Session, report_id: int) -> ClearCutReportPrevi
 
 
 def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
-    envelope = ST_MakeEnvelope(
-        filters.south_west_longitude,
-        filters.south_west_latitude,
-        filters.north_east_longitude,
-        filters.north_east_latitude,
-        SRID,
-    )
-    square = ST_SetSRID(envelope, SRID)
-    aggregated_cuts_in_boundary = (
-        query_aggregated_clear_cuts(db)
-        .filter(ST_Contains(square, ClearCut.location))
-        .subquery()
-    )
-
+    query = query_aggregated_clear_cuts(db)
+    if filters.bounds is not None:
+        envelope = ST_MakeEnvelope(
+            filters.bounds.south_west_longitude,
+            filters.bounds.south_west_latitude,
+            filters.bounds.north_east_longitude,
+            filters.bounds.north_east_latitude,
+            SRID,
+        )
+        square = ST_SetSRID(envelope, SRID)
+        query = query.filter(ST_Contains(square, ClearCut.location))
+    aggregated_cuts_in_boundary = query.subquery()
     reports = query_reports(db, aggregated_cuts_in_boundary)
     if filters.has_ecological_zonings:
         reports = reports.filter(

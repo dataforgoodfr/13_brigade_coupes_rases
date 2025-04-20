@@ -26,10 +26,6 @@ def ecological_zoning_to_ecological_zoning_schema(
     )
 
 
-class CreateEcologicalZoningSchema(EcologicalZoningSchema):
-    area_hectare: float = Field(json_schema_extra={"example": 15})
-
-
 class ClearCutEcologicalZoningResponseSchema(EcologicalZoningSchema):
     id: str = Field(json_schema_extra={"example": "1"})
     area_hectare: float = Field(json_schema_extra={"example": 15})

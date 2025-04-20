@@ -1,21 +1,22 @@
 import { withId } from "@/shared/schema";
 import { record, z } from "zod";
 
-const variableRuleTagSchema = z.object({
-	type: z.enum(["excessive_slop", "excessive_area"]),
-	value: z.number(),
+const variableRuleSchema = z.object({
+	type: z.enum(["slope", "area"]),
+	threshold: z.number(),
 });
-const staticTagSchema = z.object({
+const ecologicalZoningRuleSchema = z.object({
 	type: z.enum(["ecological_zoning"]),
+	ecological_zonings_ids: z.string().array(),
 });
-const tagResponseSchema = z.record(
+const ruleResponseSchema = z.record(
 	z.string(),
-	variableRuleTagSchema.or(staticTagSchema),
+	variableRuleSchema.or(ecologicalZoningRuleSchema),
 );
 
-export type TagResponse = z.infer<typeof tagResponseSchema>;
-export const tagSchema = withId(tagResponseSchema);
-export type Tag = z.infer<typeof tagSchema>;
+export type RuleResponse = z.infer<typeof ruleResponseSchema>;
+export const ruleSchema = withId(ruleResponseSchema);
+export type Rule = z.infer<typeof ruleSchema>;
 export const departmentResponseSchema = record(
 	z.string(),
 	z.object({ name: z.string() }),
@@ -41,7 +42,7 @@ export const ecologicalZoningSchema = withId(ecologicalZoningResponseSchema);
 export type EcologicalZoning = z.infer<typeof ecologicalZoningSchema>;
 
 export const referentialSchemaResponse = z.object({
-	tags: tagResponseSchema.optional(),
+	rules: ruleResponseSchema.optional(),
 	departments: departmentResponseSchema.optional(),
 	ecological_zonings: ecologicalZoningResponseSchema.optional(),
 });

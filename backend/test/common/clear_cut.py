@@ -22,6 +22,11 @@ def new_clear_cut_report(
                 observation_start_date=datetime.now() - timedelta(days=10),
                 observation_end_date=datetime.now() - timedelta(days=5),
                 area_hectare=10,
+                ecological_zoning_area_hectare=0.3,
+                bdf_resinous_area_hectare=0.5,
+                bdf_decidous_area_hectare=0.5,
+                bdf_mixed_area_hectare=0.5,
+                bdf_poplar_area_hectare=0.5,
                 location=from_shape(Point(2.380192, 48.878899), srid=SRID),
                 boundary=from_shape(
                     MultiPolygon(
@@ -48,9 +53,7 @@ def new_clear_cut_report(
                     srid=SRID,
                 ),
                 ecological_zonings=[
-                    ClearCutEcologicalZoning(
-                        ecological_zoning_id=ecological_zoning_id, area_hectare=10
-                    )
+                    ClearCutEcologicalZoning(ecological_zoning_id=ecological_zoning_id)
                 ],
             )
         ],
