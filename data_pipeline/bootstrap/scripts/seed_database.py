@@ -250,7 +250,9 @@ class DatabaseSeeder:
 
         return sufosat
 
-    def fix_bdforet_data_quality_issues(self, sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    def fix_bdforet_data_quality_issues(
+        self, sufosat: gpd.GeoDataFrame
+    ) -> gpd.GeoDataFrame:
         # TODO: There is an issue with the BDFORET joins
         # Some clear-cuts overlap with several BDFORET polygons of the same or different wood types
         # This can lead to a BDFORET coverage > 100%, which doesn't make sense.

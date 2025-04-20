@@ -1,17 +1,16 @@
+from datetime import datetime
+
+from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
     CheckConstraint,
     Column,
+    DateTime,
+    Float,
+    ForeignKey,
     Integer,
     String,
-    DateTime,
     Table,
-    ForeignKey,
-    Float,
 )
-from geoalchemy2 import Geometry, functions
-from app.database import Base
-from datetime import datetime
-from geoalchemy2 import Geometry, functions
 from sqlalchemy.orm import (
     Mapped,
     column_property,
@@ -182,7 +181,9 @@ class ClearCut(Base):
         ),
         nullable=True,
     )
-    report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
+    report_id: Mapped[int] = mapped_column(
+        ForeignKey("clear_cuts_reports.id"), nullable=False
+    )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
 
     ecological_zonings: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
