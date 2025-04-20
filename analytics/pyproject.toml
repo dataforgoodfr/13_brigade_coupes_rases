@@ -39,5 +39,5 @@ build-backend = "poetry.core.masonry.api"
 target-version = "py313"
 
 [tool.ruff.lint]
-# Enable flake8-bugbear and isort on top of the defaults
+# Enable isort and flake8-bugbear on top of the defaults
 extend-select = ["I", "B"]
