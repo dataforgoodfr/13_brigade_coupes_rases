@@ -6,22 +6,22 @@ import { Popup } from "react-leaflet";
 
 function BDFLabel({
 	total_area_hectare,
-	bdf_deciduous_area_hectare,
-	bdf_mixed_area_hectare,
-	bdf_poplar_area_hectare,
-	bdf_resinous_area_hectare,
+	total_bdf_deciduous_area_hectare,
+	total_bdf_mixed_area_hectare,
+	total_bdf_poplar_area_hectare,
+	total_bdf_resinous_area_hectare,
 }: {
 	total_area_hectare: number;
-	bdf_deciduous_area_hectare: number;
-	bdf_mixed_area_hectare: number;
-	bdf_poplar_area_hectare: number;
-	bdf_resinous_area_hectare: number;
+	total_bdf_deciduous_area_hectare: number;
+	total_bdf_mixed_area_hectare: number;
+	total_bdf_poplar_area_hectare: number;
+	total_bdf_resinous_area_hectare: number;
 }) {
 	const types = {
-		Feuillus: bdf_deciduous_area_hectare,
-		Mélangée: bdf_mixed_area_hectare,
-		Peupleraie: bdf_poplar_area_hectare,
-		Résineux: bdf_resinous_area_hectare,
+		Feuillus: total_bdf_deciduous_area_hectare,
+		Mélangée: total_bdf_mixed_area_hectare,
+		Peupleraie: total_bdf_poplar_area_hectare,
+		Résineux: total_bdf_resinous_area_hectare,
 	};
 
 	const relevantTypes = Object.entries(types)
@@ -57,10 +57,10 @@ export function ClearCutMapPopUp({
 		clear_cuts,
 		city,
 		name,
-		bdf_deciduous_area_hectare,
-		bdf_mixed_area_hectare,
-		bdf_poplar_area_hectare,
-		bdf_resinous_area_hectare,
+		total_bdf_deciduous_area_hectare,
+		total_bdf_mixed_area_hectare,
+		total_bdf_poplar_area_hectare,
+		total_bdf_resinous_area_hectare,
 	},
 }: {
 	report: ClearCutReport;
@@ -105,10 +105,10 @@ export function ClearCutMapPopUp({
 					</div>
 					<BDFLabel
 						total_area_hectare={total_area_hectare}
-						bdf_deciduous_area_hectare={bdf_deciduous_area_hectare}
-						bdf_mixed_area_hectare={bdf_mixed_area_hectare}
-						bdf_poplar_area_hectare={bdf_poplar_area_hectare}
-						bdf_resinous_area_hectare={bdf_resinous_area_hectare}
+						total_bdf_deciduous_area_hectare={total_bdf_deciduous_area_hectare}
+						total_bdf_mixed_area_hectare={total_bdf_mixed_area_hectare}
+						total_bdf_poplar_area_hectare={total_bdf_poplar_area_hectare}
+						total_bdf_resinous_area_hectare={total_bdf_resinous_area_hectare}
 					/>
 				</div>
 			</Popup>

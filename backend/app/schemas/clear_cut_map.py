@@ -5,7 +5,7 @@ from typing import Optional
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import ClearCutReport
+from app.models import ClearCut, ClearCutReport
 
 logger = getLogger(__name__)
 
@@ -61,11 +61,15 @@ class ClearCutReportPreviewSchema(BaseModel):
     slope_area_ratio_percentage: Optional[float] = Field(
         json_schema_extra={"example": 10.0},
     )
-    bdf_resinous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
-    bdf_deciduous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
-    bdf_mixed_area_hectare: float = Field(json_schema_extra={"example": 10.0})
-    bdf_poplar_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    total_bdf_resinous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    total_bdf_deciduous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    total_bdf_mixed_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    total_bdf_poplar_area_hectare: float = Field(json_schema_extra={"example": 10.0})
     model_config = ConfigDict(from_attributes=True)
+
+
+def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
+    return sum(getattr(cc, area_attr, 0) or 0 for cc in clear_cuts)
 
 
 def row_to_report_preview_schema(
@@ -108,24 +112,18 @@ def row_to_report_preview_schema(
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,
-        total_area_hectare=sum(
-            clear_cut.area_hectare for clear_cut in report.clear_cuts
+        total_area_hectare=sum_area(report.clear_cuts, "area_hectare"),
+        total_bdf_resinous_area_hectare=sum_area(
+            report.clear_cuts, "bdf_resinous_area_hectare"
         ),
+        total_bdf_deciduous_area_hectare=sum_area(
+            report.clear_cuts, "bdf_deciduous_area_hectare"
+        ),
+        total_bdf_mixed_area_hectare=sum_area(report.clear_cuts, "bdf_mixed_area_hectare"),
+        total_bdf_poplar_area_hectare=sum_area(report.clear_cuts, "bdf_poplar_area_hectare"),
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
         ).date(),
-        bdf_resinous_area_hectare=sum(
-            clear_cut.bdf_resinous_area_hectare or 0 for clear_cut in report.clear_cuts
-        ),
-        bdf_deciduous_area_hectare=sum(
-            clear_cut.bdf_deciduous_area_hectare or 0 for clear_cut in report.clear_cuts
-        ),
-        bdf_mixed_area_hectare=sum(
-            clear_cut.bdf_mixed_area_hectare or 0 for clear_cut in report.clear_cuts
-        ),
-        bdf_poplar_area_hectare=sum(
-            clear_cut.bdf_poplar_area_hectare or 0 for clear_cut in report.clear_cuts
-        ),
     )
 
 
