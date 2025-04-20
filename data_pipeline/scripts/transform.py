@@ -1,11 +1,11 @@
-import yaml
 import geopandas as gpd
+import yaml
+from utils.cuts_update import cutsUpdateRules
 from utils.df_utils import save_gdf
-from utils.s3 import S3Manager
 from utils.logging_etl import etl_logger
 from utils.polygonizer import Polygonizer
-from utils.cuts_update import cutsUpdateRules
 from utils.prepare_polygon import PreparePolygon
+from utils.s3 import S3Manager
 
 # Configs
 updater = cutsUpdateRules()
@@ -56,7 +56,9 @@ def cluster_clear_cuts_by_time_and_space():
         max_meters_between_clear_cuts=configs["transform_sufosat"][
             "max_meters_between_clear_cuts"
         ],
-        max_days_between_clear_cuts=configs["transform_sufosat"]["max_days_between_clear_cuts"],
+        max_days_between_clear_cuts=configs["transform_sufosat"][
+            "max_days_between_clear_cuts"
+        ],
     )
 
     logger.info("Union clear cut clusters...")
@@ -91,11 +93,14 @@ def update_clusters():
         configs["transform_sufosat"]["download_path"] + "sufosat_clusters_2018_2024.fgb"
     )
     gdf_new: gpd.GeoDataFrame = gpd.read_parquet(
-        configs["transform_sufosat"]["download_path"] + "clear_cuts_clustered.geoparquet"
+        configs["transform_sufosat"]["download_path"]
+        + "clear_cuts_clustered.geoparquet"
     )
 
     logger.info("Clustering by space and time...")
-    clear_cut_pairs = updater.cluster_by_space(gdf_filtered=gdf_filtered, gdf_new=gdf_new)
+    clear_cut_pairs = updater.cluster_by_space(
+        gdf_filtered=gdf_filtered, gdf_new=gdf_new
+    )
 
     logger.info("Updating clusters...")
     updater.update_clusters(clear_cut_pairs)

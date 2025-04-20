@@ -1,11 +1,10 @@
-from utils.logging_etl import etl_logger
 from extract import extract_tif_data
 from transform import (
-    filter_and_polygonize,
     cluster_clear_cuts_by_time_and_space,
+    filter_and_polygonize,
     update_clusters,
 )
-
+from utils.logging_etl import etl_logger
 
 logger = etl_logger("logs/main.log")
 

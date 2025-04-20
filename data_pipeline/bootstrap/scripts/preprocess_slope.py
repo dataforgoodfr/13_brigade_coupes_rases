@@ -172,7 +172,8 @@ def download_dem_tiles() -> None:
 
     archives_dir = SLOPE_DIR / "elevation_archives"
     for url in tqdm(
-        urls_to_download, desc="Downloading the tiles of all the mainland French departments"
+        urls_to_download,
+        desc="Downloading the tiles of all the mainland French departments",
     ):
         filename = url.split("/")[-1]
         filepath = archives_dir / filename
@@ -218,7 +219,9 @@ def downloaded_tiles_sanity_check(assembly_map: gpd.GeoDataFrame) -> None:
         f"Making sure we downloaded the {len(assembly_map)} tiles from the assembly map"
     )
     tiles = [
-        f.replace(".asc", "") for f in os.listdir(SLOPE_DIR / "elevation") if f.endswith(".asc")
+        f.replace(".asc", "")
+        for f in os.listdir(SLOPE_DIR / "elevation")
+        if f.endswith(".asc")
     ]
     assert assembly_map["tile_name"].isin(tiles).sum() == len(assembly_map), (
         "We have a discrepency between the assembly map and the downloaded tiles"
@@ -236,13 +239,17 @@ def compute_slope_from_elevation() -> None:
     For more information on Horn's algorithm, check out https://www.aazuspan.dev/blog/terrain-algorithms-from-scratch/.
     """
 
-    logging.info("Computing slope percentage from the elevation tiles using the Horn algorithm")
+    logging.info(
+        "Computing slope percentage from the elevation tiles using the Horn algorithm"
+    )
     (SLOPE_DIR / "slope").mkdir(exist_ok=True, parents=True)
     for filename in tqdm(os.listdir(SLOPE_DIR / "elevation"), ""):
         elevation_input_filepath = str(SLOPE_DIR / "elevation" / filename)
         # The tiles are available as .asc ASCII files, which are not very optimized.
         # We convert them to TIFF files for better performance and storage efficiency.
-        slope_output_filepath = str(SLOPE_DIR / "slope" / filename.replace(".asc", ".tif"))
+        slope_output_filepath = str(
+            SLOPE_DIR / "slope" / filename.replace(".asc", ".tif")
+        )
         gdal.DEMProcessing(
             slope_output_filepath,
             gdal.Open(elevation_input_filepath),

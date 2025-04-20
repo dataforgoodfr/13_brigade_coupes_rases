@@ -1,12 +1,13 @@
 # Custom code derived from Yoann Crouin's written code.
 # link --> https://github.com/dataforgoodfr/13_brigade_coupes_rases/blob/main/analytics/notebooks/prepare_sufosat_v3_layer.py
 # # -*- coding: utf-8 -*-
+from typing import cast
+
+import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
-from typing import cast
-import geopandas as gpd
-from utils.logging_etl import etl_logger
 from utils.disjoin_set import DisjointSet
+from utils.logging_etl import etl_logger
 
 
 class PreparePolygon:
@@ -38,9 +39,9 @@ class PreparePolygon:
         """
 
         sufosat_date = int(sufosat_date)
-        return pd.Timestamp(year=2000 + sufosat_date // 1000, month=1, day=1) + pd.Timedelta(
-            days=(sufosat_date % 1000) - 1
-        )
+        return pd.Timestamp(
+            year=2000 + sufosat_date // 1000, month=1, day=1
+        ) + pd.Timedelta(days=(sufosat_date % 1000) - 1)
 
     def pair_clear_cuts_through_space_and_time(
         self,
@@ -86,7 +87,10 @@ class PreparePolygon:
         # Lambert-93 CRS uses meters as its unit of measurement for distance.
         clear_cut_pairs: pd.DataFrame = (
             gdf.sjoin(
-                gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts
+                gdf,
+                how="left",
+                predicate="dwithin",
+                distance=max_meters_between_clear_cuts,
             )
             .reset_index()
             .rename(columns={"index": "index_left"})
@@ -256,7 +260,9 @@ class PreparePolygon:
         clear_cut_group_size = gdf.groupby("clear_cut_group").size()
 
         self.logger.info("Performing spatial union of geometries within each cluster")
-        gdf = gdf.dissolve(by="clear_cut_group", aggfunc={"date": ["min", "max"]}).rename(
+        gdf = gdf.dissolve(
+            by="clear_cut_group", aggfunc={"date": ["min", "max"]}
+        ).rename(
             columns={
                 ("date", "min"): "date_min",
                 ("date", "max"): "date_max",

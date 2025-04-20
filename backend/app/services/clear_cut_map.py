@@ -1,8 +1,20 @@
+from logging import getLogger
 from typing import Optional
+
+from geoalchemy2.functions import (
+    ST_AsGeoJSON,
+    ST_Centroid,
+    ST_Contains,
+    ST_MakeEnvelope,
+    ST_Multi,
+    ST_SetSRID,
+    ST_Union,
+)
 from geojson_pydantic import Point
 from pydantic import BaseModel
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, case, and_
+
 from app.models import (
     SRID,
     City,
@@ -11,17 +23,6 @@ from app.models import (
     ClearCutReport,
     Department,
 )
-from logging import getLogger
-from geoalchemy2.functions import (
-    ST_Contains,
-    ST_MakeEnvelope,
-    ST_SetSRID,
-    ST_AsGeoJSON,
-    ST_Union,
-    ST_Centroid,
-    ST_Multi,
-)
-
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     ClearCutReportPreviewSchema,
@@ -56,13 +57,15 @@ def query_aggregated_clear_cuts(db: Session):
             func.min(ClearCut.observation_start_date).label("cut_start"),
             func.max(ClearCut.observation_end_date).label("cut_end"),
             func.max(ClearCut.updated_at).label("last_update"),
-            func.sum(case((ClearCutEcologicalZoning.clear_cut_id is None, 0), else_=1)).label(
-                "ecological_zonings_count"
-            ),
+            func.sum(
+                case((ClearCutEcologicalZoning.clear_cut_id is None, 0), else_=1)
+            ).label("ecological_zonings_count"),
             func.count(ClearCutEcologicalZoning.clear_cut_id).label(
                 "clear_cuts_ecological_zonings_count"
             ),
-            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label("average_location"),
+            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
+                "average_location"
+            ),
         )
         .join(
             ClearCutEcologicalZoning,
@@ -89,11 +92,19 @@ def query_reports(db: Session, aggregated_cuts):
     )
 
 
-def get_report_preview_by_id(db: Session, report_id: int) -> ClearCutReportPreviewSchema:
+def get_report_preview_by_id(
+    db: Session, report_id: int
+) -> ClearCutReportPreviewSchema:
     aggregated_cuts = (
-        query_aggregated_clear_cuts(db).filter(ClearCut.report_id == report_id).subquery()
+        query_aggregated_clear_cuts(db)
+        .filter(ClearCut.report_id == report_id)
+        .subquery()
     )
-    report = query_reports(db, aggregated_cuts).filter(ClearCutReport.id == report_id).first()
+    report = (
+        query_reports(db, aggregated_cuts)
+        .filter(ClearCutReport.id == report_id)
+        .first()
+    )
     return row_to_report_preview_schema(report)
 
 
@@ -117,7 +128,9 @@ def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSch
             == aggregated_cuts_in_boundary.c.clear_cuts_ecological_zonings_count
         )
     elif filters.has_ecological_zonings is not None:
-        reports = reports.filter(aggregated_cuts_in_boundary.c.ecological_zonings_count == 0)
+        reports = reports.filter(
+            aggregated_cuts_in_boundary.c.ecological_zonings_count == 0
+        )
     if len(filters.cut_years) > 0:
         cut_years_intervals = [
             and_(

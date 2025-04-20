@@ -61,5 +61,7 @@ def downgrade() -> None:
     # ### end Alembic commands ###
 
     # Manual adjustments for non-automatic migrations
-    op.drop_constraint("ecological_zoning_area_smaller_than_clear_cut_area", "clear_cuts")
+    op.drop_constraint(
+        "ecological_zoning_area_smaller_than_clear_cut_area", "clear_cuts"
+    )
     op.drop_constraint("bdf_area_smaller_than_clear_cut_area", "clear_cuts")

@@ -3,6 +3,7 @@
 # # -*- coding: utf-8 -*-
 import os
 from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
 from utils.logging_etl import etl_logger
@@ -13,7 +14,8 @@ logger = etl_logger("logs/transform.log")
 
 def display_df(df: pd.DataFrame) -> None:
     logger.info(
-        "Data preview:\n" + df.to_string(max_rows=10, max_colwidth=50, show_dimensions=True)
+        "Data preview:\n"
+        + df.to_string(max_rows=10, max_colwidth=50, show_dimensions=True)
     )
 
 

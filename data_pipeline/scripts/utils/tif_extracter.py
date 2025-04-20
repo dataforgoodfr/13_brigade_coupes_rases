@@ -1,8 +1,9 @@
 import json
-import requests
 from datetime import datetime
-from utils.s3 import S3Manager
+
+import requests
 from utils.logging_etl import etl_logger
+from utils.s3 import S3Manager
 
 
 class ExtractFromSufosat:
@@ -79,11 +80,15 @@ class ExtractFromSufosat:
         metadata = json.loads(metadata_content)
 
         date_format = "%Y-%m-%dT%H:%M:%S"
-        base_date = datetime.strptime(metadata["date_source"].split(".")[0], date_format)
+        base_date = datetime.strptime(
+            metadata["date_source"].split(".")[0], date_format
+        )
         date_extracted = datetime.strptime(data["updated"].split(".")[0], date_format)
 
         do_update = base_date < date_extracted
-        self.logger.info(f"✅ Metadata inspection completed, update required: {do_update}")
+        self.logger.info(
+            f"✅ Metadata inspection completed, update required: {do_update}"
+        )
 
         return {"do_update": do_update, "metadata": data, "mymetadata": metadata}
 
@@ -105,7 +110,9 @@ class ExtractFromSufosat:
             f"https://zenodo.org/records/{id}/files/{query}?download=1", stream=True
         ) as r:
             r.raise_for_status()
-            self.s3_manager.s3.upload_fileobj(r.raw, self.s3_manager.bucket_name, s3_key)
+            self.s3_manager.s3.upload_fileobj(
+                r.raw, self.s3_manager.bucket_name, s3_key
+            )
 
         self.logger.info(f"✅ File loaded successfully {s3_key}")
 
@@ -148,7 +155,9 @@ class ExtractFromSufosat:
             self.s3_manager.delete_from_s3(s3_prefix + filename)
 
         self.s3_manager.s3.put_object(
-            Body=meta_data_json, Bucket=self.s3_manager.bucket_name, Key=s3_prefix + filename
+            Body=meta_data_json,
+            Bucket=self.s3_manager.bucket_name,
+            Key=s3_prefix + filename,
         )
 
         self.logger.info("✅ The metadata was been update !")

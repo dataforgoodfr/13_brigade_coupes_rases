@@ -1,4 +1,5 @@
 import csv
+
 from app.database import SessionLocal
 from app.models import City, Department
 

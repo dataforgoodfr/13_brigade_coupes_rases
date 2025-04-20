@@ -1,4 +1,5 @@
 import csv
+
 from sqlalchemy.orm import Session
 
 from app.models import City, Department, EcologicalZoning, Rules

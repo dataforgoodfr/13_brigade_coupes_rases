@@ -1,18 +1,20 @@
-from typing import Optional
-from sqlalchemy.orm import Session
-from app.models import Department
 from logging import getLogger
+from typing import Optional
 
+from sqlalchemy.orm import Session
+
+from app.models import Department
 from app.schemas.department import (
     department_to_department_base_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 
-
 logger = getLogger(__name__)
 
 
-def find_departments(db: Session, url: str, page: int = 0, size: int = 10) -> list[Department]:
+def find_departments(
+    db: Session, url: str, page: int = 0, size: int = 10
+) -> list[Department]:
     departments = db.query(Department).offset(page * size).limit(size).all()
     departments_count = db.query(Department.id).count()
     return PaginationResponseSchema(

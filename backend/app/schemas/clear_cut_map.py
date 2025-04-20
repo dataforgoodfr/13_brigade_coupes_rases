@@ -119,8 +119,12 @@ def row_to_report_preview_schema(
         total_bdf_deciduous_area_hectare=sum_area(
             report.clear_cuts, "bdf_deciduous_area_hectare"
         ),
-        total_bdf_mixed_area_hectare=sum_area(report.clear_cuts, "bdf_mixed_area_hectare"),
-        total_bdf_poplar_area_hectare=sum_area(report.clear_cuts, "bdf_poplar_area_hectare"),
+        total_bdf_mixed_area_hectare=sum_area(
+            report.clear_cuts, "bdf_mixed_area_hectare"
+        ),
+        total_bdf_poplar_area_hectare=sum_area(
+            report.clear_cuts, "bdf_poplar_area_hectare"
+        ),
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
         ).date(),

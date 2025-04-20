@@ -50,7 +50,9 @@ def overlay(
 def enrich_with_cities(
     sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
 ) -> gpd.GeoDataFrame:
-    logging.info("Enriching SUFOSAT clusters with the list of intersecting city INSEE codes")
+    logging.info(
+        "Enriching SUFOSAT clusters with the list of intersecting city INSEE codes"
+    )
 
     # Load cities data
     logging.info("Loading cities data")
@@ -67,7 +69,9 @@ def enrich_with_cities(
     # Add cities to the SUFOSAT DataFrame
     sufosat.loc[cities.index, "cities"] = cities
     missing_cities_count = sufosat["cities"].isna().sum()
-    logging.info(f"{missing_cities_count} clear-cut clusters don't intersect with any city")
+    logging.info(
+        f"{missing_cities_count} clear-cut clusters don't intersect with any city"
+    )
 
     # Handle clear-cuts that don't fall within any city polygon
     # by joining with their nearest cities
@@ -175,14 +179,18 @@ def enrich_with_bdforet(
     logging.info("Enriching SUFOSAT clusters with the BDFORET information")
 
     # Load BDFORET
-    bdforet_dask = dask_geopandas.read_file(DATA_DIR / "bdforet/bdforet.fgb", npartitions=12)
+    bdforet_dask = dask_geopandas.read_file(
+        DATA_DIR / "bdforet/bdforet.fgb", npartitions=12
+    )
 
     # Calculate intersection area in hectares (1 hectare = 10,000 m²)
     sufosat_bdf = overlay(sufosat_dask, bdforet_dask)
     sufosat_bdf["area_ha"] = sufosat_bdf.area / 10000
 
     # Select only the required columns and compute the intersections
-    sufosat_bdf_intersections: pd.DataFrame = sufosat_bdf[["bdf_type", "area_ha"]].compute()
+    sufosat_bdf_intersections: pd.DataFrame = sufosat_bdf[
+        ["bdf_type", "area_ha"]
+    ].compute()
 
     # Pivot from "bdft_type", "area_ha" columns to
     # "bdf_deciduous_area_ha", "bdf_mixed_area_ha", "bdf_poplar_area_ha", "bdf_resinous_area_ha"
@@ -221,7 +229,9 @@ def enrich_sufosat_clusters() -> None:
     ProgressBar().register()  # type: ignore
 
     # Load SUFOSAT clusters
-    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index("clear_cut_group")
+    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index(
+        "clear_cut_group"
+    )
 
     # Convert to dask_geopandas for parallel processing
     # TODO: What's the ideal number of partitions???

@@ -1,14 +1,15 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.deps import db_session
 from app.schemas.clear_cut import ClearCutResponseSchema
 from app.schemas.clear_cut_report import (
-    CreateClearCutsReportCreateSchema,
     ClearCutReportPatchSchema,
     ClearCutReportResponseSchema,
+    CreateClearCutsReportCreateSchema,
 )
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import find_clearcuts_by_report
@@ -18,7 +19,6 @@ from app.services.clear_cut_report import (
     get_report_response_by_id,
     update_clear_cut_report,
 )
-from app.config import settings
 
 logger = getLogger(__name__)
 
@@ -30,7 +30,9 @@ def authenticate(x_imports_token: str = Header(default="")):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-@router.post("/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", dependencies=[Depends(authenticate)], status_code=status.HTTP_201_CREATED
+)
 def post_report(
     response: Response,
     params: CreateClearCutsReportCreateSchema,
@@ -48,10 +50,14 @@ def list_clear_cuts_reports(
     db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
     logger.info(db)
-    return find_clearcuts_reports(db, url="/api/v1/clear-cuts-reports", page=page, size=size)
+    return find_clearcuts_reports(
+        db, url="/api/v1/clear-cuts-reports", page=page, size=size
+    )
 
 
-@router.patch("/{report_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT)
+@router.patch(
+    "/{report_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
+)
 def update_existing_clear_cut_report(
     report_id: int, item: ClearCutReportPatchSchema, db: Session = db_session
 ) -> ClearCutReportResponseSchema:
@@ -66,7 +72,8 @@ def get_by_id(report_id: int, db: Session = db_session) -> ClearCutReportRespons
 
 
 @router.get(
-    "/{report_id}/clear-cuts", response_model=PaginationResponseSchema[ClearCutResponseSchema]
+    "/{report_id}/clear-cuts",
+    response_model=PaginationResponseSchema[ClearCutResponseSchema],
 )
 def list_clear_cuts(
     report_id: int, db: Session = db_session, page: int = 0, size: int = 10

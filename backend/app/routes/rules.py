@@ -1,8 +1,9 @@
-from app.schemas.rule import RuleBaseSchema, RuleResponseSchema
-from fastapi import APIRouter, Depends
-from app.deps import db_session
 from logging import getLogger
 
+from fastapi import APIRouter, Depends
+
+from app.deps import db_session
+from app.schemas.rule import RuleBaseSchema, RuleResponseSchema
 from app.services.rules import get_rule_by_id, get_rules, update_rule
 from app.services.user_auth import get_admin_user
 

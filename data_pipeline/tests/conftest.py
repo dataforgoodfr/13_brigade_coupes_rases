@@ -1,8 +1,9 @@
-import pytest
-import boto3
 import os
-from moto import mock_aws
+
+import boto3
+import pytest
 from dotenv import load_dotenv
+from moto import mock_aws
 
 
 @pytest.fixture(scope="function")
@@ -13,7 +14,9 @@ def s3_mock(monkeypatch):
     accidentally call real S3.
     """
     monkeypatch.setenv("S3_REGION", "us-east-1")
-    monkeypatch.setenv("S3_ENDPOINT", "")  # Force empty, so it doesn't call real endpoint
+    monkeypatch.setenv(
+        "S3_ENDPOINT", ""
+    )  # Force empty, so it doesn't call real endpoint
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
     monkeypatch.setenv("S3_BUCKET_NAME", "test-bucket")

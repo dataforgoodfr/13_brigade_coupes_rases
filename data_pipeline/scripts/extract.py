@@ -1,6 +1,6 @@
 import yaml
-from utils.s3 import S3Manager
 from utils.logging_etl import etl_logger
+from utils.s3 import S3Manager
 from utils.tif_extracter import ExtractFromSufosat
 
 
@@ -12,11 +12,13 @@ def extract_tif_data():
         configs = yaml.safe_load(stream)
 
     file_exists = extract_sufosat.check_tif_in_s3(
-        configs["extract_sufosat"]["s3_prefix"], configs["extract_sufosat"]["s3_filename"]
+        configs["extract_sufosat"]["s3_prefix"],
+        configs["extract_sufosat"]["s3_filename"],
     )
 
     update_info = extract_sufosat.check_for_updates(
-        configs["extract_sufosat"]["zendo_filename"], configs["extract_sufosat"]["zendo_id"]
+        configs["extract_sufosat"]["zendo_filename"],
+        configs["extract_sufosat"]["zendo_id"],
     )
 
     # Conditionnaly download the file

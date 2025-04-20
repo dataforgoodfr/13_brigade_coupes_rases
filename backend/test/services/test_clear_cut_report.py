@@ -127,11 +127,18 @@ def test_create_report_success(db):
     )
     created_report = create_clear_cut_report(db, report)
     assert created_report.city.zip_code == report.city_zip_code
-    assert created_report.slope_area_ratio_percentage == report.slope_area_ratio_percentage
-    ecological_zoning = created_report.clear_cuts[0].ecological_zonings[0].ecological_zoning
+    assert (
+        created_report.slope_area_ratio_percentage == report.slope_area_ratio_percentage
+    )
+    ecological_zoning = (
+        created_report.clear_cuts[0].ecological_zonings[0].ecological_zoning
+    )
     assert ecological_zoning.code == report.clear_cuts[0].ecological_zonings[0].code
     assert ecological_zoning.name == report.clear_cuts[0].ecological_zonings[0].name
     assert ecological_zoning.type == report.clear_cuts[0].ecological_zonings[0].type
-    assert ecological_zoning.sub_type == report.clear_cuts[0].ecological_zonings[0].sub_type
+    assert (
+        ecological_zoning.sub_type
+        == report.clear_cuts[0].ecological_zonings[0].sub_type
+    )
 
     assert created_report.status == "to_validate"

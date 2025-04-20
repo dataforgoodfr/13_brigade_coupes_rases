@@ -1,7 +1,7 @@
-from fastapi.testclient import TestClient
-from fastapi import status
-from pytest import Session
 from common.user import get_admin_user_token
+from fastapi import status
+from fastapi.testclient import TestClient
+from pytest import Session
 
 
 def test_get_rules(client: TestClient):

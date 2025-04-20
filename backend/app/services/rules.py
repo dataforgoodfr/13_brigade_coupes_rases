@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from app.models import Rules
-from app.schemas.rule import RuleBaseSchema, RuleResponseSchema, rule_to_rule_response
 from sqlalchemy.orm import Session
 
+from app.models import Rules
+from app.schemas.rule import RuleBaseSchema, RuleResponseSchema, rule_to_rule_response
 from app.services.ecological_zoning import find_ecological_zonings_by_ids
 
 

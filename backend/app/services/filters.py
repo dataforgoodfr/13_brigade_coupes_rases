@@ -1,8 +1,9 @@
 from typing import Optional
+
 from sqlalchemy import desc, extract
-from app.models import City, ClearCut, ClearCutReport, Department, User
 from sqlalchemy.orm import Session
 
+from app.models import City, ClearCut, ClearCutReport, Department, User
 from app.schemas.filters import FiltersResponseSchema
 
 
@@ -15,7 +16,9 @@ def build_filters(db: Session, connected_user: Optional[User]) -> FiltersRespons
         )
         .all()
     )
-    departments_query = db.query(Department.id).join(City).join(ClearCutReport).distinct()
+    departments_query = (
+        db.query(Department.id).join(City).join(ClearCutReport).distinct()
+    )
     if connected_user is not None and len(connected_user.departments) > 0:
         departments_query.join(connected_user.departments)
     departments = departments_query.all()

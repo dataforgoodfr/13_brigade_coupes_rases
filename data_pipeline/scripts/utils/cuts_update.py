@@ -1,6 +1,6 @@
 import pandas as pd
-from utils.s3 import S3Manager
 from utils.logging_etl import etl_logger
+from utils.s3 import S3Manager
 
 
 class cutsUpdateRules:
@@ -9,7 +9,9 @@ class cutsUpdateRules:
         self.logger = etl_logger("logs/transform.log")
         self.data_crs = "EPSG:2154"
 
-    def cluster_by_space(self, gdf_filtered, gdf_new, lookback_days=365, max_distance=100):
+    def cluster_by_space(
+        self, gdf_filtered, gdf_new, lookback_days=365, max_distance=100
+    ):
         gdf_filtered = gdf_filtered.to_crs(self.data_crs)
         gdf_new = gdf_new.to_crs(self.data_crs)
 
@@ -17,7 +19,9 @@ class cutsUpdateRules:
         gdf_filtered = gdf_filtered[gdf_filtered["date_max"] > max_date]
 
         clear_cut_pairs = (
-            gdf_filtered.sjoin(gdf_new, how="left", predicate="dwithin", distance=max_distance)
+            gdf_filtered.sjoin(
+                gdf_new, how="left", predicate="dwithin", distance=max_distance
+            )
             .reset_index()
             .rename(columns={"index": "index_left"})
         )
@@ -44,7 +48,9 @@ class cutsUpdateRules:
         )
 
         expected_non_matched = len(gdf_new) - matched_unique_count
-        self.logger.info(f"Expected number of unmatched elements: {expected_non_matched}")
+        self.logger.info(
+            f"Expected number of unmatched elements: {expected_non_matched}"
+        )
 
         actual_non_matched = len(non_matched_new)
         self.logger.info(f"Actual number of unmatched elements: {actual_non_matched}")

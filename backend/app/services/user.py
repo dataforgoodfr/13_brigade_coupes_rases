@@ -1,10 +1,12 @@
+from logging import getLogger
 from typing import Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.models import Department, User
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
-from logging import getLogger
 
 logger = getLogger(__name__)
 
@@ -33,7 +35,9 @@ def create_user(db: Session, user: UserCreateSchema) -> User:
         role=user.role,
     )
     for department_id in user.departments:
-        department_db = db.query(Department).filter(Department.id == department_id).first()
+        department_db = (
+            db.query(Department).filter(Department.id == department_id).first()
+        )
         if department_db is None:
             raise HTTPException(
                 status_code=404, detail=f"Item with id {department_db} not found"

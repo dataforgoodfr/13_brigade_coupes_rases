@@ -1,6 +1,7 @@
 # test_s3.py
-import sys
 import os
+import sys
+
 import pytest
 
 # Adjust path if needed
