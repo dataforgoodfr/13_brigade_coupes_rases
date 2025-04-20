@@ -1,21 +1,21 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
-from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
-from app.schemas.clear_cut_report import (
-    CreateClearCutsReportCreateSchema,
-    ClearCutReportPatchSchema,
-    ClearCutReportResponseSchema,
-    report_to_response_schema,
-)
 from logging import getLogger
+
+from fastapi import HTTPException, status
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
+from app.schemas.clear_cut_report import (
+    ClearCutReportPatchSchema,
+    ClearCutReportResponseSchema,
+    CreateClearCutsReportCreateSchema,
+    report_to_response_schema,
+)
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
-from fastapi import status
 
 logger = getLogger(__name__)
 
@@ -52,7 +52,7 @@ def create_clear_cut_report(
                 observation_end_date=clear_cut.observation_end_date,
                 area_hectare=clear_cut.area_hectare,
                 bdf_resinous_area_hectare=clear_cut.bdf_resinous_area_hectare,
-                bdf_decidous_area_hectare=clear_cut.bdf_decidous_area_hectare,
+                bdf_deciduous_area_hectare=clear_cut.bdf_deciduous_area_hectare,
                 bdf_mixed_area_hectare=clear_cut.bdf_mixed_area_hectare,
                 bdf_poplar_area_hectare=clear_cut.bdf_poplar_area_hectare,
                 ecological_zoning_area_hectare=clear_cut.ecological_zoning_area_hectare,

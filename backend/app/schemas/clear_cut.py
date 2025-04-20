@@ -52,7 +52,7 @@ class ClearCutBaseSchema(BaseModel):
             "example": 15,
         },
     )
-    bdf_decidous_area_hectare: Optional[float] = Field(
+    bdf_deciduous_area_hectare: Optional[float] = Field(
         None,
         json_schema_extra={
             "example": 15,
@@ -122,7 +122,7 @@ def clear_cut_to_clear_cut_response_schema(
         observation_end_date=clear_cut.observation_end_date,
         area_hectare=clear_cut.area_hectare,
         updated_at=clear_cut.updated_at,
-        bdf_decidous_area_hectare=clear_cut.bdf_decidous_area_hectare,
+        bdf_deciduous_area_hectare=clear_cut.bdf_deciduous_area_hectare,
         bdf_resinous_area_hectare=clear_cut.bdf_resinous_area_hectare,
         bdf_mixed_area_hectare=clear_cut.bdf_mixed_area_hectare,
         bdf_poplar_area_hectare=clear_cut.bdf_poplar_area_hectare,
