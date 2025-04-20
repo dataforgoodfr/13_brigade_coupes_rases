@@ -4,6 +4,48 @@ import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 import { useMemo } from "react";
 import { Popup } from "react-leaflet";
 
+function BDFLabel({
+	total_area_hectare,
+	bdf_deciduous_area_hectare,
+	bdf_mixed_area_hectare,
+	bdf_poplar_area_hectare,
+	bdf_resinous_area_hectare,
+}: {
+	total_area_hectare: number;
+	bdf_deciduous_area_hectare: number;
+	bdf_mixed_area_hectare: number;
+	bdf_poplar_area_hectare: number;
+	bdf_resinous_area_hectare: number;
+}) {
+	const types = {
+		Feuillus: bdf_deciduous_area_hectare,
+		Mélangée: bdf_mixed_area_hectare,
+		Peupleraie: bdf_poplar_area_hectare,
+		Résineux: bdf_resinous_area_hectare,
+	};
+
+	const relevantTypes = Object.entries(types)
+		// Convert hectares to percentages
+		.map(([label, value]) => ({
+			label,
+			percentage: (value / total_area_hectare) * 100,
+		}))
+		// Only display types with a coverage > 1%
+		.filter(({ percentage }) => percentage >= 1)
+		// Display types in coverage descending order
+		.sort((a, b) => b.percentage - a.percentage);
+
+	const labelString = relevantTypes
+		.map(({ label, percentage }) => `${label} (${Math.round(percentage)}%)`)
+		.join(" / ");
+
+	return (
+		<div>
+			Type de forêt : <strong>{labelString || "Non renseigné"}</strong>
+		</div>
+	);
+}
+
 export function ClearCutMapPopUp({
 	report: {
 		status,
@@ -15,8 +57,14 @@ export function ClearCutMapPopUp({
 		clear_cuts,
 		city,
 		name,
+		bdf_deciduous_area_hectare,
+		bdf_mixed_area_hectare,
+		bdf_poplar_area_hectare,
+		bdf_resinous_area_hectare,
 	},
-}: { report: ClearCutReport }) {
+}: {
+	report: ClearCutReport;
+}) {
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
 			clear_cuts.flatMap((z) => z.ecologicalZonings).map((z) => z.name),
@@ -46,7 +94,8 @@ export function ClearCutMapPopUp({
 						Date du signalement : <strong>{updated_at}</strong>
 					</div>
 					<div>
-						Taille de la coupe :<strong> {total_area_hectare} HA</strong>
+						Taille de la coupe :
+						<strong> {total_area_hectare.toFixed(2)} HA</strong>
 					</div>
 					<div>
 						Pente : <strong>{slope_area_ratio_percentage} %</strong>
@@ -54,6 +103,13 @@ export function ClearCutMapPopUp({
 					<div>
 						Zones Natura :<strong>{ecological_zonings}</strong>
 					</div>
+					<BDFLabel
+						total_area_hectare={total_area_hectare}
+						bdf_deciduous_area_hectare={bdf_deciduous_area_hectare}
+						bdf_mixed_area_hectare={bdf_mixed_area_hectare}
+						bdf_poplar_area_hectare={bdf_poplar_area_hectare}
+						bdf_resinous_area_hectare={bdf_resinous_area_hectare}
+					/>
 				</div>
 			</Popup>
 		</>

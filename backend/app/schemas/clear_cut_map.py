@@ -49,10 +49,8 @@ class ClearCutReportPreviewSchema(BaseModel):
     status: str = Field(
         json_schema_extra={"example": "validated"},
     )
-    city: str = (
-        Field(
-            json_schema_extra={"example": "Paris"},
-        ),
+    city: str = Field(
+        json_schema_extra={"example": "Paris"},
     )
     department_id: str = Field(
         json_schema_extra={"example": "1"},
@@ -63,6 +61,10 @@ class ClearCutReportPreviewSchema(BaseModel):
     slope_area_ratio_percentage: Optional[float] = Field(
         json_schema_extra={"example": 10.0},
     )
+    bdf_resinous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    bdf_deciduous_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    bdf_mixed_area_hectare: float = Field(json_schema_extra={"example": 10.0})
+    bdf_poplar_area_hectare: float = Field(json_schema_extra={"example": 10.0})
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -112,6 +114,18 @@ def row_to_report_preview_schema(
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
         ).date(),
+        bdf_resinous_area_hectare=sum(
+            clear_cut.bdf_resinous_area_hectare or 0 for clear_cut in report.clear_cuts
+        ),
+        bdf_deciduous_area_hectare=sum(
+            clear_cut.bdf_deciduous_area_hectare or 0 for clear_cut in report.clear_cuts
+        ),
+        bdf_mixed_area_hectare=sum(
+            clear_cut.bdf_mixed_area_hectare or 0 for clear_cut in report.clear_cuts
+        ),
+        bdf_poplar_area_hectare=sum(
+            clear_cut.bdf_poplar_area_hectare or 0 for clear_cut in report.clear_cuts
+        ),
     )
 
 
