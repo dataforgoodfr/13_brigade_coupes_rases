@@ -27,7 +27,7 @@ def seed_cities_departments(db: Session):
                         City(zip_code=city_row["COM"], name=city_row["LIBELLE"])
                     )
 
-            db.add_all(departments)
+            db.add_all(departments.values())
             db.flush()
             return departments
 
