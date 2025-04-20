@@ -1,19 +1,20 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
 from app.routes import (
+    clear_cuts,
     clear_cuts_map,
     clear_cuts_reports,
     departments,
-    users,
-    referential,
-    token,
-    me,
-    clear_cuts,
     ecological_zonings,
     filters,
+    me,
+    referential,
     rules,
+    token,
+    users,
 )
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}

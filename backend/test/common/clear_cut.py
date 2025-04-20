@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 
 from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, Point
+
 from app.models import (
     SRID,
     ClearCut,
     ClearCutEcologicalZoning,
     ClearCutReport,
 )
-from shapely.geometry import Point, MultiPolygon
 
 
 def new_clear_cut_report(

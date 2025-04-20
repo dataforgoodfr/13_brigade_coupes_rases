@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.schemas.rule import RuleResponseSchemaWithoutIdSchema
 
-
 logger = getLogger(__name__)
 
 

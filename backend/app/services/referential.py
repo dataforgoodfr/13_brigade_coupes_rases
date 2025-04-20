@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
-from app.models import Department, EcologicalZoning
 from logging import getLogger
 
+from sqlalchemy.orm import Session
+
+from app.models import Department, EcologicalZoning
 from app.schemas.ecological_zoning import (
     ecological_zoning_to_ecological_zoning_schema,
 )
@@ -11,7 +12,6 @@ from app.schemas.referential import (
 )
 from app.schemas.rule import RuleResponseSchemaWithoutIdSchema
 from app.services.rules import get_rules
-
 
 logger = getLogger(__name__)
 

@@ -28,4 +28,6 @@ def download_file(url: str, output_filepath: str | Path) -> None:
                 file.write(chunk)
 
         file_size_mb = output_filepath.stat().st_size / (1024 * 1024)
-        logging.info(f"Download completed: {output_filepath} (Size: {file_size_mb:.2f} MB)")
+        logging.info(
+            f"Download completed: {output_filepath} (Size: {file_size_mb:.2f} MB)"
+        )

@@ -8,7 +8,8 @@ import pandas as pd
 
 def display_df(df: pd.DataFrame) -> None:
     logging.info(
-        "Data preview:\n" + df.to_string(max_rows=10, max_colwidth=50, show_dimensions=True)
+        "Data preview:\n"
+        + df.to_string(max_rows=10, max_colwidth=50, show_dimensions=True)
     )
 
 

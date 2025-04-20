@@ -1,11 +1,11 @@
 import datetime
 from logging import getLogger
 from typing import Optional
+
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models import ClearCutReport
-
 
 logger = getLogger(__name__)
 
@@ -106,7 +106,9 @@ def row_to_report_preview_schema(
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,
-        total_area_hectare=sum(clear_cut.area_hectare for clear_cut in report.clear_cuts),
+        total_area_hectare=sum(
+            clear_cut.area_hectare for clear_cut in report.clear_cuts
+        ),
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
         ).date(),

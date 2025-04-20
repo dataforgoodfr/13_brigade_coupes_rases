@@ -1,17 +1,18 @@
-from datetime import datetime, timedelta
 import os
-from geoalchemy2.shape import from_shape
-from shapely.geometry import Point, MultiPolygon
-from app.database import Base, SessionLocal
-from app.models import ClearCut, ClearCutEcologicalZoning, User, ClearCutReport
-from sqlalchemy import text
 import traceback
+from datetime import datetime, timedelta
 
+from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, Point
+from sqlalchemy import text
+
+from app.database import Base, SessionLocal
+from app.models import ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
 from app.services.user_auth import get_password_hash
 from common_seed import (
+    get_cities,
     seed_cities_departments,
     seed_ecological_zonings,
-    get_cities,
     seed_rules,
 )
 

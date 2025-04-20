@@ -8,9 +8,9 @@ Create Date: 2025-04-18 20:20:00.325595
 
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "8042be50cde3"
@@ -44,10 +44,18 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("rule_id", "ecological_zoning_id"),
     )
     op.drop_column("clear_cut_ecological_zoning", "area_hectare")
-    op.add_column("clear_cuts", sa.Column("bdf_resinous_area_ha", sa.Float(), nullable=True))
-    op.add_column("clear_cuts", sa.Column("bdf_decidous_area_ha", sa.Float(), nullable=True))
-    op.add_column("clear_cuts", sa.Column("bdf_mixed_area_ha", sa.Float(), nullable=True))
-    op.add_column("clear_cuts", sa.Column("bdf_poplar_area_ha", sa.Float(), nullable=True))
+    op.add_column(
+        "clear_cuts", sa.Column("bdf_resinous_area_ha", sa.Float(), nullable=True)
+    )
+    op.add_column(
+        "clear_cuts", sa.Column("bdf_decidous_area_ha", sa.Float(), nullable=True)
+    )
+    op.add_column(
+        "clear_cuts", sa.Column("bdf_mixed_area_ha", sa.Float(), nullable=True)
+    )
+    op.add_column(
+        "clear_cuts", sa.Column("bdf_poplar_area_ha", sa.Float(), nullable=True)
+    )
     op.add_column(
         "clear_cuts", sa.Column("ecological_zoning_area_ha", sa.Float(), nullable=True)
     )

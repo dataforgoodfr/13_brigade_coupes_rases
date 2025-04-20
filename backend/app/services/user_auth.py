@@ -8,10 +8,9 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.deps import db_session
 from app.services.user import get_user_by_email
-
-from app.config import settings
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -40,7 +39,9 @@ class TokenData(BaseModel):
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/token",
 )
-optional_oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/token", auto_error=False)
+optional_oauth2_schema = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/token", auto_error=False
+)
 
 
 def verify_password(plain_password: str, hashed_password: str):

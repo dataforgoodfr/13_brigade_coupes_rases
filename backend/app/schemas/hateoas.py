@@ -1,5 +1,6 @@
 import math
 from typing import Generic, TypeVar
+
 from pydantic import BaseModel, ConfigDict
 
 M = TypeVar("M")
@@ -41,5 +42,7 @@ class PaginationMetadataSchema(Metadata):
         )
 
 
-class PaginationResponseSchema(HateaosResponse[PaginationMetadataSchema, list[C]], Generic[C]):
+class PaginationResponseSchema(
+    HateaosResponse[PaginationMetadataSchema, list[C]], Generic[C]
+):
     pass
