@@ -11,6 +11,7 @@ from app.routes import (
     clear_cuts,
     ecological_zonings,
     filters,
+    rules,
 )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -38,6 +39,7 @@ app.include_router(me.router)
 app.include_router(clear_cuts.router)
 app.include_router(ecological_zonings.router)
 app.include_router(referential.router)
+app.include_router(rules.router)
 
 
 def start_server(

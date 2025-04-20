@@ -1,7 +1,7 @@
 import {
 	departmentSchema,
 	ecologicalZoningSchema,
-	tagSchema,
+	ruleSchema,
 } from "@/shared/store/referential/referential";
 import { z } from "zod";
 
@@ -67,18 +67,18 @@ export const clearCutReportResponseSchema = z.object({
 	updated_at: z.string().date(),
 	total_area_hectare: z.number(),
 	last_cut_date: z.string().date(),
-	tags_ids: z.array(z.string()),
+	rules_ids: z.array(z.string()),
 });
 export type ClearCutReportResponse = z.infer<
 	typeof clearCutReportResponseSchema
 >;
 
 export const clearCutReportSchema = clearCutReportResponseSchema
-	.omit({ tags_ids: true, clear_cuts: true, department_id: true })
+	.omit({ rules_ids: true, clear_cuts: true, department_id: true })
 	.and(
 		z.object({
 			department: departmentSchema,
-			tags: tagSchema.array(),
+			rules: ruleSchema.array(),
 			clear_cuts: z.array(clearCutSchema),
 		}),
 	);

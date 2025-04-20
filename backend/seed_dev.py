@@ -12,6 +12,7 @@ from common_seed import (
     seed_cities_departments,
     seed_ecological_zonings,
     get_cities,
+    seed_rules,
 )
 
 SRID = 4326
@@ -40,6 +41,7 @@ def seed_database():
         seed_cities_departments(db)
         [marseille, paris] = get_cities(db)
         [natura1, natura2] = seed_ecological_zonings(db)
+        seed_rules(db, [natura1, natura2])
         admin = User(
             firstname="Crysta",
             lastname="Faerie",
@@ -72,6 +74,11 @@ def seed_database():
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_decidous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
+                        ecological_zoning_area_hectare=5,
                         location=from_shape(Point(2.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -98,18 +105,19 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura2.id, area_hectare=20
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura2.id),
                         ],
                     ),
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        ecological_zoning_area_hectare=0.3,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_decidous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
                         location=from_shape(Point(1.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -136,9 +144,7 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
                         ],
                     ),
                 ],

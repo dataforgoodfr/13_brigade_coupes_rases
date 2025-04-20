@@ -14,17 +14,17 @@ import {
 	listToSelectableItems,
 	updateEventuallyBooleanSelectableItem,
 } from "@/shared/items";
-import type { Department, Tag } from "@/shared/store/referential/referential";
+import type { Department, Rule } from "@/shared/store/referential/referential";
 import {
 	selectDepartmentsByIds,
-	selectTagsByIds,
+	selectRulesByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
-	tags: SelectableItem<Tag>[];
+	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
 	departments: SelectableItem<Department>[];
@@ -36,7 +36,7 @@ export interface FiltersState {
 }
 export const initialState: FiltersState = {
 	cutYears: [],
-	tags: [],
+	rules: [],
 	departments: [],
 	areas: [],
 	statuses: [],
@@ -49,13 +49,16 @@ export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
 	async (_arg, { getState, extra: { api } }) => {
 		const result = await api().get<FiltersResponse>("api/v1/filters").json();
-		const { departments_ids, tags_ids, ...response } =
-			filtersResponseSchema.parse(result);
+		const {
+			departments_ids,
+			rules_ids: tags_ids,
+			...response
+		} = filtersResponseSchema.parse(result);
 		const state = getState();
 		return {
 			...response,
 			departments: selectDepartmentsByIds(state, departments_ids ?? []),
-			tags: selectTagsByIds(state, tags_ids ?? []),
+			rules: selectRulesByIds(state, tags_ids ?? []),
 		};
 	},
 );
@@ -146,7 +149,7 @@ export const filtersSlice = createSlice({
 				{
 					payload: {
 						cut_years: cutYears,
-						tags,
+						rules,
 						departments,
 						area_preset_hectare: areaPresetsHectare,
 						statuses,
@@ -157,7 +160,7 @@ export const filtersSlice = createSlice({
 				},
 			) => {
 				state.cutYears = listToSelectableItems(cutYears);
-				state.tags = listToSelectableItems(tags);
+				state.rules = listToSelectableItems(rules);
 				state.ecological_zoning = booleanToSelectableItem(ecological_zoning);
 				state.excessive_slop = booleanToSelectableItem(excessive_slop);
 				state.favorite = booleanToSelectableItem(favorite);
@@ -214,7 +217,7 @@ export const selectStatuses = createTypedDraftSafeSelector(
 );
 export const selectTags = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.tags,
+	(state) => state.rules,
 );
 
 export const selectAreaPresetsHectare = createTypedDraftSafeSelector(

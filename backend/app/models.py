@@ -28,7 +28,30 @@ class ClearCutEcologicalZoning(Base):
     )
     clear_cut: Mapped["ClearCut"] = relationship(back_populates="ecological_zonings")
     ecological_zoning: Mapped["EcologicalZoning"] = relationship(back_populates="clear_cuts")
-    area_hectare = Column(Float, nullable=False)
+
+
+rules_ecological_zoning = Table(
+    "rules_ecological_zonings",
+    Base.metadata,
+    Column("rule_id", Integer, ForeignKey("rules.id"), primary_key=True),
+    Column(
+        "ecological_zoning_id",
+        Integer,
+        ForeignKey("ecological_zonings.id"),
+        primary_key=True,
+    ),
+)
+
+
+class Rules(Base):
+    __tablename__ = "rules"
+    RULES = ["slope", "area", "ecological_zoning"]
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String, nullable=False)
+    ecological_zonings = relationship(
+        "EcologicalZoning", secondary=rules_ecological_zoning, back_populates="rules"
+    )
+    threshold = Column(Float, nullable=True)
 
 
 class User(Base):
@@ -97,6 +120,9 @@ class EcologicalZoning(Base):
     clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
         back_populates="ecological_zoning"
     )
+    rules = relationship(
+        "Rules", secondary=rules_ecological_zoning, back_populates="ecological_zonings"
+    )
 
 
 CLEARCUT_STATUSES = [
@@ -118,7 +144,11 @@ class ClearCut(Base):
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     observation_start_date = Column(DateTime, nullable=False)
     observation_end_date = Column(DateTime, nullable=False)
-
+    bdf_resinous_area_hectare = Column(Float, nullable=True)
+    bdf_decidous_area_hectare = Column(Float, nullable=True)
+    bdf_mixed_area_hectare = Column(Float, nullable=True)
+    bdf_poplar_area_hectare = Column(Float, nullable=True)
+    ecological_zoning_area_hectare = Column(Float, nullable=True)
     report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
 
@@ -133,7 +163,7 @@ class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
     id = Column(Integer, primary_key=True, index=True)
-    slope_area_ratio_percentage = Column(Float, index=True, nullable=False)
+    slope_area_ratio_percentage = Column(Float, index=True, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")

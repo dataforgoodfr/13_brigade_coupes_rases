@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	selectDepartmentsByIds,
 	selectEcologicalZoningByIds,
-	selectTagsByIds,
+	selectRulesByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -27,7 +27,7 @@ const mapReport = (
 	report: ClearCutReportResponse,
 ): ClearCutReport => ({
 	...report,
-	tags: selectTagsByIds(state, report.tags_ids),
+	rules: selectRulesByIds(state, report.rules_ids),
 	department: selectDepartmentsByIds(state, [report.department_id])[0],
 	clear_cuts: report.clear_cuts.map((cut) => ({
 		...cut,
