@@ -3,10 +3,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class FiltersResponseSchema(BaseModel):
-    tags_ids: list[str] = Field(
-        json_schema_extra={"example": ["1", "2", "3"]},
-    )
-
     area_preset_hectare: list[float] = Field(
         json_schema_extra={"example": [0.5, 1, 2, 5, 10]},
     )

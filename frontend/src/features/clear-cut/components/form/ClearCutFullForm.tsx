@@ -23,7 +23,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 		<>
 			<AccordionHeader
 				form={form}
-				tags={clearCut.tags}
+				tags={clearCut.rules}
 				status={clearCut.status}
 			/>
 			<Form {...form}>

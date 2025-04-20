@@ -13,6 +13,10 @@ def find_ecological_zonings_by_codes(db: Session, codes: list[str]) -> list[Ecol
     return db.query(EcologicalZoning).filter(EcologicalZoning.code.in_(codes)).all()
 
 
+def find_ecological_zonings_by_ids(db: Session, ids: list[str]) -> list[EcologicalZoning]:
+    return db.query(EcologicalZoning).filter(EcologicalZoning.id.in_(map(int, ids))).all()
+
+
 def find_or_add_ecological_zonings(
     db: Session, ecological_zonings: list[EcologicalZoningSchema]
 ) -> list[EcologicalZoning]:

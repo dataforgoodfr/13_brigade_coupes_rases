@@ -4,7 +4,6 @@ from app.models import City, ClearCut, ClearCutReport, Department, User
 from sqlalchemy.orm import Session
 
 from app.schemas.filters import FiltersResponseSchema
-from app.schemas.tag import TAGS
 
 
 def build_filters(db: Session, connected_user: Optional[User]) -> FiltersResponseSchema:
@@ -16,9 +15,7 @@ def build_filters(db: Session, connected_user: Optional[User]) -> FiltersRespons
         )
         .all()
     )
-    departments_query = (
-        db.query(Department.id).join(City).join(ClearCutReport).distinct()
-    )
+    departments_query = db.query(Department.id).join(City).join(ClearCutReport).distinct()
     if connected_user is not None and len(connected_user.departments) > 0:
         departments_query.join(connected_user.departments)
     departments = departments_query.all()
@@ -30,5 +27,4 @@ def build_filters(db: Session, connected_user: Optional[User]) -> FiltersRespons
         ecological_zoning=None,
         excessive_slop=None,
         statuses=[row[0] for row in statuses],
-        tags_ids=[str(tag) for tag in TAGS],
     )

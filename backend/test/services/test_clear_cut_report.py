@@ -3,9 +3,8 @@ import pytest
 from datetime import date
 from geoalchemy2.shape import from_shape
 from app.schemas.clear_cut import ClearCutCreateSchema
-from app.schemas.ecological_zoning import (
-    CreateEcologicalZoningSchema,
-)
+
+from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.services.clear_cut_report import create_clear_cut_report
 from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
 from app.models import ClearCut
@@ -22,6 +21,11 @@ def test_create_report_with_intersection(db):
             observation_end_date=date.today(),
             area_hectare=10,
             ecological_zonings=[],
+            bdf_resinous_area_hectare=0.5,
+            bdf_decidous_area_hectare=0.5,
+            bdf_mixed_area_hectare=0.5,
+            bdf_poplar_area_hectare=0.5,
+            ecological_zoning_area_hectare=0.5,
             location=from_shape(DbPoint(1.0, 1.0), srid=4326),
             boundary=from_shape(
                 DbMultiPolygon(
@@ -68,9 +72,8 @@ def test_create_report_with_intersection(db):
                     ],
                 ),
                 ecological_zonings=[
-                    CreateEcologicalZoningSchema(
+                    EcologicalZoningSchema(
                         type="Natura2000",
-                        area_hectare=10,
                         sub_type="Test subtype",
                         name="Test name",
                         code="TestCode",
@@ -111,7 +114,7 @@ def test_create_report_success(db):
                     ],
                 ),
                 ecological_zonings=[
-                    CreateEcologicalZoningSchema(
+                    EcologicalZoningSchema(
                         type="Natura2000",
                         sub_type="Test subtype",
                         name="Test name",

@@ -10,7 +10,7 @@ import {
 import {
 	fakeDepartments,
 	fakeEcologicalZonings,
-	fakeTags,
+	fakeRules,
 } from "@/mocks/referential";
 import { volunteerAssignedToken } from "@/mocks/users";
 import { range } from "@/shared/array";
@@ -63,7 +63,7 @@ export const createClearCutReportBaseMock = (
 		created_at: faker.date.past().toJSON().split("T")[0],
 		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
 		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
-		tags_ids: faker.helpers.arrayElements(Object.keys(fakeTags)),
+		rules_ids: faker.helpers.arrayElements(Object.keys(fakeRules)),
 		total_area_hectare: clear_cuts.reduce(
 			(acc, cut) => acc + cut.area_hectare,
 			0,

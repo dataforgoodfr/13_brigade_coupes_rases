@@ -8,7 +8,6 @@ from app.models import ClearCut
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 
 
-
 class ClearCutBaseSchema(BaseModel):
     location: Point = Field(
         json_schema_extra={
@@ -48,35 +47,40 @@ class ClearCutBaseSchema(BaseModel):
         }
     )
     bdf_resinous_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_decidous_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_mixed_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     bdf_poplar_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
     ecological_zoning_area_hectare: Optional[float] = Field(
+        None,
         json_schema_extra={
             "example": 15,
-        }
+        },
     )
-
 
 
 class ClearCutCreateSchema(ClearCutBaseSchema):
     ecological_zonings: list[EcologicalZoningSchema] = Field(default=[])
+
 
 class ClearCutResponseSchema(ClearCutBaseSchema):
     id: str = Field(

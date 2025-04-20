@@ -1,5 +1,5 @@
 import { DotByStatus } from "@/features/clear-cut/components/DotByStatus";
-import { TagBadge } from "@/features/clear-cut/components/TagBadge";
+import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 import { useMemo } from "react";
 import { Popup } from "react-leaflet";
@@ -7,7 +7,7 @@ import { Popup } from "react-leaflet";
 export function ClearCutMapPopUp({
 	report: {
 		status,
-		tags,
+		rules: tags,
 		last_cut_date,
 		total_area_hectare,
 		updated_at,
@@ -37,7 +37,7 @@ export function ClearCutMapPopUp({
 
 				<div className="flex mb-5 gap-2 font-inter">
 					{tags.map((tag) => (
-						<TagBadge key={tag.id} {...tag} />
+						<RuleBadge key={tag.id} {...tag} />
 					))}
 				</div>
 
