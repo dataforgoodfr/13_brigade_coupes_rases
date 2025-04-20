@@ -24,7 +24,7 @@ def test_post_report_success(client: TestClient):
                 "observation_end_date": "2023-12-31T00:00:00Z",
                 "area_hectare": 10,
                 "bdf_resinous_area_hectare": 0.5,
-                "bdf_decidous_area_hectare": 0.6,
+                "bdf_deciduous_area_hectare": 0.6,
                 "bdf_mixed_area_hectare": 0.7,
                 "bdf_poplar_area_hectare": 0.8,
                 "ecological_zoning_area_hectare": 0.9,
@@ -71,7 +71,7 @@ def test_post_report_success(client: TestClient):
 
     assert clear_cut_data["location"]["coordinates"] == [2.3522, 48.8566]
     assert clear_cut_data["bdf_resinous_area_hectare"] == 0.5
-    assert clear_cut_data["bdf_decidous_area_hectare"] == 0.6
+    assert clear_cut_data["bdf_deciduous_area_hectare"] == 0.6
     assert clear_cut_data["bdf_mixed_area_hectare"] == 0.7
     assert clear_cut_data["bdf_poplar_area_hectare"] == 0.8
     assert clear_cut_data["ecological_zoning_area_hectare"] == 0.9

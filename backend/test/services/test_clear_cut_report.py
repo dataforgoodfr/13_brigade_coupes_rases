@@ -23,7 +23,7 @@ def test_create_report_with_intersection(db):
             area_hectare=10,
             ecological_zonings=[],
             bdf_resinous_area_hectare=0.5,
-            bdf_decidous_area_hectare=0.5,
+            bdf_deciduous_area_hectare=0.5,
             bdf_mixed_area_hectare=0.5,
             bdf_poplar_area_hectare=0.5,
             ecological_zoning_area_hectare=0.5,
