@@ -201,7 +201,6 @@ class DatabaseSeeder:
 
         # Add the "slope_area_ratio_percentage" field
         # TODO: This field is a bit confusing, maybe we could use slope_area_ha instead
-        # TODO: "1 validation error for ClearCutReportPreviewSchema\nslope_area_ratio_percentage\n  Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/float_type"
         logging.info("Calculating slope_area_ratio_percentage")
         sufosat["slope_area_ratio_percentage"] = sufosat["slope_area_ha"] / sufosat["area_ha"]
 
@@ -302,7 +301,7 @@ class DatabaseSeeder:
                 "date_min": "observation_start_date",
                 "date_max": "observation_end_date",
                 "natura2000_area_ha": "ecological_zoning_area_hectare",
-                "bdf_deciduous_area_ha": "bdf_decidous_area_hectare",  # TODO: fix decidous -> deciduous typo
+                "bdf_deciduous_area_ha": "bdf_deciduous_area_hectare",
                 "bdf_mixed_area_ha": "bdf_mixed_area_hectare",
                 "bdf_poplar_area_ha": "bdf_poplar_area_hectare",
                 "bdf_resinous_area_ha": "bdf_resinous_area_hectare",
@@ -320,7 +319,7 @@ class DatabaseSeeder:
                 "observation_end_date",
                 "area_hectare",
                 "ecological_zoning_area_hectare",
-                "bdf_decidous_area_hectare",
+                "bdf_deciduous_area_hectare",
                 "bdf_mixed_area_hectare",
                 "bdf_poplar_area_hectare",
                 "bdf_resinous_area_hectare",

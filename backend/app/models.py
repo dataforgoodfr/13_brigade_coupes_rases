@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey, Float
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Table,
+    ForeignKey,
+    Float,
+)
 from geoalchemy2 import Geometry, functions
 from app.database import Base
 from datetime import datetime
@@ -145,10 +154,17 @@ class ClearCut(Base):
     observation_start_date = Column(DateTime, nullable=False)
     observation_end_date = Column(DateTime, nullable=False)
     bdf_resinous_area_hectare = Column(Float, nullable=True)
-    bdf_decidous_area_hectare = Column(Float, nullable=True)
+    bdf_deciduous_area_hectare = Column(Float, nullable=True)
     bdf_mixed_area_hectare = Column(Float, nullable=True)
     bdf_poplar_area_hectare = Column(Float, nullable=True)
-    ecological_zoning_area_hectare = Column(Float, nullable=True)
+    ecological_zoning_area_hectare = Column(
+        Float,
+        CheckConstraint(
+            "ecological_zoning_area_hectare <= area_hectare + 0.000001",
+            name="ecological_zoning_area_smaller_than_clear_cut_area",
+        ),
+        nullable=True,
+    )
     report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
 
@@ -157,6 +173,19 @@ class ClearCut(Base):
     )
     location_json = column_property(functions.ST_AsGeoJSON(location))
     boundary_json = column_property(functions.ST_AsGeoJSON(boundary))
+
+    __table_args__ = (
+        CheckConstraint(
+            """
+            COALESCE(bdf_resinous_area_hectare, 0)
+            + COALESCE(bdf_deciduous_area_hectare, 0)
+            + COALESCE(bdf_mixed_area_hectare, 0)
+            + COALESCE(bdf_poplar_area_hectare, 0)
+            <= area_hectare + 0.000001
+            """,
+            name="bdf_area_smaller_than_clear_cut_area",
+        ),
+    )
 
 
 class ClearCutReport(Base):
