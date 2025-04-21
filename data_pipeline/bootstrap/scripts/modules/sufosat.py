@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr 20 13:48:10 2025
+
+@author: cindy
+"""
+
 import logging
 from typing import cast
 
@@ -5,19 +12,20 @@ import geopandas as gpd
 import pandas as pd
 from tqdm import tqdm
 
-from bootstrap.scripts import DATA_DIR
-from bootstrap.scripts.utils import (
+from scripts import DATA_DIR
+from scripts.utils import (
     DisjointSet,
     display_df,
     download_file,
     load_gdf,
     log_execution,
     polygonize_raster,
+    save_gdf,
 )
-from bootstrap.scripts.utils.df_utils import save_gdf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
-RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
+DETECTIONS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_detections.fgb"
+CLUSTERS_RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
 
 
 def download_sufosat_raster_dates(input_raster_dates: str) -> None:
@@ -379,7 +387,7 @@ def add_area_ha(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
-@log_execution([RESULT_FILEPATH])
+@log_execution([DETECTIONS_RESULT_FILEPATH, CLUSTERS_RESULT_FILEPATH])
 def preprocess_sufosat(
     input_raster_dates: str = str(
         SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
@@ -424,20 +432,11 @@ def preprocess_sufosat(
     download_sufosat_raster_dates(input_raster_dates)
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
-
-    # To develop the update mechanism, we'll truncate the data up to 2025
-    # To test the mechanism, we can consider 2025+ data as new detections
-    # This is temporary
-    gdf = gdf[gdf["date"] < pd.Timestamp(2025, 1, 1)]
-
     gdf = cluster_clear_cuts(
         gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
     )
+    save_gdf(gdf, DETECTIONS_RESULT_FILEPATH)
     gdf = union_clear_cut_clusters(gdf)
     gdf = add_concave_hull_score(gdf, concave_hull_ratio)
     gdf = add_area_ha(gdf)
-    save_gdf(gdf, RESULT_FILEPATH, index=True)
-
-
-if __name__ == "__main__":
-    preprocess_sufosat()
+    save_gdf(gdf, CLUSTERS_RESULT_FILEPATH, index=True)

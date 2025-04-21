@@ -1,20 +1,72 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr 20 12:01:49 2025
+
+@author: cindy
+"""
+
 import logging
 
+import dask_geopandas
 import geopandas as gpd
 import pandas as pd
 
-from bootstrap.scripts import DATA_DIR
-from bootstrap.scripts.utils import (
-    display_df,
-    download_file,
-    load_gdf,
-    log_execution,
-    save_gdf,
-)
+from scripts import DATA_DIR
+from scripts.utils import display_df, download_file, log_execution, overlay, save_gdf
+from scripts.utils.df_utils import load_gdf
 
+ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
 NATURA_2000_DIR = DATA_DIR / "natura2000"
 CONCAT_RESULT_FILEPATH = NATURA_2000_DIR / "natura2000_concat.fgb"
 UNION_RESULT_FILEPATH = NATURA_2000_DIR / "natura2000_union.fgb"
+
+
+def enrich_with_natura2000_area(
+    sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    logging.info("Enriching SUFOSAT clusters with Natura 2000 area information")
+
+    # Load Natura 2000 data
+    # It is important to use the unioned Natura2000 geodataframe to avoid counting the same area multiple times
+    natura2000_union = load_gdf(DATA_DIR / "natura2000/natura2000_union.fgb")
+
+    # Calculate intersection area in hectares (1 hectare = 10,000 m²)
+    natura2000_area_ha = overlay(sufosat_dask, natura2000_union).area.compute() / 10000
+
+    # Add Natura 2000 area to the SUFOSAT DataFrame
+    sufosat.loc[natura2000_area_ha.index, "natura2000_area_ha"] = natura2000_area_ha
+
+    # Fill NA values with 0 (no intersection with Natura 2000)
+    sufosat["natura2000_area_ha"] = sufosat["natura2000_area_ha"].fillna(0)
+
+    logging.info(f"{len(natura2000_area_ha)} clusters intersect with Natura 2000 areas")
+
+    display_df(sufosat)
+
+    return sufosat
+
+
+def enrich_with_natura2000_codes(
+    sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    logging.info("Enriching SUFOSAT clusters with Natura 2000 codes information")
+
+    # Load Natura 2000 data
+    # It is important to use the unioned Natura2000 geodataframe to avoid counting the same area multiple times
+    natura2000_concat = load_gdf(DATA_DIR / "natura2000/natura2000_concat.fgb")
+
+    # Find the Natura2000 codes that intersect with the clear-cuts
+    natura2000_codes = overlay(sufosat_dask, natura2000_concat)
+    natura2000_codes = (
+        natura2000_codes.groupby(natura2000_codes.index)["code"].agg(list).compute()
+    )
+
+    # Add Natura 2000 area to the SUFOSAT DataFrame
+    sufosat.loc[natura2000_codes.index, "natura2000_codes"] = natura2000_codes
+
+    display_df(sufosat)
+
+    return sufosat
 
 
 def download_layers() -> None:
@@ -87,7 +139,3 @@ def preprocess_natura2000() -> None:
     save_gdf(natura2000_concat, CONCAT_RESULT_FILEPATH)
     natura2000_union = union_explode_layers(natura2000_concat)
     save_gdf(natura2000_union, UNION_RESULT_FILEPATH)
-
-
-if __name__ == "__main__":
-    preprocess_natura2000()
