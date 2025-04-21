@@ -10,7 +10,7 @@ import geopandas as gpd
 
 from scripts import DATA_DIR
 from scripts.utils import display_df, download_file, load_gdf, log_execution, save_gdf
-from script.utils.convert_crs import convert_crs_to_lambert93
+from scripts.utils.convert_crs import convert_crs_to_lambert93
 
 CADASTRE_DEPARTMENTS_DIR = DATA_DIR / "cadastre_departments"
 RESULT_FILEPATH = CADASTRE_DEPARTMENTS_DIR / "cadastre_departments.fgb"
