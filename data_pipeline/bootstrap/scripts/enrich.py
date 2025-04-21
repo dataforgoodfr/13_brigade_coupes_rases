@@ -4,9 +4,9 @@ from dask.diagnostics import ProgressBar
 from scripts import DATA_DIR
 from scripts.utils import log_execution
 from scripts.utils.df_utils import load_gdf, save_gdf
-from script.modules.cities import enrich_with_cities
-from script.modules.natura2000 import enrich_with_natura2000_area, enrich_with_natura2000_codes
-from script.modules.natura2000 import enrich_with_slope_information
+from scripts.modules.cities import enrich_with_cities
+from scripts.modules.natura2000 import enrich_with_natura2000_area, enrich_with_natura2000_codes
+from scripts.modules.natura2000 import enrich_with_slope_information
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
 
