@@ -60,7 +60,6 @@ build-backend = "poetry.core.masonry.api"
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["geopandas.*", "rasterio.*", "osgeo.*", "pykeepass.*"]
 ignore_missing_imports = true
 module = [
     "geopandas.*",
