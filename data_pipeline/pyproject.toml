@@ -57,7 +57,7 @@ module = [
     "pykeepass.*",
     "dask_geopandas.*",
 ]
-ignore_missing_imports = true
+ignore_missing_imports = false
 
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
