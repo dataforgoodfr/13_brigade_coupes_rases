@@ -1,17 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Apr 20 12:07:01 2025
-
-@author: cindy
-"""
-
 import logging
 import os
 import resource
 import shutil
 import zipfile
 
-import dask_geopandas
 import geopandas as gpd
 import numpy as np
 import py7zr
@@ -20,54 +12,17 @@ from osgeo import gdal
 from rasterio.merge import merge
 from tqdm import tqdm
 
-from scripts import DATA_DIR
-from scripts.utils import (
+from bootstrap.scripts import DATA_DIR
+from bootstrap.scripts.utils import (
     display_df,
     download_file,
     load_gdf,
     log_execution,
-    overlay,
     polygonize_raster,
 )
 
 SLOPE_DIR = DATA_DIR / "slope"
 RESULT_FILEPATH = SLOPE_DIR / "slope_gte_30.fgb"
-ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
-
-
-def enrich_with_slope_information(
-    sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
-) -> gpd.GeoDataFrame:
-    logging.info("Enriching SUFOSAT clusters with slope information")
-
-    # Load slope data
-    slope = load_gdf(DATA_DIR / "slope/slope_gte_30.fgb")
-
-    # Get the geometry of the intersection between SUFOSAT and the slopes
-    slope_intersection = overlay(sufosat_dask, slope)
-
-    # Explode multi-polygons into simple polygons for accurate area calculation,
-    # as we want the area of the single largest polygon for this metric
-    slope_intersection = slope_intersection.explode()
-
-    # Compute the simple polygons intersection area in hectares (1 hectare = 10,000 m²)
-    slope_area_ha = slope_intersection.area.compute() / 10000
-
-    # For each clear-cut cluster, keep the largest slope intersection area
-    slope_area_ha = slope_area_ha.sort_values(ascending=True)
-    slope_area_ha = slope_area_ha[~slope_area_ha.index.duplicated(keep="last")]
-
-    # Add slope area to the SUFOSAT DataFrame
-    sufosat.loc[slope_area_ha.index, "slope_area_ha"] = slope_area_ha
-
-    # Fill NA values with 0 (no intersection with slopes ≥ 30%)
-    sufosat["slope_area_ha"] = sufosat["slope_area_ha"].fillna(0)
-
-    logging.info(f"{len(slope_area_ha)} clusters intersect with steep slopes")
-
-    display_df(sufosat)
-
-    return sufosat
 
 
 def get_dem_assembly_map() -> gpd.GeoDataFrame:
@@ -433,3 +388,7 @@ def preprocess_slope() -> None:
     binarize_slope_gte_30()
     merge_raster_tiles()
     polygonize_slope_raster()
+
+
+if __name__ == "__main__":
+    preprocess_slope()
