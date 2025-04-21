@@ -45,12 +45,13 @@ class GeoBounds(BaseModel):
 
 
 class Filters(BaseModel):
-    bounds: Optional[GeoBounds]
+    bounds: Optional[GeoBounds] = None
+    report_id: Optional[int] = None
     min_area_hectare: Optional[float] = None
     max_area_hectare: Optional[float] = None
-    cut_years: list[int] = None
-    departments_ids: list[int]
-    statuses: list[str]
+    cut_years: list[int] = []
+    departments_ids: list[int] = []
+    statuses: list[str] = []
     has_ecological_zonings: Optional[bool] = None
     excessive_slope: Optional[bool] = None
 
@@ -185,6 +186,10 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
     )
     if filters is None:
         return reports_with_filters
+    if filters.report_id is not None:
+        reports_with_filters = reports_with_filters.filter(
+            reports.c.report_id == filters.report_id
+        )
     if filters.has_ecological_zonings:
         reports_with_filters = reports_with_filters.filter(
             reports.c.ecological_zoning_rule_id.is_not(None)
@@ -212,7 +217,7 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
         ]
         reports_with_filters = reports_with_filters.filter(or_(*cut_years_intervals))
 
-    if filters.departments_ids and len(filters.departments_ids) > 0:
+    if len(filters.departments_ids) > 0:
         reports_with_filters = reports_with_filters.filter(
             reports.c.department_id.in_(map(int, filters.departments_ids))
         )
@@ -237,8 +242,7 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
 def get_report_preview_by_id(
     db: Session, report_id: int
 ) -> ClearCutReportPreviewSchema:
-    reports_with_filters = query_clearcuts_filtered(db, None)
-    report = reports_with_filters.filter(ClearCutReport.id == report_id).first()
+    report = query_clearcuts_filtered(db, Filters(report_id=report_id)).first()
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
