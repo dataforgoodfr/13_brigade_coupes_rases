@@ -12,7 +12,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/shared/components/Form";
+} from "@/shared/components/form/Form";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
@@ -56,6 +56,7 @@ export function LoginForm() {
 				type="single"
 				value={authenticationTypes}
 				itemProps={{ className: "basis-1/2" }}
+				allowEmptyValue={false}
 				onValueChange={setAuthenticationType}
 			/>
 			{authenticationType?.item === "password" ? (

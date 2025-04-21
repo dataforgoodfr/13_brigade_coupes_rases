@@ -1,8 +1,11 @@
 import { Toaster } from "@/components/ui/toaster";
+import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa";
 import type { AuthContext } from "@/features/user/components/Auth.context";
 import { AppLayout } from "@/shared/components/AppLayout";
+import { AppMobileLayout } from "@/shared/components/AppMobileLayout";
 import { TimeProgress } from "@/shared/components/TimeProgress";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	getReferentialThunk,
@@ -26,10 +29,12 @@ function RootComponent() {
 		dispatch(getReferentialThunk());
 	}, [dispatch]);
 	const referentialStatus = useAppSelector(selectReferentialStatus);
-
+	const { breakpoint } = useBreakpoint();
 	return referentialStatus === "success" ? (
 		<>
-			<AppLayout />
+			<MapProvider>
+				{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+			</MapProvider>
 			<Toaster />
 		</>
 	) : (

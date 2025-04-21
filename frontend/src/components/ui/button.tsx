@@ -9,6 +9,9 @@ export const buttonVariants = cva(
 			variant: {
 				default:
 					"bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+				zinc: "bg-zinc-200 shadow-xs hover:bg-zinc-300/90 hover:border hover:border-zinc-500 ",
+				white:
+					"bg-zinc-100 shadow-xs hover:bg-zinc-200/90 hover:border hover:border-zinc-300 ",
 				destructive:
 					"bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
 				outline:

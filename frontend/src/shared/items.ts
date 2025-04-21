@@ -13,8 +13,52 @@ export interface SelectableItem<T> {
 	item: T;
 }
 
+export type EventuallyBooleanSelectableItems = [
+	SelectableItem<true>,
+	SelectableItem<false>,
+	SelectableItem<undefined>,
+];
+export const DEFAULT_EVENTUALLY_BOOLEAN: EventuallyBooleanSelectableItems = [
+	{ isSelected: false, item: true },
+	{ isSelected: false, item: false },
+	{ isSelected: true, item: undefined },
+];
+export const updateEventuallyBooleanSelectableItem = (
+	item: SelectableItem<boolean | undefined>,
+	items: EventuallyBooleanSelectableItems,
+): EventuallyBooleanSelectableItems => {
+	return items.map((i) =>
+		i.item === item.item
+			? { ...i, isSelected: true }
+			: { ...i, isSelected: false },
+	) as EventuallyBooleanSelectableItems;
+};
 export function listToSelectableItems<T>(items?: T[]): SelectableItem<T>[] {
 	return items?.map((item) => ({ isSelected: false, item })) ?? [];
+}
+export function booleanToSelectableItem(
+	value?: boolean,
+): EventuallyBooleanSelectableItems {
+	switch (value) {
+		case true:
+			return [
+				{ isSelected: true, item: true },
+				{ isSelected: false, item: false },
+				{ isSelected: false, item: undefined },
+			];
+		case false:
+			return [
+				{ isSelected: false, item: true },
+				{ isSelected: true, item: false },
+				{ isSelected: false, item: undefined },
+			];
+		case undefined:
+			return [
+				{ isSelected: false, item: true },
+				{ isSelected: false, item: false },
+				{ isSelected: true, item: undefined },
+			];
+	}
 }
 
 export function recordToSelectableItems<T>(
@@ -96,3 +140,15 @@ export const useSingleSelect = <
 export const selectableItemToString = <TItem>({
 	item,
 }: SelectableItem<TItem>) => JSON.stringify(item);
+export const booleanSelectableToString = ({
+	item,
+}: SelectableItem<boolean | undefined>) => {
+	switch (item) {
+		case true:
+			return "Oui";
+		case false:
+			return "Non";
+		default:
+			return "Tout";
+	}
+};

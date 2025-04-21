@@ -3,6 +3,7 @@ import os
 os.environ["ENVIRONMENT"] = "test"
 
 import sys
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -10,13 +11,12 @@ from fastapi.testclient import TestClient
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import app.models as models  # noqa: F401 Import must exist to load models for db truncate
-from app.main import app  # noqa: E402
-from app.database import create_engine, get_db, sessionmaker  # noqa: E402
-from alembic.config import Config  # noqa: E402
 from alembic import command  # noqa: E402
-from seed_dev import seed_database
-
+from alembic.config import Config  # noqa: E402
 from app.config import settings
+from app.database import create_engine, get_db, sessionmaker  # noqa: E402
+from app.main import app  # noqa: E402
+from seed_dev import seed_database
 
 os.environ["DATABASE_URL"] = settings.DATABASE_URL
 

@@ -69,7 +69,9 @@ def log_execution(
             decorated_function_name = func.__name__
 
             # Check if we can skip the job
-            if sum([Path(fp).exists() for fp in result_filepath]) == len(result_filepath):
+            if sum([Path(fp).exists() for fp in result_filepath]) == len(
+                result_filepath
+            ):
                 logging.info(
                     f"The result filepath {' & '.join([str(fp) for fp in result_filepath])} for the {decorated_function_name} "
                     "script already exist, we're skipping this job."

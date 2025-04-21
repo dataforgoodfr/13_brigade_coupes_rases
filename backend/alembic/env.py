@@ -1,14 +1,11 @@
 from logging.config import fileConfig
 
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
-from app.models import Base
-
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app.config import settings
+from app.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -46,7 +43,9 @@ def include_object(object, name, type_, reflected, compare_to):
             try:
                 col = object.expressions[0]
                 if (
-                    alembic_helpers._check_spatial_type(col.type, (Geometry, Geography, Raster))
+                    alembic_helpers._check_spatial_type(
+                        col.type, (Geometry, Geography, Raster)
+                    )
                     and col.type.spatial_index
                 ):
                     return False

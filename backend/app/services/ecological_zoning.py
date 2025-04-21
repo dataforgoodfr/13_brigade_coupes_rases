@@ -1,16 +1,26 @@
-from app.models import EcologicalZoning
-from app.schemas.ecological_zoning import (
-    EcologicalZoningSchema,
-    EcologicalZoningResponseSchema,
-    ecological_zoning_to_ecological_zoning_response_schema,
-)
 from sqlalchemy.orm import Session
 
+from app.models import EcologicalZoning
+from app.schemas.ecological_zoning import (
+    EcologicalZoningResponseSchema,
+    EcologicalZoningSchema,
+    ecological_zoning_to_ecological_zoning_response_schema,
+)
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 
 
-def find_ecological_zonings_by_codes(db: Session, codes: list[str]) -> list[EcologicalZoning]:
+def find_ecological_zonings_by_codes(
+    db: Session, codes: list[str]
+) -> list[EcologicalZoning]:
     return db.query(EcologicalZoning).filter(EcologicalZoning.code.in_(codes)).all()
+
+
+def find_ecological_zonings_by_ids(
+    db: Session, ids: list[str]
+) -> list[EcologicalZoning]:
+    return (
+        db.query(EcologicalZoning).filter(EcologicalZoning.id.in_(map(int, ids))).all()
+    )
 
 
 def find_or_add_ecological_zonings(
@@ -42,7 +52,9 @@ def find_or_add_ecological_zonings(
 def find_paginated_ecological_zonings(
     db: Session, url: str, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[EcologicalZoningResponseSchema]:
-    ecological_zonings = db.query(EcologicalZoning).offset(page * size).limit(size).all()
+    ecological_zonings = (
+        db.query(EcologicalZoning).offset(page * size).limit(size).all()
+    )
     ecolgocial_zonings_count = db.query(EcologicalZoning.id).count()
     return PaginationResponseSchema(
         metadata=PaginationMetadataSchema(

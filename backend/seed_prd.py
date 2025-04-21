@@ -1,7 +1,7 @@
-from app.database import SessionLocal
-from app.models import User, Department
 import traceback
 
+from app.database import SessionLocal
+from app.models import Department, User
 from app.services.user_auth import get_password_hash
 from common_seed import seed_cities_departments
 
