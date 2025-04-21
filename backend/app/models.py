@@ -54,6 +54,17 @@ rules_ecological_zoning = Table(
         primary_key=True,
     ),
 )
+rules_clear_cut_reports = Table(
+    "rules_clear_cuts_reports",
+    Base.metadata,
+    Column("rule_id", Integer, ForeignKey("rules.id"), primary_key=True),
+    Column(
+        "report_id",
+        Integer,
+        ForeignKey("clear_cuts_reports.id"),
+        primary_key=True,
+    ),
+)
 
 
 class Rules(Base):
@@ -63,6 +74,9 @@ class Rules(Base):
     type = Column(String, nullable=False)
     ecological_zonings = relationship(
         "EcologicalZoning", secondary=rules_ecological_zoning, back_populates="rules"
+    )
+    clear_cuts_reports = relationship(
+        "ClearCutReport", secondary=rules_clear_cut_reports, back_populates="rules"
     )
     threshold = Column(Float, nullable=True)
 
@@ -223,6 +237,21 @@ class ClearCutReport(Base):
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="reports")
+
+    total_area_hectare = Column(Float, nullable=True)
+    total_ecological_zoning_area_hectare = Column(Float, nullable=True)
+    total_bdf_resinous_area_hectare = Column(Float, nullable=True)
+    total_bdf_deciduous_area_hectare = Column(Float, nullable=True)
+    total_bdf_mixed_area_hectare = Column(Float, nullable=True)
+    total_bdf_poplar_area_hectare = Column(Float, nullable=True)
+    average_location = Column(Geometry(geometry_type="Point", srid=SRID), nullable=True)
+    last_cut_date = Column(DateTime, default=datetime.now, nullable=True)
+    first_cut_date = Column(DateTime, default=datetime.now, nullable=True)
+    average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
+
+    rules = relationship(
+        "Rules", secondary=rules_clear_cut_reports, back_populates="clear_cuts_reports"
+    )
 
     @validates("status")
     def validate_status(self, key, value):

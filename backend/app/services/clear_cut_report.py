@@ -2,11 +2,21 @@ from logging import getLogger
 
 from fastapi import HTTPException, status
 from geoalchemy2.elements import WKTElement
+from geoalchemy2.functions import (
+    ST_Centroid,
+    ST_Multi,
+    ST_Union,
+)
 from geoalchemy2.shape import to_shape
-from sqlalchemy import or_
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
-from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
+from app.models import (
+    SRID,
+    ClearCut,
+    ClearCutEcologicalZoning,
+    ClearCutReport,
+)
 from app.schemas.clear_cut_report import (
     ClearCutReportPatchSchema,
     ClearCutReportResponseSchema,
@@ -14,10 +24,152 @@ from app.schemas.clear_cut_report import (
     report_to_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.schemas.rule import AllRules
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
+from app.services.rules import (
+    list_rules,
+)
 
 logger = getLogger(__name__)
+
+
+def query_aggregated_clear_cuts_grouped_by_report_id(db: Session, rules: AllRules):
+    return (
+        db.query(
+            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
+                "average_location"
+            ),
+            ClearCut.report_id,
+            func.sum(ClearCut.area_hectare).label("total_area_hectare"),
+            func.min(ClearCut.observation_start_date).label("cut_start"),
+            func.max(ClearCut.observation_end_date).label("cut_end"),
+            func.sum(ClearCut.ecological_zoning_area_hectare).label(
+                "total_ecological_zoning_area_hectare"
+            ),
+            func.sum(ClearCut.bdf_deciduous_area_hectare).label(
+                "total_bdf_deciduous_area_hectare"
+            ),
+            func.sum(ClearCut.bdf_mixed_area_hectare).label(
+                "total_bdf_mixed_area_hectare"
+            ),
+            func.sum(ClearCut.bdf_poplar_area_hectare).label(
+                "total_bdf_poplar_area_hectare"
+            ),
+            func.sum(ClearCut.bdf_resinous_area_hectare).label(
+                "total_bdf_resinous_area_hectare"
+            ),
+            func.sum(
+                case(
+                    (
+                        ClearCutEcologicalZoning.ecological_zoning_id.in_(
+                            [
+                                ecological_zoning.id
+                                for ecological_zoning in rules.ecological_zoning.ecological_zonings
+                            ]
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                ),
+            ).label("total_ecological_zoning_rule_matches"),
+        )
+        .join(ClearCutEcologicalZoning, ClearCut.ecological_zonings, isouter=True)
+        .group_by(ClearCut.report_id)
+    )
+
+
+def query_reports_with_additional_data(
+    db: Session,
+    aggregated_cuts,
+    rules: AllRules,
+):
+    return db.query(
+        ClearCutReport,
+        aggregated_cuts,
+        case(
+            (
+                aggregated_cuts.c.total_area_hectare > rules.area.threshold,
+                rules.area.id,
+            ),
+            else_=None,
+        ).label("area_rule_id"),
+        case(
+            (
+                ClearCutReport.slope_area_ratio_percentage > rules.slope.threshold,
+                rules.slope.id,
+            ),
+            else_=None,
+        ).label("slope_rule_id"),
+        case(
+            (
+                and_(
+                    aggregated_cuts.c.total_ecological_zoning_area_hectare
+                    > rules.ecological_zoning.threshold,
+                    aggregated_cuts.c.total_ecological_zoning_rule_matches > 0,
+                ),
+                rules.ecological_zoning.id,
+            ),
+            else_=None,
+        ).label("ecological_zoning_rule_id"),
+    ).join(aggregated_cuts, ClearCutReport.id == aggregated_cuts.c.report_id)
+
+
+def sync_clear_cuts_reports(db: Session):
+    rules = list_rules(db)
+    aggregated_cuts = query_aggregated_clear_cuts_grouped_by_report_id(db, rules)
+    rows = query_reports_with_additional_data(
+        db, aggregated_cuts.subquery(), rules
+    ).all()
+    for row in rows:
+        [
+            report,
+            average_location,
+            report_id,
+            total_area_hectare,
+            cut_start,
+            cut_end,
+            total_ecological_zoning_area_hectare,
+            total_bdf_deciduous_area_hectare,
+            total_bdf_mixed_area_hectare,
+            total_bdf_poplar_area_hectare,
+            total_bdf_resinous_area_hectare,
+            total_ecological_zoning_rule_matches,
+            area_rule_id,
+            slope_rule_id,
+            ecological_zoning_rule_id,
+        ] = row
+        report: ClearCutReport = report
+        report.average_location = average_location
+        report.total_area_hectare = total_area_hectare
+        report.last_cut_date = cut_end
+        report.first_cut_date = cut_start
+        report.total_ecological_zoning_area_hectare = (
+            total_ecological_zoning_area_hectare
+        )
+        report.total_bdf_deciduous_area_hectare = total_bdf_deciduous_area_hectare
+        report.total_bdf_mixed_area_hectare = total_bdf_mixed_area_hectare
+        report.total_bdf_poplar_area_hectare = total_bdf_poplar_area_hectare
+        report.total_bdf_resinous_area_hectare = total_bdf_resinous_area_hectare
+        report.total_ecological_zoning_rule_matches = (
+            total_ecological_zoning_rule_matches
+        )
+        report.rules = list(
+            filter(
+                lambda rule: rule is not None,
+                [
+                    None if area_rule_id is None else rules.area,
+                    None if slope_rule_id is None else rules.slope,
+                    (
+                        None
+                        if ecological_zoning_rule_id is None
+                        else rules.ecological_zoning
+                    ),
+                ],
+            )
+        )
+    db.flush()
+    db.commit()
 
 
 def create_clear_cut_report(
