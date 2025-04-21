@@ -12,10 +12,10 @@ function BDFLabel({
 	total_bdf_resinous_area_hectare,
 }: {
 	total_area_hectare: number;
-	total_bdf_deciduous_area_hectare: number;
-	total_bdf_mixed_area_hectare: number;
-	total_bdf_poplar_area_hectare: number;
-	total_bdf_resinous_area_hectare: number;
+	total_bdf_deciduous_area_hectare: number | null;
+	total_bdf_mixed_area_hectare: number | null;
+	total_bdf_poplar_area_hectare: number | null;
+	total_bdf_resinous_area_hectare: number | null;
 }) {
 	const types = {
 		Feuillus: total_bdf_deciduous_area_hectare,
@@ -26,10 +26,16 @@ function BDFLabel({
 
 	const relevantTypes = Object.entries(types)
 		// Convert hectares to percentages
-		.map(([label, value]) => ({
-			label,
-			percentage: (value / total_area_hectare) * 100,
-		}))
+		.map(([label, value]) =>
+			value !== null
+				? {
+						label,
+						
+						percentage: (value / total_area_hectare) * 100,
+					}
+				: null,
+		)
+		.filter((v) => v !== null)
 		// Only display types with a coverage > 1%
 		.filter(({ percentage }) => percentage >= 1)
 		// Display types in coverage descending order

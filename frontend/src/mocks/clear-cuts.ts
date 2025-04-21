@@ -219,13 +219,13 @@ export const mockClearCutsResponse = (
 								boundaries,
 								ccp.average_location.coordinates,
 							),
-					  )
+						)
 					: previews,
 			points:
 				boundaries && filterInArea
 					? randomPoints.filter((point) =>
 							isPointInsidePolygon(boundaries, point.coordinates),
-					  )
+						)
 					: randomPoints,
 		} satisfies ClearCutsResponse);
 	});

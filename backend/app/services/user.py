@@ -65,14 +65,18 @@ def get_users(
 def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
     user = db.get(User, id)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        )
     return user_to_user_response_schema(user)
 
 
 def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
     if not user_db:
-        raise HTTPException(status_code=404, detail="user not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        )
     update_data = user_in.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():

@@ -61,10 +61,18 @@ class ClearCutReportPreviewSchema(BaseModel):
     slope_area_ratio_percentage: Optional[float] = Field(
         json_schema_extra={"example": 10.0},
     )
-    total_bdf_resinous_area_hectare: Optional[float] = Field(json_schema_extra={"example": 10.0})
-    total_bdf_deciduous_area_hectare: Optional[float] = Field(json_schema_extra={"example": 10.0})
-    total_bdf_mixed_area_hectare: Optional[float] = Field(json_schema_extra={"example": 10.0})
-    total_bdf_poplar_area_hectare: Optional[float] = Field(json_schema_extra={"example": 10.0})
+    total_bdf_resinous_area_hectare: Optional[float] = Field(
+        json_schema_extra={"example": 10.0}
+    )
+    total_bdf_deciduous_area_hectare: Optional[float] = Field(
+        json_schema_extra={"example": 10.0}
+    )
+    total_bdf_mixed_area_hectare: Optional[float] = Field(
+        json_schema_extra={"example": 10.0}
+    )
+    total_bdf_poplar_area_hectare: Optional[float] = Field(
+        json_schema_extra={"example": 10.0}
+    )
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -77,6 +85,13 @@ def row_to_report_preview_schema(
 ) -> ClearCutReportPreviewSchema:
     [
         report,
+        report_id,
+        slope_area_ratio_percentage,
+        created_at,
+        updated_at,
+        status,
+        city_id,
+        user_id,
         average_location,
         report_id,
         total_area_hectare,
@@ -88,7 +103,13 @@ def row_to_report_preview_schema(
         total_bdf_mixed_area_hectare,
         total_bdf_poplar_area_hectare,
         total_bdf_resinous_area_hectare,
+        total_ecological_zoning_rule_matches,
+        area_rule_id,
+        slope_rule_id,
+        ecological_zoning_rule_id,
+        department_id,
     ] = row
+    print(f"COUNT {total_ecological_zoning_rule_matches}")
     return ClearCutReportPreviewSchema(
         id=str(report.id),
         clear_cuts=[
@@ -108,7 +129,13 @@ def row_to_report_preview_schema(
         ],
         department_id=str(report.city.department.id),
         average_location=Point.model_validate_json(average_location),
-        rules_ids=[],
+        rules_ids=[
+            str(id)
+            for id in filter(
+                lambda id: id is not None,
+                [area_rule_id, slope_rule_id, ecological_zoning_rule_id],
+            )
+        ],
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
         created_at=report.created_at.date(),

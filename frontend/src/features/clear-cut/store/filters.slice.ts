@@ -30,7 +30,7 @@ export interface FiltersState {
 	departments: SelectableItem<Department>[];
 	statuses: SelectableItem<ClearCutStatus>[];
 	areas: SelectableItem<number>[];
-	excessive_slop: EventuallyBooleanSelectableItems;
+	excessive_slope: EventuallyBooleanSelectableItems;
 	ecological_zoning: EventuallyBooleanSelectableItems;
 	favorite: EventuallyBooleanSelectableItems;
 }
@@ -40,7 +40,7 @@ export const initialState: FiltersState = {
 	departments: [],
 	areas: [],
 	statuses: [],
-	excessive_slop: DEFAULT_EVENTUALLY_BOOLEAN,
+	excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN,
 	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
 	favorite: DEFAULT_EVENTUALLY_BOOLEAN,
 };
@@ -126,9 +126,9 @@ export const filtersSlice = createSlice({
 			state,
 			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>,
 		) => {
-			state.excessive_slop = updateEventuallyBooleanSelectableItem(
+			state.excessive_slope = updateEventuallyBooleanSelectableItem(
 				payload,
-				state.excessive_slop,
+				state.excessive_slope,
 			);
 		},
 		setFavorite: (
@@ -153,7 +153,7 @@ export const filtersSlice = createSlice({
 						departments,
 						area_preset_hectare: areaPresetsHectare,
 						statuses,
-						excessive_slop,
+						excessive_slope,
 						has_ecological_zonings: ecological_zoning,
 						favorite,
 					},
@@ -162,7 +162,7 @@ export const filtersSlice = createSlice({
 				state.cutYears = listToSelectableItems(cutYears);
 				state.rules = listToSelectableItems(rules);
 				state.ecological_zoning = booleanToSelectableItem(ecological_zoning);
-				state.excessive_slop = booleanToSelectableItem(excessive_slop);
+				state.excessive_slope = booleanToSelectableItem(excessive_slope);
 				state.favorite = booleanToSelectableItem(favorite);
 				state.departments = listToSelectableItems(departments);
 				state.areas = listToSelectableItems(areaPresetsHectare);
@@ -186,7 +186,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		statuses,
 		areas,
 		departments,
-		excessive_slop,
+		excessive_slope,
 		favorite,
 	}): FiltersRequest | undefined => ({
 		geoBounds,
@@ -198,7 +198,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
 		has_ecological_zonings: ecological_zoning.find((item) => item.isSelected)
 			?.item,
-		excessive_slop: excessive_slop.find((item) => item.isSelected)?.item,
+		excessive_slope: excessive_slope.find((item) => item.isSelected)?.item,
 		favorite: favorite.find((item) => item.isSelected)?.item,
 	}),
 );
@@ -231,7 +231,7 @@ export const selectEcologicalZoning = createTypedDraftSafeSelector(
 );
 export const selectExcessiveSlop = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.excessive_slop,
+	(state) => state.excessive_slope,
 );
 export const selectFavorite = createTypedDraftSafeSelector(
 	selectState,
