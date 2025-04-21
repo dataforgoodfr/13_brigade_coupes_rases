@@ -25,9 +25,10 @@ def get_rule_by_id(db: Session, id: int) -> RuleResponseSchema:
 
 def update_rule(db: Session, id: int, rule: RuleBaseSchema) -> bool:
     found_rule = find_rule_by_id(db, id)
-    ecological_zoning_diff_count = {
-        ecological_zoning.id for ecological_zoning in found_rule.ecological_zonings
-    } - {int(id) for id in rule.ecological_zonings_ids}
+    ecological_zoning_diff_count = len(
+        {ecological_zoning.id for ecological_zoning in found_rule.ecological_zonings}
+        - {int(id) for id in rule.ecological_zonings_ids}
+    )
     has_threshold_changed = found_rule.threshold != rule.threshold
     found_rule.ecological_zonings = find_ecological_zonings_by_ids(
         db, rule.ecological_zonings_ids
@@ -43,7 +44,10 @@ def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
         updated_rules.append(update_rule(db, rule.id, rule))
 
     db.flush()
-    return reduce(lambda has_changed, current_changed: has_changed and current_changed, update_rules)
+    return reduce(
+        lambda has_changed, current_changed: has_changed and current_changed,
+        update_rules,
+    )
 
 
 def find_rule_by_id(db: Session, id: int) -> Rules:
