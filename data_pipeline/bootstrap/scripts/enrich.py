@@ -2,11 +2,14 @@ import dask_geopandas
 from dask.diagnostics import ProgressBar
 
 from scripts import DATA_DIR
+from scripts.modules.cities import enrich_with_cities
+from scripts.modules.natura2000 import (
+    enrich_with_natura2000_area,
+    enrich_with_natura2000_codes,
+    enrich_with_slope_information,
+)
 from scripts.utils import log_execution
 from scripts.utils.df_utils import load_gdf, save_gdf
-from scripts.modules.cities import enrich_with_cities
-from scripts.modules.natura2000 import enrich_with_natura2000_area, enrich_with_natura2000_codes
-from scripts.modules.natura2000 import enrich_with_slope_information
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
 
@@ -25,7 +28,9 @@ def enrich_sufosat_clusters() -> None:
     ProgressBar().register()
 
     # Load SUFOSAT clusters
-    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index("clear_cut_group")
+    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index(
+        "clear_cut_group"
+    )
 
     # Convert to dask_geopandas for parallel processing
     # TODO: What's the ideal number of partitions???

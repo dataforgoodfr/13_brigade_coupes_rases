@@ -4,7 +4,6 @@ from scripts.modules.natura2000 import preprocess_natura2000
 from scripts.modules.slope import preprocess_slope
 from scripts.modules.sufosat import preprocess_sufosat
 
-    
 if __name__ == "__main__":
     preprocess_cadastre_cities()
     preprocess_cadastre_departments()

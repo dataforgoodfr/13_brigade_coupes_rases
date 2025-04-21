@@ -4,6 +4,7 @@ Created on Sun Apr 20 13:48:10 2025
 
 @author: cindy
 """
+
 import logging
 from typing import cast
 
@@ -17,8 +18,8 @@ from scripts.utils import (
     display_df,
     download_file,
     load_gdf,
+    log_execution,
     polygonize_raster,
-    log_execution, 
     save_gdf,
 )
 
@@ -96,7 +97,9 @@ def parse_sufosat_date(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def pair_clear_cuts_through_space_and_time(
-    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+    gdf: gpd.GeoDataFrame,
+    max_meters_between_clear_cuts: int,
+    max_days_between_clear_cuts: int,
 ) -> pd.DataFrame:
     """
     Identifies pairs of clear-cuts that are within a specified distance and a
@@ -135,7 +138,9 @@ def pair_clear_cuts_through_space_and_time(
     # Cluster the clear-cuts that are within `max_meters_between_clear_cuts` of each other
     # Lambert-93 CRS uses meters as its unit of measurement for distance.
     clear_cut_pairs: pd.DataFrame = (
-        gdf.sjoin(gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts)
+        gdf.sjoin(
+            gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts
+        )
         .reset_index()
         .rename(columns={"index": "index_left"})
     )
@@ -217,7 +222,9 @@ def regroup_clear_cut_pairs(clear_cut_pairs: pd.DataFrame) -> list[set[int]]:
 
 
 def cluster_clear_cuts(
-    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+    gdf: gpd.GeoDataFrame,
+    max_meters_between_clear_cuts: int,
+    max_days_between_clear_cuts: int,
 ) -> gpd.GeoDataFrame:
     """
     Clusters individual clear-cuts based on spatial and temporal proximity.
@@ -251,7 +258,9 @@ def cluster_clear_cuts(
     # Assign a clear cut group id to each clear cut polygon
     logging.info("Assigning cluster IDs to clear-cuts")
     for i, subset in tqdm(
-        enumerate(clear_cut_groups), total=len(clear_cut_groups), desc="Assigning cluster IDs"
+        enumerate(clear_cut_groups),
+        total=len(clear_cut_groups),
+        desc="Assigning cluster IDs",
     ):
         gdf.loc[list(subset), "clear_cut_group"] = i
 
@@ -371,7 +380,9 @@ def add_area_ha(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Let's sort the clear-cut clusters by their area
     gdf = gdf.sort_values("area_ha")
 
-    logging.info(f"We identified {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha")
+    logging.info(
+        f"We identified {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha"
+    )
 
     return gdf
 
@@ -421,10 +432,11 @@ def preprocess_sufosat(
     download_sufosat_raster_dates(input_raster_dates)
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
-    gdf = cluster_clear_cuts(gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts)
+    gdf = cluster_clear_cuts(
+        gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
+    )
     save_gdf(gdf, DETECTIONS_RESULT_FILEPATH)
     gdf = union_clear_cut_clusters(gdf)
     gdf = add_concave_hull_score(gdf, concave_hull_ratio)
     gdf = add_area_ha(gdf)
     save_gdf(gdf, CLUSTERS_RESULT_FILEPATH, index=True)
-    

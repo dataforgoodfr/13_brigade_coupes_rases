@@ -4,6 +4,7 @@ Created on Sun Apr 20 12:10:50 2025
 
 @author: cindy
 """
+
 import logging
 
 import geopandas as gpd
@@ -45,5 +46,7 @@ def preprocess_cadastre_departments() -> None:
     departments = download_osm_departments_cadastre()
     departments = remove_overseas_departments(departments)
     departments = convert_crs_to_lambert93(departments)
-    departments = departments[["code_insee", "nom", "geometry"]].rename(columns={"nom": "name"})
+    departments = departments[["code_insee", "nom", "geometry"]].rename(
+        columns={"nom": "name"}
+    )
     save_gdf(departments, RESULT_FILEPATH)

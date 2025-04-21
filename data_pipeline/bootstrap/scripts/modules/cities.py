@@ -4,6 +4,7 @@ Created on Sun Apr 20 11:58:18 2025
 
 @author: cindy
 """
+
 import gzip
 import logging
 import shutil
@@ -12,7 +13,14 @@ import dask_geopandas
 import geopandas as gpd
 
 from scripts import DATA_DIR
-from scripts.utils import display_df, download_file, load_gdf, overlay, log_execution, save_gdf
+from scripts.utils import (
+    display_df,
+    download_file,
+    load_gdf,
+    log_execution,
+    overlay,
+    save_gdf,
+)
 from scripts.utils.convert_crs import convert_crs_to_lambert93
 
 CADASTRE_CITIES_DIR = DATA_DIR / "cadastre_cities"
@@ -23,7 +31,9 @@ ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriche
 def enrich_with_cities(
     sufosat: gpd.GeoDataFrame, sufosat_dask: dask_geopandas.GeoDataFrame
 ) -> gpd.GeoDataFrame:
-    logging.info("Enriching SUFOSAT clusters with the list of intersecting city INSEE codes")
+    logging.info(
+        "Enriching SUFOSAT clusters with the list of intersecting city INSEE codes"
+    )
 
     # Load cities data
     logging.info("Loading cities data")
@@ -40,7 +50,9 @@ def enrich_with_cities(
     # Add cities to the SUFOSAT DataFrame
     sufosat.loc[cities.index, "cities"] = cities
     missing_cities_count = sufosat["cities"].isna().sum()
-    logging.info(f"{missing_cities_count} clear-cut clusters don't intersect with any city")
+    logging.info(
+        f"{missing_cities_count} clear-cut clusters don't intersect with any city"
+    )
 
     # Handle clear-cuts that don't fall within any city polygon
     # by joining with their nearest cities
@@ -75,7 +87,9 @@ def download_etalab_cities_cadastre() -> gpd.GeoDataFrame:
     )
 
     logging.info("Unzipping the gzipped json")
-    with gzip.open(CADASTRE_CITIES_DIR / "cadastre-france-communes.json.gz", "rb") as f_in:
+    with gzip.open(
+        CADASTRE_CITIES_DIR / "cadastre-france-communes.json.gz", "rb"
+    ) as f_in:
         with open(CADASTRE_CITIES_DIR / "cadastre-france-communes.json", "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
 
@@ -87,7 +101,9 @@ def download_etalab_cities_cadastre() -> gpd.GeoDataFrame:
 def remove_overseas_cities(cities: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     logging.info("Removing the overseas cities")
     # Remove the overseas cities
-    cities = cities[~cities["id"].str.startswith(("971", "972", "973", "974", "975", "976"))]
+    cities = cities[
+        ~cities["id"].str.startswith(("971", "972", "973", "974", "975", "976"))
+    ]
     display_df(cities)
     return cities
 
