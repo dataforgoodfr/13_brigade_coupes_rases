@@ -84,6 +84,11 @@ def get_clearcuts_map(
         description="Has ecological zonings",
         openapi_examples={"default": {"value": False}},
     ),
+    excessive_slope: Optional[bool] = Query(
+        None,
+        description="Excessive slope",
+        openapi_examples={"default": {"value": False}},
+    ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
@@ -110,6 +115,7 @@ def get_clearcuts_map(
                 statuses=statuses,
                 departments_ids=departments_ids,
                 has_ecological_zonings=has_ecological_zonings,
+                excessive_slope=excessive_slope,
             ),
         )
         print(f"CLEARCUTS : {clearcuts}")

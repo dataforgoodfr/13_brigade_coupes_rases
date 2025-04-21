@@ -47,3 +47,25 @@ def rule_to_rule_response(rule: Rules) -> RuleResponseSchema:
         threshold=rule.threshold,
         type=rule.type,
     )
+
+
+class RuleSchema(BaseModel):
+    id: int
+    threshold: Optional[float]
+    ecological_zonings_ids: list[int]
+
+
+def rule_to_rule(rule: Rules) -> RuleSchema:
+    return RuleSchema(
+        id=str(rule.id),
+        ecological_zonings_ids=[
+            ecological_zoning.id for ecological_zoning in rule.ecological_zonings
+        ],
+        threshold=rule.threshold,
+    )
+
+
+class RulesSchema(BaseModel):
+    slope: RuleSchema
+    area: RuleSchema
+    ecological_zoning: RuleSchema
