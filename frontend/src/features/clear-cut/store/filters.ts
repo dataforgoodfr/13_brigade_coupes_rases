@@ -8,7 +8,7 @@ const filtersRequestSchema = z.object({
 	geoBounds: boundsSchema.optional(),
 	departments_ids: z.array(z.string()).optional(),
 	statuses: clearCutStatusSchema.array().optional(),
-	excessive_slop: z.boolean().optional(),
+	excessive_slope: z.boolean().optional(),
 	favorite: z.boolean().optional(),
 	has_ecological_zonings: z.boolean().optional(),
 });
@@ -21,7 +21,7 @@ export const filtersResponseSchema = z.object({
 	departments_ids: z.string().array().optional(),
 	statuses: clearCutStatusSchema.array().optional(),
 	area_preset_hectare: z.array(z.number()),
-	excessive_slop: z.boolean().optional(),
+	excessive_slope: z.boolean().optional(),
 	favorite: z.boolean().optional(),
 	has_ecological_zonings: z.boolean().optional(),
 });
