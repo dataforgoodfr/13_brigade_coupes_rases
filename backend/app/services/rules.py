@@ -1,4 +1,5 @@
 from functools import reduce
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Query, Session
 
@@ -7,9 +8,7 @@ from app.schemas.rule import (
     AllRules,
     RuleBaseSchema,
     RuleResponseSchema,
-    RulesSchema,
     RulesUpdateSchema,
-    rule_to_rule,
     rule_to_rule_response,
 )
 from app.services.ecological_zoning import find_ecological_zonings_by_ids
