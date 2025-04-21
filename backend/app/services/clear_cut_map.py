@@ -13,7 +13,7 @@ from geoalchemy2.functions import (
 )
 from geojson_pydantic import Point
 from pydantic import BaseModel
-from sqlalchemy import and_, case, column, func, or_
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Query, Session, aliased
 
 from app.models import (
@@ -178,28 +178,28 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
     reports_with_filters = db.query(aliased(ClearCutReport, reports), reports)
     reports_with_filters = reports_with_filters.filter(
         or_(
-            reports.c.ecological_zoning_rule_id != None,
-            reports.c.slope_rule_id != None,
-            reports.c.area_rule_id != None,
+            reports.c.ecological_zoning_rule_id.is_not(None),
+            reports.c.slope_rule_id.is_not(None),
+            reports.c.area_rule_id.is_not(None),
         )
     )
     if filters is None:
         return reports_with_filters
     if filters.has_ecological_zonings:
         reports_with_filters = reports_with_filters.filter(
-            reports.c.ecological_zoning_rule_id != None
+            reports.c.ecological_zoning_rule_id.is_not(None)
         )
     elif filters.has_ecological_zonings is not None:
         reports_with_filters = reports_with_filters.filter(
-            reports.c.ecological_zoning_rule_id == None
+            reports.c.ecological_zoning_rule_id.is_(None)
         )
     if filters.excessive_slope:
         reports_with_filters = reports_with_filters.filter(
-            reports.c.slope_rule_id != None
+            reports.c.slope_rule_id.is_not(None)
         )
     elif filters.excessive_slope is not None:
         reports_with_filters = reports_with_filters.filter(
-            reports.c.slope_rule_id == None
+            reports.c.slope_rule_id.is_(None)
         )
 
     if len(filters.cut_years) > 0:
@@ -249,10 +249,10 @@ def get_report_preview_by_id(
 
 def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
     reports_with_filters = query_clearcuts_filtered(db, filters)
-    points = reports_with_filters.values(column("average_location"))
+    points = reports_with_filters.all()
     reports_with_filters = reports_with_filters.limit(30).all()
     map_response = ClearCutMapResponseSchema(
-        points=[Point.model_validate_json(point[0]) for point in points],
+        points=[Point.model_validate_json(point[8]) for point in points],
         previews=list(map(row_to_report_preview_schema, reports_with_filters)),
     )
     return map_response
