@@ -1,18 +1,30 @@
-from bootstrap.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
-from bootstrap.scripts.preprocess_bdforet import preprocess_bdforet
-from bootstrap.scripts.preprocess_cadastre_cities import preprocess_cadastre_cities
-from bootstrap.scripts.preprocess_natura2000 import preprocess_natura2000
-from bootstrap.scripts.preprocess_slope import preprocess_slope
-from bootstrap.scripts.preprocess_sufosat import preprocess_sufosat
+import os
+import sys
+from pathlib import Path
+
+# Aller dans le dossier bootstrap
+BOOTSTRAP_DIR = Path(__file__).resolve().parent.parent
+os.chdir(BOOTSTRAP_DIR)
+
+# Ajouter bootstrap à sys.path pour permettre `import scripts`
+sys.path.insert(0, str(BOOTSTRAP_DIR))
+
+print("cwd:", os.getcwd())
+print("sys.path[0]:", sys.path[0])
+
+from scripts.preprocess import (
+    preprocess_cadastre_departments,
+    preprocess_natura2000,
+    preprocess_slope,
+    preprocess_sufosat,
+)
 
 
 def run_pipeline() -> None:
     preprocess_sufosat()
-    preprocess_bdforet()
     preprocess_slope()
     preprocess_natura2000()
-    preprocess_cadastre_cities()
-    enrich_sufosat_clusters()
+    preprocess_cadastre_departments()
 
 
 if __name__ == "__main__":
