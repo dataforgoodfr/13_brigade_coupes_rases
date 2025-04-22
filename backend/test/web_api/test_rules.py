@@ -5,7 +5,7 @@ from pytest import Session
 
 
 def test_get_rules(client: TestClient):
-    response = client.get("api/v1/rules")
+    response = client.get("api/v1/rules/")
     assert response.status_code == status.HTTP_200_OK
 
 

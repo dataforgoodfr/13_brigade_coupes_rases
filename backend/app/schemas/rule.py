@@ -16,6 +16,14 @@ class RuleBaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RuleUpdateSchema(RuleBaseSchema):
+    id: str = Field(json_schema_extra={"example": "1"})
+
+
+class RulesUpdateSchema(BaseModel):
+    rules: list[RuleUpdateSchema]
+
+
 class RuleResponseSchemaWithoutIdSchema(RuleBaseSchema):
     type: str = Field(json_schema_extra={"example": "slope"})
 
@@ -38,7 +46,6 @@ class RuleResponseSchema(RuleBaseSchema):
 
 
 def rule_to_rule_response(rule: Rules) -> RuleResponseSchema:
-    print(f"TYPE {rule.type}")
     return RuleResponseSchema(
         id=str(rule.id),
         ecological_zonings_ids=[
@@ -69,3 +76,10 @@ class RulesSchema(BaseModel):
     slope: RuleSchema
     area: RuleSchema
     ecological_zoning: RuleSchema
+
+
+class AllRules:
+    def __init__(self, area: Rules, slope: Rules, ecological_zoning: Rules):
+        self.area = area
+        self.slope = slope
+        self.ecological_zoning = ecological_zoning

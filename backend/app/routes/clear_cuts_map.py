@@ -118,7 +118,6 @@ def get_clearcuts_map(
                 excessive_slope=excessive_slope,
             ),
         )
-        print(f"CLEARCUTS : {clearcuts}")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

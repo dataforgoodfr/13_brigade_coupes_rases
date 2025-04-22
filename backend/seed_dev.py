@@ -8,6 +8,7 @@ from sqlalchemy import text
 
 from app.database import Base, SessionLocal
 from app.models import ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
+from app.services.clear_cut_report import sync_clear_cuts_reports
 from app.services.user_auth import get_password_hash
 from common_seed import (
     get_cities,
@@ -389,6 +390,7 @@ def seed_database():
         ]
         db.add_all(clear_cuts)
 
+        sync_clear_cuts_reports(db)
         db.commit()
 
         print(f"Added {len(users)} users to the database")

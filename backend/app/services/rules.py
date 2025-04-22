@@ -1,12 +1,14 @@
+from functools import reduce
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Query, Session
 
 from app.models import Rules
 from app.schemas.rule import (
+    AllRules,
     RuleBaseSchema,
     RuleResponseSchema,
-    RulesSchema,
-    rule_to_rule,
+    RulesUpdateSchema,
     rule_to_rule_response,
 )
 from app.services.ecological_zoning import find_ecological_zonings_by_ids
@@ -20,13 +22,31 @@ def get_rule_by_id(db: Session, id: int) -> RuleResponseSchema:
     return rule_to_rule_response(find_rule_by_id(db, id))
 
 
-def update_rule(db: Session, id: int, rule: RuleBaseSchema):
+def update_rule(db: Session, id: int, rule: RuleBaseSchema) -> bool:
     found_rule = find_rule_by_id(db, id)
+    ecological_zoning_diff_count = len(
+        {ecological_zoning.id for ecological_zoning in found_rule.ecological_zonings}
+        - {int(id) for id in rule.ecological_zonings_ids}
+    )
+    has_threshold_changed = found_rule.threshold != rule.threshold
     found_rule.ecological_zonings = find_ecological_zonings_by_ids(
         db, rule.ecological_zonings_ids
     )
     found_rule.threshold = rule.threshold
     db.commit()
+    return ecological_zoning_diff_count > 0 or has_threshold_changed
+
+
+def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
+    updated_rules = []
+    for rule in rules.rules:
+        updated_rules.append(update_rule(db, rule.id, rule))
+
+    db.flush()
+    return reduce(
+        lambda has_changed, current_changed: has_changed and current_changed,
+        update_rules,
+    )
 
 
 def find_rule_by_id(db: Session, id: int) -> Rules:
@@ -48,9 +68,9 @@ def query_area_rule(db: Session) -> Query[Rules]:
     return db.query(Rules).filter(Rules.type == "area")
 
 
-def list_rules(db: Session) -> RulesSchema:
-    return RulesSchema(
-        area=rule_to_rule(query_area_rule(db).first()),
-        slope=rule_to_rule(query_slope_rule(db).first()),
-        ecological_zoning=rule_to_rule(query_ecological_zoning_rule(db).first()),
+def list_rules(db: Session) -> AllRules:
+    return AllRules(
+        area=query_area_rule(db).first(),
+        slope=query_slope_rule(db).first(),
+        ecological_zoning=query_ecological_zoning_rule(db).first(),
     )

@@ -5,7 +5,7 @@ from typing import Optional
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import ClearCut, ClearCutReport
+from app.models import ClearCut
 
 logger = getLogger(__name__)
 
@@ -80,36 +80,9 @@ def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
     return sum(getattr(cc, area_attr, 0) or 0 for cc in clear_cuts)
 
 
-def row_to_report_preview_schema(
-    row: tuple[Point, ClearCutReport],
+def report_to_report_preview_schema(
+    report,
 ) -> ClearCutReportPreviewSchema:
-    [
-        report,
-        report_id,
-        slope_area_ratio_percentage,
-        created_at,
-        updated_at,
-        status,
-        city_id,
-        user_id,
-        average_location,
-        report_id,
-        total_area_hectare,
-        cut_start,
-        cut_end,
-        last_update,
-        total_ecological_zoning_area_hectare,
-        total_bdf_deciduous_area_hectare,
-        total_bdf_mixed_area_hectare,
-        total_bdf_poplar_area_hectare,
-        total_bdf_resinous_area_hectare,
-        total_ecological_zoning_rule_matches,
-        area_rule_id,
-        slope_rule_id,
-        ecological_zoning_rule_id,
-        department_id,
-    ] = row
-    print(f"COUNT {total_ecological_zoning_rule_matches}")
     return ClearCutReportPreviewSchema(
         id=str(report.id),
         clear_cuts=[
@@ -128,24 +101,18 @@ def row_to_report_preview_schema(
             for clear_cut in report.clear_cuts
         ],
         department_id=str(report.city.department.id),
-        average_location=Point.model_validate_json(average_location),
-        rules_ids=[
-            str(id)
-            for id in filter(
-                lambda id: id is not None,
-                [area_rule_id, slope_rule_id, ecological_zoning_rule_id],
-            )
-        ],
+        average_location=Point.model_validate_json(report.average_location_json),
+        rules_ids=[str(rule.id) for rule in report.rules],
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,
-        total_area_hectare=total_area_hectare,
-        total_bdf_resinous_area_hectare=total_bdf_resinous_area_hectare,
-        total_bdf_deciduous_area_hectare=total_bdf_deciduous_area_hectare,
-        total_bdf_mixed_area_hectare=total_bdf_mixed_area_hectare,
-        total_bdf_poplar_area_hectare=total_bdf_poplar_area_hectare,
+        total_area_hectare=report.total_area_hectare,
+        total_bdf_resinous_area_hectare=report.total_bdf_resinous_area_hectare,
+        total_bdf_deciduous_area_hectare=report.total_bdf_deciduous_area_hectare,
+        total_bdf_mixed_area_hectare=report.total_bdf_mixed_area_hectare,
+        total_bdf_poplar_area_hectare=report.total_bdf_poplar_area_hectare,
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
         ).date(),

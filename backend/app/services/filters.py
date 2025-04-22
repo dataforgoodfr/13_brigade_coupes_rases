@@ -19,8 +19,11 @@ def build_filters(db: Session, connected_user: Optional[User]) -> FiltersRespons
     departments_query = (
         db.query(Department.id).join(City).join(ClearCutReport).distinct()
     )
+
     if connected_user is not None and len(connected_user.departments) > 0:
-        departments_query.join(connected_user.departments)
+        departments_query.filter(
+            Department.id.in_([dep.id for dep in connected_user.departments])
+        )
     departments = departments_query.all()
     statuses = db.query(ClearCutReport.status).distinct().all()
     return FiltersResponseSchema(
