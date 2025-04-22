@@ -28,7 +28,7 @@ class S3Manager:
         secret_key = entry.password if entry else None
         if not access_key or not secret_key:
             raise ValueError("Unable to retrieve S3 credentials from KeePass.")
-        print("Access Key and Secret Key successfully retrieved.")
+        # print("Access Key and Secret Key successfully retrieved.")
 
         kwargs = {
             "service_name": "s3",
@@ -36,6 +36,7 @@ class S3Manager:
             "aws_access_key_id": access_key,
             "aws_secret_access_key": secret_key,
         }
+
         endpoint = os.getenv("S3_ENDPOINT")
         if endpoint:
             kwargs["endpoint_url"] = endpoint
