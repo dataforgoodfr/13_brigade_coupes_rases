@@ -111,7 +111,7 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
         )
     elif filters.excessive_slope is not None:
         reports = reports.filter(
-            reports_with_rules.c.slope_rule_count > 0,
+            reports_with_rules.c.slope_rule_count == 0,
         )
 
     if len(filters.cut_years) > 0:
