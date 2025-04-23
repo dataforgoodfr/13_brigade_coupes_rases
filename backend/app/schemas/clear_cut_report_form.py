@@ -3,8 +3,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# from app.schemas.clear_cut import ClearCutResponse
-
 logger = getLogger(__name__)
 
 
@@ -15,44 +13,47 @@ class ClearCutPicture(BaseModel):
 
 
 class ClearCutReportFormBase(BaseModel):
-    id: int
     inspection_date: Optional[datetime] = None
-    weather: Optional[str]
-    forest_description: Optional[str] = None
-    remainingTrees: Optional[bool] = None
-    species: Optional[str] = None
-    workSignVisible: Optional[bool] = None
-    waterzone_description: Optional[str] = None
-    protected_zone_description: Optional[str] = None
-    soil_state: Optional[str] = None
-    other: Optional[str] = None
-    ecological_zone: Optional[bool] = None
-    ecological_zone_type: Optional[str] = None
-    nearby_zone: Optional[str] = None
-    nearby_zone_type: Optional[str] = None
-    protected_species: Optional[str] = None
-    protected_habitats: Optional[str] = None
-    ddt_request: Optional[bool] = None
-    ddt_request_owner: Optional[str] = None
-    compagny: Optional[str] = None
-    subcontractor: Optional[str] = None
-    landlord: Optional[str] = None
-    pefc_fsc_certified: Optional[bool] = None
-    over_20_ha: Optional[bool] = None
-    psg_required_plot: Optional[bool] = None
+    weather: None | str = None
+    forest_description: None | str = None
+    remainingTrees: None | str = None
+    species: None | str = None
+    workSignVisible: None | str = None
+    waterzone_description: None | str = None
+    protected_zone_description: None | str = None
+    soil_state: None | str = None
+    other: None | str = None
+    ecological_zone: None | str = None
+    ecological_zone_type: None | str = None
+    nearby_zone: None | str = None
+    nearby_zone_type: None | str = None
+    protected_species: None | str = None
+    protected_habitats: None | str = None
+    ddt_request: None | bool = None
+    ddt_request_owner: None | str = None
+    compagny: None | str = None
+    subcontractor: None | str = None
+    landlord: None | str = None
+    pefc_fsc_certified: None | bool = None
+    over_20_ha: None | bool = None
+    psg_required_plot: None | bool = None
+
+    class Config:
+        schema_extra = {"example": {"weather": "Boueux"}}
 
 
 class ClearcutReportStrategy(BaseModel):
-    relevant_for_pefc_complaint: Optional[bool] = None
-    relevant_for_rediii_complaint: Optional[bool] = None
-    relevant_for_ofb_complaint: Optional[bool] = None
-    relevant_for_alert_cnpf_ddt_srgs: Optional[bool] = None
-    relevant_for_alert_cnpf_ddt_psg_thresholds: Optional[bool] = None
-    relevant_for_psg_request: Optional[bool] = None
-    request_engaged: Optional[str] = None
+    relevant_for_pefc_complaint: None | bool = None
+    relevant_for_rediii_complaint: None | bool = None
+    relevant_for_ofb_complaint: None | bool = None
+    relevant_for_alert_cnpf_ddt_srgs: None | bool = None
+    relevant_for_alert_cnpf_ddt_psg_thresholds: None | bool = None
+    relevant_for_psg_request: None | bool = None
+    request_engaged: None | str = None
 
 
 class ClearCutReportFormResponse(ClearCutReportFormBase):
+    id: int
     report_updated_at: datetime
 
 
