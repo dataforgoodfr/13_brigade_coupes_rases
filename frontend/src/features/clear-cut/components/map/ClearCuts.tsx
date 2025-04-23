@@ -3,7 +3,11 @@ import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
 import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cut/store/clear-cuts";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
-import { setGeoBounds } from "@/features/clear-cut/store/filters.slice";
+import {
+	selectWithPoints,
+	setGeoBounds,
+	setWithPoints,
+} from "@/features/clear-cut/store/filters.slice";
 import { IconButton } from "@/shared/components/button/Button";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useGeolocation } from "@/shared/hooks/geolocation";
@@ -46,11 +50,18 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 		value: "satellite",
 	},
 ];
+const MAX_RADIUS = 10_000;
+function getPointRadius(pointsCnt: number, currentPointCnt: number) {
+	if(pointsCnt < 100){
+		return 1000;
+	}
+	return MAX_RADIUS * (currentPointCnt / pointsCnt * 5 );
+}
 export function ClearCuts() {
 	const map = useMap();
 	const { setFocusedClearCutId, focusedClearCutId } = useMapInstance();
 	const { browserLocation } = useGeolocation();
-	const [displayClearCutPreview, setDisplayClearCutPreview] = useState(false);
+	const displayPoints = useAppSelector(selectWithPoints);
 	const [layer, layers, setLayer] = useSingleSelect<
 		L.TileLayer,
 		SelectableItemEnhanced<L.TileLayer>
@@ -92,9 +103,9 @@ export function ClearCuts() {
 
 	const onZoomChanged: ZoomAnimEventHandlerFn = (e) => {
 		if (e.zoom > DISPLAY_PREVIEW_ZOOM_LEVEL) {
-			setDisplayClearCutPreview(true);
+			dispatch(setWithPoints(false));
 		} else {
-			setDisplayClearCutPreview(false);
+			dispatch(setWithPoints(true));
 		}
 	};
 
@@ -117,30 +128,31 @@ export function ClearCuts() {
 	useEffect(() => dispatchGeoBounds(), [dispatchGeoBounds]);
 
 	const previews = useMemo(() => {
-		if (displayClearCutPreview) {
+		if (!displayPoints) {
 			return value?.previews.flatMap((clearCut) =>
 				clearCut.clear_cuts.map((cut) => (
 					<ClearCutPreview key={cut.id} report={clearCut} clearCut={cut} />
 				)),
 			);
 		}
-	}, [displayClearCutPreview, value?.previews]);
+	}, [displayPoints, value?.previews]);
 	const points = useMemo(() => {
-		if (!displayClearCutPreview) {
-			return value?.points.map((location) => (
+		if (displayPoints) {
+			return value?.points.content.map(({ point, count }) => (
 				<Circle
-					key={`${location.coordinates[0]},${location.coordinates[1]}`}
+					key={`${point.coordinates[0]},${point.coordinates[1]}`}
 					color="#ff6467"
 					center={{
-						lat: location.coordinates[1],
-						lng: location.coordinates[0],
+						lat: point.coordinates[1],
+						lng: point.coordinates[0],
 					}}
-					radius={200}
+					radius={getPointRadius(value.points.total, count)}
 					fillOpacity={0.7}
-				/>
+				>
+				</Circle>
 			));
 		}
-	}, [displayClearCutPreview, value?.points]);
+	}, [displayPoints, value?.points]);
 
 	return (
 		<>

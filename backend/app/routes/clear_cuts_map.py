@@ -89,6 +89,11 @@ def get_clearcuts_map(
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),
+    with_points: Optional[bool] = Query(
+        None,
+        description="Excessive slope",
+        openapi_examples={"default": {"value": False}},
+    ), 
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
@@ -107,6 +112,7 @@ def get_clearcuts_map(
             )
         clearcuts = build_clearcuts_map(
             db,
+            with_points if with_points is not None else False,
             Filters(
                 bounds=bounds,
                 min_area_hectare=min_area_hectare,

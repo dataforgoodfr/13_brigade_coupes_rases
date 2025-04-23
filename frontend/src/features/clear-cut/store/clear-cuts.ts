@@ -89,8 +89,16 @@ export const clearCutReportSchema = clearCutReportResponseSchema
 
 export type ClearCutReport = z.infer<typeof clearCutReportSchema>;
 
+const countedPoint = z.object({
+	count: z.number(),
+	point: pointSchema,
+});
+const clusterizedPointsSchema = z.object({
+	total: z.number(),
+	content: countedPoint.array(),
+});
 export const clearCutsResponseSchema = z.object({
-	points: z.array(pointSchema),
+	points: clusterizedPointsSchema,
 	previews: z.array(clearCutReportResponseSchema),
 });
 

@@ -211,6 +211,12 @@ export const mockClearCutsResponse = (
 				[Number.parseFloat(southWestLng), Number.parseFloat(northEastLat)],
 			];
 		}
+		const points =
+			boundaries && filterInArea
+				? randomPoints.filter((point) =>
+						isPointInsidePolygon(boundaries, point.coordinates),
+					)
+				: randomPoints;
 		return HttpResponse.json({
 			previews:
 				boundaries && filterInArea
@@ -221,11 +227,9 @@ export const mockClearCutsResponse = (
 							),
 						)
 					: previews,
-			points:
-				boundaries && filterInArea
-					? randomPoints.filter((point) =>
-							isPointInsidePolygon(boundaries, point.coordinates),
-						)
-					: randomPoints,
+			points: {
+				content: points.map((p) => ({ count: 1, point: p })),
+				total: points.length,
+			},
 		} satisfies ClearCutsResponse);
 	});

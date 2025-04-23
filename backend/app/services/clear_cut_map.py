@@ -1,4 +1,5 @@
 from logging import getLogger
+from math import sqrt
 from typing import Optional
 
 from fastapi import HTTPException, status
@@ -6,6 +7,10 @@ from geoalchemy2.functions import (
     ST_Contains,
     ST_MakeEnvelope,
     ST_SetSRID,
+    ST_ClusterWithin,
+    ST_Centroid,
+    ST_NumGeometries,
+    ST_AsGeoJSON,
 )
 from geojson_pydantic import Point
 from pydantic import BaseModel
@@ -22,6 +27,8 @@ from app.models import (
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     ClearCutReportPreviewSchema,
+    ClusterizedPointsResponseSchema,
+    CountedPoint,
     report_to_report_preview_schema,
 )
 from app.services.rules import (
@@ -158,14 +165,68 @@ def get_report_preview_by_id(
     return report_to_report_preview_schema(report)
 
 
-def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
+def build_clearcuts_map(
+    db: Session, with_points: bool, filters: Filters
+) -> ClearCutMapResponseSchema:
     reports_with_filters = query_clearcuts_filtered(db, filters)
-    points = reports_with_filters.all()
+    clusterized_points = ClusterizedPointsResponseSchema(total=0, content=[])
+
+    if with_points is True:
+        if filters.bounds is not None:
+            area = (
+                filters.bounds.south_west_longitude
+                - filters.bounds.north_east_longitude
+            ) * (
+                filters.bounds.south_west_latitude - filters.bounds.north_east_latitude
+            )
+            # Needs to clusterized because with estimate that points are too many
+            if area > 1 :
+                reports_cnt = reports_with_filters.count()
+                # Distance calculated to estimate the clusters size, 
+                # if we have many points in an area the distance used by the cluster while be bigger  
+                distance = sqrt(area / reports_cnt)
+                clusters = db.query(
+                    func.unnest(
+                        ST_ClusterWithin(
+                            reports_with_filters.subquery().c.average_location, distance
+                        )
+                    ).label("cluster"),
+                ).subquery()
+                clusterized_points = ClusterizedPointsResponseSchema(
+                    total=reports_cnt,
+                    content=[
+                        CountedPoint(count=row[0], point=Point.model_validate_json(row[1]))
+                        for row in db.query(
+                            ST_NumGeometries(clusters.c.cluster).label("points_cnt"),
+                            ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
+                        ).all()
+                    ],
+                )
+            else:
+                # If area is little clusters are useless
+                clusterized_points = process_points_from_reports(reports_with_filters)
+        else:
+            # If area doesnt exists clusters are useless
+            clusterized_points = process_points_from_reports(reports_with_filters)
+
     reports_with_filters = reports_with_filters.limit(30).all()
     map_response = ClearCutMapResponseSchema(
-        points=[
-            Point.model_validate_json(point.average_location_json) for point in points
-        ],
+        points=clusterized_points,
         previews=list(map(report_to_report_preview_schema, reports_with_filters)),
     )
     return map_response
+
+def process_points_from_reports(reports_with_filters):
+    all_reports = reports_with_filters.all()
+    clusterized_points = ClusterizedPointsResponseSchema(
+                total=len(all_reports),
+                content=[
+                    CountedPoint(
+                        count=1,
+                        point=Point.model_validate_json(report.average_location_json),
+                    )
+                    for report in all_reports
+                ],
+            )
+    
+    return clusterized_points
