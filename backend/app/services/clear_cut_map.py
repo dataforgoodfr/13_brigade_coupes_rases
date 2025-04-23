@@ -4,13 +4,13 @@ from typing import Optional
 
 from fastapi import HTTPException, status
 from geoalchemy2.functions import (
+    ST_AsGeoJSON,
+    ST_Centroid,
+    ST_ClusterWithin,
     ST_Contains,
     ST_MakeEnvelope,
-    ST_SetSRID,
-    ST_ClusterWithin,
-    ST_Centroid,
     ST_NumGeometries,
-    ST_AsGeoJSON,
+    ST_SetSRID,
 )
 from geojson_pydantic import Point
 from pydantic import BaseModel
@@ -180,10 +180,10 @@ def build_clearcuts_map(
                 filters.bounds.south_west_latitude - filters.bounds.north_east_latitude
             )
             # Needs to clusterized because with estimate that points are too many
-            if area > 1 :
+            if area > 1:
                 reports_cnt = reports_with_filters.count()
-                # Distance calculated to estimate the clusters size, 
-                # if we have many points in an area the distance used by the cluster while be bigger  
+                # Distance calculated to estimate the clusters size,
+                # if we have many points in an area the distance used by the cluster while be bigger
                 distance = sqrt(area / reports_cnt)
                 clusters = db.query(
                     func.unnest(
@@ -195,7 +195,9 @@ def build_clearcuts_map(
                 clusterized_points = ClusterizedPointsResponseSchema(
                     total=reports_cnt,
                     content=[
-                        CountedPoint(count=row[0], point=Point.model_validate_json(row[1]))
+                        CountedPoint(
+                            count=row[0], point=Point.model_validate_json(row[1])
+                        )
                         for row in db.query(
                             ST_NumGeometries(clusters.c.cluster).label("points_cnt"),
                             ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
@@ -216,17 +218,18 @@ def build_clearcuts_map(
     )
     return map_response
 
+
 def process_points_from_reports(reports_with_filters):
     all_reports = reports_with_filters.all()
     clusterized_points = ClusterizedPointsResponseSchema(
-                total=len(all_reports),
-                content=[
-                    CountedPoint(
-                        count=1,
-                        point=Point.model_validate_json(report.average_location_json),
-                    )
-                    for report in all_reports
-                ],
+        total=len(all_reports),
+        content=[
+            CountedPoint(
+                count=1,
+                point=Point.model_validate_json(report.average_location_json),
             )
-    
+            for report in all_reports
+        ],
+    )
+
     return clusterized_points

@@ -93,7 +93,7 @@ def get_clearcuts_map(
         None,
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
-    ), 
+    ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:

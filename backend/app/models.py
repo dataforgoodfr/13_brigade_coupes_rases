@@ -244,7 +244,9 @@ class ClearCutReport(Base):
     total_bdf_deciduous_area_hectare = Column(Float, nullable=True)
     total_bdf_mixed_area_hectare = Column(Float, nullable=True)
     total_bdf_poplar_area_hectare = Column(Float, nullable=True)
-    average_location = Column(Geography(geometry_type="Point", srid=SRID), nullable=True)
+    average_location = Column(
+        Geography(geometry_type="Point", srid=SRID), nullable=True
+    )
     last_cut_date = Column(DateTime, default=datetime.now, nullable=True)
     first_cut_date = Column(DateTime, default=datetime.now, nullable=True)
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))

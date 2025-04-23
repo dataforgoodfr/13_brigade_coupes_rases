@@ -118,12 +118,16 @@ def report_to_report_preview_schema(
         ).date(),
     )
 
+
 class CountedPoint(BaseModel):
     count: int
     point: Point
+
+
 class ClusterizedPointsResponseSchema(BaseModel):
     total: int
     content: list[CountedPoint]
+
 
 class ClearCutMapResponseSchema(BaseModel):
     points: ClusterizedPointsResponseSchema
