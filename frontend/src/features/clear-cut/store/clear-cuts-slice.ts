@@ -2,6 +2,7 @@ import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import type { RequestedContent } from "@/shared/api/types";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	selectDepartmentsByIds,
@@ -125,11 +126,12 @@ export const selectClearCuts = createTypedDraftSafeSelector(
 export const useGetClearCuts = () => {
 	const filters = useAppSelector(selectFiltersRequest);
 	const dispatch = useAppDispatch();
+	const { breakpoint } = useBreakpoint();
 	useEffect(() => {
-		if (filters) {
+		if ((breakpoint === "mobile" && filters) || filters?.geoBounds) {
 			dispatch(getClearCutsThunk(filters));
 		}
-	}, [filters, dispatch]);
+	}, [filters, breakpoint, dispatch]);
 };
 
 export const useGetClearCut = (id: string) => {

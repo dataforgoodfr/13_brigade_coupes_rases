@@ -5,7 +5,7 @@ from typing import Optional
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models import ClearCut
+from app.models import ClearCut, ClearCutReport
 
 logger = getLogger(__name__)
 
@@ -81,7 +81,7 @@ def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
 
 
 def report_to_report_preview_schema(
-    report,
+    report: ClearCutReport,
 ) -> ClearCutReportPreviewSchema:
     return ClearCutReportPreviewSchema(
         id=str(report.id),
@@ -119,8 +119,18 @@ def report_to_report_preview_schema(
     )
 
 
+class CountedPoint(BaseModel):
+    count: int
+    point: Point
+
+
+class ClusterizedPointsResponseSchema(BaseModel):
+    total: int
+    content: list[CountedPoint]
+
+
 class ClearCutMapResponseSchema(BaseModel):
-    points: list[Point]
+    points: ClusterizedPointsResponseSchema
     previews: list[ClearCutReportPreviewSchema]
 
     model_config = ConfigDict(from_attributes=True)

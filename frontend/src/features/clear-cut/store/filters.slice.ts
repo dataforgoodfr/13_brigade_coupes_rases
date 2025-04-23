@@ -33,6 +33,7 @@ export interface FiltersState {
 	excessive_slope: EventuallyBooleanSelectableItems;
 	ecological_zoning: EventuallyBooleanSelectableItems;
 	favorite: EventuallyBooleanSelectableItems;
+	with_points?: boolean;
 }
 export const initialState: FiltersState = {
 	cutYears: [],
@@ -140,6 +141,9 @@ export const filtersSlice = createSlice({
 				state.favorite,
 			);
 		},
+		setWithPoints: (state, { payload }: PayloadAction<boolean>) => {
+			state.with_points = payload;
+		},
 	},
 	extraReducers: (builder) => {
 		builder.addCase(
@@ -173,7 +177,7 @@ export const filtersSlice = createSlice({
 });
 
 export const {
-	actions: { updateCutYear: toggleCutYear, setGeoBounds },
+	actions: { updateCutYear: toggleCutYear, setGeoBounds, setWithPoints },
 } = filtersSlice;
 
 const selectState = (state: RootState) => state.filters;
@@ -188,6 +192,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		departments,
 		excessive_slope,
 		favorite,
+		with_points,
 	}): FiltersRequest | undefined => ({
 		geoBounds,
 		cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
@@ -200,6 +205,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 			?.item,
 		excessive_slope: excessive_slope.find((item) => item.isSelected)?.item,
 		favorite: favorite.find((item) => item.isSelected)?.item,
+		with_points,
 	}),
 );
 
@@ -236,4 +242,8 @@ export const selectExcessiveSlop = createTypedDraftSafeSelector(
 export const selectFavorite = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.favorite,
+);
+export const selectWithPoints = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.with_points,
 );

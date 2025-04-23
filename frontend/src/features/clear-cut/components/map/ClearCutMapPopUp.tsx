@@ -30,7 +30,7 @@ function BDFLabel({
 			value !== null
 				? {
 						label,
-						
+
 						percentage: (value / total_area_hectare) * 100,
 					}
 				: null,
