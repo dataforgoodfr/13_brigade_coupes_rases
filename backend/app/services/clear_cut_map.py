@@ -184,7 +184,7 @@ def build_clearcuts_map(
                 reports_cnt = reports_with_filters.count()
                 # Distance calculated to estimate the clusters size,
                 # if we have many points in an area the distance used by the cluster while be bigger
-                distance = sqrt(area / reports_cnt)
+                distance = sqrt(area / reports_cnt / 2)
                 clusters = db.query(
                     func.unnest(
                         ST_ClusterWithin(
