@@ -11,7 +11,7 @@ const filtersRequestSchema = z.object({
 	excessive_slope: z.boolean().optional(),
 	favorite: z.boolean().optional(),
 	has_ecological_zonings: z.boolean().optional(),
-	with_points: z.boolean().optional()
+	with_points: z.boolean().optional(),
 });
 
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>;

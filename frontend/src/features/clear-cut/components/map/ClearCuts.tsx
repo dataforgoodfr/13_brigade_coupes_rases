@@ -88,6 +88,9 @@ export function ClearCuts() {
 	}, [browserLocation, map.setView]);
 
 	const dispatch = useAppDispatch();
+	useEffect(() => {
+		dispatch(setWithPoints(true));
+	}, [dispatch]);
 	const { value } = useAppSelector(selectClearCuts);
 	const dispatchGeoBounds = useCallback(() => {
 		const bounds = map.getBounds();
