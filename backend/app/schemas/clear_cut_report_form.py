@@ -16,14 +16,14 @@ class ClearCutReportFormBase(BaseModel):
     inspection_date: Optional[datetime] = None
     weather: None | str = None
     forest_description: None | str = None
-    remainingTrees: None | str = None
+    remainingTrees: None | bool = None
     species: None | str = None
-    workSignVisible: None | str = None
+    workSignVisible: None | bool = None
     waterzone_description: None | str = None
     protected_zone_description: None | str = None
     soil_state: None | str = None
     other: None | str = None
-    ecological_zone: None | str = None
+    ecological_zone: None | bool = None
     ecological_zone_type: None | str = None
     nearby_zone: None | str = None
     nearby_zone_type: None | str = None
@@ -39,7 +39,34 @@ class ClearCutReportFormBase(BaseModel):
     psg_required_plot: None | bool = None
 
     class Config:
-        schema_extra = {"example": {"weather": "Boueux"}}
+        json_schema_extra = {
+            "example": {
+                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "weather": "Rainy",
+                "forest_description": "Wild forest",
+                "remainingTrees": True,
+                "species": "Chênes",
+                "workSignVisible": False,
+                "waterzone_description": "small lake",
+                "protected_zone_description": "RAS",
+                "soil_state": "Muddy",
+                "other": "",
+                "ecological_zone": False,
+                "ecological_zone_type": "",
+                "nearby_zone": "",
+                "nearby_zone_type": "",
+                "protected_species": "",
+                "protected_habitats": "",
+                "ddt_request": None,
+                "ddt_request_owner": "",
+                "compagny": "",
+                "subcontractor": "",
+                "landlord": "",
+                "pefc_fsc_certified": False,
+                "over_20_ha": False,
+                "psg_required_plot": True,
+            }
+        }
 
 
 class ClearcutReportStrategy(BaseModel):
@@ -60,11 +87,85 @@ class ClearCutReportFormResponse(ClearCutReportFormBase):
 class ClearCutReportFormWithStrategy(ClearcutReportStrategy, ClearCutReportFormBase):
     _ = None
 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "weather": "Rainy",
+                "forest_description": "Wild forest",
+                "remainingTrees": True,
+                "species": "Chênes",
+                "workSignVisible": False,
+                "waterzone_description": "small lake",
+                "protected_zone_description": "RAS",
+                "soil_state": "Muddy",
+                "other": "",
+                "ecological_zone": False,
+                "ecological_zone_type": "",
+                "nearby_zone": "",
+                "nearby_zone_type": "",
+                "protected_species": "",
+                "protected_habitats": "",
+                "ddt_request": None,
+                "ddt_request_owner": "",
+                "compagny": "",
+                "subcontractor": "",
+                "landlord": "",
+                "pefc_fsc_certified": False,
+                "over_20_ha": False,
+                "psg_required_plot": True,
+                "relevant_for_pefc_complaint": None,
+                "relevant_for_rediii_complaint": False,
+                "relevant_for_ofb_complaint": False,
+                "relevant_for_alert_cnpf_ddt_srgs": False,
+                "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
+                "relevant_for_psg_request": False,
+                "request_engaged": "Request",
+            }
+        }
+
 
 class ClearCutReportFormWithStrategyResponse(
     ClearcutReportStrategy, ClearCutReportFormResponse
 ):
     _ = None
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "weather": "Rainy",
+                "forest_description": "Wild forest",
+                "remainingTrees": True,
+                "species": "Chênes",
+                "workSignVisible": False,
+                "waterzone_description": "small lake",
+                "protected_zone_description": "RAS",
+                "soil_state": "Muddy",
+                "other": "",
+                "ecological_zone": False,
+                "ecological_zone_type": "",
+                "nearby_zone": "",
+                "nearby_zone_type": "",
+                "protected_species": "",
+                "protected_habitats": "",
+                "ddt_request": None,
+                "ddt_request_owner": "",
+                "compagny": "",
+                "subcontractor": "",
+                "landlord": "",
+                "pefc_fsc_certified": False,
+                "over_20_ha": False,
+                "psg_required_plot": True,
+                "relevant_for_pefc_complaint": None,
+                "relevant_for_rediii_complaint": False,
+                "relevant_for_ofb_complaint": False,
+                "relevant_for_alert_cnpf_ddt_srgs": False,
+                "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
+                "relevant_for_psg_request": False,
+                "request_engaged": "Request",
+            }
+        }
 
 
 class ClearCutReporCreate(ClearCutReportFormBase):
