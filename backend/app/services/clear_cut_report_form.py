@@ -9,6 +9,7 @@ from app.schemas.clear_cut_report_form import (
     ClearCutReportFormBase,
     ClearCutReportFormWithStrategyResponse,
 )
+from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 
 
 logger = getLogger(__name__)
@@ -52,3 +53,25 @@ def create_clearcut_form(
     db.commit()
     db.refresh(new_clear_cut_form)
     return new_clear_cut_form
+
+
+def find_clear_cut_form_by_report_id(
+    db: Session, report_id: int, url: str, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutReportFormWithStrategyResponse]:
+    clear_cut_report_forms = (
+        db.query(ClearCutReportForm)
+        .filter(ClearCutReportForm.report_id == report_id)
+        .offset(page * size)
+        .limit(size)
+    )
+    clear_cuts_count = (
+        db.query(ClearCutReportForm.id)
+        .filter(ClearCutReportForm.report_id == report_id)
+        .count()
+    )
+    return PaginationResponseSchema(
+        content=list(clear_cut_report_forms),
+        metadata=PaginationMetadataSchema(
+            page=page, size=size, total_count=clear_cuts_count, url=url
+        ),
+    )

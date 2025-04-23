@@ -18,7 +18,9 @@ from app.services.clear_cut_report import (
     get_report_response_by_id,
     update_clear_cut_report,
 )
+from app.schemas.clear_cut_report_form import ClearCutReportFormWithStrategyResponse
 from app.config import settings
+from app.services.clear_cut_report_form import find_clear_cut_form_by_report_id
 
 logger = getLogger(__name__)
 
@@ -76,6 +78,23 @@ def list_clear_cuts(
         db,
         report_id=report_id,
         url=f"/api/v1/clear-cuts-reports/{report_id}/clear-cuts",
+        page=page,
+        size=size,
+    )
+
+
+@router.get(
+    "/{report_id}/forms",
+    response_model=PaginationResponseSchema[ClearCutReportFormWithStrategyResponse],
+)
+def list_clear_cut_forms(
+    report_id: int, db: Session = db_session, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[ClearCutReportFormWithStrategyResponse]:
+    logger.info(db)
+    return find_clear_cut_form_by_report_id(
+        db,
+        report_id=report_id,
+        url=f"/api/v1/clear-cuts-reports/{report_id}/forms",
         page=page,
         size=size,
     )
