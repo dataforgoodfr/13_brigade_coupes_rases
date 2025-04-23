@@ -16,7 +16,7 @@ import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import type { ZoomAnimEventHandlerFn } from "leaflet";
 import * as L from "leaflet";
 import { Locate } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Circle, useMap, useMapEvents } from "react-leaflet";
 
 const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
@@ -52,10 +52,10 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 ];
 const MAX_RADIUS = 10_000;
 function getPointRadius(pointsCnt: number, currentPointCnt: number) {
-	if(pointsCnt < 100){
+	if (pointsCnt < 100) {
 		return 1000;
 	}
-	return MAX_RADIUS * (currentPointCnt / pointsCnt * 5 );
+	return MAX_RADIUS * ((currentPointCnt / pointsCnt) * 5);
 }
 export function ClearCuts() {
 	const map = useMap();
@@ -148,8 +148,7 @@ export function ClearCuts() {
 					}}
 					radius={getPointRadius(value.points.total, count)}
 					fillOpacity={0.7}
-				>
-				</Circle>
+				/>
 			));
 		}
 	}, [displayPoints, value?.points]);

@@ -177,7 +177,7 @@ export const filtersSlice = createSlice({
 });
 
 export const {
-	actions: { updateCutYear: toggleCutYear, setGeoBounds , setWithPoints},
+	actions: { updateCutYear: toggleCutYear, setGeoBounds, setWithPoints },
 } = filtersSlice;
 
 const selectState = (state: RootState) => state.filters;
