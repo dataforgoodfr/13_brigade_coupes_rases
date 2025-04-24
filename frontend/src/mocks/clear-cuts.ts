@@ -10,7 +10,7 @@ import {
 import {
 	fakeDepartments,
 	fakeEcologicalZonings,
-	fakeTags,
+	fakeRules,
 } from "@/mocks/referential";
 import { volunteerAssignedToken } from "@/mocks/users";
 import { range } from "@/shared/array";
@@ -53,6 +53,10 @@ export const createClearCutReportBaseMock = (
 		),
 		...(override.clear_cuts ?? []),
 	];
+	const total_area_hectare = clear_cuts.reduce(
+		(acc, cut) => acc + cut.area_hectare,
+		0,
+	);
 	return {
 		id: faker.string.uuid(),
 		average_location: override.average_location ?? randomLocation,
@@ -63,11 +67,20 @@ export const createClearCutReportBaseMock = (
 		created_at: faker.date.past().toJSON().split("T")[0],
 		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
 		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
-		tags_ids: faker.helpers.arrayElements(Object.keys(fakeTags)),
-		total_area_hectare: clear_cuts.reduce(
-			(acc, cut) => acc + cut.area_hectare,
-			0,
-		),
+		rules_ids: faker.helpers.arrayElements(Object.keys(fakeRules)),
+		total_area_hectare,
+		total_bdf_deciduous_area_hectare: faker.number.float({
+			max: total_area_hectare / 4,
+		}),
+		total_bdf_mixed_area_hectare: faker.number.float({
+			max: total_area_hectare / 4,
+		}),
+		total_bdf_poplar_area_hectare: faker.number.float({
+			max: total_area_hectare / 4,
+		}),
+		total_bdf_resinous_area_hectare: faker.number.float({
+			max: total_area_hectare / 4,
+		}),
 		clear_cuts,
 		last_cut_date: clear_cuts.reduce(
 			(acc, cut) =>
@@ -198,6 +211,12 @@ export const mockClearCutsResponse = (
 				[Number.parseFloat(southWestLng), Number.parseFloat(northEastLat)],
 			];
 		}
+		const points =
+			boundaries && filterInArea
+				? randomPoints.filter((point) =>
+						isPointInsidePolygon(boundaries, point.coordinates),
+					)
+				: randomPoints;
 		return HttpResponse.json({
 			previews:
 				boundaries && filterInArea
@@ -208,11 +227,9 @@ export const mockClearCutsResponse = (
 							),
 						)
 					: previews,
-			points:
-				boundaries && filterInArea
-					? randomPoints.filter((point) =>
-							isPointInsidePolygon(boundaries, point.coordinates),
-						)
-					: randomPoints,
+			points: {
+				content: points.map((p) => ({ count: 1, point: p })),
+				total: points.length,
+			},
 		} satisfies ClearCutsResponse);
 	});

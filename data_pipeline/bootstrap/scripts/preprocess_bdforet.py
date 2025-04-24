@@ -121,7 +121,8 @@ def download_bdforet_departments() -> None:
 
     archives_dir = BDFORET_DIR / "archives"
     for url in tqdm(
-        urls_to_download, desc="Downloading the tiles of all the mainland French departments"
+        urls_to_download,
+        desc="Downloading the tiles of all the mainland French departments",
     ):
         filename = url.split("/")[-1]
         filepath = archives_dir / filename
@@ -140,7 +141,9 @@ def decompress_bdforet_departments() -> None:
     ):
         # Extract the shapefiles files
         with py7zr.SevenZipFile(compressed_dir / archive_filename) as archive:
-            shapefile_filepaths = [f for f in archive.getnames() if "FORMATION_VEGETALE" in f]
+            shapefile_filepaths = [
+                f for f in archive.getnames() if "FORMATION_VEGETALE" in f
+            ]
             archive.extract(targets=shapefile_filepaths, path=uncompressed_dir)
 
 
@@ -202,7 +205,9 @@ def simplify_and_filter_bdforet_types(bdforet: gpd.GeoDataFrame) -> gpd.GeoDataF
     )
 
     # Keep relevant types
-    bdforet = bdforet[bdforet["bdf_type"].isin(["deciduous", "resinous", "mixed", "poplar"])]
+    bdforet = bdforet[
+        bdforet["bdf_type"].isin(["deciduous", "resinous", "mixed", "poplar"])
+    ]
 
     # Keep relevant columns
     bdforet = bdforet[["bdf_type", "geometry"]]

@@ -1,4 +1,5 @@
 import os
+
 import boto3
 from dotenv import load_dotenv
 from pykeepass import PyKeePass
@@ -11,7 +12,9 @@ class S3Manager:
         # Cindy's Code
         keepass_password = os.getenv("KEEPASS_PASSWORD")
         if keepass_password is None:
-            raise ValueError("The environment variable KEEPASS_PASSWORD is not defined.")
+            raise ValueError(
+                "The environment variable KEEPASS_PASSWORD is not defined."
+            )
         kp = PyKeePass(
             "../keepass/secrets.kdbx", password=keepass_password
         )  # Accès à la base KeePass
@@ -49,7 +52,9 @@ class S3Manager:
         :return: True if the file is found, False otherwise.
         """
         try:
-            response = self.s3.list_objects_v2(Bucket=self.bucket_name, Prefix=s3_key_prefix)
+            response = self.s3.list_objects_v2(
+                Bucket=self.bucket_name, Prefix=s3_key_prefix
+            )
             contents = response.get("Contents", [])
             for obj in contents:
                 filename = obj["Key"].split("/")[-1]

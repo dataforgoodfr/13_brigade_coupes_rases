@@ -1,7 +1,8 @@
 import pytest
-from app.models import City, Department, EcologicalZoning
 from common.clear_cut import new_clear_cut_report
 from common.user import new_user
+
+from app.models import City, Department, EcologicalZoning
 
 
 def test_user_creation(db):
@@ -63,7 +64,9 @@ def test_report_creation(db):
 
     with pytest.raises(ValueError) as exc_info:
         new_clear_cut_report(
-            status="invalid_status", city_id=city.id, ecological_zoning_id=ecological_zoning.id
+            status="invalid_status",
+            city_id=city.id,
+            ecological_zoning_id=ecological_zoning.id,
         )
     assert (
         str(exc_info.value)

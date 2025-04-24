@@ -1,9 +1,10 @@
 import os
+
 import fiona
-import rasterio
 import numpy as np
-from tqdm import tqdm
+import rasterio
 from rasterio.features import shapes
+from tqdm import tqdm
 from utils.logging_etl import etl_logger
 
 
@@ -48,7 +49,7 @@ class Polygonizer:
                 # total_windows = len(windows)
 
                 # Process each window/block separately
-                for idx, (window_idx, window) in enumerate(
+                for _idx, (_window_idx, window) in enumerate(
                     tqdm(windows, desc="Processing blocks", unit="block")
                 ):
                     # Read only the current window data
@@ -109,7 +110,7 @@ class Polygonizer:
                 windows = list(src.block_windows())
                 # total_windows = len(windows)
 
-                for idx, (window_idx, window) in enumerate(
+                for _idx, (_window_idx, window) in enumerate(
                     tqdm(windows, desc="Polygonizing blocks", unit="block")
                 ):
                     # Read only the data for this window
@@ -126,7 +127,9 @@ class Polygonizer:
                     # Polygonize this window
                     window_polygons = (
                         {"properties": {"DN": int(value)}, "geometry": geom}
-                        for geom, value in shapes(band, mask=mask, transform=window_transform)
+                        for geom, value in shapes(
+                            band, mask=mask, transform=window_transform
+                        )
                     )
 
                     # Write window polygons to shapefile

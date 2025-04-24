@@ -59,11 +59,6 @@ module = [
 ]
 ignore_missing_imports = true
 
-[tool.ruff]
-# Same as Black.
-line-length = 96
-target-version = "py313"
-
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
@@ -77,47 +72,10 @@ select = ["E4", "E7", "E9", "F", "B"]
 unfixable = ["R"]
 mccabe = 10
 
-[tool.ruff.format]
-# Like Black, use double quotes for strings.
-quote-style = "double"
+# See https://docs.astral.sh/ruff/settings
+[tool.ruff]
+target-version = "py313"
 
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "space"
-
-# Like Black, respect magic trailing commas.
-skip-magic-trailing-comma = false
-
-# Like Black, automatically detect the appropriate line ending.
-line-ending = "auto"
-
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "venv",
-]
-
-[tool.ruff.mccabe]
-max-complexity = 10
+[tool.ruff.lint]
+# Enable isort and flake8-bugbear on top of the defaults
+extend-select = ["I", "B"]

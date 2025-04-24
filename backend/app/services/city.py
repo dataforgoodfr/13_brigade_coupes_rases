@@ -1,8 +1,9 @@
 from typing import Optional
+
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from app.models import City
-from sqlalchemy.orm import Session
 
 
 def get_city_by_name(db: Session, name: str) -> Optional[City]:
