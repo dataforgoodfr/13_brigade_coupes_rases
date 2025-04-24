@@ -1,4 +1,5 @@
 import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
+import { FormattedDate, FormattedNumber } from "react-intl";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const generalInfoKey: SectionForm = {
@@ -9,8 +10,7 @@ export const generalInfoKey: SectionForm = {
 export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 	{
 		name: "updated_at",
-		transformValue: (val: unknown) =>
-			new Date(val as string).toLocaleDateString(),
+		transformValue: ({ value }) => <FormattedDate value={value as string} />,
 		label: "Date de signalement",
 		type: "fixed",
 		renderConditions: [],
@@ -44,19 +44,31 @@ export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 		label: "Date de la coupe",
 		type: "fixed",
 		renderConditions: [],
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<FormattedDate value={value as string} />
+			) : undefined,
 	},
 	{
 		name: "total_area_hectare",
 		label: "Taille de la coupe",
 		type: "fixed",
 		renderConditions: [],
-		transformValue: (val: unknown) => `${val} ha`,
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<>
+					<FormattedNumber value={value as number} /> ha
+				</>
+			) : undefined,
 	},
 	{
 		name: "slope_area_ratio_percentage",
 		label: "Pourcentage de pente",
 		type: "fixed",
 		renderConditions: [],
-		transformValue: (val: unknown) => `${val}%`,
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<FormattedNumber value={value as number} style="percent" />
+			) : undefined,
 	},
 ];

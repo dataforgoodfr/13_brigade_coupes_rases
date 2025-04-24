@@ -26,7 +26,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 			style={{
 				color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[report.status]})`,
 				weight: 0,
-				fillOpacity: 0.75,
+				fillOpacity: 0.5,
 			}}
 			eventHandlers={{
 				mouseover: (event) => {

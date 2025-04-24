@@ -33,7 +33,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 					value.average_location.coordinates[1],
 					value.average_location.coordinates[0],
 				],
-				10,
+				15,
 				{ duration: 1 },
 			);
 		}

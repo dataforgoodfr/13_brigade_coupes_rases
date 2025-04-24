@@ -5,6 +5,7 @@ import type {
 } from "@/features/clear-cut/store/clear-cuts";
 import type { FormType } from "@/shared/components/form/Form";
 import type { Rule } from "@/shared/store/referential/referential";
+import { FormattedNumber } from "react-intl";
 import { RuleBadge } from "../RuleBadge";
 import { StatusWithLabel } from "../StatusWithLabel";
 
@@ -13,6 +14,8 @@ export default function AccordionHeader({
 	tags: abusiveTags,
 	status,
 }: { form: FormType<ClearCutForm>; tags: Rule[]; status: ClearCutStatus }) {
+	const areaHectare = form.getValues("total_area_hectare");
+	const ecologicalZoning = form.getValues("natura2000Zone.name");
 	return (
 		<div className="flex items-center mx-4 mt-4 gap-6 text-sm">
 			<img
@@ -31,11 +34,14 @@ export default function AccordionHeader({
 					))}
 				</div>
 				<Separator className="mb-4" />
-				<p>
-					Superficie de la coupe :{" "}
-					{`${form.getValues("total_area_hectare")} ha`}
-				</p>
-				<p>Zone natura 2000 : {form.getValues("natura2000Zone.name")}</p>
+				{areaHectare !== undefined && (
+					<p>
+						Superficie de la coupe : <FormattedNumber value={areaHectare} /> ha
+					</p>
+				)}
+				{ecologicalZoning !== undefined && (
+					<p>Zone écologique : {ecologicalZoning}</p>
+				)}
 			</div>
 		</div>
 	);

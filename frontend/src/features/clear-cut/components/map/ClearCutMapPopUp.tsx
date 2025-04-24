@@ -2,6 +2,7 @@ import { DotByStatus } from "@/features/clear-cut/components/DotByStatus";
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 import { useMemo } from "react";
+import { FormattedDate, FormattedNumber, useIntl } from "react-intl";
 import { Popup } from "react-leaflet";
 
 function BDFLabel({
@@ -17,6 +18,7 @@ function BDFLabel({
 	total_bdf_poplar_area_hectare: number | null;
 	total_bdf_resinous_area_hectare: number | null;
 }) {
+	const { formatNumber } = useIntl();
 	const types = {
 		Feuillus: total_bdf_deciduous_area_hectare,
 		Mélangée: total_bdf_mixed_area_hectare,
@@ -25,24 +27,22 @@ function BDFLabel({
 	};
 
 	const relevantTypes = Object.entries(types)
-		// Convert hectares to percentages
 		.map(([label, value]) =>
 			value !== null
 				? {
 						label,
-
-						percentage: (value / total_area_hectare) * 100,
+						percentage: value / total_area_hectare,
 					}
 				: null,
 		)
 		.filter((v) => v !== null)
-		// Only display types with a coverage > 1%
-		.filter(({ percentage }) => percentage >= 1)
-		// Display types in coverage descending order
 		.sort((a, b) => b.percentage - a.percentage);
 
 	const labelString = relevantTypes
-		.map(({ label, percentage }) => `${label} (${Math.round(percentage)}%)`)
+		.map(
+			({ label, percentage }) =>
+				`${label} (${formatNumber(percentage, { style: "percent" })})`,
+		)
 		.join(" / ");
 
 	return (
@@ -86,7 +86,9 @@ export function ClearCutMapPopUp({
 
 						<DotByStatus className="ml-2.5" status={status} />
 					</div>
-					<div className="text-sm">{last_cut_date}</div>
+					<div className="text-sm">
+						<FormattedDate value={last_cut_date} />
+					</div>
 				</div>
 
 				<div className="flex mb-5 gap-2 font-inter">
@@ -97,15 +99,29 @@ export function ClearCutMapPopUp({
 
 				<div className="flex flex-col gap-2.5 text-base text-secondary font-jakarta font-medium">
 					<div>
-						Date du signalement : <strong>{updated_at}</strong>
+						Date du signalement :{" "}
+						<strong>
+							<FormattedDate value={updated_at} />
+						</strong>
 					</div>
 					<div>
 						Taille de la coupe :
-						<strong> {total_area_hectare.toFixed(2)} HA</strong>
+						<strong>
+							{" "}
+							<FormattedNumber value={total_area_hectare} /> HA
+						</strong>
 					</div>
-					<div>
-						Pente : <strong>{slope_area_ratio_percentage} %</strong>
-					</div>
+					{slope_area_ratio_percentage && (
+						<div>
+							Pente :
+							<strong>
+								<FormattedNumber
+									value={slope_area_ratio_percentage}
+									style="percent"
+								/>
+							</strong>
+						</div>
+					)}
 					<div>
 						Zones Natura :<strong>{ecological_zonings}</strong>
 					</div>
