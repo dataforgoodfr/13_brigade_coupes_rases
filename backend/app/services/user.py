@@ -1,10 +1,12 @@
+from logging import getLogger
 from typing import Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.models import Department, User
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
-from logging import getLogger
 
 logger = getLogger(__name__)
 
@@ -33,7 +35,9 @@ def create_user(db: Session, user: UserCreateSchema) -> User:
         role=user.role,
     )
     for department_id in user.departments:
-        department_db = db.query(Department).filter(Department.id == department_id).first()
+        department_db = (
+            db.query(Department).filter(Department.id == department_id).first()
+        )
         if department_db is None:
             raise HTTPException(
                 status_code=404, detail=f"Item with id {department_db} not found"
@@ -61,14 +65,18 @@ def get_users(
 def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
     user = db.get(User, id)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        )
     return user_to_user_response_schema(user)
 
 
 def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
     if not user_db:
-        raise HTTPException(status_code=404, detail="user not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        )
     update_data = user_in.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():

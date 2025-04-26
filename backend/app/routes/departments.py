@@ -1,10 +1,12 @@
-from app.schemas.hateoas import PaginationResponseSchema
-from app.services.departement import find_departments
+from logging import getLogger
+
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.schemas.department import DepartmentResponseSchema
+
 from app.deps import db_session
-from logging import getLogger
+from app.schemas.department import DepartmentResponseSchema
+from app.schemas.hateoas import PaginationResponseSchema
+from app.services.departement import find_departments
 
 logger = getLogger(__name__)
 

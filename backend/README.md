@@ -1,9 +1,8 @@
 # Brigade Coupes Rases backend
 
-## Data 
+## Data
 
 All coordinates returned from the Api follow this format : latitude/longitude
-
 
 ## Development
 
@@ -64,3 +63,7 @@ PostgreSQL Database : postgresql://u8jhjikkyhen5eq6xym9:<password in keepass>@bf
 DATABASE_URL = Connection string to connect to postgres database.
 ENVIRONMENT = development
 ALLOWED_ORIGINS = domain names used to allow CORS
+
+## Database schema
+
+![](./database_schema.png)

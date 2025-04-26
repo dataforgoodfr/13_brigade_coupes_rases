@@ -36,7 +36,7 @@ export function Navbar({ className }: Props) {
 		<nav
 			className={clsx(
 				className,
-				"flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
+				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
 			)}
 		>
 			<div className="flex flex-col items-center gap-16 ">
@@ -46,7 +46,7 @@ export function Navbar({ className }: Props) {
 					className="h-auto aspect-square object-cover mt-6 size-11"
 				/>
 				<div className="flex flex-col gap-10 items-center">
-					<NavbarLink to="/clear-cuttings" Icon={House} title="Carte" />
+					<NavbarLink to="/clear-cuts" Icon={House} title="Carte" />
 					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
 
 					{user?.role === "admin" && <NavbarItems />}

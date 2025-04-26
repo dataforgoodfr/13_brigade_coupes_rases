@@ -1,23 +1,25 @@
 from datetime import datetime, timedelta
 import os
+import traceback
 from geoalchemy2.shape import from_shape
-from shapely.geometry import Point, MultiPolygon
+from shapely.geometry import MultiPolygon, Point
+from sqlalchemy import text
+
 from app.database import Base, SessionLocal
 from app.models import (
     ClearCut,
     ClearCutEcologicalZoning,
     ClearCutReportForm,
-    User,
-    ClearCutReport,
+   
+    ClearCutReport, User,
 )
-from sqlalchemy import text
-import traceback
-
+from app.services.clear_cut_report import sync_clear_cuts_reports
 from app.services.user_auth import get_password_hash
 from common_seed import (
+    get_cities,
     seed_cities_departments,
     seed_ecological_zonings,
-    get_cities,
+    seed_rules,
 )
 
 SRID = 4326
@@ -46,6 +48,7 @@ def seed_database():
         seed_cities_departments(db)
         [marseille, paris] = get_cities(db)
         [natura1, natura2] = seed_ecological_zonings(db)
+        seed_rules(db, [natura1, natura2])
         admin = User(
             firstname="Crysta",
             lastname="Faerie",
@@ -78,6 +81,11 @@ def seed_database():
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_deciduous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
+                        ecological_zoning_area_hectare=5,
                         location=from_shape(Point(2.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -104,18 +112,19 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura2.id, area_hectare=20
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura2.id),
                         ],
                     ),
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        ecological_zoning_area_hectare=0.3,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_deciduous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
                         location=from_shape(Point(1.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -142,9 +151,7 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
                         ],
                     ),
                 ],
@@ -428,6 +435,49 @@ def seed_database():
         )
 
         db.add(report)
+
+        db.flush()
+
+        reportform = ClearCutReportForm(
+            report_id=clear_cuts[0].id,
+            editor_id=admin.id,
+            report_updated_at=datetime.now() - timedelta(days=2),
+            inspection_date=datetime.now(),
+            weather="Rainy",
+            forest_description="C'était une belle fôret où coulaient rivière et riaient oiseaux",
+            remainingTrees=False,
+            species="Pins centenaires",
+            workSignVisible=False,
+            waterzone_description="Lac",
+            protected_zone_description="RAS",
+            soil_state="Ravagé",
+            other="C'est un bien triste constat",
+            ecological_zone=False,
+            ecological_zone_type="RAS",
+            nearby_zone="RAS",
+            nearby_zone_type="RAS",
+            protected_species="Le pin",
+            protected_habitats="Coucou endémique",
+            ddt_request=False,
+            ddt_request_owner="Manu",
+            compagny="A Corp",
+            subcontractor=None,
+            landlord="B. Arnault",
+            pefc_fsc_certified=None,
+            over_20_ha=True,
+            psg_required_plot=True,
+            relevant_for_pefc_complaint=True,
+            relevant_for_rediii_complaint=True,
+            relevant_for_ofb_complaint=True,
+            relevant_for_alert_cnpf_ddt_srgs=True,
+            relevant_for_alert_cnpf_ddt_psg_thresholds=True,
+            relevant_for_psg_request=True,
+            request_engaged="Plainte à déposer à la Mairie de la Penne",
+        )
+
+        db.add(reportform)
+
+        sync_clear_cuts_reports(db)
 
         db.commit()
 

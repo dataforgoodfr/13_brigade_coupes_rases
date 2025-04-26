@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
-from app.models import Department, EcologicalZoning
 from logging import getLogger
 
+from sqlalchemy.orm import Session
+
+from app.models import Department, EcologicalZoning
 from app.schemas.ecological_zoning import (
     ecological_zoning_to_ecological_zoning_schema,
 )
@@ -9,8 +10,8 @@ from app.schemas.referential import (
     ReferentialDepartmentSchema,
     ReferentialResponseSchema,
 )
-from app.services.tags import get_tags
-
+from app.schemas.rule import RuleResponseSchemaWithoutIdSchema
+from app.services.rules import get_rules
 
 logger = getLogger(__name__)
 
@@ -32,5 +33,12 @@ def get_referential(db: Session):
             )
             for ecological_zoning in ecological_zonings
         },
-        tags=get_tags(),
+        rules={
+            str(rule.id): RuleResponseSchemaWithoutIdSchema(
+                ecological_zonings_ids=rule.ecological_zonings_ids,
+                threshold=rule.threshold,
+                type=rule.type,
+            )
+            for rule in get_rules(db)
+        },
     )

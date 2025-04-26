@@ -3,11 +3,9 @@ import { Navbar } from "./Navbar";
 
 export function AppLayout() {
 	return (
-		<>
-			<div className="flex h-screen ">
-				<Navbar />
-				<Outlet />
-			</div>
-		</>
+		<div className="sm:flex hidden h-screen ">
+			<Navbar />
+			<Outlet />
+		</div>
 	);
 }

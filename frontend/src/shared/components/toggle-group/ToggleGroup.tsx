@@ -19,9 +19,15 @@ export type ToggleGroupInputProps<TItem> = Omit<
 		  }
 		| {
 				type: "single";
-				allowEmptyValue?: boolean;
+				allowEmptyValue: true;
 
 				onValueChange: (item?: SelectableItemEnhanced<TItem>) => void;
+		  }
+		| {
+				type: "single";
+				allowEmptyValue: false | undefined;
+
+				onValueChange: (item: SelectableItemEnhanced<TItem>) => void;
 		  }
 	);
 export function ToggleGroup<TItem>({
@@ -72,11 +78,13 @@ export function ToggleGroup<TItem>({
 					return;
 				}
 				const item = items.find((item) => item.value === v);
-				props.onValueChange(
-					item === undefined
-						? undefined
-						: { ...item, isSelected: !item.isSelected },
-				);
+				if (item === undefined) {
+					if (props.allowEmptyValue) {
+						props.onValueChange(undefined);
+					}
+				} else {
+					props.onValueChange({ ...item, isSelected: !item.isSelected });
+				}
 			}}
 		>
 			{Items}
