@@ -1,7 +1,7 @@
-from datetime import Boolean, datetime
-
+from datetime import datetime
 from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,

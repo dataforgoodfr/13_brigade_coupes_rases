@@ -396,48 +396,7 @@ def seed_database():
         db.add_all(clear_cuts)
 
         db.flush()
-
-        report = ClearCutReportForm(
-            report_id=clear_cuts[0].id,
-            editor_id=admin.id,
-            report_updated_at=datetime.now() - timedelta(days=2),
-            inspection_date=datetime.now(),
-            weather="Rainy",
-            forest_description="C'était une belle fôret où coulaient rivière et riaient oiseaux",
-            remainingTrees=False,
-            species="Pins centenaires",
-            workSignVisible=False,
-            waterzone_description="Lac",
-            protected_zone_description="RAS",
-            soil_state="Ravagé",
-            other="C'est un bien triste constat",
-            ecological_zone=False,
-            ecological_zone_type="RAS",
-            nearby_zone="RAS",
-            nearby_zone_type="RAS",
-            protected_species="Le pin",
-            protected_habitats="Coucou endémique",
-            ddt_request=False,
-            ddt_request_owner="Manu",
-            compagny="A Corp",
-            subcontractor=None,
-            landlord="B. Arnault",
-            pefc_fsc_certified=None,
-            over_20_ha=True,
-            psg_required_plot=True,
-            relevant_for_pefc_complaint=True,
-            relevant_for_rediii_complaint=True,
-            relevant_for_ofb_complaint=True,
-            relevant_for_alert_cnpf_ddt_srgs=True,
-            relevant_for_alert_cnpf_ddt_psg_thresholds=True,
-            relevant_for_psg_request=True,
-            request_engaged="Plainte à déposer à la Mairie de la Penne",
-        )
-
-        db.add(report)
-
-        db.flush()
-
+        
         reportform = ClearCutReportForm(
             report_id=clear_cuts[0].id,
             editor_id=admin.id,
