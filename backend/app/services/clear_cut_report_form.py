@@ -1,16 +1,14 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from app.models import ClearCutReportForm, User
-from fastapi import status
-
 from logging import getLogger
 
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.models import ClearCutReportForm, User
 from app.schemas.clear_cut_report_form import (
     ClearCutReportFormBase,
     ClearCutReportFormWithStrategyResponse,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
-
 
 logger = getLogger(__name__)
 
@@ -21,7 +19,8 @@ def get_clearcut_report_form_by_id(
     report_form = db.get(ClearCutReportForm, report_form_id)
     if report_form is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Report form not found by id {id}"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Report form not found by id {id}",
         )
 
     return report_form

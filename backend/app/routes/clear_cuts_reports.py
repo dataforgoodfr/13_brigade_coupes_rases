@@ -11,6 +11,7 @@ from app.schemas.clear_cut_report import (
     ClearCutReportResponseSchema,
     CreateClearCutsReportCreateSchema,
 )
+from app.schemas.clear_cut_report_form import ClearCutReportFormWithStrategyResponse
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import find_clearcuts_by_report
 from app.services.clear_cut_report import (
@@ -19,8 +20,6 @@ from app.services.clear_cut_report import (
     get_report_response_by_id,
     update_clear_cut_report,
 )
-from app.schemas.clear_cut_report_form import ClearCutReportFormWithStrategyResponse
-from app.config import settings
 from app.services.clear_cut_report_form import find_clear_cut_form_by_report_id
 
 logger = getLogger(__name__)

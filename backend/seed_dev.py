@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
 import os
 import traceback
+from datetime import datetime, timedelta
+
 from geoalchemy2.shape import from_shape
 from shapely.geometry import MultiPolygon, Point
 from sqlalchemy import text
@@ -9,9 +10,9 @@ from app.database import Base, SessionLocal
 from app.models import (
     ClearCut,
     ClearCutEcologicalZoning,
+    ClearCutReport,
     ClearCutReportForm,
-   
-    ClearCutReport, User,
+    User,
 )
 from app.services.clear_cut_report import sync_clear_cuts_reports
 from app.services.user_auth import get_password_hash
@@ -396,7 +397,7 @@ def seed_database():
         db.add_all(clear_cuts)
 
         db.flush()
-        
+
         reportform = ClearCutReportForm(
             report_id=clear_cuts[0].id,
             editor_id=admin.id,

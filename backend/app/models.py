@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
     Boolean,
@@ -230,7 +231,9 @@ class ClearCutReport(Base):
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
-    clear_cut_forms: Mapped[list["ClearCutReportForm"]] = relationship(back_populates="report")
+    clear_cut_forms: Mapped[list["ClearCutReportForm"]] = relationship(
+        back_populates="report"
+    )
     status = Column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(
@@ -265,7 +268,9 @@ class ClearCutReportForm(Base):
     __tablename__ = "clear_cut_report_forms"
     id = Column(Integer, primary_key=True, index=True)
 
-    report_id: Mapped[int] = mapped_column(ForeignKey("clear_cuts_reports.id"), nullable=False)
+    report_id: Mapped[int] = mapped_column(
+        ForeignKey("clear_cuts_reports.id"), nullable=False
+    )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
     editor_id = Column(Integer, index=True, nullable=True)
     report_updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)

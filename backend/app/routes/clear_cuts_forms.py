@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.services.clear_cut_report_form import (
-    create_clearcut_form,
-    get_clearcut_report_form_by_id,
-)
 from app.schemas.clear_cut_report_form import (
     ClearCutReportFormBase,
     ClearCutReportFormWithStrategy,
     ClearCutReportFormWithStrategyResponse,
+)
+from app.services.clear_cut_report_form import (
+    create_clearcut_form,
+    get_clearcut_report_form_by_id,
 )
 from app.services.user_auth import get_admin_user, get_current_user
 
@@ -41,7 +41,9 @@ def post_clearcut_form(
     return create_clearcut_form(db, editor, report_id, clearcutReportIn)
 
 
-@router.put("/{report_id}/WithStrategy", response_model=ClearCutReportFormWithStrategyResponse)
+@router.put(
+    "/{report_id}/WithStrategy", response_model=ClearCutReportFormWithStrategyResponse
+)
 def post_legal_strategy(
     report_id: int,
     clearcutReportIn: ClearCutReportFormWithStrategy,
