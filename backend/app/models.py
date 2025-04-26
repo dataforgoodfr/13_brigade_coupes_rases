@@ -318,23 +318,3 @@ class ClearCutReportForm(Base):
 
     # Miscellaneous
     other = Column(String)
-
-
-# class ClearCutPicture(Base):
-#     __tablename__ = "clear_cut_pictures"
-
-#     TAGS = ["plantation", "workSign", "clearcut", "wooden_logs", "access_ways", None]
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), unique=True, index=True)
-#     link = Column(String)
-#     tag = Column(String, index=True)
-
-#     @validates("tag")
-#     def validate_status(self, key, value):
-#         if value not in ClearCutPicture.TAGS:
-#             raise ValueError(f"tag must be one of: {', '.join(ClearCut.STATUSES)}")
-#         return value
-
-#     # Tags : plantation, workSign, clearcut, wooden_logs, access_ways
-#     # clear_cut_report = relationship("ClearCutReport", back_populates="clear_cut_report_pictures")
