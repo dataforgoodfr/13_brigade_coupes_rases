@@ -350,13 +350,15 @@ def parse_sufosat_date(sufosat_date: float) -> pd.Timestamp:
     Timestamp('2019-02-01 00:00:00')  # February 1, 2019 (32nd day of 2019)
     """
     sufosat_date = int(sufosat_date)
-    return pd.Timestamp(year=2000 + sufosat_date // 1000, month=1, day=1) + pd.Timedelta(
-        days=(sufosat_date % 1000) - 1
-    )
+    return pd.Timestamp(
+        year=2000 + sufosat_date // 1000, month=1, day=1
+    ) + pd.Timedelta(days=(sufosat_date % 1000) - 1)
 
 
 def pair_clear_cuts_through_space_and_time(
-    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+    gdf: gpd.GeoDataFrame,
+    max_meters_between_clear_cuts: int,
+    max_days_between_clear_cuts: int,
 ) -> pd.DataFrame:
     """
     Identifies pairs of clear-cuts that are within a specified distance and a
@@ -395,7 +397,9 @@ def pair_clear_cuts_through_space_and_time(
     # Cluster the clear-cuts that are within `max_meters_between_clear_cuts` of each other
     # Lambert-93 CRS uses meters as its unit of measurement for distance.
     clear_cut_pairs = (
-        gdf.sjoin(gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts)
+        gdf.sjoin(
+            gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts
+        )
         .reset_index()
         .rename(columns={"index": "index_left"})
     )
@@ -477,7 +481,9 @@ def regroup_clear_cut_pairs(clear_cut_pairs: pd.DataFrame) -> list[set[int]]:
 
 
 def cluster_clear_cuts(
-    gdf: gpd.GeoDataFrame, max_meters_between_clear_cuts: int, max_days_between_clear_cuts: int
+    gdf: gpd.GeoDataFrame,
+    max_meters_between_clear_cuts: int,
+    max_days_between_clear_cuts: int,
 ) -> gpd.GeoDataFrame:
     """
     Clusters individual clear-cuts based on spatial and temporal proximity.
@@ -511,11 +517,15 @@ def cluster_clear_cuts(
     # Assign a clear cut group id to each clear cut polygon
     logging.info("Assigning cluster IDs to clear-cuts")
     for i, subset in tqdm(
-        enumerate(clear_cut_groups), total=len(clear_cut_groups), desc="Assigning cluster IDs"
+        enumerate(clear_cut_groups),
+        total=len(clear_cut_groups),
+        desc="Assigning cluster IDs",
     ):
         gdf.loc[list(subset), "clear_cut_group"] = i
 
-    logging.info(f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters")
+    logging.info(
+        f"Clustering complete: {gdf['clear_cut_group'].nunique()} total clusters"
+    )
 
     return gdf
 
@@ -566,7 +576,9 @@ def union_clear_cut_clusters(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 
 def filter_out_clear_cuts_with_complex_shapes(
-    gdf: gpd.GeoDataFrame, concave_hull_ratio: float, concave_hull_score_threshold: float
+    gdf: gpd.GeoDataFrame,
+    concave_hull_ratio: float,
+    concave_hull_score_threshold: float,
 ) -> gpd.GeoDataFrame:
     """
     Filters out clear-cuts with overly complex shapes that may represent false positives.
@@ -677,7 +689,9 @@ def prepare_sufosat_v3_layer(
     gdf = gdf.drop(columns="sufosat_date")
 
     # Cluster individual clear-cuts that are close in space and time.
-    gdf = cluster_clear_cuts(gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts)
+    gdf = cluster_clear_cuts(
+        gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
+    )
 
     # Union all the polygons
     gdf = union_clear_cut_clusters(gdf)

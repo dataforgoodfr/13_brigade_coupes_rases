@@ -1,4 +1,6 @@
+import { LayoutProvider } from "@/features/clear-cut/components/Layout.context";
 import { AsideForm } from "@/features/clear-cut/components/form/AsideForm";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/$clearCutId")(
@@ -8,6 +10,17 @@ export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/$clearCutId")(
 );
 
 function RouteComponent() {
+	const { breakpoint } = useBreakpoint();
 	const params = Route.useParams();
-	return <AsideForm clearCutId={params.clearCutId} />;
+	return (
+		<LayoutProvider>
+			{breakpoint === "mobile" ? (
+				<AsideForm clearCutId={params.clearCutId} />
+			) : (
+				<div className="sm:flex hidden xxl:w-1/4 w-3/4 lg:w-1/3">
+					<AsideForm clearCutId={params.clearCutId} />
+				</div>
+			)}
+		</LayoutProvider>
+	);
 }

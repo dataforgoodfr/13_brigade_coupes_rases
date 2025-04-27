@@ -1,7 +1,7 @@
 import {
 	departmentSchema,
 	ecologicalZoningSchema,
-	tagSchema,
+	ruleSchema,
 } from "@/shared/store/referential/referential";
 import { z } from "zod";
 
@@ -61,32 +61,44 @@ export const clearCutReportResponseSchema = z.object({
 	name: z.string().optional(),
 	status: clearCutStatusSchema,
 	average_location: pointSchema,
-	slope_area_ratio_percentage: z.number(),
+	slope_area_ratio_percentage: z.number().nullable(),
 	department_id: z.string(),
 	created_at: z.string().date(),
 	updated_at: z.string().date(),
 	total_area_hectare: z.number(),
+	total_bdf_resinous_area_hectare: z.number().nullable(),
+	total_bdf_deciduous_area_hectare: z.number().nullable(),
+	total_bdf_mixed_area_hectare: z.number().nullable(),
+	total_bdf_poplar_area_hectare: z.number().nullable(),
 	last_cut_date: z.string().date(),
-	tags_ids: z.array(z.string()),
+	rules_ids: z.array(z.string()),
 });
 export type ClearCutReportResponse = z.infer<
 	typeof clearCutReportResponseSchema
 >;
 
 export const clearCutReportSchema = clearCutReportResponseSchema
-	.omit({ tags_ids: true, clear_cuts: true, department_id: true })
+	.omit({ rules_ids: true, clear_cuts: true, department_id: true })
 	.and(
 		z.object({
 			department: departmentSchema,
-			tags: tagSchema.array(),
+			rules: ruleSchema.array(),
 			clear_cuts: z.array(clearCutSchema),
 		}),
 	);
 
 export type ClearCutReport = z.infer<typeof clearCutReportSchema>;
 
+const countedPoint = z.object({
+	count: z.number(),
+	point: pointSchema,
+});
+const clusterizedPointsSchema = z.object({
+	total: z.number(),
+	content: countedPoint.array(),
+});
 export const clearCutsResponseSchema = z.object({
-	points: z.array(pointSchema),
+	points: clusterizedPointsSchema,
 	previews: z.array(clearCutReportResponseSchema),
 });
 

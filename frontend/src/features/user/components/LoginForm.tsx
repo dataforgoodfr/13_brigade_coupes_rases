@@ -56,6 +56,7 @@ export function LoginForm() {
 				type="single"
 				value={authenticationTypes}
 				itemProps={{ className: "basis-1/2" }}
+				allowEmptyValue={false}
 				onValueChange={setAuthenticationType}
 			/>
 			{authenticationType?.item === "password" ? (

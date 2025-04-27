@@ -8,10 +8,10 @@ from app.schemas.hateoas import PaginationResponseSchema
 from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
 from app.services.user import (
     create_user,
-    get_users,
     get_user_by_id,
-    user_to_user_response_schema,
+    get_users,
     update_user,
+    user_to_user_response_schema,
 )
 from app.services.user_auth import get_admin_user
 

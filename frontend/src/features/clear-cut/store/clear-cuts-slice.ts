@@ -2,11 +2,12 @@ import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import type { RequestedContent } from "@/shared/api/types";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	selectDepartmentsByIds,
 	selectEcologicalZoningByIds,
-	selectTagsByIds,
+	selectRulesByIds,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -27,7 +28,7 @@ const mapReport = (
 	report: ClearCutReportResponse,
 ): ClearCutReport => ({
 	...report,
-	tags: selectTagsByIds(state, report.tags_ids),
+	rules: selectRulesByIds(state, report.rules_ids),
 	department: selectDepartmentsByIds(state, [report.department_id])[0],
 	clear_cuts: report.clear_cuts.map((cut) => ({
 		...cut,
@@ -52,7 +53,7 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 		const searchParams = new URLSearchParams();
 		for (const filter in filters) {
 			const value = filters[filter as keyof FiltersRequest];
-			if (filter === "geoBounds") {
+			if (filter === "geoBounds" && filters[filter] !== undefined) {
 				const geoBounds = filters[filter] as Bounds;
 				searchParams.append("sw_lat", geoBounds.sw.lat.toString());
 				searchParams.append("sw_lng", geoBounds.sw.lng.toString());
@@ -125,11 +126,12 @@ export const selectClearCuts = createTypedDraftSafeSelector(
 export const useGetClearCuts = () => {
 	const filters = useAppSelector(selectFiltersRequest);
 	const dispatch = useAppDispatch();
+	const { breakpoint } = useBreakpoint();
 	useEffect(() => {
-		if (filters) {
+		if ((breakpoint === "mobile" && filters) || filters?.geoBounds) {
 			dispatch(getClearCutsThunk(filters));
 		}
-	}, [filters, dispatch]);
+	}, [filters, breakpoint, dispatch]);
 };
 
 export const useGetClearCut = (id: string) => {

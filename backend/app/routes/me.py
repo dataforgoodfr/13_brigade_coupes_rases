@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from app.models import User
 from app.schemas.user import UserResponseSchema
 from app.services.user import user_to_user_response_schema

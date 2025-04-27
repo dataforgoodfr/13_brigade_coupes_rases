@@ -2,6 +2,7 @@ import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutF
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { useGetClearCut } from "@/features/clear-cut/store/clear-cuts-slice";
 import { useToast } from "@/hooks/use-toast";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect } from "react";
@@ -12,7 +13,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	const { map } = useMapInstance();
 	const { toast } = useToast();
 	const navigate = useNavigate();
-
+	const { breakpoint } = useBreakpoint();
 	useEffect(() => {
 		if (status === "error") {
 			toast({
@@ -26,29 +27,31 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	}, [status, navigate, toast]);
 
 	useEffect(() => {
-		if (map && value?.average_location.coordinates) {
+		if (map && breakpoint === "all" && value?.average_location.coordinates) {
 			map.flyTo(
 				[
 					value.average_location.coordinates[1],
 					value.average_location.coordinates[0],
 				],
-				10,
+				15,
 				{ duration: 1 },
 			);
 		}
-	}, [map, value]);
+	}, [breakpoint, map, value]);
 
 	return (
 		value && (
-			<div className="lg:inset-y-0 lg:z-50 lg:flex lg:w-200 lg:flex-col">
-				<div className="relative pt-6 px-4 pb-1 border-b-1">
-					<Link to="/clear-cuts" className="absolute right-2 top-1">
+			<div className="flex flex-col w-full">
+				<div className=" pt-6 px-4 pb-1 border-b-1 flex align-middle justify-between">
+					<div className="flex flex-col">
+						<h1 className="text-2xl font-extrabold font-[Manrope]">{`${value?.city.toLocaleUpperCase()}`}</h1>
+						<span className="font-[Roboto]">
+							<FormattedDate value={value.last_cut_date} />
+						</span>
+					</div>
+					<Link to="/clear-cuts">
 						<X size={30} />
 					</Link>
-					<h1 className="text-2xl font-extrabold font-[Manrope]">{`${value?.city.toLocaleUpperCase()}`}</h1>
-					<span className="font-[Roboto]">
-						<FormattedDate value={value.last_cut_date} />
-					</span>
 				</div>
 				<ClearCutFullForm clearCut={value} />
 			</div>

@@ -2,20 +2,23 @@ import type {
 	DepartmentResponse,
 	EcologicalZoningResponse,
 	ReferentialResponse,
-	TagResponse,
+	RuleResponse,
 } from "@/shared/store/referential/referential";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
 
-export const fakeTags: TagResponse = {
-	[faker.string.uuid()]: { type: "ecological_zoning" },
+export const fakeRules: RuleResponse = {
 	[faker.string.uuid()]: {
-		type: "excessive_area",
-		value: faker.number.int({ min: 0, max: 100 }),
+		type: "ecological_zoning",
+		ecological_zonings_ids: [],
 	},
 	[faker.string.uuid()]: {
-		type: "excessive_slop",
-		value: faker.number.int({ min: 0, max: 100 }),
+		type: "area",
+		threshold: faker.number.int({ min: 0, max: 100 }),
+	},
+	[faker.string.uuid()]: {
+		type: "slope",
+		threshold: faker.number.int({ min: 0, max: 100 }),
 	},
 };
 
@@ -144,6 +147,6 @@ export const mockReferential = http.get("*/api/v1/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
 		ecological_zonings: fakeEcologicalZonings,
-		tags: fakeTags,
+		rules: fakeRules,
 	} satisfies ReferentialResponse);
 });

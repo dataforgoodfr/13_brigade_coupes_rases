@@ -1,16 +1,17 @@
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 export type FixedFieldProps = {
 	title?: string;
-	value?: string | number;
+	value?: ReactNode;
 	className?: string;
 };
 
 export function FixedField({ title, value, className }: FixedFieldProps) {
-	return (
+	return value !== undefined ? (
 		<div className={cn("flex gap-2", className)}>
 			{title && <span className="font-bold">{title} :</span>}
 			{value && <p>{value}</p>}
 		</div>
-	);
+	) : undefined;
 }

@@ -75,7 +75,7 @@ export default function AccordionContent({
 								(value) => !!form.getValues(value),
 							);
 							const value = item.transformValue
-								? item.transformValue(form.getValues(item.name))
+								? item.transformValue({ value: form.getValues(item.name) })
 								: form.getValues(item.name)?.toString();
 
 							switch (item.type) {

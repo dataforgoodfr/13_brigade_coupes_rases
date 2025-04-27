@@ -5,4 +5,4 @@ def test_get_referential(client):
     data = response.json()
     assert data["departments"] is not None
     assert data["ecological_zonings"] is not None
-    assert data["tags"] is not None
+    assert data["rules"] is not None

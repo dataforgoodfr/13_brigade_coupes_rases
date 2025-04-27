@@ -1,8 +1,10 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useRef, useState } from "react";
 
 export type MapContext = {
 	map: L.Map | null;
 	setMap: (map: L.Map) => void;
+	focusedClearCutId?: string;
+	setFocusedClearCutId: (id?: string) => void;
 } | null;
 const MapCtx = createContext<MapContext>(null);
 
@@ -14,7 +16,20 @@ export const useMapInstance = () => {
 };
 
 export const MapProvider = ({ children }: { children: React.ReactNode }) => {
-	const [map, setMap] = useState<L.Map | null>(null);
-
-	return <MapCtx.Provider value={{ map, setMap }}>{children}</MapCtx.Provider>;
+	const mapRef = useRef<L.Map | null>(null);
+	const [focusedClearCutId, setFocusedClearCutId] = useState<string>();
+	return (
+		<MapCtx.Provider
+			value={{
+				focusedClearCutId,
+				setFocusedClearCutId,
+				map: mapRef.current,
+				setMap: (map) => {
+					mapRef.current = map;
+				},
+			}}
+		>
+			{children}
+		</MapCtx.Provider>
+	);
 };

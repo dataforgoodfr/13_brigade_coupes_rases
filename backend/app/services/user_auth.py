@@ -8,10 +8,9 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.deps import db_session
 from app.services.user import get_user_by_email
-
-from app.config import settings
 
 
 def authenticate_user(db: Session, email: str, password: str):
@@ -40,7 +39,9 @@ class TokenData(BaseModel):
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/token",
 )
-optional_oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/token", auto_error=False)
+optional_oauth2_schema = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/token", auto_error=False
+)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -69,7 +70,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_optional_current_user(
+def get_optional_current_user(
     db: Session = db_session, token=Depends(optional_oauth2_schema)
 ):
     if token is None:
@@ -77,7 +78,7 @@ async def get_optional_current_user(
     return get_current_user(db, token)
 
 
-async def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
+def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -97,7 +98,7 @@ async def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme
     return user
 
 
-async def get_admin_user(
+def get_admin_user(
     current_user=Depends(get_current_user),
 ):
     if current_user.role != "admin":

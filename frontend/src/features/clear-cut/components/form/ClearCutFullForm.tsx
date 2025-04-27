@@ -20,27 +20,29 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	});
 
 	return (
-		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit((form) => console.log(form))}
-				className="p-1 flex flex-col flex-grow overflow-scroll px-4"
-			>
-				<AccordionHeader
-					form={form}
-					tags={clearCut.tags}
-					status={clearCut.status}
-				/>
-				<Accordion.Root type="multiple" className="grow">
-					<AccordionContent form={form} />
-				</Accordion.Root>
+		<>
+			<AccordionHeader
+				form={form}
+				tags={clearCut.rules}
+				status={clearCut.status}
+			/>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit((form) => console.log(form))}
+					className="p-1 flex flex-col grow px-4 h-0"
+				>
+					<Accordion.Root type="multiple" className="grow overflow-auto">
+						<AccordionContent form={form} />
+					</Accordion.Root>
+				</form>
 				<Button
 					type="submit"
-					className="mx-auto text-xl font-bold mt-12 cursor-pointer"
+					className="mx-auto my-1 text-xl font-bold  cursor-pointer"
 					size="lg"
 				>
 					Valider
 				</Button>
-			</form>
-		</Form>
+			</Form>
+		</>
 	);
 }
