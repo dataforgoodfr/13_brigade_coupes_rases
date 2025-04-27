@@ -1,4 +1,3 @@
-import type { FiltersRequest } from "@/features/admin/store/users-schemas";
 import type { Role } from "@/features/user/store/user";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -8,11 +7,15 @@ interface FiltersState {
 	name: string;
 	role: Role | "all";
 	departments: string[];
+	page: number;
+	size: number;
 }
 const initialState: FiltersState = {
 	name: "",
 	role: "all",
 	departments: [],
+	page: 0,
+	size: 10,
 };
 
 export const usersFiltersSlice = createSlice({
@@ -36,21 +39,29 @@ export const usersFiltersSlice = createSlice({
 				state.departments.splice(departmentIdx, 1);
 			}
 		},
+		setPage: (state, { payload }: PayloadAction<number>) => {
+			state.page = payload;
+		},
+		setSize: (state, { payload }: PayloadAction<number>) => {
+			state.size = payload;
+		},
 	},
 });
 
 export const {
-	actions: { setName, setRole, toggleDepartment },
+	actions: { setName, setRole, toggleDepartment, setPage, setSize },
 } = usersFiltersSlice;
 
 const selectState = (state: RootState) => state.usersFilters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
 	selectState,
-	({ name, role, departments }): FiltersRequest | undefined => {
+	({ name, role, departments, page, size }) => {
 		return {
 			name,
 			role: role === "all" ? undefined : role,
 			departments: departments,
+			page,
+			size,
 		};
 	},
 );
@@ -68,4 +79,14 @@ export const selectRole = createTypedDraftSafeSelector(
 export const selectDepartments = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.departments,
+);
+
+export const selectPage = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.page,
+);
+
+export const selectSize = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.size,
 );

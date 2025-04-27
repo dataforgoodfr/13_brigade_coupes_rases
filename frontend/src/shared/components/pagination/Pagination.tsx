@@ -15,13 +15,13 @@ const DISPLAYED_PAGES_CHUNK = 5;
 type PaginationProps = {
 	currentPage: number;
 	setCurrentPage: (page: number) => void;
-	totalPages: number;
+	pagesCount: number;
 };
 
 const Pagination: React.FC<PaginationProps> = ({
 	currentPage,
 	setCurrentPage,
-	totalPages,
+	pagesCount,
 }) => {
 	const [nbOfDisplayedPages, setNbOfDisplayedPages] = useState(
 		DISPLAYED_PAGES_CHUNK,
@@ -33,9 +33,9 @@ const Pagination: React.FC<PaginationProps> = ({
 				<PaginationItem>
 					<PaginationPrevious
 						onClick={() => {
-							if (currentPage - 1 > 0) setCurrentPage(currentPage - 1);
+							if (currentPage - 1 >= 0) setCurrentPage(currentPage - 1);
 						}}
-						aria-disabled={currentPage === 1}
+						aria-disabled={currentPage === 0}
 						className="cursor-pointer"
 					/>
 				</PaginationItem>
@@ -44,7 +44,7 @@ const Pagination: React.FC<PaginationProps> = ({
 					Array.from({ length: nbOfDisplayedPages }),
 					nbOfDisplayedPages,
 				).map((_, index) => {
-					if (index + 1 >= totalPages) {
+					if (index + 1 >= pagesCount) {
 						return null;
 					}
 
@@ -62,7 +62,7 @@ const Pagination: React.FC<PaginationProps> = ({
 					);
 				})}
 
-				{totalPages > nbOfDisplayedPages && (
+				{pagesCount > nbOfDisplayedPages && (
 					<PaginationItem>
 						<PaginationEllipsis
 							onClick={() => {
@@ -78,7 +78,7 @@ const Pagination: React.FC<PaginationProps> = ({
 				<PaginationItem>
 					<PaginationNext
 						onClick={() => {
-							if (currentPage + 1 < totalPages) setCurrentPage(currentPage + 1);
+							if (currentPage + 1 < pagesCount) setCurrentPage(currentPage + 1);
 
 							if (currentPage + 1 > nbOfDisplayedPages) {
 								setNbOfDisplayedPages(
@@ -86,7 +86,7 @@ const Pagination: React.FC<PaginationProps> = ({
 								);
 							}
 						}}
-						aria-disabled={currentPage + 1 === totalPages}
+						aria-disabled={currentPage + 1 === pagesCount}
 						className="cursor-pointer"
 					/>
 				</PaginationItem>

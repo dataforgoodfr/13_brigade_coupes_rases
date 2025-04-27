@@ -8,10 +8,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { selectPage, setPage } from "@/features/admin/store/users-filters.slice";
 import type { Users } from "@/features/admin/store/users-schemas";
-import { selectUsers, useGetUsers } from "@/features/admin/store/users.slice";
+import { selectMetadata, selectUsers, useGetUsers } from "@/features/admin/store/users.slice";
 import SortingButton from "@/shared/components/button/SortingButton";
-import { useAppSelector } from "@/shared/hooks/store";
+import Pagination from "@/shared/components/pagination/Pagination";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	createColumnHelper,
 	flexRender,
@@ -107,12 +109,15 @@ const columns = [
 export const UsersList: React.FC = () => {
 	useGetUsers();
 	const users = useAppSelector(selectUsers);
+	const dispatch = useAppDispatch();
+
+	const page = useAppSelector(selectPage);
+	const metadata = useAppSelector(selectMetadata)
 
 	const table = useReactTable({
 		data: users,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
-		// TODO: Implement sorting backend
 		getSortedRowModel: getSortedRowModel(),
 	});
 
@@ -154,6 +159,14 @@ export const UsersList: React.FC = () => {
 					})}
 				</TableBody>
 			</Table>
+
+      <Pagination
+        currentPage={page}
+        setCurrentPage={(newPage) => {
+          dispatch(setPage(newPage));
+        }}
+        pagesCount={metadata?.pagesCount ?? 0}
+      />
 		</div>
 	);
 };

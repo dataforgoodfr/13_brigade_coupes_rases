@@ -1,63 +1,91 @@
-import { selectFiltersRequest } from "@/features/admin/store/users-filters.slice";
+import {
+  selectPage,
+  selectSize,
+} from "@/features/admin/store/users-filters.slice";
 import type { Users } from "@/features/admin/store/users-schemas";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type UnknownAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { useMemo } from "react";
 
 interface FiltersState {
-	status: "idle" | "loading" | "success" | "error";
-	users: Users[];
+  status: "idle" | "loading" | "success" | "error";
+  users: Users[];
+  metadata: {
+    totalCount?: number;
+    pagesCount?: number;
+  };
 }
 const initialState: FiltersState = {
-	status: "idle",
-	users: [],
+  status: "idle",
+  users: [],
+  metadata: {},
 };
 
 export const getUsersThunk = createAppAsyncThunk(
-	"users/getUsers",
-	async (_, { extra: { api } }) => {
-		const result = await api().get<{ content: Users[] }>("api/v1/users").json();
-		// TODO: Departements selection here & schema parse here
-		return result;
-	},
+  "users/getUsers",
+  async (params: { page: number; size: number }, { extra: { api } }) => {
+    const result = await api()
+      .get<{
+        content: Users[];
+        metadata: {
+          total_count: number;
+          pages_count: number;
+        };
+      }>("api/v1/users", {
+        searchParams: {
+          page: params.page,
+          size: params.size,
+        },
+      })
+      .json();
+
+    return result;
+  }
 );
 
 export const usersSlice = createSlice({
-	initialState,
-	name: "users",
-	reducers: {},
-	extraReducers: (builder) => {
-		builder.addCase(getUsersThunk.fulfilled, (state, { payload }) => {
-			state.status = "success";
-			state.users = payload.content;
-		});
-		builder.addCase(getUsersThunk.rejected, (state, _error) => {
-			state.status = "error";
-		});
-		builder.addCase(getUsersThunk.pending, (state) => {
-			state.status = "loading";
-		});
-	},
+  initialState,
+  name: "users",
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(getUsersThunk.fulfilled, (state, { payload }) => {
+      state.status = "success";
+      state.users = payload.content;
+      state.metadata.totalCount = payload.metadata.total_count;
+      state.metadata.pagesCount = payload.metadata.pages_count;
+    });
+    builder.addCase(getUsersThunk.rejected, (state, _error) => {
+      state.status = "error";
+    });
+    builder.addCase(getUsersThunk.pending, (state) => {
+      state.status = "loading";
+    });
+  },
 });
 
 const selectState = (state: RootState) => state.users;
 export const selectStatus = createTypedDraftSafeSelector(
-	selectState,
-	(state) => state.status,
+  selectState,
+  (state) => state.status
 );
 export const selectUsers = createTypedDraftSafeSelector(
-	selectState,
-	(state) => state.users,
+  selectState,
+  (state) => state.users
+);
+export const selectMetadata = createTypedDraftSafeSelector(
+  selectState,
+  (state) => state.metadata
 );
 export const useGetUsers = () => {
-	const filters = useAppSelector(selectFiltersRequest);
-	const dispatch = useAppDispatch();
+  const page = useAppSelector(selectPage);
+  const size = useAppSelector(selectSize);
 
-	return useMemo(() => {
-		// TODO: Add filters to the request & fix type
-		return dispatch(getUsersThunk() as unknown as UnknownAction);
-	}, [dispatch]);
+  const dispatch = useAppDispatch();
+
+  return useMemo(() => {
+    return dispatch(getUsersThunk({ page, size }));
+  }, [dispatch, page, size]);
 };
