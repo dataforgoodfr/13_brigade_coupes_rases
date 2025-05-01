@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.models import ClearCutForm, User
 from app.schemas.clear_cut_form import (
-    ClearCutFormBase,
     ClearCutFormWithStrategyResponse,
     ClearCutReportFormWithStrategy,
 )
