@@ -28,21 +28,6 @@ def get_clear_cut_form_by_id(
     return report_form
 
 
-def update_clear_cut_form_by_id(
-    db: Session, report_form_id: int, clearcutReportIn: ClearCutFormBase
-):
-    report_form = get_clear_cut_form_by_id(db, report_form_id)
-    if not report_form:
-        raise HTTPException(
-            status_code=404, detail=f"Report form not found by id {report_form_id}"
-        )
-    update_data = clearcutReportIn.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(report_form, key, value)
-    db.commit()
-    return get_clear_cut_form_by_id(db, report_form_id)
-
-
 def add_clear_cut_form_entry(
     db: Session,
     editor: User,
