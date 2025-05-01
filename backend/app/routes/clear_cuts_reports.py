@@ -6,21 +6,21 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.deps import db_session
 from app.schemas.clear_cut import ClearCutResponseSchema
+from app.schemas.clear_cut_form import ClearCutFormWithStrategyResponse
 from app.schemas.clear_cut_report import (
     ClearCutReportPatchSchema,
     ClearCutReportResponseSchema,
     CreateClearCutsReportCreateSchema,
 )
-from app.schemas.clear_cut_report_form import ClearCutReportFormWithStrategyResponse
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import find_clearcuts_by_report
+from app.services.clear_cut_form import find_clear_cut_form_by_report_id
 from app.services.clear_cut_report import (
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
     update_clear_cut_report,
 )
-from app.services.clear_cut_report_form import find_clear_cut_form_by_report_id
 
 logger = getLogger(__name__)
 
@@ -92,11 +92,11 @@ def list_clear_cuts(
 
 @router.get(
     "/{report_id}/forms",
-    response_model=PaginationResponseSchema[ClearCutReportFormWithStrategyResponse],
+    response_model=PaginationResponseSchema[ClearCutFormWithStrategyResponse],
 )
 def list_clear_cut_forms(
     report_id: int, db: Session = db_session, page: int = 0, size: int = 10
-) -> PaginationResponseSchema[ClearCutReportFormWithStrategyResponse]:
+) -> PaginationResponseSchema[ClearCutFormWithStrategyResponse]:
     logger.info(db)
     return find_clear_cut_form_by_report_id(
         db,

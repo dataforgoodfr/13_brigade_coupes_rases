@@ -10,8 +10,8 @@ from app.database import Base, SessionLocal
 from app.models import (
     ClearCut,
     ClearCutEcologicalZoning,
+    ClearCutForm,
     ClearCutReport,
-    ClearCutReportForm,
     User,
 )
 from app.services.clear_cut_report import sync_clear_cuts_reports
@@ -398,7 +398,7 @@ def seed_database():
 
         db.flush()
 
-        reportform = ClearCutReportForm(
+        reportform = ClearCutForm(
             report_id=clear_cuts[0].id,
             editor_id=admin.id,
             report_updated_at=datetime.now() - timedelta(days=2),

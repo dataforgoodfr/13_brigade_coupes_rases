@@ -231,7 +231,7 @@ class ClearCutReport(Base):
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
-    clear_cut_forms: Mapped[list["ClearCutReportForm"]] = relationship(
+    clear_cut_forms: Mapped[list["ClearCutForm"]] = relationship(
         back_populates="report"
     )
     status = Column(String, nullable=False)
@@ -264,7 +264,7 @@ class ClearCutReport(Base):
         return value
 
 
-class ClearCutReportForm(Base):
+class ClearCutForm(Base):
     __tablename__ = "clear_cut_report_forms"
     id = Column(Integer, primary_key=True, index=True)
 
