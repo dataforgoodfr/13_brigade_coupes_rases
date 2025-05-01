@@ -33,7 +33,9 @@ def update_clear_cut_form_by_id(
 ):
     report_form = get_clear_cut_form_by_id(db, report_form_id)
     if not report_form:
-        raise HTTPException(status_code=404, detail=f"Report form not found by id {report_form_id}")
+        raise HTTPException(
+            status_code=404, detail=f"Report form not found by id {report_form_id}"
+        )
     update_data = clearcutReportIn.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(report_form, key, value)
@@ -42,9 +44,11 @@ def update_clear_cut_form_by_id(
 
 
 def add_clear_cut_form_entry(
-    db: Session, editor: User, report_id: int, clear_cut_report_in: ClearCutReportFormWithStrategy
+    db: Session,
+    editor: User,
+    report_id: int,
+    clear_cut_report_in: ClearCutReportFormWithStrategy,
 ):
-
     new_clear_cut_form_entry = ClearCutForm(
         report_id=report_id,
         editor_id=editor.id,
@@ -76,28 +80,50 @@ def add_clear_cut_form_entry(
     )
 
     if editor.role == "admin":
-        new_clear_cut_form_entry.relevant_for_pefc_complaint=clear_cut_report_in.relevant_for_pefc_complaint
-        new_clear_cut_form_entry.relevant_for_rediii_complaint=clear_cut_report_in.relevant_for_rediii_complaint
-        new_clear_cut_form_entry.relevant_for_ofb_complaint=clear_cut_report_in.relevant_for_ofb_complaint
-        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_srgs=clear_cut_report_in.relevant_for_alert_cnpf_ddt_srgs
-        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds=clear_cut_report_in.relevant_for_alert_cnpf_ddt_psg_thresholds
-        new_clear_cut_form_entry.relevant_for_psg_request=clear_cut_report_in.relevant_for_psg_request
-        new_clear_cut_form_entry.request_engaged=clear_cut_report_in.request_engaged
-    else :
+        new_clear_cut_form_entry.relevant_for_pefc_complaint = (
+            clear_cut_report_in.relevant_for_pefc_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_rediii_complaint = (
+            clear_cut_report_in.relevant_for_rediii_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_ofb_complaint = (
+            clear_cut_report_in.relevant_for_ofb_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_srgs = (
+            clear_cut_report_in.relevant_for_alert_cnpf_ddt_srgs
+        )
+        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds = (
+            clear_cut_report_in.relevant_for_alert_cnpf_ddt_psg_thresholds
+        )
+        new_clear_cut_form_entry.relevant_for_psg_request = (
+            clear_cut_report_in.relevant_for_psg_request
+        )
+        new_clear_cut_form_entry.request_engaged = clear_cut_report_in.request_engaged
+    else:
         # Get last clearcutform entry
         last_form_entry = (
-            db.query(ClearCutForm)
-            .order_by(ClearCutForm.id.desc())
-            .first()
-            )
-        
-        new_clear_cut_form_entry.relevant_for_pefc_complaint=last_form_entry.relevant_for_pefc_complaint
-        new_clear_cut_form_entry.relevant_for_rediii_complaint=last_form_entry.relevant_for_rediii_complaint
-        new_clear_cut_form_entry.relevant_for_ofb_complaint=last_form_entry.relevant_for_ofb_complaint
-        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_srgs=last_form_entry.relevant_for_alert_cnpf_ddt_srgs
-        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds=last_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds
-        new_clear_cut_form_entry.relevant_for_psg_request=last_form_entry.relevant_for_psg_request
-        new_clear_cut_form_entry.request_engaged=last_form_entry.request_engaged
+            db.query(ClearCutForm).order_by(ClearCutForm.id.desc()).first()
+        )
+
+        new_clear_cut_form_entry.relevant_for_pefc_complaint = (
+            last_form_entry.relevant_for_pefc_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_rediii_complaint = (
+            last_form_entry.relevant_for_rediii_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_ofb_complaint = (
+            last_form_entry.relevant_for_ofb_complaint
+        )
+        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_srgs = (
+            last_form_entry.relevant_for_alert_cnpf_ddt_srgs
+        )
+        new_clear_cut_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds = (
+            last_form_entry.relevant_for_alert_cnpf_ddt_psg_thresholds
+        )
+        new_clear_cut_form_entry.relevant_for_psg_request = (
+            last_form_entry.relevant_for_psg_request
+        )
+        new_clear_cut_form_entry.request_engaged = last_form_entry.request_engaged
 
     db.add(new_clear_cut_form_entry)
     db.commit()
@@ -115,9 +141,7 @@ def find_clear_cut_form_by_report_id(
         .limit(size)
     )
     clear_cuts_count = (
-        db.query(ClearCutForm.id)
-        .filter(ClearCutForm.report_id == report_id)
-        .count()
+        db.query(ClearCutForm.id).filter(ClearCutForm.report_id == report_id).count()
     )
     return PaginationResponseSchema(
         content=list(clear_cut_report_forms),

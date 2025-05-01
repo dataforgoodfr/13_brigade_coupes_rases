@@ -126,9 +126,7 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
         }
 
 
-class ClearCutFormWithStrategyResponse(
-    ClearcutFormStrategy, ClearCutFormResponse
-):
+class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormResponse):
     _ = None
 
     class Config:
