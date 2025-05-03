@@ -1,6 +1,7 @@
 from logging import getLogger
 
 from fastapi import APIRouter, Depends
+from pydantic import Json
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
@@ -22,7 +23,7 @@ router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
 @router.post("/", response_model=UserResponseSchema, status_code=201)
 def create_new_user(
-    item: UserCreateSchema,
+    item: Json[UserCreateSchema],
     db=db_session,
     _=Depends(get_admin_user),
 ) -> UserResponseSchema:
@@ -46,7 +47,13 @@ def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
 
 @router.put("/{id}", response_model=UserResponseSchema, status_code=200)
 def update_existing_user(
-    id: int, item: UserUpdateSchema, db: Session = db_session
+    id: int, item: Json[UserUpdateSchema], db: Session = db_session
 ) -> UserResponseSchema:
     logger.info(db)
     return user_to_user_response_schema(update_user(id, item, db))
+
+
+@router.delete("/{id}", status_code=204)
+def delete_user(id: int, db: Session = db_session, _=Depends(get_admin_user)) -> None:
+    logger.info(db)
+    return delete_user(id, db)
