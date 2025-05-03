@@ -76,7 +76,7 @@ export const selectRole = createTypedDraftSafeSelector(
 	(state) => state.role,
 );
 
-export const selectDepartments = createTypedDraftSafeSelector(
+export const selectFiltersDepartments = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.departments,
 );
