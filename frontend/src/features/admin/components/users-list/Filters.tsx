@@ -5,6 +5,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import AddUserButton from "@/features/admin/components/users-list/filters/AddUserButton";
 import { RegionFilter } from "@/features/admin/components/users-list/filters/DepartmentsFilter";
 import {
 	selectName,
@@ -38,38 +39,41 @@ export const Filters: React.FC = () => {
 	};
 
 	return (
-		<div className="flex items-center w-full gap-4">
-			<Input
-				type="search"
-				placeholder="Rechercher un utilisateur..."
-				value={search}
-				onChange={onSearch}
-				prefix={<Search className="w-5 h-5 ml-4 stroke-zinc-600" />}
-				className="pl-12 w-sm text-zinc-600"
-			/>
+		<div className="flex flex-row justify-between gap-4">
+			<div className="flex items-center w-full gap-4">
+				<Input
+					type="search"
+					placeholder="Rechercher un utilisateur..."
+					value={search}
+					onChange={onSearch}
+					prefix={<Search className="w-5 h-5 ml-4 stroke-zinc-600" />}
+					className="pl-12 w-sm text-zinc-600"
+				/>
 
-			<Select
-				value={role}
-				onValueChange={(value) => dispatch(setRole(value as Role))}
-			>
-				<SelectTrigger className="max-w-3xs">
-					<SelectValue placeholder="Sélectionner un rôle" />
-				</SelectTrigger>
+				<Select
+					value={role}
+					onValueChange={(value) => dispatch(setRole(value as Role))}
+				>
+					<SelectTrigger className="max-w-3xs">
+						<SelectValue placeholder="Sélectionner un rôle" />
+					</SelectTrigger>
 
-				<SelectContent>
-					<SelectItem value="all">Tous</SelectItem>
+					<SelectContent>
+						<SelectItem value="all">Tous</SelectItem>
 
-					{ROLES.map((role) => {
-						return (
-							<SelectItem key={role} value={role}>
-								{role}
-							</SelectItem>
-						);
-					})}
-				</SelectContent>
-			</Select>
+						{ROLES.map((role) => {
+							return (
+								<SelectItem key={role} value={role}>
+									{role}
+								</SelectItem>
+							);
+						})}
+					</SelectContent>
+				</Select>
 
-			<RegionFilter />
+				<RegionFilter />
+			</div>
+			<AddUserButton />
 		</div>
 	);
 };

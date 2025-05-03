@@ -15,7 +15,8 @@
 			"storybook-static",
 			"dist",
 			"public/mockServiceWorker.js",
-			"test/features/clear-cutting/form"
+			"test/features/clear-cutting/form",
+			"src/components/ui/multiple-select.tsx"
 		]
 	},
 	"formatter": {

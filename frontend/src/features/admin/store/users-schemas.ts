@@ -11,7 +11,7 @@ const usersRequestSchema = z.object({
 	departments: z.array(z.string()),
 });
 
-export type Users = z.infer<typeof usersRequestSchema>;
+export type User = z.infer<typeof usersRequestSchema>;
 
 export const usersListResponseSchema = z.object({
 	users: z.array(usersRequestSchema),

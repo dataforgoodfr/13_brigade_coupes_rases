@@ -2,7 +2,7 @@ import {
 	selectPage,
 	selectSize,
 } from "@/features/admin/store/users-filters.slice";
-import type { Users } from "@/features/admin/store/users-schemas";
+import type { User } from "@/features/admin/store/users-schemas";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -12,7 +12,7 @@ import { useMemo } from "react";
 
 interface UsersResponse {
 	status: "idle" | "loading" | "success" | "error";
-	users: Users[];
+	users: User[];
 	metadata: {
 		totalCount?: number;
 		pagesCount?: number;
@@ -24,12 +24,33 @@ const initialState: UsersResponse = {
 	metadata: {},
 };
 
+export const createUserThunk = createAppAsyncThunk(
+	"users/createUser",
+	async (user: User, { extra: { api } }) => {
+		await api()
+			.post<User>("api/v1/users", { body: JSON.stringify(user) })
+			.catch((error) => {
+				const validationErrors = error.data.errors;
+				throw new Error(JSON.stringify(validationErrors));
+			});
+	},
+);
+
+export const updateUserThunk = createAppAsyncThunk(
+	"users/insertUser",
+	async (user: User, { extra: { api } }) => {
+		await api().put<User>(`api/v1/users/${user.id}`, {
+			body: JSON.stringify(user),
+		});
+	},
+);
+
 export const getUsersThunk = createAppAsyncThunk(
 	"users/getUsers",
 	async (params: { page: number; size: number }, { extra: { api } }) => {
 		const result = await api()
 			.get<{
-				content: Users[];
+				content: User[];
 				metadata: {
 					total_count: number;
 					pages_count: number;
@@ -61,6 +82,26 @@ export const usersSlice = createSlice({
 			state.status = "error";
 		});
 		builder.addCase(getUsersThunk.pending, (state) => {
+			state.status = "loading";
+		});
+
+		builder.addCase(createUserThunk.fulfilled, (state) => {
+			state.status = "success";
+		});
+		builder.addCase(createUserThunk.rejected, (state, _error) => {
+			state.status = "error";
+		});
+		builder.addCase(createUserThunk.pending, (state) => {
+			state.status = "loading";
+		});
+
+		builder.addCase(updateUserThunk.fulfilled, (state) => {
+			state.status = "success";
+		});
+		builder.addCase(updateUserThunk.rejected, (state, _error) => {
+			state.status = "error";
+		});
+		builder.addCase(updateUserThunk.pending, (state) => {
 			state.status = "loading";
 		});
 	},

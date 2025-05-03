@@ -8,6 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import UpdateUserButton from "@/features/admin/components/users-list/UpdateUserButton";
 import { selectDepartments } from "@/features/admin/store/departments";
 import type { Department } from "@/features/admin/store/departments-schemas";
 import {
@@ -32,13 +33,17 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 
-const columnHelper = createColumnHelper<{
+export type UserWithDepartments = {
+	role: string;
+	id: string;
+	email: string;
 	firstname: string;
 	lastname: string;
-	email: string;
-	role: string;
+	login: string;
 	departments: Department[];
-}>();
+};
+
+const columnHelper = createColumnHelper<UserWithDepartments>();
 
 const columns = [
 	columnHelper.accessor("firstname", {
@@ -108,6 +113,18 @@ const columns = [
 			);
 		},
 	}),
+	columnHelper.display({
+		id: "actions",
+		cell: (user) => {
+			const userData = user.row.original;
+			return (
+				<span className="flex flex-wrap gap-1">
+					<UpdateUserButton user={userData} />
+				</span>
+			);
+		},
+		size: 10,
+	}),
 ];
 
 export const UsersList: React.FC = () => {
@@ -123,61 +140,52 @@ export const UsersList: React.FC = () => {
 	const filters = useAppSelector((state: RootState) => state.usersFilters);
 
 	const formattedUsers = useMemo(() => {
-		return users.reduce(
-			(
-				filteredUsers: Array<{
-					role: string;
-					departments: Department[];
-					id: string;
-					email: string;
-					firstname: string;
-					lastname: string;
-					login: string;
-				}>,
-				user,
-			) => {
-				let isValidUser = true;
+		return users.reduce((filteredUsers: Array<UserWithDepartments>, user) => {
+			let isValidUser = true;
 
-				if (filters.name)
-					isValidUser =
-						(isValidUser &&
-							// For testing purposes, basic filter users by name or email TODO: unaccent
-							user.login
-								.toLowerCase()
-								.includes(filters.name.toLowerCase() || "")) ||
-						user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
+			if (filters.name)
+				isValidUser =
+					(isValidUser &&
+						// For testing purposes, basic filter users by name or email TODO: unaccent
+						user.login
+							.toLowerCase()
+							.includes(filters.name.toLowerCase() || "")) ||
+					user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
 
-				if (filters.role !== "all")
-					isValidUser = isValidUser && user.role === filters.role;
+			if (filters.role !== "all")
+				isValidUser = isValidUser && user.role === filters.role;
 
-				if (filters.departments?.length)
-					isValidUser =
-						isValidUser &&
-						filters.departments.some((r) => user?.departments?.includes(r));
+			if (filters.departments?.length)
+				isValidUser =
+					isValidUser &&
+					filters.departments.some((r) => user?.departments?.includes(r));
 
-				if (isValidUser) {
-					filteredUsers.push({
-						...user,
-						role: user.role ?? "",
-						departments: user.departments.reduce(
-							(filteredDpt: Department[], dpt) => {
-								const department = departments.find((d) => d.id === dpt);
+			if (isValidUser) {
+				filteredUsers.push({
+					...user,
+					id: user.id,
+					login: user.login,
+					firstname: user.firstname,
+					lastname: user.lastname,
+					email: user.email,
+					role: user.role ?? "",
+					departments: user.departments.reduce(
+						(filteredDpt: Department[], dpt) => {
+							const department = departments.find((d) => d.id === dpt);
 
-								if (department) {
-									filteredDpt.push(department);
-								}
+							if (department) {
+								filteredDpt.push(department);
+							}
 
-								return filteredDpt;
-							},
-							[],
-						),
-					});
-				}
+							return filteredDpt;
+						},
+						[],
+					),
+				});
+			}
 
-				return filteredUsers;
-			},
-			[],
-		);
+			return filteredUsers;
+		}, []);
 	}, [departments, users, filters]);
 
 	const table = useReactTable({
@@ -195,7 +203,10 @@ export const UsersList: React.FC = () => {
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
 								return (
-									<TableHead key={header.id}>
+									<TableHead
+										key={header.id}
+										style={{ width: `${header.getSize()}px` }}
+									>
 										{flexRender(
 											header.column.columnDef.header,
 											header.getContext(),

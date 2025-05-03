@@ -98,6 +98,12 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     db.refresh(user_db)
     return user_db
 
+def delete_user(id: int, db: Session) -> None:
+    user_db = get_user_by_id(id, db)
+    db.delete(user_db)
+    db.commit()
+    return None
+
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter_by(email=email).first()
