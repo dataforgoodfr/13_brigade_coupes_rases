@@ -7,19 +7,25 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import DepartmentsMultiSelect from "@/features/admin/components/users-list/insert-user-modal/DepartmentsMultiSelect";
 import type { UserWithDepartments } from "@/features/admin/components/users-list/UsersList";
+import DepartmentsMultiSelect from "@/features/admin/components/users-list/insert-user-modal/DepartmentsMultiSelect";
 import {
 	selectPage,
 	selectSize,
 } from "@/features/admin/store/users-filters.slice";
-import type { User } from "@/features/admin/store/users-schemas";
 import {
 	createUserThunk,
 	getUsersThunk,
 	updateUserThunk,
 } from "@/features/admin/store/users.slice";
 import { ROLES } from "@/features/user/store/user";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/shared/components/Select";
 import {
 	Form,
 	FormControl,
@@ -28,13 +34,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/shared/components/form/Form";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/shared/components/Select";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo } from "react";
@@ -72,14 +71,13 @@ const InsertUserModal: React.FC<InsertUserModalProps> = ({ user, onClose }) => {
 	const defaultValues = useMemo(() => {
 		return {
 			...user,
+			role: user?.role as "volunteer" | "admin" | undefined,
 			departments: user?.departments?.map((dept) => ({
 				value: dept.id,
 				label: dept.name,
 			})),
 		};
 	}, [user]);
-
-	console.log("defaultValues", defaultValues, user);
 
 	const form = useForm<UserForm>({
 		resolver: zodResolver(userFormSchema),
