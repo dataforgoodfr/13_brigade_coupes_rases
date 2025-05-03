@@ -123,54 +123,61 @@ export const UsersList: React.FC = () => {
 	const filters = useAppSelector((state: RootState) => state.usersFilters);
 
 	const formattedUsers = useMemo(() => {
-		return users.reduce((filteredUsers: Array<{
-			role: string;
-			departments: Department[];
-			id: string;
-			email: string;
-			firstname: string;
-			lastname: string;
-			login: string;
-		}>, user) => {
-			let isValidUser = true;
+		return users.reduce(
+			(
+				filteredUsers: Array<{
+					role: string;
+					departments: Department[];
+					id: string;
+					email: string;
+					firstname: string;
+					lastname: string;
+					login: string;
+				}>,
+				user,
+			) => {
+				let isValidUser = true;
 
-			if (filters.name)
-				isValidUser =
-					(isValidUser &&
-						// For testing purposes, basic filter users by name or email TODO: unaccent
-						user.login
-							.toLowerCase()
-							.includes(filters.name.toLowerCase() || "")) ||
-					user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
+				if (filters.name)
+					isValidUser =
+						(isValidUser &&
+							// For testing purposes, basic filter users by name or email TODO: unaccent
+							user.login
+								.toLowerCase()
+								.includes(filters.name.toLowerCase() || "")) ||
+						user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
 
-			if (filters.role !== "all") isValidUser = isValidUser && user.role === filters.role;
+				if (filters.role !== "all")
+					isValidUser = isValidUser && user.role === filters.role;
 
-			if (filters.departments?.length)
-				isValidUser =
-					isValidUser &&
-					filters.departments.some((r) => user?.departments?.includes(r));
+				if (filters.departments?.length)
+					isValidUser =
+						isValidUser &&
+						filters.departments.some((r) => user?.departments?.includes(r));
 
-			if (isValidUser) {
-				filteredUsers.push({
-					...user,
-					role: user.role ?? "",
-					departments: user.departments.reduce(
-						(filteredDpt: Department[], dpt) => {
-							const department = departments.find((d) => d.id === dpt);
+				if (isValidUser) {
+					filteredUsers.push({
+						...user,
+						role: user.role ?? "",
+						departments: user.departments.reduce(
+							(filteredDpt: Department[], dpt) => {
+								const department = departments.find((d) => d.id === dpt);
 
-							if (department) {
-								filteredDpt.push(department);
-							}
+								if (department) {
+									filteredDpt.push(department);
+								}
 
-							return filteredDpt;
-						},
-						[],
-					),
-				});
-			}
+								return filteredDpt;
+							},
+							[],
+						),
+					});
+				}
 
-			return filteredUsers;
-		}, []);
+				return filteredUsers;
+			},
+			[],
+		);
 	}, [departments, users, filters]);
 
 	const table = useReactTable({
