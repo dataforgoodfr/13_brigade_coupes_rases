@@ -1,9 +1,8 @@
 from logging import getLogger
-from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from pydantic import Json
+from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.hateoas import PaginationResponseSchema
@@ -52,6 +51,7 @@ def update_existing_user(
 ) -> UserResponseSchema:
     logger.info(db)
     return user_to_user_response_schema(update_user(id, item, db))
+
 
 @router.delete("/{id}", status_code=204)
 def delete_user(id: int, db: Session = db_session, _=Depends(get_admin_user)) -> None:
