@@ -123,7 +123,15 @@ export const UsersList: React.FC = () => {
 	const filters = useAppSelector((state: RootState) => state.usersFilters);
 
 	const formattedUsers = useMemo(() => {
-		return users.reduce((filteredUsers, user) => {
+		return users.reduce((filteredUsers: Array<{
+			role: string;
+			departments: Department[];
+			id: string;
+			email: string;
+			firstname: string;
+			lastname: string;
+			login: string;
+		}>, user) => {
 			let isValidUser = true;
 
 			if (filters.name)
@@ -135,13 +143,12 @@ export const UsersList: React.FC = () => {
 							.includes(filters.name.toLowerCase() || "")) ||
 					user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
 
-			if (filters.role) isValidUser = isValidUser && user.role === filters.role;
+			if (filters.role !== "all") isValidUser = isValidUser && user.role === filters.role;
 
 			if (filters.departments?.length)
 				isValidUser =
 					isValidUser &&
 					filters.departments.some((r) => user?.departments?.includes(r));
-
 
 			if (isValidUser) {
 				filteredUsers.push({
