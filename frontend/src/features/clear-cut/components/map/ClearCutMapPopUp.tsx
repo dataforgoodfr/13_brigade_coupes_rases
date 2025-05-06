@@ -27,15 +27,13 @@ function BDFLabel({
 	};
 
 	const relevantTypes = Object.entries(types)
-		.map(([label, value]) =>
-			value !== null
-				? {
-						label,
-						percentage: value / total_area_hectare,
-					}
-				: null,
-		)
-		.filter((v) => v !== null)
+		.map(([label, value]) => ({
+			label,
+			percentage: (value || 0) / total_area_hectare,
+		}))
+		// Only display types with a coverage > 1%
+		.filter(({ percentage }) => percentage >= 0.01)
+		// Display types in coverage descending order
 		.sort((a, b) => b.percentage - a.percentage);
 
 	const labelString = relevantTypes
