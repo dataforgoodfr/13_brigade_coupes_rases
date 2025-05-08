@@ -25,12 +25,12 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	}, [focusedClearCutId, report.id]);
 
 	// Extract the clear-cut ID from the URL path using a regular expression
-	const match = location.pathname.match(/\/clear-cuts\/(\d+)/);
-	const isUrlMatch = match ? match[1] === report.id : false;
+	const urlMatch = location.pathname.match(/\/clear-cuts\/(\d+)/);
+	const reportIsOpenInSideList = urlMatch ? urlMatch[1] === report.id : false;
 
 	// The clear-cut is considered focused if the map's popup is open or if the report ID
 	// in the URL matches the current report (i.e., the report is selected in the aside list).
-	const isFocused = focusedClearCutId === report.id || isUrlMatch;
+	const isFocused = focusedClearCutId === report.id || reportIsOpenInSideList;
 
 	// Modify the clear-cut polygon style when it is focused
 	const weight = isFocused ? 2 : 0;
