@@ -158,8 +158,8 @@ export function ClearCuts() {
 
 	return (
 		<>
-			<div className="sm:p-1  leaflet-top flex w-full z-10">
-				<div className="leaflet-control flex grow p-1 rounded-md justify-end  z-10">
+			<div className="sm:p-1 justify-end leaflet-top flex  w-full z-10">
+				<div className="leaflet-control flex p-1 rounded-md justify-end z-10">
 					<IconButton
 						icon={<Locate />}
 						className="hidden sm:flex"
