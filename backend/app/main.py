@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes import (
     clear_cuts,
+    clear_cuts_forms,
     clear_cuts_map,
     clear_cuts_reports,
     departments,
@@ -31,6 +32,7 @@ app.add_middleware(
 
 # Include routes
 app.include_router(clear_cuts_reports.router)
+app.include_router(clear_cuts_forms.router)
 app.include_router(departments.router)
 app.include_router(token.router)
 app.include_router(clear_cuts_map.router)
