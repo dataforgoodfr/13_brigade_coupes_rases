@@ -1,5 +1,6 @@
-import { adminApi } from "@/features/admin/store/api";
+import { departmentsSlice } from "@/features/admin/store/departments";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
+import { usersSlice } from "@/features/admin/store/users.slice";
 import { clearCutsSlice } from "@/features/clear-cut/store/clear-cuts-slice";
 import { filtersSlice } from "@/features/clear-cut/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
@@ -33,8 +34,9 @@ const reducer = combineReducers({
 	[clearCutsSlice.reducerPath]: clearCutsSlice.reducer,
 	[userSlice.reducerPath]: userSlice.reducer,
 	// Admin reducers
-	[adminApi.reducerPath]: adminApi.reducer,
 	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
+	[usersSlice.reducerPath]: usersSlice.reducer,
+	[departmentsSlice.reducerPath]: departmentsSlice.reducer,
 });
 export const setupStore = (preloadedState?: Partial<RootState>) =>
 	configureStore({
@@ -58,8 +60,7 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 				},
 			})
 				.concat(unauthorizedMiddleware.middleware)
-				.concat(usersApi.middleware)
-				.concat(adminApi.middleware),
+				.concat(usersApi.middleware),
 		preloadedState,
 	});
 

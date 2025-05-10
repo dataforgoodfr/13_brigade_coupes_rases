@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { selectDepartments } from "@/features/admin/store/departments";
+import type { Department } from "@/features/admin/store/departments-schemas";
 import {
-	type Region,
-	selectRegions,
-	toggleRegion,
+	selectFiltersDepartments,
+	toggleDepartment,
 } from "@/features/admin/store/users-filters.slice";
 import {
 	DropdownMenu,
@@ -13,44 +14,32 @@ import {
 	DropdownMenuTrigger,
 } from "@/shared/components/dropdown/DropdownMenu";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { useEffect, useState } from "react";
 
 export const RegionFilter: React.FC = () => {
 	const dispatch = useAppDispatch();
-	const regionsFilter = useAppSelector(selectRegions);
 
-	const [regions, setRegions] = useState([]);
+	const departments = useAppSelector(selectDepartments);
 
-	useEffect(() => {
-		// Fetch regions TODO: mock ?
-		fetch("https://geo.api.gouv.fr/regions")
-			.then((response) => response.json())
-			.then((data) => {
-				setRegions(data);
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
-	}, []);
+	const departmentsFilter = useAppSelector(selectFiltersDepartments);
 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline">Selectionner des régions</Button>
+				<Button variant="outline">Selectionner des départements</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56 h-96 overflow-y-auto">
-				<DropdownMenuLabel>Régions</DropdownMenuLabel>
+				<DropdownMenuLabel>Départements</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				{regions.map((region: Region) => {
+				{departments.map((department: Department) => {
 					return (
 						<DropdownMenuCheckboxItem
-							key={region.code}
-							checked={regionsFilter.some((r) => r.code === region.code)}
+							key={department.code}
+							checked={departmentsFilter.some((dpt) => dpt === department.id)}
 							onCheckedChange={() => {
-								dispatch(toggleRegion(region));
+								dispatch(toggleDepartment(department.id));
 							}}
 						>
-							{region.nom}
+							{department.name}
 						</DropdownMenuCheckboxItem>
 					);
 				})}
