@@ -14,6 +14,7 @@ on:
       database-action:
         required: true
         options:
+          - upgrade-database
           - setup-database
           - reset-database
         type: choice
@@ -53,6 +54,12 @@ jobs:
         run: |
           make upgrade-db
           make seed-${{ inputs.env }}-db
+
+      - name: Setup and seed database
+        working-directory: backend
+        if: ${{ inputs.database-action == 'upgrade-database' }}
+        run: |
+          make upgrade-db
 
       - name: Reset database
         working-directory: backend
