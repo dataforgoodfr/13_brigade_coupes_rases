@@ -2,6 +2,7 @@ from datetime import datetime
 
 from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     DateTime,
@@ -230,6 +231,9 @@ class ClearCutReport(Base):
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
+    clear_cut_forms: Mapped[list["ClearCutForm"]] = relationship(
+        back_populates="report"
+    )
     status = Column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(
@@ -258,3 +262,59 @@ class ClearCutReport(Base):
         if value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
+
+
+class ClearCutForm(Base):
+    __tablename__ = "clear_cut_report_forms"
+    id = Column(Integer, primary_key=True, index=True)
+
+    report_id: Mapped[int] = mapped_column(
+        ForeignKey("clear_cuts_reports.id"), nullable=False
+    )
+    report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
+    editor_id = Column(Integer, index=True, nullable=True)
+    created_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # Ground datas
+    inspection_date = Column(DateTime, nullable=True)
+    weather = Column(String, index=True)
+    forest_description = Column(String, index=True)
+    remainingTrees = Column(Boolean)
+    species = Column(String, index=True)
+    workSignVisible = Column(Boolean)
+    waterzone_description = Column(String)
+    protected_zone_description = Column(String)
+    soil_state = Column(String)
+
+    # Ecological informations
+    ecological_zone = Column(Boolean)
+    ecological_zone_type = Column(String)
+    nearby_zone = Column(String)
+    nearby_zone_type = Column(String)
+    protected_species = Column(String)
+    protected_habitats = Column(String)
+    ddt_request = Column(Boolean)
+    ddt_request_owner = Column(String)
+
+    # Stakeholders
+    compagny = Column(String)
+    subcontractor = Column(String)
+    landlord = Column(String)
+
+    # Reglementation
+    pefc_fsc_certified = Column(Boolean, nullable=True)
+    over_20_ha = Column(Boolean, nullable=True)
+    psg_required_plot = Column(Boolean, nullable=True)
+
+    # Legal strategy
+    relevant_for_pefc_complaint = Column(Boolean, nullable=True)
+    relevant_for_rediii_complaint = Column(Boolean, nullable=True)
+    relevant_for_ofb_complaint = Column(Boolean, nullable=True)
+    relevant_for_alert_cnpf_ddt_srgs = Column(Boolean, nullable=True)
+    relevant_for_alert_cnpf_ddt_psg_thresholds = Column(Boolean, nullable=True)
+    relevant_for_psg_request = Column(Boolean, nullable=True)
+    relevant_for_psg_request = Column(Boolean, nullable=True)
+    request_engaged = Column(String, nullable=True)
+
+    # Miscellaneous
+    other = Column(String)
