@@ -82,7 +82,7 @@ class ClearcutFormStrategy(BaseModel):
 
 class ClearCutFormResponse(ClearCutFormBase):
     id: int
-    report_updated_at: datetime
+    created_at: datetime
 
 
 class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
@@ -100,18 +100,18 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
                 "waterzone_description": "small lake",
                 "protected_zone_description": "RAS",
                 "soil_state": "Muddy",
-                "other": "",
+                "other": "Other",
                 "ecological_zone": False,
-                "ecological_zone_type": "",
-                "nearby_zone": "",
-                "nearby_zone_type": "",
-                "protected_species": "",
-                "protected_habitats": "",
+                "ecological_zone_type": "Ecological Zone Type",
+                "nearby_zone": "Nearby Zone",
+                "nearby_zone_type": "Nearby Zone Type",
+                "protected_species": "Protected Species",
+                "protected_habitats": "Protected Habitats",
                 "ddt_request": None,
-                "ddt_request_owner": "",
-                "compagny": "",
-                "subcontractor": "",
-                "landlord": "",
+                "ddt_request_owner": "Request owner",
+                "compagny": "Company",
+                "subcontractor": "Sub contractor",
+                "landlord": "Land lord",
                 "pefc_fsc_certified": False,
                 "over_20_ha": False,
                 "psg_required_plot": True,

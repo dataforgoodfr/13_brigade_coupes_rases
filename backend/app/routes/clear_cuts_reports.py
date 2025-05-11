@@ -6,7 +6,10 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.deps import db_session
 from app.schemas.clear_cut import ClearCutResponseSchema
-from app.schemas.clear_cut_form import ClearCutFormWithStrategyResponse
+from app.schemas.clear_cut_form import (
+    ClearCutFormWithStrategyResponse,
+    ClearCutReportFormWithStrategy,
+)
 from app.schemas.clear_cut_report import (
     ClearCutReportPatchSchema,
     ClearCutReportResponseSchema,
@@ -14,13 +17,18 @@ from app.schemas.clear_cut_report import (
 )
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import find_clearcuts_by_report
-from app.services.clear_cut_form import find_clear_cut_form_by_report_id
+from app.services.clear_cut_form import (
+    add_clear_cut_form_entry,
+    find_clear_cut_form_by_report_id,
+    get_clear_cut_form_by_id,
+)
 from app.services.clear_cut_report import (
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
     update_clear_cut_report,
 )
+from app.services.user_auth import get_current_user
 
 logger = getLogger(__name__)
 
@@ -104,4 +112,31 @@ def list_clear_cut_forms(
         url=f"/api/v1/clear-cuts-reports/{report_id}/forms",
         page=page,
         size=size,
+    )
+
+
+@router.get(
+    "/{report_id}/forms/{form_id}", response_model=ClearCutFormWithStrategyResponse
+)
+def get_form_by_id(
+    form_id: int,
+    db: Session = db_session,
+) -> ClearCutFormWithStrategyResponse:
+    logger.info(db)
+    form = get_clear_cut_form_by_id(db, form_id)
+    return form
+
+
+@router.post("/{report_id}/forms", status_code=status.HTTP_201_CREATED)
+def add_clearcut_form_version(
+    report_id: int,
+    response: Response,
+    new_version: ClearCutReportFormWithStrategy,
+    db: Session = db_session,
+    editor=Depends(get_current_user),
+):
+    logger.info(db)
+    form = add_clear_cut_form_entry(db, editor, report_id, new_version)
+    response.headers["location"] = (
+        f"/api/v1/clear-cuts-reports/{report_id}/forms/{form.id}"
     )

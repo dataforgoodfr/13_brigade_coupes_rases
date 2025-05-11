@@ -273,7 +273,7 @@ class ClearCutForm(Base):
     )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
     editor_id = Column(Integer, index=True, nullable=True)
-    report_updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     # Ground datas
     inspection_date = Column(DateTime, nullable=True)

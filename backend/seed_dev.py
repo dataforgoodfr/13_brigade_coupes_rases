@@ -401,7 +401,7 @@ def seed_database():
         reportform = ClearCutForm(
             report_id=clear_cuts[0].id,
             editor_id=admin.id,
-            report_updated_at=datetime.now() - timedelta(days=2),
+            created_at=datetime.now() - timedelta(days=2),
             inspection_date=datetime.now(),
             weather="Rainy",
             forest_description="C'était une belle fôret où coulaient rivière et riaient oiseaux",
