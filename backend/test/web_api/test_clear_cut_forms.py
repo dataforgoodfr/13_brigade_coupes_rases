@@ -1,8 +1,7 @@
+from common.user import get_admin_user_token
 from fastapi import status
 from fastapi.testclient import TestClient
 from pytest import Session
-
-from common.user import get_admin_user_token
 
 
 def test_create_version_success(client: TestClient, db: Session):
@@ -68,23 +67,26 @@ def test_create_version_success(client: TestClient, db: Session):
     assert data["pefc_fsc_certified"] == report_data["pefc_fsc_certified"]
     assert data["protected_habitats"] == report_data["protected_habitats"]
     assert data["protected_species"] == report_data["protected_species"]
-    assert data["protected_zone_description"] == report_data["protected_zone_description"]
+    assert (
+        data["protected_zone_description"] == report_data["protected_zone_description"]
+    )
     assert data["psg_required_plot"] == report_data["psg_required_plot"]
-    assert data["relevant_for_alert_cnpf_ddt_psg_thresholds"] == report_data[
-        "relevant_for_alert_cnpf_ddt_psg_thresholds"
-    ]
-    assert data["relevant_for_alert_cnpf_ddt_srgs"] == report_data[
-        "relevant_for_alert_cnpf_ddt_srgs"
-    ]
-    assert data["relevant_for_ofb_complaint"] == report_data[
-        "relevant_for_ofb_complaint"
-    ]
-    assert data["relevant_for_psg_request"] == report_data[
-        "relevant_for_psg_request"
-    ]
-    assert data["relevant_for_rediii_complaint"] == report_data[
-        "relevant_for_rediii_complaint"
-    ]
+    assert (
+        data["relevant_for_alert_cnpf_ddt_psg_thresholds"]
+        == report_data["relevant_for_alert_cnpf_ddt_psg_thresholds"]
+    )
+    assert (
+        data["relevant_for_alert_cnpf_ddt_srgs"]
+        == report_data["relevant_for_alert_cnpf_ddt_srgs"]
+    )
+    assert (
+        data["relevant_for_ofb_complaint"] == report_data["relevant_for_ofb_complaint"]
+    )
+    assert data["relevant_for_psg_request"] == report_data["relevant_for_psg_request"]
+    assert (
+        data["relevant_for_rediii_complaint"]
+        == report_data["relevant_for_rediii_complaint"]
+    )
     assert data["remainingTrees"] == report_data["remainingTrees"]
     assert data["request_engaged"] == report_data["request_engaged"]
     assert data["soil_state"] == report_data["soil_state"]
@@ -93,4 +95,3 @@ def test_create_version_success(client: TestClient, db: Session):
     assert data["waterzone_description"] == report_data["waterzone_description"]
     assert data["weather"] == report_data["weather"]
     assert data["workSignVisible"] == report_data["workSignVisible"]
-   
