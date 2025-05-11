@@ -55,7 +55,7 @@ jobs:
           make upgrade-db
           make seed-${{ inputs.env }}-db
 
-      - name: Setup and seed database
+      - name: Upgrade database
         working-directory: backend
         if: ${{ inputs.database-action == 'upgrade-database' }}
         run: |
