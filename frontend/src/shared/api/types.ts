@@ -49,3 +49,30 @@ export type RequiredRequestedContent<TValue, TError = unknown> = Omit<
 	RequestedContent<TValue, TError>,
 	"value"
 > & { value: TValue };
+
+const hateaosMetadataSchema = z.object({
+	links: z.record(z.string(), z.string()),
+});
+export const hateaosResponseSchema = <TValue extends z.ZodType>(
+	valueSchema: TValue,
+) =>
+	z.object({
+		content: valueSchema,
+		metadata: hateaosMetadataSchema,
+	});
+
+export const paginationResponseSchema = <TValue extends z.ZodType>(
+	valueSchema: TValue,
+) =>
+	hateaosResponseSchema(valueSchema.array()).and(
+		z.object({
+			metadata: hateaosMetadataSchema.and(
+				z.object({
+					pages_count: z.number(),
+					total_count: z.number(),
+					page: z.number(),
+					size: z.number(),
+				}),
+			),
+		}),
+	);

@@ -1,67 +1,61 @@
+import type { FiltersRequest } from "@/features/admin/store/filters";
 import {
-	selectPage,
-	selectSize,
-} from "@/features/admin/store/users-filters.slice";
-import type { Users } from "@/features/admin/store/users-schemas";
+	type PaginatedUsers,
+	type PaginatedUsersResponse,
+	type User,
+	paginatedUsersResponseSchema,
+} from "@/features/admin/store/users";
+import { selectFiltersRequest } from "@/features/admin/store/users-filters.slice";
+import { requestToParams } from "@/shared/api/api";
+import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
 import { useMemo } from "react";
 
-interface UsersResponse {
-	status: "idle" | "loading" | "success" | "error";
-	users: Users[];
-	metadata: {
-		totalCount?: number;
-		pagesCount?: number;
-	};
-}
-const initialState: UsersResponse = {
-	status: "idle",
-	users: [],
-	metadata: {},
+type State = {
+	users: RequestedContent<PaginatedUsers>;
 };
+export const getUsersThunk = createAppAsyncThunk<
+	PaginatedUsers,
+	FiltersRequest
+>("users/getUsers", async (request, { extra: { api }, getState }) => {
+	const result = await api()
+		.get<PaginatedUsersResponse>("api/v1/users", {
+			searchParams: requestToParams(request),
+		})
+		.json();
 
-export const getUsersThunk = createAppAsyncThunk(
-	"users/getUsers",
-	async (params: { page: number; size: number }, { extra: { api } }) => {
-		const result = await api()
-			.get<{
-				content: Users[];
-				metadata: {
-					total_count: number;
-					pages_count: number;
-				};
-			}>("api/v1/users", {
-				searchParams: {
-					page: params.page,
-					size: params.size,
-				},
-			})
-			.json();
-
-		return result;
-	},
-);
+	const paginatedUsers = paginatedUsersResponseSchema.parse(result);
+	const state = getState();
+	return {
+		...paginatedUsers,
+		content: paginatedUsers.content.map((user) => {
+			return {
+				...user,
+				departments: selectDepartmentsByIds(state, user.departments_ids),
+			} satisfies User;
+		}),
+	};
+});
 
 export const usersSlice = createSlice({
-	initialState,
+	initialState: { users: { status: "idle" } } as State,
 	name: "users",
 	reducers: {},
 	extraReducers: (builder) => {
 		builder.addCase(getUsersThunk.fulfilled, (state, { payload }) => {
-			state.status = "success";
-			state.users = payload.content;
-			state.metadata.totalCount = payload.metadata.total_count;
-			state.metadata.pagesCount = payload.metadata.pages_count;
+			state.users.value = payload;
+			state.users.status = "success";
 		});
 		builder.addCase(getUsersThunk.rejected, (state, _error) => {
-			state.status = "error";
+			state.users.status = "error";
 		});
 		builder.addCase(getUsersThunk.pending, (state) => {
-			state.status = "loading";
+			state.users.status = "loading";
 		});
 	},
 });
@@ -69,23 +63,21 @@ export const usersSlice = createSlice({
 const selectState = (state: RootState) => state.users;
 export const selectStatus = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.status,
+	(state) => state.users.status,
 );
 export const selectUsers = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.users,
+	(state) => state.users.value?.content ?? [],
 );
 export const selectMetadata = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.metadata,
+	(state) => state.users.value?.metadata,
 );
 export const useGetUsers = () => {
-	const page = useAppSelector(selectPage);
-	const size = useAppSelector(selectSize);
-
+	const request = useAppSelector(selectFiltersRequest);
 	const dispatch = useAppDispatch();
 
 	return useMemo(() => {
-		return dispatch(getUsersThunk({ page, size }));
-	}, [dispatch, page, size]);
+		return dispatch(getUsersThunk(request));
+	}, [dispatch, request]);
 };

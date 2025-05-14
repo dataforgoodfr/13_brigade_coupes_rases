@@ -1,18 +1,28 @@
+import type { FiltersRequest } from "@/features/admin/store/filters";
 import type { Role } from "@/features/user/store/user";
+import {
+	type NamedId,
+	type SelectableItem,
+	listToSelectableItems,
+} from "@/shared/items";
+import { getReferentialThunk } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface FiltersState {
 	name: string;
-	role: Role | "all";
-	departments: string[];
+	roles: SelectableItem<Role>[];
+	departments: SelectableItem<NamedId>[];
 	page: number;
 	size: number;
 }
 const initialState: FiltersState = {
 	name: "",
-	role: "all",
+	roles: [
+		{ isSelected: true, item: "admin" },
+		{ isSelected: true, item: "volunteer" },
+	],
 	departments: [],
 	page: 0,
 	size: 10,
@@ -25,19 +35,14 @@ export const usersFiltersSlice = createSlice({
 		setName: (state, { payload }: PayloadAction<string>) => {
 			state.name = payload;
 		},
-		setRole: (state, { payload }: PayloadAction<Role | "all">) => {
-			state.role = payload;
+		setRoles: (state, { payload }: PayloadAction<SelectableItem<Role>[]>) => {
+			state.roles = payload;
 		},
-		toggleDepartment: (state, { payload }: PayloadAction<string>) => {
-			const departmentIdx = state.departments.findIndex(
-				(department) => department === payload,
-			);
-
-			if (departmentIdx === -1) {
-				state.departments.push(payload);
-			} else {
-				state.departments.splice(departmentIdx, 1);
-			}
+		setDepartments: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<NamedId>[]>,
+		) => {
+			state.departments = payload;
 		},
 		setPage: (state, { payload }: PayloadAction<number>) => {
 			state.page = payload;
@@ -46,20 +51,29 @@ export const usersFiltersSlice = createSlice({
 			state.size = payload;
 		},
 	},
+	extraReducers: (builder) => {
+		builder.addCase(getReferentialThunk.fulfilled, (state, { payload }) => {
+			state.departments = payload.departments
+				? listToSelectableItems(
+						Object.entries(payload.departments).map(
+							([id, dpt]) => ({ id, name: dpt.name }) satisfies NamedId,
+						),
+					)
+				: [];
+		});
+	},
 });
-
-export const {
-	actions: { setName, setRole, toggleDepartment, setPage, setSize },
-} = usersFiltersSlice;
 
 const selectState = (state: RootState) => state.usersFilters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
 	selectState,
-	({ name, role, departments, page, size }) => {
+	({ name, roles, departments, page, size }): FiltersRequest => {
 		return {
 			name,
-			role: role === "all" ? undefined : role,
-			departments: departments,
+			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
+			departments_ids: departments
+				.filter((department) => department.isSelected)
+				.map((department) => department.item.id),
 			page,
 			size,
 		};
@@ -71,12 +85,12 @@ export const selectName = createTypedDraftSafeSelector(
 	(state) => state.name,
 );
 
-export const selectRole = createTypedDraftSafeSelector(
+export const selectRoles = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.role,
+	(state) => state.roles,
 );
 
-export const selectFiltersDepartments = createTypedDraftSafeSelector(
+export const selectDepartments = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.departments,
 );

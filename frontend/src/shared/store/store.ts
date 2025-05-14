@@ -1,4 +1,3 @@
-import { departmentsSlice } from "@/features/admin/store/departments";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
 import { clearCutsSlice } from "@/features/clear-cut/store/clear-cuts-slice";
@@ -36,7 +35,6 @@ const reducer = combineReducers({
 	// Admin reducers
 	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
 	[usersSlice.reducerPath]: usersSlice.reducer,
-	[departmentsSlice.reducerPath]: departmentsSlice.reducer,
 });
 export const setupStore = (preloadedState?: Partial<RootState>) =>
 	configureStore({

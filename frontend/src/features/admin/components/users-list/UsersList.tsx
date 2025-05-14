@@ -8,21 +8,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { selectDepartments } from "@/features/admin/store/departments";
-import type { Department } from "@/features/admin/store/departments-schemas";
+import type { User } from "@/features/admin/store/users";
 import {
 	selectPage,
-	setPage,
+	usersFiltersSlice,
 } from "@/features/admin/store/users-filters.slice";
 import {
 	selectMetadata,
 	selectUsers,
-	useGetUsers,
 } from "@/features/admin/store/users.slice";
 import SortingButton from "@/shared/components/button/SortingButton";
 import Pagination from "@/shared/components/pagination/Pagination";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import type { RootState } from "@/shared/store/store";
 import {
 	createColumnHelper,
 	flexRender,
@@ -30,15 +27,8 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useMemo } from "react";
 
-const columnHelper = createColumnHelper<{
-	firstname: string;
-	lastname: string;
-	email: string;
-	role: string;
-	departments: Department[];
-}>();
+const columnHelper = createColumnHelper<User>();
 
 const columns = [
 	columnHelper.accessor("firstname", {
@@ -111,77 +101,13 @@ const columns = [
 ];
 
 export const UsersList: React.FC = () => {
-	useGetUsers();
 	const users = useAppSelector(selectUsers);
-	const dispatch = useAppDispatch();
-
-	const page = useAppSelector(selectPage);
 	const metadata = useAppSelector(selectMetadata);
-
-	const departments = useAppSelector(selectDepartments);
-
-	const filters = useAppSelector((state: RootState) => state.usersFilters);
-
-	const formattedUsers = useMemo(() => {
-		return users.reduce(
-			(
-				filteredUsers: Array<{
-					role: string;
-					departments: Department[];
-					id: string;
-					email: string;
-					firstname: string;
-					lastname: string;
-					login: string;
-				}>,
-				user,
-			) => {
-				let isValidUser = true;
-
-				if (filters.name)
-					isValidUser =
-						(isValidUser &&
-							// For testing purposes, basic filter users by name or email TODO: unaccent
-							user.login
-								.toLowerCase()
-								.includes(filters.name.toLowerCase() || "")) ||
-						user.email.toLowerCase().includes(filters.name.toLowerCase() || "");
-
-				if (filters.role !== "all")
-					isValidUser = isValidUser && user.role === filters.role;
-
-				if (filters.departments?.length)
-					isValidUser =
-						isValidUser &&
-						filters.departments.some((r) => user?.departments?.includes(r));
-
-				if (isValidUser) {
-					filteredUsers.push({
-						...user,
-						role: user.role ?? "",
-						departments: user.departments.reduce(
-							(filteredDpt: Department[], dpt) => {
-								const department = departments.find((d) => d.id === dpt);
-
-								if (department) {
-									filteredDpt.push(department);
-								}
-
-								return filteredDpt;
-							},
-							[],
-						),
-					});
-				}
-
-				return filteredUsers;
-			},
-			[],
-		);
-	}, [departments, users, filters]);
+	const dispatch = useAppDispatch();
+	const page = useAppSelector(selectPage);
 
 	const table = useReactTable({
-		data: formattedUsers,
+		data: users,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
@@ -225,14 +151,15 @@ export const UsersList: React.FC = () => {
 					})}
 				</TableBody>
 			</Table>
-
-			<Pagination
-				currentPage={page}
-				setCurrentPage={(newPage) => {
-					dispatch(setPage(newPage));
-				}}
-				pagesCount={metadata?.pagesCount ?? 0}
-			/>
+			{metadata && (
+				<Pagination
+					currentPage={page}
+					setCurrentPage={(newPage) => {
+						dispatch(usersFiltersSlice.actions.setPage(newPage));
+					}}
+					pagesCount={metadata?.pages_count}
+				/>
+			)}
 		</div>
 	);
 };
