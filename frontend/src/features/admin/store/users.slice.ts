@@ -14,7 +14,7 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 import { createSlice } from "@reduxjs/toolkit";
-import { useMemo } from "react";
+import { useEffect } from "react";
 
 type State = {
 	users: RequestedContent<PaginatedUsers>;
@@ -77,7 +77,7 @@ export const useGetUsers = () => {
 	const request = useAppSelector(selectFiltersRequest);
 	const dispatch = useAppDispatch();
 
-	return useMemo(() => {
-		return dispatch(getUsersThunk(request));
+	useEffect(() => {
+		dispatch(getUsersThunk(request));
 	}, [dispatch, request]);
 };

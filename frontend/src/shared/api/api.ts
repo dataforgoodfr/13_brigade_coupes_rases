@@ -1,4 +1,5 @@
 import ky from "ky";
+import { z } from "zod";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
@@ -24,8 +25,8 @@ export const requestToParams = <T extends Record<string, unknown>>(
 			for (const v of value) {
 				searchParams.append(key, v.toString());
 			}
-		} else if (value !== undefined) {
-			searchParams.append(key, JSON.stringify(value));
+		} else if (value !== undefined && value !== null) {
+			searchParams.append(key, value.toString());
 		}
 	}
 	return searchParams;
@@ -44,3 +45,6 @@ export const parseParam = (
 		searchParams.append(key, JSON.stringify(value));
 	}
 };
+
+export const sortSchema = z.enum(["asc", "desc"]);
+export type Sort = z.infer<typeof sortSchema>;

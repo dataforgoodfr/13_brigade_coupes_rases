@@ -9,10 +9,7 @@ export const UsersListPage: React.FC = () => {
 		<div className="flex flex-col gap-8 p-4">
 			<h1 className="text-2xl font-bold">Liste des utilisateurs</h1>
 			<Filters />
-
-			<div className="h-1/3">
-				<UsersList />
-			</div>
+			<UsersList />
 		</div>
 	);
 };

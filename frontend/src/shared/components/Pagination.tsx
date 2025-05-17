@@ -12,13 +12,13 @@ import { useState } from "react";
 
 const DISPLAYED_PAGES_CHUNK = 5;
 
-type PaginationProps = {
+type Props = {
 	currentPage: number;
 	setCurrentPage: (page: number) => void;
 	pagesCount: number;
 };
 
-const Pagination: React.FC<PaginationProps> = ({
+export const Pagination: React.FC<Props> = ({
 	currentPage,
 	setCurrentPage,
 	pagesCount,

@@ -3,13 +3,13 @@ import { paginationResponseSchema } from "@/shared/api/types";
 import { departmentSchema } from "@/shared/store/referential/referential";
 import { z } from "zod";
 
-const userResponseSchema = z.object({
+export const userResponseSchema = z.object({
 	id: z.string(),
 	login: z.string(),
 	email: z.string(),
 	firstname: z.string(),
 	lastname: z.string(),
-	role: roleSchema.optional(),
+	role: roleSchema,
 	departments_ids: z.array(z.string()),
 });
 

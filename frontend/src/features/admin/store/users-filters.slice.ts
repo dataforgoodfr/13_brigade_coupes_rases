@@ -1,5 +1,9 @@
-import type { FiltersRequest } from "@/features/admin/store/filters";
+import type {
+	FiltersRequest,
+	SortableKeys,
+} from "@/features/admin/store/filters";
 import type { Role } from "@/features/user/store/user";
+import type { Sort } from "@/shared/api/api";
 import {
 	type NamedId,
 	type SelectableItem,
@@ -14,6 +18,8 @@ interface FiltersState {
 	name: string;
 	roles: SelectableItem<Role>[];
 	departments: SelectableItem<NamedId>[];
+	ascSort: SortableKeys;
+	descSort: SortableKeys;
 	page: number;
 	size: number;
 }
@@ -24,6 +30,8 @@ const initialState: FiltersState = {
 		{ isSelected: true, item: "volunteer" },
 	],
 	departments: [],
+	ascSort: [],
+	descSort: [],
 	page: 0,
 	size: 10,
 };
@@ -37,6 +45,16 @@ export const usersFiltersSlice = createSlice({
 		},
 		setRoles: (state, { payload }: PayloadAction<SelectableItem<Role>[]>) => {
 			state.roles = payload;
+		},
+		toggleSort: (state, { payload }: PayloadAction<SortableKeys[number]>) => {
+			if (state.ascSort.includes(payload)) {
+				state.ascSort = state.ascSort.filter((col) => col !== payload);
+				state.descSort.push(payload);
+			} else if (state.descSort.includes(payload)) {
+				state.descSort = state.descSort.filter((col) => col !== payload);
+			} else {
+				state.ascSort.push(payload);
+			}
 		},
 		setDepartments: (
 			state,
@@ -67,7 +85,15 @@ export const usersFiltersSlice = createSlice({
 const selectState = (state: RootState) => state.usersFilters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
 	selectState,
-	({ name, roles, departments, page, size }): FiltersRequest => {
+	({
+		name,
+		roles,
+		departments,
+		page,
+		size,
+		ascSort,
+		descSort,
+	}): FiltersRequest => {
 		return {
 			name,
 			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
@@ -76,6 +102,8 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 				.map((department) => department.item.id),
 			page,
 			size,
+			ascSort,
+			descSort,
 		};
 	},
 );
@@ -95,6 +123,14 @@ export const selectDepartments = createTypedDraftSafeSelector(
 	(state) => state.departments,
 );
 
+export const selectColumnSort = (column: SortableKeys[number]) =>
+	createTypedDraftSafeSelector(selectState, (state): Sort | undefined =>
+		state.ascSort.includes(column)
+			? "asc"
+			: state.descSort.includes(column)
+				? "desc"
+				: undefined,
+	);
 export const selectPage = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.page,

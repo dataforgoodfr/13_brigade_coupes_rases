@@ -1,18 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import type { Sort } from "@/shared/api/api";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-type SortingButtonProps = {
+type Props = {
 	onClick: () => void;
 	children: React.ReactNode;
+	sort?: Sort;
 };
 
-const SortingButton: React.FC<SortingButtonProps> = ({ onClick, children }) => {
+export const SortingButton: React.FC<Props> = ({ onClick, children, sort }) => {
 	return (
 		<Button variant="ghost" onClick={onClick}>
 			{children}
-			<ArrowUpDown />
+			{sort === undefined && <ArrowUpDown />}
+			{sort === "asc" && <ArrowUp />}
+			{sort === "desc" && <ArrowDown />}
 		</Button>
 	);
 };
-
-export default SortingButton;
