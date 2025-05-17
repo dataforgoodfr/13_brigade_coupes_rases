@@ -130,3 +130,7 @@
 @utility slide-up {
 	animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
+
+[aria-disabled="true"] {
+	@apply opacity-50 cursor-not-allowed;
+}

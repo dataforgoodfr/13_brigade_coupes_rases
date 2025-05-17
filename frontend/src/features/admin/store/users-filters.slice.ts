@@ -1,24 +1,41 @@
-import type { FiltersRequest } from "@/features/admin/store/users-schemas";
+import type {
+	FiltersRequest,
+	SortableKeys,
+} from "@/features/admin/store/filters";
 import type { Role } from "@/features/user/store/user";
+import type { Sort } from "@/shared/api/api";
+import {
+	type NamedId,
+	type SelectableItem,
+	listToSelectableItems,
+} from "@/shared/items";
+import { getReferentialThunk } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-export type Region = {
-	code: string;
-	nom: string;
-};
-
 interface FiltersState {
 	name: string;
-	role: Role | "all";
-	regions: Region[];
+	roles: SelectableItem<Role>[];
+	departments: SelectableItem<NamedId>[];
+	ascSort: SortableKeys;
+	descSort: SortableKeys;
+	page: number;
+	size: number;
 }
 const initialState: FiltersState = {
 	name: "",
-	role: "all",
-	regions: [],
+	roles: [
+		{ isSelected: true, item: "admin" },
+		{ isSelected: true, item: "volunteer" },
+	],
+	departments: [],
+	ascSort: [],
+	descSort: [],
+	page: 0,
+	size: 10,
 };
+
 export const usersFiltersSlice = createSlice({
 	initialState,
 	name: "usersFilters",
@@ -26,33 +43,67 @@ export const usersFiltersSlice = createSlice({
 		setName: (state, { payload }: PayloadAction<string>) => {
 			state.name = payload;
 		},
-		setRole: (state, { payload }: PayloadAction<Role | "all">) => {
-			state.role = payload;
+		setRoles: (state, { payload }: PayloadAction<SelectableItem<Role>[]>) => {
+			state.roles = payload;
 		},
-		toggleRegion: (state, { payload }: PayloadAction<Region>) => {
-			const regionIdx = state.regions.findIndex((r) => r.code === payload.code);
-
-			if (regionIdx === -1) {
-				state.regions.push(payload);
+		toggleSort: (state, { payload }: PayloadAction<SortableKeys[number]>) => {
+			if (state.ascSort.includes(payload)) {
+				state.ascSort = state.ascSort.filter((col) => col !== payload);
+				state.descSort.push(payload);
+			} else if (state.descSort.includes(payload)) {
+				state.descSort = state.descSort.filter((col) => col !== payload);
 			} else {
-				state.regions.splice(regionIdx, 1);
+				state.ascSort.push(payload);
 			}
 		},
+		setDepartments: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<NamedId>[]>,
+		) => {
+			state.departments = payload;
+		},
+		setPage: (state, { payload }: PayloadAction<number>) => {
+			state.page = payload;
+		},
+		setSize: (state, { payload }: PayloadAction<number>) => {
+			state.size = payload;
+		},
+	},
+	extraReducers: (builder) => {
+		builder.addCase(getReferentialThunk.fulfilled, (state, { payload }) => {
+			state.departments = payload.departments
+				? listToSelectableItems(
+						Object.entries(payload.departments).map(
+							([id, dpt]) => ({ id, name: dpt.name }) satisfies NamedId,
+						),
+					)
+				: [];
+		});
 	},
 });
-
-export const {
-	actions: { setName, setRole, toggleRegion },
-} = usersFiltersSlice;
 
 const selectState = (state: RootState) => state.usersFilters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
 	selectState,
-	({ name, role, regions }): FiltersRequest | undefined => {
+	({
+		name,
+		roles,
+		departments,
+		page,
+		size,
+		ascSort,
+		descSort,
+	}): FiltersRequest => {
 		return {
 			name,
-			role: role === "all" ? undefined : role,
-			regions: regions.map((r) => r.nom),
+			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
+			departments_ids: departments
+				.filter((department) => department.isSelected)
+				.map((department) => department.item.id),
+			page,
+			size,
+			ascSort,
+			descSort,
 		};
 	},
 );
@@ -62,12 +113,30 @@ export const selectName = createTypedDraftSafeSelector(
 	(state) => state.name,
 );
 
-export const selectRole = createTypedDraftSafeSelector(
+export const selectRoles = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.role,
+	(state) => state.roles,
 );
 
-export const selectRegions = createTypedDraftSafeSelector(
+export const selectDepartments = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.regions,
+	(state) => state.departments,
+);
+
+export const selectColumnSort = (column: SortableKeys[number]) =>
+	createTypedDraftSafeSelector(selectState, (state): Sort | undefined =>
+		state.ascSort.includes(column)
+			? "asc"
+			: state.descSort.includes(column)
+				? "desc"
+				: undefined,
+	);
+export const selectPage = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.page,
+);
+
+export const selectSize = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.size,
 );

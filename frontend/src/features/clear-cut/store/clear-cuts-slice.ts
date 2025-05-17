@@ -1,6 +1,7 @@
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
+import { parseParam } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -59,12 +60,8 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 				searchParams.append("sw_lng", geoBounds.sw.lng.toString());
 				searchParams.append("ne_lat", geoBounds.ne.lat.toString());
 				searchParams.append("ne_lng", geoBounds.ne.lng.toString());
-			} else if (Array.isArray(value)) {
-				for (const v of value) {
-					searchParams.append(filter, v.toString());
-				}
-			} else if (value !== undefined) {
-				searchParams.append(filter, JSON.stringify(value));
+			} else {
+				parseParam(filter, value, searchParams);
 			}
 		}
 		const result = await api()

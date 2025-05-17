@@ -14,17 +14,13 @@ import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
-	type NamedId,
-	type SelectableItem,
 	booleanSelectableToString,
+	namedIdTranslator,
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
 import clsx from "clsx";
 import { type FC, type PropsWithChildren, useEffect } from "react";
-
-const namedIdTranslator = ({ item }: SelectableItem<NamedId>) =>
-	item.name.toString();
 
 interface Props {
 	className?: string;
