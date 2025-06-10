@@ -18,7 +18,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const ref = useRef<L.FeatureGroup>(null);
 	const location = useLocation();
 	const navigateToDetail = useNavigateToClearCut(report.id);
-	const {breakpoint}= useBreakpoint()
+	const { breakpoint } = useBreakpoint();
 	useEffect(() => {
 		if (focusedClearCutId === report.id) {
 			ref.current?.openPopup();
@@ -56,15 +56,14 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				mouseout: (event) => {
 					event.target.closePopup();
 				},
-				dblclick:() => {
-						 navigateToDetail();
+				dblclick: () => {
+					navigateToDetail();
 				},
 				click: (event) => {
-					if(breakpoint !== "mobile"){
-						 navigateToDetail();
-					} else{
-					event.target.openPopup();
-
+					if (breakpoint !== "mobile") {
+						navigateToDetail();
+					} else {
+						event.target.openPopup();
 					}
 				},
 				popupopen: () => {
