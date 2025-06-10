@@ -1,8 +1,10 @@
+import { Slider } from "@/components/ui/slider";
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
 import {
 	filtersSlice,
 	getFiltersThunk,
-	selectAreaPresetsHectare,
+	selectAreaRange,
+	selectAreas,
 	selectCutYears,
 	selectDepartments,
 	selectEcologicalZoning,
@@ -12,6 +14,7 @@ import {
 } from "@/features/clear-cut/store/filters.slice";
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
+import { useDebounce } from "@/shared/hooks/debounce";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	booleanSelectableToString,
@@ -65,11 +68,8 @@ export function AdvancedFilters({ className }: Props) {
 		namedIdTranslator,
 		namedIdTranslator,
 	);
-	const areaPresets = useEnhancedItems(
-		useAppSelector(selectAreaPresetsHectare),
-		(area) => `${area.item} hectares`,
-		selectableItemToString,
-	);
+	const areaRange = useAppSelector(selectAreaRange);
+	const areas = useAppSelector(selectAreas);
 	const statuses = useEnhancedItems(
 		useAppSelector(selectStatuses),
 		(status) => <StatusWithLabel status={status.item} />,
@@ -94,6 +94,13 @@ export function AdvancedFilters({ className }: Props) {
 	useEffect(() => {
 		dispatch(getFiltersThunk());
 	}, [dispatch]);
+	const [currentAreas, onAreasChanged] = useDebounce(
+		areas,
+		(newAreas: number[] | undefined) =>
+			dispatch(
+				filtersSlice.actions.setAreas(newAreas as [number, number] | undefined),
+			),
+	);
 	return (
 		<div className={clsx("flex flex-col gap-2 py-3", className)}>
 			<div className="flex gap-2">
@@ -129,17 +136,22 @@ export function AdvancedFilters({ className }: Props) {
 			</div>
 			<div className="flex gap-2">
 				<FieldWrapper>
-					<label htmlFor={AREA.id}>{AREA.label}</label>
-					<ComboboxFilter
-						type="multiple"
-						countPreview
-						hasInput
-						hasReset
-						id={AREA.id}
-						label={AREA.label}
-						items={areaPresets}
-						changeOnClose={(areaPresets) =>
-							dispatch(filtersSlice.actions.setAreas(areaPresets))
+					<label htmlFor={AREA.id}>
+						{AREA.label} hectares{" "}
+						{currentAreas && (
+							<>
+								({currentAreas[0]}, {currentAreas[1]})
+							</>
+						)}
+					</label>
+					<Slider
+						className="my-auto"
+						value={currentAreas}
+						min={areaRange.min}
+						max={areaRange.max}
+						step={0.5}
+						onValueChange={(values) =>
+							onAreasChanged(values as [number, number] | undefined)
 						}
 					/>
 				</FieldWrapper>

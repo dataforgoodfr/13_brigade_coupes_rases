@@ -142,6 +142,7 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
         reports = reports.filter(ClearCutReport.status.in_(filters.statuses))
 
     if filters.min_area_hectare is not None:
+        print(f"Filtering by min area: {filters.min_area_hectare}")
         reports = reports.filter(
             ClearCutReport.total_area_hectare >= filters.min_area_hectare
         )
@@ -182,28 +183,37 @@ def build_clearcuts_map(
             # Needs to clusterized because with estimate that points are too many
             if area > 1:
                 reports_cnt = reports_with_filters.count()
-                # Distance calculated to estimate the clusters size,
-                # if we have many points in an area the distance used by the cluster while be bigger
-                distance = sqrt(area / reports_cnt / 2)
-                clusters = db.query(
-                    func.unnest(
-                        ST_ClusterWithin(
-                            reports_with_filters.subquery().c.average_location, distance
-                        )
-                    ).label("cluster"),
-                ).subquery()
-                clusterized_points = ClusterizedPointsResponseSchema(
-                    total=reports_cnt,
-                    content=[
-                        CountedPoint(
-                            count=row[0], point=Point.model_validate_json(row[1])
-                        )
-                        for row in db.query(
-                            ST_NumGeometries(clusters.c.cluster).label("points_cnt"),
-                            ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
-                        ).all()
-                    ],
-                )
+                print(f"COUNT {reports_cnt}")
+                if reports_cnt == 0:
+                    clusterized_points = ClusterizedPointsResponseSchema(
+                        total=reports_cnt, content=[]
+                    )
+                else:
+                    # Distance calculated to estimate the clusters size,
+                    # if we have many points in an area the distance used by the cluster while be bigger
+                    distance = sqrt(area / reports_cnt / 2)
+                    clusters = db.query(
+                        func.unnest(
+                            ST_ClusterWithin(
+                                reports_with_filters.subquery().c.average_location,
+                                distance,
+                            )
+                        ).label("cluster"),
+                    ).subquery()
+                    clusterized_points = ClusterizedPointsResponseSchema(
+                        total=reports_cnt,
+                        content=[
+                            CountedPoint(
+                                count=row[0], point=Point.model_validate_json(row[1])
+                            )
+                            for row in db.query(
+                                ST_NumGeometries(clusters.c.cluster).label(
+                                    "points_cnt"
+                                ),
+                                ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
+                            ).all()
+                        ],
+                    )
             else:
                 # If area is little clusters are useless
                 clusterized_points = process_points_from_reports(reports_with_filters)

@@ -22,14 +22,16 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
+import type { Range } from "@/shared/types/range";
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
 	geoBounds?: Bounds;
+	area_range: Range;
 	departments: SelectableItem<Department>[];
 	statuses: SelectableItem<ClearCutStatus>[];
-	areas: SelectableItem<number>[];
+	areas?: [number, number];
 	excessive_slope: EventuallyBooleanSelectableItems;
 	ecological_zoning: EventuallyBooleanSelectableItems;
 	favorite: EventuallyBooleanSelectableItems;
@@ -39,7 +41,7 @@ export const initialState: FiltersState = {
 	cutYears: [],
 	rules: [],
 	departments: [],
-	areas: [],
+	area_range: { min: 0, max: 0 },
 	statuses: [],
 	excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN,
 	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
@@ -81,7 +83,10 @@ export const filtersSlice = createSlice({
 		) => {
 			state.cutYears = payload;
 		},
-		setAreas: (state, { payload }: PayloadAction<SelectableItem<number>[]>) => {
+		setAreas: (
+			state,
+			{ payload }: PayloadAction<[number, number] | undefined>,
+		) => {
 			state.areas = payload;
 		},
 		updateDepartment: (
@@ -155,7 +160,7 @@ export const filtersSlice = createSlice({
 						cut_years: cutYears,
 						rules,
 						departments,
-						area_preset_hectare: areaPresetsHectare,
+						area_range,
 						statuses,
 						excessive_slope,
 						has_ecological_zonings: ecological_zoning,
@@ -163,13 +168,14 @@ export const filtersSlice = createSlice({
 					},
 				},
 			) => {
+				state.areas = [area_range.min, area_range.max];
 				state.cutYears = listToSelectableItems(cutYears);
 				state.rules = listToSelectableItems(rules);
 				state.ecological_zoning = booleanToSelectableItem(ecological_zoning);
 				state.excessive_slope = booleanToSelectableItem(excessive_slope);
 				state.favorite = booleanToSelectableItem(favorite);
 				state.departments = listToSelectableItems(departments);
-				state.areas = listToSelectableItems(areaPresetsHectare);
+				state.area_range = area_range;
 				state.statuses = listToSelectableItems(statuses);
 			},
 		);
@@ -199,7 +205,8 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		departments_ids: departments
 			.filter((d) => d.isSelected)
 			.map((d) => d.item.id),
-		areas: areas.filter((a) => a.isSelected).map((a) => a.item),
+		min_area_hectare: areas?.[0],
+		max_area_hectare: areas?.[1],
 		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
 		has_ecological_zonings: ecological_zoning.find((item) => item.isSelected)
 			?.item,
@@ -226,11 +233,14 @@ export const selectTags = createTypedDraftSafeSelector(
 	(state) => state.rules,
 );
 
-export const selectAreaPresetsHectare = createTypedDraftSafeSelector(
+export const selectAreas = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.areas,
 );
-
+export const selectAreaRange = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.area_range,
+);
 export const selectEcologicalZoning = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.ecological_zoning,
