@@ -22,7 +22,7 @@ export const filtersResponseSchema = z.object({
 	cut_years: z.array(z.number()),
 	departments_ids: z.string().array().optional(),
 	statuses: clearCutStatusSchema.array().optional(),
-	area_range: z.object({ min: z.number(), max: z.number() }),
+	area_range: z.object({min: z.number(), max: z.number()}),
 	excessive_slope: z.boolean().optional(),
 	favorite: z.boolean().optional(),
 	has_ecological_zonings: z.boolean().optional(),

@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 
 from sqlalchemy import desc, extract, func
 from sqlalchemy.orm import Session
@@ -19,14 +20,12 @@ def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSc
     departments_query = (
         db.query(Department.id).join(City).join(ClearCutReport).distinct()
     )
-    area_range = db.query(
+    [min, max] = db.query(
         func.min(ClearCutReport.total_area_hectare),
         func.max(ClearCutReport.total_area_hectare),
     ).first()
-    if area_range is None:
-        min_area, max_area = 0, 0
-    else:
-        min_area, max_area = area_range
+    min = 0 if min is None else min
+    max = 0 if max is None else max
     if connected_user is not None and len(connected_user.departments) > 0:
         departments_query.filter(
             Department.id.in_([dep.id for dep in connected_user.departments])
@@ -34,9 +33,7 @@ def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSc
     departments = departments_query.all()
     statuses = db.query(ClearCutReport.status).distinct().all()
     return FiltersResponseSchema(
-        area_range=AreaRangeResponseSchema(
-            min=math.floor(min_area), max=math.ceil(max_area)
-        ),
+        area_range=AreaRangeResponseSchema(min=math.floor(min), max=math.ceil(max)),
         cut_years=[row[0] for row in cut_years],
         departments_ids=[str(row[0]) for row in departments],
         ecological_zoning=None,

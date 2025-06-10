@@ -14,8 +14,9 @@ export function ClearCutItem({
 	rules: tags,
 	city,
 }: ClearCutReport) {
-	const handleCardClick = useNavigateToClearCut(id);
+	const handleCardClick = useNavigateToClearCut(id)
 	const { focusedClearCutId, setFocusedClearCutId } = useMapInstance();
+
 
 	return (
 		<li

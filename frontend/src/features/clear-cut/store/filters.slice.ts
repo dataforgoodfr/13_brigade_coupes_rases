@@ -83,10 +83,7 @@ export const filtersSlice = createSlice({
 		) => {
 			state.cutYears = payload;
 		},
-		setAreas: (
-			state,
-			{ payload }: PayloadAction<[number, number] | undefined>,
-		) => {
+		setAreas: (state, { payload }: PayloadAction<[number, number] | undefined>) => {
 			state.areas = payload;
 		},
 		updateDepartment: (
