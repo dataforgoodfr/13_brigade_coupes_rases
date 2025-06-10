@@ -1,10 +1,9 @@
 import math
 
-from sqlalchemy import desc, extract, func
-from sqlalchemy.orm import Session
-
 from app.models import City, ClearCut, ClearCutReport, Department, User
 from app.schemas.filters import AreaRangeResponseSchema, FiltersResponseSchema
+from sqlalchemy import desc, extract, func
+from sqlalchemy.orm import Session
 
 
 def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSchema:
