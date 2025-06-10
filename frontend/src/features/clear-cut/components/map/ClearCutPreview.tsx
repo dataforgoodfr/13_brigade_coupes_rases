@@ -1,10 +1,12 @@
 import { ClearCutMapPopUp } from "@/features/clear-cut/components/map/ClearCutMapPopUp";
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
+import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
 import type {
 	ClearCut,
 	ClearCutReport,
 } from "@/features/clear-cut/store/clear-cuts";
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useLocation } from "@tanstack/react-router";
 import { type RefObject, useEffect, useRef } from "react";
 import { GeoJSON } from "react-leaflet";
@@ -15,7 +17,8 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const { setFocusedClearCutId, focusedClearCutId } = useMapInstance();
 	const ref = useRef<L.FeatureGroup>(null);
 	const location = useLocation();
-
+	const navigateToDetail = useNavigateToClearCut(report.id);
+	const {breakpoint}= useBreakpoint()
 	useEffect(() => {
 		if (focusedClearCutId === report.id) {
 			ref.current?.openPopup();
@@ -53,8 +56,16 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				mouseout: (event) => {
 					event.target.closePopup();
 				},
+				dblclick:() => {
+						 navigateToDetail();
+				},
 				click: (event) => {
+					if(breakpoint !== "mobile"){
+						 navigateToDetail();
+					} else{
 					event.target.openPopup();
+
+					}
 				},
 				popupopen: () => {
 					setFocusedClearCutId(report.id);

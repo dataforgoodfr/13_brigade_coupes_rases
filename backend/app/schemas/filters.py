@@ -3,10 +3,13 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class AreaRangeResponseSchema(BaseModel):
+    min: int = Field(json_schema_extra={"example": 0.5})
+    max: int = Field(json_schema_extra={"example": 10})
+
+
 class FiltersResponseSchema(BaseModel):
-    area_preset_hectare: list[float] = Field(
-        json_schema_extra={"example": [0.5, 1, 2, 5, 10]},
-    )
+    area_range: AreaRangeResponseSchema
 
     cut_years: list[int] = Field(
         json_schema_extra={"example": [2020, 2021, 2022, 2023]},

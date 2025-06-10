@@ -6,15 +6,14 @@ import {
 } from "@/features/admin/store/users-filters.slice";
 import { Input } from "@/shared/components/input/Input";
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
+import { useDebounce } from "@/shared/hooks/debounce";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	namedIdTranslator,
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
-import { debounce } from "lodash-es";
 import { Search } from "lucide-react";
-import { useState } from "react";
 const DEPARTMENTS = {
 	id: "departments",
 	label: "Départements",
@@ -36,18 +35,9 @@ export const Filters: React.FC = () => {
 		namedIdTranslator,
 		namedIdTranslator,
 	);
-	const [search, setSearch] = useState(searchedName);
-
-	const handleSearch = debounce((name) => {
-		dispatch(usersFiltersSlice.actions.setName(name));
-	}, 500);
-
-	const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const name = e.target.value;
-
-		setSearch(name);
-		handleSearch(name);
-	};
+	const [search, handleSearch] = useDebounce(searchedName, (n) =>
+		dispatch(usersFiltersSlice.actions.setName(n)),
+	);
 
 	return (
 		<div className="flex items-center w-full gap-4">
@@ -55,7 +45,7 @@ export const Filters: React.FC = () => {
 				type="search"
 				placeholder="Rechercher un utilisateur..."
 				value={search}
-				onChange={onSearch}
+				onChange={(e) => handleSearch(e.target.value)}
 				prefix={<Search className="w-5 h-5 ml-4 stroke-zinc-600" />}
 				className="pl-12 w-sm text-zinc-600"
 			/>
