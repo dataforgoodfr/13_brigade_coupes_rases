@@ -3,7 +3,6 @@ import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
-import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { FormattedDate } from "react-intl";
 
@@ -15,9 +14,8 @@ export function ClearCutItem({
 	rules: tags,
 	city,
 }: ClearCutReport) {
-	const handleCardClick = useNavigateToClearCut(id)
+	const handleCardClick = useNavigateToClearCut(id);
 	const { focusedClearCutId, setFocusedClearCutId } = useMapInstance();
-
 
 	return (
 		<li

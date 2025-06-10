@@ -22,8 +22,8 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 import type { Range } from "@/shared/types/range";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
@@ -83,7 +83,10 @@ export const filtersSlice = createSlice({
 		) => {
 			state.cutYears = payload;
 		},
-		setAreas: (state, { payload }: PayloadAction<[number, number] | undefined>) => {
+		setAreas: (
+			state,
+			{ payload }: PayloadAction<[number, number] | undefined>,
+		) => {
 			state.areas = payload;
 		},
 		updateDepartment: (
