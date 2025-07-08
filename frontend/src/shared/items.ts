@@ -152,3 +152,6 @@ export const booleanSelectableToString = ({
 			return "Tout";
 	}
 };
+
+export const namedIdTranslator = ({ item }: SelectableItem<NamedId>) =>
+	item.name.toString();

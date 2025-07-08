@@ -8,6 +8,6 @@ export const mockFilters = http.get("*/api/v1/filters", () => {
 		rules_ids: Object.keys(fakeRules),
 		statuses: [...CLEAR_CUTTING_STATUSES],
 		departments_ids: Object.keys(fakeDepartments),
-		area_preset_hectare: [0.5, 1, 2, 5, 10],
+		area_range: { min: 0.5, max: 10 },
 	} satisfies FiltersResponse);
 });
