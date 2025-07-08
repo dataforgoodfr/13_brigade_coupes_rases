@@ -10,7 +10,7 @@ export const userResponseSchema = z.object({
 	firstname: z.string(),
 	lastname: z.string(),
 	role: roleSchema,
-	departments_ids: z.array(z.string()),
+	departments: z.array(z.string()),
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
@@ -21,7 +21,7 @@ export type PaginatedUsersResponse = z.infer<
 >;
 
 const userSchema = userResponseSchema
-	.omit({ departments_ids: true })
+	.omit({ departments: true })
 	.and(z.object({ departments: departmentSchema.array() }));
 export type User = z.infer<typeof userSchema>;
 export const paginatedUsersSchema = paginationResponseSchema(userSchema);

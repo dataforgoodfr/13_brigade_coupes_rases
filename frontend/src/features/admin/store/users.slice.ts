@@ -36,7 +36,7 @@ export const getUsersThunk = createAppAsyncThunk<
 		content: paginatedUsers.content.map((user) => {
 			return {
 				...user,
-				departments: selectDepartmentsByIds(state, user.departments_ids),
+				departments: selectDepartmentsByIds(state, user.departments),
 			} satisfies User;
 		}),
 	};
