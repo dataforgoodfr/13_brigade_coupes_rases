@@ -111,12 +111,8 @@ def clear_cut_to_clear_cut_response_schema(
     return ClearCutResponseSchema(
         id=str(clear_cut.id),
         report_id=str(clear_cut.report_id),
-        boundary=MultiPolygon.model_validate_json(clear_cut.boundary),
-        location=Point.model_validate_json(clear_cut.location),
-        ecological_zonings_ids=[
-            str(ecological_zoning.ecological_zoning_id)
-            for ecological_zoning in clear_cut.ecological_zonings
-        ],
+        boundary=MultiPolygon.model_validate_json(clear_cut.boundary_json),
+        location=Point.model_validate_json(clear_cut.location_json),
         created_at=clear_cut.created_at,
         observation_start_date=clear_cut.observation_start_date,
         observation_end_date=clear_cut.observation_end_date,

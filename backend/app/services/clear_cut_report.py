@@ -121,6 +121,7 @@ def sync_clear_cuts_reports(db: Session):
     rows = query_reports_with_additional_data(
         db, aggregated_cuts.subquery(), rules
     ).all()
+    report: ClearCutReport
     for row in rows:
         [
             report,
@@ -139,7 +140,6 @@ def sync_clear_cuts_reports(db: Session):
             slope_rule_id,
             ecological_zoning_rule_id,
         ] = row
-        report: ClearCutReport = report
         report.average_location = average_location
         report.total_area_hectare = total_area_hectare
         report.last_cut_date = cut_end

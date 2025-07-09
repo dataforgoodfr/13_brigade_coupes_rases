@@ -62,6 +62,5 @@ def report_to_response_schema(report: ClearCutReport) -> ClearCutReportResponseS
         status=report.status,
         slope_area_ratio_percentage=report.slope_area_ratio_percentage,
         updated_at=report.updated_at,
-        user_id=report.user_id and str(report.user_id),
-        city_id=str(report.city_id),
+        user_id=str(report.user_id) if report.user_id is not None else None,
     )

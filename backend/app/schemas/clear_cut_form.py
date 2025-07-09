@@ -2,7 +2,7 @@ from datetime import datetime
 from logging import getLogger
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 logger = getLogger(__name__)
 
@@ -98,12 +98,12 @@ class ClearCutFormResponse(ClearCutFormBase):
     id: int
     created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
-    _ = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "inspection_date": datetime(2025, 4, 23, 14, 00),
                 "weather": "Rainy",
@@ -144,13 +144,13 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
                 "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
+    )
 
 
 class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormResponse):
-    _ = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "inspection_date": datetime(2025, 4, 23, 14, 00),
                 "weather": "Rainy",
@@ -190,7 +190,8 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
                 "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
                 "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
-        }
+        },
+    )
 
 
 class ClearCutFormCreate(ClearCutFormBase):

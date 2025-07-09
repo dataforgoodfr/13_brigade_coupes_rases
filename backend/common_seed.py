@@ -36,8 +36,7 @@ def seed_cities_departments(db: Session):
 def get_cities(db: Session) -> list[City]:
     marseille = db.query(City).filter(City.zip_code == "13055").first()
     paris = db.query(City).filter(City.zip_code == "75056").first()
-
-    return [marseille, paris]
+    return [city for city in [marseille, paris] if city is not None]
 
 
 def seed_ecological_zonings(db: Session) -> tuple[EcologicalZoning, EcologicalZoning]:

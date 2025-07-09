@@ -51,7 +51,7 @@ class Filters(BaseModel):
     min_area_hectare: Optional[float] = None
     max_area_hectare: Optional[float] = None
     cut_years: list[int] = []
-    departments_ids: list[int] = []
+    departments_ids: list[str] = []
     statuses: list[str] = []
     has_ecological_zonings: Optional[bool] = None
     excessive_slope: Optional[bool] = None

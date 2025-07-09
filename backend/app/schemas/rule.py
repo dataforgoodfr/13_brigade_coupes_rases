@@ -64,7 +64,7 @@ class RuleSchema(BaseModel):
 
 def rule_to_rule(rule: Rules) -> RuleSchema:
     return RuleSchema(
-        id=str(rule.id),
+        id=rule.id,
         ecological_zonings_ids=[
             ecological_zoning.id for ecological_zoning in rule.ecological_zonings
         ],
