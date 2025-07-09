@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -28,9 +27,9 @@ def find_departments(
     )
 
 
-def get_department_by_id(db: Session, id: int) -> Optional[Department]:
+def get_department_by_id(db: Session, id: int) -> Department | None:
     return db.get(Department, id)
 
 
-def get_department_by_code(db: Session, code: str) -> Optional[Department]:
+def get_department_by_code(db: Session, code: str) -> Department | None:
     return db.query(Department).filter(Department.code == code).first()

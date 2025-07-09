@@ -1,6 +1,5 @@
 from datetime import datetime
 from logging import getLogger
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,11 +9,11 @@ logger = getLogger(__name__)
 class ClearCutPicture(BaseModel):
     id: int
     link: str
-    tag: Optional[str] = None
+    tag: str | None = None
 
 
 class ClearCutFormBase(BaseModel):
-    inspection_date: Optional[datetime] = None
+    inspection_date: datetime | None = None
     weather: None | str = None
     forest_description: None | str = None
     remainingTrees: None | bool = None
@@ -40,12 +39,12 @@ class ClearCutFormBase(BaseModel):
     psg_required_plot: None | bool = None
 
     # Image fields (S3 keys)
-    images_clear_cut: Optional[List[str]] = None
-    images_plantation: Optional[List[str]] = None
-    image_worksite_sign: Optional[List[str]] = None
-    images_tree_trunks: Optional[List[str]] = None
-    images_soil_state: Optional[List[str]] = None
-    images_access_road: Optional[List[str]] = None
+    images_clear_cut: list[str] | None = None
+    images_plantation: list[str] | None = None
+    image_worksite_sign: list[str] | None = None
+    images_tree_trunks: list[str] | None = None
+    images_soil_state: list[str] | None = None
+    images_access_road: list[str] | None = None
 
     class Config:
         json_schema_extra = {
@@ -195,4 +194,4 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
 
 
 class ClearCutFormCreate(ClearCutFormBase):
-    editor_id: Optional[int] = None
+    editor_id: int | None = None

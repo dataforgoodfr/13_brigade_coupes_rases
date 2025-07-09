@@ -1,6 +1,5 @@
 import re
 import uuid
-from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
@@ -37,7 +36,7 @@ class S3Service:
         self,
         filename: str,
         content_type: str,
-        report_id: Optional[str] = None,
+        report_id: str | None = None,
         expires_in: int = 3600,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB default
     ) -> dict:

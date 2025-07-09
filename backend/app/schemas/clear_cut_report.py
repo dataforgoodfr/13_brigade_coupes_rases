@@ -1,6 +1,5 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -11,7 +10,7 @@ logger = getLogger(__name__)
 
 
 class CreateClearCutsReportCreateSchema(BaseModel):
-    slope_area_ratio_percentage: Optional[float] = Field(
+    slope_area_ratio_percentage: float | None = Field(
         json_schema_extra={"example": "10"}
     )
     clear_cuts: list[ClearCutCreateSchema]
@@ -21,8 +20,8 @@ class CreateClearCutsReportCreateSchema(BaseModel):
 
 
 class ClearCutReportPatchSchema(BaseModel):
-    status: Optional[str] = None
-    user_id: Optional[int] = None
+    status: str | None = None
+    user_id: int | None = None
 
     @field_validator("status")
     def validate_status(cls, value):
@@ -33,13 +32,13 @@ class ClearCutReportPatchSchema(BaseModel):
 
 class ClearCutReportResponseSchema(BaseModel):
     id: str = Field(json_schema_extra={"example": "1"})
-    slope_area_ratio_percentage: Optional[float] = Field(
+    slope_area_ratio_percentage: float | None = Field(
         json_schema_extra={"example": "10"},
     )
     status: str = Field(
         json_schema_extra={"example": "validated"},
     )
-    user_id: Optional[str] = Field(
+    user_id: str | None = Field(
         json_schema_extra={"example": "1"},
     )
     clear_cuts_ids: list[str] = Field(

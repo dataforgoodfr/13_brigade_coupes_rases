@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 from sqlalchemy import desc, extract, func
 from sqlalchemy.orm import Session
@@ -8,7 +7,7 @@ from app.models import City, ClearCut, ClearCutReport, Department, User
 from app.schemas.filters import AreaRangeResponseSchema, FiltersResponseSchema
 
 
-def build_filters(db: Session, connected_user: Optional[User]) -> FiltersResponseSchema:
+def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSchema:
     cut_years = (
         db.query(extract("year", ClearCut.observation_end_date).label("cut_year"))
         .distinct()

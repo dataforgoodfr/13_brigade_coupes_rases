@@ -1,14 +1,10 @@
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import Rules
 
 
 class RuleBaseSchema(BaseModel):
-    threshold: Optional[float] = Field(
-        default=None, json_schema_extra={"example": "42"}
-    )
+    threshold: float | None = Field(default=None, json_schema_extra={"example": "42"})
     ecological_zonings_ids: list[str] = Field(
         default=[], json_schema_extra={"example": ["1", "2", "3"]}
     )
@@ -58,7 +54,7 @@ def rule_to_rule_response(rule: Rules) -> RuleResponseSchema:
 
 class RuleSchema(BaseModel):
     id: int
-    threshold: Optional[float]
+    threshold: float | None
     ecological_zonings_ids: list[int]
 
 

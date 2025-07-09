@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -99,5 +98,5 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     return user_db
 
 
-def get_user_by_email(db: Session, email: str) -> Optional[User]:
+def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter_by(email=email).first()

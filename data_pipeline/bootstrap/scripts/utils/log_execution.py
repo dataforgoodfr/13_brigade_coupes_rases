@@ -3,8 +3,9 @@ import logging
 import math
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -25,7 +26,7 @@ def _format_time(timespan: float, precision: int = 3) -> str:
             value = int(leftover / length)
             if value > 0:
                 leftover = leftover % length
-                time_parts.append("%s%s" % (str(value), suffix))
+                time_parts.append(f"{value}{suffix}")
             if leftover < 1:
                 break
         return " ".join(time_parts)
@@ -48,21 +49,21 @@ def _format_time(timespan: float, precision: int = 3) -> str:
         order = min(-int(math.floor(math.log10(timespan)) // 3), 3)
     else:
         order = 3
-    return "%.*g %s" % (precision, timespan * scaling[order], units[order])
+    return f"{timespan * scaling[order]:.{precision}g} {units[order]}"
 
 
 def log_execution(
     result_filepath: str | Path | list[str | Path],
-) -> Callable[[Callable[..., T]], Callable[..., Optional[T]]]:
+) -> Callable[[Callable[..., T]], Callable[..., T | None]]:
     """
     Decorator for logging start, end, and duration
     """
     if not isinstance(result_filepath, list):
         result_filepath = [result_filepath]
 
-    def decorator(func: Callable[..., T]) -> Callable[..., Optional[T]]:
+    def decorator(func: Callable[..., T]) -> Callable[..., T | None]:
         @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Optional[T]:
+        def wrapper(*args: Any, **kwargs: Any) -> T | None:
             # Get the function name
             decorated_function_name = func.__name__
 

@@ -27,10 +27,10 @@ IGNORE_TABLES = ["spatial_ref_sys"]
 
 def render_item(obj_type, obj, autogen_context):
     """Apply custom rendering for selected items."""
-    if obj_type == "type" and isinstance(obj, (Geometry, Geography, Raster)):
+    if obj_type == "type" and isinstance(obj, Geometry | Geography | Raster):
         import_name = obj.__class__.__name__
         autogen_context.imports.add(f"from geoalchemy2 import {import_name}")
-        return "%r" % obj
+        return f"{obj!r}"
 
     # default rendering for other objects
     return False

@@ -95,7 +95,7 @@ class User(Base):
     lastname: Mapped[str] = mapped_column(String, nullable=False)
     login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    password: Mapped[str | None] = mapped_column(String, nullable=True)
+    password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False

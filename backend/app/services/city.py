@@ -1,12 +1,10 @@
-from typing import Optional
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models import City
 
 
-def get_city_by_name(db: Session, name: str) -> Optional[City]:
+def get_city_by_name(db: Session, name: str) -> City | None:
     return db.query(City).filter(City.name == name).first()
 
 

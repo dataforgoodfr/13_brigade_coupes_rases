@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -34,32 +33,32 @@ def get_clearcuts_report_by_id(
 
 @router.get("/", response_model=ClearCutMapResponseSchema)
 def get_clearcuts_map(
-    sw_lat: Optional[float] = Query(
+    sw_lat: float | None = Query(
         None,
         description="Sout west latitude",
         openapi_examples={"default": {"value": 47.49308072945064}},
     ),
-    sw_lng: Optional[float] = Query(
+    sw_lng: float | None = Query(
         None,
         description="Sout west longitude",
         openapi_examples={"default": {"value": -1.0766601562500002}},
     ),
-    ne_lat: Optional[float] = Query(
+    ne_lat: float | None = Query(
         None,
         description="North east latitude",
         openapi_examples={"default": {"value": 49.79899569636492}},
     ),
-    ne_lng: Optional[float] = Query(
+    ne_lng: float | None = Query(
         None,
         description="North east longitude",
         openapi_examples={"default": {"value": 4.051208496093751}},
     ),
-    min_area_hectare: Optional[float] = Query(
+    min_area_hectare: float | None = Query(
         None,
         description="Minimum area in hectare",
         openapi_examples={"default": {"value": 1.0}},
     ),
-    max_area_hectare: Optional[float] = Query(
+    max_area_hectare: float | None = Query(
         None,
         description="Maximum area in hectare",
         openapi_examples={"default": {"value": 100.0}},
@@ -79,17 +78,17 @@ def get_clearcuts_map(
         description="List of department ids",
         openapi_examples={"default": {"value": ["1"]}},
     ),
-    has_ecological_zonings: Optional[bool] = Query(
+    has_ecological_zonings: bool | None = Query(
         None,
         description="Has ecological zonings",
         openapi_examples={"default": {"value": False}},
     ),
-    excessive_slope: Optional[bool] = Query(
+    excessive_slope: bool | None = Query(
         None,
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),
-    with_points: Optional[bool] = Query(
+    with_points: bool | None = Query(
         None,
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},

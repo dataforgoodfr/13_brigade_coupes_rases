@@ -46,8 +46,8 @@ docker-stop = "docker compose down"
 target-version = "py313"
 
 [tool.ruff.lint]
-# Enable isort and flake8-bugbear on top of the defaults
-extend-select = ["I", "B"]
+# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
+extend-select = ["I", "B", "UP"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

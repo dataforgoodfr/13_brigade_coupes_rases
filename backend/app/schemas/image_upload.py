@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -10,8 +10,8 @@ class ImageUploadRequest(BaseModel):
     content_type: str = Field(
         ..., description="MIME type of the file (e.g., image/jpeg, image/png)"
     )
-    file_size: Optional[int] = Field(None, description="Size of the file in bytes")
-    report_id: Optional[str] = Field(
+    file_size: int | None = Field(None, description="Size of the file in bytes")
+    report_id: str | None = Field(
         None, description="ID of the clear cut report this image belongs to"
     )
 
@@ -20,7 +20,7 @@ class ImageUploadResponse(BaseModel):
     """Response schema for pre-signed upload URL"""
 
     upload_url: str = Field(..., description="Pre-signed URL for uploading the file")
-    fields: Dict[str, Any] = Field(
+    fields: dict[str, Any] = Field(
         ..., description="Fields to include in the POST request"
     )
     file_url: str = Field(

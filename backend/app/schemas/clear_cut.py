@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, Field
@@ -46,31 +45,31 @@ class ClearCutBaseSchema(BaseModel):
             "example": "2023-01-01T00:00:00Z",
         }
     )
-    bdf_resinous_area_hectare: Optional[float] = Field(
+    bdf_resinous_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_deciduous_area_hectare: Optional[float] = Field(
+    bdf_deciduous_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_mixed_area_hectare: Optional[float] = Field(
+    bdf_mixed_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_poplar_area_hectare: Optional[float] = Field(
+    bdf_poplar_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    ecological_zoning_area_hectare: Optional[float] = Field(
+    ecological_zoning_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
