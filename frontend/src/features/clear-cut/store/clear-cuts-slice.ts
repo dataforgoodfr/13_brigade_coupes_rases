@@ -62,7 +62,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 				const latestForm = formsData.content[0] as Record<string, unknown>;
 
 				// Map backend form fields to frontend field names
-				return {
+				const clearCutForm: ClearCutForm = {
 					...baseReport,
 					// On-site inspection fields
 					onSiteDate: latestForm.inspection_date
@@ -126,7 +126,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 					imgsPlantation:
 						(latestForm.images_plantation as string[]) || undefined,
 					imgWorksiteSign:
-						(latestForm.image_worksite_sign as string) || undefined,
+						(latestForm.image_worksite_sign as string[]) || undefined,
 					imgsTreeTrunks:
 						(latestForm.images_tree_trunks as string[]) || undefined,
 					imgsSoilState:
@@ -134,6 +134,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 					imgsAccessRoad:
 						(latestForm.images_access_road as string[]) || undefined,
 				};
+				return clearCutForm;
 			}
 		} catch (error) {
 			// If no forms exist or error fetching, just return the base report
@@ -179,7 +180,6 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 >("submitClearCutForm", async ({ reportId, formData }, { extra: { api } }) => {
 	// Map frontend field names to backend field names
 	const backendFormData = {
-		...formData,
 		// On-site inspection fields
 		inspection_date: formData.onSiteDate ? formData.onSiteDate : undefined,
 		weather: formData.weather,
@@ -230,43 +230,6 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 		images_tree_trunks: formData.imgsTreeTrunks,
 		images_soil_state: formData.imgsSoilState,
 		images_access_road: formData.imgsAccessRoad,
-
-		// Remove frontend field names to avoid conflicts
-		onSiteDate: undefined,
-		standTypeAndSilviculturalSystemBCC: undefined,
-		isPlantationPresentACC: undefined,
-		newTreeSpicies: undefined,
-		isWorksiteSignPresent: undefined,
-		waterCourseOrWetlandPresence: undefined,
-		protectedSpeciesDestructionIndex: undefined,
-		soilState: undefined,
-		isNatura2000: undefined,
-		ecoZoneType: undefined,
-		isNearEcoZone: undefined,
-		nearEcoZoneType: undefined,
-		protectedSpeciesOnZone: undefined,
-		protectedSpeciesHabitatOnZone: undefined,
-		isDDT: undefined,
-		byWho: undefined,
-		companyName: undefined,
-		ownerName: undefined,
-		isCCOrCompanyCertified: undefined,
-		isMoreThan20ha: undefined,
-		isSubjectToPSG: undefined,
-		isRelevantComplaintPEFC: undefined,
-		isRelevantComplaintREDIII: undefined,
-		isRelevantComplaintOFB: undefined,
-		isRelevantAlertSRGS: undefined,
-		isRelevantAlertPSG: undefined,
-		isRelevantRequestPSG: undefined,
-		actionsUndertaken: undefined,
-		otherInfos: undefined,
-		imgsClearCut: undefined,
-		imgsPlantation: undefined,
-		imgWorksiteSign: undefined,
-		imgsTreeTrunks: undefined,
-		imgsSoilState: undefined,
-		imgsAccessRoad: undefined,
 	};
 
 	await api()
