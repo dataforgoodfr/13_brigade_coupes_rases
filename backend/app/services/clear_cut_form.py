@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models import ClearCutForm, User
+from app.models import ClearCutForm, ClearCutReport, User
 from app.schemas.clear_cut_form import (
     ClearCutFormWithStrategyResponse,
     ClearCutReportFormWithStrategy,
@@ -118,6 +118,13 @@ def add_clear_cut_form_entry(
             new_clear_cut_form_entry.request_engaged = last_form_entry.request_engaged
 
     db.add(new_clear_cut_form_entry)
+
+    # Update report status from "to_validate" to "validated" when form is submitted
+    report = db.get(ClearCutReport, report_id)
+    if report and report.status == "to_validate":
+        if report.status != "validated":
+            report.status = "validated"
+
     db.commit()
     db.refresh(new_clear_cut_form_entry)
     return new_clear_cut_form_entry

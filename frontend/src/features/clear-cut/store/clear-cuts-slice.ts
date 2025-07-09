@@ -273,6 +273,14 @@ export const clearCutsSlice = createSlice({
 		});
 		builder.addCase(submitClearCutFormThunk.fulfilled, (state) => {
 			state.submission = { status: "success" };
+			// Update the report status to "validated" after successful form submission
+			if (
+				state.detail.status === "success" &&
+				state.detail.value &&
+				state.detail.value.status === "to_validate"
+			) {
+				state.detail.value.status = "validated";
+			}
 		});
 		builder.addCase(submitClearCutFormThunk.rejected, (state, error) => {
 			state.submission = { status: "error", error };
