@@ -15,14 +15,13 @@ on:
       - "backend/**"
       - "pyproject.toml"
 
-
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     services:
       db:
         image: postgis/postgis:15-3.5
@@ -54,7 +53,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.13
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install Poetry
         run: |
