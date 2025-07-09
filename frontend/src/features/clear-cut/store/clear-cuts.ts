@@ -123,16 +123,16 @@ const clearCutFormOnSiteResponseSchema = z.object({
 	//ACC : after clear-cutting
 	isPlantationPresentACC: z.boolean().default(false),
 	newTreeSpicies: z.string().optional(),
-	imgsPlantation: z.array(z.string().url()).default([]),
+	imgsPlantation: z.array(z.string()).default([]),
 	isWorksiteSignPresent: z.boolean().default(false),
-	imgWorksiteSign: z.string().url().optional(),
+	imgWorksiteSign: z.array(z.string()).optional(),
 	waterCourseOrWetlandPresence: z.string().optional(),
 	protectedSpeciesDestructionIndex: z.string().optional(),
 	soilState: z.string().optional(),
-	imgsClearCut: z.array(z.string().url()).optional(),
-	imgsTreeTrunks: z.array(z.string().url()).default([]),
-	imgsSoilState: z.array(z.string().url()).default([]),
-	imgsAccessRoad: z.array(z.string().url()).default([]),
+	imgsClearCut: z.array(z.string()).optional(),
+	imgsTreeTrunks: z.array(z.string()).default([]),
+	imgsSoilState: z.array(z.string()).default([]),
+	imgsAccessRoad: z.array(z.string()).default([]),
 });
 
 const clearCutFormEcologicalZoningFormResponseSchema = z.object({

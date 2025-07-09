@@ -120,6 +120,16 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 
 					// Other fields
 					otherInfos: (latestForm.other as string) || undefined,
+
+					// Image fields (S3 keys)
+					imgsClearCut: (latestForm.images_clear_cut as string[]) || undefined,
+					imgsPlantation: (latestForm.images_plantation as string[]) || undefined,
+					imgWorksiteSign: latestForm.image_worksite_sign 
+						? [latestForm.image_worksite_sign as string] 
+						: [],
+					imgsTreeTrunks: (latestForm.images_tree_trunks as string[]) || undefined,
+					imgsSoilState: (latestForm.images_soil_state as string[]) || undefined,
+					imgsAccessRoad: (latestForm.images_access_road as string[]) || undefined,
 				};
 			}
 		} catch (error) {
@@ -210,6 +220,14 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 		// Other fields
 		other: formData.otherInfos,
 
+		// Image fields (S3 keys)
+		images_clear_cut: formData.imgsClearCut,
+		images_plantation: formData.imgsPlantation,
+		image_worksite_sign: formData.imgWorksiteSign?.[0] || null, // Single image field
+		images_tree_trunks: formData.imgsTreeTrunks,
+		images_soil_state: formData.imgsSoilState,
+		images_access_road: formData.imgsAccessRoad,
+
 		// Remove frontend field names to avoid conflicts
 		onSiteDate: undefined,
 		standTypeAndSilviculturalSystemBCC: undefined,
@@ -240,6 +258,12 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 		isRelevantRequestPSG: undefined,
 		actionsUndertaken: undefined,
 		otherInfos: undefined,
+		imgsClearCut: undefined,
+		imgsPlantation: undefined,
+		imgWorksiteSign: undefined,
+		imgsTreeTrunks: undefined,
+		imgsSoilState: undefined,
+		imgsAccessRoad: undefined,
 	};
 
 	await api()

@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -39,6 +39,14 @@ class ClearCutFormBase(BaseModel):
     over_20_ha: None | bool = None
     psg_required_plot: None | bool = None
 
+    # Image fields (S3 keys)
+    images_clear_cut: Optional[List[str]] = None
+    images_plantation: Optional[List[str]] = None
+    image_worksite_sign: Optional[str] = None
+    images_tree_trunks: Optional[List[str]] = None
+    images_soil_state: Optional[List[str]] = None
+    images_access_road: Optional[List[str]] = None
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -66,6 +74,12 @@ class ClearCutFormBase(BaseModel):
                 "pefc_fsc_certified": False,
                 "over_20_ha": False,
                 "psg_required_plot": True,
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
 
@@ -122,6 +136,12 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
                 "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
                 "relevant_for_psg_request": False,
                 "request_engaged": "Request",
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
 
@@ -163,6 +183,12 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
                 "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
                 "relevant_for_psg_request": False,
                 "request_engaged": "Request",
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
 

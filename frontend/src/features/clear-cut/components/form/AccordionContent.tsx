@@ -4,7 +4,7 @@ import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionIt
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
 import { FixedField } from "@/shared/components/form/FormFixedField";
-import { FormInputFile } from "@/shared/components/form/FormInputFile";
+import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormInputText } from "@/shared/components/form/FormInputText";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
@@ -104,12 +104,13 @@ export default function AccordionContent({
 									) : null;
 								case "inputFile":
 									return render ? (
-										<FormInputFile
+										<FormS3ImageUpload
 											key={item.name}
 											control={form.control}
 											name={item.name}
 											label={item.label}
 											disabled={isDisabled}
+											reportId={form.getValues("id")}
 										/>
 									) : item.fallBack ? (
 										item.fallBack(item.name)

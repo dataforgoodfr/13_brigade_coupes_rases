@@ -34,31 +34,28 @@ L’objectif est de développer une solution complète pour :
 
 ## Pour contribuer
 
-Pour contribuer, vous pouvez demander un accès au projet sur github.  Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
+Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
 
 Essayez de respecter les conventions de code et le style d'écriture du projet:
 
-  - feature/nom_de_la_feature pour une nouvelle fonctionnalité
-  - chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
-  - hotfix/nom_du_hotfix pour une correction rapide
-
+- feature/nom_de_la_feature pour une nouvelle fonctionnalité
+- chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
+- hotfix/nom_du_hotfix pour une correction rapide
 
 Chaque commit doit suivre la convention de style suivante :
 
-  - Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
-  - Structure:
-    - [Type] (optional scope): [Description]
-    - [Optional Body]
-    - [Optional Footer]
-  - Exemple : chore(readme): ajouter détails pour contribuer au repo
+- Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
+- Structure:
+  - [Type] (optional scope): [Description]
+  - [Optional Body]
+  - [Optional Footer]
+- Exemple : chore(readme): ajouter détails pour contribuer au repo
 
 Créez une pull request.
 
 - Pour faciliter la revue de la pull request :
   - Liez la pull request à un ticket NocoDB en ajoutant le lien du ticket dans la description.
   - Rédigez une description détaillée de la pull request afin de fournir un maximum d’informations sur les modifications apportées.
-
-
 
 # Architecture du Projet (sujet à améliorer et definir selon les expertises des volonteurs)
 
@@ -84,12 +81,11 @@ L'ideeèr du projet est de créer une architecture modulaire qui permet d'automa
 └── 📁 analytics/ (contient les scripts pour analyser et visualiser les données)
 ```
 
-
 ## Diagramme
 
-Pour visualiser ce graph sur VS Code, vous pouvez installer des plugins comme "Markdown Preview Enhanced". 
+Pour visualiser ce graph sur VS Code, vous pouvez installer des plugins comme "Markdown Preview Enhanced".
 
-Le graph est pas nécessairement complet, mais il donne une idée de l'architecture générale du projet. 
+Le graph est pas nécessairement complet, mais il donne une idée de l'architecture générale du projet.
 
 ```mermaid
 flowchart LR
@@ -99,7 +95,7 @@ flowchart LR
 
     %% Main Clever Cloud subgraph
     subgraph CC["CleverCloud"]
-    
+
       %% Data Engineering Subgraph
       subgraph DE["Data Engineering"]
       ETL[Docker-based Ingestion Jobs]
@@ -177,7 +173,7 @@ Il y a aussi un fichier projet `pyproject.toml` à la racine du projet qui conti
 
 Installer les dépendances:
 
-  Il faut être dans le répertoire backend, data_pipeline ou analytics et exécuter la commande suivante: 
+Il faut être dans le répertoire backend, data_pipeline ou analytics et exécuter la commande suivante:
 
     poetry install
 
@@ -244,3 +240,37 @@ Un mot de passe est nécessaire pour ouvrir la base de données, lire ou modifie
 Considérez la base de données keepass comme étant la golden source de tous les secrets du projet.  
 Chaque secret utilisés dans le projet doit être référencés dans le keepass.  
 Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ...
+
+# Lancer le projet en local
+
+## Database
+
+```bash
+docker compose up db pgadmin
+```
+
+Database is available at [http://localhost:5432](http://localhost:5432).
+Login to pgAdmin at [http://localhost:5050](http://localhost:5050) with the credentials:
+
+- Email: `devuser@devuser.com`
+- Password : `devuser`
+
+## Frontend
+
+```bash
+cd frontend
+pnpm i
+pnpm dev
+```
+
+Website is available at [http://localhost:5173](http://localhost:5173)
+
+## Backend
+
+```bash
+cd backend
+poetry install
+poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
+```
+
+Backend is available at [http://localhost:8080](http://localhost:8080)

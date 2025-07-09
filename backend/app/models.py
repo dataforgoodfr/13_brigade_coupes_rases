@@ -2,6 +2,7 @@ from datetime import datetime
 
 from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     Column,
@@ -318,3 +319,11 @@ class ClearCutForm(Base):
 
     # Miscellaneous
     other = Column(String)
+
+    # Image fields (S3 keys stored as JSON arrays or strings)
+    images_clear_cut = Column(JSON, nullable=True)
+    images_plantation = Column(JSON, nullable=True)
+    image_worksite_sign = Column(String, nullable=True)
+    images_tree_trunks = Column(JSON, nullable=True)
+    images_soil_state = Column(JSON, nullable=True)
+    images_access_road = Column(JSON, nullable=True)
