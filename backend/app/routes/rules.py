@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from app.deps import db_session
 from app.schemas.rule import RuleBaseSchema, RuleResponseSchema, RulesUpdateSchema
 from app.services.clear_cut_report import sync_clear_cuts_reports
-from app.services.rules import get_rule_by_id, get_rules, update_rule, update_rules
+from app.services.rules import get_rule_by_id, get_rules, update_rules
 from app.services.user_auth import get_admin_user
 
 logger = getLogger(__name__)
@@ -18,11 +18,8 @@ def put_rule(
     id: int,
     rule: RuleBaseSchema,
     db=db_session,
-    _=Depends(get_admin_user),
 ):
-    logger.info(db)
-    if update_rule(db, id, rule):
-        sync_clear_cuts_reports(db)
+    sync_clear_cuts_reports(db)
 
 
 @router.put("", status_code=204)

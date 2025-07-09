@@ -36,7 +36,7 @@ import type {
 	ClearCutFormResponse,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { User } from "@/features/user/store/user";
-import { mockClearCut } from "@/mocks/clear-cuts";
+import { mockClearCut, mockClearCutFormsResponse } from "@/mocks/clear-cuts";
 import { fakeDepartments } from "@/mocks/referential";
 import { server } from "@/test/mocks/server";
 import { adminMock, volunteerMock } from "@/test/mocks/user";
@@ -168,7 +168,7 @@ describe.each(sections)(
 	"$section.name section form when there is volunteer not assigned",
 	({ section, items }) => {
 		beforeEach(() => {
-			server.use(mock.handler);
+			server.use(mock.handler, mockClearCutFormsResponse());
 		});
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
@@ -182,7 +182,7 @@ describe.each(sections)(
 	"$section.name section form when there is a connected admin",
 	({ section, items }) => {
 		beforeEach(() => {
-			server.use(mock.handler);
+			server.use(mock.handler, mockClearCutFormsResponse());
 		});
 		itShouldHaveValue(items, section, adminMock);
 		itShouldHaveDisabledState(items, section, false, adminMock);
@@ -192,7 +192,7 @@ describe.each(sections)(
 	"$section.name section form when there isn't a connected user",
 	({ section, items }) => {
 		beforeEach(() => {
-			server.use(mock.handler);
+			server.use(mock.handler, mockClearCutFormsResponse());
 		});
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
@@ -226,7 +226,9 @@ function itShouldHaveValue(
 	return items
 		.filter((item) => item.renderConditions.length === 0)
 		.map((item) =>
-			it(`${item.label ?? item.name} should have value ${item.expected}`, async () => {
+			it(`${item.label ?? item.name} should have value ${
+				item.expected
+			}`, async () => {
 				const { user } = renderApp({
 					route: "/clear-cuts/$clearCutId",
 					params: { $clearCutId: "ABC" },
@@ -253,7 +255,11 @@ function itShouldHaveDisabledState(
 			(item) => item.renderConditions.length === 0 && item.type !== "fixed",
 		)
 		.map((item) => {
-			it(`should display the ${item.type} for "${item.label ?? item.name}", its label, and it should be ${state ? "disabled" : "enabled"}`, async () => {
+			it(`should display the ${item.type} for "${
+				item.label ?? item.name
+			}", its label, and it should be ${
+				state ? "disabled" : "enabled"
+			}`, async () => {
 				const { user } = renderApp({
 					route: "/clear-cuts/$clearCutId",
 					params: { $clearCutId: "ABC" },

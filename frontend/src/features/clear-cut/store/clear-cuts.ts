@@ -114,7 +114,9 @@ export type ClearCuts = z.infer<typeof clearCutsSchema>;
 const clearCutFormOnSiteResponseSchema = z.object({
 	imgSatelliteCC: z.string().url().optional(),
 	assignedUser: z.string().optional(),
-	onSiteDate: z.string().optional(),
+	onSiteDate: z.union([z.string(), z.date()]).transform((val) => 
+		val instanceof Date ? val.toISOString().split('T')[0] : val
+	).optional(),
 	weather: z.string().optional(),
 	// BCC : before clear-cutting
 	standTypeAndSilviculturalSystemBCC: z.string().optional(),

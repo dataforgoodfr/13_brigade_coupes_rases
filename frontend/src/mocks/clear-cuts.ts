@@ -191,6 +191,19 @@ const clearCutPreviews = randomPoints.map((center) =>
 	createClearCutReportBaseMock({ average_location: center }),
 );
 
+export const mockClearCutFormsResponse = () =>
+	http.get("*/api/v1/clear-cuts-reports/:id/forms", () => {
+		return HttpResponse.json({
+			content: [],
+			totalElements: 0,
+			totalPages: 0,
+			number: 0,
+			size: 1,
+			first: true,
+			last: true,
+		});
+	});
+
 export const mockClearCutsResponse = (
 	override: Partial<ClearCutsResponse> = {},
 	filterInArea = false,

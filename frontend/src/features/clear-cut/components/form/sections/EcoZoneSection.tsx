@@ -19,9 +19,17 @@ export const ecoZoneValue: SectionFormItem<ClearCutForm>[] = [
 		type: "customized",
 		renderConditions: ["isNatura2000"],
 		customizeRender: (form: FormType<ClearCutForm>, key: string | number) => {
+			const natura2000Zone = form.getValues("natura2000Zone");
+			if (!natura2000Zone) {
+				return (
+					<p key={key} className="text-muted-foreground">
+						Aucune zone Natura 2000 sélectionnée
+					</p>
+				);
+			}
 			return (
 				<p key={key}>
-					{`${form.getValues("natura2000Zone.id")} ${form.getValues("natura2000Zone.name")}`}
+					{`${natura2000Zone.id || ""} ${natura2000Zone.name || ""}`}
 				</p>
 			);
 		},

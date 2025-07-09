@@ -60,7 +60,7 @@ const fakeUsers: AdminUserResponse[] = range(10, () => ({
 	firstname: faker.person.firstName(),
 	lastname: faker.person.lastName(),
 	role: faker.helpers.arrayElement(["admin", "volunteer"]),
-	departments_ids: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
+	departments: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
 	login: faker.internet.username(),
 	email: faker.internet.email(),
 }));
@@ -85,7 +85,7 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 
 		isValidUser &&=
 			departments_ids.length === 0 ||
-			departments_ids.some((r) => user.departments_ids?.includes(r));
+			departments_ids.some((r) => user.departments?.includes(r));
 
 		return isValidUser;
 	});

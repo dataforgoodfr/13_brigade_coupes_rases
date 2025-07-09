@@ -33,15 +33,21 @@ export function FormToggleGroup<T extends FieldValues = FieldValues>({
 								className="shadow-[0px_2px_6px_0px_#00000033] max-w-fit ml-1 my-2"
 								type="single"
 								disabled={disabled}
-								value={`${field.value}`}
-								onValueChange={(newValue) => {
-									if (newValue) {
-										return field.onChange(newValue);
-									}
-									return;
+								value={field.value === null ? "null" : String(field.value)}
+								onValueChange={(newValue: string) => {
+									const valueMap: Record<string, boolean | null> = {
+										true: true,
+										false: false,
+										null: null,
+										"": null,
+									};
+									field.onChange(valueMap[newValue]);
 								}}
 							>
-								<ToggleGroupItem className={toggleGroupItemClass} value="true">
+								<ToggleGroupItem
+									className={toggleGroupItemClass}
+									value={"true"}
+								>
 									Oui
 								</ToggleGroupItem>
 								<ToggleGroupItem className={toggleGroupItemClass} value="false">
