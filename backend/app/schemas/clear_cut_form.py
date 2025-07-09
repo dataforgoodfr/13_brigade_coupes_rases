@@ -49,7 +49,7 @@ class ClearCutFormBase(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,
@@ -104,7 +104,7 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,
@@ -151,7 +151,7 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
         from_attributes=True,
         json_schema_extra={
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,

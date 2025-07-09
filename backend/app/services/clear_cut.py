@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from geoalchemy2.functions import ST_AsGeoJSON
 from sqlalchemy.orm import Session
 
@@ -5,9 +6,6 @@ from app.models import ClearCut, ClearCutEcologicalZoning
 from app.schemas.clear_cut import (
     ClearCutResponseSchema,
     clear_cut_to_clear_cut_response_schema,
-)
-from app.schemas.clear_cut_report import (
-    ClearCutReportResponseSchema,
 )
 from app.schemas.ecological_zoning import (
     ClearCutEcologicalZoningResponseSchema,
@@ -22,8 +20,8 @@ def map_geo_clearcut(clearcut: ClearCut, boundary: str, location: str) -> ClearC
     return clearcut
 
 
-def get_clearcut_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
-    [clearcut, boundary, location] = (
+def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponseSchema:
+    result = (
         db.query(
             ClearCut,
             ST_AsGeoJSON(ClearCut.boundary),
@@ -32,6 +30,12 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
         .filter(ClearCut.id == id)
         .first()
     )
+    if result is None:
+        raise HTTPException(status_code=404, detail="ClearCut not found")
+    clearcut: ClearCut
+    boundary: str
+    location: str
+    clearcut, boundary, location = result
     return clear_cut_to_clear_cut_response_schema(
         map_geo_clearcut(clearcut, boundary, location)
     )
@@ -56,15 +60,15 @@ def clear_cuts_to_paginated_response(
     page: int,
     size: int,
 ):
-    clear_cuts = map(
+    clear_cuts_response = map(
         lambda row: clear_cut_to_clear_cut_response_schema(
             map_geo_clearcut(row[0], row[1], row[2])
         ),
         clear_cuts,
     )
     return PaginationResponseSchema(
-        content=list(clear_cuts),
-        metadata=PaginationMetadataSchema(
+        content=list(clear_cuts_response),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=clear_cuts_count, url=url
         ),
     )
@@ -111,13 +115,13 @@ def find_ecological_zonings_by_clear_cut(
         .filter(ClearCutEcologicalZoning.clear_cut_id == clear_cut_id)
         .count()
     )
-    ecological_zonings = map(
+    ecological_zonings_response = map(
         clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema,
         ecological_zonings,
     )
     return PaginationResponseSchema(
-        content=list(ecological_zonings),
-        metadata=PaginationMetadataSchema(
+        content=list(ecological_zonings_response),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=ecological_zonings_count, url=url
         ),
     )

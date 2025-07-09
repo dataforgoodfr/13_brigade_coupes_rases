@@ -33,7 +33,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    email: str | None = None
+    email: str
 
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -50,13 +50,6 @@ def verify_password(plain_password: str, hashed_password: str):
         password=password_byte_enc,
         hashed_password=hashed_password.encode("utf-8"),
     )
-
-
-def get_password_hash(password: str):
-    pwd_bytes = password.encode("utf-8")
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password=pwd_bytes, salt=salt)
-    return hashed_password.decode("utf-8")
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):

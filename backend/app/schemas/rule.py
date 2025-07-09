@@ -13,7 +13,7 @@ class RuleBaseSchema(BaseModel):
 
 
 class RuleUpdateSchema(RuleBaseSchema):
-    id: str = Field(json_schema_extra={"example": "1"})
+    id: int = Field(json_schema_extra={"example": 1})
 
 
 class RulesUpdateSchema(BaseModel):

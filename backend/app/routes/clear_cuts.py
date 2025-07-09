@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.clear_cut import ClearCutResponseSchema
-from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
+from app.schemas.ecological_zoning import (
+    ClearCutEcologicalZoningResponseSchema,
+)
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import (
     find_clear_cuts,
@@ -20,11 +22,11 @@ router = APIRouter(prefix="/api/v1/clear-cuts", tags=["Clearcuts"])
 
 @router.get(
     "/{clear_cut_id}/ecological-zonings",
-    response_model=PaginationResponseSchema[EcologicalZoningResponseSchema],
+    response_model=PaginationResponseSchema[ClearCutEcologicalZoningResponseSchema],
 )
 def list_ecological_zonings(
     clear_cut_id: int, db: Session = db_session, page: int = 0, size: int = 10
-) -> PaginationResponseSchema[EcologicalZoningResponseSchema]:
+) -> PaginationResponseSchema[ClearCutEcologicalZoningResponseSchema]:
     logger.info(db)
     return find_ecological_zonings_by_clear_cut(
         db,

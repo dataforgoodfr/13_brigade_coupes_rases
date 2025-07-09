@@ -181,10 +181,10 @@ class ClearCut(Base):
     __tablename__ = "clear_cuts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     area_hectare: Mapped[float] = mapped_column(Float, nullable=False)
-    location: Mapped[Geometry] = mapped_column(
+    location: Mapped[str] = mapped_column(
         Geometry(geometry_type="Point", srid=SRID), nullable=False
     )
-    boundary: Mapped[Geometry] = mapped_column(
+    boundary: Mapped[str] = mapped_column(
         Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(

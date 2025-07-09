@@ -137,8 +137,8 @@ def find_clear_cut_form_by_report_id(
         db.query(ClearCutForm.id).filter(ClearCutForm.report_id == report_id).count()
     )
     return PaginationResponseSchema(
-        content=forms.all(),
-        metadata=PaginationMetadataSchema(
+        content=list(forms.all()),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=forms_count, url=url
         ),
     )

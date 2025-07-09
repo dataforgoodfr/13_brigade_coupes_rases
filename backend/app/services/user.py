@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models import Department, User
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from app.services.get_password_hash import get_password_hash
 
 logger = getLogger(__name__)
 
@@ -32,6 +33,7 @@ def create_user(db: Session, user: UserCreateSchema) -> User:
         login=user.login,
         email=user.email,
         role=user.role,
+        password=get_password_hash(user.password),
     )
     for department_id in user.departments:
         department_db = (
@@ -54,7 +56,7 @@ def get_users(
     users = db.query(User).offset(page * size).limit(size).all()
     users_count = db.query(User.id).count()
     return PaginationResponseSchema(
-        metadata=PaginationMetadataSchema(
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, url=url, total_count=users_count
         ),
         content=[user_to_user_response_schema(user) for user in users],

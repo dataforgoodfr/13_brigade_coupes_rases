@@ -70,7 +70,7 @@ def list_clear_cuts_reports(
 )
 def update_existing_clear_cut_report(
     report_id: int, item: ClearCutReportPatchSchema, db: Session = db_session
-) -> ClearCutReportResponseSchema:
+) -> None:
     logger.info(db)
     update_clear_cut_report(report_id, db, item)
 

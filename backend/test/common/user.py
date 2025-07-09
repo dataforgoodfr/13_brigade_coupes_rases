@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
 
 from app.models import User
-from app.services.user_auth import get_password_hash
+from app.services.get_password_hash import get_password_hash
 
 
 def new_user(

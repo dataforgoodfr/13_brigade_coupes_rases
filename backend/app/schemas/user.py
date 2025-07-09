@@ -8,15 +8,15 @@ from .shared import UserBaseSchema
 logger = getLogger(__name__)
 
 
-# Schema for creating a new User instance
-class UserCreateSchema(UserBaseSchema):
+class UserUpdateSchema(UserBaseSchema):
     departments: list[int] = Field(
         default_factory=list, json_schema_extra={"example": [1]}
     )
 
 
-class UserUpdateSchema(UserCreateSchema):
-    pass
+class UserCreateSchema(UserUpdateSchema):
+    # TODO: this should probably not be here
+    password: str = Field(json_schema_extra={"example": "strongpassword123"})
 
 
 class UserResponseSchema(UserBaseSchema):

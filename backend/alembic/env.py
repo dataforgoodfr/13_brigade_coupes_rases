@@ -1,4 +1,5 @@
 from logging.config import fileConfig
+from typing import cast
 
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
 from sqlalchemy import engine_from_config, pool
@@ -20,7 +21,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-configuration = config.get_section(config.config_ini_section)
+configuration = cast(dict[str, str], config.get_section(config.config_ini_section))
 configuration["sqlalchemy.url"] = settings.DATABASE_URL
 IGNORE_TABLES = ["spatial_ref_sys"]
 
@@ -75,7 +76,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = configuration.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,

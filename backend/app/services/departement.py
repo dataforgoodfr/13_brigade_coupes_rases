@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Department
 from app.schemas.department import (
+    DepartmentBaseSchema,
     department_to_department_base_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
@@ -13,11 +14,11 @@ logger = getLogger(__name__)
 
 def find_departments(
     db: Session, url: str, page: int = 0, size: int = 10
-) -> list[Department]:
+) -> PaginationResponseSchema[DepartmentBaseSchema]:
     departments = db.query(Department).offset(page * size).limit(size).all()
     departments_count = db.query(Department.id).count()
     return PaginationResponseSchema(
-        metadata=PaginationMetadataSchema(
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=departments_count, url=url
         ),
         content=[
