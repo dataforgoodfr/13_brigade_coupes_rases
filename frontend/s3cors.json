@@ -3,7 +3,10 @@
 		{
 			"AllowedHeaders": ["*"],
 			"AllowedMethods": ["GET", "POST", "PUT"],
-			"AllowedOrigins": ["http://localhost:5173"],
+			"AllowedOrigins": [
+				"http://localhost:5173",
+				"https://app-ab2f14d8-10a9-454d-9a7d-92ab22a54110.cleverapps.io/"
+			],
 			"ExposeHeaders": ["ETag"],
 			"MaxAgeSeconds": 3600
 		}
