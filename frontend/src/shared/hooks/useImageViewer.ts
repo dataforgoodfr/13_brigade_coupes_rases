@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { api } from "@/shared/api/api";
 import { getStoredToken } from "@/features/user/store/user.slice";
+import { api } from "@/shared/api/api";
+import { useState } from "react";
 
 export interface ImageViewResponse {
 	view_url: string;
@@ -19,7 +19,7 @@ export function useImageViewer(): UseImageViewerResult {
 
 	const getViewableUrls = async (s3Keys: string[]): Promise<string[]> => {
 		if (!s3Keys || s3Keys.length === 0) return [];
-		
+
 		setLoading(true);
 		setError(null);
 
@@ -47,12 +47,13 @@ export function useImageViewer(): UseImageViewerResult {
 						// Return a placeholder or empty string for failed images
 						return "";
 					}
-				})
+				}),
 			);
 
 			return viewableUrls.filter((url) => url !== "");
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "Failed to get viewable URLs";
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to get viewable URLs";
 			setError(errorMessage);
 			return [];
 		} finally {

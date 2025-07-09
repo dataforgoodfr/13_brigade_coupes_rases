@@ -82,7 +82,7 @@ const mapItem = (
 			break;
 		case "inputFile":
 			expected =
-				Array.isArray(expected) && expected.length === 0 ? "" : expected;
+				Array.isArray(expected) && expected.length === 0 ? null : expected;
 			break;
 	}
 	switch (item.name) {

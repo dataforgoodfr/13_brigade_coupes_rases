@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { api } from "@/shared/api/api";
 import { getStoredToken } from "@/features/user/store/user.slice";
+import { api } from "@/shared/api/api";
+import { useState } from "react";
 
 export interface ImageUploadRequest {
 	filename: string;
@@ -11,7 +11,7 @@ export interface ImageUploadRequest {
 
 export interface ImageUploadResponse {
 	upload_url: string;
-	fields: Record<string, any>;
+	fields: Record<string, string>;
 	file_url: string;
 	expires_in: number;
 	key: string;
@@ -24,7 +24,10 @@ export interface UploadedImage {
 }
 
 export interface UseImageUploadResult {
-	uploadImages: (files: FileList, reportId?: string) => Promise<UploadedImage[]>;
+	uploadImages: (
+		files: FileList,
+		reportId?: string,
+	) => Promise<UploadedImage[]>;
 	uploading: boolean;
 	error: string | null;
 	progress: number;
@@ -91,12 +94,12 @@ export function useImageUpload(): UseImageUploadResult {
 
 				// Upload file directly to S3 using pre-signed POST
 				const formData = new FormData();
-				
+
 				// Add all the fields from the pre-signed POST
 				for (const [key, value] of Object.entries(response.fields)) {
 					formData.append(key, value);
 				}
-				
+
 				// Add the file last
 				formData.append("file", file);
 

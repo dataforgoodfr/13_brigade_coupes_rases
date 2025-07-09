@@ -1,4 +1,8 @@
-import { mockClearCut, mockClearCutFormsResponse, mockClearCutsResponse } from "@/mocks/clear-cuts";
+import {
+	mockClearCut,
+	mockClearCutFormsResponse,
+	mockClearCutsResponse,
+} from "@/mocks/clear-cuts";
 import { mockFilters } from "@/mocks/filters";
 import { mockReferential } from "@/mocks/referential";
 import { mockMe, mockToken, mockUsers } from "@/mocks/users";

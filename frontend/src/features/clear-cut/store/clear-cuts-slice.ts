@@ -123,13 +123,17 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 
 					// Image fields (S3 keys)
 					imgsClearCut: (latestForm.images_clear_cut as string[]) || undefined,
-					imgsPlantation: (latestForm.images_plantation as string[]) || undefined,
-					imgWorksiteSign: latestForm.image_worksite_sign 
-						? [latestForm.image_worksite_sign as string] 
+					imgsPlantation:
+						(latestForm.images_plantation as string[]) || undefined,
+					imgWorksiteSign: latestForm.image_worksite_sign
+						? [latestForm.image_worksite_sign as string]
 						: [],
-					imgsTreeTrunks: (latestForm.images_tree_trunks as string[]) || undefined,
-					imgsSoilState: (latestForm.images_soil_state as string[]) || undefined,
-					imgsAccessRoad: (latestForm.images_access_road as string[]) || undefined,
+					imgsTreeTrunks:
+						(latestForm.images_tree_trunks as string[]) || undefined,
+					imgsSoilState:
+						(latestForm.images_soil_state as string[]) || undefined,
+					imgsAccessRoad:
+						(latestForm.images_access_road as string[]) || undefined,
 				};
 			}
 		} catch (error) {
