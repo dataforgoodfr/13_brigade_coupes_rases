@@ -42,7 +42,7 @@ class ClearCutFormBase(BaseModel):
     # Image fields (S3 keys)
     images_clear_cut: Optional[List[str]] = None
     images_plantation: Optional[List[str]] = None
-    image_worksite_sign: Optional[str] = None
+    image_worksite_sign: Optional[List[str]] = None
     images_tree_trunks: Optional[List[str]] = None
     images_soil_state: Optional[List[str]] = None
     images_access_road: Optional[List[str]] = None
@@ -76,7 +76,7 @@ class ClearCutFormBase(BaseModel):
                 "psg_required_plot": True,
                 "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
                 "images_plantation": ["development/reports/123/uuid_image2.jpg"],
-                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
                 "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
                 "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
                 "images_access_road": ["development/reports/123/uuid_image6.jpg"],
@@ -138,7 +138,7 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
                 "request_engaged": "Request",
                 "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
                 "images_plantation": ["development/reports/123/uuid_image2.jpg"],
-                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
                 "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
                 "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
                 "images_access_road": ["development/reports/123/uuid_image6.jpg"],
@@ -185,7 +185,7 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
                 "request_engaged": "Request",
                 "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
                 "images_plantation": ["development/reports/123/uuid_image2.jpg"],
-                "image_worksite_sign": "development/reports/123/uuid_image3.jpg",
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
                 "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
                 "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
                 "images_access_road": ["development/reports/123/uuid_image6.jpg"],

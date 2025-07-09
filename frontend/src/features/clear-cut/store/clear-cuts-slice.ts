@@ -125,9 +125,8 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 					imgsClearCut: (latestForm.images_clear_cut as string[]) || undefined,
 					imgsPlantation:
 						(latestForm.images_plantation as string[]) || undefined,
-					imgWorksiteSign: latestForm.image_worksite_sign
-						? [latestForm.image_worksite_sign as string]
-						: [],
+					imgWorksiteSign:
+						(latestForm.image_worksite_sign as string) || undefined,
 					imgsTreeTrunks:
 						(latestForm.images_tree_trunks as string[]) || undefined,
 					imgsSoilState:
@@ -227,7 +226,7 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 		// Image fields (S3 keys)
 		images_clear_cut: formData.imgsClearCut,
 		images_plantation: formData.imgsPlantation,
-		image_worksite_sign: formData.imgWorksiteSign?.[0] || null, // Single image field
+		image_worksite_sign: formData.imgWorksiteSign,
 		images_tree_trunks: formData.imgsTreeTrunks,
 		images_soil_state: formData.imgsSoilState,
 		images_access_road: formData.imgsAccessRoad,

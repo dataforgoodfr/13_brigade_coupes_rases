@@ -31,7 +31,7 @@ def upgrade() -> None:
     )
     op.add_column(
         "clear_cut_report_forms",
-        sa.Column("image_worksite_sign", sa.String(), nullable=True),
+        sa.Column("image_worksite_sign", sa.JSON(), nullable=True),
     )
     op.add_column(
         "clear_cut_report_forms",

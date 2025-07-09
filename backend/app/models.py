@@ -323,7 +323,7 @@ class ClearCutForm(Base):
     # Image fields (S3 keys stored as JSON arrays or strings)
     images_clear_cut = Column(JSON, nullable=True)
     images_plantation = Column(JSON, nullable=True)
-    image_worksite_sign = Column(String, nullable=True)
+    image_worksite_sign = Column(JSON, nullable=True)
     images_tree_trunks = Column(JSON, nullable=True)
     images_soil_state = Column(JSON, nullable=True)
     images_access_road = Column(JSON, nullable=True)
