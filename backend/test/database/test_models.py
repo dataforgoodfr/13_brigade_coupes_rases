@@ -1,8 +1,8 @@
 import pytest
-from common.clear_cut import new_clear_cut_report
-from common.user import new_user
 
 from app.models import City, Department, EcologicalZoning
+from test.common.clear_cut import new_clear_cut_report
+from test.common.user import new_user
 
 
 def test_user_creation(db):

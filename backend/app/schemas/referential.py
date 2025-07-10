@@ -1,5 +1,4 @@
 from logging import getLogger
-from typing import Dict
 
 from pydantic import BaseModel, ConfigDict
 
@@ -16,8 +15,8 @@ class ReferentialDepartmentSchema(BaseModel):
 
 
 class ReferentialResponseSchema(BaseModel):
-    departments: Dict[str, ReferentialDepartmentSchema]
-    ecological_zonings: Dict[str, EcologicalZoningSchema]
-    rules: Dict[str, RuleResponseSchemaWithoutIdSchema]
+    departments: dict[str, ReferentialDepartmentSchema]
+    ecological_zonings: dict[str, EcologicalZoningSchema]
+    rules: dict[str, RuleResponseSchemaWithoutIdSchema]
 
     model_config = ConfigDict(from_attributes=True)

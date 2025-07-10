@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 from app.models import NATURA_2000, ClearCutEcologicalZoning, EcologicalZoning
@@ -7,7 +5,7 @@ from app.models import NATURA_2000, ClearCutEcologicalZoning, EcologicalZoning
 
 class EcologicalZoningSchema(BaseModel):
     type: str = Field(json_schema_extra={"example": NATURA_2000}, default=NATURA_2000)
-    sub_type: Optional[str] = Field(
+    sub_type: str | None = Field(
         json_schema_extra={"example": "Protection des oiseaux"}, default=None
     )
     name: str = Field(

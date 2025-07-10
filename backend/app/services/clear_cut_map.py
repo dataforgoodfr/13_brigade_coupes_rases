@@ -1,6 +1,5 @@
 from logging import getLogger
 from math import sqrt
-from typing import Optional
 
 from fastapi import HTTPException, status
 from geoalchemy2.functions import (
@@ -46,18 +45,18 @@ class GeoBounds(BaseModel):
 
 
 class Filters(BaseModel):
-    bounds: Optional[GeoBounds] = None
-    report_id: Optional[int] = None
-    min_area_hectare: Optional[float] = None
-    max_area_hectare: Optional[float] = None
+    bounds: GeoBounds | None = None
+    report_id: int | None = None
+    min_area_hectare: float | None = None
+    max_area_hectare: float | None = None
     cut_years: list[int] = []
-    departments_ids: list[int] = []
+    departments_ids: list[str] = []
     statuses: list[str] = []
-    has_ecological_zonings: Optional[bool] = None
-    excessive_slope: Optional[bool] = None
+    has_ecological_zonings: bool | None = None
+    excessive_slope: bool | None = None
 
 
-def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
+def query_clearcuts_filtered(db: Session, filters: Filters | None):
     rules = list_rules(db)
 
     reports_with_rules = (

@@ -14,7 +14,7 @@ on:
 jobs:
   release:
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -34,11 +34,11 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-      - name: Deploy to clever cloud 
+      - name: Deploy to clever cloud
         uses: 47ng/actions-clever-cloud@v2.0.0
         with:
           appID: ${{ inputs.app-id }}
           force: true
         env:
-            CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-            CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

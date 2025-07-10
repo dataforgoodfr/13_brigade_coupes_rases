@@ -15,7 +15,7 @@ from app.models import (
     User,
 )
 from app.services.clear_cut_report import sync_clear_cuts_reports
-from app.services.user_auth import get_password_hash
+from app.services.get_password_hash import get_password_hash
 from common_seed import (
     get_cities,
     seed_cities_departments,

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const sortableKeysSchema = userResponseSchema
 	.keyof()
-	.exclude(["departments_ids", "id"])
+	.exclude(["departments", "id"])
 	.array();
 
 export type SortableKeys = z.infer<typeof sortableKeysSchema>;

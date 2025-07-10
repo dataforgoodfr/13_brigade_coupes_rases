@@ -1,6 +1,5 @@
 import datetime
 from logging import getLogger
-from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
 from pydantic import BaseModel, ConfigDict, Field
@@ -58,19 +57,19 @@ class ClearCutReportPreviewSchema(BaseModel):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    slope_area_ratio_percentage: Optional[float] = Field(
+    slope_area_ratio_percentage: float | None = Field(
         json_schema_extra={"example": 10.0},
     )
-    total_bdf_resinous_area_hectare: Optional[float] = Field(
+    total_bdf_resinous_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_deciduous_area_hectare: Optional[float] = Field(
+    total_bdf_deciduous_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_mixed_area_hectare: Optional[float] = Field(
+    total_bdf_mixed_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_poplar_area_hectare: Optional[float] = Field(
+    total_bdf_poplar_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
     model_config = ConfigDict(from_attributes=True)
@@ -108,7 +107,7 @@ def report_to_report_preview_schema(
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,
-        total_area_hectare=report.total_area_hectare,
+        total_area_hectare=report.total_area_hectare,  # type: ignore
         total_bdf_resinous_area_hectare=report.total_bdf_resinous_area_hectare,
         total_bdf_deciduous_area_hectare=report.total_bdf_deciduous_area_hectare,
         total_bdf_mixed_area_hectare=report.total_bdf_mixed_area_hectare,

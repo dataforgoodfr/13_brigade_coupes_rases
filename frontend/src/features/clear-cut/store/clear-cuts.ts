@@ -114,23 +114,28 @@ export type ClearCuts = z.infer<typeof clearCutsSchema>;
 const clearCutFormOnSiteResponseSchema = z.object({
 	imgSatelliteCC: z.string().url().optional(),
 	assignedUser: z.string().optional(),
-	onSiteDate: z.string().optional(),
+	onSiteDate: z
+		.union([z.string(), z.date()])
+		.transform((val) =>
+			val instanceof Date ? val.toISOString().split("T")[0] : val,
+		)
+		.optional(),
 	weather: z.string().optional(),
 	// BCC : before clear-cutting
 	standTypeAndSilviculturalSystemBCC: z.string().optional(),
 	//ACC : after clear-cutting
 	isPlantationPresentACC: z.boolean().default(false),
 	newTreeSpicies: z.string().optional(),
-	imgsPlantation: z.array(z.string().url()).default([]),
+	imgsPlantation: z.array(z.string()).default([]),
 	isWorksiteSignPresent: z.boolean().default(false),
-	imgWorksiteSign: z.string().url().optional(),
+	imgWorksiteSign: z.array(z.string()).optional(),
 	waterCourseOrWetlandPresence: z.string().optional(),
 	protectedSpeciesDestructionIndex: z.string().optional(),
 	soilState: z.string().optional(),
-	imgsClearCut: z.array(z.string().url()).optional(),
-	imgsTreeTrunks: z.array(z.string().url()).default([]),
-	imgsSoilState: z.array(z.string().url()).default([]),
-	imgsAccessRoad: z.array(z.string().url()).default([]),
+	imgsClearCut: z.array(z.string()).optional(),
+	imgsTreeTrunks: z.array(z.string()).default([]),
+	imgsSoilState: z.array(z.string()).default([]),
+	imgsAccessRoad: z.array(z.string()).default([]),
 });
 
 const clearCutFormEcologicalZoningFormResponseSchema = z.object({

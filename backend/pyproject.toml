@@ -18,6 +18,7 @@ pre-commit = "^2.20.0"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
+mypy = "^1.16.1"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.13"
@@ -34,6 +35,7 @@ pyjwt = "^2.10.1"
 bcrypt = "^4.3.0"
 python-multipart = "^0.0.20"
 geojson-pydantic = "^1.2.0"
+boto3 = "^1.35.0"
 
 [tool.poetry.scripts]
 docker-start = "docker compose up -d --build"
@@ -44,8 +46,8 @@ docker-stop = "docker compose down"
 target-version = "py313"
 
 [tool.ruff.lint]
-# Enable isort and flake8-bugbear on top of the defaults
-extend-select = ["I", "B"]
+# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
+extend-select = ["I", "B", "UP"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

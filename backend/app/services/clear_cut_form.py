@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models import ClearCutForm, User
+from app.models import ClearCutForm, ClearCutReport, User
 from app.schemas.clear_cut_form import (
     ClearCutFormWithStrategyResponse,
     ClearCutReportFormWithStrategy,
@@ -59,6 +59,13 @@ def add_clear_cut_form_entry(
         pefc_fsc_certified=new_version.pefc_fsc_certified,
         over_20_ha=new_version.over_20_ha,
         psg_required_plot=new_version.psg_required_plot,
+        # Image fields
+        images_clear_cut=new_version.images_clear_cut,
+        images_plantation=new_version.images_plantation,
+        image_worksite_sign=new_version.image_worksite_sign,
+        images_tree_trunks=new_version.images_tree_trunks,
+        images_soil_state=new_version.images_soil_state,
+        images_access_road=new_version.images_access_road,
     )
 
     if editor.role == "admin":
@@ -111,6 +118,13 @@ def add_clear_cut_form_entry(
             new_clear_cut_form_entry.request_engaged = last_form_entry.request_engaged
 
     db.add(new_clear_cut_form_entry)
+
+    # Update report status from "to_validate" to "validated" when form is submitted
+    report = db.get(ClearCutReport, report_id)
+    if report and report.status == "to_validate":
+        if report.status != "validated":
+            report.status = "validated"
+
     db.commit()
     db.refresh(new_clear_cut_form_entry)
     return new_clear_cut_form_entry
@@ -130,8 +144,8 @@ def find_clear_cut_form_by_report_id(
         db.query(ClearCutForm.id).filter(ClearCutForm.report_id == report_id).count()
     )
     return PaginationResponseSchema(
-        content=forms.all(),
-        metadata=PaginationMetadataSchema(
+        content=list(forms.all()),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=forms_count, url=url
         ),
     )
