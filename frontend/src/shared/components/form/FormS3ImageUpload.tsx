@@ -95,10 +95,6 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 							const newUploadedImages = [...uploadedImages, ...s3Keys];
 							setUploadedImages(newUploadedImages);
 
-							// Use S3 URLs for preview instead of blob URLs
-							const s3PreviewUrls = uploaded.map((img) => img.file_url);
-							setPreviewUrls((prev) => [...prev, ...s3PreviewUrls]);
-
 							// Update form field immediately
 							field.onChange(newUploadedImages);
 						} catch (err) {
