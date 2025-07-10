@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   build-test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     services:
       db:
         image: postgis/postgis:15-3.5
