@@ -40,11 +40,14 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 		[form],
 	);
 
+	const [initialClearCutId, setInitialClearCutId] = React.useState(clearCut.id);
+
 	React.useEffect(() => {
-		if (clearCut) {
+		if (clearCut && clearCut.id !== initialClearCutId) {
 			resetForm(clearCut);
+			setInitialClearCutId(clearCut.id);
 		}
-	}, [clearCut, resetForm]);
+	}, [clearCut, resetForm, initialClearCutId]);
 
 	const handleSubmit = (formData: ClearCutForm) => {
 		dispatch(
