@@ -45,7 +45,8 @@ def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
     db.flush()
     return reduce(
         lambda has_changed, current_changed: has_changed and current_changed,
-        update_rules,
+        updated_rules,
+        False,
     )
 
 
@@ -69,8 +70,17 @@ def query_area_rule(db: Session) -> Query[Rules]:
 
 
 def list_rules(db: Session) -> AllRules:
+    area_rule = query_area_rule(db).first()
+    slope_rule = query_slope_rule(db).first()
+    ecological_zoning_rule = query_ecological_zoning_rule(db).first()
+
+    if area_rule is None or slope_rule is None or ecological_zoning_rule is None:
+        raise HTTPException(
+            status_code=404, detail="One or more required rules not found"
+        )
+
     return AllRules(
-        area=query_area_rule(db).first(),
-        slope=query_slope_rule(db).first(),
-        ecological_zoning=query_ecological_zoning_rule(db).first(),
+        area=area_rule,
+        slope=slope_rule,
+        ecological_zoning=ecological_zoning_rule,
     )

@@ -30,7 +30,7 @@ jobs:
       DATABASE_URL: ${{secrets.DATABASE_URL}}
       ENVIRONMENT: development
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         python-version: ["3.13"]
@@ -47,7 +47,7 @@ jobs:
       - name: Install development dependencies
         run: make install-dev-dependencies
         working-directory: backend
-        
+
       - name: Setup and seed database
         working-directory: backend
         if: ${{ inputs.database-action == 'setup-database' }}

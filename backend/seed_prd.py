@@ -2,7 +2,7 @@ import traceback
 
 from app.database import SessionLocal
 from app.models import Department, User
-from app.services.user_auth import get_password_hash
+from app.services.get_password_hash import get_password_hash
 from common_seed import seed_cities_departments
 
 SRID = 4326

@@ -34,31 +34,28 @@ L’objectif est de développer une solution complète pour :
 
 ## Pour contribuer
 
-Pour contribuer, vous pouvez demander un accès au projet sur github.  Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
+Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
 
 Essayez de respecter les conventions de code et le style d'écriture du projet:
 
-  - feature/nom_de_la_feature pour une nouvelle fonctionnalité
-  - chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
-  - hotfix/nom_du_hotfix pour une correction rapide
-
+- feature/nom_de_la_feature pour une nouvelle fonctionnalité
+- chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
+- hotfix/nom_du_hotfix pour une correction rapide
 
 Chaque commit doit suivre la convention de style suivante :
 
-  - Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
-  - Structure:
-    - [Type] (optional scope): [Description]
-    - [Optional Body]
-    - [Optional Footer]
-  - Exemple : chore(readme): ajouter détails pour contribuer au repo
+- Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
+- Structure:
+  - [Type] (optional scope): [Description]
+  - [Optional Body]
+  - [Optional Footer]
+- Exemple : chore(readme): ajouter détails pour contribuer au repo
 
 Créez une pull request.
 
 - Pour faciliter la revue de la pull request :
   - Liez la pull request à un ticket NocoDB en ajoutant le lien du ticket dans la description.
   - Rédigez une description détaillée de la pull request afin de fournir un maximum d’informations sur les modifications apportées.
-
-
 
 # Architecture du Projet (sujet à améliorer et definir selon les expertises des volonteurs)
 
@@ -84,12 +81,11 @@ L'ideeèr du projet est de créer une architecture modulaire qui permet d'automa
 └── 📁 analytics/ (contient les scripts pour analyser et visualiser les données)
 ```
 
-
 ## Diagramme
 
-Pour visualiser ce graph sur VS Code, vous pouvez installer des plugins comme "Markdown Preview Enhanced". 
+Pour visualiser ce graph sur VS Code, vous pouvez installer des plugins comme "Markdown Preview Enhanced".
 
-Le graph est pas nécessairement complet, mais il donne une idée de l'architecture générale du projet. 
+Le graph est pas nécessairement complet, mais il donne une idée de l'architecture générale du projet.
 
 ```mermaid
 flowchart LR
@@ -99,7 +95,7 @@ flowchart LR
 
     %% Main Clever Cloud subgraph
     subgraph CC["CleverCloud"]
-    
+
       %% Data Engineering Subgraph
       subgraph DE["Data Engineering"]
       ETL[Docker-based Ingestion Jobs]
@@ -177,7 +173,7 @@ Il y a aussi un fichier projet `pyproject.toml` à la racine du projet qui conti
 
 Installer les dépendances:
 
-  Il faut être dans le répertoire backend, data_pipeline ou analytics et exécuter la commande suivante: 
+Il faut être dans le répertoire backend, data_pipeline ou analytics et exécuter la commande suivante:
 
     poetry install
 
@@ -242,5 +238,95 @@ Un mot de passe est nécessaire pour ouvrir la base de données, lire ou modifie
 ### Bonnes pratiques
 
 Considérez la base de données keepass comme étant la golden source de tous les secrets du projet.  
-Chaque secret utilisés dans le projet doit être référencés dans le keepass.  
+Chaque secret utilisés dans le projet doit être référencé dans le keepass.  
 Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ...
+
+# Les commandes pour développer en local
+
+Quelques commandes pour démarrer le projet en local.
+Voir les README des sous-répertoires pour plus de détails sur chaque partie du projet.
+
+## Base de données
+
+```bash
+# Lancer PostgreSQL et pgAdmin
+docker compose up db pgadmin
+```
+
+La base de données est accessible à l'adresse [http://localhost:5432](http://localhost:5432).
+Connectez-vous à pgAdmin sur [http://localhost:8888/](http://localhost:8888/) avec les identifiants suivants :
+
+- Email : `devuser@devuser.com`
+- Mot de passe : `devuser`
+
+Le site web est accessible à l'adresse [http://localhost:5173](http://localhost:5173)
+
+## Backend
+
+```bash
+# Aller dans le répertoire backend
+cd backend
+
+# Installer les dépendances
+poetry install
+
+# Activer l'environnement virtuel
+source .venv/bin/activate
+
+# Lancer le serveur de développement
+poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
+
+# Pour seeder la base de données avec des données de développement
+poetry run python -m seed_dev
+```
+
+L'API du backend est accessible à l'adresse [http://localhost:8080](http://localhost:8080)
+
+## Frontend
+
+```bash
+# Aller dans le répertoire frontend
+cd frontend
+
+# Installer les dépendances
+pnpm i
+
+# Lancer le serveur de développement
+pnpm dev
+
+# Pour construire le projet pour la production et vérifier le typing
+pnpm run build
+
+# Pour lancer les tests
+pnpm test
+```
+
+## Data pipeline
+
+```bash
+# Aller dans le répertoire data_pipeline
+cd data_pipeline
+
+# Installer les dépendances
+poetry install
+
+# Activer l'environnement virtuel
+source .venv/bin/activate
+
+# Pour seeder la base de données avec des données réalistes
+cd data_pipeline/
+python -m bootstrap.scripts.seed_database --natura2000-concat-filepath bootstrap/data/natura2000/natura2000_concat.fgb --enriched-clear-cuts-filepath bootstrap/data/sufosat/sufosat_clusters_enriched.fgb --database-url postgresql://devuser:devuser@localhost:5432/local --sample 1000
+```
+
+## S3
+
+```bash
+# Lister les fichiers dans le bucket S3
+aws s3 ls s3://brigade-coupe-rase-s3 --recursive --profile d4g-s13-brigade-coupes-rases
+
+# Supprimer les fichiers de développement dans le bucket S3
+aws s3 rm s3://brigade-coupe-rase-s3/development/reports/ --recursive --profile d4g-s13-brigade-coupes-rases
+
+# Mettre à jour la configuration CORS du bucket S3
+aws s3api put-bucket-cors --bucket brigade-coupe-rase-s3 --cors-configuration file://s3cors.json --profile d4g-s13-brigade-coupes-rases
+```

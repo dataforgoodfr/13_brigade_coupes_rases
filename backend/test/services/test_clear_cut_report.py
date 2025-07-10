@@ -1,7 +1,6 @@
 from datetime import date
 
 import pytest
-from common.clear_cut import new_clear_cut_report
 from geoalchemy2.shape import from_shape
 from geojson_pydantic import MultiPolygon, Point
 from shapely.geometry import MultiPolygon as DbMultiPolygon
@@ -12,6 +11,7 @@ from app.schemas.clear_cut import ClearCutCreateSchema
 from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.services.clear_cut_report import create_clear_cut_report
+from test.common.clear_cut import new_clear_cut_report
 
 
 def test_create_report_with_intersection(db):

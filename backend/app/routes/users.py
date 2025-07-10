@@ -41,7 +41,7 @@ def list_users(
 @router.get("/{id}", response_model=UserResponseSchema)
 def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
     logger.info(db)
-    return user_to_user_response_schema(get_user_by_id(id, db))
+    return get_user_by_id(id, db)
 
 
 @router.put("/{id}", response_model=UserResponseSchema, status_code=200)

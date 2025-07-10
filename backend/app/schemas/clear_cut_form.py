@@ -1,8 +1,7 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 logger = getLogger(__name__)
 
@@ -10,11 +9,11 @@ logger = getLogger(__name__)
 class ClearCutPicture(BaseModel):
     id: int
     link: str
-    tag: Optional[str] = None
+    tag: str | None = None
 
 
 class ClearCutFormBase(BaseModel):
-    inspection_date: Optional[datetime] = None
+    inspection_date: datetime | None = None
     weather: None | str = None
     forest_description: None | str = None
     remainingTrees: None | bool = None
@@ -39,10 +38,18 @@ class ClearCutFormBase(BaseModel):
     over_20_ha: None | bool = None
     psg_required_plot: None | bool = None
 
+    # Image fields (S3 keys)
+    images_clear_cut: list[str] | None = None
+    images_plantation: list[str] | None = None
+    image_worksite_sign: list[str] | None = None
+    images_tree_trunks: list[str] | None = None
+    images_soil_state: list[str] | None = None
+    images_access_road: list[str] | None = None
+
     class Config:
         json_schema_extra = {
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,
@@ -66,6 +73,12 @@ class ClearCutFormBase(BaseModel):
                 "pefc_fsc_certified": False,
                 "over_20_ha": False,
                 "psg_required_plot": True,
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
 
@@ -84,14 +97,14 @@ class ClearCutFormResponse(ClearCutFormBase):
     id: int
     created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
-    _ = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,
@@ -122,17 +135,23 @@ class ClearCutReportFormWithStrategy(ClearcutFormStrategy, ClearCutFormBase):
                 "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
                 "relevant_for_psg_request": False,
                 "request_engaged": "Request",
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
         }
+    )
 
 
 class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormResponse):
-    _ = None
-
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
-                "inspection_date": datetime(2025, 4, 23, 14, 00),
+                "inspection_date": "2025-04-23T14:00:00",
                 "weather": "Rainy",
                 "forest_description": "Wild forest",
                 "remainingTrees": True,
@@ -163,9 +182,16 @@ class ClearCutFormWithStrategyResponse(ClearcutFormStrategy, ClearCutFormRespons
                 "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
                 "relevant_for_psg_request": False,
                 "request_engaged": "Request",
+                "images_clear_cut": ["development/reports/123/uuid_image1.jpg"],
+                "images_plantation": ["development/reports/123/uuid_image2.jpg"],
+                "image_worksite_sign": ["development/reports/123/uuid_image3.jpg"],
+                "images_tree_trunks": ["development/reports/123/uuid_image4.jpg"],
+                "images_soil_state": ["development/reports/123/uuid_image5.jpg"],
+                "images_access_road": ["development/reports/123/uuid_image6.jpg"],
             }
-        }
+        },
+    )
 
 
 class ClearCutFormCreate(ClearCutFormBase):
-    editor_id: Optional[int] = None
+    editor_id: int | None = None

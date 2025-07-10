@@ -1,4 +1,4 @@
-from common.clear_cut import new_clear_cut_report
+from test.common.clear_cut import new_clear_cut_report
 
 
 def test_get_clearcuts_map(client, db):

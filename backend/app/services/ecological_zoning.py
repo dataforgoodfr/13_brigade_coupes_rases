@@ -57,7 +57,7 @@ def find_paginated_ecological_zonings(
     )
     ecolgocial_zonings_count = db.query(EcologicalZoning.id).count()
     return PaginationResponseSchema(
-        metadata=PaginationMetadataSchema(
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=ecolgocial_zonings_count, url=url
         ),
         content=[

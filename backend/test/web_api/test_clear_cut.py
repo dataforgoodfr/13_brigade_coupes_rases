@@ -89,7 +89,7 @@ def test_post_report_success(client: TestClient):
 
 
 def test_post_report_invalid_data(client: TestClient):
-    invalid_data = {}
+    invalid_data: dict = {}
 
     response = client.post(
         "/api/v1/clear-cuts-reports",

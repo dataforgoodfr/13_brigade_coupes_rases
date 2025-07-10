@@ -2,6 +2,7 @@ from datetime import datetime
 
 from geoalchemy2 import Geometry, functions
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     Column,
@@ -34,8 +35,10 @@ user_department = Table(
 
 class ClearCutEcologicalZoning(Base):
     __tablename__ = "clear_cut_ecological_zoning"
-    clear_cut_id = Column(Integer, ForeignKey("clear_cuts.id"), primary_key=True)
-    ecological_zoning_id = Column(
+    clear_cut_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("clear_cuts.id"), primary_key=True
+    )
+    ecological_zoning_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("ecological_zonings.id"), primary_key=True
     )
     clear_cut: Mapped["ClearCut"] = relationship(back_populates="ecological_zonings")
@@ -71,15 +74,15 @@ rules_clear_cut_reports = Table(
 class Rules(Base):
     __tablename__ = "rules"
     RULES = ["slope", "area", "ecological_zoning"]
-    id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    type: Mapped[str] = mapped_column(String, nullable=False)
     ecological_zonings = relationship(
         "EcologicalZoning", secondary=rules_ecological_zoning, back_populates="rules"
     )
     clear_cuts_reports = relationship(
         "ClearCutReport", secondary=rules_clear_cut_reports, back_populates="rules"
     )
-    threshold = Column(Float, nullable=True)
+    threshold: Mapped[float | None] = mapped_column(Float, nullable=True)
 
 
 class User(Base):
@@ -87,19 +90,21 @@ class User(Base):
 
     ROLES = ["admin", "volunteer"]
 
-    id = Column(Integer, primary_key=True, index=True)
-    firstname = Column(String, nullable=False)
-    lastname = Column(String, nullable=False)
-    login = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=True)
-    role = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    firstname: Mapped[str] = mapped_column(String, nullable=False)
+    lastname: Mapped[str] = mapped_column(String, nullable=False)
+    login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, nullable=False
+    )
     # TODO: updated_at is not set when departments are updated
-    updated_at = Column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
-    deleted_at = Column(DateTime, nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     departments = relationship(
         "Department", secondary=user_department, back_populates="users"
@@ -116,9 +121,9 @@ class User(Base):
 class Department(Base):
     __tablename__ = "departments"
 
-    id = Column(Integer, primary_key=True, index=True)
-    code = Column(String, nullable=False)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    code: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
     users = relationship(
         "User", secondary=user_department, back_populates="departments"
     )
@@ -133,9 +138,9 @@ class Department(Base):
 
 class City(Base):
     __tablename__ = "cities"
-    id = Column(Integer, primary_key=True, index=True)
-    zip_code = Column(String, index=True, nullable=False)
-    name = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    zip_code: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
     department_id: Mapped[int] = mapped_column(
         ForeignKey("departments.id"), nullable=False
     )
@@ -150,11 +155,11 @@ NATURA_2000 = "Natura2000"
 
 class EcologicalZoning(Base):
     __tablename__ = "ecological_zonings"
-    id = Column(Integer, primary_key=True, index=True)
-    type = Column(String, nullable=False)
-    sub_type = Column(String, nullable=True)
-    name = Column(String, nullable=False)
-    code = Column(String, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    type: Mapped[str] = mapped_column(String, nullable=False)
+    sub_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    code: Mapped[str] = mapped_column(String, nullable=False)
     clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
         back_populates="ecological_zoning"
     )
@@ -174,21 +179,31 @@ CLEARCUT_STATUSES = [
 
 class ClearCut(Base):
     __tablename__ = "clear_cuts"
-    id = Column(Integer, primary_key=True, index=True)
-    area_hectare = Column(Float, nullable=False)
-    location = Column(Geometry(geometry_type="Point", srid=SRID), nullable=False)
-    boundary = Column(Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False)
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    area_hectare: Mapped[float] = mapped_column(Float, nullable=False)
+    location: Mapped[str] = mapped_column(
+        Geometry(geometry_type="Point", srid=SRID), nullable=False
+    )
+    boundary: Mapped[str] = mapped_column(
+        Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
-    observation_start_date = Column(DateTime, nullable=False)
-    observation_end_date = Column(DateTime, nullable=False)
-    bdf_resinous_area_hectare = Column(Float, nullable=True)
-    bdf_deciduous_area_hectare = Column(Float, nullable=True)
-    bdf_mixed_area_hectare = Column(Float, nullable=True)
-    bdf_poplar_area_hectare = Column(Float, nullable=True)
-    ecological_zoning_area_hectare = Column(
+    observation_start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    observation_end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    bdf_resinous_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    bdf_deciduous_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    bdf_mixed_area_hectare: Mapped[float | None] = mapped_column(Float, nullable=True)
+    bdf_poplar_area_hectare: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ecological_zoning_area_hectare: Mapped[float | None] = mapped_column(
         Float,
         CheckConstraint(
             "ecological_zoning_area_hectare <= area_hectare + 0.000001",
@@ -224,17 +239,21 @@ class ClearCut(Base):
 class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
-    id = Column(Integer, primary_key=True, index=True)
-    slope_area_ratio_percentage = Column(Float, index=True, nullable=True)
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    slope_area_ratio_percentage: Mapped[float | None] = mapped_column(
+        Float, index=True, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
     clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
     clear_cut_forms: Mapped[list["ClearCutForm"]] = relationship(
         back_populates="report"
     )
-    status = Column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(
         back_populates="clear_cuts_reports", lazy="joined"
@@ -242,15 +261,31 @@ class ClearCutReport(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="reports")
 
-    total_area_hectare = Column(Float, nullable=True)
-    total_ecological_zoning_area_hectare = Column(Float, nullable=True)
-    total_bdf_resinous_area_hectare = Column(Float, nullable=True)
-    total_bdf_deciduous_area_hectare = Column(Float, nullable=True)
-    total_bdf_mixed_area_hectare = Column(Float, nullable=True)
-    total_bdf_poplar_area_hectare = Column(Float, nullable=True)
-    average_location = Column(Geometry(geometry_type="Point", srid=SRID), nullable=True)
-    last_cut_date = Column(DateTime, default=datetime.now, nullable=True)
-    first_cut_date = Column(DateTime, default=datetime.now, nullable=True)
+    total_area_hectare: Mapped[float | None] = mapped_column(Float, nullable=True)
+    total_ecological_zoning_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    total_bdf_resinous_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    total_bdf_deciduous_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    total_bdf_mixed_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    total_bdf_poplar_area_hectare: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    average_location: Mapped[Geometry | None] = mapped_column(
+        Geometry(geometry_type="Point", srid=SRID), nullable=True
+    )
+    last_cut_date: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.now, nullable=True
+    )
+    first_cut_date: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.now, nullable=True
+    )
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
     rules = relationship(
@@ -266,55 +301,76 @@ class ClearCutReport(Base):
 
 class ClearCutForm(Base):
     __tablename__ = "clear_cut_report_forms"
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), nullable=False
     )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
-    editor_id = Column(Integer, index=True, nullable=True)
-    created_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    editor_id: Mapped[int | None] = mapped_column(Integer, index=True, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, onupdate=datetime.now
+    )
 
     # Ground datas
-    inspection_date = Column(DateTime, nullable=True)
-    weather = Column(String, index=True)
-    forest_description = Column(String, index=True)
-    remainingTrees = Column(Boolean)
-    species = Column(String, index=True)
-    workSignVisible = Column(Boolean)
-    waterzone_description = Column(String)
-    protected_zone_description = Column(String)
-    soil_state = Column(String)
+    inspection_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    weather: Mapped[str | None] = mapped_column(String, index=True)
+    forest_description: Mapped[str | None] = mapped_column(String, index=True)
+    remainingTrees: Mapped[bool | None] = mapped_column(Boolean)
+    species: Mapped[str | None] = mapped_column(String, index=True)
+    workSignVisible: Mapped[bool | None] = mapped_column(Boolean)
+    waterzone_description: Mapped[str | None] = mapped_column(String)
+    protected_zone_description: Mapped[str | None] = mapped_column(String)
+    soil_state: Mapped[str | None] = mapped_column(String)
 
     # Ecological informations
-    ecological_zone = Column(Boolean)
-    ecological_zone_type = Column(String)
-    nearby_zone = Column(String)
-    nearby_zone_type = Column(String)
-    protected_species = Column(String)
-    protected_habitats = Column(String)
-    ddt_request = Column(Boolean)
-    ddt_request_owner = Column(String)
+    ecological_zone: Mapped[bool | None] = mapped_column(Boolean)
+    ecological_zone_type: Mapped[str | None] = mapped_column(String)
+    nearby_zone: Mapped[str | None] = mapped_column(String)
+    nearby_zone_type: Mapped[str | None] = mapped_column(String)
+    protected_species: Mapped[str | None] = mapped_column(String)
+    protected_habitats: Mapped[str | None] = mapped_column(String)
+    ddt_request: Mapped[bool | None] = mapped_column(Boolean)
+    ddt_request_owner: Mapped[str | None] = mapped_column(String)
 
     # Stakeholders
-    compagny = Column(String)
-    subcontractor = Column(String)
-    landlord = Column(String)
+    compagny: Mapped[str | None] = mapped_column(String)
+    subcontractor: Mapped[str | None] = mapped_column(String)
+    landlord: Mapped[str | None] = mapped_column(String)
 
     # Reglementation
-    pefc_fsc_certified = Column(Boolean, nullable=True)
-    over_20_ha = Column(Boolean, nullable=True)
-    psg_required_plot = Column(Boolean, nullable=True)
+    pefc_fsc_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    over_20_ha: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    psg_required_plot: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Legal strategy
-    relevant_for_pefc_complaint = Column(Boolean, nullable=True)
-    relevant_for_rediii_complaint = Column(Boolean, nullable=True)
-    relevant_for_ofb_complaint = Column(Boolean, nullable=True)
-    relevant_for_alert_cnpf_ddt_srgs = Column(Boolean, nullable=True)
-    relevant_for_alert_cnpf_ddt_psg_thresholds = Column(Boolean, nullable=True)
-    relevant_for_psg_request = Column(Boolean, nullable=True)
-    relevant_for_psg_request = Column(Boolean, nullable=True)
-    request_engaged = Column(String, nullable=True)
+    relevant_for_pefc_complaint: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    relevant_for_rediii_complaint: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    relevant_for_ofb_complaint: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    relevant_for_alert_cnpf_ddt_srgs: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    relevant_for_alert_cnpf_ddt_psg_thresholds: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    relevant_for_psg_request: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True
+    )
+    request_engaged: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # Miscellaneous
-    other = Column(String)
+    other: Mapped[str | None] = mapped_column(String)
+
+    # Image fields (S3 keys stored as JSON arrays or strings)
+    images_clear_cut: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    images_plantation: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    image_worksite_sign: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    images_tree_trunks: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    images_soil_state: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    images_access_road: Mapped[list | None] = mapped_column(JSON, nullable=True)

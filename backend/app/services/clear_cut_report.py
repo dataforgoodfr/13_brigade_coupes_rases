@@ -121,6 +121,7 @@ def sync_clear_cuts_reports(db: Session):
     rows = query_reports_with_additional_data(
         db, aggregated_cuts.subquery(), rules
     ).all()
+    report: ClearCutReport
     for row in rows:
         [
             report,
@@ -139,7 +140,6 @@ def sync_clear_cuts_reports(db: Session):
             slope_rule_id,
             ecological_zoning_rule_id,
         ] = row
-        report: ClearCutReport = report
         report.average_location = average_location
         report.total_area_hectare = total_area_hectare
         report.last_cut_date = cut_end
@@ -238,8 +238,8 @@ def update_clear_cut_report(id: int, db: Session, report: ClearCutReportPatchSch
         setattr(clearcut, key, value)
     db.commit()
     db.refresh(clearcut)
-    clearcut.location = to_shape(clearcut.location, srid=SRID).wkt
-    clearcut.boundary = to_shape(clearcut.boundary, srid=SRID).wkt
+    clearcut.location = to_shape(clearcut.location).wkt
+    clearcut.boundary = to_shape(clearcut.boundary).wkt
     return clearcut
 
 
@@ -248,13 +248,10 @@ def find_clearcuts_reports(
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
     reports = db.query(ClearCutReport).offset(page * size).limit(size).all()
     reports_count = db.query(ClearCutReport.id).count()
-    reports = map(
-        report_to_response_schema,
-        reports,
-    )
+    reports_response = map(report_to_response_schema, reports)
     return PaginationResponseSchema(
-        content=list(reports),
-        metadata=PaginationMetadataSchema(
+        content=list(reports_response),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=reports_count, url=url
         ),
     )

@@ -1,7 +1,8 @@
-from common.user import get_admin_user_token
 from fastapi import status
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
+
+from test.common.user import get_admin_user_token
 
 
 def test_create_version_success(client: TestClient, db: Session):
@@ -95,3 +96,60 @@ def test_create_version_success(client: TestClient, db: Session):
     assert data["waterzone_description"] == report_data["waterzone_description"]
     assert data["weather"] == report_data["weather"]
     assert data["workSignVisible"] == report_data["workSignVisible"]
+
+
+def test_form_submission_updates_report_status(client: TestClient, db: Session):
+    """Test that submitting a form updates the report status from 'to_validate' to 'validated'"""
+    token = get_admin_user_token(client, db)
+
+    # Verify initial report status is "to_validate"
+    report_response = client.get("/api/v1/clear-cuts-reports/1")
+    assert report_response.status_code == status.HTTP_200_OK
+    initial_report_data = report_response.json()
+    assert initial_report_data["status"] == "to_validate"
+
+    # Submit a form
+    form_data = {
+        "compagny": "Test Company",
+        "ddt_request_owner": "Test Owner",
+        "ecological_zone": False,
+        "ecological_zone_type": "Test Zone",
+        "forest_description": "Test Forest",
+        "inspection_date": "2025-04-23T14:00:00",
+        "landlord": "Test Landlord",
+        "nearby_zone": "Test Nearby Zone",
+        "nearby_zone_type": "Test Nearby Zone Type",
+        "other": "Test Other",
+        "over_20_ha": False,
+        "pefc_fsc_certified": False,
+        "protected_habitats": "Test Habitats",
+        "protected_species": "Test Species",
+        "protected_zone_description": "Test Description",
+        "psg_required_plot": True,
+        "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
+        "relevant_for_alert_cnpf_ddt_srgs": False,
+        "relevant_for_ofb_complaint": False,
+        "relevant_for_psg_request": False,
+        "relevant_for_rediii_complaint": False,
+        "remainingTrees": True,
+        "request_engaged": "Test Request",
+        "soil_state": "Test Soil",
+        "species": "Test Species",
+        "subcontractor": "Test Subcontractor",
+        "waterzone_description": "Test Water Zone",
+        "weather": "Test Weather",
+        "workSignVisible": False,
+    }
+
+    response = client.post(
+        "/api/v1/clear-cuts-reports/1/forms",
+        json=form_data,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+
+    # Verify report status is now "validated"
+    updated_report_response = client.get("/api/v1/clear-cuts-reports/1")
+    assert updated_report_response.status_code == status.HTTP_200_OK
+    updated_report_data = updated_report_response.json()
+    assert updated_report_data["status"] == "validated"

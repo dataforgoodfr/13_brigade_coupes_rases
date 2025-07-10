@@ -1,8 +1,8 @@
-from common.user import get_admin_user_token, get_volunteer_user_token, new_user
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
 
 from app.models import Department
+from test.common.user import get_admin_user_token, get_volunteer_user_token, new_user
 
 
 def test_create_user(client: TestClient, db: Session):
@@ -12,6 +12,7 @@ def test_create_user(client: TestClient, db: Session):
         "lastname": "Tree",
         "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
+        "password": "password",
         "role": "volunteer",
     }
     response = client.post(
@@ -36,6 +37,7 @@ def test_create_user_without_admin_right_should_return_forbidden(
         "lastname": "Tree",
         "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
+        "password": "password",
         "role": "volunteer",
     }
     response = client.post(
@@ -78,11 +80,11 @@ def test_update_user(client, db):
     db.commit()
     db.refresh(user)
 
-    # Update role
+    # Update firstname
     update_response = client.put(
         f"/api/v1/users/{user.id}",
         json={
-            "role": "admin",
+            "firstname": "Sorenza",
         },
     )
     assert update_response.status_code == 200
@@ -92,7 +94,7 @@ def test_update_user(client, db):
     assert get_response.status_code == 200
     data = get_response.json()
 
-    assert data["role"] == "admin"
+    assert data["firstname"] == "Sorenza"
 
 
 def test_get_users(client, db):

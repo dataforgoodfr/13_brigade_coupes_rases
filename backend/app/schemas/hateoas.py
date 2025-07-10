@@ -24,7 +24,10 @@ class PaginationMetadataSchema(Metadata):
     pages_count: int
     total_count: int
 
-    def __init__(self, page: int, size: int, total_count: int, url: str):
+    @classmethod
+    def create(
+        cls, page: int, size: int, total_count: int, url: str
+    ) -> "PaginationMetadataSchema":
         links = {
             "self": f"{url}?page={page}&size={size}",
         }
@@ -33,7 +36,7 @@ class PaginationMetadataSchema(Metadata):
         if page > 0:
             links["previous"] = f"{url}?page={page - 1}&size={size}"
 
-        super().__init__(
+        return cls(
             pages_count=math.ceil(total_count / size),
             total_count=total_count,
             size=size,
