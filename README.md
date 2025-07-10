@@ -35,6 +35,7 @@ L’objectif est de développer une solution complète pour :
 ## Pour contribuer
 
 Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
+Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
 
 Essayez de respecter les conventions de code et le style d'écriture du projet:
 
@@ -316,9 +317,6 @@ source .venv/bin/activate
 # Pour seeder la base de données avec des données réalistes
 cd data_pipeline/
 python -m bootstrap.scripts.seed_database --natura2000-concat-filepath bootstrap/data/natura2000/natura2000_concat.fgb --enriched-clear-cuts-filepath bootstrap/data/sufosat/sufosat_clusters_enriched.fgb --database-url postgresql://devuser:devuser@localhost:5432/local --sample 1000
-
-# Après avoir seedé la base de données, il faut lancer la synchronisation des reports (process à revoir)
-curl -X POST "http://localhost:8080/api/v1/clear-cuts-reports/sync-reports"
 ```
 
 ## S3

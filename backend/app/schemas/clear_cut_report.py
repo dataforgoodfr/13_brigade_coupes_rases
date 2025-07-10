@@ -1,16 +1,17 @@
 from datetime import datetime
 from logging import getLogger
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
 from app.models import CLEARCUT_STATUSES, ClearCutReport
 from app.schemas.clear_cut import ClearCutCreateSchema
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 logger = getLogger(__name__)
 
 
 class CreateClearCutsReportCreateSchema(BaseModel):
-    slope_area_hectare: float | None = Field(json_schema_extra={"example": "10.0"})
+    slope_area_ratio_percentage: float | None = Field(
+        json_schema_extra={"example": "10"}
+    )
     clear_cuts: list[ClearCutCreateSchema]
     city_zip_code: str = Field(
         json_schema_extra={"example": "1"},
@@ -30,8 +31,8 @@ class ClearCutReportPatchSchema(BaseModel):
 
 class ClearCutReportResponseSchema(BaseModel):
     id: str = Field(json_schema_extra={"example": "1"})
-    slope_area_hectare: float | None = Field(
-        json_schema_extra={"example": "10.0"},
+    slope_area_ratio_percentage: float | None = Field(
+        json_schema_extra={"example": "10"},
     )
     status: str = Field(
         json_schema_extra={"example": "validated"},

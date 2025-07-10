@@ -1,25 +1,10 @@
 from datetime import datetime
 
 from geoalchemy2 import Geometry, functions
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    CheckConstraint,
-    Column,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-)
-from sqlalchemy.orm import (
-    Mapped,
-    column_property,
-    mapped_column,
-    relationship,
-    validates,
-)
+from sqlalchemy import (JSON, Boolean, CheckConstraint, Column, DateTime,
+                        Float, ForeignKey, Integer, String, Table)
+from sqlalchemy.orm import (Mapped, column_property, mapped_column,
+                            relationship, validates)
 
 from app.database import Base
 
@@ -265,7 +250,7 @@ class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    slope_area_hectare: Mapped[float | None] = mapped_column(
+    slope_area_ratio_percentage: Mapped[float | None] = mapped_column(
         Float, index=True, nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
