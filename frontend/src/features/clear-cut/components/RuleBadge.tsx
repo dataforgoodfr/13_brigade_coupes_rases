@@ -8,7 +8,7 @@ function translateRule(rule: Rule) {
 		case "area":
 			return `Sup ${rule.threshold} HA`;
 		case "slope":
-			return `Pente > 30 %`;
+			return "Pente > 30 %";
 	}
 }
 export function RuleBadge(tag: Rule & { className?: string }) {
