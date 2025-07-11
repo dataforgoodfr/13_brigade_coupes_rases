@@ -228,7 +228,7 @@ export const mockClearCutsResponse = (
 			boundaries && filterInArea
 				? randomPoints.filter((point) =>
 						isPointInsidePolygon(boundaries, point.coordinates),
-					)
+				  )
 				: randomPoints;
 		return HttpResponse.json({
 			previews:
@@ -238,7 +238,7 @@ export const mockClearCutsResponse = (
 								boundaries,
 								ccp.average_location.coordinates,
 							),
-						)
+					  )
 					: previews,
 			points: {
 				content: points.map((p) => ({ count: 1, point: p })),

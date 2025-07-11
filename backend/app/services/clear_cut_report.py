@@ -1,35 +1,22 @@
 from logging import getLogger
 
-from fastapi import HTTPException, status
-from geoalchemy2.elements import WKTElement
-from geoalchemy2.functions import (
-    ST_Centroid,
-    ST_Multi,
-    ST_Union,
-)
-from geoalchemy2.shape import to_shape
-from sqlalchemy import case, func, or_
-from sqlalchemy.orm import Session
-
-from app.models import (
-    SRID,
-    ClearCut,
-    ClearCutEcologicalZoning,
-    ClearCutReport,
-)
-from app.schemas.clear_cut_report import (
-    ClearCutReportPatchSchema,
-    ClearCutReportResponseSchema,
-    CreateClearCutsReportCreateSchema,
-    report_to_response_schema,
-)
-from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
+from app.schemas.clear_cut_report import (ClearCutReportPatchSchema,
+                                          ClearCutReportResponseSchema,
+                                          CreateClearCutsReportCreateSchema,
+                                          report_to_response_schema)
+from app.schemas.hateoas import (PaginationMetadataSchema,
+                                 PaginationResponseSchema)
 from app.schemas.rule import AllRules
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
-from app.services.rules import (
-    list_rules,
-)
+from app.services.rules import list_rules
+from fastapi import HTTPException, status
+from geoalchemy2.elements import WKTElement
+from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
+from geoalchemy2.shape import to_shape
+from sqlalchemy import case, func, or_
+from sqlalchemy.orm import Session
 
 logger = getLogger(__name__)
 
@@ -103,8 +90,7 @@ def query_reports_with_additional_data(
         ).label("slope_rule_id"),
         case(
             (
-                aggregated_cuts.c.total_ecological_zoning_area_hectare
-                >= rules.ecological_zoning.threshold,
+                aggregated_cuts.c.total_ecological_zoning_rule_matches >= 0,
                 rules.ecological_zoning.id,
             ),
             else_=None,

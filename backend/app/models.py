@@ -250,7 +250,7 @@ class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    slope_area_ratio_percentage: Mapped[float | None] = mapped_column(
+    slope_area_hectare: Mapped[float | None] = mapped_column(
         Float, index=True, nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(

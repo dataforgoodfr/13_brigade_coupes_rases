@@ -57,7 +57,7 @@ class ClearCutReportPreviewSchema(BaseModel):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    slope_area_ratio_percentage: float | None = Field(
+    slope_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0},
     )
     total_bdf_resinous_area_hectare: float | None = Field(
