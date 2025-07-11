@@ -57,7 +57,7 @@ class ClearCutReportPreviewSchema(BaseModel):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    slope_area_ratio_percentage: float | None = Field(
+    slope_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0},
     )
     total_bdf_resinous_area_hectare: float | None = Field(
@@ -103,7 +103,7 @@ def report_to_report_preview_schema(
         average_location=Point.model_validate_json(report.average_location_json),
         rules_ids=[str(rule.id) for rule in report.rules],
         status=report.status,
-        slope_area_ratio_percentage=report.slope_area_ratio_percentage,
+        slope_area_hectare=report.slope_area_hectare,
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,

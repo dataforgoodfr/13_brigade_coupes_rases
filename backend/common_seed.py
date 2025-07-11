@@ -64,7 +64,7 @@ def seed_rules(db: Session, ecological_zonings: list[EcologicalZoning]):
         ),
         Rules(
             type="slope",
-            threshold=30.0,
+            threshold=2.0,
         ),
         Rules(
             type="ecological_zoning",

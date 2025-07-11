@@ -26,6 +26,7 @@ from app.services.clear_cut_report import (
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
+    sync_clear_cuts_reports,
     update_clear_cut_report,
 )
 from app.services.user_auth import get_current_user
@@ -33,6 +34,12 @@ from app.services.user_auth import get_current_user
 logger = getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/clear-cuts-reports", tags=["ClearcutsReports"])
+
+
+# TODO: (unsecure) Workaround to sync the clear cuts after seeding
+@router.post("/sync-reports", status_code=204)
+def sync_clear_cut_reports(db=db_session):
+    sync_clear_cuts_reports(db)
 
 
 def authenticate(x_imports_token: str = Header(default="")):
