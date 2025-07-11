@@ -76,7 +76,7 @@ def seed_database():
         clear_cuts = [
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=15,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -161,7 +161,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=10,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -225,7 +225,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=6.8,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -259,7 +259,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=marseille,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=4.2,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=15),
@@ -293,7 +293,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=marseille,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=5.7,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -355,7 +355,7 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=14.3,
+                slope_area_hectare=8.1,
                 status="validated",
                 user=admin,
             ),
@@ -389,7 +389,7 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=10.8,
+                slope_area_hectare=3.9,
                 status="to_validate",
                 user=volunteer,
             ),

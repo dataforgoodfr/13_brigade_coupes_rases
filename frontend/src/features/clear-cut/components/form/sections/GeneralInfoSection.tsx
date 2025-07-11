@@ -62,13 +62,16 @@ export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 			) : undefined,
 	},
 	{
-		name: "slope_area_ratio_percentage",
-		label: "Pourcentage de pente",
+		name: "slope_area_hectare",
+		label: "Pente raide (>30%)",
 		type: "fixed",
 		renderConditions: [],
 		transformValue: ({ value }) =>
 			value !== undefined ? (
-				<FormattedNumber value={value as number} style="percent" />
+				<>
+					<FormattedNumber value={value as number} maximumFractionDigits={2} />{" "}
+					ha
+				</>
 			) : undefined,
 	},
 ];

@@ -96,7 +96,7 @@ def query_reports_with_additional_data(
         ).label("area_rule_id"),
         case(
             (
-                ClearCutReport.slope_area_ratio_percentage > rules.slope.threshold,
+                ClearCutReport.slope_area_hectare > rules.slope.threshold,
                 rules.slope.id,
             ),
             else_=None,
@@ -219,7 +219,7 @@ def create_clear_cut_report(
             )
             for clear_cut in report.clear_cuts
         ],
-        slope_area_ratio_percentage=report.slope_area_ratio_percentage,
+        slope_area_hectare=report.slope_area_hectare,
         status="to_validate",
     )
 

@@ -51,7 +51,7 @@ def test_create_report_with_intersection(db):
 
     intersecting_report = CreateClearCutsReportCreateSchema(
         city_zip_code="75056",
-        slope_area_ratio_percentage=10,
+        slope_area_hectare=7.2,
         clear_cuts=[
             ClearCutCreateSchema(
                 observation_start_date=date.today(),
@@ -93,7 +93,7 @@ def test_create_report_with_intersection(db):
 def test_create_report_success(db):
     report = CreateClearCutsReportCreateSchema(
         city_zip_code="75056",
-        slope_area_ratio_percentage=10,
+        slope_area_hectare=7.2,
         clear_cuts=[
             ClearCutCreateSchema(
                 observation_start_date=date.today(),
@@ -127,9 +127,7 @@ def test_create_report_success(db):
     )
     created_report = create_clear_cut_report(db, report)
     assert created_report.city.zip_code == report.city_zip_code
-    assert (
-        created_report.slope_area_ratio_percentage == report.slope_area_ratio_percentage
-    )
+    assert created_report.slope_area_hectare == report.slope_area_hectare
     ecological_zoning = (
         created_report.clear_cuts[0].ecological_zonings[0].ecological_zoning
     )
