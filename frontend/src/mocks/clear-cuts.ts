@@ -65,7 +65,7 @@ export const createClearCutReportBaseMock = (
 		department_id: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
 		city: faker.location.city(),
 		created_at: faker.date.past().toJSON().split("T")[0],
-		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
+		slope_area_hectare: faker.number.float({ min: 0, max: total_area_hectare }),
 		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
 		rules_ids: faker.helpers.arrayElements(Object.keys(fakeRules)),
 		total_area_hectare,
@@ -228,7 +228,7 @@ export const mockClearCutsResponse = (
 			boundaries && filterInArea
 				? randomPoints.filter((point) =>
 						isPointInsidePolygon(boundaries, point.coordinates),
-					)
+				  )
 				: randomPoints;
 		return HttpResponse.json({
 			previews:
@@ -238,7 +238,7 @@ export const mockClearCutsResponse = (
 								boundaries,
 								ccp.average_location.coordinates,
 							),
-						)
+					  )
 					: previews,
 			points: {
 				content: points.map((p) => ({ count: 1, point: p })),

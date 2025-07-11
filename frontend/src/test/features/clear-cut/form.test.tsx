@@ -67,7 +67,8 @@ const mock = mockClearCut({
 	soilState: "Sol en mauvais état",
 	department_id: Object.keys(fakeDepartments)[0],
 	updated_at: "2026-03-13",
-	slope_area_ratio_percentage: 0.54556,
+	slope_area_hectare: 0.54556,
+	total_area_hectare: 1,
 	average_location: { coordinates: [1, 2], type: "Point" },
 });
 
@@ -89,8 +90,8 @@ const mapItem = (
 		case "last_cut_date":
 			expected = "19/03/2024";
 			break;
-		case "slope_area_ratio_percentage":
-			expected = "55\u00a0%";
+		case "slope_area_hectare":
+			expected = "0,55 ha";
 			break;
 		case "total_area_hectare":
 			expected = `${expected} ha`;

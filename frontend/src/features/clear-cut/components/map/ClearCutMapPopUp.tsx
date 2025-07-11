@@ -57,7 +57,7 @@ export function ClearCutMapPopUp({
 		last_cut_date,
 		total_area_hectare,
 		updated_at,
-		slope_area_ratio_percentage,
+		slope_area_hectare,
 		clear_cuts,
 		city,
 		name,
@@ -109,20 +109,24 @@ export function ClearCutMapPopUp({
 							<FormattedNumber value={total_area_hectare} /> HA
 						</strong>
 					</div>
-					{slope_area_ratio_percentage && (
+					{slope_area_hectare && (
 						<div>
-							Pente :
+							{"Pente raide (>30%) :"}
 							<strong>
+								{" "}
 								<FormattedNumber
-									value={slope_area_ratio_percentage}
-									style="percent"
-								/>
+									value={slope_area_hectare}
+									maximumFractionDigits={2}
+								/>{" "}
+								ha
 							</strong>
 						</div>
 					)}
-					<div>
-						Zones Natura :<strong>{ecological_zonings}</strong>
-					</div>
+					{ecological_zonings && (
+						<div>
+							Zones Natura :<strong>{ecological_zonings}</strong>
+						</div>
+					)}
 					<BDFLabel
 						total_area_hectare={total_area_hectare}
 						total_bdf_deciduous_area_hectare={total_bdf_deciduous_area_hectare}

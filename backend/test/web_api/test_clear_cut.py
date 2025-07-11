@@ -16,7 +16,7 @@ def test_endpoint_authentication(client: TestClient):
 
 def test_post_report_success(client: TestClient):
     report_data = {
-        "slope_area_ratio_percentage": 15,
+        "slope_area_hectare": 6.5,
         "city_zip_code": "75056",
         "clear_cuts": [
             {
@@ -63,7 +63,7 @@ def test_post_report_success(client: TestClient):
     print(data)
 
     assert data["id"] == location.split("/")[-1]
-    assert data["slope_area_ratio_percentage"] == 15
+    assert data["slope_area_hectare"] == 6.5
 
     response = client.get(f"/api/v1/clear-cuts/{data['clear_cuts_ids'][0]}")
     assert response.status_code == status.HTTP_200_OK
