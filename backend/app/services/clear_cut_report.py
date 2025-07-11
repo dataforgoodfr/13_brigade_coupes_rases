@@ -8,7 +8,7 @@ from geoalchemy2.functions import (
     ST_Union,
 )
 from geoalchemy2.shape import to_shape
-from sqlalchemy import and_, case, func, or_
+from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -89,25 +89,21 @@ def query_reports_with_additional_data(
         aggregated_cuts,
         case(
             (
-                aggregated_cuts.c.total_area_hectare > rules.area.threshold,
+                aggregated_cuts.c.total_area_hectare >= rules.area.threshold,
                 rules.area.id,
             ),
             else_=None,
         ).label("area_rule_id"),
         case(
             (
-                ClearCutReport.slope_area_hectare > rules.slope.threshold,
+                ClearCutReport.slope_area_hectare >= rules.slope.threshold,
                 rules.slope.id,
             ),
             else_=None,
         ).label("slope_rule_id"),
         case(
             (
-                and_(
-                    aggregated_cuts.c.total_ecological_zoning_area_hectare
-                    > rules.ecological_zoning.threshold,
-                    aggregated_cuts.c.total_ecological_zoning_rule_matches > 0,
-                ),
+                aggregated_cuts.c.total_ecological_zoning_rule_matches >= 0,
                 rules.ecological_zoning.id,
             ),
             else_=None,

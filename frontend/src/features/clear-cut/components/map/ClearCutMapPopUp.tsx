@@ -122,9 +122,11 @@ export function ClearCutMapPopUp({
 							</strong>
 						</div>
 					)}
-					<div>
-						Zones Natura :<strong>{ecological_zonings}</strong>
-					</div>
+					{ecological_zonings && (
+						<div>
+							Zones Natura :<strong>{ecological_zonings}</strong>
+						</div>
+					)}
 					<BDFLabel
 						total_area_hectare={total_area_hectare}
 						total_bdf_deciduous_area_hectare={total_bdf_deciduous_area_hectare}
