@@ -103,7 +103,8 @@ def query_reports_with_additional_data(
         ).label("slope_rule_id"),
         case(
             (
-                aggregated_cuts.c.total_ecological_zoning_rule_matches >= 0,
+                aggregated_cuts.c.total_ecological_zoning_area_hectare
+                >= rules.ecological_zoning.threshold,
                 rules.ecological_zoning.id,
             ),
             else_=None,
