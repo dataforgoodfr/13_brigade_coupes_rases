@@ -112,11 +112,19 @@ export function ClearCuts() {
 		}
 	};
 
+	const onZoomEnd = () => {
+		const currentZoom = map.getZoom();
+		if (currentZoom > DISPLAY_PREVIEW_ZOOM_LEVEL) {
+			dispatch(setWithPoints(false));
+		} else {
+			dispatch(setWithPoints(true));
+		}
+		dispatchGeoBounds();
+	};
+
 	useMapEvents({
 		zoomanim: onZoomChanged,
-		zoomend: () => {
-			dispatchGeoBounds();
-		},
+		zoomend: onZoomEnd,
 		dragend: () => {
 			dispatchGeoBounds();
 		},
