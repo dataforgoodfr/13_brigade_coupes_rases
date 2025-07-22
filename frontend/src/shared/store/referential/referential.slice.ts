@@ -71,6 +71,25 @@ function selectByIds<
 	);
 }
 
+function selectByIdsDifferent<
+	T extends keyof State["value"],
+	K extends keyof State["value"][T],
+>(property: T) {
+	return createSelector(
+		[selectState, (_s: RootState, ids: K[] = []) => ids],
+		(referential: State, ids: K[] = []) =>
+			Object.entries(referential.value[property])
+				.filter(([id]) => !ids.includes(id as K))
+				.map(([id, value]) => ({ id, ...value })),
+	);
+}
+
 export const selectDepartmentsByIds = selectByIds("departments");
 export const selectRulesByIds = selectByIds("rules");
 export const selectEcologicalZoningByIds = selectByIds("ecological_zonings");
+
+export const selectDepartmentsByIdsDifferent =
+	selectByIdsDifferent("departments");
+export const selectRulesByIdsDifferent = selectByIdsDifferent("rules");
+export const selectEcologicalZoningByIdsDifferent =
+	selectByIdsDifferent("ecological_zonings");

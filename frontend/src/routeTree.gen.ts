@@ -24,6 +24,9 @@ const IndexLazyImport = createFileRoute('/')()
 const AdministrationUsersLazyImport = createFileRoute(
   '/_administration/users',
 )()
+const AdministrationRulesLazyImport = createFileRoute(
+  '/_administration/rules',
+)()
 const ClearCutsClearCutsIndexLazyImport = createFileRoute(
   '/_clear-cuts/clear-cuts/',
 )()
@@ -66,6 +69,14 @@ const AdministrationUsersLazyRoute = AdministrationUsersLazyImport.update({
   getParentRoute: () => AdministrationRoute,
 } as any).lazy(() =>
   import('./routes/_administration/users.lazy').then((d) => d.Route),
+)
+
+const AdministrationRulesLazyRoute = AdministrationRulesLazyImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => AdministrationRoute,
+} as any).lazy(() =>
+  import('./routes/_administration/rules.lazy').then((d) => d.Route),
 )
 
 const ClearCutsClearCutsIndexLazyRoute =
@@ -127,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/_administration/rules': {
+      id: '/_administration/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof AdministrationRulesLazyImport
+      parentRoute: typeof AdministrationImport
+    }
     '/_administration/users': {
       id: '/_administration/users'
       path: '/users'
@@ -154,10 +172,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AdministrationRouteChildren {
+  AdministrationRulesLazyRoute: typeof AdministrationRulesLazyRoute
   AdministrationUsersLazyRoute: typeof AdministrationUsersLazyRoute
 }
 
 const AdministrationRouteChildren: AdministrationRouteChildren = {
+  AdministrationRulesLazyRoute: AdministrationRulesLazyRoute,
   AdministrationUsersLazyRoute: AdministrationUsersLazyRoute,
 }
 
@@ -183,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '': typeof ClearCutsRouteWithChildren
   '/login': typeof LoginRoute
+  '/rules': typeof AdministrationRulesLazyRoute
   '/users': typeof AdministrationUsersLazyRoute
   '/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/clear-cuts': typeof ClearCutsClearCutsIndexLazyRoute
@@ -192,6 +213,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '': typeof ClearCutsRouteWithChildren
   '/login': typeof LoginRoute
+  '/rules': typeof AdministrationRulesLazyRoute
   '/users': typeof AdministrationUsersLazyRoute
   '/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/clear-cuts': typeof ClearCutsClearCutsIndexLazyRoute
@@ -204,6 +226,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRoute
   '/_clear-cuts': typeof ClearCutsRouteWithChildren
   '/login': typeof LoginRoute
+  '/_administration/rules': typeof AdministrationRulesLazyRoute
   '/_administration/users': typeof AdministrationUsersLazyRoute
   '/_clear-cuts/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/_clear-cuts/clear-cuts/': typeof ClearCutsClearCutsIndexLazyRoute
@@ -215,11 +238,19 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/login'
+    | '/rules'
     | '/users'
     | '/clear-cuts/$clearCutId'
     | '/clear-cuts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/login' | '/users' | '/clear-cuts/$clearCutId' | '/clear-cuts'
+  to:
+    | '/'
+    | ''
+    | '/login'
+    | '/rules'
+    | '/users'
+    | '/clear-cuts/$clearCutId'
+    | '/clear-cuts'
   id:
     | '__root__'
     | '/'
@@ -227,6 +258,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_clear-cuts'
     | '/login'
+    | '/_administration/rules'
     | '/_administration/users'
     | '/_clear-cuts/clear-cuts/$clearCutId'
     | '/_clear-cuts/clear-cuts/'
@@ -272,6 +304,7 @@ export const routeTree = rootRoute
     "/_administration": {
       "filePath": "_administration.tsx",
       "children": [
+        "/_administration/rules",
         "/_administration/users"
       ]
     },
@@ -287,6 +320,10 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/_administration/rules": {
+      "filePath": "_administration/rules.lazy.tsx",
+      "parent": "/_administration"
     },
     "/_administration/users": {
       "filePath": "_administration/users.lazy.tsx",

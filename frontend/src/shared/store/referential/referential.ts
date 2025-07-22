@@ -1,17 +1,27 @@
 import { withId } from "@/shared/schema";
 import { record, z } from "zod";
 
-const variableRuleSchema = z.object({
-	type: z.enum(["slope", "area"]),
+export const variableRulesTypeSchema = z.enum(["slope", "area"]);
+export type VariableRulesType = z.infer<typeof variableRulesTypeSchema>;
+export const ecologicalZoningRuleTypeSchema = z.enum(["ecological_zoning"]);
+export type EcologicalZoningRuleType = z.infer<
+	typeof ecologicalZoningRuleTypeSchema
+>;
+export type EcologicalZoningType = z.infer<
+	typeof ecologicalZoningRuleTypeSchema
+>;
+export type RuleType = VariableRulesType | EcologicalZoningRuleType;
+export const variableRuleResponseSchema = z.object({
+	type: variableRulesTypeSchema,
 	threshold: z.number(),
 });
-const ecologicalZoningRuleSchema = z.object({
-	type: z.enum(["ecological_zoning"]),
+export const ecologicalZoningRuleResponseSchema = z.object({
+	type: ecologicalZoningRuleTypeSchema,
 	ecological_zonings_ids: z.string().array(),
 });
 const ruleResponseSchema = z.record(
 	z.string(),
-	variableRuleSchema.or(ecologicalZoningRuleSchema),
+	variableRuleResponseSchema.or(ecologicalZoningRuleResponseSchema),
 );
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;

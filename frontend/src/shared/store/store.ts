@@ -1,3 +1,4 @@
+import { rulesSlice } from "@/features/admin/store/rules.slice";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
 import { clearCutsSlice } from "@/features/clear-cut/store/clear-cuts-slice";
@@ -28,6 +29,7 @@ unauthorizedMiddleware.startListening({
 });
 const reducer = combineReducers({
 	[filtersSlice.reducerPath]: filtersSlice.reducer,
+	[rulesSlice.reducerPath]: rulesSlice.reducer,
 	[usersApi.reducerPath]: usersApi.reducer,
 	[referentialSlice.reducerPath]: referentialSlice.reducer,
 	[clearCutsSlice.reducerPath]: clearCutsSlice.reducer,
