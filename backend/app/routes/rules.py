@@ -42,7 +42,7 @@ def get_rule(id: int, db=db_session):
     return get_rule_by_id(db, id)
 
 
-@router.get("/", status_code=200, response_model=list[RuleResponseSchema])
+@router.get("", status_code=200, response_model=list[RuleResponseSchema])
 def list_rules(db=db_session):
     logger.info(db)
     return get_rules(db)
