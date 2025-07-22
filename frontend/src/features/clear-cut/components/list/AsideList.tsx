@@ -8,6 +8,7 @@ import { AdvancedFilters } from "@/features/clear-cut/components/filters/Advance
 import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { IconButton } from "@/shared/components/button/Button";
+import { Title } from "@/shared/components/typo/Title";
 import { useAppSelector } from "@/shared/hooks/store";
 import { Filter, MapIcon } from "lucide-react";
 
@@ -18,9 +19,7 @@ export function AsideList() {
 		<div id="aside-list" className="flex flex-col w-full">
 			<Collapsible>
 				<div className="flex justify-between  items-center mt-5 sm:mt-14 border-b-1 border-zinc-200 px-3 py-2">
-					<h1 className="text-2xl 2xl:text-4xl/6  text-secondary text-start font-semibold font-poppins  ">
-						COUPES RASES
-					</h1>
+					<Title className="text-primary">COUPES RASES</Title>
 					<IconButton
 						variant="zinc"
 						className="sm:hidden"

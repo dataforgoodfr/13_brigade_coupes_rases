@@ -1,5 +1,6 @@
 import {
 	type RulesResponse,
+	type UpdateRulesRequest,
 	type VariableRuleResponse,
 	rulesResponseSchema,
 } from "@/features/admin/store/rules";
@@ -13,8 +14,8 @@ import type {
 	VariableRulesType as VariableRuleType,
 } from "@/shared/store/referential/referential";
 import {
-	selectDepartmentsByIdsDifferent,
 	selectEcologicalZoningByIds,
+	selectEcologicalZoningByIdsDifferent,
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -28,6 +29,7 @@ export type EcologicalZoningRule = {
 type Rule =
 	| VariableRuleResponse
 	| {
+			id: string;
 			type: EcologicalZoningType;
 			ecological_zonings: SelectableItem<EcologicalZoning>[];
 	  };
@@ -35,6 +37,31 @@ type State = {
 	rules: RequestedContent<Rule[]>;
 };
 
+export const updateRulesThunk = createAppAsyncThunk<void, void>(
+	"rules/updateRules",
+	async (_, { getState, extra: { api }, dispatch }) => {
+		const state = getState();
+		const rules = selectRules(state);
+		if (rules === undefined) {
+			throw new Error("Rules are not loaded");
+		}
+		await api().put("api/v1/rules", {
+			json: {
+				rules: rules?.map((r) => ({
+					id: r.id,
+					threshold: r.type !== "ecological_zoning" ? r.threshold : undefined,
+					ecological_zonings_ids:
+						r.type === "ecological_zoning"
+							? r.ecological_zonings
+									.filter((item) => item.isSelected)
+									.map((item) => item.item.id)
+							: [],
+				})),
+			} satisfies UpdateRulesRequest,
+		});
+		dispatch(getRulesThunk());
+	},
+);
 export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 	"rules/getRules",
 	async (_, { getState, extra: { api } }) => {
@@ -52,7 +79,7 @@ export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 								true,
 							),
 							...listToSelectableItems(
-								selectDepartmentsByIdsDifferent(
+								selectEcologicalZoningByIdsDifferent(
 									state,
 									rule.ecological_zonings_ids,
 								),
@@ -91,7 +118,7 @@ export const rulesSlice = createSlice({
 			if (state.rules.value) {
 				state.rules.value = state.rules.value.map((rule) => {
 					if (rule.type === payload.type) {
-						return { ...rule, value: payload.value };
+						return { ...rule, threshold: payload.value };
 					}
 					return rule;
 				});
@@ -117,18 +144,13 @@ const selectRules = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.rules.value,
 );
-export const selectRuleByTypes = (types: RuleType[]) =>
-	createTypedDraftSafeSelector(
-		(state: RootState) => selectRules(state),
-		(rules) => {
-			return rules?.filter((r) => types.includes(r.type)) ?? [];
-		},
-	);
-export const useGetRules = () => {
+
+export const useGetRules = (order: RuleType[]) => {
 	const dispatch = useAppDispatch();
 	const rules = useAppSelector(selectRules);
 	useEffect(() => {
 		dispatch(getRulesThunk());
 	}, [dispatch]);
-	return rules;
+	const findByType = (type: RuleType) => rules?.find((r) => r.type === type);
+	return order.map(findByType).filter((r) => r !== undefined);
 };

@@ -16,6 +16,7 @@ import {
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
+import { Title } from "@/shared/components/typo/Title";
 import { useAppDispatch } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,9 +46,7 @@ export function LoginForm() {
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
-			<h1 className="text-2xl font-poppins font-semibold text-primary">
-				Connexion
-			</h1>
+			<Title className=" text-primary">Connexion</Title>
 			<h3 className="text-neutral-600 font-light">
 				Merci de saisir vos identifiants
 			</h3>

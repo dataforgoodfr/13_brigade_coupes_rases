@@ -1,17 +1,29 @@
+import { withId } from "@/shared/schema";
 import {
 	ecologicalZoningRuleResponseSchema,
 	variableRuleResponseSchema,
 } from "@/shared/store/referential/referential";
 import { z } from "zod";
 
-export const ecologicalZoningRuleResponseSchemaWithId =
-	ecologicalZoningRuleResponseSchema.and(z.object({ id: z.string() }));
-export const variableRuleResponseSchemaWithId = variableRuleResponseSchema.and(
-	z.object({ id: z.string() }),
+export const ecologicalZoningRuleResponseSchemaWithId = withId(
+	ecologicalZoningRuleResponseSchema,
+);
+export const variableRuleResponseSchemaWithId = withId(
+	variableRuleResponseSchema,
 );
 export const ruleResponseSchema = variableRuleResponseSchemaWithId.or(
 	ecologicalZoningRuleResponseSchemaWithId,
 );
+const ruleRequestSchema = withId(
+	ecologicalZoningRuleResponseSchema
+		.omit({ type: true })
+		.or(variableRuleResponseSchema.omit({ type: true })),
+);
+
+export const updateRulesRequestSchema = z.object({
+	rules: ruleRequestSchema.array(),
+});
+export type UpdateRulesRequest = z.infer<typeof updateRulesRequestSchema>;
 
 export const rulesResponseSchema = z.array(ruleResponseSchema);
 

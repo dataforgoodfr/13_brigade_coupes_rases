@@ -8,6 +8,7 @@ export const router = createRouter({
 	routeTree,
 	context: { auth: undefined as unknown as AuthContext },
 });
+export type Router = typeof router;
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

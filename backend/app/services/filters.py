@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 from sqlalchemy import desc, extract, func
 from sqlalchemy.orm import Session
