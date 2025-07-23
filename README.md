@@ -35,7 +35,6 @@ L’objectif est de développer une solution complète pour :
 ## Pour contribuer
 
 Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
-Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases` .
 
 Essayez de respecter les conventions de code et le style d'écriture du projet:
 
