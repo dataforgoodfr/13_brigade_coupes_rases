@@ -1,9 +1,10 @@
 from datetime import datetime
 from logging import getLogger
 
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from app.models import CLEARCUT_STATUSES, ClearCutReport
 from app.schemas.clear_cut import ClearCutCreateSchema
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 logger = getLogger(__name__)
 

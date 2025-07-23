@@ -1,10 +1,25 @@
 from datetime import datetime
 
 from geoalchemy2 import Geometry, functions
-from sqlalchemy import (JSON, Boolean, CheckConstraint, Column, DateTime,
-                        Float, ForeignKey, Integer, String, Table)
-from sqlalchemy.orm import (Mapped, column_property, mapped_column,
-                            relationship, validates)
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    column_property,
+    mapped_column,
+    relationship,
+    validates,
+)
 
 from app.database import Base
 

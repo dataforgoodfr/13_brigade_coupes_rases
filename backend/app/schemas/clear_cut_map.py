@@ -61,7 +61,6 @@ class ClearCutReportPreviewSchema(BaseModel):
         json_schema_extra={"example": 10.0},
     )
     total_bdf_resinous_area_hectare: float | None = Field(
-    total_bdf_resinous_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
     total_bdf_deciduous_area_hectare: float | None = Field(
