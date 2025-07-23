@@ -2,21 +2,12 @@ from logging import getLogger
 
 from fastapi import HTTPException, status
 from geoalchemy2.elements import WKTElement
-from geoalchemy2.functions import (
-    ST_Centroid,
-    ST_Multi,
-    ST_Union,
-)
+from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
 from geoalchemy2.shape import to_shape
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
-from app.models import (
-    SRID,
-    ClearCut,
-    ClearCutEcologicalZoning,
-    ClearCutReport,
-)
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
 from app.schemas.clear_cut_report import (
     ClearCutReportPatchSchema,
     ClearCutReportResponseSchema,
@@ -27,9 +18,7 @@ from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSche
 from app.schemas.rule import AllRules
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
-from app.services.rules import (
-    list_rules,
-)
+from app.services.rules import list_rules
 
 logger = getLogger(__name__)
 

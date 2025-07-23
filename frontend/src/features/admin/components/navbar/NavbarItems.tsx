@@ -1,6 +1,15 @@
-import { NavbarLink } from "@/shared/components/NavbarLink";
-import { UsersIcon } from "lucide-react";
+import { NavbarItem } from "@/shared/components/NavbarItem";
+import { SettingsIcon } from "lucide-react";
 
 export const NavbarItems: React.FC = () => {
-	return <NavbarLink to="/users" Icon={UsersIcon} title="Utilisateurs" />;
+	return (
+		<>
+			<NavbarItem
+				type="link"
+				to="/administration"
+				Icon={SettingsIcon}
+				title="Administration"
+			/>
+		</>
+	);
 };

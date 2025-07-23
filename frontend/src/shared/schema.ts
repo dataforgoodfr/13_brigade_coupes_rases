@@ -1,5 +1,10 @@
 import { type ZodRecord, type ZodString, type ZodType, z } from "zod";
 
-export function withId<T extends ZodType>(schema: ZodRecord<ZodString, T>) {
-	return schema.valueSchema.and(z.object({ id: z.string() }));
+export function recordWithId<T extends ZodType>(
+	schema: ZodRecord<ZodString, T>,
+) {
+	return withId(schema.valueSchema);
+}
+export function withId<T extends ZodType>(schema: T) {
+	return schema.and(z.object({ id: z.string() }));
 }

@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import type { HTMLInputTypeAttribute } from "react";
 import type { FieldValues } from "react-hook-form";
 import {
 	FormControl,
@@ -9,13 +10,14 @@ import {
 	type FormProps,
 } from "./Form";
 
-export function FormInputText<T extends FieldValues = FieldValues>({
+export function FormInput<T extends FieldValues = FieldValues>({
 	control,
 	name,
 	label,
+	type,
 	disabled = false,
 	...props
-}: FormProps<T>) {
+}: FormProps<T> & { type: HTMLInputTypeAttribute }) {
 	return (
 		<FormField
 			control={control}
@@ -24,7 +26,7 @@ export function FormInputText<T extends FieldValues = FieldValues>({
 				<FormItem className="flex gap-4 items-center">
 					{label && <FormLabel className="font-bold">{label}</FormLabel>}
 					<FormControl>
-						<Input type="text" disabled={disabled} {...field} {...props} />
+						<Input type={type} disabled={disabled} {...field} {...props} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>

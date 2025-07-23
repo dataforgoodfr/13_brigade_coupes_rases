@@ -4,7 +4,7 @@ import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionIt
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
 import { FixedField } from "@/shared/components/form/FormFixedField";
-import { FormInputText } from "@/shared/components/form/FormInputText";
+import { FormInput } from "@/shared/components/form/FormInput";
 import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
@@ -92,7 +92,8 @@ export default function AccordionContent({
 									) : null;
 								case "inputText":
 									return render ? (
-										<FormInputText
+										<FormInput
+											type="text"
 											key={item.name}
 											control={form.control}
 											name={item.name}

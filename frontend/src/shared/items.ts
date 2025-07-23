@@ -33,8 +33,11 @@ export const updateEventuallyBooleanSelectableItem = (
 			: { ...i, isSelected: false },
 	) as EventuallyBooleanSelectableItems;
 };
-export function listToSelectableItems<T>(items?: T[]): SelectableItem<T>[] {
-	return items?.map((item) => ({ isSelected: false, item })) ?? [];
+export function listToSelectableItems<T>(
+	items?: T[],
+	isSelected = false,
+): SelectableItem<T>[] {
+	return items?.map((item) => ({ isSelected: isSelected, item })) ?? [];
 }
 export function booleanToSelectableItem(
 	value?: boolean,

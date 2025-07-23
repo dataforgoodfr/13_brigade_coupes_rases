@@ -41,9 +41,11 @@ class ClearCutEcologicalZoning(Base):
     ecological_zoning_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("ecological_zonings.id"), primary_key=True
     )
-    clear_cut: Mapped["ClearCut"] = relationship(back_populates="ecological_zonings")
+    clear_cut: Mapped["ClearCut"] = relationship(
+        back_populates="ecological_zonings", cascade="all, delete"
+    )
     ecological_zoning: Mapped["EcologicalZoning"] = relationship(
-        back_populates="clear_cuts"
+        back_populates="clear_cuts", cascade="all, delete"
     )
 
 
@@ -77,10 +79,16 @@ class Rules(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     type: Mapped[str] = mapped_column(String, nullable=False)
     ecological_zonings = relationship(
-        "EcologicalZoning", secondary=rules_ecological_zoning, back_populates="rules"
+        "EcologicalZoning",
+        secondary=rules_ecological_zoning,
+        back_populates="rules",
+        cascade="all, delete",
     )
     clear_cuts_reports = relationship(
-        "ClearCutReport", secondary=rules_clear_cut_reports, back_populates="rules"
+        "ClearCutReport",
+        secondary=rules_clear_cut_reports,
+        back_populates="rules",
+        cascade="all, delete",
     )
     threshold: Mapped[float | None] = mapped_column(Float, nullable=True)
 
@@ -107,9 +115,14 @@ class User(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     departments = relationship(
-        "Department", secondary=user_department, back_populates="users"
+        "Department",
+        secondary=user_department,
+        back_populates="users",
+        cascade="all, delete",
     )
-    reports = relationship("ClearCutReport", back_populates="user")
+    reports = relationship(
+        "ClearCutReport", back_populates="user", cascade="all, delete"
+    )
 
     @validates("role")
     def validate_role(self, key, value):
@@ -125,9 +138,14 @@ class Department(Base):
     code: Mapped[str] = mapped_column(String, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     users = relationship(
-        "User", secondary=user_department, back_populates="departments"
+        "User",
+        secondary=user_department,
+        back_populates="departments",
+        cascade="all, delete",
     )
-    cities: Mapped[list["City"]] = relationship(back_populates="department")
+    cities: Mapped[list["City"]] = relationship(
+        back_populates="department", cascade="all, delete"
+    )
 
     @validates("name")
     def validate_name(self, key, value):
@@ -144,9 +162,11 @@ class City(Base):
     department_id: Mapped[int] = mapped_column(
         ForeignKey("departments.id"), nullable=False
     )
-    department: Mapped["Department"] = relationship(back_populates="cities")
+    department: Mapped["Department"] = relationship(
+        back_populates="cities", cascade="all, delete"
+    )
     clear_cuts_reports: Mapped[list["ClearCutReport"]] = relationship(
-        back_populates="city"
+        back_populates="city", cascade="all, delete"
     )
 
 
@@ -161,10 +181,13 @@ class EcologicalZoning(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[str] = mapped_column(String, nullable=False)
     clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
-        back_populates="ecological_zoning"
+        back_populates="ecological_zoning", cascade="all, delete"
     )
     rules = relationship(
-        "Rules", secondary=rules_ecological_zoning, back_populates="ecological_zonings"
+        "Rules",
+        secondary=rules_ecological_zoning,
+        back_populates="ecological_zonings",
+        cascade="all, delete",
     )
 
 
@@ -214,10 +237,12 @@ class ClearCut(Base):
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), nullable=False
     )
-    report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cuts")
+    report: Mapped["ClearCutReport"] = relationship(
+        back_populates="clear_cuts", cascade="all, delete"
+    )
 
     ecological_zonings: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
-        back_populates="clear_cut", lazy="joined"
+        back_populates="clear_cut", lazy="joined", cascade="all, delete"
     )
     location_json = column_property(functions.ST_AsGeoJSON(location))
     boundary_json = column_property(functions.ST_AsGeoJSON(boundary))
@@ -249,17 +274,19 @@ class ClearCutReport(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
-    clear_cuts: Mapped[list["ClearCut"]] = relationship(back_populates="report")
+    clear_cuts: Mapped[list["ClearCut"]] = relationship(
+        back_populates="report", cascade="all, delete"
+    )
     clear_cut_forms: Mapped[list["ClearCutForm"]] = relationship(
-        back_populates="report"
+        back_populates="report", cascade="all, delete"
     )
     status: Mapped[str] = mapped_column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
     city: Mapped["City"] = relationship(
-        back_populates="clear_cuts_reports", lazy="joined"
+        back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    user: Mapped["User"] = relationship(back_populates="reports")
+    user: Mapped["User"] = relationship(back_populates="reports", cascade="all, delete")
 
     total_area_hectare: Mapped[float | None] = mapped_column(Float, nullable=True)
     total_ecological_zoning_area_hectare: Mapped[float | None] = mapped_column(
@@ -289,7 +316,10 @@ class ClearCutReport(Base):
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
     rules = relationship(
-        "Rules", secondary=rules_clear_cut_reports, back_populates="clear_cuts_reports"
+        "Rules",
+        secondary=rules_clear_cut_reports,
+        back_populates="clear_cuts_reports",
+        cascade="all, delete",
     )
 
     @validates("status")

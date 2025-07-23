@@ -1,21 +1,31 @@
-import { withId } from "@/shared/schema";
+import { recordWithId } from "@/shared/schema";
 import { record, z } from "zod";
 
-const variableRuleSchema = z.object({
-	type: z.enum(["slope", "area"]),
+export const variableRulesTypeSchema = z.enum(["slope", "area"]);
+export type VariableRulesType = z.infer<typeof variableRulesTypeSchema>;
+export const ecologicalZoningRuleTypeSchema = z.enum(["ecological_zoning"]);
+export type EcologicalZoningRuleType = z.infer<
+	typeof ecologicalZoningRuleTypeSchema
+>;
+export type EcologicalZoningType = z.infer<
+	typeof ecologicalZoningRuleTypeSchema
+>;
+export type RuleType = VariableRulesType | EcologicalZoningRuleType;
+export const variableRuleResponseSchema = z.object({
+	type: variableRulesTypeSchema,
 	threshold: z.number(),
 });
-const ecologicalZoningRuleSchema = z.object({
-	type: z.enum(["ecological_zoning"]),
+export const ecologicalZoningRuleResponseSchema = z.object({
+	type: ecologicalZoningRuleTypeSchema,
 	ecological_zonings_ids: z.string().array(),
 });
 const ruleResponseSchema = z.record(
 	z.string(),
-	variableRuleSchema.or(ecologicalZoningRuleSchema),
+	variableRuleResponseSchema.or(ecologicalZoningRuleResponseSchema),
 );
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
-export const ruleSchema = withId(ruleResponseSchema);
+export const ruleSchema = recordWithId(ruleResponseSchema);
 export type Rule = z.infer<typeof ruleSchema>;
 export const departmentResponseSchema = record(
 	z.string(),
@@ -23,7 +33,7 @@ export const departmentResponseSchema = record(
 );
 
 export type DepartmentResponse = z.infer<typeof departmentResponseSchema>;
-export const departmentSchema = withId(departmentResponseSchema);
+export const departmentSchema = recordWithId(departmentResponseSchema);
 export type Department = z.infer<typeof departmentSchema>;
 
 const ecologicalZoningResponseSchema = z.record(
@@ -38,7 +48,9 @@ const ecologicalZoningResponseSchema = z.record(
 export type EcologicalZoningResponse = z.infer<
 	typeof ecologicalZoningResponseSchema
 >;
-export const ecologicalZoningSchema = withId(ecologicalZoningResponseSchema);
+export const ecologicalZoningSchema = recordWithId(
+	ecologicalZoningResponseSchema,
+);
 export type EcologicalZoning = z.infer<typeof ecologicalZoningSchema>;
 
 export const referentialSchemaResponse = z.object({
