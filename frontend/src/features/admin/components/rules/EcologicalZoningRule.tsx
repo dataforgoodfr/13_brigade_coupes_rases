@@ -19,7 +19,7 @@ export function EcologicalZoningRuleComponent({
 	const items = useEnhancedItems(
 		ecological_zonings,
 		(item) => item.item.name,
-		(item) => item.item.name,
+		(item) => item.item.id,
 	);
 	return (
 		<RuleLayout
