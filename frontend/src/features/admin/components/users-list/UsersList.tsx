@@ -175,7 +175,7 @@ export const UsersList: React.FC = () => {
 					setCurrentPage={(newPage) => {
 						dispatch(usersFiltersSlice.actions.setPage(newPage));
 					}}
-					pagesCount={metadata?.pages_count}
+					pagesCount={metadata?.pagesCount}
 				/>
 			)}
 		</div>

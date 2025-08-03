@@ -8,7 +8,7 @@ export const actorsKey: SectionForm = {
 
 export const actorsValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "companyName",
+		name: "company",
 		label: "Nom de l'entreprise qui réalise les travaux",
 		type: "inputText",
 		renderConditions: [],
@@ -20,7 +20,7 @@ export const actorsValue: SectionFormItem<ClearCutForm>[] = [
 		renderConditions: [],
 	},
 	{
-		name: "ownerName",
+		name: "landlord",
 		label: "Nom du propriétaire",
 		type: "inputText",
 		renderConditions: [],

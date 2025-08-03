@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
 
-@router.post("/", response_model=UserResponseSchema, status_code=201)
+@router.post("/", response_model=UserResponseSchema, status_code=201, response_model_exclude_none=True)
 def create_new_user(
     item: UserCreateSchema,
     db=db_session,
@@ -30,7 +30,7 @@ def create_new_user(
     return user_to_user_response_schema(create_user(db, item))
 
 
-@router.get("/", response_model=PaginationResponseSchema[UserResponseSchema])
+@router.get("/", response_model=PaginationResponseSchema[UserResponseSchema], response_model_exclude_none=True)
 def list_users(
     db: Session = db_session, page: int = 0, size: int = 10, _=Depends(get_admin_user)
 ) -> PaginationResponseSchema[UserResponseSchema]:
@@ -38,13 +38,13 @@ def list_users(
     return get_users(db, url="/api/v1/users", page=page, size=size)
 
 
-@router.get("/{id}", response_model=UserResponseSchema)
+@router.get("/{id}", response_model=UserResponseSchema, response_model_exclude_none=True)
 def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
     logger.info(db)
     return get_user_by_id(id, db)
 
 
-@router.put("/{id}", response_model=UserResponseSchema, status_code=200)
+@router.put("/{id}", response_model=UserResponseSchema, status_code=200, response_model_exclude_none=True)
 def update_existing_user(
     id: int, item: UserUpdateSchema, db: Session = db_session
 ) -> UserResponseSchema:

@@ -5,11 +5,11 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.deps import db_session
+from app.schemas.base import BaseSchema
 from app.services.user import get_user_by_email
 
 
@@ -27,12 +27,12 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60
 
 
-class Token(BaseModel):
+class Token(BaseSchema):
     access_token: str
     token_type: str
 
 
-class TokenData(BaseModel):
+class TokenData(BaseSchema):
     email: str
 
 

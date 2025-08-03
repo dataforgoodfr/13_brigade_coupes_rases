@@ -8,7 +8,7 @@ export const otherInfoKey: SectionForm = {
 
 export const otherInfoValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "otherInfos",
+		name: "other",
 		label: "Informations complémentaires",
 		type: "textArea",
 		renderConditions: [],

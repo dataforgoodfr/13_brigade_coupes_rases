@@ -53,8 +53,8 @@ export const getFiltersThunk = createAppAsyncThunk(
 	async (_arg, { getState, extra: { api } }) => {
 		const result = await api().get<FiltersResponse>("api/v1/filters").json();
 		const {
-			departments_ids,
-			rules_ids: tags_ids,
+			departmentsIds: departments_ids,
+			rulesIds: tags_ids,
 			...response
 		} = filtersResponseSchema.parse(result);
 		const state = getState();
@@ -157,13 +157,13 @@ export const filtersSlice = createSlice({
 				state,
 				{
 					payload: {
-						cut_years: cutYears,
+						cutYears: cutYears,
 						rules,
 						departments,
-						area_range,
+						areaRange: area_range,
 						statuses,
-						excessive_slope,
-						has_ecological_zonings: ecological_zoning,
+						excessiveSlope: excessive_slope,
+						hasEcologicalZonings: ecological_zoning,
 						favorite,
 					},
 				},
@@ -201,18 +201,18 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		with_points,
 	}): FiltersRequest | undefined => ({
 		geoBounds,
-		cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-		departments_ids: departments
+		cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+		departmentsIds: departments
 			.filter((d) => d.isSelected)
 			.map((d) => d.item.id),
-		min_area_hectare: areas?.[0],
-		max_area_hectare: areas?.[1],
+		minAreaHectare: areas?.[0],
+		maxAreaHectare: areas?.[1],
 		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-		has_ecological_zonings: ecological_zoning.find((item) => item.isSelected)
+		hasEcologicalZonings: ecological_zoning.find((item) => item.isSelected)
 			?.item,
-		excessive_slope: excessive_slope.find((item) => item.isSelected)?.item,
+		excessiveSlope: excessive_slope.find((item) => item.isSelected)?.item,
 		favorite: favorite.find((item) => item.isSelected)?.item,
-		with_points,
+		withPoints: with_points,
 	}),
 );
 

@@ -9,38 +9,38 @@ export const generalInfoKey: SectionForm = {
 
 export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "updated_at",
+		name: "report.updatedAt",
 		transformValue: ({ value }) => <FormattedDate value={value as string} />,
 		label: "Date de signalement",
 		type: "fixed",
 		renderConditions: [],
 	},
 	{
-		name: "city",
+		name: "report.city",
 		label: "Commune",
 		type: "fixed",
 		renderConditions: [],
 	},
 	{
-		name: "department.name",
+		name: "report.department.name",
 		label: "Département",
 		type: "fixed",
 		renderConditions: [],
 	},
 	{
-		name: "average_location.coordinates.0",
+		name: "report.averageLocation.coordinates.0",
 		label: "Latitude",
 		type: "fixed",
 		renderConditions: [],
 	},
 	{
-		name: "average_location.coordinates.1",
+		name: "report.averageLocation.coordinates.1",
 		label: "Longitude",
 		type: "fixed",
 		renderConditions: [],
 	},
 	{
-		name: "last_cut_date",
+		name: "report.lastCutDate",
 		label: "Date de la coupe",
 		type: "fixed",
 		renderConditions: [],
@@ -50,7 +50,7 @@ export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 			) : undefined,
 	},
 	{
-		name: "total_area_hectare",
+		name: "report.totalAreaHectare",
 		label: "Taille de la coupe",
 		type: "fixed",
 		renderConditions: [],
@@ -62,7 +62,7 @@ export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
 			) : undefined,
 	},
 	{
-		name: "slope_area_hectare",
+		name: "report.slopeAreaHectare",
 		label: "Pente raide (>30%)",
 		type: "fixed",
 		renderConditions: [],

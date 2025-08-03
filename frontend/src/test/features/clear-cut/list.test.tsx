@@ -13,7 +13,7 @@ describe("Clear cuts list", () => {
 		const report = createClearCutReportMock({
 			city: "TEST CITY",
 			comment: "TEST COMMENT",
-			average_location: { type: "Point", coordinates: [15, 15] },
+			averageLocation: { type: "Point", coordinates: [15, 15] },
 		});
 		server.use(
 			mockClearCutsResponse({

@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column("soil_state", sa.String(), nullable=True),
         sa.Column("ecological_zone", sa.Boolean(), nullable=True),
         sa.Column("ecological_zone_type", sa.String(), nullable=True),
-        sa.Column("nearby_zone", sa.String(), nullable=True),
+        sa.Column("nearby_zone", sa.Boolean(), nullable=True),
         sa.Column("nearby_zone_type", sa.String(), nullable=True),
         sa.Column("protected_species", sa.String(), nullable=True),
         sa.Column("protected_habitats", sa.String(), nullable=True),

@@ -34,9 +34,11 @@ import type {
 import type {
 	ClearCutForm,
 	ClearCutFormResponse,
+	ClearCutReportResponse,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { User } from "@/features/user/store/user";
-import { mockClearCut, mockClearCutFormsResponse } from "@/mocks/clear-cuts";
+import { mockClearCutReportResponse } from "@/mocks/clear-cuts";
+import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms";
 import { fakeDepartments } from "@/mocks/referential";
 import { server } from "@/test/mocks/server";
 import { adminMock, volunteerMock } from "@/test/mocks/user";
@@ -56,59 +58,69 @@ type SectionData<
 	section: SectionForm;
 	items: Item[];
 };
-const mock = mockClearCut({
+const reportMock = mockClearCutReportResponse({
 	id: "ABC",
 	city: "Paris",
-	last_cut_date: "2024-03-19",
-	onSiteDate: "2024-03-19T14:26:30.789Z",
+	lastCutDate: "2024-03-19",
+	departmentId: Object.keys(fakeDepartments)[0],
+	updatedAt: "2026-03-13",
+	slopeAreaHectare: 0.54556,
+	totalAreaHectare: 1,
+	averageLocation: { coordinates: [1, 2], type: "Point" },
+});
+const formMock = mockClearCutFormsResponse({
+	inspectionDate: "2024-03-19T14:26:30.789Z",
 	weather: "Nuageux",
-	standTypeAndSilviculturalSystemBCC: "Epicéa",
-	waterCourseOrWetlandPresence: "Présence de cours d'eau",
+	forest: "Epicéa",
+	wetland: "Présence de cours d'eau",
 	soilState: "Sol en mauvais état",
-	department_id: Object.keys(fakeDepartments)[0],
-	updated_at: "2026-03-13",
-	slope_area_hectare: 0.54556,
-	total_area_hectare: 1,
-	average_location: { coordinates: [1, 2], type: "Point" },
 });
 
 const mapItem = (
 	item: SectionFormItem<ClearCutForm>,
 ): TestFormItem<ClearCutForm> => {
-	let expected = mock.response[item.name as keyof ClearCutFormResponse];
-
+	const formReport = { report: reportMock.response, ...formMock.response };
+	let expected: unknown;
+	if (item.name.startsWith("report.")) {
+		expected =
+			formReport.report[
+				item.name.replace("report.", "") as keyof ClearCutReportResponse
+			];
+	} else {
+		expected = formReport[item.name as keyof ClearCutFormResponse];
+	}
 	switch (item.type) {
 		case "textArea":
 			expected = expected === undefined ? "" : expected;
 			break;
 		case "inputFile":
 			expected =
-				Array.isArray(expected) && expected.length === 0 ? null : expected;
+				Array.isArray(expected) && expected.length === 0 ? undefined : expected;
 			break;
 	}
 	switch (item.name) {
-		case "last_cut_date":
+		case "inspectionDate":
 			expected = "19/03/2024";
 			break;
-		case "slope_area_hectare":
+		case "report.slopeAreaHectare":
 			expected = "0,55 ha";
 			break;
-		case "total_area_hectare":
+		case "report.totalAreaHectare":
 			expected = `${expected} ha`;
 			break;
-		case "department.name":
+		case "report.department.name":
 			expected = "Ain";
 			break;
-		case "average_location.coordinates.0":
+		case "report.averageLocation.coordinates.0":
 			expected = "1";
 			break;
-		case "average_location.coordinates.1":
+		case "report.averageLocation.coordinates.1":
 			expected = "2";
 			break;
-		case "updated_at":
+		case "report.updatedAt":
 			expected = "13/03/2026";
 			break;
-		case "onSiteDate":
+		case "report.lastCutDate":
 			expected = "19/03/2024";
 			break;
 		default:
@@ -147,13 +159,20 @@ const sections: SectionData[] = [
 		items: regulationsValue.map(mapItem),
 	},
 ];
+const setupServerBeforeEach = () => {
+	beforeEach(() => {
+		server.use(
+			reportMock.handler,
+			mockClearCutFormsResponse({ reportId: reportMock.response.id }).handler,
+		);
+	});
+};
 describe.each(sections)(
 	"$section.name section form when there is volunteer assigned",
 	({ section, items }) => {
 		beforeEach(() => {
-			const assignedClearCutMock = mockClearCut({
-				...mock.response,
-				assignedUser: volunteerMock.login,
+			const assignedClearCutMock = mockClearCutFormsResponse({
+				...reportMock.response,
 			});
 			server.use(assignedClearCutMock.handler);
 		});
@@ -165,12 +184,11 @@ describe.each(sections)(
 		}
 	},
 );
+
 describe.each(sections)(
 	"$section.name section form when there is volunteer not assigned",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		setupServerBeforeEach();
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -182,9 +200,7 @@ describe.each(sections)(
 describe.each(sections)(
 	"$section.name section form when there is a connected admin",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		setupServerBeforeEach();
 		itShouldHaveValue(items, section, adminMock);
 		itShouldHaveDisabledState(items, section, false, adminMock);
 	},
@@ -192,9 +208,7 @@ describe.each(sections)(
 describe.each(sections)(
 	"$section.name section form when there isn't a connected user",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		setupServerBeforeEach();
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {

@@ -1,5 +1,7 @@
-import type { PaginatedUsersResponse } from "@/features/admin/store/users";
-import type { UserResponse as AdminUserResponse } from "@/features/admin/store/users";
+import type {
+	UserResponse as AdminUserResponse,
+	PaginatedUsersResponse,
+} from "@/features/admin/store/users";
 import type { TokenResponse, UserResponse } from "@/features/user/store/user";
 import { fakeDepartments } from "@/mocks/referential";
 import { range } from "@/shared/array";
@@ -12,32 +14,35 @@ const volunteerToken =
 
 export const volunteerAssignedToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXItYXNzaWduZWRAZXhhbXBsZS5jb20iLCJleHAiOjE3NDQ0MDE1MzR9.PYc5hvIIuobVFt1TMb8EHdlK7iI5ZhsAqrOqKzFFAVw";
+export const volunteerAssignedMock: UserResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	avatarUrl: faker.image.avatar(),
+};
+export const adminMock: UserResponse = {
+	role: "admin",
+	email: "admin@example.com",
+	login: "adminAdmin",
+	avatarUrl: faker.image.avatar(),
+};
+export const volunteerMock: UserResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	avatarUrl: faker.image.avatar(),
+};
 export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
 	const token = request.headers.get("Authorization");
-	const avatarUrl = faker.image.avatar();
 	if (token?.includes(adminToken)) {
-		return HttpResponse.json({
-			role: "admin",
-			email: "admin@example.com",
-			login: "adminAdmin",
-			avatarUrl,
-		} satisfies UserResponse);
+		return HttpResponse.json(adminMock);
 	}
 	if (token?.includes(volunteerAssignedToken)) {
-		return HttpResponse.json({
-			role: "volunteer",
-			email: "volunteer-assigned@example.com",
-			login: "assignedVolunteer",
-			avatarUrl,
-		} satisfies UserResponse);
+		return HttpResponse.json(volunteerAssignedMock);
 	}
-	return HttpResponse.json({
-		role: "volunteer",
-		departments: [],
-		email: "volunteer@example.com",
-		login: "volunteerVolunteers",
-		avatarUrl,
-	} satisfies UserResponse);
+	return HttpResponse.json(volunteerMock);
 });
 
 export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
@@ -96,8 +101,8 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 			links: {},
 			page: page,
 			size: size,
-			pages_count: Math.ceil(users.length / size),
-			total_count: users.length,
+			pagesCount: Math.ceil(users.length / size),
+			totalCount: users.length,
 		},
 	} satisfies PaginatedUsersResponse);
 });

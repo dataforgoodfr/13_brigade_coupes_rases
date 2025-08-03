@@ -23,9 +23,9 @@ def test_create_user(client: TestClient, db: Session):
     data = response.json()
 
     assert data["id"] is not None
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-    assert data["deleted_at"] is None
+    assert data["createdAt"] is not None
+    assert data["updatedAt"] is not None
+    assert data["deletedAt"] is None
 
 
 def test_create_user_without_admin_right_should_return_forbidden(
@@ -59,9 +59,9 @@ def test_get_user(client, db):
     data = response.json()
 
     assert data["id"] is not None
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-    assert data["deleted_at"] is None
+    assert data["createdAt"] is not None
+    assert data["updatedAt"] is not None
+    assert data["deletedAt"] is None
 
 
 # def test_create_invalid_user(client):
@@ -130,8 +130,8 @@ def test_login_user(client, db):
     assert response.status_code == 200
 
     data = response.json()
-    assert data["access_token"] is not None
-    assert data["token_type"] == "bearer"
+    assert data["accessToken"] is not None
+    assert data["tokenType"] == "bearer"
 
 
 def test_login_user_not_found_should_return_unauthorized(client):

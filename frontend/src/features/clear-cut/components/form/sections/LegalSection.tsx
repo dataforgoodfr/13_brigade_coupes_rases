@@ -8,43 +8,43 @@ export const legalKey: SectionForm = {
 
 export const legalValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "isRelevantComplaintPEFC",
+		name: "relevantForPefcComplaint",
 		label: "Pertinent pour plainte PEFC",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "isRelevantComplaintREDIII",
+		name: "relevantForRediiiComplaint",
 		label: "Pertinent pour plainte REDIII",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "isRelevantComplaintOFB",
+		name: "relevantForOfbComplaint",
 		label: "Pertinent pour plainte OFB",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "isRelevantAlertSRGS",
+		name: "relevantForAlertCnpfDdtSrgs",
 		label: "Pertinent pour alerte CNPF/DDT pour non-respect des SRGS",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "isRelevantAlertPSG",
+		name: "relevantForAlertCnpfDdtPsgThresholds",
 		label: "Pertinent pour alerte CNPF/DDT pour non-respect des seuils PSG",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "isRelevantRequestPSG",
+		name: "relevantForPsgRequest",
 		label: "Pertinent pour demande de PSG",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "actionsUndertaken",
+		name: "requestEngaged",
 		label: "Démarches engagées",
 		type: "textArea",
 		renderConditions: [],

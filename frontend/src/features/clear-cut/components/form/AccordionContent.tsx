@@ -1,5 +1,5 @@
 import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
-import { selectLoggedUser } from "@/features/user/store/user.slice";
+import { useLoggedUser } from "@/features/user/store/user.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
@@ -9,7 +9,6 @@ import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
 import { FormToggleGroup } from "@/shared/components/form/FormToggleGroup";
-import { useAppSelector } from "@/shared/hooks/store";
 import { useEffect, useMemo } from "react";
 import { actorsKey, actorsValue } from "./sections/ActorsSection";
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection";
@@ -37,7 +36,7 @@ ccForm.set(otherInfoKey, otherInfoValue);
 export default function AccordionContent({
 	form,
 }: { form: FormType<ClearCutForm> }) {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useLoggedUser();
 
 	useEffect(() => {
 		if (user && user.role === "admin") {

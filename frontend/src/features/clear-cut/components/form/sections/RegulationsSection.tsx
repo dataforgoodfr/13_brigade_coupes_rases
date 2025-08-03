@@ -8,19 +8,19 @@ export const regulationsKey: SectionForm = {
 
 export const regulationsValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "isCCOrCompanyCertified",
+		name: "isPefcFscCertified",
 		label: "Coupe ou entreprise certifiée PEFC/FSC ?",
 		type: "toggleGroup",
 		renderConditions: [],
 	},
 	{
-		name: "isMoreThan20ha",
+		name: "isOver20Ha",
 		label: "Propriété de plus de 20 hectares",
 		type: "toggleGroup",
 		renderConditions: [],
 	},
 	{
-		name: "isSubjectToPSG",
+		name: "isPsgRequiredPlot",
 		label: "Parcelle soumise à PSG",
 		type: "toggleGroup",
 		renderConditions: [],

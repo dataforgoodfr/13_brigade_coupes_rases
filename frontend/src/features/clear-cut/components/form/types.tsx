@@ -1,23 +1,20 @@
 import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
 import type { FormType } from "@/shared/components/form/Form";
-import type { JSX } from "react";
+import type { ReactNode } from "@tanstack/react-router";
 import type React from "react";
 import type { Path, PathValue } from "react-hook-form";
 
 type BaseFormItem<Form = unknown, Name extends Path<Form> = Path<Form>> = {
 	name: Name;
 	transformValue?: (props: { value: PathValue<Form, Name> }) =>
-		| JSX.Element
+		| ReactNode
 		| null
 		| undefined;
 	label?: string;
 	renderConditions: Path<Form>[];
 	fallBack?: (key: string | number) => React.ReactNode;
 	className?: string;
-	customizeRender?: (
-		form: FormType<ClearCutForm>,
-		key: string | number,
-	) => React.ReactNode;
+	disabled?: boolean;
 };
 export type SwitchItem<
 	Form = unknown,
@@ -67,6 +64,10 @@ export type CustomizedItem<
 	Name extends Path<Form> = Path<Form>,
 > = BaseFormItem<Form, Name> & {
 	type: "customized";
+	customizeRender?: (
+		form: FormType<ClearCutForm>,
+		key: string | number,
+	) => React.ReactNode;
 };
 
 export type SectionFormItem<

@@ -34,7 +34,7 @@ def get_user_token(client: TestClient, db: Session, role: str):
         },
     )
     data = response.json()
-    return data["access_token"]
+    return data["accessToken"]
 
 
 def get_admin_user_token(client: TestClient, db: Session):

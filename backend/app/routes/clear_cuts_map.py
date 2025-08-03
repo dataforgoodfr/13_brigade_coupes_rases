@@ -21,7 +21,11 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/clear-cuts-map", tags=["Clearcut map"])
 
 
-@router.get("/{report_id}", response_model=ClearCutReportPreviewSchema)
+@router.get(
+    "/{report_id}",
+    response_model=ClearCutReportPreviewSchema,
+    response_model_exclude_none=True,
+)
 def get_clearcuts_report_by_id(
     report_id: int, db: Session = db_session
 ) -> ClearCutReportPreviewSchema:
@@ -31,40 +35,51 @@ def get_clearcuts_report_by_id(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/", response_model=ClearCutMapResponseSchema)
+@router.get(
+    "/",
+    response_model=ClearCutMapResponseSchema,
+    response_model_exclude_none=True,
+)
 def get_clearcuts_map(
     sw_lat: float | None = Query(
         None,
+        alias="swLat",
         description="Sout west latitude",
         openapi_examples={"default": {"value": 47.49308072945064}},
     ),
     sw_lng: float | None = Query(
         None,
+        alias="swLng",
         description="Sout west longitude",
         openapi_examples={"default": {"value": -1.0766601562500002}},
     ),
     ne_lat: float | None = Query(
         None,
+        alias="neLat",
         description="North east latitude",
         openapi_examples={"default": {"value": 49.79899569636492}},
     ),
     ne_lng: float | None = Query(
         None,
+        alias="neLng",
         description="North east longitude",
         openapi_examples={"default": {"value": 4.051208496093751}},
     ),
     min_area_hectare: float | None = Query(
         None,
+        alias="minAreaHectare",
         description="Minimum area in hectare",
         openapi_examples={"default": {"value": 1.0}},
     ),
     max_area_hectare: float | None = Query(
         None,
+        alias="maxAreaHectare",
         description="Maximum area in hectare",
         openapi_examples={"default": {"value": 100.0}},
     ),
     cut_years: list[int] = Query(
         [],
+        alias="cutYears",
         description="List of cut years",
         openapi_examples={"default": {"value": [2024, 2025, 2026]}},
     ),
@@ -75,21 +90,25 @@ def get_clearcuts_map(
     ),
     departments_ids: list[str] = Query(
         [],
+        alias="departmentsIds",
         description="List of department ids",
         openapi_examples={"default": {"value": ["1"]}},
     ),
     has_ecological_zonings: bool | None = Query(
         None,
+        alias="hasEcologicalZonings",
         description="Has ecological zonings",
         openapi_examples={"default": {"value": False}},
     ),
     excessive_slope: bool | None = Query(
         None,
+        alias="excessiveSlope",
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),
     with_points: bool | None = Query(
         None,
+        alias="withPoints",
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),

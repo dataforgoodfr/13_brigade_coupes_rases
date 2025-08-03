@@ -8,6 +8,7 @@ import {
 	userSchema,
 } from "@/features/user/store/user";
 import type { RequestedContent } from "@/shared/api/types";
+import { useAppSelector } from "@/shared/hooks/store";
 import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -90,7 +91,9 @@ export const userSlice = createSlice({
 	},
 });
 const selectState = (state: RootState) => state.user;
-export const selectLoggedUser = createTypedDraftSafeSelector(
+const selectLoggedUser = createTypedDraftSafeSelector(
 	selectState,
 	(user) => user.value,
 );
+
+export const useLoggedUser = () => useAppSelector(selectLoggedUser);

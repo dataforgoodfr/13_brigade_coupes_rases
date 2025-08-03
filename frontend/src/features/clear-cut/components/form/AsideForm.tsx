@@ -28,11 +28,15 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	}, [status, navigate, toast]);
 
 	useEffect(() => {
-		if (map && breakpoint === "all" && value?.average_location.coordinates) {
+		if (
+			map &&
+			breakpoint === "all" &&
+			value?.report.averageLocation.coordinates
+		) {
 			map.flyTo(
 				[
-					value.average_location.coordinates[1],
-					value.average_location.coordinates[0],
+					value.report.averageLocation.coordinates[1],
+					value.report.averageLocation.coordinates[0],
 				],
 				15,
 				{ duration: 1 },
@@ -45,9 +49,9 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 			<div className="flex flex-col w-full">
 				<div className=" pt-6 px-4 pb-1 border-b-1 flex align-middle justify-between">
 					<div className="flex flex-col">
-						<Title>{`${value?.city.toLocaleUpperCase()}`}</Title>
+						<Title>{`${value.report.city.toLocaleUpperCase()}`}</Title>
 						<span className="font-[Roboto]">
-							<FormattedDate value={value.last_cut_date} />
+							<FormattedDate value={value.report.lastCutDate} />
 						</span>
 					</div>
 					<Link to="/clear-cuts">

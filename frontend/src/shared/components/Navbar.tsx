@@ -1,7 +1,7 @@
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
-import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
+import { useLoggedUser, userSlice } from "@/features/user/store/user.slice";
 import { NavbarItem } from "@/shared/components/NavbarItem";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import { useAppDispatch } from "@/shared/hooks/store";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 
@@ -12,7 +12,7 @@ interface Props {
 	className?: string;
 }
 export function Navbar({ className }: Props) {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useLoggedUser();
 	const router = useRouter();
 	const navigate = useNavigate();
 	const handleLogout = () => {

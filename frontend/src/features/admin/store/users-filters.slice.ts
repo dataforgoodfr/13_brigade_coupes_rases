@@ -97,7 +97,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		return {
 			name,
 			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
-			departments_ids: departments
+			departmentsIds: departments
 				.filter((department) => department.isSelected)
 				.map((department) => department.item.id),
 			page,

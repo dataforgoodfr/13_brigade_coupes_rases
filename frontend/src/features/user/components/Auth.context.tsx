@@ -1,9 +1,9 @@
 import {
 	getMeThunk,
 	getStoredToken,
-	selectLoggedUser,
+	useLoggedUser,
 } from "@/features/user/store/user.slice";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import { useAppDispatch } from "@/shared/hooks/store";
 import { type ReactNode, createContext, useContext, useEffect } from "react";
 
 export type AuthContext = { isAuthenticated: boolean; isAdmin: boolean };
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function AuthProvider({ children }: Props) {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useLoggedUser();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		if (user !== undefined) {

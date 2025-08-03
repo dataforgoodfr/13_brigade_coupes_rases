@@ -2,14 +2,15 @@ import datetime
 from logging import getLogger
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from app.models import ClearCut, ClearCutReport
+from app.schemas.base import BaseSchema
 
 logger = getLogger(__name__)
 
 
-class ClearCutPreviewSchema(BaseModel):
+class ClearCutPreviewSchema(BaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
     location: Point
     boundary: MultiPolygon
@@ -26,10 +27,10 @@ class ClearCutPreviewSchema(BaseModel):
         json_schema_extra={"example": "[1,2,3]"},
     )
 
-    model_config = ConfigDict(from_attributes=True)
+    
 
 
-class ClearCutReportPreviewSchema(BaseModel):
+class ClearCutReportPreviewSchema(BaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
     clear_cuts: list[ClearCutPreviewSchema]
     created_at: datetime.date = Field(
@@ -72,7 +73,7 @@ class ClearCutReportPreviewSchema(BaseModel):
     total_bdf_poplar_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    model_config = ConfigDict(from_attributes=True)
+    
 
 
 def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
@@ -118,18 +119,18 @@ def report_to_report_preview_schema(
     )
 
 
-class CountedPoint(BaseModel):
+class CountedPoint(BaseSchema):
     count: int
     point: Point
 
 
-class ClusterizedPointsResponseSchema(BaseModel):
+class ClusterizedPointsResponseSchema(BaseSchema):
     total: int
     content: list[CountedPoint]
 
 
-class ClearCutMapResponseSchema(BaseModel):
+class ClearCutMapResponseSchema(BaseSchema):
     points: ClusterizedPointsResponseSchema
     previews: list[ClearCutReportPreviewSchema]
 
-    model_config = ConfigDict(from_attributes=True)
+    

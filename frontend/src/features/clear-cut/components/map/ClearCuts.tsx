@@ -141,7 +141,7 @@ export function ClearCuts() {
 	const previews = useMemo(() => {
 		if (!displayPoints) {
 			return value?.previews.flatMap((clearCut) =>
-				clearCut.clear_cuts.map((cut) => (
+				clearCut.clearCuts.map((cut) => (
 					<ClearCutPreview key={cut.id} report={clearCut} clearCut={cut} />
 				)),
 			);

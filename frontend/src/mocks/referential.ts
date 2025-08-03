@@ -10,7 +10,7 @@ import { http, HttpResponse } from "msw";
 export const fakeRules: RuleResponse = {
 	[faker.string.uuid()]: {
 		type: "ecological_zoning",
-		ecological_zonings_ids: [],
+		ecologicalZoningsIds: [],
 	},
 	[faker.string.uuid()]: {
 		type: "area",
@@ -25,13 +25,12 @@ export const fakeRules: RuleResponse = {
 export const fakeEcologicalZonings: EcologicalZoningResponse = {
 	"1": {
 		type: "Natura2000",
-		sub_type: "ZSC",
+		subType: "ZSC",
 		name: "Forêt de Rambouillet",
 		code: "FR1100796",
 	},
 	"2": {
 		type: "Natura2000",
-		sub_type: null,
 		name: "Etands de canal d'Ille et Rance",
 		code: "FR5300050",
 	},
@@ -146,7 +145,7 @@ export const fakeDepartments: DepartmentResponse = [
 export const mockReferential = http.get("*/api/v1/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
-		ecological_zonings: fakeEcologicalZonings,
+		ecologicalZonings: fakeEcologicalZonings,
 		rules: fakeRules,
 	} satisfies ReferentialResponse);
 });

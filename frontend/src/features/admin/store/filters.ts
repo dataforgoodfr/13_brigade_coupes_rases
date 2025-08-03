@@ -14,7 +14,7 @@ const filtersRequestSchema = z.object({
 	page: z.number(),
 	size: z.number(),
 	roles: z.array(roleSchema),
-	departments_ids: z.array(z.string()),
+	departmentsIds: z.array(z.string()),
 	[`${sortSchema.extract(["asc"])}Sort`]: sortableKeysSchema,
 	[`${sortSchema.extract(["desc"])}Sort`]: sortableKeysSchema,
 });

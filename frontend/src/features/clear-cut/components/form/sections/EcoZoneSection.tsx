@@ -9,78 +9,85 @@ export const ecoZoneKey: SectionForm = {
 
 export const ecoZoneValue: SectionFormItem<ClearCutForm>[] = [
 	{
-		name: "isNatura2000",
+		name: "hasEcologicalZonings",
 		label: "Coupe au sein d'une zone Natura 2000 ?",
 		type: "switch",
 		renderConditions: [],
+		disabled: true,
 	},
 	{
-		name: "natura2000Zone",
+		name: "ecologicalZonings",
 		type: "customized",
-		renderConditions: ["isNatura2000"],
+		renderConditions: ["hasEcologicalZonings"],
 		customizeRender: (form: FormType<ClearCutForm>, key: string | number) => {
-			const natura2000Zone = form.getValues("natura2000Zone");
-			if (!natura2000Zone) {
-				return (
-					<p key={key} className="text-muted-foreground">
-						Aucune zone Natura 2000 sélectionnée
-					</p>
-				);
-			}
+			// const zones = form
+			// 	.getValues("clear_cuts")
+			// 	.flatMap((c) => c.ecologicalZonings);
+			// if (zones.length === 0) {
+			// 	return (
+			// 		<p key={key} className="text-muted-foreground">
+			// 			Aucune zone Natura 2000 détectée
+			// 		</p>
+			// 	);
+			// }
 			return (
-				<p key={key}>
-					{`${natura2000Zone.id || ""} ${natura2000Zone.name || ""}`}
-				</p>
+				<>
+					{/* {uniqBy(zones, (z) => z.id).map((z) => (
+						<p key={z.id}>
+							${z.id} ${z.name}
+						</p>
+					))} */}
+				</>
 			);
 		},
 	},
 	{
-		name: "isOtherEcoZone",
+		name: "hasOtherEcologicalZone",
 		label: "Coupe au sein d'autres zone écologiques ?",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "ecoZoneType",
+		name: "otherEcologicalZoneType",
 		label: "Type de zonages écologiques",
 		type: "textArea",
-		renderConditions: ["isOtherEcoZone"],
+		renderConditions: ["hasNearbyEcologicalZone"],
 	},
 	{
-		name: "isNearEcoZone",
+		name: "hasNearbyEcologicalZone",
 		label: "Zonages écologiques à proximité ?",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "nearEcoZoneType",
+		name: "nearbyEcologicalZoneType",
 		label: "Type de zonages écologiques a proximité",
 		type: "textArea",
-		renderConditions: ["isNearEcoZone"],
+		renderConditions: ["hasNearbyEcologicalZone"],
 	},
 	{
-		name: "protectedSpeciesOnZone",
+		name: "protectedSpecies",
 		label: "Espèces protégées sur la zone (bibliographie)",
 		type: "textArea",
 		renderConditions: [],
 	},
 	{
-		name: "protectedSpeciesHabitatOnZone",
+		name: "protectedHabitats",
 		label: "Habitat d'espèces protégées sur la zone (bibliographie)",
 		type: "textArea",
 		renderConditions: [],
 	},
 	{
-		name: "isDDT",
+		name: "hasDdtRequest",
 		label:
 			"Demande DDT faite sur la réalisation d'une évaluation d'incidence ?",
 		type: "switch",
 		renderConditions: [],
 	},
 	{
-		name: "byWho",
+		name: "ddtRequestOwner",
 		label: "Par qui ?",
 		type: "textArea",
-		renderConditions: ["isDDT"],
+		renderConditions: ["hasDdtRequest"],
 	},
 ];

@@ -13,14 +13,17 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { createSlice } from "@reduxjs/toolkit";
+import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { uniqBy } from "lodash-es";
 import { useEffect } from "react";
 import {
 	type ClearCutForm,
 	type ClearCutReport,
 	type ClearCutReportResponse,
 	type ClearCuts,
-	clearCutFormResponseSchema,
+	clearCutFormSchema,
+	clearCutFormsResponseSchema,
+	clearCutReportResponseSchema,
 	clearCutsResponseSchema,
 } from "./clear-cuts";
 
@@ -29,121 +32,58 @@ const mapReport = (
 	report: ClearCutReportResponse,
 ): ClearCutReport => ({
 	...report,
-	rules: selectRulesByIds(state, report.rules_ids),
-	department: selectDepartmentsByIds(state, [report.department_id])[0],
-	clear_cuts: report.clear_cuts.map((cut) => ({
+	rules: selectRulesByIds(state, report.rulesIds),
+	department: selectDepartmentsByIds(state, [report.departmentId])[0],
+	clearCuts: report.clearCuts.map((cut) => ({
 		...cut,
 		ecologicalZonings: selectEcologicalZoningByIds(
 			state,
-			cut.ecological_zoning_ids,
+			cut.ecologicalZoningIds,
 		),
 	})),
 });
-export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
-	"getClearCutForm",
-	async (id, { getState, extra: { api } }) => {
-		// Get the base report data
-		const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
-		const report = clearCutFormResponseSchema.parse(reportResult);
-		const state = getState();
-		const baseReport = mapReport(state, report) as ClearCutForm;
+export const getClearCutFormThunk = createAppAsyncThunk<
+	ClearCutForm ,
+	string
+>("getClearCutForm", async (id, { getState, extra: { api } }) => {
+	// Get the base report data
+	const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
+	const report = clearCutReportResponseSchema.parse(reportResult);
+	const state = getState();
+	const baseReport = mapReport(state, report);
 
-		// Try to get the latest form data for this report
-		try {
-			const formsResult = await api()
-				.get(`api/v1/clear-cuts-reports/${id}/forms`, {
-					searchParams: { page: "0", size: "1" },
-				})
-				.json();
+	const formsResult = clearCutFormsResponseSchema.parse(
+		await api()
+			.get(`api/v1/clear-cuts-reports/${id}/forms`, {
+				searchParams: { page: "0", size: "1" },
+			})
+			.json(),
+	);
+	const ecologicalZonings = uniqBy(
+		baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
+		"id",
+	);
 
-			// If forms exist, merge the latest form data with the base report
-			const formsData = formsResult as { content?: unknown[] };
-			if (formsData.content && formsData.content.length > 0) {
-				const latestForm = formsData.content[0] as Record<string, unknown>;
-
-				// Map backend form fields to frontend field names
-				const clearCutForm: ClearCutForm = {
-					...baseReport,
-					// On-site inspection fields
-					onSiteDate: latestForm.inspection_date
-						? (latestForm.inspection_date as string).split("T")[0]
-						: undefined,
-					weather: (latestForm.weather as string) || undefined,
-					standTypeAndSilviculturalSystemBCC:
-						(latestForm.forest_description as string) || undefined,
-					isPlantationPresentACC: latestForm.remainingTrees as boolean,
-					newTreeSpicies: (latestForm.species as string) || undefined,
-					isWorksiteSignPresent: latestForm.workSignVisible as boolean,
-					waterCourseOrWetlandPresence:
-						(latestForm.waterzone_description as string) || undefined,
-					protectedSpeciesDestructionIndex:
-						(latestForm.protected_zone_description as string) || undefined,
-					soilState: (latestForm.soil_state as string) || undefined,
-
-					// Ecological zoning fields
-					isNatura2000: latestForm.ecological_zone as boolean,
-					ecoZoneType: (latestForm.ecological_zone_type as string) || undefined,
-					isOtherEcoZone: Boolean(latestForm.ecological_zone_type),
-					isNearEcoZone: latestForm.nearby_zone === "true",
-					nearEcoZoneType: (latestForm.nearby_zone_type as string) || undefined,
-					protectedSpeciesOnZone:
-						(latestForm.protected_species as string) || undefined,
-					protectedSpeciesHabitatOnZone:
-						(latestForm.protected_habitats as string) || undefined,
-					isDDT: latestForm.ddt_request as boolean,
-					byWho: (latestForm.ddt_request_owner as string) || undefined,
-
-					// Actors fields
-					companyName: (latestForm.compagny as string) || undefined,
-					subcontractor: (latestForm.subcontractor as string) || undefined,
-					ownerName: (latestForm.landlord as string) || undefined, // This maps landlord -> ownerName
-
-					// Regulations fields
-					isCCOrCompanyCertified: latestForm.pefc_fsc_certified as boolean,
-					isMoreThan20ha: latestForm.over_20_ha as boolean,
-					isSubjectToPSG: latestForm.psg_required_plot as boolean,
-
-					// Legal strategy fields
-					isRelevantComplaintPEFC:
-						latestForm.relevant_for_pefc_complaint as boolean,
-					isRelevantComplaintREDIII:
-						latestForm.relevant_for_rediii_complaint as boolean,
-					isRelevantComplaintOFB:
-						latestForm.relevant_for_ofb_complaint as boolean,
-					isRelevantAlertSRGS:
-						latestForm.relevant_for_alert_cnpf_ddt_srgs as boolean,
-					isRelevantAlertPSG:
-						latestForm.relevant_for_alert_cnpf_ddt_psg_thresholds as boolean,
-					isRelevantRequestPSG: latestForm.relevant_for_psg_request as boolean,
-					actionsUndertaken:
-						(latestForm.request_engaged as string) || undefined,
-
-					// Other fields
-					otherInfos: (latestForm.other as string) || undefined,
-
-					// Image fields (S3 keys)
-					imgsClearCut: (latestForm.images_clear_cut as string[]) || undefined,
-					imgsPlantation:
-						(latestForm.images_plantation as string[]) || undefined,
-					imgWorksiteSign:
-						(latestForm.image_worksite_sign as string[]) || undefined,
-					imgsTreeTrunks:
-						(latestForm.images_tree_trunks as string[]) || undefined,
-					imgsSoilState:
-						(latestForm.images_soil_state as string[]) || undefined,
-					imgsAccessRoad:
-						(latestForm.images_access_road as string[]) || undefined,
-				};
-				return clearCutForm;
-			}
-		} catch (error) {
-			// If no forms exist or error fetching, just return the base report
-			console.info("No forms found for report, using base data");
-		}
-
-		return baseReport;
-	},
-);
+	const computedProperties = {
+		reportCreatedAt: baseReport.createdAt,
+		reportUpdatedAt: baseReport.updatedAt,
+		hasEcologicalZonings: ecologicalZonings.length > 0,
+	};
+	// If forms exist, merge the latest form data with the base report
+	if (formsResult.content && formsResult.content.length > 0) {
+		const form = formsResult.content[0];
+		return {
+			report: baseReport,
+			...form,
+			ecologicalZonings,
+			...computedProperties,
+		};
+	}
+	return clearCutFormSchema.parse({
+		report: baseReport,
+		...computedProperties,
+	});
+});
 const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
 	async (filters, { getState, extra: { api } }) => {
@@ -152,10 +92,10 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 			const value = filters[filter as keyof FiltersRequest];
 			if (filter === "geoBounds" && filters[filter] !== undefined) {
 				const geoBounds = filters[filter] as Bounds;
-				searchParams.append("sw_lat", geoBounds.sw.lat.toString());
-				searchParams.append("sw_lng", geoBounds.sw.lng.toString());
-				searchParams.append("ne_lat", geoBounds.ne.lat.toString());
-				searchParams.append("ne_lng", geoBounds.ne.lng.toString());
+				searchParams.append("swLat", geoBounds.sw.lat.toString());
+				searchParams.append("swLng", geoBounds.sw.lng.toString());
+				searchParams.append("neLat", geoBounds.ne.lat.toString());
+				searchParams.append("neLng", geoBounds.ne.lng.toString());
 			} else {
 				parseParam(filter, value, searchParams);
 			}
@@ -177,67 +117,17 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 export const submitClearCutFormThunk = createAppAsyncThunk<
 	void,
 	{ reportId: string; formData: ClearCutForm }
->("submitClearCutForm", async ({ reportId, formData }, { extra: { api } }) => {
-	// Map frontend field names to backend field names
-	const backendFormData = {
-		// On-site inspection fields
-		inspection_date: formData.onSiteDate ? formData.onSiteDate : undefined,
-		weather: formData.weather,
-		forest_description: formData.standTypeAndSilviculturalSystemBCC,
-		remainingTrees: formData.isPlantationPresentACC,
-		species: formData.newTreeSpicies,
-		workSignVisible: formData.isWorksiteSignPresent,
-		waterzone_description: formData.waterCourseOrWetlandPresence,
-		protected_zone_description: formData.protectedSpeciesDestructionIndex,
-		soil_state: formData.soilState,
-
-		// Ecological zoning fields
-		ecological_zone: formData.isNatura2000,
-		ecological_zone_type: formData.ecoZoneType,
-		nearby_zone: formData.isNearEcoZone.toString(),
-		nearby_zone_type: formData.nearEcoZoneType,
-		protected_species: formData.protectedSpeciesOnZone,
-		protected_habitats: formData.protectedSpeciesHabitatOnZone,
-		ddt_request: formData.isDDT,
-		ddt_request_owner: formData.byWho,
-
-		// Actors fields
-		compagny: formData.companyName, // Note: backend uses "compagny" (typo)
-		subcontractor: formData.subcontractor,
-		landlord: formData.ownerName,
-
-		// Regulations fields
-		pefc_fsc_certified: formData.isCCOrCompanyCertified,
-		over_20_ha: formData.isMoreThan20ha,
-		psg_required_plot: formData.isSubjectToPSG,
-
-		// Legal strategy fields
-		relevant_for_pefc_complaint: formData.isRelevantComplaintPEFC,
-		relevant_for_rediii_complaint: formData.isRelevantComplaintREDIII,
-		relevant_for_ofb_complaint: formData.isRelevantComplaintOFB,
-		relevant_for_alert_cnpf_ddt_srgs: formData.isRelevantAlertSRGS,
-		relevant_for_alert_cnpf_ddt_psg_thresholds: formData.isRelevantAlertPSG,
-		relevant_for_psg_request: formData.isRelevantRequestPSG,
-		request_engaged: formData.actionsUndertaken,
-
-		// Other fields
-		other: formData.otherInfos,
-
-		// Image fields (S3 keys)
-		images_clear_cut: formData.imgsClearCut,
-		images_plantation: formData.imgsPlantation,
-		image_worksite_sign: formData.imgWorksiteSign,
-		images_tree_trunks: formData.imgsTreeTrunks,
-		images_soil_state: formData.imgsSoilState,
-		images_access_road: formData.imgsAccessRoad,
-	};
-
-	await api()
-		.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
-			json: backendFormData,
-		})
-		.json();
-});
+>(
+	"submitClearCutForm",
+	async ({ reportId, formData }, { extra: { api }, dispatch }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
+				json: formData,
+			})
+			.json();
+		dispatch(getClearCutFormThunk(reportId));
+	},
+);
 type State = {
 	clearCuts: RequestedContent<ClearCuts>;
 	detail: RequestedContent<ClearCutForm>;
@@ -251,7 +141,14 @@ const initialState: State = {
 export const clearCutsSlice = createSlice({
 	name: "clearCuts",
 	initialState,
-	reducers: {},
+	reducers: {
+		addToFavorites: (state, action: PayloadAction<{ id: string }>) => {
+			localStorage.setItem(
+				`clear-cut:${action.payload.id}`,
+				JSON.stringify(state.detail),
+			);
+		},
+	},
 	extraReducers: (builder) => {
 		builder.addCase(getClearCutFormThunk.fulfilled, (state, { payload }) => {
 			state.detail = { status: "success", value: payload };
@@ -270,17 +167,6 @@ export const clearCutsSlice = createSlice({
 		});
 		builder.addCase(getClearCutsThunk.pending, (state) => {
 			state.clearCuts = { status: "loading" };
-		});
-		builder.addCase(submitClearCutFormThunk.fulfilled, (state) => {
-			state.submission = { status: "success" };
-			// Update the report status to "validated" after successful form submission
-			if (
-				state.detail.status === "success" &&
-				state.detail.value &&
-				state.detail.value.status === "to_validate"
-			) {
-				state.detail.value.status = "validated";
-			}
 		});
 		builder.addCase(submitClearCutFormThunk.rejected, (state, error) => {
 			state.submission = { status: "error", error };

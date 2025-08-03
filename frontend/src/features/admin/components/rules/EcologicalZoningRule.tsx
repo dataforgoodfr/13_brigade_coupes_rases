@@ -12,7 +12,7 @@ type Props = {
 	) => void;
 } & EcologicalZoningRule;
 export function EcologicalZoningRuleComponent({
-	ecological_zonings,
+	ecologicalZ$onings: ecological_zonings,
 	className,
 	updateEcologicalZonings,
 }: Props) {

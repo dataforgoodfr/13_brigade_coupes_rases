@@ -1,9 +1,11 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from app.schemas.base import BaseSchema
 
 
-class ImageUploadRequest(BaseModel):
+class ImageUploadRequest(BaseSchema):
     """Request schema for generating pre-signed upload URL"""
 
     filename: str = Field(..., description="Name of the file to upload")
@@ -16,7 +18,7 @@ class ImageUploadRequest(BaseModel):
     )
 
 
-class ImageUploadResponse(BaseModel):
+class ImageUploadResponse(BaseSchema):
     """Response schema for pre-signed upload URL"""
 
     upload_url: str = Field(..., description="Pre-signed URL for uploading the file")

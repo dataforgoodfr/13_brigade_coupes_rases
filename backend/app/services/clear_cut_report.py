@@ -244,7 +244,7 @@ def find_clearcuts_reports(
 
 
 def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
-    report = db.get(ClearCutReport, report_id)
+    report = db.get(ClearCutReport, report_id).join(ClearCutReport.user)
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Report not found by id {id}"

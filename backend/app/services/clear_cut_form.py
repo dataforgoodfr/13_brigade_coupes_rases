@@ -5,17 +5,17 @@ from sqlalchemy.orm import Session
 
 from app.models import ClearCutForm, ClearCutReport, User
 from app.schemas.clear_cut_form import (
-    ClearCutFormWithStrategyResponse,
-    ClearCutReportFormWithStrategy,
+    ClearCutFormCreate,
+    ClearCutFormResponse,
+    clear_cut_form_create_to_clear_cut_form,
+    clear_cut_form_response_from_clear_cut_form,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 
 logger = getLogger(__name__)
 
 
-def get_clear_cut_form_by_id(
-    db: Session, form_id: int
-) -> ClearCutFormWithStrategyResponse:
+def get_clear_cut_form_by_id(db: Session, form_id: int) -> ClearCutFormResponse:
     report_form = db.get(ClearCutForm, form_id)
     if report_form is None:
         raise HTTPException(
@@ -23,49 +23,17 @@ def get_clear_cut_form_by_id(
             detail=f"Report form not found by id {form_id}",
         )
 
-    return report_form
+    return clear_cut_form_response_from_clear_cut_form(report_form)
 
 
 def add_clear_cut_form_entry(
     db: Session,
     editor: User,
     report_id: int,
-    new_version: ClearCutReportFormWithStrategy,
-):
-    new_clear_cut_form_entry = ClearCutForm(
-        report_id=report_id,
-        editor_id=editor.id,
-        inspection_date=new_version.inspection_date,
-        weather=new_version.weather,
-        forest_description=new_version.forest_description,
-        remainingTrees=new_version.remainingTrees,
-        species=new_version.species,
-        workSignVisible=new_version.workSignVisible,
-        waterzone_description=new_version.waterzone_description,
-        protected_zone_description=new_version.protected_zone_description,
-        soil_state=new_version.soil_state,
-        other=new_version.other,
-        ecological_zone=new_version.ecological_zone,
-        ecological_zone_type=new_version.ecological_zone_type,
-        nearby_zone=new_version.nearby_zone,
-        nearby_zone_type=new_version.nearby_zone_type,
-        protected_species=new_version.protected_species,
-        protected_habitats=new_version.protected_habitats,
-        ddt_request=new_version.ddt_request,
-        ddt_request_owner=new_version.ddt_request_owner,
-        compagny=new_version.compagny,
-        subcontractor=new_version.subcontractor,
-        landlord=new_version.landlord,
-        pefc_fsc_certified=new_version.pefc_fsc_certified,
-        over_20_ha=new_version.over_20_ha,
-        psg_required_plot=new_version.psg_required_plot,
-        # Image fields
-        images_clear_cut=new_version.images_clear_cut,
-        images_plantation=new_version.images_plantation,
-        image_worksite_sign=new_version.image_worksite_sign,
-        images_tree_trunks=new_version.images_tree_trunks,
-        images_soil_state=new_version.images_soil_state,
-        images_access_road=new_version.images_access_road,
+    new_version: ClearCutFormCreate,
+) -> ClearCutForm:
+    new_clear_cut_form_entry = clear_cut_form_create_to_clear_cut_form(
+        new_version, editor, report_id
     )
 
     if editor.role == "admin":
@@ -132,9 +100,11 @@ def add_clear_cut_form_entry(
 
 def find_clear_cut_form_by_report_id(
     db: Session, report_id: int, url: str, page: int = 0, size: int = 10
-) -> PaginationResponseSchema[ClearCutFormWithStrategyResponse]:
+) -> PaginationResponseSchema[ClearCutFormResponse]:
     forms = (
         db.query(ClearCutForm)
+        .join(ClearCutReport)
+        .join(User)
         .filter(ClearCutForm.report_id == report_id)
         .order_by(ClearCutForm.created_at.desc())
         .offset(page * size)
@@ -144,7 +114,7 @@ def find_clear_cut_form_by_report_id(
         db.query(ClearCutForm.id).filter(ClearCutForm.report_id == report_id).count()
     )
     return PaginationResponseSchema(
-        content=list(forms.all()),
+        content=list(map(clear_cut_form_response_from_clear_cut_form, forms.all())),
         metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=forms_count, url=url
         ),
