@@ -1,3 +1,6 @@
+import { useLocation } from "@tanstack/react-router";
+import { type RefObject, useEffect, useRef } from "react";
+import { GeoJSON } from "react-leaflet";
 import { ClearCutMapPopUp } from "@/features/clear-cut/components/map/ClearCutMapPopUp";
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
@@ -7,9 +10,6 @@ import type {
 } from "@/features/clear-cut/store/clear-cuts";
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
-import { useLocation } from "@tanstack/react-router";
-import { type RefObject, useEffect, useRef } from "react";
-import { GeoJSON } from "react-leaflet";
 
 type Props = { report: ClearCutReport; clearCut: ClearCut };
 

@@ -1,3 +1,6 @@
+import { screen } from "@testing-library/react";
+import type { UserEvent } from "@testing-library/user-event";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
 	actorsKey,
 	actorsValue,
@@ -30,30 +33,27 @@ import type {
 	SectionForm,
 	SectionFormItem,
 } from "@/features/clear-cut/components/form/types";
-
 import type {
-	ClearCutForm,
+	ClearCutFormInput,
 	ClearCutFormResponse,
 	ClearCutReportResponse,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { User } from "@/features/user/store/user";
+import { worker } from "@/mocks/browser";
 import { mockClearCutReportResponse } from "@/mocks/clear-cuts";
 import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms";
 import { fakeDepartments } from "@/mocks/referential";
-import { server } from "@/test/mocks/server";
 import { adminMock, volunteerMock } from "@/test/mocks/user";
 import {
 	type FieldInput,
-	type TestFormItem,
 	formField,
+	type TestFormItem,
 } from "@/test/page-object/form-input";
 import { renderApp } from "@/test/renderApp";
-import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
 
 type SectionData<
-	Item extends SectionFormItem<ClearCutForm> = TestFormItem<ClearCutForm>,
+	Item extends
+		SectionFormItem<ClearCutFormInput> = TestFormItem<ClearCutFormInput>,
 > = {
 	section: SectionForm;
 	items: Item[];
@@ -77,8 +77,8 @@ const formMock = mockClearCutFormsResponse({
 });
 
 const mapItem = (
-	item: SectionFormItem<ClearCutForm>,
-): TestFormItem<ClearCutForm> => {
+	item: SectionFormItem<ClearCutFormInput>,
+): TestFormItem<ClearCutFormInput> => {
 	const formReport = { report: reportMock.response, ...formMock.response };
 	let expected: unknown;
 	if (item.name.startsWith("report.")) {
@@ -161,7 +161,7 @@ const sections: SectionData[] = [
 ];
 const setupServerBeforeEach = () => {
 	beforeEach(() => {
-		server.use(
+		worker.use(
 			reportMock.handler,
 			mockClearCutFormsResponse({ reportId: reportMock.response.id }).handler,
 		);
@@ -174,7 +174,7 @@ describe.each(sections)(
 			const assignedClearCutMock = mockClearCutFormsResponse({
 				...reportMock.response,
 			});
-			server.use(assignedClearCutMock.handler);
+			worker.use(assignedClearCutMock.handler);
 		});
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
@@ -234,7 +234,7 @@ function isShouldNotDisplayAdminSection(
 	});
 }
 function itShouldHaveValue(
-	items: TestFormItem<ClearCutForm>[],
+	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
 	connectedUser?: User,
 ) {
@@ -250,7 +250,7 @@ function itShouldHaveValue(
 					user: connectedUser,
 				});
 				await openAccordion(section, user);
-				const field = formField<ClearCutForm, unknown>({
+				const field = formField<ClearCutFormInput, unknown>({
 					user,
 					item: item,
 				}) as FieldInput;
@@ -260,7 +260,7 @@ function itShouldHaveValue(
 		);
 }
 function itShouldHaveDisabledState(
-	items: TestFormItem<ClearCutForm>[],
+	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
 	state: boolean,
 	connectedUser?: User,
@@ -281,7 +281,7 @@ function itShouldHaveDisabledState(
 					user: connectedUser,
 				});
 				await openAccordion(section, user);
-				const field = formField<ClearCutForm, unknown>({
+				const field = formField<ClearCutFormInput, unknown>({
 					user,
 					item: item,
 				}) as FieldInput;

@@ -1,4 +1,4 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const regulationsKey: SectionForm = {
@@ -6,7 +6,7 @@ export const regulationsKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const regulationsValue: SectionFormItem<ClearCutForm>[] = [
+export const regulationsValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
 		name: "isPefcFscCertified",
 		label: "Coupe ou entreprise certifiée PEFC/FSC ?",

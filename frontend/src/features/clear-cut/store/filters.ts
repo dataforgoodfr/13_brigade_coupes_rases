@@ -1,5 +1,5 @@
-import { clearCutStatusSchema } from "@/features/clear-cut/store/clear-cuts";
 import { z } from "zod";
+import { clearCutStatusSchema } from "@/features/clear-cut/store/clear-cuts";
 import { boundsSchema } from "./types";
 
 const filtersRequestSchema = z.object({

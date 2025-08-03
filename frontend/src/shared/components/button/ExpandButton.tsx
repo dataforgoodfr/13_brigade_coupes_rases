@@ -1,8 +1,8 @@
+import clsx from "clsx";
+import { forwardRef } from "react";
 import type { ButtonProps } from "@/components/ui/button";
 import { IconButton } from "@/shared/components/button/Button";
 import { ExpandChevron } from "@/shared/components/button/ExpandChevron";
-import clsx from "clsx";
-import { forwardRef } from "react";
 
 type Props = ButtonProps & {
 	open: boolean;

@@ -1,30 +1,26 @@
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
+	type ComponentPropsWithoutRef,
+	type ComponentRef,
+	createContext,
+	forwardRef,
+	type HTMLAttributes,
+	useContext,
+	useId,
+} from "react";
+import {
 	type Control,
 	Controller,
 	type ControllerProps,
 	type FieldPath,
 	type FieldValues,
-	FormProvider,
 	type Path,
 	type UseFormReturn,
 	useFormContext,
 } from "react-hook-form";
-
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-	type ComponentPropsWithoutRef,
-	type ComponentRef,
-	type HTMLAttributes,
-	createContext,
-	forwardRef,
-	useContext,
-	useId,
-} from "react";
-
-export const Form = FormProvider;
 
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,

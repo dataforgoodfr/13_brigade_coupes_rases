@@ -1,16 +1,16 @@
+import { Filter, MapIcon } from "lucide-react";
 import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useLayout } from "@/features/clear-cut/components/Layout.context";
 import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
+import { useLayout } from "@/features/clear-cut/components/Layout.context";
 import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem";
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
 import { IconButton } from "@/shared/components/button/Button";
 import { Title } from "@/shared/components/typo/Title";
 import { useAppSelector } from "@/shared/hooks/store";
-import { Filter, MapIcon } from "lucide-react";
 
 export function AsideList() {
 	const { value } = useAppSelector(selectClearCuts);

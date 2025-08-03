@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
+
 type Options = { user: UserEvent };
 export function loginForm({ user }: Options) {
 	const setEmail = async (email: string) => {

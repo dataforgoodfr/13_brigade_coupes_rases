@@ -1,5 +1,5 @@
-import { Switch } from "@/components/ui/switch";
 import type { FieldValues } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
 import {
 	FormControl,
 	FormField,

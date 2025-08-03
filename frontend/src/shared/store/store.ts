@@ -1,6 +1,12 @@
+import {
+	combineReducers,
+	configureStore,
+	createListenerMiddleware,
+	isRejected,
+} from "@reduxjs/toolkit";
 import { rulesSlice } from "@/features/admin/store/rules.slice";
-import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
+import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
 import { clearCutsSlice } from "@/features/clear-cut/store/clear-cuts-slice";
 import { filtersSlice } from "@/features/clear-cut/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
@@ -9,14 +15,9 @@ import {
 	setStoredToken,
 	userSlice,
 } from "@/features/user/store/user.slice";
-import { UNAUTHORIZED_ERROR_NAME, api } from "@/shared/api/api";
+import { api, UNAUTHORIZED_ERROR_NAME } from "@/shared/api/api";
 import { referentialSlice } from "@/shared/store/referential/referential.slice";
-import {
-	combineReducers,
-	configureStore,
-	createListenerMiddleware,
-	isRejected,
-} from "@reduxjs/toolkit";
+
 const unauthorizedMiddleware = createListenerMiddleware();
 
 unauthorizedMiddleware.startListening({

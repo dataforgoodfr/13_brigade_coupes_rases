@@ -1,7 +1,7 @@
-import { loginForm } from "@/test/page-object/login";
-import { renderApp } from "@/test/renderApp";
 import { screen } from "@testing-library/react";
 import { describe, it } from "vitest";
+import { loginForm } from "@/test/page-object/login";
+import { renderApp } from "@/test/renderApp";
 
 describe("Administration", () => {
 	it("should see administration button if administrator", async () => {

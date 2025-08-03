@@ -1,4 +1,4 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import type { FixedItem, SectionForm, SectionFormItem } from "../types";
 
 export const onSiteKey: SectionForm = {
@@ -6,7 +6,7 @@ export const onSiteKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const onSiteValue: SectionFormItem<ClearCutForm>[] = [
+export const onSiteValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
 		name: "report.affectedUser",
 		label: "Bénévole en charge du terrain :",
@@ -18,7 +18,7 @@ export const onSiteValue: SectionFormItem<ClearCutForm>[] = [
 				<p>Aucun bénévole n'est assigné</p>
 			</div>
 		),
-	} satisfies FixedItem<ClearCutForm, "report.affectedUser">,
+	} satisfies FixedItem<ClearCutFormInput, "report.affectedUser">,
 	{
 		name: "inspectionDate",
 		label: "Date du terrain",

@@ -1,5 +1,5 @@
-import type { PropsWithChildrenClassName } from "@/shared/types/props";
 import clsx from "clsx";
+import type { PropsWithChildrenClassName } from "@/shared/types/props";
 
 export function Title({ children, className }: PropsWithChildrenClassName) {
 	return (

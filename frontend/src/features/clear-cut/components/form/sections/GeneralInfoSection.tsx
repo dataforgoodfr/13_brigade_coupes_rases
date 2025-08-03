@@ -1,5 +1,5 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
 import { FormattedDate, FormattedNumber } from "react-intl";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const generalInfoKey: SectionForm = {
@@ -7,7 +7,7 @@ export const generalInfoKey: SectionForm = {
 	className: "grid grid-cols-2 gap-2",
 };
 
-export const generalInfoValue: SectionFormItem<ClearCutForm>[] = [
+export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
 		name: "report.updatedAt",
 		transformValue: ({ value }) => <FormattedDate value={value as string} />,

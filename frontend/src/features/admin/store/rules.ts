@@ -1,9 +1,9 @@
+import { z } from "zod";
 import { withId } from "@/shared/schema";
 import {
 	ecologicalZoningRuleResponseSchema,
 	variableRuleResponseSchema,
 } from "@/shared/store/referential/referential";
-import { z } from "zod";
 
 export const ecologicalZoningRuleResponseSchemaWithId = withId(
 	ecologicalZoningRuleResponseSchema,

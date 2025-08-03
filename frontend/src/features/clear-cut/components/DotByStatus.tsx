@@ -1,6 +1,6 @@
+import clsx from "clsx";
 import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts";
 import { Dot } from "@/shared/components/Dot";
-import clsx from "clsx";
 import { CLEAR_CUTTING_STATUS_BACKGROUND_COLORS } from "../store/status";
 
 interface Props {

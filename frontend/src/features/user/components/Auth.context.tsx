@@ -1,10 +1,10 @@
+import { createContext, type ReactNode, useContext, useEffect } from "react";
 import {
 	getMeThunk,
 	getStoredToken,
 	useLoggedUser,
 } from "@/features/user/store/user.slice";
 import { useAppDispatch } from "@/shared/hooks/store";
-import { type ReactNode, createContext, useContext, useEffect } from "react";
 
 export type AuthContext = { isAuthenticated: boolean; isAdmin: boolean };
 const AuthCtx = createContext<AuthContext>({

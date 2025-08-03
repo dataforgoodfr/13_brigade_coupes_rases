@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.1.3/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -7,29 +7,34 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": [
-			"src/routeTree.gen.ts",
-			"node_modules",
-			"dev-dist",
-			".storybook",
-			"storybook-static",
-			"dist",
-			"public/mockServiceWorker.js",
-			"test/features/clear-cutting/form"
+		"includes": [
+			"vitest.config.ts",
+			"vite.config.ts",
+			"src/**/*",
+			"!src/routeTree.gen.ts",
+			"!node_modules",
+			"!dev-dist",
+			"!.storybook",
+			"!storybook-static",
+			"!dist",
+			"!public/mockServiceWorker.js",
+			"!test/features/clear-cutting/form"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
-	"organizeImports": {
-		"enabled": true
+	"assist": {
+		"actions": {
+			"source": { "organizeImports": "on" }
+		}
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"suspicious": { "noConsoleLog": "error" },
+			"suspicious": { "noConsole": "error" },
 			"correctness": { "noUnusedImports": "error" }
 		}
 	},

@@ -1,5 +1,4 @@
-import type { ReactNode } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 
 export interface NamedId<
 	TId extends string = string,

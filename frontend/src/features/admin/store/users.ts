@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { roleSchema } from "@/features/user/store/user";
 import { paginationResponseSchema } from "@/shared/api/types";
 import { departmentSchema } from "@/shared/store/referential/referential";
-import { z } from "zod";
 
 export const userResponseSchema = z.object({
 	id: z.string(),

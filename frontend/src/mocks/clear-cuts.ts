@@ -1,3 +1,5 @@
+import { faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
 import {
 	CLEAR_CUTTING_STATUSES,
 	type ClearCutReportResponse,
@@ -15,8 +17,6 @@ import {
 import { volunteerAssignedMock, volunteerAssignedToken } from "@/mocks/users";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
-import { faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
 
 export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},

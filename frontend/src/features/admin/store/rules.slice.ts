@@ -1,12 +1,14 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { useEffect } from "react";
 import {
 	type RulesResponse,
+	rulesResponseSchema,
 	type UpdateRulesRequest,
 	type VariableRuleResponse,
-	rulesResponseSchema,
 } from "@/features/admin/store/rules";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { type SelectableItem, listToSelectableItems } from "@/shared/items";
+import { listToSelectableItems, type SelectableItem } from "@/shared/items";
 import type {
 	EcologicalZoning,
 	EcologicalZoningType,
@@ -20,8 +22,6 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { useEffect } from "react";
 export type EcologicalZoningRule = {
 	type: EcologicalZoningType;
 	ecologicalZonings: SelectableItem<EcologicalZoning>[];

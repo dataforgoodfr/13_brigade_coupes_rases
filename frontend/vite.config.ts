@@ -1,12 +1,11 @@
-/// <reference types="vitest" />
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { defineConfig, type PluginOption, type UserConfigFnObject } from "vite";
 import { VitePWA, type VitePWAOptions } from "vite-plugin-pwa";
 import { reactClickToComponent } from "vite-plugin-react-click-to-component";
+import tsconfigPaths from "vite-tsconfig-paths";
+
 type RuntimeCaching = NonNullable<
 	VitePWAOptions["workbox"]["runtimeCaching"]
 >[number];
@@ -15,14 +14,8 @@ function cacheNetworkFirst(
 ): RuntimeCaching {
 	return { urlPattern, handler: "NetworkFirst", method: "GET" };
 }
-export default defineConfig(({ mode }) => {
+export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 	return {
-		test: {
-			environment: "jsdom",
-			setupFiles: ["src/test/setup.ts"],
-			testTimeout: 60_000,
-			pool: "forks",
-		},
 		preview: {
 			port: 8000,
 		},
@@ -82,7 +75,8 @@ export default defineConfig(({ mode }) => {
 			tailwindcss(),
 			tsconfigPaths(),
 			reactClickToComponent(),
-			TanStackRouterVite({ autoCodeSplitting: true }),
-		],
+			tanstackRouter({ autoCodeSplitting: true }),
+		] as PluginOption[],
 	};
-});
+};
+export default defineConfig(baseConfigFn);

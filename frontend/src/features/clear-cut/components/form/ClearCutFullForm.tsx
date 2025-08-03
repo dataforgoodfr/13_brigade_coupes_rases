@@ -1,3 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Accordion } from "radix-ui";
+import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	type ClearCutForm,
@@ -8,11 +11,7 @@ import {
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
 import { useLoggedUser } from "@/features/user/store/user.slice";
-import { Form } from "@/shared/components/form/Form";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Accordion } from "radix-ui";
-import { useForm } from "react-hook-form";
 import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
 
@@ -20,7 +19,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
 	const loggedUser = useLoggedUser();
-	const form = useForm<ClearCutForm>({
+	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: clearCut,
 	});
@@ -41,7 +40,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 				tags={clearCut.report.rules}
 				status={clearCut.report.status}
 			/>
-			<Form {...form}>
+			<FormProvider {...form}>
 				<form
 					onSubmit={form.handleSubmit(handleSubmit)}
 					className="p-1 flex flex-col grow px-4 h-0"
@@ -62,7 +61,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 						</Button>
 					)}
 				</form>
-			</Form>
+			</FormProvider>
 		</>
 	);
 }

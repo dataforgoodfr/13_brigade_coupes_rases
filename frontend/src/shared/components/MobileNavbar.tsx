@@ -1,6 +1,6 @@
+import { Bookmark, House, Settings } from "lucide-react";
 import { useLoggedUser } from "@/features/user/store/user.slice";
 import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink";
-import { Bookmark, House, Settings } from "lucide-react";
 
 export function MobileNavbar() {
 	const user = useLoggedUser();

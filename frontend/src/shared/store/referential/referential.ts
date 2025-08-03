@@ -1,5 +1,5 @@
-import { recordWithId } from "@/shared/schema";
 import { record, z } from "zod";
+import { recordWithId } from "@/shared/schema";
 
 export const variableRulesTypeSchema = z.enum(["slope", "area"]);
 export type VariableRulesType = z.infer<typeof variableRulesTypeSchema>;

@@ -1,3 +1,5 @@
+import { createRootRouteWithContext, Navigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa";
@@ -11,8 +13,6 @@ import {
 	getReferentialThunk,
 	selectReferentialStatus,
 } from "@/shared/store/referential/referential.slice";
-import { Navigate, createRootRouteWithContext } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 interface RouterContext {
 	auth?: AuthContext;

@@ -1,3 +1,4 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts";
 import {
 	type FiltersRequest,
@@ -6,12 +7,12 @@ import {
 } from "@/features/clear-cut/store/filters";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import {
+	booleanToSelectableItem,
 	DEFAULT_EVENTUALLY_BOOLEAN,
 	type EventuallyBooleanSelectableItems,
+	listToSelectableItems,
 	type NamedId,
 	type SelectableItem,
-	booleanToSelectableItem,
-	listToSelectableItems,
 	updateEventuallyBooleanSelectableItem,
 } from "@/shared/items";
 import type { Department, Rule } from "@/shared/store/referential/referential";
@@ -23,7 +24,6 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 import type { Range } from "@/shared/types/range";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
@@ -157,7 +157,7 @@ export const filtersSlice = createSlice({
 				state,
 				{
 					payload: {
-						cutYears: cutYears,
+						cutYears,
 						rules,
 						departments,
 						areaRange: area_range,

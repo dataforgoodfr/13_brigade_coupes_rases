@@ -1,7 +1,7 @@
-import type { Router } from "@/shared/router";
 import { Link } from "@tanstack/react-router";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
+import type { Router } from "@/shared/router";
 
 interface Props extends ComponentProps<typeof Link<Router>> {
 	Icon: LucideIcon;

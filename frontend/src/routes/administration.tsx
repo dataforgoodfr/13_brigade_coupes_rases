@@ -1,8 +1,8 @@
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RulesPage } from "@/features/admin/components/rules/RulesPage";
 import { UsersListPage } from "@/features/admin/components/users-list/UsersListPage";
 import { Title } from "@/shared/components/typo/Title";
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/administration")({
 	beforeLoad: async ({ context, location }) => {

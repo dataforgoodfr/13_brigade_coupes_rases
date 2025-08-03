@@ -1,13 +1,13 @@
-import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutFullForm";
-import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
-import { useGetClearCut } from "@/features/clear-cut/store/clear-cuts-slice";
-import { useToast } from "@/hooks/use-toast";
-import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { Title } from "@radix-ui/react-toast";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useEffect } from "react";
 import { FormattedDate } from "react-intl";
+import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutFullForm";
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
+import { useGetClearCut } from "@/features/clear-cut/store/clear-cuts-slice";
+import { useToast } from "@/hooks/use-toast";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 
 export function AsideForm({ clearCutId }: { clearCutId: string }) {
 	const { value, status } = useGetClearCut(clearCutId);

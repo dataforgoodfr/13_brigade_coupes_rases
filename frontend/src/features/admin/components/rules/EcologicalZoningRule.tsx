@@ -12,12 +12,12 @@ type Props = {
 	) => void;
 } & EcologicalZoningRule;
 export function EcologicalZoningRuleComponent({
-	ecologicalZ$onings: ecological_zonings,
+	ecologicalZonings,
 	className,
 	updateEcologicalZonings,
 }: Props) {
 	const items = useEnhancedItems(
-		ecological_zonings,
+		ecologicalZonings,
 		(item) => item.item.name,
 		(item) => item.item.id,
 	);

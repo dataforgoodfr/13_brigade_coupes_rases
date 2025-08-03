@@ -1,3 +1,5 @@
+import { fakerFR as faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
 import type {
 	UserResponse as AdminUserResponse,
 	PaginatedUsersResponse,
@@ -5,8 +7,7 @@ import type {
 import type { TokenResponse, UserResponse } from "@/features/user/store/user";
 import { fakeDepartments } from "@/mocks/referential";
 import { range } from "@/shared/array";
-import { fakerFR as faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
+
 const adminToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTc0Mjc2NjQxMn0.-rl7wbmum8v5kmbeW2l67K6hxas62Y8N9UpHAC0-A58";
 const volunteerToken =

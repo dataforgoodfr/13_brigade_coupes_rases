@@ -1,10 +1,11 @@
-import { App } from "@/App";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { IntlProvider } from "react-intl";
 import { Provider } from "react-redux";
+import { App } from "@/App";
 import "./index.css";
 import { store } from "./shared/store/store";
+
 async function enableMocking() {
 	if (
 		import.meta.env.MODE !== "development" ||

@@ -1,6 +1,5 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DropdownFilter } from "@/shared/components/dropdown/DropdownFilter";
-
-import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
 	title: "Dropdown filter",

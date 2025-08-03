@@ -10,65 +10,53 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdministrationRouteImport } from './routes/administration'
+import { Route as ClearCutsRouteImport } from './routes/_clear-cuts'
+import { Route as AuthRouteImport } from './routes/_auth'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as LoginImport } from './routes/login'
-import { Route as AdministrationImport } from './routes/administration'
-import { Route as ClearCutsImport } from './routes/_clear-cuts'
-import { Route as AuthImport } from './routes/_auth'
-
-// Create Virtual Routes
-
-const IndexLazyImport = createFileRoute('/')()
-const ClearCutsClearCutsIndexLazyImport = createFileRoute(
+const IndexLazyRouteImport = createFileRoute('/')()
+const ClearCutsClearCutsIndexLazyRouteImport = createFileRoute(
   '/_clear-cuts/clear-cuts/',
 )()
-const ClearCutsClearCutsClearCutIdLazyImport = createFileRoute(
+const ClearCutsClearCutsClearCutIdLazyRouteImport = createFileRoute(
   '/_clear-cuts/clear-cuts/$clearCutId',
 )()
 
-// Create/Update Routes
-
-const LoginRoute = LoginImport.update({
+const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const AdministrationRoute = AdministrationImport.update({
+const AdministrationRoute = AdministrationRouteImport.update({
   id: '/administration',
   path: '/administration',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const ClearCutsRoute = ClearCutsImport.update({
+const ClearCutsRoute = ClearCutsRouteImport.update({
   id: '/_clear-cuts',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const AuthRoute = AuthImport.update({
+const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexLazyRoute = IndexLazyImport.update({
+const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
-
 const ClearCutsClearCutsIndexLazyRoute =
-  ClearCutsClearCutsIndexLazyImport.update({
+  ClearCutsClearCutsIndexLazyRouteImport.update({
     id: '/clear-cuts/',
     path: '/clear-cuts/',
     getParentRoute: () => ClearCutsRoute,
   } as any).lazy(() =>
     import('./routes/_clear-cuts.clear-cuts.index.lazy').then((d) => d.Route),
   )
-
 const ClearCutsClearCutsClearCutIdLazyRoute =
-  ClearCutsClearCutsClearCutIdLazyImport.update({
+  ClearCutsClearCutsClearCutIdLazyRouteImport.update({
     id: '/clear-cuts/$clearCutId',
     path: '/clear-cuts/$clearCutId',
     getParentRoute: () => ClearCutsRoute,
@@ -78,98 +66,22 @@ const ClearCutsClearCutsClearCutIdLazyRoute =
     ),
   )
 
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthImport
-      parentRoute: typeof rootRoute
-    }
-    '/_clear-cuts': {
-      id: '/_clear-cuts'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof ClearCutsImport
-      parentRoute: typeof rootRoute
-    }
-    '/administration': {
-      id: '/administration'
-      path: '/administration'
-      fullPath: '/administration'
-      preLoaderRoute: typeof AdministrationImport
-      parentRoute: typeof rootRoute
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginImport
-      parentRoute: typeof rootRoute
-    }
-    '/_clear-cuts/clear-cuts/$clearCutId': {
-      id: '/_clear-cuts/clear-cuts/$clearCutId'
-      path: '/clear-cuts/$clearCutId'
-      fullPath: '/clear-cuts/$clearCutId'
-      preLoaderRoute: typeof ClearCutsClearCutsClearCutIdLazyImport
-      parentRoute: typeof ClearCutsImport
-    }
-    '/_clear-cuts/clear-cuts/': {
-      id: '/_clear-cuts/clear-cuts/'
-      path: '/clear-cuts'
-      fullPath: '/clear-cuts'
-      preLoaderRoute: typeof ClearCutsClearCutsIndexLazyImport
-      parentRoute: typeof ClearCutsImport
-    }
-  }
-}
-
-// Create and export the route tree
-
-interface ClearCutsRouteChildren {
-  ClearCutsClearCutsClearCutIdLazyRoute: typeof ClearCutsClearCutsClearCutIdLazyRoute
-  ClearCutsClearCutsIndexLazyRoute: typeof ClearCutsClearCutsIndexLazyRoute
-}
-
-const ClearCutsRouteChildren: ClearCutsRouteChildren = {
-  ClearCutsClearCutsClearCutIdLazyRoute: ClearCutsClearCutsClearCutIdLazyRoute,
-  ClearCutsClearCutsIndexLazyRoute: ClearCutsClearCutsIndexLazyRoute,
-}
-
-const ClearCutsRouteWithChildren = ClearCutsRoute._addFileChildren(
-  ClearCutsRouteChildren,
-)
-
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '': typeof ClearCutsRouteWithChildren
   '/administration': typeof AdministrationRoute
   '/login': typeof LoginRoute
   '/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/clear-cuts': typeof ClearCutsClearCutsIndexLazyRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '': typeof ClearCutsRouteWithChildren
   '/administration': typeof AdministrationRoute
   '/login': typeof LoginRoute
   '/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/clear-cuts': typeof ClearCutsClearCutsIndexLazyRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
   '/_auth': typeof AuthRoute
   '/_clear-cuts': typeof ClearCutsRouteWithChildren
@@ -178,12 +90,10 @@ export interface FileRoutesById {
   '/_clear-cuts/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
   '/_clear-cuts/clear-cuts/': typeof ClearCutsClearCutsIndexLazyRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | ''
     | '/administration'
     | '/login'
     | '/clear-cuts/$clearCutId'
@@ -191,7 +101,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | ''
     | '/administration'
     | '/login'
     | '/clear-cuts/$clearCutId'
@@ -207,7 +116,6 @@ export interface FileRouteTypes {
     | '/_clear-cuts/clear-cuts/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AuthRoute: typeof AuthRoute
@@ -216,6 +124,74 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
 }
 
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/administration': {
+      id: '/administration'
+      path: '/administration'
+      fullPath: '/administration'
+      preLoaderRoute: typeof AdministrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_clear-cuts': {
+      id: '/_clear-cuts'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ClearCutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_clear-cuts/clear-cuts/': {
+      id: '/_clear-cuts/clear-cuts/'
+      path: '/clear-cuts'
+      fullPath: '/clear-cuts'
+      preLoaderRoute: typeof ClearCutsClearCutsIndexLazyRouteImport
+      parentRoute: typeof ClearCutsRoute
+    }
+    '/_clear-cuts/clear-cuts/$clearCutId': {
+      id: '/_clear-cuts/clear-cuts/$clearCutId'
+      path: '/clear-cuts/$clearCutId'
+      fullPath: '/clear-cuts/$clearCutId'
+      preLoaderRoute: typeof ClearCutsClearCutsClearCutIdLazyRouteImport
+      parentRoute: typeof ClearCutsRoute
+    }
+  }
+}
+
+interface ClearCutsRouteChildren {
+  ClearCutsClearCutsClearCutIdLazyRoute: typeof ClearCutsClearCutsClearCutIdLazyRoute
+  ClearCutsClearCutsIndexLazyRoute: typeof ClearCutsClearCutsIndexLazyRoute
+}
+
+const ClearCutsRouteChildren: ClearCutsRouteChildren = {
+  ClearCutsClearCutsClearCutIdLazyRoute: ClearCutsClearCutsClearCutIdLazyRoute,
+  ClearCutsClearCutsIndexLazyRoute: ClearCutsClearCutsIndexLazyRoute,
+}
+
+const ClearCutsRouteWithChildren = ClearCutsRoute._addFileChildren(
+  ClearCutsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AuthRoute: AuthRoute,
@@ -223,51 +199,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdministrationRoute: AdministrationRoute,
   LoginRoute: LoginRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/_auth",
-        "/_clear-cuts",
-        "/administration",
-        "/login"
-      ]
-    },
-    "/": {
-      "filePath": "index.lazy.tsx"
-    },
-    "/_auth": {
-      "filePath": "_auth.tsx"
-    },
-    "/_clear-cuts": {
-      "filePath": "_clear-cuts.tsx",
-      "children": [
-        "/_clear-cuts/clear-cuts/$clearCutId",
-        "/_clear-cuts/clear-cuts/"
-      ]
-    },
-    "/administration": {
-      "filePath": "administration.tsx"
-    },
-    "/login": {
-      "filePath": "login.tsx"
-    },
-    "/_clear-cuts/clear-cuts/$clearCutId": {
-      "filePath": "_clear-cuts.clear-cuts.$clearCutId.lazy.tsx",
-      "parent": "/_clear-cuts"
-    },
-    "/_clear-cuts/clear-cuts/": {
-      "filePath": "_clear-cuts.clear-cuts.index.lazy.tsx",
-      "parent": "/_clear-cuts"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

@@ -1,3 +1,4 @@
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
 import {
@@ -7,7 +8,6 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
@@ -35,9 +35,8 @@ export const referentialSlice = createSlice({
 				ecologicalZonings: payload.ecologicalZonings ?? {},
 			};
 		});
-		builder.addCase(getReferentialThunk.rejected, (state, error) => {
+		builder.addCase(getReferentialThunk.rejected, (state) => {
 			state.status = "error";
-			console.error(error);
 		});
 		builder.addCase(getReferentialThunk.pending, (state) => {
 			state.status = "loading";

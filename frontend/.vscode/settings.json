@@ -13,7 +13,7 @@
 		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"editor.codeActionsOnSave": {
-		"source.organizeImports": "always",
+   		"source.organizeImports.biome": "always",
 		"source.removeUnusedImports": "always"
 	},
 	"editor.formatOnSave": true,

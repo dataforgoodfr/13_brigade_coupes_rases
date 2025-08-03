@@ -1,9 +1,9 @@
-import type { Router } from "@/shared/router";
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import type { LucideIcon } from "lucide-react";
 import type React from "react";
 import type { ComponentProps } from "react";
+import type { Router } from "@/shared/router";
 
 type LinkProps = ComponentProps<typeof Link<Router>> & { type: "link" };
 type ButtonProps = ComponentProps<"button"> & { type: "button" };

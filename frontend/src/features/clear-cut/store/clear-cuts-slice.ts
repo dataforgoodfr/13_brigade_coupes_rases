@@ -1,3 +1,6 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { uniqBy } from "lodash-es";
+import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
@@ -13,9 +16,6 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { uniqBy } from "lodash-es";
-import { useEffect } from "react";
 import {
 	type ClearCutForm,
 	type ClearCutReport,
@@ -42,48 +42,48 @@ const mapReport = (
 		),
 	})),
 });
-export const getClearCutFormThunk = createAppAsyncThunk<
-	ClearCutForm ,
-	string
->("getClearCutForm", async (id, { getState, extra: { api } }) => {
-	// Get the base report data
-	const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
-	const report = clearCutReportResponseSchema.parse(reportResult);
-	const state = getState();
-	const baseReport = mapReport(state, report);
+export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
+	"getClearCutForm",
+	async (id, { getState, extra: { api } }) => {
+		// Get the base report data
+		const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
+		const report = clearCutReportResponseSchema.parse(reportResult);
+		const state = getState();
+		const baseReport = mapReport(state, report);
 
-	const formsResult = clearCutFormsResponseSchema.parse(
-		await api()
-			.get(`api/v1/clear-cuts-reports/${id}/forms`, {
-				searchParams: { page: "0", size: "1" },
-			})
-			.json(),
-	);
-	const ecologicalZonings = uniqBy(
-		baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
-		"id",
-	);
+		const formsResult = clearCutFormsResponseSchema.parse(
+			await api()
+				.get(`api/v1/clear-cuts-reports/${id}/forms`, {
+					searchParams: { page: "0", size: "1" },
+				})
+				.json(),
+		);
+		const ecologicalZonings = uniqBy(
+			baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
+			"id",
+		);
 
-	const computedProperties = {
-		reportCreatedAt: baseReport.createdAt,
-		reportUpdatedAt: baseReport.updatedAt,
-		hasEcologicalZonings: ecologicalZonings.length > 0,
-	};
-	// If forms exist, merge the latest form data with the base report
-	if (formsResult.content && formsResult.content.length > 0) {
-		const form = formsResult.content[0];
-		return {
-			report: baseReport,
-			...form,
-			ecologicalZonings,
-			...computedProperties,
+		const computedProperties = {
+			reportCreatedAt: baseReport.createdAt,
+			reportUpdatedAt: baseReport.updatedAt,
+			hasEcologicalZonings: ecologicalZonings.length > 0,
 		};
-	}
-	return clearCutFormSchema.parse({
-		report: baseReport,
-		...computedProperties,
-	});
-});
+		// If forms exist, merge the latest form data with the base report
+		if (formsResult.content && formsResult.content.length > 0) {
+			const form = formsResult.content[0];
+			return {
+				report: baseReport,
+				...form,
+				ecologicalZonings,
+				...computedProperties,
+			};
+		}
+		return clearCutFormSchema.parse({
+			report: baseReport,
+			...computedProperties,
+		});
+	},
+);
 const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
 	async (filters, { getState, extra: { api } }) => {

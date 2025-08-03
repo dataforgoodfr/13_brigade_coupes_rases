@@ -1,10 +1,10 @@
+import { z } from "zod";
 import { paginationResponseSchema } from "@/shared/api/types";
 import {
 	departmentSchema,
 	ecologicalZoningSchema,
 	ruleSchema,
 } from "@/shared/store/referential/referential";
-import { z } from "zod";
 
 export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
 
@@ -201,7 +201,7 @@ export const clearCutFormSchema = clearCutFormSectionsResponseSchema.and(
 );
 
 export type ClearCutForm = z.infer<typeof clearCutFormSchema>;
-
+export type ClearCutFormInput = z.input<typeof clearCutFormSchema>;
 export const clearCutFormsResponseSchema = paginationResponseSchema(
 	clearCutFormResponseSchema,
 );

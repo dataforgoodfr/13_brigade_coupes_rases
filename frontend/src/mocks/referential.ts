@@ -1,11 +1,11 @@
+import { faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
 import type {
 	DepartmentResponse,
 	EcologicalZoningResponse,
 	ReferentialResponse,
 	RuleResponse,
 } from "@/shared/store/referential/referential";
-import { faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
 
 export const fakeRules: RuleResponse = {
 	[faker.string.uuid()]: {

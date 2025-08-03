@@ -1,8 +1,8 @@
-import { Login } from "@/features/user/components/Login";
-import { useLoggedUser } from "@/features/user/store/user.slice";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { z } from "zod";
+import { Login } from "@/features/user/components/Login";
+import { useLoggedUser } from "@/features/user/store/user.slice";
 
 // Define the login route with optional redirect parameter
 export const Route = createFileRoute("/login")({

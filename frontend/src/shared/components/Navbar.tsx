@@ -1,12 +1,11 @@
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import clsx from "clsx";
+import { House, LogIn, LogOutIcon } from "lucide-react";
+import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
 import { useLoggedUser, userSlice } from "@/features/user/store/user.slice";
 import { NavbarItem } from "@/shared/components/NavbarItem";
 import { useAppDispatch } from "@/shared/hooks/store";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import clsx from "clsx";
-
-import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
-import { House, LogIn, LogOutIcon } from "lucide-react";
 
 interface Props {
 	className?: string;

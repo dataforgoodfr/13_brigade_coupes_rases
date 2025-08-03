@@ -1,5 +1,5 @@
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { FieldValues } from "react-hook-form";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
 	FormControl,
 	FormField,

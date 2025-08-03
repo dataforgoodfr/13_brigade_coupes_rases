@@ -1,6 +1,6 @@
-import { clearCutItem } from "@/test/page-object/clear-cuts-item";
 import { screen, type waitForOptions } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
+import { clearCutItem } from "@/test/page-object/clear-cuts-item";
 
 type Options = { user: UserEvent } & waitForOptions;
 export function clearCuts({ user, ...options }: Options) {

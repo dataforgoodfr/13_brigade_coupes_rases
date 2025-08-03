@@ -1,5 +1,10 @@
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import {} from "@/components/ui/pagination";
 import {
 	Table,
 	TableBody,
@@ -10,23 +15,17 @@ import {
 } from "@/components/ui/table";
 import type { User } from "@/features/admin/store/users";
 import {
+	selectMetadata,
+	selectUsers,
+} from "@/features/admin/store/users.slice";
+import {
 	selectColumnSort,
 	selectPage,
 	usersFiltersSlice,
 } from "@/features/admin/store/users-filters.slice";
-import {
-	selectMetadata,
-	selectUsers,
-} from "@/features/admin/store/users.slice";
-import Pagination from "@/shared/components/Pagination";
 import { SortingButton } from "@/shared/components/button/SortingButton";
+import Pagination from "@/shared/components/Pagination";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import {
-	createColumnHelper,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<User>();
 

@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { userResponseSchema } from "@/features/admin/store/users";
 import { roleSchema } from "@/features/user/store/user";
 import { sortSchema } from "@/shared/api/api";
-import { z } from "zod";
 
 const sortableKeysSchema = userResponseSchema
 	.keyof()

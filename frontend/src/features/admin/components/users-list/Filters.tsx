@@ -1,3 +1,4 @@
+import { SearchIcon } from "lucide-react";
 import {
 	selectDepartments,
 	selectName,
@@ -13,7 +14,7 @@ import {
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
-import { Search } from "lucide-react";
+
 const DEPARTMENTS = {
 	id: "departments",
 	label: "Départements",
@@ -38,7 +39,6 @@ export const Filters: React.FC = () => {
 	const [search, handleSearch] = useDebounce(searchedName, (n) =>
 		dispatch(usersFiltersSlice.actions.setName(n)),
 	);
-
 	return (
 		<div className="flex items-center w-full gap-4">
 			<Input
@@ -46,7 +46,7 @@ export const Filters: React.FC = () => {
 				placeholder="Rechercher un utilisateur..."
 				value={search}
 				onChange={(e) => handleSearch(e.target.value)}
-				prefix={<Search className="w-5 h-5 ml-4 stroke-zinc-600" />}
+				prefix={<SearchIcon className="w-5 h-5 ml-4 stroke-zinc-600" />}
 				className="pl-12 w-sm text-zinc-600"
 			/>
 			<label htmlFor={ROLES.id}>{ROLES.label}</label>

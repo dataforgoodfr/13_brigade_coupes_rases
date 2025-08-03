@@ -1,5 +1,5 @@
-import { departmentSchema } from "@/shared/store/referential/referential";
 import { z } from "zod";
+import { departmentSchema } from "@/shared/store/referential/referential";
 
 export const loginRequestSchema = z.object({
 	email: z.string().email(),

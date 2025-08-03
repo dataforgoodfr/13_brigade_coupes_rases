@@ -1,3 +1,12 @@
+import {
+	createMemoryHistory,
+	createRouter,
+	RouterProvider,
+} from "@tanstack/react-router";
+import { type RenderOptions, render } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { IntlProvider } from "react-intl";
+import { Provider } from "react-redux";
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import {
 	type AuthContext,
@@ -12,15 +21,7 @@ import {
 	type RootState,
 	setupStore,
 } from "@/shared/store/store";
-import {
-	RouterProvider,
-	createMemoryHistory,
-	createRouter,
-} from "@tanstack/react-router";
-import { type RenderOptions, render } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
-import { IntlProvider } from "react-intl";
-import { Provider } from "react-redux";
+
 type Split<S extends string, D extends string> = string extends S
 	? string[]
 	: S extends ""

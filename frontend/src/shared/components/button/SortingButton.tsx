@@ -1,6 +1,6 @@
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Sort } from "@/shared/api/api";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 type Props = {
 	onClick: () => void;

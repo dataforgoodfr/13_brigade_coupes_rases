@@ -1,9 +1,11 @@
+import { createSlice } from "@reduxjs/toolkit";
+import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/admin/store/filters";
 import {
 	type PaginatedUsers,
 	type PaginatedUsersResponse,
-	type User,
 	paginatedUsersResponseSchema,
+	type User,
 } from "@/features/admin/store/users";
 import { selectFiltersRequest } from "@/features/admin/store/users-filters.slice";
 import { requestToParams } from "@/shared/api/api";
@@ -13,8 +15,6 @@ import { selectDepartmentsByIds } from "@/shared/store/referential/referential.s
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { createSlice } from "@reduxjs/toolkit";
-import { useEffect } from "react";
 
 type State = {
 	users: RequestedContent<PaginatedUsers>;

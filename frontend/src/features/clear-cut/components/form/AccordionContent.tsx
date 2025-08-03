@@ -1,15 +1,14 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
+import { useEffect, useMemo } from "react";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import { useLoggedUser } from "@/features/user/store/user.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
 import { FixedField } from "@/shared/components/form/FormFixedField";
 import { FormInput } from "@/shared/components/form/FormInput";
-import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
 import { FormToggleGroup } from "@/shared/components/form/FormToggleGroup";
-import { useEffect, useMemo } from "react";
 import { actorsKey, actorsValue } from "./sections/ActorsSection";
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection";
 import {
@@ -25,7 +24,8 @@ import {
 } from "./sections/RegulationsSection";
 import type { SectionForm, SectionFormItem } from "./types";
 
-const ccForm: Map<SectionForm, SectionFormItem<ClearCutForm>[]> = new Map();
+const ccForm: Map<SectionForm, SectionFormItem<ClearCutFormInput>[]> =
+	new Map();
 ccForm.set(generalInfoKey, generalInfoValue);
 ccForm.set(onSiteKey, onSiteValue);
 ccForm.set(ecoZoneKey, ecoZoneValue);
@@ -35,7 +35,9 @@ ccForm.set(otherInfoKey, otherInfoValue);
 
 export default function AccordionContent({
 	form,
-}: { form: FormType<ClearCutForm> }) {
+}: {
+	form: FormType<ClearCutFormInput>;
+}) {
 	const user = useLoggedUser();
 
 	useEffect(() => {
@@ -46,18 +48,18 @@ export default function AccordionContent({
 		}
 	}, [user]);
 
-	const assignedUser = form.getValues("assignedUser");
+	const affectedUser = form.getValues("report.affectedUser");
 
 	const isDisabled = useMemo(() => {
 		if (!user) return true;
 
 		if (user.role === "volunteer") {
-			if (!assignedUser) return true;
-			if (assignedUser !== user.login) return true;
+			if (!affectedUser) return true;
+			if (affectedUser.login !== user.login) return true;
 		}
 
 		return false;
-	}, [user, assignedUser]);
+	}, [user, affectedUser]);
 
 	return (
 		<>
@@ -103,18 +105,19 @@ export default function AccordionContent({
 										item.fallBack(item.name)
 									) : null;
 								case "inputFile":
-									return render ? (
-										<FormS3ImageUpload
-											key={item.name}
-											control={form.control}
-											name={item.name}
-											label={item.label}
-											disabled={isDisabled}
-											reportId={form.getValues("id")}
-										/>
-									) : item.fallBack ? (
-										item.fallBack(item.name)
-									) : null;
+									return null;
+								// return render ? (
+								// 	<FormS3ImageUpload
+								// 		key={item.name}
+								// 		control={form.control}
+								// 		name={item.name}
+								// 		label={item.label}
+								// 		disabled={isDisabled}
+								// 		reportId={form.getValues("id")}
+								// 	/>
+								// ) : item.fallBack ? (
+								// 	item.fallBack(item.name)
+								// ) : null;
 								case "datePicker":
 									return render ? (
 										<FormDatePicker

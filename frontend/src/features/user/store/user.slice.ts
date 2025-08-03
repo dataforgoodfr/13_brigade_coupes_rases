@@ -1,9 +1,10 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
 	type LoginRequest,
 	type TokenResponse,
+	tokenSchema,
 	type User,
 	type UserResponse,
-	tokenSchema,
 	userResponseSchema,
 	userSchema,
 } from "@/features/user/store/user";
@@ -13,7 +14,7 @@ import { selectDepartmentsByIds } from "@/shared/store/referential/referential.s
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+
 const TOKEN_KEY = "token";
 
 export function setStoredToken(token: TokenResponse | undefined) {
@@ -81,7 +82,6 @@ export const userSlice = createSlice({
 			state.value = user;
 		});
 		builder.addCase(getMeThunk.rejected, (state, { error }) => {
-			console.error(error);
 			state.status = "error";
 			state.error = error;
 		});
