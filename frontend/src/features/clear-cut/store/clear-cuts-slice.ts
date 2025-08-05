@@ -46,7 +46,9 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 	"getClearCutForm",
 	async (id, { getState, extra: { api } }) => {
 		// Get the base report data
-		const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
+		const reportResult = await api()
+			.get(`api/v1/clear-cuts-reports/${id}`)
+			.json();
 		const report = clearCutReportResponseSchema.parse(reportResult);
 		const state = getState();
 		const baseReport = mapReport(state, report);
@@ -64,8 +66,6 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 		);
 
 		const computedProperties = {
-			reportCreatedAt: baseReport.createdAt,
-			reportUpdatedAt: baseReport.updatedAt,
 			hasEcologicalZonings: ecologicalZonings.length > 0,
 		};
 		// If forms exist, merge the latest form data with the base report

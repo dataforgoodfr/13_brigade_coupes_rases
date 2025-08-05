@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { worker } from "@/mocks/browser";
 import {
-	createClearCutReportBaseMock as createClearCutReportMock,
+	createClearCutReportResponseBaseMock as createClearCutReportMock,
 	mockClearCutsResponse,
 } from "@/mocks/clear-cuts";
 import { advancedFilters } from "@/test/page-object/advanced-filters";

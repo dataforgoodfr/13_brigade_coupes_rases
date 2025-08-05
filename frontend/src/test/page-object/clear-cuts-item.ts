@@ -1,5 +1,5 @@
 import { type waitForOptions, within } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
+import type { UserEvent } from "@vitest/browser/context";
 
 type Options = {
 	user: UserEvent;

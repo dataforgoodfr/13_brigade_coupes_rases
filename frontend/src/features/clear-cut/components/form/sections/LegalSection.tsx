@@ -4,7 +4,7 @@ import type { SectionForm, SectionFormItem } from "../types";
 export const legalKey: SectionForm = {
 	name: "Stratégie juridique",
 	className: "flex flex-col gap-4",
-};
+} as const;
 
 export const legalValue: SectionFormItem<ClearCutFormInput>[] = [
 	{

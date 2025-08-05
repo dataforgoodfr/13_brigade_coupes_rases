@@ -14,6 +14,7 @@
     "build:preview": "pnpm build && vite preview",
     "preview": "vite preview",
     "test": "vitest",
+    "test:debug": "vitest --inspect --no-file-parallelism",
     "coverage": "vitest run --coverage",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo-association-canopee.svg",
     "storybook": "storybook dev -p 6006",

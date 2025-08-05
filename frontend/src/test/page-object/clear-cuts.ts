@@ -1,5 +1,5 @@
 import { screen, type waitForOptions } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
+import type { UserEvent } from "@vitest/browser/context";
 import { clearCutItem } from "@/test/page-object/clear-cuts-item";
 
 type Options = { user: UserEvent } & waitForOptions;

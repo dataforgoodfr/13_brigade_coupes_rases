@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
+import type { UserEvent } from "@vitest/browser/context";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	actorsKey,
@@ -34,6 +34,7 @@ import type {
 	SectionFormItem,
 } from "@/features/clear-cut/components/form/types";
 import type {
+	ClearCutForm,
 	ClearCutFormInput,
 	ClearCutFormResponse,
 	ClearCutReportResponse,
@@ -58,124 +59,143 @@ type SectionData<
 	section: SectionForm;
 	items: Item[];
 };
-const reportMock = mockClearCutReportResponse({
-	id: "ABC",
-	city: "Paris",
-	lastCutDate: "2024-03-19",
-	departmentId: Object.keys(fakeDepartments)[0],
-	updatedAt: "2026-03-13",
-	slopeAreaHectare: 0.54556,
-	totalAreaHectare: 1,
-	averageLocation: { coordinates: [1, 2], type: "Point" },
-});
-const formMock = mockClearCutFormsResponse({
-	inspectionDate: "2024-03-19T14:26:30.789Z",
-	weather: "Nuageux",
-	forest: "Epicéa",
-	wetland: "Présence de cours d'eau",
-	soilState: "Sol en mauvais état",
-});
 
-const mapItem = (
-	item: SectionFormItem<ClearCutFormInput>,
-): TestFormItem<ClearCutFormInput> => {
-	const formReport = { report: reportMock.response, ...formMock.response };
-	let expected: unknown;
-	if (item.name.startsWith("report.")) {
-		expected =
-			formReport.report[
-				item.name.replace("report.", "") as keyof ClearCutReportResponse
-			];
-	} else {
-		expected = formReport[item.name as keyof ClearCutFormResponse];
-	}
-	switch (item.type) {
-		case "textArea":
-			expected = expected === undefined ? "" : expected;
-			break;
-		case "inputFile":
+const setupTest = (
+	report: Partial<ClearCutReportResponse> = {},
+	form: Partial<ClearCutFormResponse> = {},
+) => {
+	const reportMock = mockClearCutReportResponse(
+		{
+			id: "ABC",
+			city: "Paris",
+			lastCutDate: "2024-03-19",
+			departmentId: Object.keys(fakeDepartments)[0],
+			updatedAt: "2026-03-13",
+			slopeAreaHectare: 0.54556,
+			totalAreaHectare: 1,
+			averageLocation: { coordinates: [1, 2], type: "Point" },
+			...report,
+		},
+		{ ecologicalZoningsCount: 1, clearCutsCount: 1 },
+	);
+	const formMock = mockClearCutFormsResponse({
+		reportId: reportMock.response.id,
+		inspectionDate: "2024-03-19T14:26:30.789Z",
+		weather: "Nuageux",
+		forest: "Epicéa",
+		wetland: "Présence de cours d'eau",
+		soilState: "Sol en mauvais état",
+		...form,
+	});
+
+	type FormReport = { report: ClearCutReportResponse } & ClearCutFormResponse &
+		Pick<ClearCutForm, "hasEcologicalZonings">;
+	const mapItem = (
+		item: SectionFormItem<ClearCutFormInput>,
+	): TestFormItem<ClearCutFormInput> => {
+		const formReport: FormReport = {
+			report: reportMock.response,
+			...formMock.response,
+			hasEcologicalZonings: true,
+		};
+		let expected: unknown;
+		if (item.name.startsWith("report.")) {
 			expected =
-				Array.isArray(expected) && expected.length === 0 ? undefined : expected;
-			break;
-	}
-	switch (item.name) {
-		case "inspectionDate":
-			expected = "19/03/2024";
-			break;
-		case "report.slopeAreaHectare":
-			expected = "0,55 ha";
-			break;
-		case "report.totalAreaHectare":
-			expected = `${expected} ha`;
-			break;
-		case "report.department.name":
-			expected = "Ain";
-			break;
-		case "report.averageLocation.coordinates.0":
-			expected = "1";
-			break;
-		case "report.averageLocation.coordinates.1":
-			expected = "2";
-			break;
-		case "report.updatedAt":
-			expected = "13/03/2026";
-			break;
-		case "report.lastCutDate":
-			expected = "19/03/2024";
-			break;
-		default:
-			break;
-	}
+				formReport.report[
+					item.name.replace("report.", "") as keyof ClearCutReportResponse
+				];
+		} else {
+			expected = formReport[item.name as keyof ClearCutFormResponse];
+		}
+		switch (item.type) {
+			case "textArea":
+				expected = expected === undefined ? "" : expected;
+				break;
+			case "inputFile":
+				expected =
+					Array.isArray(expected) && expected.length === 0
+						? undefined
+						: expected;
+				break;
+		}
+		switch (item.name) {
+			case "inspectionDate":
+				expected = "19/03/2024";
+				break;
+			case "report.slopeAreaHectare":
+				expected = "0,55 ha";
+				break;
+			case "report.totalAreaHectare":
+				expected = `${expected} ha`;
+				break;
+			case "report.department.name":
+				expected = "Ain";
+				break;
+			case "report.averageLocation.coordinates.0":
+				expected = "1";
+				break;
+			case "report.averageLocation.coordinates.1":
+				expected = "2";
+				break;
+			case "report.updatedAt":
+				expected = "13/03/2026";
+				break;
+			case "report.lastCutDate":
+				expected = "19/03/2024";
+				break;
+			default:
+				break;
+		}
 
-	return { ...item, expected: expected === undefined ? null : expected };
+		return { ...item, expected: expected === undefined ? null : expected };
+	};
+	return {
+		sections: [
+			{
+				section: actorsKey,
+				items: actorsValue.map(mapItem),
+			},
+			{
+				section: ecoZoneKey,
+				items: ecoZoneValue.map(mapItem),
+			},
+			{
+				section: generalInfoKey,
+				items: generalInfoValue.map(mapItem),
+			},
+			{
+				section: legalKey,
+				items: legalValue.map(mapItem),
+			},
+			{
+				section: onSiteKey,
+				items: onSiteValue.map(mapItem),
+			},
+			{
+				section: otherInfoKey,
+				items: otherInfoValue.map(mapItem),
+			},
+			{
+				section: regulationsKey,
+				items: regulationsValue.map(mapItem),
+			},
+		] as SectionData[],
+		reportMock,
+		formMock,
+	};
 };
-const sections: SectionData[] = [
-	{
-		section: actorsKey,
-		items: actorsValue.map(mapItem),
-	},
-	{
-		section: ecoZoneKey,
-		items: ecoZoneValue.map(mapItem),
-	},
-	{
-		section: generalInfoKey,
-		items: generalInfoValue.map(mapItem),
-	},
-	{
-		section: legalKey,
-		items: legalValue.map(mapItem),
-	},
-	{
-		section: onSiteKey,
-		items: onSiteValue.map(mapItem),
-	},
-	{
-		section: otherInfoKey,
-		items: otherInfoValue.map(mapItem),
-	},
-	{
-		section: regulationsKey,
-		items: regulationsValue.map(mapItem),
-	},
-];
-const setupServerBeforeEach = () => {
+
+const defaultSetup = setupTest();
+const defaultSetupServerBeforeEach = (setup: ReturnType<typeof setupTest>) => {
 	beforeEach(() => {
-		worker.use(
-			reportMock.handler,
-			mockClearCutFormsResponse({ reportId: reportMock.response.id }).handler,
-		);
+		worker.use(setup.reportMock.handler, setup.formMock.handler);
 	});
 };
-describe.each(sections)(
+const setupVolunteerAssigned = setupTest({ affectedUser: volunteerMock });
+describe.each(setupVolunteerAssigned.sections)(
 	"$section.name section form when there is volunteer assigned",
 	({ section, items }) => {
-		beforeEach(() => {
-			const assignedClearCutMock = mockClearCutFormsResponse({
-				...reportMock.response,
-			});
-			worker.use(assignedClearCutMock.handler);
-		});
+		defaultSetupServerBeforeEach(setupVolunteerAssigned);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -185,10 +205,10 @@ describe.each(sections)(
 	},
 );
 
-describe.each(sections)(
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there is volunteer not assigned",
 	({ section, items }) => {
-		setupServerBeforeEach();
+		defaultSetupServerBeforeEach(defaultSetup);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -197,18 +217,18 @@ describe.each(sections)(
 		}
 	},
 );
-describe.each(sections)(
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there is a connected admin",
 	({ section, items }) => {
-		setupServerBeforeEach();
+		defaultSetupServerBeforeEach(defaultSetup);
 		itShouldHaveValue(items, section, adminMock);
 		itShouldHaveDisabledState(items, section, false, adminMock);
 	},
 );
-describe.each(sections)(
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there isn't a connected user",
 	({ section, items }) => {
-		setupServerBeforeEach();
+		defaultSetupServerBeforeEach(defaultSetup);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -285,7 +305,7 @@ function itShouldHaveDisabledState(
 					user,
 					item: item,
 				}) as FieldInput;
-				field.expectDisabledState(state);
+				await field.expectDisabledState(state);
 			});
 		});
 }

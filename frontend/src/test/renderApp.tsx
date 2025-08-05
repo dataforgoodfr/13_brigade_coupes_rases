@@ -3,10 +3,11 @@ import {
 	createRouter,
 	RouterProvider,
 } from "@tanstack/react-router";
-import { type RenderOptions, render } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
+import { type RenderOptions } from "@testing-library/react";
+import { userEvent } from "@vitest/browser/context";
 import { IntlProvider } from "react-intl";
 import { Provider } from "react-redux";
+import { render } from "vitest-browser-react";
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import {
 	type AuthContext,

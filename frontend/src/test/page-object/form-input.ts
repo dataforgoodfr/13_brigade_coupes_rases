@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
+import type { UserEvent } from "@vitest/browser/context";
 import type { FieldValues } from "react-hook-form";
 import { expect } from "vitest";
 import type {
@@ -117,7 +117,7 @@ function switchField<Form extends FieldValues>(
 		...field,
 		findValue: async () => {
 			const element = await field.findElement();
-			return element.getAttribute("checked") != null;
+			return element.getAttribute("aria-checked") === "true";
 		},
 	};
 }
@@ -174,11 +174,9 @@ function fieldWithLabel<
 			return (await findInputByLabel(item)).hasAttribute("disabled");
 		},
 		expectDisabledState: async (state) => {
-			if (state === true) {
-				expect(await findInputByLabel(item)).toBeDisabled();
-			} else {
-				expect(await findInputByLabel(item)).toBeEnabled();
-			}
+			expect(await findInputByLabel(item))[
+				state === true ? "to" : "not"
+			].toBeDisabled();
 		},
 	};
 }

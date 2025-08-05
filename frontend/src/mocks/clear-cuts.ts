@@ -18,8 +18,11 @@ import { volunteerAssignedMock, volunteerAssignedToken } from "@/mocks/users";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
 
+type ClearCutResponseMockOptions = { ecologicalZoningsCount?: number };
+
 export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},
+	options: ClearCutResponseMockOptions = {},
 ): ClearCutResponse => {
 	const startDate = faker.date.anytime();
 	const location = override.location ?? franceRandomPointMock();
@@ -32,6 +35,7 @@ export const createClearCutResponseMock = (
 		boundary: randomMultiPolygonFromLocation(location.coordinates, 3.5, 7),
 		ecologicalZoningIds: faker.helpers.arrayElements(
 			Object.keys(fakeEcologicalZonings),
+			options.ecologicalZoningsCount,
 		),
 		observationStartDate: startDate.toJSON().split("T")[0],
 		observationEndDate: endDate.toJSON().split("T")[0],
@@ -40,16 +44,23 @@ export const createClearCutResponseMock = (
 		...override,
 	};
 };
-export const createClearCutReportBaseMock = (
+type ClearCutReportResponseMockOptions = {
+	clearCutsCount?: number;
+} & ClearCutResponseMockOptions;
+export const createClearCutReportResponseBaseMock = (
 	override: Partial<ClearCutReportResponse> = {},
+	options: ClearCutReportResponseMockOptions = {},
 ): ClearCutReportResponse => {
 	const date = faker.date.anytime();
 	const randomLocation = franceRandomPointMock();
 	const clear_cuts = [
-		...range<ClearCutResponse>(1, () =>
-			createClearCutResponseMock({
-				location: override.averageLocation ?? randomLocation,
-			}),
+		...range<ClearCutResponse>(options.clearCutsCount ?? 1, () =>
+			createClearCutResponseMock(
+				{
+					location: override.averageLocation ?? randomLocation,
+				},
+				options,
+			),
 		),
 		...(override.clearCuts ?? []),
 	];
@@ -141,7 +152,7 @@ const randomMultiPolygonFromLocation = (
 const randomPoints = range<Point>(100, franceRandomPointMock);
 
 const clearCutPreviews = randomPoints.map((center) =>
-	createClearCutReportBaseMock({ averageLocation: center }),
+	createClearCutReportResponseBaseMock({ averageLocation: center }),
 );
 
 export const mockClearCutsResponse = (
@@ -186,8 +197,9 @@ export const mockClearCutsResponse = (
 
 export const mockClearCutReportResponse = (
 	override: Partial<ClearCutReportResponse> = {},
+	options: ClearCutReportResponseMockOptions = {},
 ) => {
-	const baseMock = createClearCutReportBaseMock(override);
+	const baseMock = createClearCutReportResponseBaseMock(override, options);
 	return {
 		handler: http.get(
 			"*/api/v1/clear-cuts-reports/:id",
@@ -201,7 +213,7 @@ export const mockClearCutReportResponse = (
 				return HttpResponse.json({
 					...baseMock,
 					id,
-					affectedUser,
+					affectedUser: affectedUser ?? baseMock.affectedUser,
 				} satisfies ClearCutReportResponse);
 			},
 		),

@@ -28,6 +28,13 @@ type FormFieldContextValue<
 > = {
 	name: TName;
 };
+export type FormFieldRenderProps<
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+	TTransformedValues = TFieldValues,
+> = Parameters<
+	ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
+>[0];
 
 const FormFieldContext = createContext<FormFieldContextValue>(
 	{} as FormFieldContextValue,

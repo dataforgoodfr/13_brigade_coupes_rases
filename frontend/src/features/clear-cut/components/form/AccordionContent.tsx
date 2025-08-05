@@ -6,6 +6,7 @@ import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
 import { FixedField } from "@/shared/components/form/FormFixedField";
 import { FormInput } from "@/shared/components/form/FormInput";
+import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
 import { FormToggleGroup } from "@/shared/components/form/FormToggleGroup";
@@ -54,8 +55,7 @@ export default function AccordionContent({
 		if (!user) return true;
 
 		if (user.role === "volunteer") {
-			if (!affectedUser) return true;
-			if (affectedUser.login !== user.login) return true;
+			return (!affectedUser || affectedUser.login !== user.login) ?? false;
 		}
 
 		return false;
@@ -105,19 +105,18 @@ export default function AccordionContent({
 										item.fallBack(item.name)
 									) : null;
 								case "inputFile":
-									return null;
-								// return render ? (
-								// 	<FormS3ImageUpload
-								// 		key={item.name}
-								// 		control={form.control}
-								// 		name={item.name}
-								// 		label={item.label}
-								// 		disabled={isDisabled}
-								// 		reportId={form.getValues("id")}
-								// 	/>
-								// ) : item.fallBack ? (
-								// 	item.fallBack(item.name)
-								// ) : null;
+									return render ? (
+										<FormS3ImageUpload
+											key={item.name}
+											control={form.control}
+											name={item.name}
+											label={item.label}
+											disabled={isDisabled}
+											reportId={form.getValues("report.id")}
+										/>
+									) : item.fallBack ? (
+										item.fallBack(item.name)
+									) : null;
 								case "datePicker":
 									return render ? (
 										<FormDatePicker
