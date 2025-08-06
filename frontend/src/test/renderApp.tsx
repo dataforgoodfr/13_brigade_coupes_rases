@@ -3,8 +3,8 @@ import {
 	createRouter,
 	RouterProvider,
 } from "@tanstack/react-router";
-import { type RenderOptions } from "@testing-library/react";
-import { userEvent } from "@vitest/browser/context";
+import type { RenderOptions } from "@testing-library/react";
+import { page, userEvent } from "@vitest/browser/context";
 import { IntlProvider } from "react-intl";
 import { Provider } from "react-redux";
 import { render } from "vitest-browser-react";
@@ -47,6 +47,7 @@ interface Options<R extends Route = Route>
 }
 
 export function renderApp<R extends Route = Route>(options: Options<R>) {
+	localStorage.clear();
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
@@ -98,6 +99,9 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 	);
 	return {
 		...render(<Wrapper />, renderOptions),
+		store,
+		page,
+		router,
 		user: userEvent.setup(),
 	};
 }

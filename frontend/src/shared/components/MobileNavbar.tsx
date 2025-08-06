@@ -25,7 +25,7 @@ export function MobileNavbar() {
 						to="/administration"
 						label="Paramètres"
 						Icon={Settings}
-						title="Historique"
+						title="Paramètres"
 					/>
 				)}
 			</div>
