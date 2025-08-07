@@ -31,8 +31,8 @@ def upgrade() -> None:
         UPDATE clear_cut_report_forms
         SET nearby_zone_tmp = 
             CASE
-                WHEN lower(nearby_zone) IN ('true', '1', 't', 'yes', 'y') THEN TRUE
-                WHEN lower(nearby_zone) IN ('false', '0', 'f', 'no', 'n') THEN FALSE
+                WHEN nearby_zone IN ('true', '1', 't', 'yes', 'y') THEN TRUE
+                WHEN nearby_zone IN ('false', '0', 'f', 'no', 'n') THEN FALSE
                 ELSE NULL
             END
     """)
