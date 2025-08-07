@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 import "../index.css";
 import { cleanup } from "vitest-browser-react";
 
-import.meta.glob("../../dist/assets/*.css", { eager: true });
+// import.meta.glob("../../dist/assets/*.css", { eager: true });
 
 vi.mock("@/features/offline/hooks/useReloadPwa", () => ({
 	useReloadPwa: vi.fn(),
