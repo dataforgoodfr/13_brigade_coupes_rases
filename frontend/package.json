@@ -16,6 +16,7 @@
     "test": "vitest",
     "test:debug": "vitest --inspect --no-file-parallelism",
     "coverage": "vitest run --coverage",
+    "postinstall": "pnpm exec playwright install",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo-association-canopee.svg",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
