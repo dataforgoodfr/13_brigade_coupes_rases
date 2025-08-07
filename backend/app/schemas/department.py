@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from app.models import Department
 from app.schemas.base import BaseSchema
@@ -12,7 +12,6 @@ class DepartmentBaseSchema(BaseSchema):
     id: str
     code: str = Field(json_schema_extra={"example": "01"})
     name: str = Field(json_schema_extra={"example": "Ain"})
-    
 
 
 def department_to_department_base_schema(

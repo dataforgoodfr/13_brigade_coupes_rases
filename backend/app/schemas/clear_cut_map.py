@@ -2,7 +2,7 @@ import datetime
 from logging import getLogger
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from app.models import ClearCut, ClearCutReport
 from app.schemas.base import BaseSchema
@@ -26,8 +26,6 @@ class ClearCutPreviewSchema(BaseSchema):
     ecological_zoning_ids: list[str] = Field(
         json_schema_extra={"example": "[1,2,3]"},
     )
-
-    
 
 
 class ClearCutReportPreviewSchema(BaseSchema):
@@ -73,7 +71,6 @@ class ClearCutReportPreviewSchema(BaseSchema):
     total_bdf_poplar_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    
 
 
 def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
@@ -132,5 +129,3 @@ class ClusterizedPointsResponseSchema(BaseSchema):
 class ClearCutMapResponseSchema(BaseSchema):
     points: ClusterizedPointsResponseSchema
     previews: list[ClearCutReportPreviewSchema]
-
-    

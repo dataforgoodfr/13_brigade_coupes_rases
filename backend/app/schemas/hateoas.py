@@ -1,8 +1,6 @@
 import math
 from typing import Generic, TypeVar
 
-from pydantic import ConfigDict
-
 from app.schemas.base import BaseSchema
 
 M = TypeVar("M")
@@ -12,12 +10,10 @@ C = TypeVar("C")
 class HateaosResponse(BaseSchema, Generic[M, C]):
     metadata: M
     content: C
-    
 
 
 class Metadata(BaseSchema):
     links: dict[str, str]
-    
 
 
 class PaginationMetadataSchema(Metadata):

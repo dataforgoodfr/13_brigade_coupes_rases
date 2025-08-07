@@ -1,4 +1,4 @@
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
 from app.models import Rules
 from app.schemas.base import BaseSchema
@@ -9,8 +9,6 @@ class RuleBaseSchema(BaseSchema):
     ecological_zonings_ids: list[str] = Field(
         default=[], json_schema_extra={"example": ["1", "2", "3"]}
     )
-
-    
 
 
 class RuleUpdateSchema(RuleBaseSchema):

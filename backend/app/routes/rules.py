@@ -36,13 +36,23 @@ def put_rules(
         sync_clear_cuts_reports(db)
 
 
-@router.get("/{id}", status_code=200, response_model=RuleResponseSchema, response_model_exclude_none=True)
+@router.get(
+    "/{id}",
+    status_code=200,
+    response_model=RuleResponseSchema,
+    response_model_exclude_none=True,
+)
 def get_rule(id: int, db=db_session):
     logger.info(db)
     return get_rule_by_id(db, id)
 
 
-@router.get("", status_code=200, response_model=list[RuleResponseSchema], response_model_exclude_none=True)
+@router.get(
+    "",
+    status_code=200,
+    response_model=list[RuleResponseSchema],
+    response_model_exclude_none=True,
+)
 def list_rules(db=db_session):
     logger.info(db)
     return get_rules(db)

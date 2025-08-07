@@ -1,12 +1,11 @@
 from datetime import datetime
 from logging import getLogger
 
-from pydantic import  EmailStr, Field
-
 from app.models import ClearCutForm, User
 from app.schemas.base import BaseSchema
 
 logger = getLogger(__name__)
+
 
 class GroundSection(BaseSchema):
     inspection_date: datetime | None = None
@@ -24,7 +23,6 @@ class GroundSection(BaseSchema):
     tree_trunks_images: list[str] | None = None
     soil_state_images: list[str] | None = None
     access_road_images: list[str] | None = None
-    
 
 
 class EcologicalZoningSection(BaseSchema):
@@ -36,21 +34,18 @@ class EcologicalZoningSection(BaseSchema):
     protected_habitats: None | str = None
     has_ddt_request: None | bool = None
     ddt_request_owner: None | str = None
-    
 
 
 class EngagedActorSection(BaseSchema):
     company: None | str = None
     subcontractor: None | str = None
     landlord: None | str = None
-    
 
 
 class RegulationSection(BaseSchema):
     is_pefc_fsc_certified: None | bool = None
     is_over_20_ha: None | bool = None
     is_psg_required_plot: None | bool = None
-    
 
 
 class OtherSection(BaseSchema):
@@ -65,7 +60,6 @@ class StrategySection(BaseSchema):
     relevant_for_alert_cnpf_ddt_psg_thresholds: None | bool = None
     relevant_for_psg_request: None | bool = None
     request_engaged: None | str = None
-    
 
 
 class ClearCutFormResponse(
@@ -80,8 +74,6 @@ class ClearCutFormResponse(
     created_at: datetime
     report_id: str
 
-    
-
 
 class ClearCutFormCreate(
     GroundSection,
@@ -92,7 +84,6 @@ class ClearCutFormCreate(
     StrategySection,
 ):
     pass
-
 
 
 def clear_cut_form_create_to_clear_cut_form(

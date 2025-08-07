@@ -1,5 +1,8 @@
 from fastapi import status
 from fastapi.testclient import TestClient
+from pytest import Session
+
+from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
 def ensure_authentication(client: TestClient, verb: str, path: str):
@@ -117,3 +120,82 @@ def test_get_report(client: TestClient):
     data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert data["id"] == "1"
+
+
+def test_affect_me_using_connected_volunteer_should_work(
+    db: Session, client: TestClient
+):
+    token = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")[1]
+    updates = {"status": "validated"}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == "assigned-test@volunteer.com"
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_affect_other_using_connected_volunteer_should_return_forbidden(
+    db: Session, client: TestClient
+):
+    [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
+    new_user = create_user(db, login="foo-login")
+
+    updates = {"user_id": str(new_user.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_affect_me_using_connected_admin_should_work(db: Session, client: TestClient):
+    [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
+    updates = {"userId": str(me.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == "assigned-test@admin.com"
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_affect_other_using_connected_admin_should_work(
+    db: Session, client: TestClient
+):
+    [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
+    new_user = create_user(db, login="foo")
+    expected_email = new_user.email
+    updates = {"userId": str(new_user.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == expected_email
+    assert response.status_code == status.HTTP_200_OK

@@ -406,16 +406,19 @@ def seed_database():
             forest="Dense pine forest",
             has_remaining_trees=True,
             trees_species="Pinus sylvestris",
-            planting_images=[  "planting_image_1.jpg", "planting_image_2.jpg"  ],
+            planting_images=["planting_image_1.jpg", "planting_image_2.jpg"],
             has_construction_panel=False,
-            construction_panel_images=[ "construction_panel_image_1.jpg", "construction_panel_image_2.jpg"  ],
+            construction_panel_images=[
+                "construction_panel_image_1.jpg",
+                "construction_panel_image_2.jpg",
+            ],
             wetland="Yes",
             destruction_clues="None",
             soil_state="Healthy",
-            clear_cut_images=[ "clear_cut_image_1.jpg", "clear_cut_image_2.jpg"  ],
-            tree_trunks_images=[ "tree_trunks_image_1.jpg", "tree_trunks_image_2.jpg"  ],
-            soil_state_images=[ "soil_state_image_1.jpg", "soil_state_image_2.jpg"  ],
-            access_road_images=[ "access_road_image_1.jpg", "access_road_image_2.jpg"  ],
+            clear_cut_images=["clear_cut_image_1.jpg", "clear_cut_image_2.jpg"],
+            tree_trunks_images=["tree_trunks_image_1.jpg", "tree_trunks_image_2.jpg"],
+            soil_state_images=["soil_state_image_1.jpg", "soil_state_image_2.jpg"],
+            access_road_images=["access_road_image_1.jpg", "access_road_image_2.jpg"],
             # Ecological informations
             has_other_ecological_zone=False,
             other_ecological_zone_type="N/A",
@@ -442,10 +445,9 @@ def seed_database():
             relevant_for_psg_request=False,
             request_engaged="None",
             # Miscellaneous
-            other="No additional information"
+            other="No additional information",
         )
 
-        
         db.add(reportform)
 
         sync_clear_cuts_reports(db)

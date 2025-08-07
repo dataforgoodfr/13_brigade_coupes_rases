@@ -6,7 +6,7 @@ from test.common.user import get_admin_user_token
 
 
 def test_create_version_success(client: TestClient, db: Session):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
 
     report_data = {
         "relevantForPefcComplaint": True,
@@ -52,12 +52,11 @@ def test_create_version_success(client: TestClient, db: Session):
         json=report_data,
         headers={"Authorization": f"Bearer {token}"},
     )
-    
+
     assert response.status_code == status.HTTP_201_CREATED
 
     location = response.headers["location"]
     data = client.get(location).json()
-
 
     assert data["id"] == location.split("/")[-1]
     assert data["company"] == report_data["company"]
@@ -84,13 +83,10 @@ def test_create_version_success(client: TestClient, db: Session):
         data["relevantForAlertCnpfDdtSrgs"]
         == report_data["relevantForAlertCnpfDdtSrgs"]
     )
-    assert (
-        data["relevantForOfbComplaint"] == report_data["relevantForOfbComplaint"]
-    )
+    assert data["relevantForOfbComplaint"] == report_data["relevantForOfbComplaint"]
     assert data["relevantForPsgRequest"] == report_data["relevantForPsgRequest"]
     assert (
-        data["relevantForRediiiComplaint"]
-        == report_data["relevantForRediiiComplaint"]
+        data["relevantForRediiiComplaint"] == report_data["relevantForRediiiComplaint"]
     )
     assert data["hasRemainingTrees"] == report_data["hasRemainingTrees"]
     assert data["requestEngaged"] == report_data["requestEngaged"]
@@ -104,7 +100,7 @@ def test_create_version_success(client: TestClient, db: Session):
 
 def test_form_submission_updates_report_status(client: TestClient, db: Session):
     """Test that submitting a form updates the report status from 'to_validate' to 'validated'"""
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
 
     # Verify initial report status is "to_validate"
     report_response = client.get("/api/v1/clear-cuts-reports/1")

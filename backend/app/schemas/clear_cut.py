@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import  Field
+from pydantic import Field
 
 from app.models import ClearCut
 from app.schemas.base import BaseSchema

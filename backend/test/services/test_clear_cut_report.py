@@ -8,7 +8,7 @@ from shapely.geometry import Point as DbPoint
 
 from app.models import ClearCut
 from app.schemas.clear_cut import ClearCutCreateSchema
-from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
+from app.schemas.clear_cut_report import CreateClearCutsReportCreateRequestSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.services.clear_cut_report import create_clear_cut_report
 from test.common.clear_cut import new_clear_cut_report
@@ -49,7 +49,7 @@ def test_create_report_with_intersection(db):
     db.add(report)
     db.commit()
 
-    intersecting_report = CreateClearCutsReportCreateSchema(
+    intersecting_report = CreateClearCutsReportCreateRequestSchema(
         city_zip_code="75056",
         slope_area_hectare=7.2,
         clear_cuts=[
@@ -91,7 +91,7 @@ def test_create_report_with_intersection(db):
 
 
 def test_create_report_success(db):
-    report = CreateClearCutsReportCreateSchema(
+    report = CreateClearCutsReportCreateRequestSchema(
         city_zip_code="75056",
         slope_area_hectare=7.2,
         clear_cuts=[

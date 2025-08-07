@@ -1,4 +1,4 @@
-from pydantic import  ConfigDict, Field
+from pydantic import Field
 
 from app.schemas.base import BaseSchema
 
@@ -30,5 +30,3 @@ class FiltersResponseSchema(BaseSchema):
     statuses: list[str] = Field(
         json_schema_extra={"example": ["pending", "validated"]},
     )
-
-    

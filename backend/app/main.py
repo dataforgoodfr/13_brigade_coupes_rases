@@ -1,9 +1,5 @@
-from fastapi import FastAPI, Request, Response
-from fastapi.encoders import jsonable_encoder
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from pydantic.alias_generators import to_camel
-from fastapi.routing import APIRoute
 
 from app.config import settings
 from app.routes import (
@@ -21,7 +17,8 @@ from app.routes import (
     users,
 )
 
-app = FastAPI(    title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
+app = FastAPI(
+    title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
 )
 
 

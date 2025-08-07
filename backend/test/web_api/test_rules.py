@@ -11,7 +11,7 @@ def test_get_rules(client: TestClient):
 
 
 def test_update_rules(client: TestClient, db: Session):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
 
     response = client.put(
         "api/v1/rules/1",

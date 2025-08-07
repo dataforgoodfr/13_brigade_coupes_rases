@@ -1,7 +1,7 @@
 from datetime import datetime
 from logging import getLogger
 
-from pydantic import ConfigDict, EmailStr, Field, field_validator
+from pydantic import EmailStr, Field, field_validator
 
 from app.models import CLEARCUT_STATUSES, ClearCutReport
 from app.schemas.base import BaseSchema
@@ -18,7 +18,7 @@ class PublicUserResponseSchema(BaseSchema):
     )
 
 
-class CreateClearCutsReportCreateSchema(BaseSchema):
+class CreateClearCutsReportCreateRequestSchema(BaseSchema):
     slope_area_hectare: float | None = Field(json_schema_extra={"example": "10.0"})
     clear_cuts: list[ClearCutCreateSchema]
     city_zip_code: str = Field(
@@ -26,7 +26,7 @@ class CreateClearCutsReportCreateSchema(BaseSchema):
     )
 
 
-class ClearCutReportPatchSchema(BaseSchema):
+class ClearCutReportPutRequestSchema(BaseSchema):
     status: str | None = None
     user_id: int | None = None
 
@@ -69,11 +69,11 @@ def report_to_response_schema(report: ClearCutReport) -> ClearCutReportResponseS
         id=str(report.id),
         affected_user=(
             None
-            if report.report.user_id == None
+            if report.user_id is None
             else PublicUserResponseSchema(
-                id=str(report.report.user.id),
-                email=report.report.user.email,
-                login=report.report.user.login,
+                id=str(report.user.id),
+                email=report.user.email,
+                login=report.user.login,
             )
         ),
         clear_cuts_ids=[str(clearcut.id) for clearcut in report.clear_cuts],

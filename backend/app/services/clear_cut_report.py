@@ -3,15 +3,14 @@ from logging import getLogger
 from fastapi import HTTPException, status
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
-from geoalchemy2.shape import to_shape
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
-from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
 from app.schemas.clear_cut_report import (
-    ClearCutReportPatchSchema,
+    ClearCutReportPutRequestSchema,
     ClearCutReportResponseSchema,
-    CreateClearCutsReportCreateSchema,
+    CreateClearCutsReportCreateRequestSchema,
     report_to_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
@@ -159,7 +158,7 @@ def sync_clear_cuts_reports(db: Session):
 
 
 def create_clear_cut_report(
-    db: Session, report: CreateClearCutsReportCreateSchema
+    db: Session, report: CreateClearCutsReportCreateRequestSchema
 ) -> ClearCutReport:
     intersecting_clearcut = (
         db.query(ClearCut)
@@ -215,18 +214,27 @@ def create_clear_cut_report(
     return db_item
 
 
-def update_clear_cut_report(id: int, db: Session, report: ClearCutReportPatchSchema):
-    clearcut = db.get(ClearCutReport, id)
-    if not clearcut:
-        raise HTTPException(status_code=404, detail="ClearCut not found")
-    update_data = report.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(clearcut, key, value)
+def update_clear_cut_report(
+    id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
+):
+    user_id = None
+    if connected_user.role == "volunteer":
+        if request.user_id is not None and request.user_id != connected_user.id:
+            raise HTTPException(
+                status_code=403, detail="Volunteer could not assign an other user"
+            )
+        user_id = connected_user.id
+    if connected_user.role == "admin":
+        user_id = request.user_id
+    report = db.get(ClearCutReport, id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Clear cut report not found")
+
+    report.user_id = user_id
+
     db.commit()
-    db.refresh(clearcut)
-    clearcut.location = to_shape(clearcut.location).wkt
-    clearcut.boundary = to_shape(clearcut.boundary).wkt
-    return clearcut
+    db.refresh(report)
+    return report
 
 
 def find_clearcuts_reports(
@@ -244,7 +252,7 @@ def find_clearcuts_reports(
 
 
 def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
-    report = db.get(ClearCutReport, report_id).join(ClearCutReport.user)
+    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if report is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Report not found by id {id}"

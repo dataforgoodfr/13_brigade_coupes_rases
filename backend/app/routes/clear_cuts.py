@@ -50,7 +50,11 @@ def get_clear_cut(
     return get_clearcut_by_id(id=clear_cut_id, db=db)
 
 
-@router.get("/", response_model=PaginationResponseSchema[ClearCutResponseSchema], response_model_exclude_none=True)
+@router.get(
+    "/",
+    response_model=PaginationResponseSchema[ClearCutResponseSchema],
+    response_model_exclude_none=True,
+)
 def list_clear_cuts(
     db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:

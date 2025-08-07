@@ -6,7 +6,6 @@ from app.schemas.department import DepartmentBaseSchema
 
 
 class CitySchema(BaseSchema):
-
     id: str
     name: str = Field(json_schema_extra={"example": "Paris"})
     zip_code: str = Field(json_schema_extra={"example": "75000"})
