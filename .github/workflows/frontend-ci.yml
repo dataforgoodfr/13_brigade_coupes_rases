@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.11.0
-          cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -46,7 +44,7 @@ jobs:
         run: pnpm run build
 
       - name: Run tests
-        run: pnpm test
+        run: pwd && ls && pnpm test
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
