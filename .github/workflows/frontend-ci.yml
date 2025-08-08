@@ -43,8 +43,14 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      - name: Run tests
-        run: pwd && ls -a && pnpm test
+        # Workaroung to vitest import plugin pwa useRegisterSW
+      - name: Prepare test
+        run: pnpm test
+        continue-on-error: true
+
+      - name: Prepare test
+        run: pnpm test
+        
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
