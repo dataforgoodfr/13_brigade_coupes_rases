@@ -44,7 +44,7 @@ jobs:
         run: pnpm run build
 
       - name: Run tests
-        run: pwd && ls && pnpm test
+        run: pwd && ls -a && pnpm test
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
