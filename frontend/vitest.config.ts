@@ -14,6 +14,9 @@ export default defineConfig((env) =>
 				},
 				{
 					test: {
+						alias: {
+							"@/": new URL("./src/", import.meta.url).pathname,
+						},
 						setupFiles: ["./src/test/setup.browser.ts"],
 						include: ["src/**/*.browser.test.tsx"],
 						name: "browser",

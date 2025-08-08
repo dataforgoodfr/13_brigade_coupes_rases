@@ -16,12 +16,11 @@
     "test": "vitest",
     "test:debug": "vitest --inspect --no-file-parallelism",
     "coverage": "vitest run --coverage",
-    "postinstall": "pnpm exec playwright install chromium --with-deps",
+    "postinstall": "pnpm exec playwright install --with-deps",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo-association-canopee.svg",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "gen:routes": "tsr generate",
-    "test:browser": "vitest --config=vitest.browser.config.ts"
+    "gen:routes": "tsr generate"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
