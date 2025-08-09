@@ -1,8 +1,13 @@
+import { loadEnv } from "vite";
 import { defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config";
 import { baseConfigFn } from "./vite.config";
 
 export default defineConfig((env) =>
 	mergeConfig(baseConfigFn(env), {
+		define: {
+			...loadEnv(env.mode, process.cwd()),
+			CI: process.env.CI,
+		},
 		test: {
 			projects: [
 				{

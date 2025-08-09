@@ -15,7 +15,7 @@ configure({
 	asyncUtilTimeout: 5_000,
 });
 
-beforeAll(() => worker.start());
+beforeAll(() => worker.start({ quiet: import.meta.env.CI === "true" }));
 afterEach(() => {
 	worker.resetHandlers();
 });
