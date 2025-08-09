@@ -3,7 +3,7 @@ import { baseConfigFn } from "./vite.config";
 
 export default defineConfig((env) =>
 	mergeConfig(baseConfigFn(env), {
-		optimizeDeps: { include: ["react-dom/client", " react/jsx-dev-runtime"] },
+		optimizeDeps: { include: ["react-dom/client", "react/jsx-dev-runtime"] },
 		test: {
 			projects: [
 				{
