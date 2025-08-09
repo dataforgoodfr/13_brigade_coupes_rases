@@ -6,7 +6,7 @@ export default defineConfig((env) =>
 	mergeConfig(baseConfigFn(env), {
 		define: {
 			...loadEnv(env.mode, process.cwd()),
-			CI: process.env.CI,
+			VITE_CI: "true",
 		},
 		test: {
 			projects: [
