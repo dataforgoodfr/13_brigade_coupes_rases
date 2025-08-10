@@ -82,7 +82,7 @@ export function useImageUpload(): UseImageUploadResult {
 
 				const authenticatedApi = api.extend({
 					headers: {
-						Authorization: `Bearer ${token.access_token}`,
+						Authorization: `Bearer ${token.accessToken}`,
 					},
 				});
 

@@ -31,7 +31,7 @@ export function useImageViewer(): UseImageViewerResult {
 
 			const authenticatedApi = api.extend({
 				headers: {
-					Authorization: `Bearer ${token.access_token}`,
+					Authorization: `Bearer ${token.accessToken}`,
 				},
 			});
 

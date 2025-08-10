@@ -45,7 +45,7 @@ export const userSchema = commonUserSchema
 		]),
 	);
 
-export const tokenSchema = z.object({ access_token: z.string().jwt() });
+export const tokenSchema = z.object({ accessToken: z.jwt() });
 export type User = z.infer<typeof userSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 export type TokenResponse = z.infer<typeof tokenSchema>;

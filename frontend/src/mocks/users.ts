@@ -57,7 +57,7 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 		token = volunteerAssignedToken;
 	}
 	return HttpResponse.json({
-		access_token: token,
+		accessToken: token,
 	} satisfies TokenResponse);
 });
 
