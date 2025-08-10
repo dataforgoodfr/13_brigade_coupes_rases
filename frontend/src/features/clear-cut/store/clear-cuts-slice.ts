@@ -46,9 +46,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 	"getClearCutForm",
 	async (id, { getState, extra: { api } }) => {
 		// Get the base report data
-		const reportResult = await api()
-			.get(`api/v1/clear-cuts-reports/${id}`)
-			.json();
+		const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
 		const report = clearCutReportResponseSchema.parse(reportResult);
 		const state = getState();
 		const baseReport = mapReport(state, report);
