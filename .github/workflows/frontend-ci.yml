@@ -43,11 +43,6 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-        # Workaroung to vitest import plugin pwa useRegisterSW
-      - name: Prepare tests
-        run: pnpm test:ci
-        continue-on-error: true
-
       - name: Run tests
         run: pnpm test:ci
 
