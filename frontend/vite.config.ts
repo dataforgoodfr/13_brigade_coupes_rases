@@ -14,7 +14,7 @@ function cacheNetworkFirst(
 ): RuntimeCaching {
 	return { urlPattern, handler: "NetworkFirst", method: "GET" };
 }
-export const baseConfigFn: UserConfigFnObject = ({ mode, isPreview }) => {
+export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 	return {
 		preview: {
 			port: 8000,
@@ -24,7 +24,10 @@ export const baseConfigFn: UserConfigFnObject = ({ mode, isPreview }) => {
 				registerType: "prompt",
 				injectRegister: false,
 				workbox: {
-					maximumFileSizeToCacheInBytes: isPreview ? 3 : undefined,
+					maximumFileSizeToCacheInBytes:
+						process.env.STORYBOOK === "true"
+							? Number.MAX_SAFE_INTEGER
+							: undefined,
 					globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
 					cleanupOutdatedCaches: true,
 					clientsClaim: true,

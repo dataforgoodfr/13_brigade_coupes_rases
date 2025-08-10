@@ -20,7 +20,7 @@
     "install:playwright": "pnpm exec playwright install chromium --with-deps",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/logo-association-canopee.svg",
     "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build",
+    "build:storybook": "STORYBOOK=true storybook build",
     "gen:routes": "tsr generate"
   },
   "dependencies": {
