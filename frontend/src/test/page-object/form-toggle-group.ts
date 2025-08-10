@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
+import type { UserEvent } from "@vitest/browser/context";
+
 type Options = { user: UserEvent; label: string };
 export function formToggleGroup({ label }: Options) {
 	const findButtons = async () => {

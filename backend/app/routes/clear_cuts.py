@@ -23,6 +23,7 @@ router = APIRouter(prefix="/api/v1/clear-cuts", tags=["Clearcuts"])
 @router.get(
     "/{clear_cut_id}/ecological-zonings",
     response_model=PaginationResponseSchema[ClearCutEcologicalZoningResponseSchema],
+    response_model_exclude_none=True,
 )
 def list_ecological_zonings(
     clear_cut_id: int, db: Session = db_session, page: int = 0, size: int = 10
@@ -40,6 +41,7 @@ def list_ecological_zonings(
 @router.get(
     "/{clear_cut_id}",
     response_model=ClearCutResponseSchema,
+    response_model_exclude_none=True,
 )
 def get_clear_cut(
     clear_cut_id: int, db: Session = db_session
@@ -48,7 +50,11 @@ def get_clear_cut(
     return get_clearcut_by_id(id=clear_cut_id, db=db)
 
 
-@router.get("/", response_model=PaginationResponseSchema[ClearCutResponseSchema])
+@router.get(
+    "/",
+    response_model=PaginationResponseSchema[ClearCutResponseSchema],
+    response_model_exclude_none=True,
+)
 def list_clear_cuts(
     db: Session = db_session, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:

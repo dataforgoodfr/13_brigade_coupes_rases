@@ -1,5 +1,5 @@
-import { Progress, type ProgressProps } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
+import { Progress, type ProgressProps } from "@/components/ui/progress";
 
 interface Props extends Omit<ProgressProps, "value"> {
 	durationMs: number;

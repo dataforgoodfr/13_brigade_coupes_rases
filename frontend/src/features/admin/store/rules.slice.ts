@@ -1,12 +1,14 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { useEffect } from "react";
 import {
 	type RulesResponse,
+	rulesResponseSchema,
 	type UpdateRulesRequest,
 	type VariableRuleResponse,
-	rulesResponseSchema,
 } from "@/features/admin/store/rules";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { type SelectableItem, listToSelectableItems } from "@/shared/items";
+import { listToSelectableItems, type SelectableItem } from "@/shared/items";
 import type {
 	EcologicalZoning,
 	EcologicalZoningType,
@@ -20,18 +22,16 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { useEffect } from "react";
 export type EcologicalZoningRule = {
 	type: EcologicalZoningType;
-	ecological_zonings: SelectableItem<EcologicalZoning>[];
+	ecologicalZonings: SelectableItem<EcologicalZoning>[];
 };
 type Rule =
 	| VariableRuleResponse
 	| {
 			id: string;
 			type: EcologicalZoningType;
-			ecological_zonings: SelectableItem<EcologicalZoning>[];
+			ecologicalZonings: SelectableItem<EcologicalZoning>[];
 	  };
 type State = {
 	rules: RequestedContent<Rule[]>;
@@ -50,9 +50,9 @@ export const updateRulesThunk = createAppAsyncThunk<void, void>(
 				rules: rules?.map((r) => ({
 					id: r.id,
 					threshold: r.type !== "ecological_zoning" ? r.threshold : undefined,
-					ecological_zonings_ids:
+					ecologicalZoningsIds:
 						r.type === "ecological_zoning"
-							? r.ecological_zonings
+							? r.ecologicalZonings
 									.filter((item) => item.isSelected)
 									.map((item) => item.item.id)
 							: [],
@@ -72,16 +72,16 @@ export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 			rule.type === "ecological_zoning"
 				? {
 						...rule,
-						ecological_zonings_ids: undefined,
-						ecological_zonings: [
+						ecologicalZoningsIds: undefined,
+						ecologicalZonings: [
 							...listToSelectableItems(
-								selectEcologicalZoningByIds(state, rule.ecological_zonings_ids),
+								selectEcologicalZoningByIds(state, rule.ecologicalZoningsIds),
 								true,
 							),
 							...listToSelectableItems(
 								selectEcologicalZoningByIdsDifferent(
 									state,
-									rule.ecological_zonings_ids,
+									rule.ecologicalZoningsIds,
 								),
 							),
 						],
@@ -104,7 +104,7 @@ export const rulesSlice = createSlice({
 					if (rule.type === "ecological_zoning") {
 						return {
 							...rule,
-							ecological_zonings: payload,
+							ecologicalZonings: payload,
 						} satisfies EcologicalZoningRule;
 					}
 					return rule;

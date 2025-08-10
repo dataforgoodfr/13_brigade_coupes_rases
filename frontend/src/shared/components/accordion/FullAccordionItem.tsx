@@ -1,10 +1,10 @@
+import React from "react";
 import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import React from "react";
 
 type AccordionFullItemProps = {
 	title: string;
@@ -20,23 +20,21 @@ export function AccordionFullItem({
 	const val = React.useId();
 
 	return (
-		<>
-			<AccordionItem
-				value={val}
-				className="data-[state=closed]:border-b-1 data-[state=closed]:border-(--border) data-[state=open]:border-b-0 overflow-hidden"
+		<AccordionItem
+			value={val}
+			className="data-[state=closed]:border-b-1 data-[state=closed]:border-(--border) data-[state=open]:border-b-0 overflow-hidden"
+		>
+			<AccordionTrigger className="cursor-pointer text-lg font-bold font-[Roboto]">
+				{title}
+			</AccordionTrigger>
+			<AccordionContent
+				className={cn(
+					"font-[Roboto] border-t-1 pt-4 overflow-hidden",
+					className,
+				)}
 			>
-				<AccordionTrigger className="cursor-pointer text-lg font-bold font-[Roboto]">
-					{title}
-				</AccordionTrigger>
-				<AccordionContent
-					className={cn(
-						"font-[Roboto] border-t-1 pt-4 overflow-hidden",
-						className,
-					)}
-				>
-					{children}
-				</AccordionContent>
-			</AccordionItem>
-		</>
+				{children}
+			</AccordionContent>
+		</AccordionItem>
 	);
 }

@@ -6,7 +6,7 @@ from test.common.user import get_admin_user_token, get_volunteer_user_token, new
 
 
 def test_create_user(client: TestClient, db: Session):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
     userJson = {
         "firstname": "John",
         "lastname": "Tree",
@@ -23,15 +23,14 @@ def test_create_user(client: TestClient, db: Session):
     data = response.json()
 
     assert data["id"] is not None
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-    assert data["deleted_at"] is None
+    assert data["createdAt"] is not None
+    assert data["updatedAt"] is not None
 
 
 def test_create_user_without_admin_right_should_return_forbidden(
     client: TestClient, db: Session
 ):
-    token = get_volunteer_user_token(client, db)
+    token = get_volunteer_user_token(client, db)[1]
     userJson = {
         "firstname": "John",
         "lastname": "Tree",
@@ -48,7 +47,7 @@ def test_create_user_without_admin_right_should_return_forbidden(
 
 
 def test_get_user(client, db):
-    user = new_user()
+    user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -59,9 +58,8 @@ def test_get_user(client, db):
     data = response.json()
 
     assert data["id"] is not None
-    assert data["created_at"] is not None
-    assert data["updated_at"] is not None
-    assert data["deleted_at"] is None
+    assert data["createdAt"] is not None
+    assert data["updatedAt"] is not None
 
 
 # def test_create_invalid_user(client):
@@ -75,7 +73,7 @@ def test_get_user(client, db):
 
 
 def test_update_user(client, db):
-    user = new_user()
+    user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -98,7 +96,7 @@ def test_update_user(client, db):
 
 
 def test_get_users(client, db):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
     user = new_user(login="ABC", email="ABC@ABC.com")
 
     department = Department(code="75", name="Paris")
@@ -116,7 +114,7 @@ def test_get_users(client, db):
 
 
 def test_login_user(client, db):
-    user = new_user()
+    user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
 
@@ -130,8 +128,8 @@ def test_login_user(client, db):
     assert response.status_code == 200
 
     data = response.json()
-    assert data["access_token"] is not None
-    assert data["token_type"] == "bearer"
+    assert data["accessToken"] is not None
+    assert data["tokenType"] == "bearer"
 
 
 def test_login_user_not_found_should_return_unauthorized(client):
@@ -146,7 +144,7 @@ def test_login_user_not_found_should_return_unauthorized(client):
 
 
 def test_get_me(client, db):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
     response = client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200
 

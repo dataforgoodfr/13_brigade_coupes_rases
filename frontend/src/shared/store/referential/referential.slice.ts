@@ -1,3 +1,4 @@
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
 import {
@@ -7,7 +8,6 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
@@ -21,7 +21,7 @@ export const getReferentialThunk = createAppAsyncThunk(
 type State = RequiredRequestedContent<Required<ReferentialResponse>>;
 const initialState: State = {
 	status: "idle",
-	value: { departments: {}, rules: {}, ecological_zonings: {} },
+	value: { departments: {}, rules: {}, ecologicalZonings: {} },
 };
 export const referentialSlice = createSlice({
 	name: "referential",
@@ -32,12 +32,11 @@ export const referentialSlice = createSlice({
 			state.value = {
 				departments: payload.departments ?? {},
 				rules: payload.rules ?? {},
-				ecological_zonings: payload.ecological_zonings ?? {},
+				ecologicalZonings: payload.ecologicalZonings ?? {},
 			};
 		});
-		builder.addCase(getReferentialThunk.rejected, (state, error) => {
+		builder.addCase(getReferentialThunk.rejected, (state) => {
 			state.status = "error";
-			console.error(error);
 		});
 		builder.addCase(getReferentialThunk.pending, (state) => {
 			state.status = "loading";
@@ -86,10 +85,10 @@ function selectByIdsDifferent<
 
 export const selectDepartmentsByIds = selectByIds("departments");
 export const selectRulesByIds = selectByIds("rules");
-export const selectEcologicalZoningByIds = selectByIds("ecological_zonings");
+export const selectEcologicalZoningByIds = selectByIds("ecologicalZonings");
 
 export const selectDepartmentsByIdsDifferent =
 	selectByIdsDifferent("departments");
 export const selectRulesByIdsDifferent = selectByIdsDifferent("rules");
 export const selectEcologicalZoningByIdsDifferent =
-	selectByIdsDifferent("ecological_zonings");
+	selectByIdsDifferent("ecologicalZonings");

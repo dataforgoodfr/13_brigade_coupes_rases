@@ -1,13 +1,12 @@
 import { X } from "lucide-react";
 import { Dialog as RadixDialog } from "radix-ui";
-
-import { cn } from "@/lib/utils";
 import {
 	type ComponentPropsWithoutRef,
 	type ComponentRef,
-	type HTMLAttributes,
 	forwardRef,
+	type HTMLAttributes,
 } from "react";
+import { cn } from "@/lib/utils";
 export const DialogClose = RadixDialog.Close;
 export const DialogPortal = RadixDialog.Portal;
 export const DialogTrigger = RadixDialog.Trigger;

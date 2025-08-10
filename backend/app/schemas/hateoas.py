@@ -1,21 +1,19 @@
 import math
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from app.schemas.base import BaseSchema
 
 M = TypeVar("M")
 C = TypeVar("C")
 
 
-class HateaosResponse(BaseModel, Generic[M, C]):
+class HateaosResponse(BaseSchema, Generic[M, C]):
     metadata: M
     content: C
-    model_config = ConfigDict(from_attributes=True)
 
 
-class Metadata(BaseModel):
+class Metadata(BaseSchema):
     links: dict[str, str]
-    model_config = ConfigDict(from_attributes=True)
 
 
 class PaginationMetadataSchema(Metadata):

@@ -1,10 +1,9 @@
-import { selectLoggedUser } from "@/features/user/store/user.slice";
-import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink";
-import { useAppSelector } from "@/shared/hooks/store";
 import { Bookmark, House, Settings } from "lucide-react";
+import { useLoggedUser } from "@/features/user/store/user.slice";
+import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink";
 
 export function MobileNavbar() {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useLoggedUser();
 
 	return (
 		<nav className="flex sm:hidden py-1 items-center shadow justify-around ">
@@ -26,7 +25,7 @@ export function MobileNavbar() {
 						to="/administration"
 						label="Paramètres"
 						Icon={Settings}
-						title="Historique"
+						title="Paramètres"
 					/>
 				)}
 			</div>

@@ -1,17 +1,18 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from app.models import City
+from app.schemas.base import BaseSchema
 from app.schemas.department import DepartmentBaseSchema
 
 
-class CitySchema(BaseModel):
+class CitySchema(BaseSchema):
     id: str
     name: str = Field(json_schema_extra={"example": "Paris"})
     zip_code: str = Field(json_schema_extra={"example": "75000"})
     department: DepartmentBaseSchema
 
 
-class CityPreviewSchema(BaseModel):
+class CityPreviewSchema(BaseSchema):
     name: str = Field(json_schema_extra={"example": "Paris"})
     zip_code: str = Field(json_schema_extra={"example": "75000"})
     department_id: str

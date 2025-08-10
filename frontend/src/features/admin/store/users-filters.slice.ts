@@ -1,3 +1,4 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type {
 	FiltersRequest,
 	SortableKeys,
@@ -5,14 +6,13 @@ import type {
 import type { Role } from "@/features/user/store/user";
 import type { Sort } from "@/shared/api/api";
 import {
+	listToSelectableItems,
 	type NamedId,
 	type SelectableItem,
-	listToSelectableItems,
 } from "@/shared/items";
 import { getReferentialThunk } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface FiltersState {
 	name: string;
@@ -97,7 +97,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		return {
 			name,
 			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
-			departments_ids: departments
+			departmentsIds: departments
 				.filter((department) => department.isSelected)
 				.map((department) => department.item.id),
 			page,

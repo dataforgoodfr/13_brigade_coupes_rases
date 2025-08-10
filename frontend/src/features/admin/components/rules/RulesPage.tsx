@@ -8,6 +8,7 @@ import {
 	useGetRules,
 } from "@/features/admin/store/rules.slice";
 import { useAppDispatch } from "@/shared/hooks/store";
+
 const RULES_PROPS = {
 	slope: {
 		label: "Seuil d’alerte de la pente (%)",

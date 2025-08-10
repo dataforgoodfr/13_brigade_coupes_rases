@@ -68,11 +68,15 @@ export const paginationResponseSchema = <TValue extends z.ZodType>(
 		z.object({
 			metadata: hateaosMetadataSchema.and(
 				z.object({
-					pages_count: z.number(),
-					total_count: z.number(),
+					pagesCount: z.number(),
+					totalCount: z.number(),
 					page: z.number(),
 					size: z.number(),
 				}),
 			),
 		}),
 	);
+
+export type PaginationResponse<TValue> = z.infer<
+	ReturnType<typeof paginationResponseSchema<z.ZodType<TValue>>>
+>;

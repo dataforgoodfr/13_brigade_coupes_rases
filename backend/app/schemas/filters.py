@@ -1,12 +1,14 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from app.schemas.base import BaseSchema
 
 
-class AreaRangeResponseSchema(BaseModel):
+class AreaRangeResponseSchema(BaseSchema):
     min: int = Field(json_schema_extra={"example": 0.5})
     max: int = Field(json_schema_extra={"example": 10})
 
 
-class FiltersResponseSchema(BaseModel):
+class FiltersResponseSchema(BaseSchema):
     area_range: AreaRangeResponseSchema
 
     cut_years: list[int] = Field(
@@ -28,5 +30,3 @@ class FiltersResponseSchema(BaseModel):
     statuses: list[str] = Field(
         json_schema_extra={"example": ["pending", "validated"]},
     )
-
-    model_config = ConfigDict(from_attributes=True)

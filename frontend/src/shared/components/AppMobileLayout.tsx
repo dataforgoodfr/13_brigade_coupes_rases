@@ -1,5 +1,5 @@
-import { MobileNavbar } from "@/shared/components/MobileNavbar";
 import { Outlet } from "@tanstack/react-router";
+import { MobileNavbar } from "@/shared/components/MobileNavbar";
 
 export function AppMobileLayout() {
 	return (

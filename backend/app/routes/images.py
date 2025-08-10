@@ -1,8 +1,8 @@
 from logging import getLogger
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
+from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
 from app.services.s3 import s3_service
 from app.services.user_auth import get_current_user
@@ -12,14 +12,18 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/images", tags=["Images"])
 
 
-class ImageViewResponse(BaseModel):
+class ImageViewResponse(BaseSchema):
     """Response schema for image viewing URL"""
 
     view_url: str
     expires_in: int
 
 
-@router.post("/upload-url", response_model=ImageUploadResponse)
+@router.post(
+    "/upload-url",
+    response_model=ImageUploadResponse,
+    response_model_exclude_none=True,
+)
 def generate_upload_url(
     request: ImageUploadRequest,
     _=Depends(get_current_user),
@@ -75,7 +79,11 @@ def generate_upload_url(
         ) from e
 
 
-@router.get("/view/{s3_key:path}", response_model=ImageViewResponse)
+@router.get(
+    "/view/{s3_key:path}",
+    response_model=ImageViewResponse,
+    response_model_exclude_none=True,
+)
 def generate_view_url(
     s3_key: str,
     _=Depends(get_current_user),

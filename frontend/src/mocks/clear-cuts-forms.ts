@@ -1,0 +1,46 @@
+import { faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
+import type {
+	ClearCutFormResponse,
+	ClearCutFormsResponse,
+} from "@/features/clear-cut/store/clear-cuts";
+import { createPaginationOneElementMock } from "@/mocks/pagination";
+
+export const mockClearCutFormsResponse = (
+	override: Partial<ClearCutFormResponse> = {},
+) => {
+	const clearCut = {
+		id: faker.string.uuid(),
+		reportId: faker.string.uuid(),
+		createdAt: faker.date.recent().toJSON().split("T")[0],
+		clearCutImages: [],
+		hasRemainingTrees: false,
+		plantingImages: [],
+		hasConstructionPanel: false,
+		treeTrunksImages: [],
+		soilStateImages: [],
+		accessRoadImages: [],
+		hasOtherEcologicalZone: false,
+		hasNearbyEcologicalZone: false,
+		hasDdtRequest: false,
+		relevantForPefcComplaint: false,
+		relevantForRediiiComplaint: false,
+		relevantForOfbComplaint: false,
+		relevantForAlertCnpfDdtSrgs: false,
+		relevantForAlertCnpfDdtPsgThresholds: false,
+		relevantForPsgRequest: false,
+		...override,
+	} satisfies ClearCutFormResponse;
+	return {
+		handler: http.get("*/api/v1/clear-cuts-reports/:id/forms", ({ params }) => {
+			const { id } = params as { id: string };
+			return HttpResponse.json(
+				createPaginationOneElementMock({
+					...clearCut,
+					reportId: id,
+				}) satisfies ClearCutFormsResponse,
+			);
+		}),
+		response: clearCut,
+	};
+};

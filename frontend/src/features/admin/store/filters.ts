@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { userResponseSchema } from "@/features/admin/store/users";
 import { roleSchema } from "@/features/user/store/user";
 import { sortSchema } from "@/shared/api/api";
-import { z } from "zod";
 
 const sortableKeysSchema = userResponseSchema
 	.keyof()
@@ -14,7 +14,7 @@ const filtersRequestSchema = z.object({
 	page: z.number(),
 	size: z.number(),
 	roles: z.array(roleSchema),
-	departments_ids: z.array(z.string()),
+	departmentsIds: z.array(z.string()),
 	[`${sortSchema.extract(["asc"])}Sort`]: sortableKeysSchema,
 	[`${sortSchema.extract(["desc"])}Sort`]: sortableKeysSchema,
 });

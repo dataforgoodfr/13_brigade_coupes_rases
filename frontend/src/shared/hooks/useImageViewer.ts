@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { getStoredToken } from "@/features/user/store/user.slice";
 import { api } from "@/shared/api/api";
-import { useState } from "react";
 
 export interface ImageViewResponse {
 	view_url: string;
@@ -42,9 +42,7 @@ export function useImageViewer(): UseImageViewerResult {
 							.get(`api/v1/images/view/${encodeURIComponent(s3Key)}`)
 							.json<ImageViewResponse>();
 						return response.view_url;
-					} catch (err) {
-						console.error(`Failed to get viewable URL for ${s3Key}:`, err);
-						// Return a placeholder or empty string for failed images
+					} catch (_e) {
 						return "";
 					}
 				}),

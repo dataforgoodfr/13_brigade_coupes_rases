@@ -1,3 +1,6 @@
+import { screen } from "@testing-library/react";
+import type { UserEvent } from "@vitest/browser/context";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
 	actorsKey,
 	actorsValue,
@@ -30,133 +33,169 @@ import type {
 	SectionForm,
 	SectionFormItem,
 } from "@/features/clear-cut/components/form/types";
-
 import type {
 	ClearCutForm,
+	ClearCutFormInput,
 	ClearCutFormResponse,
+	ClearCutReportResponse,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { User } from "@/features/user/store/user";
-import { mockClearCut, mockClearCutFormsResponse } from "@/mocks/clear-cuts";
+import { worker } from "@/mocks/browser";
+import { mockClearCutReportResponse } from "@/mocks/clear-cuts";
+import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms";
 import { fakeDepartments } from "@/mocks/referential";
-import { server } from "@/test/mocks/server";
 import { adminMock, volunteerMock } from "@/test/mocks/user";
 import {
 	type FieldInput,
-	type TestFormItem,
 	formField,
+	type TestFormItem,
 } from "@/test/page-object/form-input";
 import { renderApp } from "@/test/renderApp";
-import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
 
 type SectionData<
-	Item extends SectionFormItem<ClearCutForm> = TestFormItem<ClearCutForm>,
+	Item extends
+		SectionFormItem<ClearCutFormInput> = TestFormItem<ClearCutFormInput>,
 > = {
 	section: SectionForm;
 	items: Item[];
 };
-const mock = mockClearCut({
-	id: "ABC",
-	city: "Paris",
-	last_cut_date: "2024-03-19",
-	onSiteDate: "2024-03-19T14:26:30.789Z",
-	weather: "Nuageux",
-	standTypeAndSilviculturalSystemBCC: "Epicéa",
-	waterCourseOrWetlandPresence: "Présence de cours d'eau",
-	soilState: "Sol en mauvais état",
-	department_id: Object.keys(fakeDepartments)[0],
-	updated_at: "2026-03-13",
-	slope_area_hectare: 0.54556,
-	total_area_hectare: 1,
-	average_location: { coordinates: [1, 2], type: "Point" },
-});
 
-const mapItem = (
-	item: SectionFormItem<ClearCutForm>,
-): TestFormItem<ClearCutForm> => {
-	let expected = mock.response[item.name as keyof ClearCutFormResponse];
+const setupTest = (
+	report: Partial<ClearCutReportResponse> = {},
+	form: Partial<ClearCutFormResponse> = {},
+) => {
+	const reportMock = mockClearCutReportResponse(
+		{
+			id: "ABC",
+			city: "Paris",
+			lastCutDate: "2024-03-19",
+			departmentId: Object.keys(fakeDepartments)[0],
+			updatedAt: "2026-03-13",
+			slopeAreaHectare: 0.54556,
+			totalAreaHectare: 1,
+			averageLocation: { coordinates: [1, 2], type: "Point" },
+			...report,
+		},
+		{ ecologicalZoningsCount: 1, clearCutsCount: 1 },
+	);
+	const formMock = mockClearCutFormsResponse({
+		reportId: reportMock.response.id,
+		inspectionDate: "2024-03-19T14:26:30.789Z",
+		weather: "Nuageux",
+		forest: "Epicéa",
+		wetland: "Présence de cours d'eau",
+		soilState: "Sol en mauvais état",
+		...form,
+	});
 
-	switch (item.type) {
-		case "textArea":
-			expected = expected === undefined ? "" : expected;
-			break;
-		case "inputFile":
+	type FormReport = { report: ClearCutReportResponse } & ClearCutFormResponse &
+		Pick<ClearCutForm, "hasEcologicalZonings">;
+	const mapItem = (
+		item: SectionFormItem<ClearCutFormInput>,
+	): TestFormItem<ClearCutFormInput> => {
+		const formReport: FormReport = {
+			report: reportMock.response,
+			...formMock.response,
+			hasEcologicalZonings: true,
+		};
+		let expected: unknown;
+		if (item.name.startsWith("report.")) {
 			expected =
-				Array.isArray(expected) && expected.length === 0 ? null : expected;
-			break;
-	}
-	switch (item.name) {
-		case "last_cut_date":
-			expected = "19/03/2024";
-			break;
-		case "slope_area_hectare":
-			expected = "0,55 ha";
-			break;
-		case "total_area_hectare":
-			expected = `${expected} ha`;
-			break;
-		case "department.name":
-			expected = "Ain";
-			break;
-		case "average_location.coordinates.0":
-			expected = "1";
-			break;
-		case "average_location.coordinates.1":
-			expected = "2";
-			break;
-		case "updated_at":
-			expected = "13/03/2026";
-			break;
-		case "onSiteDate":
-			expected = "19/03/2024";
-			break;
-		default:
-			break;
-	}
+				formReport.report[
+					item.name.replace("report.", "") as keyof ClearCutReportResponse
+				];
+		} else {
+			expected = formReport[item.name as keyof ClearCutFormResponse];
+		}
+		switch (item.type) {
+			case "textArea":
+				expected = expected === undefined ? "" : expected;
+				break;
+			case "inputFile":
+				expected =
+					Array.isArray(expected) && expected.length === 0
+						? undefined
+						: expected;
+				break;
+		}
+		switch (item.name) {
+			case "inspectionDate":
+				expected = "19/03/2024";
+				break;
+			case "report.slopeAreaHectare":
+				expected = "0,55 ha";
+				break;
+			case "report.totalAreaHectare":
+				expected = `${expected} ha`;
+				break;
+			case "report.department.name":
+				expected = "Ain";
+				break;
+			case "report.averageLocation.coordinates.0":
+				expected = "1";
+				break;
+			case "report.averageLocation.coordinates.1":
+				expected = "2";
+				break;
+			case "report.updatedAt":
+				expected = "13/03/2026";
+				break;
+			case "report.lastCutDate":
+				expected = "19/03/2024";
+				break;
+			default:
+				break;
+		}
 
-	return { ...item, expected: expected === undefined ? null : expected };
+		return { ...item, expected: expected === undefined ? null : expected };
+	};
+	return {
+		sections: [
+			{
+				section: actorsKey,
+				items: actorsValue.map(mapItem),
+			},
+			{
+				section: ecoZoneKey,
+				items: ecoZoneValue.map(mapItem),
+			},
+			{
+				section: generalInfoKey,
+				items: generalInfoValue.map(mapItem),
+			},
+			{
+				section: legalKey,
+				items: legalValue.map(mapItem),
+			},
+			{
+				section: onSiteKey,
+				items: onSiteValue.map(mapItem),
+			},
+			{
+				section: otherInfoKey,
+				items: otherInfoValue.map(mapItem),
+			},
+			{
+				section: regulationsKey,
+				items: regulationsValue.map(mapItem),
+			},
+		] as SectionData[],
+		reportMock,
+		formMock,
+	};
 };
-const sections: SectionData[] = [
-	{
-		section: actorsKey,
-		items: actorsValue.map(mapItem),
-	},
-	{
-		section: ecoZoneKey,
-		items: ecoZoneValue.map(mapItem),
-	},
-	{
-		section: generalInfoKey,
-		items: generalInfoValue.map(mapItem),
-	},
-	{
-		section: legalKey,
-		items: legalValue.map(mapItem),
-	},
-	{
-		section: onSiteKey,
-		items: onSiteValue.map(mapItem),
-	},
-	{
-		section: otherInfoKey,
-		items: otherInfoValue.map(mapItem),
-	},
-	{
-		section: regulationsKey,
-		items: regulationsValue.map(mapItem),
-	},
-];
-describe.each(sections)(
+
+const defaultSetup = setupTest();
+const defaultSetupServerBeforeEach = (setup: ReturnType<typeof setupTest>) => {
+	beforeEach(() => {
+		worker.use(setup.reportMock.handler, setup.formMock.handler);
+	});
+};
+const setupVolunteerAssigned = setupTest({ affectedUser: volunteerMock });
+describe.each(setupVolunteerAssigned.sections)(
 	"$section.name section form when there is volunteer assigned",
 	({ section, items }) => {
-		beforeEach(() => {
-			const assignedClearCutMock = mockClearCut({
-				...mock.response,
-				assignedUser: volunteerMock.login,
-			});
-			server.use(assignedClearCutMock.handler);
-		});
+		defaultSetupServerBeforeEach(setupVolunteerAssigned);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -165,12 +204,11 @@ describe.each(sections)(
 		}
 	},
 );
-describe.each(sections)(
+
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there is volunteer not assigned",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		defaultSetupServerBeforeEach(defaultSetup);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -179,22 +217,18 @@ describe.each(sections)(
 		}
 	},
 );
-describe.each(sections)(
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there is a connected admin",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		defaultSetupServerBeforeEach(defaultSetup);
 		itShouldHaveValue(items, section, adminMock);
 		itShouldHaveDisabledState(items, section, false, adminMock);
 	},
 );
-describe.each(sections)(
+describe.each(defaultSetup.sections)(
 	"$section.name section form when there isn't a connected user",
 	({ section, items }) => {
-		beforeEach(() => {
-			server.use(mock.handler, mockClearCutFormsResponse());
-		});
+		defaultSetupServerBeforeEach(defaultSetup);
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section);
 		} else {
@@ -220,7 +254,7 @@ function isShouldNotDisplayAdminSection(
 	});
 }
 function itShouldHaveValue(
-	items: TestFormItem<ClearCutForm>[],
+	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
 	connectedUser?: User,
 ) {
@@ -236,7 +270,7 @@ function itShouldHaveValue(
 					user: connectedUser,
 				});
 				await openAccordion(section, user);
-				const field = formField<ClearCutForm, unknown>({
+				const field = formField<ClearCutFormInput, unknown>({
 					user,
 					item: item,
 				}) as FieldInput;
@@ -246,7 +280,7 @@ function itShouldHaveValue(
 		);
 }
 function itShouldHaveDisabledState(
-	items: TestFormItem<ClearCutForm>[],
+	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
 	state: boolean,
 	connectedUser?: User,
@@ -267,11 +301,11 @@ function itShouldHaveDisabledState(
 					user: connectedUser,
 				});
 				await openAccordion(section, user);
-				const field = formField<ClearCutForm, unknown>({
+				const field = formField<ClearCutFormInput, unknown>({
 					user,
 					item: item,
 				}) as FieldInput;
-				field.expectDisabledState(state);
+				await field.expectDisabledState(state);
 			});
 		});
 }

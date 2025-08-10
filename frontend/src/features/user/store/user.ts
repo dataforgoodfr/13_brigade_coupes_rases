@@ -1,5 +1,5 @@
-import { departmentSchema } from "@/shared/store/referential/referential";
 import { z } from "zod";
+import { departmentSchema } from "@/shared/store/referential/referential";
 
 export const loginRequestSchema = z.object({
 	email: z.string().email(),
@@ -10,6 +10,7 @@ export const ROLES = ["volunteer", "admin"] as const;
 export const roleSchema = z.enum(ROLES);
 
 export type Role = z.infer<typeof roleSchema>;
+
 export const commonUserSchema = z.object({
 	login: z.string(),
 	email: z.string(),

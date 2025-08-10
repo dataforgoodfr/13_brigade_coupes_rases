@@ -1,3 +1,7 @@
+import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import type { FieldValues } from "react-hook-form";
+import { FormattedDate } from "react-intl";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -6,10 +10,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
-import type { FieldValues } from "react-hook-form";
-import { FormattedDate } from "react-intl";
 import {
 	FormControl,
 	FormField,

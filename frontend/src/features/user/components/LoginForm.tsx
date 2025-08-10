@@ -1,3 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LogInIcon } from "lucide-react";
+import { FormProvider, useForm } from "react-hook-form";
 import largeLogo from "@/assets/logo-lg.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,7 +9,6 @@ import {
 } from "@/features/user/store/user";
 import { loginThunk } from "@/features/user/store/user.slice";
 import {
-	Form,
 	FormControl,
 	FormField,
 	FormItem,
@@ -19,9 +21,6 @@ import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { Title } from "@/shared/components/typo/Title";
 import { useAppDispatch } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LogInIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
 
 type AuthenticationType = "password" | "sso";
 export function LoginForm() {
@@ -58,8 +57,8 @@ export function LoginForm() {
 				allowEmptyValue={false}
 				onValueChange={setAuthenticationType}
 			/>
-			{authenticationType?.item === "password" ? (
-				<Form {...form}>
+			{authenticationType?.item === "password" && (
+				<FormProvider {...form}>
 					<form
 						onSubmit={form.handleSubmit((login) => dispatch(loginThunk(login)))}
 						className="space-y-4 mt-4"
@@ -103,9 +102,7 @@ export function LoginForm() {
 							Connexion
 						</Button>
 					</form>
-				</Form>
-			) : (
-				<></>
+				</FormProvider>
 			)}
 		</>
 	);

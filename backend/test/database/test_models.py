@@ -6,12 +6,12 @@ from test.common.user import new_user
 
 
 def test_user_creation(db):
-    user = new_user()
+    user = new_user(role="volunteer")
     db.add(user)
     db.commit()
 
     with pytest.raises(ValueError) as exc_info:
-        new_user("not_a_valid_role")
+        new_user(role="not_a_valid_role")
 
     assert str(exc_info.value) == "Role must be one of: admin, volunteer"
 

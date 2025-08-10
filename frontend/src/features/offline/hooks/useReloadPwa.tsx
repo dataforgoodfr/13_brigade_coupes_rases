@@ -1,7 +1,7 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
+import { useEffect } from "react";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
 
 export function useReloadPwa() {
 	const {
@@ -10,12 +10,12 @@ export function useReloadPwa() {
 		updateServiceWorker,
 	} = useRegisterSW({
 		onRegistered(r) {
-			// biome-ignore lint/suspicious/noConsoleLog: <explanation>
-			console.log(`SW Registered: ${r}`);
+			// biome-ignore lint/suspicious/noConsole: Debug purpose
+			console.debug(`SW Registered: ${r}`);
 		},
 		onRegisterError(error) {
-			// biome-ignore lint/suspicious/noConsoleLog: <explanation>
-			console.log("SW registration error", error);
+			// biome-ignore lint/suspicious/noConsole: Debug purpose
+			console.debug("SW registration error", error);
 		},
 	});
 	const { toast } = useToast();

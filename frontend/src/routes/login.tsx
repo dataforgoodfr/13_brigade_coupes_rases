@@ -1,9 +1,8 @@
-import { Login } from "@/features/user/components/Login";
-import { selectLoggedUser } from "@/features/user/store/user.slice";
-import { useAppSelector } from "@/shared/hooks/store";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { z } from "zod";
+import { Login } from "@/features/user/components/Login";
+import { useLoggedUser } from "@/features/user/store/user.slice";
 
 // Define the login route with optional redirect parameter
 export const Route = createFileRoute("/login")({
@@ -21,7 +20,7 @@ export const Route = createFileRoute("/login")({
 
 function RouteComponent() {
 	const navigate = Route.useNavigate();
-	const loggedUser = useAppSelector(selectLoggedUser);
+	const loggedUser = useLoggedUser();
 	const { redirect: redirectParam } = Route.useSearch();
 
 	// If user is logged in, redirect to the intended page or home

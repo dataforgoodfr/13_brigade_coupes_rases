@@ -1,11 +1,11 @@
+import { FormattedNumber } from "react-intl";
 import { Separator } from "@/components/ui/separator";
 import type {
-	ClearCutForm,
+	ClearCutFormInput,
 	ClearCutStatus,
 } from "@/features/clear-cut/store/clear-cuts";
 import type { FormType } from "@/shared/components/form/Form";
 import type { Rule } from "@/shared/store/referential/referential";
-import { FormattedNumber } from "react-intl";
 import { RuleBadge } from "../RuleBadge";
 import { StatusWithLabel } from "../StatusWithLabel";
 
@@ -13,17 +13,25 @@ export default function AccordionHeader({
 	form,
 	tags: abusiveTags,
 	status,
-}: { form: FormType<ClearCutForm>; tags: Rule[]; status: ClearCutStatus }) {
-	const areaHectare = form.getValues("total_area_hectare");
-	const ecologicalZoning = form.getValues("natura2000Zone.name");
+}: {
+	form: FormType<ClearCutFormInput>;
+	tags: Rule[];
+	status: ClearCutStatus;
+}) {
+	const areaHectare = form.getValues("report.totalAreaHectare");
+	const ecologicalZonings = form.getValues("ecologicalZonings");
 	return (
 		<div className="flex items-center mx-4 mt-4 gap-6 text-sm">
-			<img
-				alt="Vue satellite de le coupe rase"
-				src={form.getValues("imgSatelliteCC")}
-				loading="lazy"
-				className="flex-1 aspect-square shadow-[0px_2px_6px_0px_#00000033] rounded-lg max-w-[45%]"
-			/>
+			{form.getValues("report.satelliteImages")?.map((image) => (
+				<img
+					key={image}
+					alt="Vue satellite de le coupe rase"
+					src={image}
+					loading="lazy"
+					className="flex-1 aspect-square shadow-[0px_2px_6px_0px_#00000033] rounded-lg max-w-[45%]"
+				/>
+			))}
+
 			<div className="flex-1">
 				<div className="flex items-center gap-2 mb-4">
 					<StatusWithLabel status={status} />
@@ -39,8 +47,10 @@ export default function AccordionHeader({
 						Superficie de la coupe : <FormattedNumber value={areaHectare} /> ha
 					</p>
 				)}
-				{ecologicalZoning !== undefined && (
-					<p>Zone écologique : {ecologicalZoning}</p>
+				{ecologicalZonings !== undefined && (
+					<p>
+						Zones écologique : {ecologicalZonings.map((z) => z.name).join(", ")}
+					</p>
 				)}
 			</div>
 		</div>

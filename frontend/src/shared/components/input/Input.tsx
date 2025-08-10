@@ -1,19 +1,19 @@
-import { cn } from "@/lib/utils";
-import type { ReactNode } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
 	type ComponentProps,
 	type ComponentPropsWithRef,
-	type PropsWithChildren,
 	forwardRef,
+	type PropsWithChildren,
+	type ReactNode,
 } from "react";
+import { cn } from "@/lib/utils";
 
 type Props = {
 	suffixClassName?: string;
 	suffix?: ReactNode;
 	prefixClassName?: string;
 	prefix?: ReactNode;
-} & ComponentProps<"input">;
+} & Omit<ComponentProps<"input">, "prefix">;
 
 type InputAsideProps = { className: string } & PropsWithChildren;
 const InputAside = ({ children, className }: InputAsideProps) => {

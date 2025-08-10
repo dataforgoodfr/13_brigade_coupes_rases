@@ -1,22 +1,21 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
 from app.models import Rules
+from app.schemas.base import BaseSchema
 
 
-class RuleBaseSchema(BaseModel):
+class RuleBaseSchema(BaseSchema):
     threshold: float | None = Field(default=None, json_schema_extra={"example": "42"})
     ecological_zonings_ids: list[str] = Field(
         default=[], json_schema_extra={"example": ["1", "2", "3"]}
     )
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class RuleUpdateSchema(RuleBaseSchema):
     id: int = Field(json_schema_extra={"example": 1})
 
 
-class RulesUpdateSchema(BaseModel):
+class RulesUpdateSchema(BaseSchema):
     rules: list[RuleUpdateSchema]
 
 
@@ -52,7 +51,7 @@ def rule_to_rule_response(rule: Rules) -> RuleResponseSchema:
     )
 
 
-class RuleSchema(BaseModel):
+class RuleSchema(BaseSchema):
     id: int
     threshold: float | None
     ecological_zonings_ids: list[int]
@@ -68,7 +67,7 @@ def rule_to_rule(rule: Rules) -> RuleSchema:
     )
 
 
-class RulesSchema(BaseModel):
+class RulesSchema(BaseSchema):
     slope: RuleSchema
     area: RuleSchema
     ecological_zoning: RuleSchema

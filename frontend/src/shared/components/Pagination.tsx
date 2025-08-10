@@ -1,3 +1,5 @@
+import { take } from "lodash-es";
+import { useState } from "react";
 import {
 	PaginationContent,
 	PaginationEllipsis,
@@ -7,8 +9,6 @@ import {
 	PaginationPrevious,
 	Pagination as PaginationUI,
 } from "@/components/ui/pagination";
-import { take } from "lodash-es";
-import { useState } from "react";
 
 const DISPLAYED_PAGES_CHUNK = 5;
 

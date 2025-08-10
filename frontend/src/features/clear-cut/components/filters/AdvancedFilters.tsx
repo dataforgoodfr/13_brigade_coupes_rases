@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import { type FC, type PropsWithChildren, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
 import {
@@ -22,8 +24,6 @@ import {
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
-import clsx from "clsx";
-import { type FC, type PropsWithChildren, useEffect } from "react";
 
 interface Props {
 	className?: string;

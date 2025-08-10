@@ -1,18 +1,20 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
 	type LoginRequest,
 	type TokenResponse,
+	tokenSchema,
 	type User,
 	type UserResponse,
-	tokenSchema,
 	userResponseSchema,
 	userSchema,
 } from "@/features/user/store/user";
 import type { RequestedContent } from "@/shared/api/types";
+import { useAppSelector } from "@/shared/hooks/store";
 import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+
 const TOKEN_KEY = "token";
 
 export function setStoredToken(token: TokenResponse | undefined) {
@@ -80,7 +82,6 @@ export const userSlice = createSlice({
 			state.value = user;
 		});
 		builder.addCase(getMeThunk.rejected, (state, { error }) => {
-			console.error(error);
 			state.status = "error";
 			state.error = error;
 		});
@@ -90,7 +91,9 @@ export const userSlice = createSlice({
 	},
 });
 const selectState = (state: RootState) => state.user;
-export const selectLoggedUser = createTypedDraftSafeSelector(
+const selectLoggedUser = createTypedDraftSafeSelector(
 	selectState,
 	(user) => user.value,
 );
+
+export const useLoggedUser = () => useAppSelector(selectLoggedUser);

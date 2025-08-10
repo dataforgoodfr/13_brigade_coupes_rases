@@ -1,4 +1,4 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const otherInfoKey: SectionForm = {
@@ -6,9 +6,9 @@ export const otherInfoKey: SectionForm = {
 	className: "flex flex-col gap-4",
 };
 
-export const otherInfoValue: SectionFormItem<ClearCutForm>[] = [
+export const otherInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
-		name: "otherInfos",
+		name: "other",
 		label: "Informations complémentaires",
 		type: "textArea",
 		renderConditions: [],

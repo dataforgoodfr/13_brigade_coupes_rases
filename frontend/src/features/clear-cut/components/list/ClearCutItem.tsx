@@ -1,14 +1,14 @@
-import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
-import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
-import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
-import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
-import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 import clsx from "clsx";
 import { FormattedDate } from "react-intl";
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
+import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
+import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
+import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
+import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 
 export function ClearCutItem({
 	id,
-	created_at,
+	createdAt,
 	status,
 	comment,
 	rules: tags,
@@ -33,7 +33,7 @@ export function ClearCutItem({
 		>
 			<div className="flex justify-between">
 				<h3 className="me-auto text-lg font-bold text-gray-800">{city}</h3>
-				<FormattedDate value={created_at} />
+				<FormattedDate value={createdAt} />
 			</div>
 			<StatusWithLabel status={status} />
 			{comment && <p className="text-zinc-500 line-clamp-2">{comment}</p>}

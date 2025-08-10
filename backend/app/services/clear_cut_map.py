@@ -12,7 +12,6 @@ from geoalchemy2.functions import (
     ST_SetSRID,
 )
 from geojson_pydantic import Point
-from pydantic import BaseModel
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
@@ -23,6 +22,7 @@ from app.models import (
     Department,
     Rules,
 )
+from app.schemas.base import BaseSchema
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     ClearCutReportPreviewSchema,
@@ -37,14 +37,14 @@ from app.services.rules import (
 logger = getLogger(__name__)
 
 
-class GeoBounds(BaseModel):
+class GeoBounds(BaseSchema):
     south_west_latitude: float
     south_west_longitude: float
     north_east_latitude: float
     north_east_longitude: float
 
 
-class Filters(BaseModel):
+class Filters(BaseSchema):
     bounds: GeoBounds | None = None
     report_id: int | None = None
     min_area_hectare: float | None = None

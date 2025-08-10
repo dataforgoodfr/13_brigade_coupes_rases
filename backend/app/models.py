@@ -123,6 +123,7 @@ class User(Base):
     reports = relationship(
         "ClearCutReport", back_populates="user", cascade="all, delete"
     )
+    forms = relationship("ClearCutForm", back_populates="editor", cascade="all, delete")
 
     @validates("role")
     def validate_role(self, key, value):
@@ -315,6 +316,7 @@ class ClearCutReport(Base):
     )
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
+    statellite_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
     rules = relationship(
         "Rules",
         secondary=rules_clear_cut_reports,
@@ -337,7 +339,10 @@ class ClearCutForm(Base):
         ForeignKey("clear_cuts_reports.id"), nullable=False
     )
     report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
-    editor_id: Mapped[int | None] = mapped_column(Integer, index=True, nullable=True)
+    editor_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=False
+    )
+    editor: Mapped["User"] = relationship(back_populates="forms", cascade="all, delete")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now
     )
@@ -345,33 +350,39 @@ class ClearCutForm(Base):
     # Ground datas
     inspection_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     weather: Mapped[str | None] = mapped_column(String, index=True)
-    forest_description: Mapped[str | None] = mapped_column(String, index=True)
-    remainingTrees: Mapped[bool | None] = mapped_column(Boolean)
-    species: Mapped[str | None] = mapped_column(String, index=True)
-    workSignVisible: Mapped[bool | None] = mapped_column(Boolean)
-    waterzone_description: Mapped[str | None] = mapped_column(String)
-    protected_zone_description: Mapped[str | None] = mapped_column(String)
+    forest: Mapped[str | None] = mapped_column(String, index=True)
+    has_remaining_trees: Mapped[bool | None] = mapped_column(Boolean)
+    trees_species: Mapped[str | None] = mapped_column(String, index=True)
+    planting_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    has_construction_panel: Mapped[bool | None] = mapped_column(Boolean)
+    construction_panel_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    wetland: Mapped[str | None] = mapped_column(String)
+    destruction_clues: Mapped[str | None] = mapped_column(String)
     soil_state: Mapped[str | None] = mapped_column(String)
+    clear_cut_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    tree_trunks_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    soil_state_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    access_road_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     # Ecological informations
-    ecological_zone: Mapped[bool | None] = mapped_column(Boolean)
-    ecological_zone_type: Mapped[str | None] = mapped_column(String)
-    nearby_zone: Mapped[str | None] = mapped_column(String)
-    nearby_zone_type: Mapped[str | None] = mapped_column(String)
+    has_other_ecological_zone: Mapped[bool | None] = mapped_column(Boolean)
+    other_ecological_zone_type: Mapped[str | None] = mapped_column(String)
+    has_nearby_ecological_zone: Mapped[bool | None] = mapped_column(Boolean)
+    nearby_ecological_zone_type: Mapped[str | None] = mapped_column(String)
     protected_species: Mapped[str | None] = mapped_column(String)
     protected_habitats: Mapped[str | None] = mapped_column(String)
-    ddt_request: Mapped[bool | None] = mapped_column(Boolean)
+    has_ddt_request: Mapped[bool | None] = mapped_column(Boolean)
     ddt_request_owner: Mapped[str | None] = mapped_column(String)
 
     # Stakeholders
-    compagny: Mapped[str | None] = mapped_column(String)
+    company: Mapped[str | None] = mapped_column(String)
     subcontractor: Mapped[str | None] = mapped_column(String)
     landlord: Mapped[str | None] = mapped_column(String)
 
     # Reglementation
-    pefc_fsc_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
-    over_20_ha: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
-    psg_required_plot: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_pefc_fsc_certified: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_over_20_ha: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_psg_required_plot: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Legal strategy
     relevant_for_pefc_complaint: Mapped[bool | None] = mapped_column(
@@ -396,11 +407,3 @@ class ClearCutForm(Base):
 
     # Miscellaneous
     other: Mapped[str | None] = mapped_column(String)
-
-    # Image fields (S3 keys stored as JSON arrays or strings)
-    images_clear_cut: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    images_plantation: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    image_worksite_sign: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    images_tree_trunks: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    images_soil_state: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    images_access_road: Mapped[list | None] = mapped_column(JSON, nullable=True)

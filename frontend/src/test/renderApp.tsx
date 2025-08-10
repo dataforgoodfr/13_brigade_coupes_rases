@@ -1,3 +1,12 @@
+import {
+	createMemoryHistory,
+	createRouter,
+	RouterProvider,
+} from "@tanstack/react-router";
+import { page, userEvent } from "@vitest/browser/context";
+import { IntlProvider } from "react-intl";
+import { Provider } from "react-redux";
+import { type ComponentRenderOptions, render } from "vitest-browser-react";
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
 import {
 	type AuthContext,
@@ -12,15 +21,7 @@ import {
 	type RootState,
 	setupStore,
 } from "@/shared/store/store";
-import {
-	RouterProvider,
-	createMemoryHistory,
-	createRouter,
-} from "@tanstack/react-router";
-import { type RenderOptions, render } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
-import { IntlProvider } from "react-intl";
-import { Provider } from "react-redux";
+
 type Split<S extends string, D extends string> = string extends S
 	? string[]
 	: S extends ""
@@ -36,7 +37,7 @@ type RouteParams<R extends Route> = {
 };
 
 interface Options<R extends Route = Route>
-	extends Omit<RenderOptions, "queries"> {
+	extends Omit<ComponentRenderOptions, "queries"> {
 	preloadedState?: Partial<RootState>;
 	store?: AppStore;
 	route?: R;
@@ -45,6 +46,7 @@ interface Options<R extends Route = Route>
 }
 
 export function renderApp<R extends Route = Route>(options: Options<R>) {
+	localStorage.clear();
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
@@ -96,6 +98,9 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 	);
 	return {
 		...render(<Wrapper />, renderOptions),
+		store,
+		page,
+		router,
 		user: userEvent.setup(),
 	};
 }

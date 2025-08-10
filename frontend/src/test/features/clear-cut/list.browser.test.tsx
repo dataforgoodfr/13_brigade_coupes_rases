@@ -1,21 +1,22 @@
+import { describe, expect, it } from "vitest";
+import { worker } from "@/mocks/browser";
 import {
-	createClearCutReportBaseMock as createClearCutReportMock,
+	createClearCutReportResponseBaseMock as createClearCutReportMock,
 	mockClearCutsResponse,
 } from "@/mocks/clear-cuts";
-import { server } from "@/test/mocks/server";
 import { advancedFilters } from "@/test/page-object/advanced-filters";
 import { clearCuts } from "@/test/page-object/clear-cuts";
 import { renderApp } from "@/test/renderApp";
 import { filtersState } from "@/test/store/filters";
-import { describe, expect, it } from "vitest";
+
 describe("Clear cuts list", () => {
 	it("should render preview", async () => {
 		const report = createClearCutReportMock({
 			city: "TEST CITY",
 			comment: "TEST COMMENT",
-			average_location: { type: "Point", coordinates: [15, 15] },
+			averageLocation: { type: "Point", coordinates: [15, 15] },
 		});
-		server.use(
+		worker.use(
 			mockClearCutsResponse({
 				previews: [report],
 			}),

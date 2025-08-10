@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from app.models import ClearCut
+from app.schemas.base import BaseSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 
 
-class ClearCutBaseSchema(BaseModel):
+class ClearCutBaseSchema(BaseSchema):
     location: Point = Field(
         json_schema_extra={
             "example": {"type": "Point", "coordinates": [2.3522, 48.8566]},

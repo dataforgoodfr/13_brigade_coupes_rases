@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { ButtonProps } from "@/components/ui/button";
 import {
 	Command,
@@ -18,9 +20,6 @@ import { cn } from "@/lib/utils";
 import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import { ResetButton } from "@/shared/components/button/ResetButton";
 import type { SelectableItemEnhanced } from "@/shared/items";
-
-import { Check } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 
 export type SingleSelectComboboxProps<TItem> = {
 	type: "single";
@@ -134,39 +133,37 @@ export function Combobox<TItem>({
 			</PopoverTrigger>
 
 			<PopoverContent>
-				<>
-					<Command>
-						{commandInputProps && <CommandInput {...commandInputProps} />}
-						<CommandList>
-							{commandEmptyProps && <CommandEmpty {...commandEmptyProps} />}
-							<CommandGroup>
-								{localItems.map((enhancedItem) => (
-									<CommandItem
-										key={enhancedItem.value}
-										value={enhancedItem.value}
-										onSelect={() => {
-											toggle(enhancedItem);
-											if (closeAfterToggle) {
-												close();
-											}
-										}}
-									>
-										{enhancedItem.label}
-										<Check
-											className={cn(
-												"ml-auto",
-												enhancedItem.isSelected ? "opacity-100" : "opacity-0",
-											)}
-										/>
-									</CommandItem>
-								))}
-							</CommandGroup>
-						</CommandList>
-					</Command>
-					{hasReset && (
-						<ResetButton disabled={selectedItemsCount === 0} onClick={reset} />
-					)}
-				</>
+				<Command>
+					{commandInputProps && <CommandInput {...commandInputProps} />}
+					<CommandList>
+						{commandEmptyProps && <CommandEmpty {...commandEmptyProps} />}
+						<CommandGroup>
+							{localItems.map((enhancedItem) => (
+								<CommandItem
+									key={enhancedItem.value}
+									value={enhancedItem.value}
+									onSelect={() => {
+										toggle(enhancedItem);
+										if (closeAfterToggle) {
+											close();
+										}
+									}}
+								>
+									{enhancedItem.label}
+									<Check
+										className={cn(
+											"ml-auto",
+											enhancedItem.isSelected ? "opacity-100" : "opacity-0",
+										)}
+									/>
+								</CommandItem>
+							))}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+				{hasReset && (
+					<ResetButton disabled={selectedItemsCount === 0} onClick={reset} />
+				)}
 			</PopoverContent>
 		</Popover>
 	);

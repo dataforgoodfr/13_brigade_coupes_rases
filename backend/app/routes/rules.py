@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/rules", tags=["Rules"])
 
 
-@router.put("/{id}", status_code=204)
+@router.put("/{id}", status_code=204, response_model_exclude_none=True)
 def put_rule(
     id: int,
     rule: RuleBaseSchema,
@@ -25,7 +25,7 @@ def put_rule(
         sync_clear_cuts_reports(db)
 
 
-@router.put("", status_code=204)
+@router.put("", status_code=204, response_model_exclude_none=True)
 def put_rules(
     rules: RulesUpdateSchema,
     db=db_session,
@@ -36,13 +36,23 @@ def put_rules(
         sync_clear_cuts_reports(db)
 
 
-@router.get("/{id}", status_code=200, response_model=RuleResponseSchema)
+@router.get(
+    "/{id}",
+    status_code=200,
+    response_model=RuleResponseSchema,
+    response_model_exclude_none=True,
+)
 def get_rule(id: int, db=db_session):
     logger.info(db)
     return get_rule_by_id(db, id)
 
 
-@router.get("", status_code=200, response_model=list[RuleResponseSchema])
+@router.get(
+    "",
+    status_code=200,
+    response_model=list[RuleResponseSchema],
+    response_model_exclude_none=True,
+)
 def list_rules(db=db_session):
     logger.info(db)
     return get_rules(db)
