@@ -51,7 +51,7 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 							if (token) {
 								return api.extend({
 									headers: {
-										Authorization: `Bearer ${token.access_token}`,
+										Authorization: `Bearer ${token.accessToken}`,
 									},
 								});
 							}
