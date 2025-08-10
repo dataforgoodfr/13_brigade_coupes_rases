@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Accordion } from "radix-ui";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
 import { useLoggedUser } from "@/features/user/store/user.slice";
+import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
@@ -23,6 +25,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 		resolver: zodResolver(clearCutFormSchema),
 		values: clearCut,
 	});
+	const { toast } = useToast();
 
 	const handleSubmit = (formData: ClearCutForm) => {
 		dispatch(
@@ -32,6 +35,14 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 			}),
 		);
 	};
+
+	useEffect(() => {
+		if (submission.status === "success") {
+			toast({ title: "Formulaire modifié" });
+		} else {
+			toast({ title: "Erreur lors de la sauvegarde du formulaire !" });
+		}
+	}, [submission.status, toast]);
 
 	return (
 		<>

@@ -1,46 +1,46 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.3/schema.json",
-	"vcs": {
-		"enabled": false,
-		"clientKind": "git",
-		"useIgnoreFile": false
-	},
-	"files": {
-		"ignoreUnknown": false,
-		"includes": [
-			"vitest.config.ts",
-			"vite.config.ts",
-			"src/**/*",
-			"!src/routeTree.gen.ts",
-			"!node_modules",
-			"!dev-dist",
-			"!.storybook",
-			"!storybook-static",
-			"!dist",
-			"!public/mockServiceWorker.js",
-			"!test/features/clear-cutting/form"
-		]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab"
-	},
-	"assist": {
-		"actions": {
-			"source": { "organizeImports": "on" }
-		}
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"suspicious": { "noConsole": "error" },
-			"correctness": { "noUnusedImports": "error" }
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double"
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/2.1.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "vitest.config.ts",
+      "vite.config.ts",
+      "src/**/*",
+      "!src/routeTree.gen.ts",
+      "!node_modules",
+      "!dev-dist",
+      "!.storybook",
+      "!storybook-static",
+      "!dist",
+      "!public/mockServiceWorker.js",
+      "!test/features/clear-cutting/form"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
+  "assist": {
+    "actions": {
+      "source": { "organizeImports": "on" }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": { "noConsole": "error" },
+      "correctness": { "noUnusedImports": "error" }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
 }
