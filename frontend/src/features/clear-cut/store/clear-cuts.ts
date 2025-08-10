@@ -37,8 +37,8 @@ export const clearCutResponseSchema = z.object({
 	id: z.string(),
 	boundary: multiPolygonSchema,
 	location: pointSchema,
-	observationStartDate: z.string().date(),
-	observationEndDate: z.string().date(),
+	observationStartDate: z.iso.date(),
+	observationEndDate: z.iso.date(),
 	ecologicalZoningIds: z.string().array(),
 	areaHectare: z.number(),
 });
@@ -56,7 +56,7 @@ export type ClearCut = z.infer<typeof clearCutSchema>;
 
 export const publicUserSchema = z.object({
 	login: z.string(),
-	email: z.string().email(),
+	email: z.email(),
 });
 export type PublicUser = z.infer<typeof publicUserSchema>;
 export const clearCutReportResponseSchema = z.object({
@@ -69,15 +69,15 @@ export const clearCutReportResponseSchema = z.object({
 	averageLocation: pointSchema,
 	slopeAreaHectare: z.number().optional(),
 	departmentId: z.string(),
-	createdAt: z.string().date(),
-	updatedAt: z.string().date(),
+	createdAt: z.iso.date(),
+	updatedAt: z.iso.date(),
 	totalAreaHectare: z.number(),
 	totalBdfResinousAreaHectare: z.number().optional(),
 	totalBdfDeciduousAreaHectare: z.number().optional(),
 	totalBdfMixedAreaHectare: z.number().optional(),
 	totalBdfPoplarAreaHectare: z.number().optional(),
-	lastCutDate: z.string().date(),
-	satelliteImages: z.array(z.string().url()).optional(),
+	lastCutDate: z.iso.date(),
+	satelliteImages: z.array(z.url()).optional(),
 	rulesIds: z.array(z.string()),
 	affectedUser: publicUserSchema.optional(),
 });
@@ -177,7 +177,7 @@ const clearCutFormOtherSchema = z.object({
 const existingClearCurFormSchema = z.object({
 	id: z.string(),
 	reportId: z.string(),
-	createdAt: z.string().date(),
+	createdAt: z.iso.date(),
 });
 const clearCutFormSectionsResponseSchema = clearCutFormOtherSchema
 	.and(clearCutFormGroundSchema)

@@ -39,7 +39,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	useEffect(() => {
 		if (submission.status === "success") {
 			toast({ title: "Formulaire modifié" });
-		} else {
+		} else if (submission.status === "error") {
 			toast({ title: "Erreur lors de la sauvegarde du formulaire !" });
 		}
 	}, [submission.status, toast]);
