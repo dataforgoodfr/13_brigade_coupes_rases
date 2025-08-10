@@ -10,6 +10,7 @@
     "dev:mock:win": "set VITE_MOCK=true && vite",
     "cleanup": "biome check --write",
     "cleanup:tsc": "biome check --write && tsc",
+    "build:ci": "vite build",
     "build": "pnpm cleanup && tsc -b && vite build",
     "build:preview": "pnpm build && vite preview",
     "preview": "vite preview",
