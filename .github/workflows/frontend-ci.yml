@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install playwright
+        run: pnpm install:playwright
+        
       - name: Build project
         run: pnpm run build
 
