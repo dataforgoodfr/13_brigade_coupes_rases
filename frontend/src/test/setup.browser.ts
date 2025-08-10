@@ -2,6 +2,7 @@ import { worker } from "@/mocks/browser";
 import "@testing-library/jest-dom/vitest";
 import { configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import "react/jsx-dev-runtime";
 
 import "../index.css";
 
