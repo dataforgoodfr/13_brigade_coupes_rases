@@ -20,7 +20,7 @@ const RULES_PROPS = {
 	},
 };
 
-export function RulesPage() {
+export function RulesTab() {
 	const rules = useGetRules(["slope", "area", "ecological_zoning"]);
 
 	const dispatch = useAppDispatch();

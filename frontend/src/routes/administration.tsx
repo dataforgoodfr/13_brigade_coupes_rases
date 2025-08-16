@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RulesPage } from "@/features/admin/components/rules/RulesPage";
-import { UsersListPage } from "@/features/admin/components/users-list/UsersListPage";
+import { UsersListTab } from "@/features/admin/components/users-list/UsersListTab";
 import { Title } from "@/shared/components/typo/Title";
 
 export const Route = createFileRoute("/administration")({
@@ -25,20 +24,18 @@ export const Route = createFileRoute("/administration")({
 
 function RouteComponent() {
 	return (
-		<div className="flex flex-col gap-4 w-full h-full p-8">
+		<div className="flex flex-col gap-4 grow p-8">
 			<Title>ADMINISTRATION</Title>
-			<Tabs defaultValue="users" className="w-full h-full ">
+			<Tabs defaultValue="users" className="grow">
 				<TabsList>
 					<TabsTrigger value="users">Utilisateurs</TabsTrigger>
 					<TabsTrigger value="rules">Paramètres</TabsTrigger>
 				</TabsList>
 				<Outlet />
-				<TabsContent value="users">
-					<UsersListPage />
+				<TabsContent value="users" className=" flex flex-col gap-8 grow p-4">
+					<UsersListTab />
 				</TabsContent>
-				<TabsContent value="rules">
-					<RulesPage />
-				</TabsContent>
+				<TabsContent value="rules"></TabsContent>
 			</Tabs>
 		</div>
 	);

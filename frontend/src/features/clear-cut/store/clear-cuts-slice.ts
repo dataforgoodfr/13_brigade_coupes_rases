@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { uniqBy } from "lodash-es";
+import { uniqBy } from "es-toolkit";
 import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
@@ -60,7 +60,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
 		);
 		const ecologicalZonings = uniqBy(
 			baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
-			"id",
+			(e) => e.id,
 		);
 
 		const computedProperties = {

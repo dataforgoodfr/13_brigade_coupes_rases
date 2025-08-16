@@ -4,7 +4,7 @@ import type {
 	SortableKeys,
 } from "@/features/admin/store/filters";
 import type { Role } from "@/features/user/store/user";
-import type { Sort } from "@/shared/api/api";
+import type { ServerSideRequestKeys } from "@/shared/api/types";
 import {
 	listToSelectableItems,
 	type NamedId,
@@ -15,16 +15,25 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 
 interface FiltersState {
-	name: string;
+	fullTextSearch?: string;
 	roles: SelectableItem<Role>[];
 	departments: SelectableItem<NamedId>[];
+	email?: string;
+	login?: string;
+	firstName?: string;
+	lastName?: string;
 	ascSort: SortableKeys;
 	descSort: SortableKeys;
 	page: number;
 	size: number;
 }
+
+type FilterableKeys = Exclude<
+	keyof FiltersState,
+	ServerSideRequestKeys | "fullTextSearch"
+>;
+type TextFilterableKeys = Exclude<TextFilterableKeys, "departments" | "roles">;
 const initialState: FiltersState = {
-	name: "",
 	roles: [
 		{ isSelected: true, item: "admin" },
 		{ isSelected: true, item: "volunteer" },
@@ -33,18 +42,33 @@ const initialState: FiltersState = {
 	ascSort: [],
 	descSort: [],
 	page: 0,
-	size: 10,
+	size: 30,
 };
 
 export const usersFiltersSlice = createSlice({
 	initialState,
 	name: "usersFilters",
 	reducers: {
-		setName: (state, { payload }: PayloadAction<string>) => {
-			state.name = payload;
+		setFullTextSearch: (
+			state,
+			{ payload }: PayloadAction<string | undefined>,
+		) => {
+			state.fullTextSearch = payload === "" ? undefined : payload;
 		},
 		setRoles: (state, { payload }: PayloadAction<SelectableItem<Role>[]>) => {
 			state.roles = payload;
+		},
+		setEmail: (state, { payload }: PayloadAction<string | undefined>) => {
+			state.email = payload;
+		},
+		setLogin: (state, { payload }: PayloadAction<string | undefined>) => {
+			state.login = payload;
+		},
+		setFirstName: (state, { payload }: PayloadAction<string | undefined>) => {
+			state.firstName = payload;
+		},
+		setLastName: (state, { payload }: PayloadAction<string | undefined>) => {
+			state.lastName = payload;
 		},
 		toggleSort: (state, { payload }: PayloadAction<SortableKeys[number]>) => {
 			if (state.ascSort.includes(payload)) {
@@ -86,31 +110,35 @@ const selectState = (state: RootState) => state.usersFilters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
 	selectState,
 	({
-		name,
+		fullTextSearch,
 		roles,
+		email,
 		departments,
 		page,
 		size,
 		ascSort,
+		firstName,
+		lastName,
 		descSort,
-	}): FiltersRequest => {
-		return {
-			name,
-			roles: roles.filter((role) => role.isSelected).map((role) => role.item),
-			departmentsIds: departments
-				.filter((department) => department.isSelected)
-				.map((department) => department.item.id),
-			page,
-			size,
-			ascSort,
-			descSort,
-		};
-	},
+	}): FiltersRequest => ({
+		fullTextSearch,
+		email,
+		firstName,
+		lastName,
+		roles: roles.filter((role) => role.isSelected).map((role) => role.item),
+		departmentsIds: departments
+			.filter((department) => department.isSelected)
+			.map((department) => department.item.id),
+		page,
+		size,
+		ascSort,
+		descSort,
+	}),
 );
 
-export const selectName = createTypedDraftSafeSelector(
+export const selectFullTextSearch = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.name,
+	(state) => state.fullTextSearch,
 );
 
 export const selectRoles = createTypedDraftSafeSelector(
@@ -123,14 +151,17 @@ export const selectDepartments = createTypedDraftSafeSelector(
 	(state) => state.departments,
 );
 
-export const selectColumnSort = (column: SortableKeys[number]) =>
-	createTypedDraftSafeSelector(selectState, (state): Sort | undefined =>
+export const selectColumnSort = createTypedDraftSafeSelector(
+	[selectState, (_s, column: SortableKeys[number]) => column],
+	(state, column) =>
 		state.ascSort.includes(column)
 			? "asc"
 			: state.descSort.includes(column)
 				? "desc"
 				: undefined,
-	);
+);
+export const selectFilter = <Key extends FilterableKeys>(key: Key) =>
+	createTypedDraftSafeSelector(selectState, (state) => state[key]);
 export const selectPage = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.page,

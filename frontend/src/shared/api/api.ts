@@ -1,5 +1,4 @@
 import ky from "ky";
-import { z } from "zod";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
@@ -45,6 +44,3 @@ export const parseParam = (
 		searchParams.append(key, JSON.stringify(value));
 	}
 };
-
-export const sortSchema = z.enum(["asc", "desc"]);
-export type Sort = z.infer<typeof sortSchema>;

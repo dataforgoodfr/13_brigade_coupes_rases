@@ -4,7 +4,8 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
+import { upperFirst } from "es-toolkit";
+import { useMemo } from "react";
 import {
 	Table,
 	TableBody,
@@ -14,106 +15,132 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import type { User } from "@/features/admin/store/users";
-import {
-	selectMetadata,
-	selectUsers,
-} from "@/features/admin/store/users.slice";
+import { selectUsers } from "@/features/admin/store/users.slice";
 import {
 	selectColumnSort,
-	selectPage,
+	selectDepartments,
+	selectFilter,
+	selectRoles,
 	usersFiltersSlice,
 } from "@/features/admin/store/users-filters.slice";
+import { Badge } from "@/shared/components/Badge";
 import { SortingButton } from "@/shared/components/button/SortingButton";
-import Pagination from "@/shared/components/Pagination";
+import { Input } from "@/shared/components/input/Input";
+import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import {
+	namedIdTranslator,
+	selectableItemToString,
+	useEnhancedItems,
+} from "@/shared/items";
 
 const columnHelper = createColumnHelper<User>();
+type Props = {
+	label: string;
+	field: "firstName" | "lastName" | "login" | "email";
+};
+const TextHeader = ({ label, field }: Props) => {
+	const dispatch = useAppDispatch();
+	const firstName = useAppSelector(selectFilter<typeof field>(field));
+	const firstNameSort = useAppSelector((s) => selectColumnSort(s, field));
+	const action: `set${Capitalize<typeof field>}` = `set${upperFirst(field) as Capitalize<typeof field>}`;
+	return (
+		<div className="flex grow items-center gap-1">
+			<label htmlFor={field}>{label}</label>
+			<Input
+				id={field}
+				value={firstName}
+				onChange={(e) => {
+					dispatch(usersFiltersSlice.actions[action](e.target.value));
+				}}
+			/>
+			<SortingButton
+				sort={firstNameSort}
+				onClick={() => dispatch(usersFiltersSlice.actions.toggleSort(field))}
+			></SortingButton>
+		</div>
+	);
+};
+
+const RoleHeader = () => {
+	const dispatch = useAppDispatch();
+	const roleSort = useAppSelector((s) => selectColumnSort(s, "role"));
+	const roles = useEnhancedItems(
+		useAppSelector(selectRoles),
+		selectableItemToString,
+		selectableItemToString,
+	);
+	return (
+		<>
+			<ComboboxFilter
+				type="multiple"
+				countPreview
+				hasInput
+				hasReset
+				label="Rôle"
+				items={roles}
+				changeOnClose={(roles) =>
+					dispatch(usersFiltersSlice.actions.setRoles(roles))
+				}
+			/>
+			<SortingButton
+				sort={roleSort}
+				onClick={() => dispatch(usersFiltersSlice.actions.toggleSort("role"))}
+			/>
+		</>
+	);
+};
 
 export const UsersList: React.FC = () => {
 	const users = useAppSelector(selectUsers);
-	const metadata = useAppSelector(selectMetadata);
 	const dispatch = useAppDispatch();
-	const page = useAppSelector(selectPage);
-	const firstnameSort = useAppSelector(selectColumnSort("firstname"));
-	const lastnameSort = useAppSelector(selectColumnSort("lastname"));
-	const emailSort = useAppSelector(selectColumnSort("email"));
-	const loginSort = useAppSelector(selectColumnSort("login"));
-	const roleSort = useAppSelector(selectColumnSort("role"));
 
+	const departments = useEnhancedItems(
+		useAppSelector(selectDepartments),
+		namedIdTranslator,
+		namedIdTranslator,
+	);
 	const columns = [
-		columnHelper.accessor("firstname", {
-			id: "firstname",
-			header: () => (
-				<SortingButton
-					sort={firstnameSort}
-					onClick={() =>
-						dispatch(usersFiltersSlice.actions.toggleSort("firstname"))
-					}
-				>
-					Prénom
-				</SortingButton>
-			),
+		columnHelper.accessor("firstName", {
+			id: "firstName",
+			header: () => <TextHeader field="firstName" label="Prénom" />,
 		}),
-		columnHelper.accessor("lastname", {
-			id: "lastname",
-			header: () => (
-				<SortingButton
-					sort={lastnameSort}
-					onClick={() =>
-						dispatch(usersFiltersSlice.actions.toggleSort("lastname"))
-					}
-				>
-					Nom
-				</SortingButton>
-			),
+		columnHelper.accessor("lastName", {
+			id: "lastName",
+			header: () => <TextHeader field="lastName" label="Nom" />,
 		}),
 		columnHelper.accessor("login", {
 			id: "login",
-			header: () => (
-				<SortingButton
-					sort={loginSort}
-					onClick={() =>
-						dispatch(usersFiltersSlice.actions.toggleSort("login"))
-					}
-				>
-					Pseudo
-				</SortingButton>
-			),
+			header: () => <TextHeader field="login" label="Pseudo" />,
 		}),
 		columnHelper.accessor("email", {
 			id: "email",
-			header: () => (
-				<SortingButton
-					sort={emailSort}
-					onClick={() =>
-						dispatch(usersFiltersSlice.actions.toggleSort("email"))
-					}
-				>
-					Email
-				</SortingButton>
-			),
+			header: () => <TextHeader field="email" label="Email" />,
 		}),
 		columnHelper.accessor("role", {
 			id: "role",
-			header: () => (
-				<SortingButton
-					sort={roleSort}
-					onClick={() => dispatch(usersFiltersSlice.actions.toggleSort("role"))}
-				>
-					Rôle
-				</SortingButton>
-			),
+			header: RoleHeader,
 		}),
 		columnHelper.accessor("departments", {
 			id: "departments",
-			header: () => <span>Départements</span>,
+			header: () => (
+				<ComboboxFilter
+					type="multiple"
+					countPreview
+					hasInput
+					hasReset
+					label="Départements"
+					items={departments}
+					changeOnClose={(departments) =>
+						dispatch(usersFiltersSlice.actions.setDepartments(departments))
+					}
+				/>
+			),
 			cell: (info) => {
 				const departments = info.getValue();
-
 				if (!departments?.length) {
 					return null;
 				}
-
 				return (
 					<span className="flex flex-wrap gap-1">
 						{departments.map((department) => (
@@ -129,54 +156,40 @@ export const UsersList: React.FC = () => {
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 	});
+	const headerGroups = useMemo(() => table.getHeaderGroups(), [table]);
 	return (
-		<div className="flex flex-col gap-4 overflow-auto">
-			<Table className="w-full table-fixed">
-				<TableHeader>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
+		<Table className="table-fixed ">
+			<TableHeader>
+				{headerGroups.map((headerGroup) => (
+					<TableRow key={headerGroup.id}>
+						{headerGroup.headers.map((header) => {
+							return (
+								<TableHead key={header.id}>
+									{flexRender(
+										header.column.columnDef.header,
+										header.getContext(),
+									)}
+								</TableHead>
+							);
+						})}
+					</TableRow>
+				))}
+			</TableHeader>
+			<TableBody>
+				{table.getRowModel().rows.map((row) => {
+					return (
+						<TableRow key={row.id}>
+							{row.getVisibleCells().map((cell) => {
 								return (
-									<TableHead key={header.id}>
-										{flexRender(
-											header.column.columnDef.header,
-											header.getContext(),
-										)}
-									</TableHead>
+									<TableCell key={cell.id}>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</TableCell>
 								);
 							})}
 						</TableRow>
-					))}
-				</TableHeader>
-				<TableBody>
-					{table.getRowModel().rows.map((row) => {
-						return (
-							<TableRow key={row.id}>
-								{row.getVisibleCells().map((cell) => {
-									return (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									);
-								})}
-							</TableRow>
-						);
-					})}
-				</TableBody>
-			</Table>
-
-			{metadata && (
-				<Pagination
-					currentPage={page}
-					setCurrentPage={(newPage) => {
-						dispatch(usersFiltersSlice.actions.setPage(newPage));
-					}}
-					pagesCount={metadata?.pagesCount}
-				/>
-			)}
-		</div>
+					);
+				})}
+			</TableBody>
+		</Table>
 	);
 };

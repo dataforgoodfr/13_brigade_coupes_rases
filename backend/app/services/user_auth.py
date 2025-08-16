@@ -5,8 +5,9 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
-
+from pydantic.alias_generators import to_snake
 from app.config import settings
 from app.deps import db_session
 from app.schemas.base import BaseSchema
@@ -26,6 +27,16 @@ SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60
 
+
+
+class TokenSnakeCase(BaseModel):
+    access_token: str
+    token_type: str
+    model_config = ConfigDict(
+        alias_generator=to_snake,
+        populate_by_name=True,
+        from_attributes=True,
+    )
 
 class Token(BaseSchema):
     access_token: str

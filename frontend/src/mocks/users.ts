@@ -63,8 +63,8 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 
 const fakeUsers: AdminUserResponse[] = range(10, () => ({
 	id: faker.string.uuid(),
-	firstname: faker.person.firstName(),
-	lastname: faker.person.lastName(),
+	firstName: faker.person.firstName(),
+	lastName: faker.person.lastName(),
 	role: faker.helpers.arrayElement(["admin", "volunteer"]),
 	departments: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
 	login: faker.internet.username(),

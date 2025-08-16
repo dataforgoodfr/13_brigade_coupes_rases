@@ -12,8 +12,8 @@ def new_user(
     login=None,
 ):
     return User(
-        firstname="Houba",
-        lastname="Houba",
+        first_name="Houba",
+        last_name="Houba",
         login="HoubaHouba" if login is None else login,
         email="houba.houba@marsupilami.com" if email is None else email,
         role="volunteer" if role is None else role,

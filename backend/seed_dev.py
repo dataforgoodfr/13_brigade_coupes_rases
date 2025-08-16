@@ -51,16 +51,16 @@ def seed_database():
         [natura1, natura2] = seed_ecological_zonings(db)
         seed_rules(db, [natura1, natura2])
         admin = User(
-            firstname="Crysta",
-            lastname="Faerie",
+            first_name="Crysta",
+            last_name="Faerie",
             login="CrystaFaerie",
             email="admin@example.com",
             role="admin",
             password=get_password_hash("admin"),
         )
         volunteer = User(
-            firstname="Pips",
-            lastname="Sprite",
+            first_name="Pips",
+            last_name="Sprite",
             login="PipsSprite",
             email="volunteer@example.com",
             role="volunteer",

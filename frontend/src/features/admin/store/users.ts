@@ -7,8 +7,8 @@ export const userResponseSchema = z.object({
 	id: z.string(),
 	login: z.string(),
 	email: z.string(),
-	firstname: z.string(),
-	lastname: z.string(),
+	firstName: z.string(),
+	lastName: z.string(),
 	role: roleSchema,
 	departments: z.array(z.string()),
 });

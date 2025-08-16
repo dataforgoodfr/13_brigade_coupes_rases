@@ -12,6 +12,8 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
+    Index,
+    text,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -22,6 +24,10 @@ from sqlalchemy.orm import (
 )
 
 from app.database import Base
+
+from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.event import listens_for
+from sqlalchemy.sql import func
 
 SRID = 4326
 
@@ -99,8 +105,8 @@ class User(Base):
     ROLES = ["admin", "volunteer"]
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    firstname: Mapped[str] = mapped_column(String, nullable=False)
-    lastname: Mapped[str] = mapped_column(String, nullable=False)
+    first_name: Mapped[str] = mapped_column(String, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, nullable=False)
     login: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
@@ -108,11 +114,17 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False
     )
-    # TODO: updated_at is not set when departments are updated
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    # Full-text search column
+    search_vector: Mapped[str] = mapped_column(String, nullable=True)
+
+    __table_args__ = (
+        Index("ix_users_search_vector", "search_vector", postgresql_using="gin"),
+    )
 
     departments = relationship(
         "Department",
@@ -120,6 +132,7 @@ class User(Base):
         back_populates="users",
         cascade="all, delete",
     )
+
     reports = relationship(
         "ClearCutReport", back_populates="user", cascade="all, delete"
     )
@@ -131,7 +144,17 @@ class User(Base):
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
 
-
+@listens_for(User, "before_insert")
+@listens_for(User, "before_update")
+def update_search_vector(mapper, connection, target):
+    connection.execute(
+        text("""
+            UPDATE users
+            SET search_vector = concat(first_name,last_name,login,email)
+            WHERE id = :id
+        """),
+        {"id": target.id}
+    )
 class Department(Base):
     __tablename__ = "departments"
 

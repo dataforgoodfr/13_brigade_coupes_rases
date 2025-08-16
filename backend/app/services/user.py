@@ -1,12 +1,14 @@
 from logging import getLogger
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import func
+from sqlalchemy.orm import Session, aliased
 
-from app.models import Department, User
+from app.models import Department, User, user_department
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
 from app.services.get_password_hash import get_password_hash
+from pydantic.alias_generators import to_snake
 
 logger = getLogger(__name__)
 
@@ -18,8 +20,8 @@ def user_to_user_response_schema(user: User) -> UserResponseSchema:
         created_at=user.created_at,
         role=user.role,
         updated_at=user.updated_at,
-        firstname=user.firstname,
-        lastname=user.lastname,
+        first_name=user.first_name,
+        last_name=user.last_name,
         login=user.login,
         email=user.email,
         departments=[str(department.id) for department in user.departments],
@@ -28,8 +30,8 @@ def user_to_user_response_schema(user: User) -> UserResponseSchema:
 
 def create_user(db: Session, user: UserCreateSchema) -> User:
     new_user = User(
-        firstname=user.firstname,
-        lastname=user.lastname,
+        first_name=user.first_name,
+        last_name=user.last_name,
         login=user.login,
         email=user.email,
         role=user.role,
@@ -51,9 +53,48 @@ def create_user(db: Session, user: UserCreateSchema) -> User:
 
 
 def get_users(
-    db: Session, url: str, page: int = 0, size: int = 10
+    db: Session,
+    url: str,
+    page: int,
+    size: int,
+    full_text_search:str,
+    email: str,
+    login: str,
+    first_name: str,
+    last_name: str,
+    roles: list[str],
+    departments_ids: list[str],
+    asc_sort: list[str],
+    desc_sort: list[str],
 ) -> PaginationResponseSchema[UserResponseSchema]:
-    users = db.query(User).offset(page * size).limit(size).all()
+    query = db.query(User)
+    for sort in asc_sort:
+        query = query.order_by(User.__table__.c[to_snake(sort)])
+    for sort in desc_sort:
+        query = query.order_by(User.__table__.c[to_snake(sort)].desc())
+    if email is not None:
+        query = query = query.filter(User.email.ilike(f"%{email}%"))
+    if login is not None:
+        query = query.filter(User.login.ilike(f"%{login}%"))
+    if first_name is not None:
+        query = query.filter(User.first_name.ilike(f"%{first_name}%"))
+    if last_name is not None:
+        query = query.filter(User.last_name.ilike(f"%{last_name}%"))
+    if roles is not None:
+        query = query.filter(User.role.in_(roles))
+    if full_text_search is not None:
+        print(full_text_search)
+        query = query.filter(User.search_vector.ilike(f"%{full_text_search}%"))
+    
+    if departments_ids is not None and len(departments_ids) > 0:
+        matching_departments = (
+            db.query(user_department)
+            .filter(user_department.c.department_id.in_(departments_ids))
+            .subquery()
+        )
+        aliased(user_department, matching_departments, name="matching_departments")
+        query = query.join(matching_departments)
+    users = query.offset(page * size).limit(size).all()
     users_count = db.query(User.id).count()
     return PaginationResponseSchema(
         metadata=PaginationMetadataSchema.create(

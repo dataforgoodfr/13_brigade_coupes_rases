@@ -14,8 +14,8 @@ def seed_database():
         seed_cities_departments(db)
         paris = db.query(Department).filter_by(code="75").first()
         admin = User(
-            firstname="Crysta",
-            lastname="Faerie",
+            first_name="Crysta",
+            last_name="Faerie",
             login="CrystaFaerie",
             email="admin@example.com",
             role="admin",

@@ -80,3 +80,26 @@ export const paginationResponseSchema = <TValue extends z.ZodType>(
 export type PaginationResponse<TValue> = z.infer<
 	ReturnType<typeof paginationResponseSchema<z.ZodType<TValue>>>
 >;
+
+export function sortedRequest<T extends z.ZodType>(keySchema: T) {
+	return z.object({
+		ascSort: keySchema,
+		descSort: keySchema,
+	});
+}
+export const paginatedRequestSchema = z.object({
+	page: z.number(),
+	size: z.number(),
+});
+
+export function serverSideRequestSchema<
+	Base extends z.ZodObject,
+	Key extends z.ZodType,
+>(baseSchema: Base, keySchema: Key) {
+	return baseSchema
+		.extend(paginatedRequestSchema)
+		.extend(sortedRequest(keySchema));
+}
+const emptySortedRequestSchemaKeys = sortedRequest(z.string()).keyof().or(paginatedRequestSchema.keyof());
+
+export type ServerSideRequestKeys = z.infer<typeof emptySortedRequestSchemaKeys>;

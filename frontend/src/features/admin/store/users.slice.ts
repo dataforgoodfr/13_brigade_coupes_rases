@@ -16,6 +16,8 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 
+const EMPTY_USERS: User[] = [];
+
 type State = {
 	users: RequestedContent<PaginatedUsers>;
 };
@@ -67,7 +69,7 @@ export const selectStatus = createTypedDraftSafeSelector(
 );
 export const selectUsers = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.users.value?.content ?? [],
+	(state) => state.users.value?.content ?? EMPTY_USERS,
 );
 export const selectMetadata = createTypedDraftSafeSelector(
 	selectState,
