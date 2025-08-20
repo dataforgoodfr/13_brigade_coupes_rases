@@ -1,0 +1,69 @@
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { UserForm } from "@/features/admin/components/users-list/UserForm";
+import {
+	createUserThunk,
+	selectCreatedUser,
+} from "@/features/admin/store/users.slice";
+import { useToast } from "@/hooks/use-toast";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+
+const Header = () => (
+	<DialogHeader>
+		<DialogTitle>Ajouter un utilisateur</DialogTitle>
+		<DialogDescription>
+			Ajoutez un nouveau bénévole ou administrateur en remplissant les
+			informations ci-dessous.
+		</DialogDescription>
+	</DialogHeader>
+);
+const Footer = () => (
+	<DialogFooter>
+		<DialogClose asChild>
+			<Button variant="zinc">Annuler</Button>
+		</DialogClose>
+		<Button type="submit">Enregistrer</Button>
+	</DialogFooter>
+);
+export function CreateUserDialog() {
+	const dispatch = useAppDispatch();
+	const { toast } = useToast();
+	const createdUser = useAppSelector(selectCreatedUser);
+	const [isOpen, setIsOpen] = useState(false);
+	useEffect(() => {
+		if (createdUser.status === "success") {
+			toast({ title: `Utilisateur ${createdUser.value?.login} créé` });
+			setIsOpen(false);
+		} else if (createdUser.status === "error") {
+			toast({
+				title: "La création de l'utilisateur a échoué",
+				description: createdUser.error?.detail.content,
+				variant: "destructive",
+			});
+		}
+	}, [createdUser, toast]);
+	return (
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+			<DialogTrigger asChild>
+				<Button>Ajouter</Button>
+			</DialogTrigger>
+			<DialogContent>
+				<UserForm
+					onSubmit={(form) => dispatch(createUserThunk(form))}
+					header={<Header />}
+					footer={<Footer />}
+				></UserForm>
+			</DialogContent>
+		</Dialog>
+	);
+}

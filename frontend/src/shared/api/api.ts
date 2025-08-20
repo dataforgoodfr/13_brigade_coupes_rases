@@ -1,10 +1,11 @@
 import ky from "ky";
+import z from "zod";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
 	hooks: {
 		beforeError: [
-			(error) => {
+			async (error) => {
 				const { response } = error;
 				if (response.status === 401) {
 					error.name = UNAUTHORIZED_ERROR_NAME;
@@ -44,3 +45,13 @@ export const parseParam = (
 		searchParams.append(key, JSON.stringify(value));
 	}
 };
+
+export const toApiErrorSchema = <
+	Type extends z.ZodLiteral,
+	Content extends z.ZodType = z.ZodString,
+>(
+	type: Type,
+	content: Content,
+) => z.object({ detail: z.object({ type, content: content }) });
+export const toStringApiErrorSchema = <Type extends z.ZodLiteral>(type: Type) =>
+	toApiErrorSchema(type, z.string());

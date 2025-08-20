@@ -1,6 +1,8 @@
-import { createSelector, createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
+import { useAppSelector } from "@/shared/hooks/store";
+import type { NamedId, SelectableItem } from "@/shared/items";
 import {
 	type ReferentialResponse,
 	referentialSchemaResponse,
@@ -54,7 +56,7 @@ function selectByIds<
 	T extends keyof State["value"],
 	K extends keyof State["value"][T],
 >(property: T) {
-	return createSelector(
+	return createTypedDraftSafeSelector(
 		[selectState, (_s: RootState, ids: K[] = []) => ids],
 		(referential: State, ids: K[] = []) =>
 			ids
@@ -74,7 +76,7 @@ function selectByIdsDifferent<
 	T extends keyof State["value"],
 	K extends keyof State["value"][T],
 >(property: T) {
-	return createSelector(
+	return createTypedDraftSafeSelector(
 		[selectState, (_s: RootState, ids: K[] = []) => ids],
 		(referential: State, ids: K[] = []) =>
 			Object.entries(referential.value[property])
@@ -82,6 +84,21 @@ function selectByIdsDifferent<
 				.map(([id, value]) => ({ id, ...value })),
 	);
 }
+
+const selectSelectableItemsNamedId = createTypedDraftSafeSelector(
+	[selectState, (_s, property) => property],
+	<K extends "departments">(s: State, property: K) => {
+		return Object.entries(s.value[property]).map(
+			([k, v]) =>
+				({
+					isSelected: false,
+					item: { id: k, name: v.name },
+				}) satisfies SelectableItem<NamedId>,
+		);
+	},
+);
+export const useSelectSelectableDepartments = () =>
+	useAppSelector((s) => selectSelectableItemsNamedId(s, "departments"));
 
 export const selectDepartmentsByIds = selectByIds("departments");
 export const selectRulesByIds = selectByIds("rules");

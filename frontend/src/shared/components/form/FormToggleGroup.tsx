@@ -1,65 +1,51 @@
 import type { FieldValues } from "react-hook-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	type FormProps,
-} from "./Form";
+import { FormFieldLayout } from "@/shared/components/form/FormFieldLayout";
+import { FormField, FormMessage, type FormProps } from "./Form";
+
+const toggleGroupItemClass =
+	"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)";
 
 export function FormToggleGroup<T extends FieldValues = FieldValues>({
 	control,
 	name,
-	label,
 	disabled = false,
+	...props
 }: FormProps<T>) {
-	const toggleGroupItemClass =
-		"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)";
-
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => {
 				return (
-					<FormItem>
-						{label && (
-							<FormLabel className="font-bold block">{label}</FormLabel>
-						)}
-						<FormControl>
-							<ToggleGroup
-								className="shadow-[0px_2px_6px_0px_#00000033] max-w-fit ml-1 my-2"
-								type="single"
-								disabled={disabled}
-								value={field.value === null ? "null" : String(field.value)}
-								onValueChange={(newValue: string) => {
-									const valueMap: Record<string, boolean | null> = {
-										true: true,
-										false: false,
-										null: null,
-										"": null,
-									};
-									field.onChange(valueMap[newValue]);
-								}}
-							>
-								<ToggleGroupItem
-									className={toggleGroupItemClass}
-									value={"true"}
-								>
-									Oui
-								</ToggleGroupItem>
-								<ToggleGroupItem className={toggleGroupItemClass} value="false">
-									Non
-								</ToggleGroupItem>
-								<ToggleGroupItem className={toggleGroupItemClass} value="null">
-									Pas d'informations
-								</ToggleGroupItem>
-							</ToggleGroup>
-						</FormControl>
+					<FormFieldLayout {...props}>
+						<ToggleGroup
+							className="shadow-[0px_2px_6px_0px_#00000033] max-w-fit ml-1 my-2"
+							type="single"
+							disabled={disabled}
+							value={field.value === null ? "null" : String(field.value)}
+							onValueChange={(newValue: string) => {
+								const valueMap: Record<string, boolean | null> = {
+									true: true,
+									false: false,
+									null: null,
+									"": null,
+								};
+								field.onChange(valueMap[newValue]);
+							}}
+						>
+							<ToggleGroupItem className={toggleGroupItemClass} value="true">
+								Oui
+							</ToggleGroupItem>
+							<ToggleGroupItem className={toggleGroupItemClass} value="false">
+								Non
+							</ToggleGroupItem>
+							<ToggleGroupItem className={toggleGroupItemClass} value="null">
+								Pas d'informations
+							</ToggleGroupItem>
+						</ToggleGroup>
 						<FormMessage />
-					</FormItem>
+					</FormFieldLayout>
 				);
 			}}
 		/>

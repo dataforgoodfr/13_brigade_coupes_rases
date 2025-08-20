@@ -1,14 +1,15 @@
+import secrets
 from logging import getLogger
 
-from fastapi import HTTPException, status
-from sqlalchemy import func
+from fastapi import status
+from pydantic.alias_generators import to_snake
 from sqlalchemy.orm import Session, aliased
 
+from app.common.errors import AppHTTPException
 from app.models import Department, User, user_department
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
-from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from app.schemas.user import UserResponseSchema, UserUpdateSchema
 from app.services.get_password_hash import get_password_hash
-from pydantic.alias_generators import to_snake
 
 logger = getLogger(__name__)
 
@@ -28,22 +29,36 @@ def user_to_user_response_schema(user: User) -> UserResponseSchema:
     )
 
 
-def create_user(db: Session, user: UserCreateSchema) -> User:
+def create_user(db: Session, user: UserUpdateSchema) -> User:
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email or User.login == user.login)
+        .first()
+    )
+    if existing_user is not None:
+        raise AppHTTPException(
+            status_code=409,
+            type="  ",
+            detail="A user already has the same login or the same email",
+        )
+    password = secrets.token_urlsafe(10)
     new_user = User(
         first_name=user.first_name,
         last_name=user.last_name,
         login=user.login,
         email=user.email,
         role=user.role,
-        password=get_password_hash(user.password),
+        password=get_password_hash(password),
     )
     for department_id in user.departments:
         department_db = (
-            db.query(Department).filter(Department.id == department_id).first()
+            db.query(Department).filter(Department.id == int(department_id)).first()
         )
         if department_db is None:
-            raise HTTPException(
-                status_code=404, detail=f"Item with id {department_db} not found"
+            raise AppHTTPException(
+                status_code=404,
+                type="DEPARTMENT_NOT_FOUND",
+                detail=f"Department with id {department_db} not found",
             )
         new_user.departments.append(department_db)
     db.add(new_user)
@@ -57,7 +72,7 @@ def get_users(
     url: str,
     page: int,
     size: int,
-    full_text_search:str,
+    full_text_search: str,
     email: str,
     login: str,
     first_name: str,
@@ -85,7 +100,7 @@ def get_users(
     if full_text_search is not None:
         print(full_text_search)
         query = query.filter(User.search_vector.ilike(f"%{full_text_search}%"))
-    
+
     if departments_ids is not None and len(departments_ids) > 0:
         matching_departments = (
             db.query(user_department)
@@ -107,8 +122,10 @@ def get_users(
 def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
     user = db.get(User, id)
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="USER_NOT_FOUND",
+            detail=f"User {id} not found",
         )
     return user_to_user_response_schema(user)
 
@@ -116,8 +133,10 @@ def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
 def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
     if not user_db:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"User {id} not found"
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="USER_NOT_FOUND",
+            detail=f"User {id} not found",
         )
     update_data = user_in.model_dump(exclude_unset=True)
 
@@ -129,8 +148,9 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
                     db.query(Department).filter(Department.id == department_id).first()
                 )
                 if department_db is None:
-                    raise HTTPException(
+                    raise AppHTTPException(
                         status_code=404,
+                        type="DEPARTMENT_NOT_FOUND",
                         detail=f"Item with id {department_db} not found",
                     )
                 user_db.departments.append(department_db)

@@ -20,7 +20,7 @@ def test_create_user(client: TestClient, db: Session):
     )
 
     assert response.status_code == 201
-    data = response.json()
+    data = client.get(response.headers["location"]).json()
 
     assert data["id"] is not None
     assert data["createdAt"] is not None
@@ -82,7 +82,7 @@ def test_update_user(client, db):
     update_response = client.put(
         f"/api/v1/users/{user.id}",
         json={
-            "first_name": "Sorenza",
+            "firstName": "Sorenza",
         },
     )
     assert update_response.status_code == 200
@@ -92,7 +92,7 @@ def test_update_user(client, db):
     assert get_response.status_code == 200
     data = get_response.json()
 
-    assert data["first_name"] == "Sorenza"
+    assert data["firstName"] == "Sorenza"
 
 
 def test_get_users(client, db):

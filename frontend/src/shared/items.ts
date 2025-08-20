@@ -1,4 +1,5 @@
 import { type ReactNode, useMemo, useState } from "react";
+import z from "zod";
 
 export interface NamedId<
 	TId extends string = string,
@@ -7,6 +8,8 @@ export interface NamedId<
 	id: TId;
 	name: TName;
 }
+export const toSelectableItemSchema = <T extends z.ZodType>(itemSchema: T) =>
+	z.object({ isSelected: z.boolean(), item: itemSchema });
 export interface SelectableItem<T> {
 	isSelected: boolean;
 	item: T;
@@ -82,33 +85,54 @@ export function recordToSelectableItemsTransformed<TItem, TTransformed = TItem>(
 				item: transform(key, item),
 			}));
 }
+const labelledValueSchema = z.object({ label: z.string(), value: z.string() });
+
+export type LabelledValue = { label: ReactNode; value: string };
 export type SelectableItemEnhanced<T> = SelectableItem<T> & {
 	prefix?: ReactNode;
-	label: ReactNode;
-	value: string;
-};
+} & LabelledValue;
+export const toSelectableItemEnhancedSchema = <T extends z.ZodType>(
+	itemSchema: T,
+) =>
+	z
+		.object({ isSelected: z.boolean(), item: itemSchema, prefix: z.string() })
+		.and(labelledValueSchema);
 export function recordToNamedId(record?: Record<string, string>): NamedId[] {
 	return record === undefined
 		? []
 		: Object.entries(record).map(([k, v]) => ({ id: k, name: v }));
 }
+const EMPTY_ITEMS: unknown[] = [];
 
+export type UseEnhancedItemsOptions<
+	TItem,
+	TLabel extends ReactNode,
+	TValue extends string = string,
+> = {
+	items: readonly SelectableItem<TItem>[] | undefined;
+	getItemLabel: (item: SelectableItem<TItem>) => TLabel;
+	getItemValue: (item: SelectableItem<TItem>) => TValue;
+};
 export const useEnhancedItems = <
 	TItem,
 	TLabel extends ReactNode,
 	TValue extends string = string,
->(
-	items: readonly SelectableItem<TItem>[],
-	getItemLabel: (item: SelectableItem<TItem>) => TLabel,
-	getItemValue: (item: SelectableItem<TItem>) => TValue,
-): SelectableItemEnhanced<TItem>[] =>
+>({
+	items,
+	getItemLabel,
+	getItemValue,
+}: UseEnhancedItemsOptions<
+	TItem,
+	TLabel,
+	TValue
+>): SelectableItemEnhanced<TItem>[] =>
 	useMemo(
 		() =>
-			items.map((item) => ({
+			items?.map((item) => ({
 				...item,
 				label: getItemLabel(item),
 				value: getItemValue(item),
-			})),
+			})) ?? (EMPTY_ITEMS as SelectableItemEnhanced<TItem>[]),
 		[items, getItemLabel, getItemValue],
 	);
 

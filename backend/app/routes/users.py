@@ -1,12 +1,11 @@
 from logging import getLogger
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.hateoas import PaginationResponseSchema
-from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from app.schemas.user import UserResponseSchema, UserUpdateSchema
 from app.services.user import (
     create_user,
     get_user_by_id,
@@ -23,17 +22,17 @@ router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
 @router.post(
     "/",
-    response_model=UserResponseSchema,
     status_code=201,
-    response_model_exclude_none=True,
 )
 def create_new_user(
-    item: UserCreateSchema,
+    response: Response,
+    item: UserUpdateSchema,
     db=db_session,
     _=Depends(get_admin_user),
-) -> UserResponseSchema:
+):
     logger.info(db)
-    return user_to_user_response_schema(create_user(db, item))
+    created_user = user_to_user_response_schema(create_user(db, item))
+    response.headers["location"] = f"/api/v1/users/{created_user.id}"
 
 
 @router.get(

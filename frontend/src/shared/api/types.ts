@@ -100,6 +100,10 @@ export function serverSideRequestSchema<
 		.extend(paginatedRequestSchema)
 		.extend(sortedRequest(keySchema));
 }
-const emptySortedRequestSchemaKeys = sortedRequest(z.string()).keyof().or(paginatedRequestSchema.keyof());
+const emptySortedRequestSchemaKeys = sortedRequest(z.string())
+	.keyof()
+	.or(paginatedRequestSchema.keyof());
 
-export type ServerSideRequestKeys = z.infer<typeof emptySortedRequestSchemaKeys>;
+export type ServerSideRequestKeys = z.infer<
+	typeof emptySortedRequestSchemaKeys
+>;

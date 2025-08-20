@@ -16,11 +16,11 @@ export function EcologicalZoningRuleComponent({
 	className,
 	updateEcologicalZonings,
 }: Props) {
-	const items = useEnhancedItems(
-		ecologicalZonings,
-		(item) => item.item.name,
-		(item) => item.item.id,
-	);
+	const items = useEnhancedItems({
+		items: ecologicalZonings,
+		getItemLabel: (item) => item.item.name,
+		getItemValue: (item) => item.item.id,
+	});
 	return (
 		<RuleLayout
 			className={className}

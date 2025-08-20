@@ -32,6 +32,7 @@ type FormS3ImageFieldProps<T extends FieldValues> = FormFieldRenderProps<T> & {
 	onSelectedImageIndexChanged: (index: number) => void;
 } & Forms3ImageUploadProps<T>;
 
+const EMPTY_ARRAY: string[] = [];
 function FormS3ImageField<T extends FieldValues>({
 	onPreviewUrlsChanged,
 	previewUrls,
@@ -80,29 +81,22 @@ function FormS3ImageField<T extends FieldValues>({
 	};
 	// // Load existing images from S3 keys when form value changes (on mount or external change)
 	useEffect(() => {
-		const loadExistingImages = async () => {
-			if (field.value && Array.isArray(field.value) && field.value.length > 0) {
-				// Check if these are S3 keys (not blob URLs)
-				const s3Keys = field.value.filter(
-					(item: string) =>
-						typeof item === "string" && !item.startsWith("blob:"),
-				);
+		if (field.value && Array.isArray(field.value) && field.value.length > 0) {
+			// Check if these are S3 keys (not blob URLs)
+			const s3Keys = field.value.filter(
+				(item: string) => typeof item === "string" && !item.startsWith("blob:"),
+			);
 
-				if (s3Keys.length > 0) {
-					try {
-						const viewableUrls = await getViewableUrls(s3Keys);
-						setUploadedImages(s3Keys);
-						onPreviewUrlsChanged(viewableUrls);
-					} catch (_e) {}
-				}
-			} else if (!field.value || field.value.length === 0) {
-				// Clear images if form value is empty
-				setUploadedImages([]);
-				onPreviewUrlsChanged([]);
+			if (s3Keys.length > 0) {
+				getViewableUrls(s3Keys).then((viewableUrls) => {
+					setUploadedImages(s3Keys);
+					onPreviewUrlsChanged(viewableUrls);
+				});
 			}
-		};
-
-		loadExistingImages();
+		} else if (!field.value || field.value.length === 0) {
+			setUploadedImages(EMPTY_ARRAY);
+			onPreviewUrlsChanged(EMPTY_ARRAY);
+		}
 	}, [field.value, getViewableUrls, onPreviewUrlsChanged]);
 
 	return (

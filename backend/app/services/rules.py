@@ -1,8 +1,8 @@
 from functools import reduce
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Query, Session
 
+from app.common.errors import AppHTTPException
 from app.models import Rules
 from app.schemas.rule import (
     AllRules,
@@ -53,7 +53,11 @@ def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
 def find_rule_by_id(db: Session, id: int) -> Rules:
     found_rule = db.get(Rules, id)
     if found_rule is None:
-        raise HTTPException(status_code=404, detail=f"Rule with id {id} not found")
+        raise AppHTTPException(
+            status_code=404,
+            type="RULE_NOT_FOUND",
+            detail=f"Rule with id {id} not found",
+        )
     return found_rule
 
 
@@ -75,8 +79,10 @@ def list_rules(db: Session) -> AllRules:
     ecological_zoning_rule = query_ecological_zoning_rule(db).first()
 
     if area_rule is None or slope_rule is None or ecological_zoning_rule is None:
-        raise HTTPException(
-            status_code=404, detail="One or more required rules not found"
+        raise AppHTTPException(
+            status_code=404,
+            type="RULE_NOT_FOUND",
+            detail="One or more required rules not found",
         )
 
     return AllRules(

@@ -1,7 +1,7 @@
-from fastapi import HTTPException
 from geoalchemy2.functions import ST_AsGeoJSON
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.models import ClearCut, ClearCutEcologicalZoning
 from app.schemas.clear_cut import (
     ClearCutResponseSchema,
@@ -31,7 +31,9 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponseSchema:
         .first()
     )
     if result is None:
-        raise HTTPException(status_code=404, detail="ClearCut not found")
+        raise AppHTTPException(
+            status_code=404, type="CLEAR_CUT_NOT_FOUND", detail="ClearCut not found"
+        )
     clearcut: ClearCut
     boundary: str
     location: str

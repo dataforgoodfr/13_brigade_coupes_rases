@@ -32,7 +32,6 @@ type FilterableKeys = Exclude<
 	keyof FiltersState,
 	ServerSideRequestKeys | "fullTextSearch"
 >;
-type TextFilterableKeys = Exclude<TextFilterableKeys, "departments" | "roles">;
 const initialState: FiltersState = {
 	roles: [
 		{ isSelected: true, item: "admin" },

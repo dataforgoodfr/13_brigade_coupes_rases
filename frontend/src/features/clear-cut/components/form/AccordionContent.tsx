@@ -94,6 +94,8 @@ export default function AccordionContent({
 								case "inputText":
 									return render ? (
 										<FormInput
+											orientation="vertical"
+											align="start"
 											type="text"
 											key={item.name}
 											control={form.control}
@@ -120,6 +122,8 @@ export default function AccordionContent({
 								case "datePicker":
 									return render ? (
 										<FormDatePicker
+											align="start"
+											orientation="vertical"
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -144,6 +148,8 @@ export default function AccordionContent({
 								case "textArea":
 									return render ? (
 										<FormTextArea
+											orientation="vertical"
+											align="start"
 											key={item.name}
 											control={form.control}
 											name={item.name}

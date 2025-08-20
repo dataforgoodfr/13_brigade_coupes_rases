@@ -1,11 +1,12 @@
 from logging import getLogger
 
-from fastapi import HTTPException, status
+from fastapi import status
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
 from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
 from app.schemas.clear_cut_report import (
     ClearCutReportPutRequestSchema,
@@ -220,15 +221,21 @@ def update_clear_cut_report(
     user_id = None
     if connected_user.role == "volunteer":
         if request.user_id is not None and request.user_id != connected_user.id:
-            raise HTTPException(
-                status_code=403, detail="Volunteer could not assign an other user"
+            raise AppHTTPException(
+                status_code=403,
+                type="INVALID_REQUESTER_RIGHTS",
+                detail="Volunteer could not assign an other user",
             )
         user_id = connected_user.id
     if connected_user.role == "admin":
         user_id = request.user_id
     report = db.get(ClearCutReport, id)
     if not report:
-        raise HTTPException(status_code=404, detail="Clear cut report not found")
+        raise AppHTTPException(
+            status_code=404,
+            type="REPORT_NOT_FOUND",
+            detail="Clear cut report not found",
+        )
 
     report.user_id = user_id
 
@@ -254,8 +261,10 @@ def find_clearcuts_reports(
 def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
     report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if report is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Report not found by id {id}"
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
+            detail=f"Report not found by id {id}",
         )
     return report
 

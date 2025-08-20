@@ -1,3 +1,4 @@
+import { CreateUserDialog } from "@/features/admin/components/users-list/CreateUserDialog";
 import { Filters } from "@/features/admin/components/users-list/Filters";
 import { Pagination } from "@/features/admin/components/users-list/Pagination";
 import { UsersList } from "@/features/admin/components/users-list/UsersList";
@@ -9,7 +10,11 @@ export const UsersListTab: React.FC = () => {
 	return (
 		<>
 			<h1 className="text-2xl font-bold">Liste des utilisateurs</h1>
-			<Filters />
+			<div className="flex justify-between">
+				<Filters />
+				<CreateUserDialog />
+			</div>
+
 			<div className="flex gap-4 grow  overflow-auto h-0">
 				<UsersList />
 			</div>

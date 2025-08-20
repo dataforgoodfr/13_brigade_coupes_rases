@@ -1,8 +1,9 @@
 from logging import getLogger
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.deps import db_session
 from app.models import CLEARCUT_STATUSES
 from app.schemas.clear_cut_map import (
@@ -32,7 +33,7 @@ def get_clearcuts_report_by_id(
     try:
         return get_report_preview_by_id(db, report_id=report_id)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise AppHTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get(
@@ -144,6 +145,6 @@ def get_clearcuts_map(
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise AppHTTPException(status_code=500, detail=str(e)) from e
 
     return clearcuts

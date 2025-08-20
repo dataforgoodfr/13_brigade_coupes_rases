@@ -1,11 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { trimStart } from "es-toolkit";
 import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/admin/store/filters";
 import {
+	type CreateUserError,
+	type CreateUserRequest,
+	createUserErrorSchema,
 	type PaginatedUsers,
 	type PaginatedUsersResponse,
 	paginatedUsersResponseSchema,
 	type User,
+	type UserForm,
+	type UserResponse,
+	userResponseSchema,
 } from "@/features/admin/store/users";
 import { selectFiltersRequest } from "@/features/admin/store/users-filters.slice";
 import { requestToParams } from "@/shared/api/api";
@@ -20,11 +27,31 @@ const EMPTY_USERS: User[] = [];
 
 type State = {
 	users: RequestedContent<PaginatedUsers>;
+	createdUser: RequestedContent<UserResponse, CreateUserError>;
 };
+
+export const createUserThunk = createAppAsyncThunk<UserResponse, UserForm>(
+	"createUser",
+	async (request, { extra: { api } }) => {
+		const response = await api().post<PaginatedUsersResponse>("api/v1/users", {
+			json: {
+				...request,
+				departments: request.departments
+					.filter((d) => d.isSelected)
+					.map((d) => d.item.id),
+			} satisfies CreateUserRequest,
+		});
+
+		const createdUser = await api()
+			.get(trimStart(response.headers.get("location") as string, "/"))
+			.json();
+		return userResponseSchema.parse(createdUser);
+	},
+);
 export const getUsersThunk = createAppAsyncThunk<
 	PaginatedUsers,
 	FiltersRequest
->("users/getUsers", async (request, { extra: { api }, getState }) => {
+>("getUsers", async (request, { extra: { api }, getState }) => {
 	const result = await api()
 		.get<PaginatedUsersResponse>("api/v1/users", {
 			searchParams: requestToParams(request),
@@ -43,9 +70,12 @@ export const getUsersThunk = createAppAsyncThunk<
 		}),
 	};
 });
-
+const initialState: State = {
+	users: { status: "idle" },
+	createdUser: { status: "idle" },
+};
 export const usersSlice = createSlice({
-	initialState: { users: { status: "idle" } } as State,
+	initialState,
 	name: "users",
 	reducers: {},
 	extraReducers: (builder) => {
@@ -58,6 +88,18 @@ export const usersSlice = createSlice({
 		});
 		builder.addCase(getUsersThunk.pending, (state) => {
 			state.users.status = "loading";
+		});
+		builder.addCase(createUserThunk.fulfilled, (state, { payload }) => {
+			state.createdUser.value = payload;
+			state.createdUser.status = "success";
+		});
+		builder.addCase(createUserThunk.rejected, (state, { payload }) => {
+			const parsedPayload = createUserErrorSchema.parse(payload);
+			state.createdUser.status = "error";
+			state.createdUser.error = parsedPayload;
+		});
+		builder.addCase(createUserThunk.pending, (state) => {
+			state.createdUser.status = "loading";
 		});
 	},
 });
@@ -74,6 +116,10 @@ export const selectUsers = createTypedDraftSafeSelector(
 export const selectMetadata = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.users.value?.metadata,
+);
+export const selectCreatedUser = createTypedDraftSafeSelector(
+	selectState,
+	(s) => s.createdUser,
 );
 export const useGetUsers = () => {
 	const request = useAppSelector(selectFiltersRequest);

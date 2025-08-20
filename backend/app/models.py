@@ -9,12 +9,13 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Table,
-    Index,
     text,
 )
+from sqlalchemy.event import listens_for
 from sqlalchemy.orm import (
     Mapped,
     column_property,
@@ -24,10 +25,6 @@ from sqlalchemy.orm import (
 )
 
 from app.database import Base
-
-from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.event import listens_for
-from sqlalchemy.sql import func
 
 SRID = 4326
 
@@ -144,6 +141,7 @@ class User(Base):
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
 
+
 @listens_for(User, "before_insert")
 @listens_for(User, "before_update")
 def update_search_vector(mapper, connection, target):
@@ -153,8 +151,10 @@ def update_search_vector(mapper, connection, target):
             SET search_vector = concat(first_name,last_name,login,email)
             WHERE id = :id
         """),
-        {"id": target.id}
+        {"id": target.id},
     )
+
+
 class Department(Base):
     __tablename__ = "departments"
 

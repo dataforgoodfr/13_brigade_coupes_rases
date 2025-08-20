@@ -4,6 +4,7 @@ import {
 	createListenerMiddleware,
 	isRejected,
 } from "@reduxjs/toolkit";
+import type { KyOptions } from "node_modules/ky/distribution/types/options";
 import { rulesSlice } from "@/features/admin/store/rules.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
@@ -46,16 +47,17 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 			getDefaultMiddleware({
 				thunk: {
 					extraArgument: {
-						api: () => {
+						api: (options: KyOptions = {}) => {
 							const token = getStoredToken();
 							if (token) {
 								return api.extend({
+									...options,
 									headers: {
 										Authorization: `Bearer ${token.accessToken}`,
 									},
 								});
 							}
-							return api;
+							return api.extend(options);
 						},
 					},
 				},

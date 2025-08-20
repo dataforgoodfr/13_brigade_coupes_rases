@@ -179,9 +179,9 @@ export const FormMessage = forwardRef<
 });
 FormMessage.displayName = "FormMessage";
 
-export type FormProps<T extends FieldValues> = {
+export type FormProps<T extends FieldValues, N extends Path<T> = Path<T>> = {
 	control: Control<T>;
-	name: Path<T>;
+	name: N;
 	label?: string;
 	disabled?: boolean;
 	placeholder?: string;

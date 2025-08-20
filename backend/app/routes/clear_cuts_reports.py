@@ -1,8 +1,9 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Header, Response, status
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.config import settings
 from app.deps import db_session
 from app.models import User
@@ -42,7 +43,9 @@ def sync_clear_cut_reports(db=db_session):
 
 def authenticate(x_imports_token: str = Header(default="")):
     if x_imports_token != settings.IMPORTS_TOKEN or x_imports_token == "":
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise AppHTTPException(
+            status_code=401, type="INVALID_TOKEN", detail="Invalid token"
+        )
 
 
 @router.post(
@@ -57,7 +60,9 @@ def post_report(
         clearcut = create_clear_cut_report(db, params)
         response.headers["location"] = f"/api/v1/clear-cuts-reports/{clearcut.id}"
     except ValueError as err:
-        raise HTTPException(status_code=400, detail=str(err)) from err
+        raise AppHTTPException(
+            status_code=400, type="INVALID_REPORT", detail=str(err)
+        ) from err
 
 
 @router.get(

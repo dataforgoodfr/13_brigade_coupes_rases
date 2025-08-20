@@ -38,12 +38,13 @@ export type ComboboxProps<TItem> = {
 	commandInputProps?: Omit<CommandInputProps, "children">;
 	commandEmptyProps?: CommandEmptyProps;
 	buttonProps?: ButtonProps;
-	items: SelectableItemEnhanced<TItem>[];
+	items?: SelectableItemEnhanced<TItem>[];
 	closeAfterToggle?: boolean;
 } & (SingleSelectComboboxProps<TItem> | MultiSelectComboboxProps<TItem>);
 
+const EMPTY_ARRAY: unknown[] = [];
 export function Combobox<TItem>({
-	items,
+	items = EMPTY_ARRAY as SelectableItemEnhanced<TItem>[],
 	buttonProps,
 	commandInputProps,
 	commandEmptyProps,

@@ -65,11 +65,11 @@ const TextHeader = ({ label, field }: Props) => {
 const RoleHeader = () => {
 	const dispatch = useAppDispatch();
 	const roleSort = useAppSelector((s) => selectColumnSort(s, "role"));
-	const roles = useEnhancedItems(
-		useAppSelector(selectRoles),
-		selectableItemToString,
-		selectableItemToString,
-	);
+	const roles = useEnhancedItems({
+		items: useAppSelector(selectRoles),
+		getItemLabel: selectableItemToString,
+		getItemValue: selectableItemToString,
+	});
 	return (
 		<>
 			<ComboboxFilter
@@ -95,11 +95,11 @@ export const UsersList: React.FC = () => {
 	const users = useAppSelector(selectUsers);
 	const dispatch = useAppDispatch();
 
-	const departments = useEnhancedItems(
-		useAppSelector(selectDepartments),
-		namedIdTranslator,
-		namedIdTranslator,
-	);
+	const departments = useEnhancedItems({
+		items: useAppSelector(selectDepartments),
+		getItemLabel: namedIdTranslator,
+		getItemValue: namedIdTranslator,
+	});
 	const columns = [
 		columnHelper.accessor("firstName", {
 			id: "firstName",

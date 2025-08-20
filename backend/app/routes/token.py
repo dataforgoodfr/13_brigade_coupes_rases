@@ -17,7 +17,7 @@ def generate_token(
     db=db_session,
     referer: Annotated[str | None, Header()] = None,
 ):
-    if referer.endswith("docs"):
+    if referer is not None and referer.endswith("docs"):
         token = create_token(db, user.username, user.password)
         return TokenSnakeCase(
             access_token=token.access_token, token_type=token.token_type

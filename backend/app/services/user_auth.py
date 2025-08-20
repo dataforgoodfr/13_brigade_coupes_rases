@@ -2,12 +2,14 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy.orm import Session
 from pydantic.alias_generators import to_snake
+from sqlalchemy.orm import Session
+
+from app.common.errors import AppHTTPException
 from app.config import settings
 from app.deps import db_session
 from app.schemas.base import BaseSchema
@@ -28,7 +30,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60
 
 
-
 class TokenSnakeCase(BaseModel):
     access_token: str
     token_type: str
@@ -37,6 +38,7 @@ class TokenSnakeCase(BaseModel):
         populate_by_name=True,
         from_attributes=True,
     )
+
 
 class Token(BaseSchema):
     access_token: str
@@ -83,8 +85,9 @@ def get_optional_current_user(
 
 
 def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
+    credentials_exception = AppHTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
+        type="INVALID_CREDENTIALS",
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -106,15 +109,20 @@ def get_admin_user(
     current_user=Depends(get_current_user),
 ):
     if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="User should have admin role")
+        raise AppHTTPException(
+            status_code=403,
+            type="INVALID_REQUESTER",
+            detail="User should have admin role",
+        )
     return current_user
 
 
 def create_token(db: Session, email: str, password: str):
     user = authenticate_user(db, email, password)
     if not user:
-        raise HTTPException(
+        raise AppHTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
+            type="INVALID_CREDENTIALS",
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
