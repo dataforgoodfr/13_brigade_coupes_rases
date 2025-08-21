@@ -1,7 +1,7 @@
 from logging import getLogger
 from math import sqrt
 
-from fastapi import HTTPException, status
+from fastapi import status
 from geoalchemy2.functions import (
     ST_AsGeoJSON,
     ST_Centroid,
@@ -15,6 +15,7 @@ from geojson_pydantic import Point
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.models import (
     SRID,
     City,
@@ -158,8 +159,9 @@ def get_report_preview_by_id(
 ) -> ClearCutReportPreviewSchema:
     report = query_clearcuts_filtered(db, Filters(report_id=report_id)).first()
     if report is None:
-        raise HTTPException(
+        raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
             detail=f"Clear cut report {report_id} not found",
         )
     return report_to_report_preview_schema(report)

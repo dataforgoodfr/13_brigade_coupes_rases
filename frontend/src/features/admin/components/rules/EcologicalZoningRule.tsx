@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { RuleLayout } from "@/features/admin/components/rules/RuleLayout";
 import type { EcologicalZoningRule } from "@/features/admin/store/rules.slice";
 import { Badge } from "@/shared/components/Badge";
@@ -16,15 +17,16 @@ export function EcologicalZoningRuleComponent({
 	className,
 	updateEcologicalZonings,
 }: Props) {
-	const items = useEnhancedItems(
-		ecologicalZonings,
-		(item) => item.item.name,
-		(item) => item.item.id,
-	);
+	const items = useEnhancedItems({
+		items: ecologicalZonings,
+		getItemLabel: (item) => item.item.name,
+		getItemValue: (item) => item.item.id,
+	});
+	const id = `ecologicalZoning${nanoid()}`;
 	return (
 		<RuleLayout
 			className={className}
-			inputId="ecological_zoning"
+			inputId={id}
 			label="Classification zones protégées Natura 2000"
 			hint="Déclenche une alerte si une coupe ≥ 0,5 ha se trouve dans l’une des zones protégées sélectionnées."
 		>
@@ -33,7 +35,7 @@ export function EcologicalZoningRuleComponent({
 				countPreview
 				hasInput
 				hasReset
-				id="ecological_zoning"
+				id={id}
 				label="Zones"
 				items={items}
 				changeOnClose={updateEcologicalZonings}

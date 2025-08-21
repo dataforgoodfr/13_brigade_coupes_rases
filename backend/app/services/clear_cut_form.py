@@ -1,8 +1,9 @@
 from logging import getLogger
 
-from fastapi import HTTPException, status
+from fastapi import status
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.models import ClearCutForm, ClearCutReport, User
 from app.schemas.clear_cut_form import (
     ClearCutFormCreate,
@@ -18,8 +19,9 @@ logger = getLogger(__name__)
 def get_clear_cut_form_by_id(db: Session, form_id: int) -> ClearCutFormResponse:
     report_form = db.get(ClearCutForm, form_id)
     if report_form is None:
-        raise HTTPException(
+        raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
             detail=f"Report form not found by id {form_id}",
         )
 

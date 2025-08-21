@@ -16,7 +16,7 @@ export function AsideList() {
 	const { value } = useAppSelector(selectClearCuts);
 	const { setLayout } = useLayout();
 	return (
-		<div id="aside-list" className="flex flex-col w-full">
+		<div className="flex flex-col w-full">
 			<Collapsible>
 				<div className="flex justify-between  items-center mt-5 sm:mt-14 border-b-1 border-zinc-200 px-3 py-2">
 					<Title className="text-primary">COUPES RASES</Title>

@@ -289,7 +289,7 @@ function itShouldHaveDisabledState(
 		.filter(
 			(item) => item.renderConditions.length === 0 && item.type !== "fixed",
 		)
-		.map((item) => {
+		.forEach((item) => {
 			it(`should display the ${item.type} for "${
 				item.label ?? item.name
 			}", its label, and it should be ${

@@ -1,4 +1,4 @@
-import { take } from "lodash-es";
+import { take } from "es-toolkit";
 import { useState } from "react";
 import {
 	PaginationContent,
@@ -16,19 +16,21 @@ type Props = {
 	currentPage: number;
 	setCurrentPage: (page: number) => void;
 	pagesCount: number;
+	className?: string;
 };
 
 export const Pagination: React.FC<Props> = ({
 	currentPage,
 	setCurrentPage,
 	pagesCount,
+	className,
 }) => {
 	const [nbOfDisplayedPages, setNbOfDisplayedPages] = useState(
 		DISPLAYED_PAGES_CHUNK,
 	);
 
 	return (
-		<PaginationUI>
+		<PaginationUI className={className}>
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious
@@ -53,7 +55,7 @@ export const Pagination: React.FC<Props> = ({
 						<PaginationItem key={index}>
 							<PaginationLink
 								isActive={currentPage === index + 1}
-								onClick={() => setCurrentPage(index + 1)}
+								onClick={() => setCurrentPage(index)}
 								className="cursor-pointer"
 							>
 								{index + 1}

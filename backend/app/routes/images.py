@@ -2,6 +2,7 @@ from logging import getLogger
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.common.errors import AppHTTPException
 from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
 from app.services.s3 import s3_service
@@ -43,8 +44,9 @@ def generate_upload_url(
             "image/webp",
         ]
         if request.content_type not in allowed_types:
-            raise HTTPException(
+            raise AppHTTPException(
                 status_code=400,
+                type="INVALID_CONTENT_TYPE",
                 detail=f"Content type {request.content_type} not allowed. Allowed types: {allowed_types}",
             )
 
@@ -53,6 +55,7 @@ def generate_upload_url(
         if request.file_size and request.file_size > max_size:
             raise HTTPException(
                 status_code=400,
+                type="FILE_SIZE_EXCEDEED",
                 detail=f"File size {request.file_size} exceeds maximum allowed size of {max_size} bytes",
             )
 
@@ -74,7 +77,7 @@ def generate_upload_url(
 
     except Exception as e:
         logger.error(f"Failed to generate upload URL: {str(e)}")
-        raise HTTPException(
+        raise AppHTTPException(
             status_code=500, detail="Failed to generate upload URL"
         ) from e
 

@@ -15,7 +15,7 @@ type ComboboxFilterWithoutInputProps<TItem> = Omit<
 type ComboboxFilterWithInputProps<TItem> = ComboboxProps<TItem> & {
 	hasInput: true;
 };
-export type ComboboxFilterProps<TItem> = { label: string } & (
+export type ComboboxFilterProps<TItem> = { label?: string } & (
 	| ComboboxFilterWithoutInputProps<TItem>
 	| ComboboxFilterWithInputProps<TItem>
 ) &

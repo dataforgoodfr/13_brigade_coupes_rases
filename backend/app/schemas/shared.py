@@ -5,8 +5,8 @@ from app.schemas.base import BaseSchema
 
 
 class UserBaseSchema(BaseSchema):
-    firstname: str = Field(default_factory=str, json_schema_extra={"example": "John"})
-    lastname: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
+    first_name: str = Field(default_factory=str, json_schema_extra={"example": "John"})
+    last_name: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
     login: str = Field(default_factory=str, json_schema_extra={"example": "JognTree78"})
     email: EmailStr = Field(
         default_factory=EmailStr, json_schema_extra={"example": "john.tree@canope.com"}

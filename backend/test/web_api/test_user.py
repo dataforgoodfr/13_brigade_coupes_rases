@@ -8,8 +8,8 @@ from test.common.user import get_admin_user_token, get_volunteer_user_token, new
 def test_create_user(client: TestClient, db: Session):
     token = get_admin_user_token(client, db)[1]
     userJson = {
-        "firstname": "John",
-        "lastname": "Tree",
+        "first_name": "John",
+        "last_name": "Tree",
         "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
         "password": "password",
@@ -20,7 +20,7 @@ def test_create_user(client: TestClient, db: Session):
     )
 
     assert response.status_code == 201
-    data = response.json()
+    data = client.get(response.headers["location"]).json()
 
     assert data["id"] is not None
     assert data["createdAt"] is not None
@@ -32,8 +32,8 @@ def test_create_user_without_admin_right_should_return_forbidden(
 ):
     token = get_volunteer_user_token(client, db)[1]
     userJson = {
-        "firstname": "John",
-        "lastname": "Tree",
+        "first_name": "John",
+        "last_name": "Tree",
         "login": "JohnTree78",
         "email": "john.tree2@yahoo.com",
         "password": "password",
@@ -78,21 +78,21 @@ def test_update_user(client, db):
     db.commit()
     db.refresh(user)
 
-    # Update firstname
+    # Update first_name
     update_response = client.put(
         f"/api/v1/users/{user.id}",
         json={
-            "firstname": "Sorenza",
+            "firstName": "Sorenza",
         },
     )
-    assert update_response.status_code == 200
+    assert update_response.status_code == 204
 
     # Check updated datas
     get_response = client.get(f"/api/v1/users/{user.id}")
     assert get_response.status_code == 200
     data = get_response.json()
 
-    assert data["firstname"] == "Sorenza"
+    assert data["firstName"] == "Sorenza"
 
 
 def test_get_users(client, db):
