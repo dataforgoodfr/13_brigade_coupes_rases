@@ -9,19 +9,21 @@ export type Props = {
 	orientation?: Orientation;
 	withControl?: boolean;
 	align?: Align;
+	gap?: number;
 };
 
 export type FormFieldLayoutProps = Omit<Props, "children">;
 export function FormFieldLayout({
 	label,
 	children,
+	gap = 2,
 	align = "center",
 	orientation = "horizontal",
 	withControl = true,
 }: Props) {
 	return (
 		<FormItem
-			className={clsx(`flex gap-4 items-${align}`, {
+			className={clsx(`flex gap-${gap} items-${align}`, {
 				"flex-col": orientation === "vertical",
 			})}
 		>

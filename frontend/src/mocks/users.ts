@@ -75,8 +75,8 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
 	const roles = url.searchParams.getAll("roles");
-	const page = Number.parseInt(url.searchParams.get("page") as string);
-	const size = Number.parseInt(url.searchParams.get("size") as string);
+	const page = Number.parseInt(url.searchParams.get("page") as string, 10);
+	const size = Number.parseInt(url.searchParams.get("size") as string, 10);
 	const departments_ids = url.searchParams.getAll("departments_ids");
 
 	const users = fakeUsers.filter((user) => {

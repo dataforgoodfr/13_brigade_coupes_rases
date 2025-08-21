@@ -14,6 +14,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { UpdateUserDialog } from "@/features/admin/components/users-list/UpdateUserDialog";
 import type { User } from "@/features/admin/store/users";
 import { selectUsers } from "@/features/admin/store/users.slice";
 import {
@@ -150,6 +151,7 @@ export const UsersList: React.FC = () => {
 				);
 			},
 		}),
+		columnHelper.display({ id: "action" }),
 	];
 	const table = useReactTable({
 		data: users,
@@ -158,7 +160,7 @@ export const UsersList: React.FC = () => {
 	});
 	const headerGroups = useMemo(() => table.getHeaderGroups(), [table]);
 	return (
-		<Table className="table-fixed ">
+		<Table className="table-fixed">
 			<TableHeader>
 				{headerGroups.map((headerGroup) => (
 					<TableRow key={headerGroup.id}>
@@ -186,6 +188,9 @@ export const UsersList: React.FC = () => {
 									</TableCell>
 								);
 							})}
+							<TableCell>
+								<UpdateUserDialog {...row.original} />
+							</TableCell>
 						</TableRow>
 					);
 				})}

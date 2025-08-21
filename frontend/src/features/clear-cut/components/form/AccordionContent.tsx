@@ -33,7 +33,11 @@ ccForm.set(ecoZoneKey, ecoZoneValue);
 ccForm.set(actorsKey, actorsValue);
 ccForm.set(regulationsKey, regulationsValue);
 ccForm.set(otherInfoKey, otherInfoValue);
-
+const COMMON_PROPS = {
+	gap: 1,
+	orientation: "vertical",
+	align: "start",
+} as const;
 export default function AccordionContent({
 	form,
 }: {
@@ -94,8 +98,7 @@ export default function AccordionContent({
 								case "inputText":
 									return render ? (
 										<FormInput
-											orientation="vertical"
-											align="start"
+											{...COMMON_PROPS}
 											type="text"
 											key={item.name}
 											control={form.control}
@@ -109,6 +112,7 @@ export default function AccordionContent({
 								case "inputFile":
 									return render ? (
 										<FormS3ImageUpload
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -122,8 +126,7 @@ export default function AccordionContent({
 								case "datePicker":
 									return render ? (
 										<FormDatePicker
-											align="start"
-											orientation="vertical"
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -136,6 +139,7 @@ export default function AccordionContent({
 								case "switch":
 									return render ? (
 										<FormSwitch
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -148,8 +152,7 @@ export default function AccordionContent({
 								case "textArea":
 									return render ? (
 										<FormTextArea
-											orientation="vertical"
-											align="start"
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -162,6 +165,7 @@ export default function AccordionContent({
 								case "toggleGroup":
 									return render ? (
 										<FormToggleGroup
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}

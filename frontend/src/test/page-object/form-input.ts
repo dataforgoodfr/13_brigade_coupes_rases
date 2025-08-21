@@ -129,7 +129,7 @@ function toggleGroupField<Form extends FieldValues>(
 	);
 	const allDisabled = async () => {
 		const buttonsGroup = await findElement();
-		return Array.from(buttonsGroup.children).every((button) =>
+		return Array.from(buttonsGroup.children[0].children).every((button) =>
 			button.hasAttribute("disabled"),
 		);
 	};

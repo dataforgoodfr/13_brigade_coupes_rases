@@ -8,6 +8,7 @@ from app.schemas.hateoas import PaginationResponseSchema
 from app.schemas.user import UserResponseSchema, UserUpdateSchema
 from app.services.user import (
     create_user,
+    delete_user_by_id,
     get_user_by_id,
     get_users,
     update_user,
@@ -81,14 +82,19 @@ def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
     return get_user_by_id(id, db)
 
 
+@router.delete(
+    "/{id}",
+    status_code=204,
+)
+def delete_user(id: int, db: Session = db_session):
+    logger.info(db)
+    return delete_user_by_id(id, db)
+
+
 @router.put(
     "/{id}",
-    response_model=UserResponseSchema,
-    status_code=200,
-    response_model_exclude_none=True,
+    status_code=204,
 )
-def update_existing_user(
-    id: int, item: UserUpdateSchema, db: Session = db_session
-) -> UserResponseSchema:
+def update_existing_user(id: int, item: UserUpdateSchema, db: Session = db_session):
     logger.info(db)
-    return user_to_user_response_schema(update_user(id, item, db))
+    update_user(id, item, db)

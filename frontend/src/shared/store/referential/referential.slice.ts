@@ -81,7 +81,10 @@ function selectByIdsDifferent<
 		(referential: State, ids: K[] = []) =>
 			Object.entries(referential.value[property])
 				.filter(([id]) => !ids.includes(id as K))
-				.map(([id, value]) => ({ id, ...value })),
+				.map(
+					([id, value]) =>
+						({ id, ...value }) as State["value"][T][K] & { id: K },
+				),
 	);
 }
 

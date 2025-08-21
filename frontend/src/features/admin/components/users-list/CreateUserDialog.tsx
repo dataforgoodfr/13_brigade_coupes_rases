@@ -13,7 +13,8 @@ import {
 import { UserForm } from "@/features/admin/components/users-list/UserForm";
 import {
 	createUserThunk,
-	selectCreatedUser,
+	selectEditedUser,
+	usersSlice,
 } from "@/features/admin/store/users.slice";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -28,7 +29,7 @@ const Header = () => (
 	</DialogHeader>
 );
 const Footer = () => (
-	<DialogFooter>
+	<DialogFooter className="mt-4">
 		<DialogClose asChild>
 			<Button variant="zinc">Annuler</Button>
 		</DialogClose>
@@ -38,12 +39,13 @@ const Footer = () => (
 export function CreateUserDialog() {
 	const dispatch = useAppDispatch();
 	const { toast } = useToast();
-	const createdUser = useAppSelector(selectCreatedUser);
+	const createdUser = useAppSelector(selectEditedUser);
 	const [isOpen, setIsOpen] = useState(false);
 	useEffect(() => {
 		if (createdUser.status === "success") {
 			toast({ title: `Utilisateur ${createdUser.value?.login} créé` });
 			setIsOpen(false);
+			dispatch(usersSlice.actions.resetEditedUser());
 		} else if (createdUser.status === "error") {
 			toast({
 				title: "La création de l'utilisateur a échoué",
@@ -51,7 +53,7 @@ export function CreateUserDialog() {
 				variant: "destructive",
 			});
 		}
-	}, [createdUser, toast]);
+	}, [createdUser, toast, dispatch]);
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>

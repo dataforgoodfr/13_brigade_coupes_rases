@@ -14,8 +14,8 @@ export const userResponseSchema = z.object({
 	role: roleSchema,
 	departments: z.array(z.string()),
 });
-export const createUserRequestSchema = userResponseSchema.omit({ id: true });
-export type CreateUserRequest = z.infer<typeof createUserRequestSchema>;
+export const editUserRequestSchema = userResponseSchema.omit({ id: true });
+export type EditUserRequest = z.infer<typeof editUserRequestSchema>;
 export const userFormSchema = userResponseSchema
 	.omit({
 		id: true,
@@ -39,8 +39,14 @@ export type User = z.infer<typeof userSchema>;
 export const paginatedUsersSchema = paginationResponseSchema(userSchema);
 export type PaginatedUsers = z.infer<typeof paginatedUsersSchema>;
 
-export const createUserErrorSchema = toStringApiErrorSchema(
+export const userAlreadyExistsErrorSchema = toStringApiErrorSchema(
 	z.literal("USER_ALREADY_EXISTS"),
 );
+export const userNotFoundErrorSchema = toStringApiErrorSchema(
+	z.literal("USER_NOT_FOUND"),
+);
 
-export type CreateUserError = z.infer<typeof createUserErrorSchema>;
+export type UserAlreadyExistsError = z.infer<
+	typeof userAlreadyExistsErrorSchema
+>;
+export type UserNotFoundError = z.infer<typeof userNotFoundErrorSchema>;

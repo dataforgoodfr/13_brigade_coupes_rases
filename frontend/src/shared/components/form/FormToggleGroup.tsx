@@ -1,7 +1,7 @@
 import type { FieldValues } from "react-hook-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FormFieldLayout } from "@/shared/components/form/FormFieldLayout";
-import { FormField, FormMessage, type FormProps } from "./Form";
+import { FormField, type FormProps } from "./Form";
 
 const toggleGroupItemClass =
 	"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)";
@@ -44,7 +44,6 @@ export function FormToggleGroup<T extends FieldValues = FieldValues>({
 								Pas d'informations
 							</ToggleGroupItem>
 						</ToggleGroup>
-						<FormMessage />
 					</FormFieldLayout>
 				);
 			}}

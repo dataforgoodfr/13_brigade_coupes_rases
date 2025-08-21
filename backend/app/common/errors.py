@@ -1,6 +1,7 @@
-from typing import Annotated, Any, Dict, Optional
-from typing_extensions import Doc
+from typing import Annotated, Any
+
 from fastapi import HTTPException
+from typing_extensions import Doc
 
 
 class AppHTTPException(HTTPException):
@@ -24,7 +25,7 @@ class AppHTTPException(HTTPException):
             ),
         ] = None,
         headers: Annotated[
-            Optional[Dict[str, str]],
+            dict[str, str] | None,
             Doc(
                 """
                 Any headers to send to the client in the response.
