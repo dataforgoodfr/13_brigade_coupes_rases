@@ -37,21 +37,21 @@ def create_user(db: Session, user: UserUpdateSchema) -> User:
         .first()
     )
     password = secrets.token_urlsafe(10)
-    user: User = existing_user if existing_user is not None else User()
+    new_user: User = existing_user if existing_user is not None else User()
     if existing_user is not None and existing_user.deleted_at is None:
         raise AppHTTPException(
             status_code=409,
             type="USER_ALREADY_EXISTS",
             detail="A user already has the same login or the same email",
         )
-    user.created_at = datetime.now()
-    user.updated_at = datetime.now()
-    user.first_name = user.first_name
-    user.last_name = user.last_name
-    user.login = user.login
-    user.email = user.email
-    user.role = user.role
-    user.password = get_password_hash(password)
+    new_user.created_at = datetime.now()
+    new_user.updated_at = datetime.now()
+    new_user.first_name = user.first_name
+    new_user.last_name = user.last_name
+    new_user.login = user.login
+    new_user.email = user.email
+    new_user.role = user.role
+    new_user.password = get_password_hash(password)
 
     for department_id in user.departments:
         department_db = (
@@ -63,11 +63,11 @@ def create_user(db: Session, user: UserUpdateSchema) -> User:
                 type="DEPARTMENT_NOT_FOUND",
                 detail=f"Department with id {department_db} not found",
             )
-        user.departments.append(department_db)
-    db.add(user)
+        new_user.departments.append(department_db)
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(new_user)
+    return new_user
 
 
 def get_users(
@@ -85,7 +85,7 @@ def get_users(
     asc_sort: list[str],
     desc_sort: list[str],
 ) -> PaginationResponseSchema[UserResponseSchema]:
-    query = db.query(User).filter(User.deleted_at.is_(None))
+    query = db.query(User).filter(User.deleted_at.__eq__(None))
     for sort in asc_sort:
         query = query.order_by(User.__table__.c[to_snake(sort)])
     for sort in desc_sort:
@@ -123,8 +123,8 @@ def get_users(
 
 
 def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
-    user = db.query(User).filter(User.deleted_at.is_(None) and User.id == id).first()
-    if user is None:
+    user = db.get(User, id)
+    if user is None or user.deleted_at is not None:
         raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             type="USER_NOT_FOUND",
@@ -135,7 +135,7 @@ def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
 
 def delete_user_by_id(id: int, db: Session):
     user = db.get(User, id)
-    if user is None:
+    if user is None or user.deleted_at is not None:
         raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             type="USER_NOT_FOUND",
@@ -147,7 +147,7 @@ def delete_user_by_id(id: int, db: Session):
 
 def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
-    if not user_db:
+    if user_db is None or user_db.deleted_at is not None:
         raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             type="USER_NOT_FOUND",

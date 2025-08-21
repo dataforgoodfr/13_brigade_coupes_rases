@@ -85,7 +85,7 @@ def test_update_user(client, db):
             "firstName": "Sorenza",
         },
     )
-    assert update_response.status_code == 200
+    assert update_response.status_code == 204
 
     # Check updated datas
     get_response = client.get(f"/api/v1/users/{user.id}")
