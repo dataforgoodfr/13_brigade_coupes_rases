@@ -172,6 +172,9 @@ export const clearCutsSlice = createSlice({
 		builder.addCase(submitClearCutFormThunk.pending, (state) => {
 			state.submission = { status: "loading" };
 		});
+		builder.addCase(submitClearCutFormThunk.fulfilled, (state) => {
+			state.submission = { status: "success" };
+		});
 	},
 });
 
