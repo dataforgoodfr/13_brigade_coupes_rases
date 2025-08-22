@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RulesTab } from "@/features/admin/components/rules/RulesTab";
 import { UsersListTab } from "@/features/admin/components/users-list/UsersListTab";
 import { Title } from "@/shared/components/typo/Title";
 
@@ -35,7 +36,9 @@ function RouteComponent() {
 				<TabsContent value="users" className=" flex flex-col gap-8 grow p-4">
 					<UsersListTab />
 				</TabsContent>
-				<TabsContent value="rules"></TabsContent>
+				<TabsContent value="rules">
+					<RulesTab />
+				</TabsContent>
 			</Tabs>
 		</div>
 	);
