@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getStoredToken } from "@/features/user/store/user.slice";
+import { getStoredToken } from "@/features/user/store/me.slice";
 import { api } from "@/shared/api/api";
 
 export interface ImageUploadRequest {

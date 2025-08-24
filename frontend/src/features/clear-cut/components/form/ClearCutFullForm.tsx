@@ -11,7 +11,7 @@ import {
 	selectSubmission,
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
-import { useLoggedUser } from "@/features/user/store/user.slice";
+import { useMe } from "@/features/user/store/me.slice";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
@@ -20,7 +20,7 @@ import AccordionHeader from "./AccordionHeader";
 export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
-	const loggedUser = useLoggedUser();
+	const loggedUser = useMe();
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: clearCut,

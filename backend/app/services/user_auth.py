@@ -85,9 +85,9 @@ def get_optional_current_user(
 
 
 def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
-    credentials_exception = AppHTTPException(
+    invalid_token = AppHTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        type="INVALID_CREDENTIALS",
+        type="INVALID_TOKEN",
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -95,13 +95,18 @@ def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
         if email is None:
-            raise credentials_exception
+            raise invalid_token
         token_data = TokenData(email=email)
     except InvalidTokenError:
-        raise credentials_exception from InvalidTokenError
+        raise invalid_token from InvalidTokenError
     user = get_user_by_email(db, email=token_data.email)
     if user is None:
-        raise credentials_exception
+        raise AppHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            type="INVALID_CREDENTIALS",
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 

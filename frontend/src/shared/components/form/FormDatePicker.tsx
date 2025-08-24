@@ -10,7 +10,10 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { type FormFieldLayoutProps } from "@/shared/components/form/FormFieldLayout";
+import {
+	FormFieldLayout,
+	type FormFieldLayoutProps,
+} from "@/shared/components/form/FormFieldLayout";
 import { FormControl, FormField, type FormProps } from "./Form";
 
 export type FormDatePickerProps<T extends FieldValues> = FormProps<T> &
@@ -26,37 +29,39 @@ export function FormDatePicker<T extends FieldValues = FieldValues>({
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<Popover>
-					<PopoverTrigger asChild disabled={disabled}>
-						<FormControl>
-							<Button
-								disabled={disabled}
-								type="button"
-								variant="outline"
-								className={cn(
-									"w-[240px] pl-3 text-left font-normal",
-									!field.value && "text-muted-foreground",
-								)}
-							>
-								{field.value ? (
-									<FormattedDate value={field.value} />
-								) : (
-									<span>Sélectionner une date</span>
-								)}
-								<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-							</Button>
-						</FormControl>
-					</PopoverTrigger>
-					<PopoverContent className="w-auto p-0" align="start">
-						<Calendar
-							mode="single"
-							locale={fr}
-							selected={field.value}
-							onSelect={field.onChange}
-							captionLayout="dropdown"
-						/>
-					</PopoverContent>
-				</Popover>
+				<FormFieldLayout {...props} withControl={false}>
+					<Popover>
+						<PopoverTrigger asChild disabled={disabled}>
+							<FormControl>
+								<Button
+									disabled={disabled}
+									type="button"
+									variant="outline"
+									className={cn(
+										"w-[240px] pl-3 text-left font-normal",
+										!field.value && "text-muted-foreground",
+									)}
+								>
+									{field.value ? (
+										<FormattedDate value={field.value} />
+									) : (
+										<span>Sélectionner une date</span>
+									)}
+									<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+								</Button>
+							</FormControl>
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-0" align="start">
+							<Calendar
+								mode="single"
+								locale={fr}
+								selected={field.value}
+								onSelect={field.onChange}
+								captionLayout="dropdown"
+							/>
+						</PopoverContent>
+					</Popover>
+				</FormFieldLayout>
 			)}
 		/>
 	);

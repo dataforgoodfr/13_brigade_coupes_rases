@@ -13,9 +13,9 @@ import { filtersSlice } from "@/features/clear-cut/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
 import {
 	getStoredToken,
+	meSlice,
 	setStoredToken,
-	userSlice,
-} from "@/features/user/store/user.slice";
+} from "@/features/user/store/me.slice";
 import { api, UNAUTHORIZED_ERROR_NAME } from "@/shared/api/api";
 import { referentialSlice } from "@/shared/store/referential/referential.slice";
 
@@ -35,7 +35,7 @@ const reducer = combineReducers({
 	[usersApi.reducerPath]: usersApi.reducer,
 	[referentialSlice.reducerPath]: referentialSlice.reducer,
 	[clearCutsSlice.reducerPath]: clearCutsSlice.reducer,
-	[userSlice.reducerPath]: userSlice.reducer,
+	[meSlice.reducerPath]: meSlice.reducer,
 	// Admin reducers
 	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
 	[usersSlice.reducerPath]: usersSlice.reducer,

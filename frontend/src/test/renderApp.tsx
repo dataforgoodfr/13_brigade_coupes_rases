@@ -13,7 +13,7 @@ import {
 	AuthProvider,
 	useAuth,
 } from "@/features/user/components/Auth.context";
-import type { User } from "@/features/user/store/user";
+import type { Me } from "@/features/user/store/me";
 import { routeTree } from "@/routeTree.gen";
 import type { Routes as Route } from "@/shared/router";
 import {
@@ -42,7 +42,7 @@ interface Options<R extends Route = Route>
 	store?: AppStore;
 	route?: R;
 	params?: RouteParams<R>;
-	user?: User;
+	user?: Me;
 }
 
 export function renderApp<R extends Route = Route>(options: Options<R>) {

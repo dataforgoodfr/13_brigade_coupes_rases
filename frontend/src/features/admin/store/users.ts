@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { roleSchema } from "@/features/user/store/user";
+import { roleSchema } from "@/features/user/store/me";
 import { toStringApiErrorSchema } from "@/shared/api/api";
 import { paginationResponseSchema } from "@/shared/api/types";
 import { toSelectableItemSchema } from "@/shared/items";

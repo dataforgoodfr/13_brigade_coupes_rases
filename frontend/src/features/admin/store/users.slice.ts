@@ -23,7 +23,10 @@ import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import { createAppAsyncThunk } from "@/shared/store/thunk";
+import {
+	addRequestedContentCases,
+	createAppAsyncThunk,
+} from "@/shared/store/thunk";
 
 const EMPTY_USERS: User[] = [];
 
@@ -122,48 +125,25 @@ export const usersSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
-		builder.addCase(getUsersThunk.fulfilled, (state, { payload }) => {
-			state.users.value = payload;
-			state.users.status = "success";
-		});
-		builder.addCase(getUsersThunk.rejected, (state, _error) => {
-			state.users.status = "error";
-		});
-		builder.addCase(getUsersThunk.pending, (state) => {
-			state.users.status = "loading";
-		});
-		builder.addCase(createUserThunk.fulfilled, (state, { payload }) => {
-			state.editedUser.value = payload;
-			state.editedUser.status = "success";
-		});
-		builder.addCase(createUserThunk.rejected, (state, { payload }) => {
-			state.editedUser.status = "error";
-			state.editedUser.error = userAlreadyExistsErrorSchema.parse(payload);
-		});
-		builder.addCase(createUserThunk.pending, (state) => {
-			state.editedUser.status = "loading";
-		});
-		builder.addCase(updateUserThunk.fulfilled, (state, { payload }) => {
-			state.editedUser.value = payload;
-			state.editedUser.status = "success";
-		});
-		builder.addCase(updateUserThunk.rejected, (state, { payload }) => {
-			state.editedUser.status = "error";
-			state.editedUser.error = userNotFoundErrorSchema.parse(payload);
-		});
-		builder.addCase(updateUserThunk.pending, (state) => {
-			state.editedUser.status = "loading";
-		});
-		builder.addCase(deleteUserThunk.fulfilled, (state) => {
-			state.deletedUser.status = "success";
-		});
-		builder.addCase(deleteUserThunk.rejected, (state, { payload }) => {
-			state.deletedUser.status = "error";
-			state.deletedUser.error = userNotFoundErrorSchema.parse(payload);
-		});
-		builder.addCase(deleteUserThunk.pending, (state) => {
-			state.deletedUser.status = "loading";
-		});
+		addRequestedContentCases(builder, getUsersThunk, (state) => state.users);
+		addRequestedContentCases(
+			builder,
+			createUserThunk,
+			(state) => state.editedUser,
+			{ errorSchema: userAlreadyExistsErrorSchema },
+		);
+		addRequestedContentCases(
+			builder,
+			updateUserThunk,
+			(state) => state.editedUser,
+			{ errorSchema: userNotFoundErrorSchema },
+		);
+		addRequestedContentCases(
+			builder,
+			deleteUserThunk,
+			(state) => state.deletedUser,
+			{ errorSchema: userNotFoundErrorSchema },
+		);
 	},
 });
 

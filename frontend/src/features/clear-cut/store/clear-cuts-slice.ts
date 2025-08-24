@@ -15,7 +15,10 @@ import {
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import { createAppAsyncThunk } from "@/shared/store/thunk";
+import {
+	addRequestedContentCases,
+	createAppAsyncThunk,
+} from "@/shared/store/thunk";
 import {
 	type ClearCutForm,
 	type ClearCutReport,
@@ -148,33 +151,21 @@ export const clearCutsSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
-		builder.addCase(getClearCutFormThunk.fulfilled, (state, { payload }) => {
-			state.detail = { status: "success", value: payload };
-		});
-		builder.addCase(getClearCutFormThunk.rejected, (state, error) => {
-			state.detail = { status: "error", error };
-		});
-		builder.addCase(getClearCutFormThunk.pending, (state) => {
-			state.detail = { status: "loading" };
-		});
-		builder.addCase(getClearCutsThunk.fulfilled, (state, { payload }) => {
-			state.clearCuts = { status: "success", value: payload };
-		});
-		builder.addCase(getClearCutsThunk.rejected, (state, error) => {
-			state.clearCuts = { status: "error", error };
-		});
-		builder.addCase(getClearCutsThunk.pending, (state) => {
-			state.clearCuts = { status: "loading" };
-		});
-		builder.addCase(submitClearCutFormThunk.rejected, (state, error) => {
-			state.submission = { status: "error", error };
-		});
-		builder.addCase(submitClearCutFormThunk.pending, (state) => {
-			state.submission = { status: "loading" };
-		});
-		builder.addCase(submitClearCutFormThunk.fulfilled, (state) => {
-			state.submission = { status: "success" };
-		});
+		addRequestedContentCases(
+			builder,
+			getClearCutFormThunk,
+			(state) => state.detail,
+		);
+		addRequestedContentCases(
+			builder,
+			getClearCutsThunk,
+			(state) => state.clearCuts,
+		);
+		addRequestedContentCases(
+			builder,
+			submitClearCutFormThunk,
+			(state) => state.submission,
+		);
 	},
 });
 

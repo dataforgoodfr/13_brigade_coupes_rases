@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
@@ -16,6 +16,7 @@ from app.services.clear_cut_map import (
     build_clearcuts_map,
     get_report_preview_by_id,
 )
+from app.services.user_auth import get_optional_current_user
 
 logger = getLogger(__name__)
 
@@ -113,7 +114,14 @@ def get_clearcuts_map(
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),
+    favorite: bool | None = Query(
+        None,
+        alias="favorite",
+        description="Is favorite",
+        openapi_examples={"default": {"value": None}},
+    ),
     db: Session = db_session,
+    user=Depends(get_optional_current_user),
 ) -> ClearCutMapResponseSchema:
     try:
         bounds = None
@@ -141,6 +149,8 @@ def get_clearcuts_map(
                 departments_ids=departments_ids,
                 has_ecological_zonings=has_ecological_zonings,
                 excessive_slope=excessive_slope,
+                is_favorite=favorite,
+                current_user_id=user.id,
             ),
         )
 

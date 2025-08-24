@@ -21,7 +21,10 @@ import {
 } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
-import { createAppAsyncThunk } from "@/shared/store/thunk";
+import {
+	addRequestedContentCases,
+	createAppAsyncThunk,
+} from "@/shared/store/thunk";
 export type EcologicalZoningRule = {
 	type: EcologicalZoningType;
 	ecologicalZonings: SelectableItem<EcologicalZoning>[];
@@ -126,16 +129,7 @@ export const rulesSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
-		builder.addCase(getRulesThunk.fulfilled, (state, { payload }) => {
-			state.rules.value = payload;
-			state.rules.status = "success";
-		});
-		builder.addCase(getRulesThunk.rejected, (state, _error) => {
-			state.rules.status = "error";
-		});
-		builder.addCase(getRulesThunk.pending, (state) => {
-			state.rules.status = "loading";
-		});
+		addRequestedContentCases(builder, getRulesThunk, (state) => state.rules);
 	},
 });
 

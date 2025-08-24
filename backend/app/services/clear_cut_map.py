@@ -15,6 +15,7 @@ from geojson_pydantic import Point
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
+
 from app.common.errors import AppHTTPException
 from app.models import (
     SRID,
@@ -22,6 +23,8 @@ from app.models import (
     ClearCutReport,
     Department,
     Rules,
+    User,
+    user_clear_cut_report,
 )
 from app.schemas.base import BaseSchema
 from app.schemas.clear_cut_map import (
@@ -55,6 +58,8 @@ class Filters(BaseSchema):
     statuses: list[str] = []
     has_ecological_zonings: bool | None = None
     excessive_slope: bool | None = None
+    current_user_id: int | None = None
+    is_favorite: bool | None = None
 
 
 def query_clearcuts_filtered(db: Session, filters: Filters | None):
@@ -91,6 +96,26 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
 
     if filters is None:
         return reports
+
+    if filters.is_favorite is not None and filters.current_user_id is not None:
+        favorite_subquery = (
+            db.query(user_clear_cut_report.c.report_id)
+            .filter(user_clear_cut_report.c.user_id == filters.current_user_id)
+            .subquery()
+        )
+        if filters.is_favorite:
+            reports = reports.filter(
+                ClearCutReport.id.in_(
+                    favorite_subquery
+                )
+            )
+        else:
+            reports = reports.filter(
+                ClearCutReport.id.notin_(
+                    favorite_subquery
+                )
+            )
+
     if filters.bounds is not None:
         envelope = ST_MakeEnvelope(
             filters.bounds.south_west_longitude,

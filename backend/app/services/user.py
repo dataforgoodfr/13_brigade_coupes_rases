@@ -7,27 +7,18 @@ from pydantic.alias_generators import to_snake
 from sqlalchemy.orm import Session, aliased
 
 from app.common.errors import AppHTTPException
-from app.models import Department, User, user_department
+from app.models import ClearCutReport, Department, User, user_department
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
-from app.schemas.user import UserResponseSchema, UserUpdateSchema
+from app.schemas.user import (
+    MeResponseSchema,
+    MeUpdateSchema,
+    UserResponseSchema,
+    UserUpdateSchema,
+    user_to_me_response_schema,
+)
 from app.services.get_password_hash import get_password_hash
 
 logger = getLogger(__name__)
-
-
-def user_to_user_response_schema(user: User) -> UserResponseSchema:
-    return UserResponseSchema(
-        id=str(user.id),
-        deleted_at=user.deleted_at,
-        created_at=user.created_at,
-        role=user.role,
-        updated_at=user.updated_at,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        login=user.login,
-        email=user.email,
-        departments=[str(department.id) for department in user.departments],
-    )
 
 
 def create_user(db: Session, user: UserUpdateSchema) -> User:
@@ -179,3 +170,10 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
 
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter_by(email=email).first()
+
+
+def update_me(db: Session, user: User, request: MeUpdateSchema):
+    user.favorites = (
+        db.query(ClearCutReport).filter(ClearCutReport.id.in_(request.favorites)).all()
+    )
+    db.commit()

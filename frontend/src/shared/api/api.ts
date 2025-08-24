@@ -1,5 +1,6 @@
 import ky from "ky";
 import z from "zod";
+import type { RequestedContent } from "@/shared/api/types";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
@@ -55,3 +56,37 @@ export const toApiErrorSchema = <
 ) => z.object({ detail: z.object({ type, content: content }) });
 export const toStringApiErrorSchema = <Type extends z.ZodLiteral>(type: Type) =>
 	toApiErrorSchema(type, z.string());
+
+export const setSuccess = <TValue, TError>(
+	requestedContent: RequestedContent<TValue, TError>,
+	value: TValue,
+): RequestedContent<TValue, TError> => {
+	requestedContent.status = "success";
+	requestedContent.value = value;
+	requestedContent.error = undefined;
+	return requestedContent;
+};
+export const setLoading = <TValue, TError>(
+	requestedContent: RequestedContent<TValue, TError>,
+): RequestedContent<TValue, TError> => {
+	requestedContent.status = "loading";
+	requestedContent.error = undefined;
+	return requestedContent;
+};
+export const setIdle = <TValue, TError>(
+	requestedContent: RequestedContent<TValue, TError>,
+): RequestedContent<TValue, TError> => {
+	requestedContent.status = "idle";
+	requestedContent.error = undefined;
+	requestedContent.value = undefined;
+	return requestedContent;
+};
+export const setError = <TValue, TError>(
+	requestedContent: RequestedContent<TValue, TError>,
+	error: TError,
+): RequestedContent<TValue, TError> => {
+	requestedContent.status = "error";
+	requestedContent.value = undefined;
+	requestedContent.error = error;
+	return requestedContent;
+};
