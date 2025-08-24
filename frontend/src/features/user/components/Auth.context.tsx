@@ -2,7 +2,7 @@ import { createContext, type ReactNode, useContext, useEffect } from "react";
 import {
 	getMeThunk,
 	getStoredToken,
-	useMe,
+	useConnectedMe,
 } from "@/features/user/store/me.slice";
 import { useAppDispatch } from "@/shared/hooks/store";
 
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function AuthProvider({ children }: Props) {
-	const user = useMe();
+	const user = useConnectedMe();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		if (user !== undefined) {

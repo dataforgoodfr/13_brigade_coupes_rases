@@ -1,9 +1,9 @@
 import { Bookmark, House, Settings } from "lucide-react";
-import { useMe } from "@/features/user/store/me.slice";
+import { useConnectedMe } from "@/features/user/store/me.slice";
 import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink";
 
 export function MobileNavbar() {
-	const user = useMe();
+	const user = useConnectedMe();
 
 	return (
 		<nav className="flex sm:hidden py-1 items-center shadow justify-around ">

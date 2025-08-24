@@ -20,12 +20,14 @@ export const volunteerAssignedMock: MeResponse = {
 	departments: [],
 	email: "volunteer@example.com",
 	login: "volunteerVolunteers",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
 export const adminMock: MeResponse = {
 	role: "admin",
 	email: "admin@example.com",
 	login: "adminAdmin",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
 export const volunteerMock: MeResponse = {
@@ -33,6 +35,7 @@ export const volunteerMock: MeResponse = {
 	departments: [],
 	email: "volunteer@example.com",
 	login: "volunteerVolunteers",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
 export const mockMe = http.get("*/api/v1/me", async ({ request }) => {

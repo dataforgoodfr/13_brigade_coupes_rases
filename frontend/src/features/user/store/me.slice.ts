@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
 	type CredentialError,
+	connectedMeSchema,
 	credentialErrorSchema,
 	type LoginRequest,
 	type Me,
@@ -9,6 +10,8 @@ import {
 	meErrorSchema,
 	meResponseSchema,
 	meSchema,
+	type OfflineMe,
+	offlineMeSchema,
 	type TokenResponse,
 	tokenSchema,
 	type UpdateMeRequest,
@@ -25,6 +28,7 @@ import {
 } from "@/shared/store/thunk";
 
 const TOKEN_KEY = "token";
+const OFFLINE_ME_KEY = "me";
 
 export function setStoredToken(token: TokenResponse | undefined) {
 	if (token) {
@@ -38,6 +42,22 @@ export function getStoredToken(): TokenResponse | undefined {
 	if (token !== null) {
 		return tokenSchema.safeParse(JSON.parse(token)).data;
 	}
+}
+
+function getOfflineMe(): OfflineMe {
+	const me = localStorage.getItem(OFFLINE_ME_KEY);
+	const defaultMe: OfflineMe = { favorites: [] };
+	if (me !== null) {
+		return offlineMeSchema.safeParse(JSON.parse(me)).data ?? defaultMe;
+	}
+	return defaultMe;
+}
+
+function saveOfflineMe(me: OfflineMe) {
+	localStorage.setItem(
+		OFFLINE_ME_KEY,
+		JSON.stringify(offlineMeSchema.parse(me)),
+	);
 }
 
 export const loginThunk = createAppAsyncThunk(
@@ -61,6 +81,10 @@ export const loginThunk = createAppAsyncThunk(
 export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
 	async (_, { getState, extra: { api } }) => {
+		const token = getStoredToken();
+		if (token === undefined) {
+			return getOfflineMe();
+		}
 		const userResult = await api().get<MeResponse>("api/v1/me").json();
 		const user = meResponseSchema.parse(userResult);
 		const departments = selectDepartmentsByIds(
@@ -73,22 +97,43 @@ export const getMeThunk = createAppAsyncThunk(
 export const addFavoriteThunk = createAppAsyncThunk<void, string>(
 	"users/addFavorite",
 	async (favorite, { getState, extra: { api }, dispatch }) => {
-		const { favorites } = selectMe(getState()) as Me;
-		await api().put("api/v1/me", {
-			json: { favorites: [...favorites, favorite] } satisfies UpdateMeRequest,
-		});
+		const me = meSchema.parse(selectMe(getState()));
+		const connectedMe = connectedMeSchema.safeParse(me);
+		if (connectedMe.success) {
+			await api().put("api/v1/me", {
+				json: {
+					favorites: [...connectedMe.data.favorites, favorite],
+				} satisfies UpdateMeRequest,
+			});
+		} else {
+			const updatedMe: OfflineMe = {
+				...me,
+				favorites: [...me.favorites, favorite],
+			};
+			saveOfflineMe(updatedMe);
+		}
 		dispatch(getMeThunk());
 	},
 );
 export const removeFavoriteThunk = createAppAsyncThunk<void, string>(
 	"users/removeFavorite",
 	async (favorite, { getState, extra: { api }, dispatch }) => {
-		const { favorites } = selectMe(getState()) as Me;
-		await api().put("api/v1/me", {
-			json: {
-				favorites: favorites.filter((id) => id !== favorite),
-			} satisfies UpdateMeRequest,
-		});
+		const me = meSchema.parse(selectMe(getState()));
+		const connectedMe = connectedMeSchema.safeParse(me);
+		if (connectedMe.success) {
+			await api().put("api/v1/me", {
+				json: {
+					favorites: connectedMe.data.favorites.filter((id) => id !== favorite),
+				} satisfies UpdateMeRequest,
+			});
+		} else {
+			const updatedMe: OfflineMe = {
+				...me,
+				favorites: me.favorites.filter((id) => id !== favorite),
+			};
+			saveOfflineMe(updatedMe);
+		}
+
 		dispatch(getMeThunk());
 	},
 );
@@ -99,7 +144,7 @@ type State = {
 };
 const initialState: State = {
 	login: { status: "idle" },
-	me: { status: "idle" },
+	me: { status: "idle", value: getOfflineMe() },
 	updateMe: { status: "idle" },
 };
 export const meSlice = createSlice({
@@ -111,7 +156,7 @@ export const meSlice = createSlice({
 			state.me.status = "success";
 		},
 		logoutUser: (state) => {
-			state.me.value = undefined;
+			state.me.value = getOfflineMe();
 			state.me.status = "idle";
 			setStoredToken(undefined);
 		},
@@ -139,8 +184,19 @@ const selectMe = createTypedDraftSafeSelector(
 	selectState,
 	(user) => user.me.value,
 );
+const selectConnectedMe = createTypedDraftSafeSelector(
+	selectState,
+	(user) => connectedMeSchema.safeParse(user.me.value).data,
+);
+
+const EMPTY_FAVORITES: string[] = [];
+export const selectFavorites = createTypedDraftSafeSelector(
+	selectMe,
+	(me) => me?.favorites ?? EMPTY_FAVORITES,
+);
 export const selectLogin = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.login,
 );
 export const useMe = () => useAppSelector(selectMe);
+export const useConnectedMe = () => useAppSelector(selectConnectedMe);

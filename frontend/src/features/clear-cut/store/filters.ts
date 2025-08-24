@@ -10,7 +10,8 @@ const filtersRequestSchema = z.object({
 	departmentsIds: z.array(z.string()).optional(),
 	statuses: clearCutStatusSchema.array().optional(),
 	excessiveSlope: z.boolean().optional(),
-	favorite: z.boolean().optional(),
+	inReportsIds: z.string().array().optional(),
+	outReportsIds: z.string().array().optional(),
 	hasEcologicalZonings: z.boolean().optional(),
 	withPoints: z.boolean().optional(),
 });

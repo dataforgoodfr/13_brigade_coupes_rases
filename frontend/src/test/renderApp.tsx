@@ -52,9 +52,12 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 		// Automatically create a store instance if no store was passed in
 		store = setupStore({
 			...preloadedState,
-			user: options.user
-				? { status: "success", value: options.user }
-				: preloadedState.user,
+			me: {
+				...(preloadedState.me as RootState["me"]),
+				me: options.user
+					? { status: "success", value: options.user }
+					: (preloadedState.me?.me as RootState["me"]["me"]),
+			},
 		}),
 		route = options.route ?? "/",
 		params,

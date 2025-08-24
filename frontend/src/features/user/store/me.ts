@@ -12,27 +12,32 @@ export const roleSchema = z.enum(ROLES);
 
 export type Role = z.infer<typeof roleSchema>;
 
-export const commonMeSchema = z.object({
-	login: z.string(),
-	email: z.string(),
-	avatarUrl: z.string().url().optional(),
-	departments: z.array(z.string()).optional(),
+export const offlineMeSchema = z.object({
 	favorites: z.string().array(),
 });
+const connectedMeBaseSchema = z
+	.object({
+		login: z.string(),
+		email: z.string(),
+		avatarUrl: z.string().url().optional(),
+		departments: z.array(z.string()).optional(),
+	})
+	.extend(offlineMeSchema.shape);
+
 const volunteerResponseSchema = z.object({
 	role: roleSchema.extract(["volunteer"]),
 });
 const administratorResponseSchema = z.object({
 	role: roleSchema.extract(["admin"]),
 });
-const specificUserPropertiesSchema = z.discriminatedUnion("role", [
+const rolePropertiesSchema = z.discriminatedUnion("role", [
 	volunteerResponseSchema,
 	administratorResponseSchema,
 ]);
 
-export const meResponseSchema = commonMeSchema.and(
-	specificUserPropertiesSchema,
-);
+export const meResponseSchema = connectedMeBaseSchema
+	.and(rolePropertiesSchema)
+	.and(offlineMeSchema);
 
 export const updateMeRequestSchema = z.object({
 	favorites: z.string().array(),
@@ -41,7 +46,7 @@ const enrichedVolunteerSchema = z.object({
 	role: roleSchema.extract(["volunteer"]),
 });
 
-export const meSchema = commonMeSchema
+export const connectedMeSchema = connectedMeBaseSchema
 	.omit({ departments: true })
 	.and(z.object({ departments: departmentSchema.array() }))
 	.and(
@@ -50,9 +55,11 @@ export const meSchema = commonMeSchema
 			administratorResponseSchema,
 		]),
 	);
-
+export const meSchema = connectedMeSchema.or(offlineMeSchema);
 export const tokenSchema = z.object({ accessToken: z.jwt() });
 export type Me = z.infer<typeof meSchema>;
+export type ConnectedMe = z.infer<typeof connectedMeSchema>;
+export type OfflineMe = z.infer<typeof offlineMeSchema>;
 export type MeResponse = z.infer<typeof meResponseSchema>;
 export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>;
 export type TokenResponse = z.infer<typeof tokenSchema>;

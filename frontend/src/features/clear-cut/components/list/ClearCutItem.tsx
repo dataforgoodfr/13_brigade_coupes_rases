@@ -9,41 +9,36 @@ import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
 import {
 	addFavoriteThunk,
 	removeFavoriteThunk,
-	useMe,
+	selectFavorites,
 } from "@/features/user/store/me.slice";
 import { IconButton } from "@/shared/components/button/Button";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 
 type FavoriteButtonProps = {
 	reportId: string;
 };
 const FavoriteButton = ({ reportId }: FavoriteButtonProps) => {
-	const me = useMe();
 	const dispatch = useAppDispatch();
-	const isFavorite = me?.favorites.includes(reportId);
+	const isFavorite = useAppSelector(selectFavorites).includes(reportId);
 	return (
-		<>
-			{me && (
-				<IconButton
-					variant="ghost"
-					icon={
-						<HeartIcon
-							className={clsx("text-destructive", {
-								"fill-destructive": isFavorite,
-							})}
-						/>
-					}
-					onClick={(e) => {
-						e.stopPropagation();
-						if (isFavorite) {
-							dispatch(removeFavoriteThunk(reportId));
-						} else {
-							dispatch(addFavoriteThunk(reportId));
-						}
-					}}
+		<IconButton
+			variant="ghost"
+			icon={
+				<HeartIcon
+					className={clsx("text-destructive", {
+						"fill-destructive": isFavorite,
+					})}
 				/>
-			)}
-		</>
+			}
+			onClick={(e) => {
+				e.stopPropagation();
+				if (isFavorite) {
+					dispatch(removeFavoriteThunk(reportId));
+				} else {
+					dispatch(addFavoriteThunk(reportId));
+				}
+			}}
+		/>
 	);
 };
 export function ClearCutItem({

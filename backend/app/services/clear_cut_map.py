@@ -58,8 +58,8 @@ class Filters(BaseSchema):
     statuses: list[str] = []
     has_ecological_zonings: bool | None = None
     excessive_slope: bool | None = None
-    current_user_id: int | None = None
-    is_favorite: bool | None = None
+    in_reports_ids: list[str] | None = []
+    out_reports_ids: list[str] | None = []
 
 
 def query_clearcuts_filtered(db: Session, filters: Filters | None):
@@ -97,25 +97,10 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
     if filters is None:
         return reports
 
-    if filters.is_favorite is not None and filters.current_user_id is not None:
-        favorite_subquery = (
-            db.query(user_clear_cut_report.c.report_id)
-            .filter(user_clear_cut_report.c.user_id == filters.current_user_id)
-            .subquery()
-        )
-        if filters.is_favorite:
-            reports = reports.filter(
-                ClearCutReport.id.in_(
-                    favorite_subquery
-                )
-            )
-        else:
-            reports = reports.filter(
-                ClearCutReport.id.notin_(
-                    favorite_subquery
-                )
-            )
-
+    if filters.in_reports_ids:
+        reports = reports.filter(ClearCutReport.id.in_(filters.in_reports_ids))
+    if filters.out_reports_ids:
+        reports = reports.filter(ClearCutReport.id.notin_(filters.out_reports_ids))
     if filters.bounds is not None:
         envelope = ST_MakeEnvelope(
             filters.bounds.south_west_longitude,

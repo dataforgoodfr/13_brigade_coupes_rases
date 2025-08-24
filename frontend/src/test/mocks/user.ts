@@ -5,6 +5,7 @@ export const volunteerMock = {
 	departments: [],
 	email: "volunteer@email.com",
 	login: "volunteer",
+	favorites: [],
 } satisfies MeResponse;
 
 export const adminMock = {
@@ -12,4 +13,5 @@ export const adminMock = {
 	departments: [],
 	email: "admin@email.com",
 	login: "admin",
+	favorites: [],
 } satisfies MeResponse;
