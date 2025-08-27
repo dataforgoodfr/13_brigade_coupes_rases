@@ -4,10 +4,12 @@ import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
+import { getMeThunk } from "@/features/user/store/me.slice";
 import { parseParam } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+import { localStorageRepository } from "@/shared/localStorage";
 import {
 	selectDepartmentsByIds,
 	selectEcologicalZoningByIds,
@@ -18,6 +20,7 @@ import type { RootState } from "@/shared/store/store";
 import {
 	addRequestedContentCases,
 	createAppAsyncThunk,
+	withIdStorageActionCreator,
 } from "@/shared/store/thunk";
 import {
 	type ClearCutForm,
@@ -29,6 +32,8 @@ import {
 	clearCutReportResponseSchema,
 	clearCutsResponseSchema,
 } from "./clear-cuts";
+
+const formStorage = localStorageRepository<ClearCutForm>("clear-cut-form");
 
 const mapReport = (
 	state: RootState,
@@ -45,45 +50,53 @@ const mapReport = (
 		),
 	})),
 });
-export const getClearCutFormThunk = createAppAsyncThunk<ClearCutForm, string>(
+export const getClearCutFormThunk = createAppAsyncThunk<
+	ClearCutForm,
+	{ id: string }
+>(
 	"getClearCutForm",
-	async (id, { getState, extra: { api } }) => {
-		// Get the base report data
-		const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json();
-		const report = clearCutReportResponseSchema.parse(reportResult);
-		const state = getState();
-		const baseReport = mapReport(state, report);
+	withIdStorageActionCreator(
+		async ({ id }, { getState, extra: { api } }) => {
+			// Get the base report data
+			const reportResult = await api()
+				.get(`api/v1/clear-cuts-map/${id}`)
+				.json();
+			const report = clearCutReportResponseSchema.parse(reportResult);
+			const state = getState();
+			const baseReport = mapReport(state, report);
 
-		const formsResult = clearCutFormsResponseSchema.parse(
-			await api()
-				.get(`api/v1/clear-cuts-reports/${id}/forms`, {
-					searchParams: { page: "0", size: "1" },
-				})
-				.json(),
-		);
-		const ecologicalZonings = uniqBy(
-			baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
-			(e) => e.id,
-		);
+			const formsResult = clearCutFormsResponseSchema.parse(
+				await api()
+					.get(`api/v1/clear-cuts-reports/${id}/forms`, {
+						searchParams: { page: "0", size: "1" },
+					})
+					.json(),
+			);
+			const ecologicalZonings = uniqBy(
+				baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
+				(e) => e.id,
+			);
 
-		const computedProperties = {
-			hasEcologicalZonings: ecologicalZonings.length > 0,
-		};
-		// If forms exist, merge the latest form data with the base report
-		if (formsResult.content && formsResult.content.length > 0) {
-			const form = formsResult.content[0];
-			return {
-				report: baseReport,
-				...form,
-				ecologicalZonings,
-				...computedProperties,
+			const computedProperties = {
+				hasEcologicalZonings: ecologicalZonings.length > 0,
 			};
-		}
-		return clearCutFormSchema.parse({
-			report: baseReport,
-			...computedProperties,
-		});
-	},
+			// If forms exist, merge the latest form data with the base report
+			if (formsResult.content && formsResult.content.length > 0) {
+				const form = formsResult.content[0];
+				return {
+					report: baseReport,
+					...form,
+					ecologicalZonings,
+					...computedProperties,
+				};
+			}
+			return clearCutFormSchema.parse({
+				report: baseReport,
+				...computedProperties,
+			});
+		},
+		{ getId: (v) => v.id, key: "clear-cut-form", schema: clearCutFormSchema },
+	),
 );
 const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
@@ -126,7 +139,7 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 				json: formData,
 			})
 			.json();
-		dispatch(getClearCutFormThunk(reportId));
+		dispatch(getClearCutFormThunk({ id: reportId }));
 	},
 );
 type State = {
@@ -139,6 +152,7 @@ const initialState: State = {
 	detail: { status: "idle" },
 	submission: { status: "idle" },
 };
+
 export const clearCutsSlice = createSlice({
 	name: "clearCuts",
 	initialState,
@@ -166,6 +180,9 @@ export const clearCutsSlice = createSlice({
 			submitClearCutFormThunk,
 			(state) => state.submission,
 		);
+		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
+			formStorage.syncStorage(favorites, clearCutFormSchema);
+		});
 	},
 });
 
@@ -196,7 +213,7 @@ export const useGetClearCuts = () => {
 export const useGetClearCut = (id: string) => {
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		dispatch(getClearCutFormThunk(id));
+		dispatch(getClearCutFormThunk({ id }));
 	}, [id, dispatch]);
 	return useAppSelector(selectDetail);
 };

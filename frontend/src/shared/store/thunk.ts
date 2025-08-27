@@ -3,32 +3,43 @@ import {
 	createAsyncThunk,
 	type Draft,
 } from "@reduxjs/toolkit";
+import { isUndefined } from "es-toolkit";
 import type { KyInstance } from "ky";
 import { HTTPError } from "ky";
 import type { KyOptions } from "node_modules/ky/distribution/types/options";
 import type z from "zod";
 import { setError, setLoading, setSuccess } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
+import { localStorageRepository } from "@/shared/localStorage";
 import type { RootState } from "@/shared/store/store";
 
 const createAppThunk = createAsyncThunk.withTypes<{
 	state: RootState;
 	extra: { api: (options?: KyOptions) => KyInstance };
 }>();
+type AppThunk<Returned, ThunkArg> = ReturnType<
+	typeof createAppThunk<Returned, ThunkArg>
+>;
+type PayloadCreator<Returned, ThunkArg> = Parameters<
+	typeof createAppThunk<Returned, ThunkArg>
+>[1];
+type CreateAppThunkOptions<Returned, ThunkArg> = Parameters<
+	typeof createAppThunk<Returned, ThunkArg>
+>[2];
 export const createAppAsyncThunk = <Returned, ThunkArg = void>(
 	prefix: string,
-	payloadCreator: Parameters<typeof createAppThunk<Returned, ThunkArg>>[1],
-	options?: Parameters<typeof createAppThunk<Returned, ThunkArg>>[2],
+	payloadCreator: PayloadCreator<Returned, ThunkArg>,
+	options?: CreateAppThunkOptions<Returned, ThunkArg>,
 ) =>
 	createAppThunk<Returned, ThunkArg>(
 		prefix,
 		async (arg, api): Promise<Returned> => {
 			try {
-				return (await payloadCreator(arg, api)) as Promise<Returned>;
+				return (await payloadCreator(arg, api)) as Returned;
 			} catch (e) {
 				if (e instanceof HTTPError) {
 					const apiError = await e.response.json();
-					return api.rejectWithValue(apiError) as unknown as Promise<Returned>;
+					api.rejectWithValue(apiError);
 				}
 				throw e;
 			}
@@ -36,10 +47,55 @@ export const createAppAsyncThunk = <Returned, ThunkArg = void>(
 		options,
 	);
 
-type AppThunk<Returned, ThunkArg> = ReturnType<
-	typeof createAppAsyncThunk<Returned, ThunkArg>
->;
+type Options<Returned> = {
+	key: string;
+	schema: z.ZodType<Returned>;
+};
 
+export function withStorageActionCreator<Returned, ThunkArg>(
+	innerCreator: PayloadCreator<Returned, ThunkArg>,
+	{ key, schema }: Options<Returned>,
+): PayloadCreator<Returned, ThunkArg> {
+	const storage = localStorageRepository<Returned>(key);
+	return async (arg, api) => {
+		try {
+			const returned = (await innerCreator(arg, api)) as Returned;
+			storage.setToLocalStorage(returned);
+			return returned;
+		} catch (e) {
+			const found = storage.getFromLocalStorage(schema);
+			if (isUndefined(found)) {
+				throw e;
+			}
+			return found;
+		}
+	};
+}
+type StorageIdOptions<Returned> = Options<Returned> & {
+	getId: (value: { id: string }) => string;
+};
+export function withIdStorageActionCreator<
+	Returned,
+	ThunkArg extends { id: string },
+>(
+	innerCreator: PayloadCreator<Returned, ThunkArg>,
+	{ key, schema, getId }: StorageIdOptions<Returned>,
+): PayloadCreator<Returned, ThunkArg> {
+	const storage = localStorageRepository<Returned>(key);
+	return async (arg, api) => {
+		try {
+			const returned = (await innerCreator(arg, api)) as Returned;
+			storage.setToLocalStorageById(getId(arg), returned);
+			return returned;
+		} catch (e) {
+			const found = storage.getFromLocalStorageById(getId(arg), schema);
+			if (isUndefined(found)) {
+				throw e;
+			}
+			return found;
+		}
+	};
+}
 const CASES = ["pending", "fulfilled", "rejected"] as const;
 type Case = (typeof CASES)[number];
 export const addRequestedContentCases = <State, Value, Error, ThunkArg = void>(

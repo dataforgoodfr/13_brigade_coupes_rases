@@ -1,13 +1,11 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AsideForm } from "@/features/clear-cut/components/form/AsideForm";
 import { LayoutProvider } from "@/features/clear-cut/components/Layout.context";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 
-export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/$clearCutId")(
-	{
-		component: RouteComponent,
-	},
-);
+export const Route = createFileRoute("/_clear-cuts/clear-cuts/$clearCutId")({
+	component: RouteComponent,
+});
 
 function RouteComponent() {
 	const { breakpoint } = useBreakpoint();

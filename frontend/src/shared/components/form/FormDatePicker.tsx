@@ -56,7 +56,7 @@ export function FormDatePicker<T extends FieldValues = FieldValues>({
 								mode="single"
 								locale={fr}
 								selected={field.value}
-								onSelect={field.onChange}
+								onSelect={(v) => field.onChange(v?.toISOString())}
 								captionLayout="dropdown"
 							/>
 						</PopoverContent>

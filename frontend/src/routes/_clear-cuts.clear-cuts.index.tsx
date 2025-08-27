@@ -1,10 +1,10 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { LayoutProvider } from "@/features/clear-cut/components/Layout.context";
 import { AsideList } from "@/features/clear-cut/components/list/AsideList";
 import { MobileLayout } from "@/features/clear-cut/components/MobileLayout";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 
-export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/")({
+export const Route = createFileRoute("/_clear-cuts/clear-cuts/")({
 	component: RouteComponent,
 });
 

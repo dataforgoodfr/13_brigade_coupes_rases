@@ -19,6 +19,7 @@ import {
 import { setIdle } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppSelector } from "@/shared/hooks/store";
+import { localStorageRepository } from "@/shared/localStorage";
 import { selectDepartmentsByIds } from "@/shared/store/referential/referential.slice";
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
@@ -27,38 +28,22 @@ import {
 	createAppAsyncThunk,
 } from "@/shared/store/thunk";
 
-const TOKEN_KEY = "token";
-const OFFLINE_ME_KEY = "me";
+const tokenStorage = localStorageRepository<TokenResponse>("token");
+export const setStoredToken = (token: TokenResponse | undefined) =>
+	tokenStorage.setToLocalStorage(token);
+export const getStoredToken = () =>
+	tokenStorage.getFromLocalStorage(tokenSchema);
 
-export function setStoredToken(token: TokenResponse | undefined) {
-	if (token) {
-		localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
-	} else {
-		localStorage.removeItem(TOKEN_KEY);
-	}
-}
-export function getStoredToken(): TokenResponse | undefined {
-	const token = localStorage.getItem(TOKEN_KEY);
-	if (token !== null) {
-		return tokenSchema.safeParse(JSON.parse(token)).data;
-	}
-}
+const meStorage = localStorageRepository<OfflineMe>("me");
 
-function getOfflineMe(): OfflineMe {
-	const me = localStorage.getItem(OFFLINE_ME_KEY);
-	const defaultMe: OfflineMe = { favorites: [] };
-	if (me !== null) {
-		return offlineMeSchema.safeParse(JSON.parse(me)).data ?? defaultMe;
-	}
-	return defaultMe;
-}
+const getOfflineMe = () =>
+	meStorage.getFromLocalStorageOrDefault(offlineMeSchema, {
+		favorites: [],
+	});
 
-function saveOfflineMe(me: OfflineMe) {
-	localStorage.setItem(
-		OFFLINE_ME_KEY,
-		JSON.stringify(offlineMeSchema.parse(me)),
-	);
-}
+const saveOfflineMe = (me: OfflineMe) => {
+	meStorage.setToLocalStorage(me);
+};
 
 export const loginThunk = createAppAsyncThunk(
 	"users/login",
@@ -81,17 +66,17 @@ export const loginThunk = createAppAsyncThunk(
 export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
 	async (_, { getState, extra: { api } }) => {
-		const token = getStoredToken();
-		if (token === undefined) {
+		try {
+			const userResult = await api().get<MeResponse>("api/v1/me");
+			const user = meResponseSchema.parse(userResult);
+			const departments = selectDepartmentsByIds(
+				getState(),
+				user.departments ?? [],
+			);
+			return meSchema.parse({ ...user, departments });
+		} catch (_e) {
 			return getOfflineMe();
 		}
-		const userResult = await api().get<MeResponse>("api/v1/me").json();
-		const user = meResponseSchema.parse(userResult);
-		const departments = selectDepartmentsByIds(
-			getState(),
-			user.departments ?? [],
-		);
-		return meSchema.parse({ ...user, departments });
 	},
 );
 export const addFavoriteThunk = createAppAsyncThunk<void, string>(
@@ -197,6 +182,13 @@ export const selectFavorites = createTypedDraftSafeSelector(
 export const selectLogin = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.login,
+);
+
+export const selectIsInFavorites = createTypedDraftSafeSelector(
+	[selectFavorites, (_favorites, id: string) => id],
+	(favorites, id) => {
+		return favorites.includes(id);
+	},
 );
 export const useMe = () => useAppSelector(selectMe);
 export const useConnectedMe = () => useAppSelector(selectConnectedMe);

@@ -1,4 +1,4 @@
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import z from "zod";
 import type { RequestedContent } from "@/shared/api/types";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
@@ -16,6 +16,11 @@ export const api = ky.extend({
 		],
 	},
 });
+
+export function isNetworkError(error: unknown) {
+	return !(error instanceof HTTPError);
+}
+
 export const requestToParams = <T extends Record<string, unknown>>(
 	request: T,
 ) => {

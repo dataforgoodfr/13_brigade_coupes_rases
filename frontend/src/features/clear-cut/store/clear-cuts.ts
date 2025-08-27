@@ -177,7 +177,7 @@ const clearCutFormOtherSchema = z.object({
 const existingClearCurFormSchema = z.object({
 	id: z.string(),
 	reportId: z.string(),
-	createdAt: z.iso.date(),
+	createdAt: z.iso.datetime({ local: true }),
 });
 const clearCutFormSectionsResponseSchema = clearCutFormOtherSchema
 	.and(clearCutFormGroundSchema)
@@ -186,7 +186,7 @@ const clearCutFormSectionsResponseSchema = clearCutFormOtherSchema
 	.and(clearCutFormRegulationSchema)
 	.and(clearCutFormLegalStrategySchema);
 
-const clearCutFormResponseSchema = existingClearCurFormSchema.and(
+export const clearCutFormResponseSchema = existingClearCurFormSchema.and(
 	clearCutFormSectionsResponseSchema,
 );
 
