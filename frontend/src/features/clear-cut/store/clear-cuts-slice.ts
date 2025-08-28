@@ -5,7 +5,7 @@ import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import { getMeThunk } from "@/features/user/store/me.slice";
-import { parseParam } from "@/shared/api/api";
+import { isNetworkError, parseParam } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -95,7 +95,12 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 				...computedProperties,
 			});
 		},
-		{ getId: (v) => v.id, key: "clear-cut-form", schema: clearCutFormSchema },
+		{
+			getId: (v) => v.id,
+			storage: formStorage,
+			schema: clearCutFormSchema,
+			type: "controlled",
+		},
 	),
 );
 const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
@@ -114,17 +119,36 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 				parseParam(filter, value, searchParams);
 			}
 		}
-		const result = await api()
-			.get("api/v1/clear-cuts-map", {
-				searchParams,
-			})
-			.json();
-		const clearCuts = clearCutsResponseSchema.parse(result);
-		const state = getState();
-		const previews = clearCuts.previews.map((report) =>
-			mapReport(state, report),
-		) satisfies ClearCutReport[];
-		return { ...clearCuts, previews };
+		try {
+			const result = await api()
+				.get("api/v1/clear-cuts-map", {
+					searchParams,
+				})
+				.json();
+			const clearCuts = clearCutsResponseSchema.parse(result);
+			const state = getState();
+			const previews = clearCuts.previews.map((report) =>
+				mapReport(state, report),
+			) satisfies ClearCutReport[];
+			return { ...clearCuts, previews };
+		} catch (e) {
+			if (isNetworkError(e)) {
+				const forms = formStorage.getValuesFromStorage(clearCutFormSchema);
+				const reports = forms.map((f) => f.report);
+				return {
+					previews: reports,
+					points: {
+						total: reports.length,
+						content: reports.map((r) => ({
+							count: 1,
+							point: r.averageLocation,
+						})),
+					},
+				} satisfies ClearCuts;
+			} else {
+				throw e;
+			}
+		}
 	},
 );
 

@@ -1,3 +1,4 @@
+import { isUndefined } from "es-toolkit";
 import z from "zod";
 
 export const localStorageRepository = <Value>(key: string) => ({
@@ -21,9 +22,11 @@ export const localStorageRepository = <Value>(key: string) => ({
 		syncStorage(key, ids, schema),
 	getRecordFromStorage: (schema: z.ZodType<Value>) =>
 		getRecordFromStorage(key, schema),
+	getValuesFromStorage: (schema: z.ZodType<Value>) =>
+		getValuesFromStorage(key, schema),
 });
 function setToLocalStorage<Value>(key: string, value?: Value) {
-	if (value) {
+	if (!isUndefined(value)) {
 		localStorage.setItem(key, JSON.stringify(value));
 	} else {
 		localStorage.removeItem(key);
@@ -84,6 +87,12 @@ function getRecordFromStorage<Value>(
 	}
 	return {};
 }
+function getValuesFromStorage<Value>(
+	key: string,
+	schema: z.ZodType<Value>,
+): Value[] {
+	return Object.values(getRecordFromStorage(key, schema));
+}
 function syncStorage<Value>(
 	key: string,
 	ids: string[],
@@ -95,3 +104,7 @@ function syncStorage<Value>(
 	);
 	setToLocalStorage(key, withIds);
 }
+
+export type LocalStorageRepository<Value> = ReturnType<
+	typeof localStorageRepository<Value>
+>;

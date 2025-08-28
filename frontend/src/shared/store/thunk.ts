@@ -10,7 +10,10 @@ import type { KyOptions } from "node_modules/ky/distribution/types/options";
 import type z from "zod";
 import { setError, setLoading, setSuccess } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
-import { localStorageRepository } from "@/shared/localStorage";
+import {
+	type LocalStorageRepository,
+	localStorageRepository,
+} from "@/shared/localStorage";
 import type { RootState } from "@/shared/store/store";
 
 const createAppThunk = createAsyncThunk.withTypes<{
@@ -47,16 +50,32 @@ export const createAppAsyncThunk = <Returned, ThunkArg = void>(
 		options,
 	);
 
-type Options<Returned> = {
-	key: string;
+type CommonOptions<Returned> = {
 	schema: z.ZodType<Returned>;
 };
+type WithStorage<Returned> = {
+	type: "controlled";
+	storage: LocalStorageRepository<Returned>;
+};
+type WithKey = {
+	type: "uncontrolled";
+	key: string;
+};
+type Options<Returned> = CommonOptions<Returned> &
+	(WithStorage<Returned> | WithKey);
 
+function buildStorage<Returned>(
+	options: WithKey | WithStorage<Returned>,
+): LocalStorageRepository<Returned> {
+	return options.type === "controlled"
+		? options.storage
+		: localStorageRepository<Returned>(options.key);
+}
 export function withStorageActionCreator<Returned, ThunkArg>(
 	innerCreator: PayloadCreator<Returned, ThunkArg>,
-	{ key, schema }: Options<Returned>,
+	{ schema, ...options }: Options<Returned>,
 ): PayloadCreator<Returned, ThunkArg> {
-	const storage = localStorageRepository<Returned>(key);
+	const storage = buildStorage(options);
 	return async (arg, api) => {
 		try {
 			const returned = (await innerCreator(arg, api)) as Returned;
@@ -79,9 +98,9 @@ export function withIdStorageActionCreator<
 	ThunkArg extends { id: string },
 >(
 	innerCreator: PayloadCreator<Returned, ThunkArg>,
-	{ key, schema, getId }: StorageIdOptions<Returned>,
+	{ schema, getId, ...options }: StorageIdOptions<Returned>,
 ): PayloadCreator<Returned, ThunkArg> {
-	const storage = localStorageRepository<Returned>(key);
+	const storage = buildStorage(options);
 	return async (arg, api) => {
 		try {
 			const returned = (await innerCreator(arg, api)) as Returned;
@@ -101,7 +120,7 @@ type Case = (typeof CASES)[number];
 export const addRequestedContentCases = <State, Value, Error, ThunkArg = void>(
 	builder: ActionReducerMapBuilder<State>,
 	thunk: AppThunk<Value, ThunkArg>,
-	accessor: (state: Draft<State>) => RequestedContent<Value, Error>,
+	accessor: (state: Draft<State>) => RequestedContent<Value, Error | undefined>,
 	{
 		cases = CASES,
 		errorSchema,
@@ -123,7 +142,9 @@ export const addRequestedContentCases = <State, Value, Error, ThunkArg = void>(
 		builder.addCase(thunk.rejected, (state, { payload }) => {
 			setError(
 				accessor(state),
-				errorSchema?.parse(payload) ?? (payload as Error),
+				isUndefined(payload)
+					? undefined
+					: (errorSchema?.safeParse(payload).data ?? (payload as Error)),
 			);
 		});
 	}

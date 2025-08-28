@@ -14,6 +14,7 @@ import {
 	useAuth,
 } from "@/features/user/components/Auth.context";
 import type { Me } from "@/features/user/store/me";
+import { initialState } from "@/features/user/store/me.slice";
 import { routeTree } from "@/routeTree.gen";
 import type { Routes as Route } from "@/shared/router";
 import {
@@ -50,19 +51,21 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
-		store = setupStore({
-			...preloadedState,
-			me: {
-				...(preloadedState.me as RootState["me"]),
-				me: options.user
-					? { status: "success", value: options.user }
-					: (preloadedState.me?.me as RootState["me"]["me"]),
-			},
-		}),
+
 		route = options.route ?? "/",
 		params,
 		...renderOptions
 	} = options;
+	preloadedState.me ??= initialState;
+	const store = setupStore({
+		...preloadedState,
+		me: {
+			...(preloadedState.me as RootState["me"]),
+			me: options.user
+				? { status: "success", value: options.user }
+				: (preloadedState.me?.me as RootState["me"]["me"]),
+		},
+	});
 	const history = createMemoryHistory({
 		initialEntries: [
 			params

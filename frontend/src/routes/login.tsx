@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { isUndefined } from "es-toolkit";
 import { useEffect } from "react";
 import { z } from "zod";
 import { Login } from "@/features/user/components/Login";
@@ -26,7 +27,7 @@ function RouteComponent() {
 	// If user is logged in, redirect to the intended page or home
 	useEffect(() => {
 		const doRedirect = async () => {
-			if (loggedUser === undefined) {
+			if (isUndefined(loggedUser)) {
 				return;
 			}
 			await navigate({ to: redirectParam || "/" });

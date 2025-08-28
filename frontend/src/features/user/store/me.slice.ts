@@ -16,7 +16,7 @@ import {
 	tokenSchema,
 	type UpdateMeRequest,
 } from "@/features/user/store/me";
-import { setIdle } from "@/shared/api/api";
+import { isNetworkError, setIdle } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppSelector } from "@/shared/hooks/store";
 import { localStorageRepository } from "@/shared/localStorage";
@@ -67,15 +67,18 @@ export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
 	async (_, { getState, extra: { api } }) => {
 		try {
-			const userResult = await api().get<MeResponse>("api/v1/me");
+			const userResult = await api().get<MeResponse>("api/v1/me").json();
 			const user = meResponseSchema.parse(userResult);
 			const departments = selectDepartmentsByIds(
 				getState(),
 				user.departments ?? [],
 			);
 			return meSchema.parse({ ...user, departments });
-		} catch (_e) {
-			return getOfflineMe();
+		} catch (e) {
+			if (isNetworkError(e)) {
+				return getOfflineMe();
+			}
+			throw e;
 		}
 	},
 );
@@ -127,7 +130,7 @@ type State = {
 	login: RequestedContent<void, CredentialError>;
 	updateMe: RequestedContent<void, MeError>;
 };
-const initialState: State = {
+export const initialState: State = {
 	login: { status: "idle" },
 	me: { status: "idle", value: getOfflineMe() },
 	updateMe: { status: "idle" },
@@ -171,7 +174,7 @@ const selectMe = createTypedDraftSafeSelector(
 );
 const selectConnectedMe = createTypedDraftSafeSelector(
 	selectState,
-	(user) => connectedMeSchema.safeParse(user.me.value).data,
+	(state) => connectedMeSchema.safeParse(state.me.value).data,
 );
 
 const EMPTY_FAVORITES: string[] = [];

@@ -41,7 +41,7 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 						cacheNetworkFirst(
 							/^https:\/\/server.arcgisonline.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/\d+\/\d+\/\d+$/i,
 						),
-						cacheNetworkFirst(/^https:\/\/.*\/api\/v1\/referential$/i),
+						cacheNetworkFirst(/^https?:\/\/.*\/api\/v1\/referential$/i),
 					],
 				},
 				devOptions: {

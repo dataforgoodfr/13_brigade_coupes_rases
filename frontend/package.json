@@ -13,6 +13,7 @@
     "build:ci": "vite build",
     "build": "pnpm cleanup && tsc -b && vite build",
     "build:preview": "pnpm build && vite preview",
+    "build:dev:preview": "pnpm build --mode development && vite preview",
     "preview": "vite preview",
     "test": "vitest",
     "test:ci": "vitest --mode test-ci",
