@@ -10,11 +10,10 @@ from app.common.errors import AppHTTPException
 from app.models import ClearCutReport, Department, User, user_department
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.user import (
-    MeResponseSchema,
     MeUpdateSchema,
     UserResponseSchema,
     UserUpdateSchema,
-    user_to_me_response_schema,
+    user_to_user_response_schema,
 )
 from app.services.get_password_hash import get_password_hash
 

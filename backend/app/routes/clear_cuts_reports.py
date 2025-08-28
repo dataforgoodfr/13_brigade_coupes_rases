@@ -65,7 +65,6 @@ def post_report(
         ) from err
 
 
-
 @router.get(
     "/",
     response_model=PaginationResponseSchema[ClearCutReportResponseSchema],

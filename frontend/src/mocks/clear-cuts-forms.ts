@@ -12,7 +12,7 @@ export const mockClearCutFormsResponse = (
 	const clearCut = {
 		id: faker.string.uuid(),
 		reportId: faker.string.uuid(),
-		createdAt: faker.date.recent().toJSON().split("T")[0],
+		createdAt: faker.date.recent().toJSON(),
 		clearCutImages: [],
 		hasRemainingTrees: false,
 		plantingImages: [],

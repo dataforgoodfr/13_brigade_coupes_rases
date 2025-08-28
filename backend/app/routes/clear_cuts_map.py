@@ -1,6 +1,6 @@
 from logging import getLogger
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
@@ -16,7 +16,6 @@ from app.services.clear_cut_map import (
     build_clearcuts_map,
     get_report_preview_by_id,
 )
-from app.services.user_auth import get_optional_current_user
 
 logger = getLogger(__name__)
 

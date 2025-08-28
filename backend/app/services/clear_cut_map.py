@@ -15,7 +15,6 @@ from geojson_pydantic import Point
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
-
 from app.common.errors import AppHTTPException
 from app.models import (
     SRID,
@@ -23,8 +22,6 @@ from app.models import (
     ClearCutReport,
     Department,
     Rules,
-    User,
-    user_clear_cut_report,
 )
 from app.schemas.base import BaseSchema
 from app.schemas.clear_cut_map import (

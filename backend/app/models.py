@@ -41,6 +41,7 @@ user_clear_cut_report = Table(
     Column("report_id", Integer, ForeignKey("clear_cuts_reports.id"), primary_key=True),
 )
 
+
 class ClearCutEcologicalZoning(Base):
     __tablename__ = "clear_cut_ecological_zoning"
     clear_cut_id: Mapped[int] = mapped_column(

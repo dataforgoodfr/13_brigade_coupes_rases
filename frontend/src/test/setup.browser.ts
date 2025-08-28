@@ -16,7 +16,7 @@ vi.mock("@/features/offline/hooks/useReloadPwa", () => ({
 configure({
 	asyncUtilTimeout: 5_000,
 });
-beforeAll(() => worker.start({ quiet: import.meta.env.VITE_CI === "true" }));
+beforeAll(() => worker.start());
 afterEach(() => {
 	worker.resetHandlers();
 });

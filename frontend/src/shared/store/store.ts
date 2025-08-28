@@ -5,6 +5,7 @@ import {
 	isRejected,
 } from "@reduxjs/toolkit";
 import type { KyOptions } from "node_modules/ky/distribution/types/options";
+import logger from "redux-logger";
 import { rulesSlice } from "@/features/admin/store/rules.slice";
 import { usersSlice } from "@/features/admin/store/users.slice";
 import { usersFiltersSlice } from "@/features/admin/store/users-filters.slice";
@@ -29,6 +30,7 @@ unauthorizedMiddleware.startListening({
 		}
 	},
 });
+
 const reducer = combineReducers({
 	[filtersSlice.reducerPath]: filtersSlice.reducer,
 	[rulesSlice.reducerPath]: rulesSlice.reducer,
@@ -62,6 +64,7 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 					},
 				},
 			})
+				.concat(logger)
 				.concat(unauthorizedMiddleware.middleware)
 				.concat(usersApi.middleware),
 		preloadedState,
