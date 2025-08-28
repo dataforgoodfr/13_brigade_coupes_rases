@@ -11,12 +11,11 @@ import {
 	meResponseSchema,
 	meSchema,
 	type OfflineMe,
-	offlineMeSchema,
 	type TokenResponse,
 	tokenSchema,
 	type UpdateMeRequest,
 } from "@/features/user/store/me";
-import { isNetworkError, setIdle } from "@/shared/api/api";
+import { setIdle } from "@/shared/api/api";
 import type { RequestedContent } from "@/shared/api/types";
 import { useAppSelector } from "@/shared/hooks/store";
 import { localStorageRepository } from "@/shared/localStorage";
@@ -26,6 +25,7 @@ import type { RootState } from "@/shared/store/store";
 import {
 	addRequestedContentCases,
 	createAppAsyncThunk,
+	withStorageActionCreator,
 } from "@/shared/store/thunk";
 
 const tokenStorage = localStorageRepository<TokenResponse>("token");
@@ -36,12 +36,12 @@ export const getStoredToken = () =>
 
 const meStorage = localStorageRepository<OfflineMe>("me");
 
-const getOfflineMe = () =>
-	meStorage.getFromLocalStorageOrDefault(offlineMeSchema, {
+const getMe = () =>
+	meStorage.getFromLocalStorageOrDefault(meSchema, {
 		favorites: [],
 	});
 
-const saveOfflineMe = (me: OfflineMe) => {
+const saveMe = (me: OfflineMe) => {
 	meStorage.setToLocalStorage(me);
 };
 
@@ -65,8 +65,8 @@ export const loginThunk = createAppAsyncThunk(
 
 export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
-	async (_, { getState, extra: { api } }) => {
-		try {
+	withStorageActionCreator(
+		async (_, { getState, extra: { api } }) => {
 			const userResult = await api().get<MeResponse>("api/v1/me").json();
 			const user = meResponseSchema.parse(userResult);
 			const departments = selectDepartmentsByIds(
@@ -74,13 +74,9 @@ export const getMeThunk = createAppAsyncThunk(
 				user.departments ?? [],
 			);
 			return meSchema.parse({ ...user, departments });
-		} catch (e) {
-			if (isNetworkError(e)) {
-				return getOfflineMe();
-			}
-			throw e;
-		}
-	},
+		},
+		{ storage: meStorage, type: "controlled", schema: meSchema },
+	),
 );
 export const addFavoriteThunk = createAppAsyncThunk<void, string>(
 	"users/addFavorite",
@@ -98,7 +94,7 @@ export const addFavoriteThunk = createAppAsyncThunk<void, string>(
 				...me,
 				favorites: [...me.favorites, favorite],
 			};
-			saveOfflineMe(updatedMe);
+			saveMe(updatedMe);
 		}
 		dispatch(getMeThunk());
 	},
@@ -119,7 +115,7 @@ export const removeFavoriteThunk = createAppAsyncThunk<void, string>(
 				...me,
 				favorites: me.favorites.filter((id) => id !== favorite),
 			};
-			saveOfflineMe(updatedMe);
+			saveMe(updatedMe);
 		}
 
 		dispatch(getMeThunk());
@@ -132,7 +128,7 @@ type State = {
 };
 export const initialState: State = {
 	login: { status: "idle" },
-	me: { status: "idle", value: getOfflineMe() },
+	me: { status: "idle", value: getMe() },
 	updateMe: { status: "idle" },
 };
 export const meSlice = createSlice({
@@ -144,7 +140,7 @@ export const meSlice = createSlice({
 			state.me.status = "success";
 		},
 		logoutUser: (state) => {
-			state.me.value = getOfflineMe();
+			state.me.value = getMe();
 			state.me.status = "idle";
 			setStoredToken(undefined);
 		},

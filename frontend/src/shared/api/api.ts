@@ -23,6 +23,7 @@ function isError(value: unknown): value is Error {
 }
 
 const errorMessages = new Set([
+	"net::ERR_INTERNET_DISCONNECTED",
 	"network error", // Chrome
 	"Failed to fetch", // Chrome
 	"NetworkError when attempting to fetch resource.", // Firefox

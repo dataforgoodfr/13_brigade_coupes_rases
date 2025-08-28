@@ -71,7 +71,7 @@ function buildStorage<Returned>(
 		? options.storage
 		: localStorageRepository<Returned>(options.key);
 }
-export function withStorageActionCreator<Returned, ThunkArg>(
+export function withStorageActionCreator<Returned, ThunkArg = void>(
 	innerCreator: PayloadCreator<Returned, ThunkArg>,
 	{ schema, ...options }: Options<Returned>,
 ): PayloadCreator<Returned, ThunkArg> {
