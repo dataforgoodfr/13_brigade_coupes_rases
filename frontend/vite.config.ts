@@ -19,6 +19,7 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 		preview: {
 			port: 8000,
 		},
+		build: { sourcemap: true },
 		plugins: [
 			VitePWA({
 				registerType: "prompt",

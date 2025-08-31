@@ -82,6 +82,7 @@ function getRecordFromStorage<Value>(
 	schema: z.ZodType<Value>,
 ): Record<string, Value> {
 	const entry = localStorage.getItem(key);
+
 	if (entry !== null) {
 		return z.record(z.string(), schema).parse(JSON.parse(entry));
 	}

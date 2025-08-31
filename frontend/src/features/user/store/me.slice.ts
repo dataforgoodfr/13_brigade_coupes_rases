@@ -140,6 +140,7 @@ export const meSlice = createSlice({
 			state.me.status = "success";
 		},
 		logoutUser: (state) => {
+			meStorage.setToLocalStorage(undefined);
 			state.me.value = getMe();
 			state.me.status = "idle";
 			setStoredToken(undefined);

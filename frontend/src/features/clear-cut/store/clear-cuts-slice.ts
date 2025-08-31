@@ -20,7 +20,8 @@ import type { RootState } from "@/shared/store/store";
 import {
 	addRequestedContentCases,
 	createAppAsyncThunk,
-	withIdStorageActionCreator,
+	createPersistEntityToStorageThunk,
+	withEntityStorageActionCreator,
 } from "@/shared/store/thunk";
 import {
 	type ClearCutForm,
@@ -50,12 +51,19 @@ const mapReport = (
 		),
 	})),
 });
+export const persistClearCutForm =
+	createPersistEntityToStorageThunk<ClearCutForm>("persistClearCutForm", {
+		schema: clearCutFormSchema,
+		storage: formStorage,
+		type: "controlled",
+		getId: (form) => form.report.id,
+	});
 export const getClearCutFormThunk = createAppAsyncThunk<
 	ClearCutForm,
 	{ id: string }
 >(
 	"getClearCutForm",
-	withIdStorageActionCreator(
+	withEntityStorageActionCreator(
 		async ({ id }, { getState, extra: { api } }) => {
 			// Get the base report data
 			const reportResult = await api()
@@ -90,10 +98,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 					...computedProperties,
 				};
 			}
-			return clearCutFormSchema.parse({
-				report: baseReport,
-				...computedProperties,
-			});
+			return clearCutFormSchema.parse({ toto: "" });
 		},
 		{
 			getId: (v) => v.id,

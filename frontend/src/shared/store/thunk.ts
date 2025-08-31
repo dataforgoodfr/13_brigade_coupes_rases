@@ -61,8 +61,7 @@ type WithKey = {
 	type: "uncontrolled";
 	key: string;
 };
-type Options<Returned> = CommonOptions<Returned> &
-	(WithStorage<Returned> | WithKey);
+type Options<Value> = CommonOptions<Value> & (WithStorage<Value> | WithKey);
 
 function buildStorage<Returned>(
 	options: WithKey | WithStorage<Returned>,
@@ -71,6 +70,16 @@ function buildStorage<Returned>(
 		? options.storage
 		: localStorageRepository<Returned>(options.key);
 }
+export function createPersistToStorageThunk<ThunkArg>(
+	prefix: string,
+	options: Options<ThunkArg>,
+) {
+	return createAppAsyncThunk<void, ThunkArg>(prefix, async (arg) => {
+		const storage = buildStorage(options);
+		storage.setToLocalStorage(arg);
+	});
+}
+
 export function withStorageActionCreator<Returned, ThunkArg = void>(
 	innerCreator: PayloadCreator<Returned, ThunkArg>,
 	{ schema, ...options }: Options<Returned>,
@@ -90,15 +99,24 @@ export function withStorageActionCreator<Returned, ThunkArg = void>(
 		}
 	};
 }
-type StorageIdOptions<Returned> = Options<Returned> & {
-	getId: (value: { id: string }) => string;
+type StorageEntityOptions<Returned, Entity = Returned> = Options<Returned> & {
+	getId: (value: Entity) => string;
 };
-export function withIdStorageActionCreator<
+export function createPersistEntityToStorageThunk<ThunkArg>(
+	prefix: string,
+	{ getId, ...options }: StorageEntityOptions<ThunkArg, ThunkArg>,
+) {
+	return createAppAsyncThunk<void, ThunkArg>(prefix, async (arg) => {
+		const storage = buildStorage(options);
+		storage.setToLocalStorageById(getId(arg), arg);
+	});
+}
+export function withEntityStorageActionCreator<
 	Returned,
 	ThunkArg extends { id: string },
 >(
 	innerCreator: PayloadCreator<Returned, ThunkArg>,
-	{ schema, getId, ...options }: StorageIdOptions<Returned>,
+	{ schema, getId, ...options }: StorageEntityOptions<Returned, ThunkArg>,
 ): PayloadCreator<Returned, ThunkArg> {
 	const storage = buildStorage(options);
 	return async (arg, api) => {

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isUndefined } from "es-toolkit";
 import { Accordion } from "radix-ui";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -8,6 +9,7 @@ import {
 	clearCutFormSchema,
 } from "@/features/clear-cut/store/clear-cuts";
 import {
+	persistClearCutForm,
 	selectSubmission,
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
@@ -24,6 +26,12 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: clearCut,
+	});
+	form.watch((value) => {
+		const clearCutForm = clearCutFormSchema.safeParse(value).data;
+		if (!isUndefined(clearCutForm)) {
+			dispatch(persistClearCutForm(clearCutForm));
+		}
 	});
 	const { toast } = useToast();
 
