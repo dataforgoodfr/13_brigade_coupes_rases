@@ -37,8 +37,12 @@ function getFromLocalStorage<Value>(
 	schema: z.ZodType<Value>,
 ): Value | undefined {
 	const item = localStorage.getItem(key);
-	if (item !== null) {
-		return schema.parse(JSON.parse(item));
+	try {
+		if (item !== null) {
+			return schema.parse(JSON.parse(item));
+		}
+	} catch (_e) {
+		localStorage.removeItem(key);
 	}
 }
 
@@ -81,12 +85,7 @@ function getRecordFromStorage<Value>(
 	key: string,
 	schema: z.ZodType<Value>,
 ): Record<string, Value> {
-	const entry = localStorage.getItem(key);
-
-	if (entry !== null) {
-		return z.record(z.string(), schema).parse(JSON.parse(entry));
-	}
-	return {};
+	return getFromLocalStorage(key, z.record(z.string(), schema)) ?? {};
 }
 function getValuesFromStorage<Value>(
 	key: string,
