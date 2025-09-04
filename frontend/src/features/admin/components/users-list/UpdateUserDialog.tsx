@@ -70,11 +70,15 @@ export function UpdateUserDialog(user: User) {
 	);
 	useEffect(() => {
 		if (updatedUser.status === "success") {
-			toast({ title: `Utilisateur ${updatedUser.value?.login} mis à jour` });
+			toast({
+				id: "user-updated",
+				title: `Utilisateur ${updatedUser.value?.login} mis à jour`,
+			});
 			setIsOpen(false);
 			dispatch(usersSlice.actions.resetEditedUser());
 		} else if (updatedUser.status === "error") {
 			toast({
+				id: "user-update-failed",
 				title: "La mise à jour de l'utilisateur a échoué",
 				description: updatedUser.error?.detail.content,
 				variant: "destructive",

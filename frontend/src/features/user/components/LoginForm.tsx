@@ -53,12 +53,14 @@ export function LoginForm() {
 	useEffect(() => {
 		if (login.status === "success") {
 			toast({
+				id: "login-success",
 				title: "Connexion réussie",
 				variant: "success",
 				description: "Vous êtes maintenant connecté.",
 			});
 		} else if (login.status === "error") {
 			toast({
+				id: "login-failed",
 				title: "Erreur de connexion",
 				description: "Identifiants invalides. Veuillez réessayer.",
 				variant: "destructive",

@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { uniqBy } from "es-toolkit";
+import { isUndefined, uniqBy } from "es-toolkit";
 import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
@@ -20,21 +20,23 @@ import type { RootState } from "@/shared/store/store";
 import {
 	addRequestedContentCases,
 	createAppAsyncThunk,
-	createPersistEntityToStorageThunk,
 	withEntityStorageActionCreator,
 } from "@/shared/store/thunk";
 import {
 	type ClearCutForm,
+	type ClearCutFormVersions,
 	type ClearCutReport,
 	type ClearCutReportResponse,
 	type ClearCuts,
 	clearCutFormSchema,
 	clearCutFormsResponseSchema,
+	clearCutFormVersionsSchema,
 	clearCutReportResponseSchema,
 	clearCutsResponseSchema,
 } from "./clear-cuts";
 
-const formStorage = localStorageRepository<ClearCutForm>("clear-cut-form");
+const formStorage =
+	localStorageRepository<ClearCutFormVersions>("clear-cut-form");
 
 const mapReport = (
 	state: RootState,
@@ -51,20 +53,28 @@ const mapReport = (
 		),
 	})),
 });
-export const persistClearCutForm =
-	createPersistEntityToStorageThunk<ClearCutForm>("persistClearCutForm", {
-		schema: clearCutFormSchema,
-		storage: formStorage,
-		type: "controlled",
-		getId: (form) => form.report.id,
+
+export const persistClearCutCurrentForm = createAppAsyncThunk<
+	void,
+	ClearCutForm
+>("persistClearCutForm", async (form, { getState }) => {
+	const versions = selectDetail(getState());
+	if (isUndefined(versions.value)) {
+		return;
+	}
+	formStorage.setToLocalStorageById(form.report.id, {
+		...versions.value,
+		current: form,
 	});
+});
+
 export const getClearCutFormThunk = createAppAsyncThunk<
-	ClearCutForm,
-	{ id: string }
+	ClearCutFormVersions,
+	{ id: string; hasBeenCreated?: boolean }
 >(
 	"getClearCutForm",
 	withEntityStorageActionCreator(
-		async ({ id }, { getState, extra: { api } }) => {
+		async ({ id, hasBeenCreated }, { getState, extra: { api } }) => {
 			// Get the base report data
 			const reportResult = await api()
 				.get(`api/v1/clear-cuts-map/${id}`)
@@ -88,22 +98,42 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 			const computedProperties = {
 				hasEcologicalZonings: ecologicalZonings.length > 0,
 			};
+			let formReport: ClearCutForm;
 			// If forms exist, merge the latest form data with the base report
 			if (formsResult.content && formsResult.content.length > 0) {
 				const form = formsResult.content[0];
-				return {
+				formReport = {
 					report: baseReport,
 					...form,
 					ecologicalZonings,
 					...computedProperties,
 				};
+			} else {
+				formReport = clearCutFormSchema.parse({
+					report: baseReport,
+					reportId: baseReport.id,
+					...computedProperties,
+				} as ClearCutForm);
 			}
-			return clearCutFormSchema.parse({ toto: "" });
+			const versions = formStorage.getFromLocalStorageById(
+				formReport.report.id,
+				clearCutFormVersionsSchema,
+			);
+
+			const shouldShowDisclaimer = versions?.current.etag !== formReport.etag;
+			return {
+				current: hasBeenCreated
+					? formReport
+					: (versions?.current ?? formReport),
+				latest: formReport,
+				versionMismatchDisclaimerShown:
+					hasBeenCreated ?? (!shouldShowDisclaimer || isUndefined(versions)),
+			};
 		},
 		{
 			getId: (v) => v.id,
 			storage: formStorage,
-			schema: clearCutFormSchema,
+			schema: clearCutFormVersionsSchema,
 			type: "controlled",
 		},
 	),
@@ -138,8 +168,10 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 			return { ...clearCuts, previews };
 		} catch (e) {
 			if (isNetworkError(e)) {
-				const forms = formStorage.getValuesFromStorage(clearCutFormSchema);
-				const reports = forms.map((f) => f.report);
+				const forms = formStorage.getValuesFromStorage(
+					clearCutFormVersionsSchema,
+				);
+				const reports = forms.map((f) => f.current.report);
 				return {
 					previews: reports,
 					points: {
@@ -168,12 +200,12 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 				json: formData,
 			})
 			.json();
-		dispatch(getClearCutFormThunk({ id: reportId }));
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }));
 	},
 );
 type State = {
 	clearCuts: RequestedContent<ClearCuts>;
-	detail: RequestedContent<ClearCutForm>;
+	detail: RequestedContent<ClearCutFormVersions>;
 	submission: RequestedContent<void>;
 };
 const initialState: State = {
@@ -191,6 +223,15 @@ export const clearCutsSlice = createSlice({
 				`clear-cut:${action.payload.id}`,
 				JSON.stringify(state.detail),
 			);
+		},
+		replaceCurrentVersionByLatest: (state) => {
+			if (
+				!isUndefined(state.detail.value?.current) &&
+				!isUndefined(state.detail.value?.latest)
+			) {
+				state.detail.value.current = state.detail.value?.latest;
+				state.detail.value.versionMismatchDisclaimerShown = true;
+			}
 		},
 	},
 	extraReducers: (builder) => {
@@ -210,7 +251,7 @@ export const clearCutsSlice = createSlice({
 			(state) => state.submission,
 		);
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
-			formStorage.syncStorage(favorites, clearCutFormSchema);
+			formStorage.syncStorage(favorites, clearCutFormVersionsSchema);
 		});
 	},
 });

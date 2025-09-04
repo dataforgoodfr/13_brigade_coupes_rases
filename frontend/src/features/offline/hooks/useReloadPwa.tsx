@@ -22,11 +22,13 @@ export function useReloadPwa() {
 	useEffect(() => {
 		if (offlineReady) {
 			toast({
+				id: "app-ready",
 				title: "L'application est prête",
 				description: "Utilisation en mode déconnecté disponible",
 			});
 		} else if (needRefresh) {
 			toast({
+				id: "new-app-available",
 				title: "Nouveau contenu disponible",
 				description: "Cliquez sur Recharger l'application",
 				onClose: () => {

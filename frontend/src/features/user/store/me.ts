@@ -56,7 +56,10 @@ export const connectedMeSchema = connectedMeBaseSchema
 		]),
 	);
 export const meSchema = connectedMeSchema.or(offlineMeSchema);
-export const tokenSchema = z.object({ accessToken: z.jwt() });
+export const tokenSchema = z.object({
+	accessToken: z.jwt(),
+	refreshToken: z.jwt(),
+});
 export type Me = z.infer<typeof meSchema>;
 export type ConnectedMe = z.infer<typeof connectedMeSchema>;
 export type OfflineMe = z.infer<typeof offlineMeSchema>;

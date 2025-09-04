@@ -9,7 +9,7 @@ import {
 	clearCutFormSchema,
 } from "@/features/clear-cut/store/clear-cuts";
 import {
-	persistClearCutForm,
+	persistClearCutCurrentForm,
 	selectSubmission,
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
@@ -30,7 +30,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	form.watch((value) => {
 		const clearCutForm = clearCutFormSchema.safeParse(value).data;
 		if (!isUndefined(clearCutForm)) {
-			dispatch(persistClearCutForm(clearCutForm));
+			dispatch(persistClearCutCurrentForm(clearCutForm));
 		}
 	});
 	const { toast } = useToast();
@@ -46,9 +46,12 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 
 	useEffect(() => {
 		if (submission.status === "success") {
-			toast({ title: "Formulaire modifié" });
+			toast({ id: "edited-form", title: "Formulaire modifié" });
 		} else if (submission.status === "error") {
-			toast({ title: "Erreur lors de la sauvegarde du formulaire !" });
+			toast({
+				id: "form-edition-error",
+				title: "Erreur lors de la sauvegarde du formulaire !",
+			});
 		}
 	}, [submission.status, toast]);
 

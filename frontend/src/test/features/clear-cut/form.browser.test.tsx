@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import { screen } from "@testing-library/react";
 import type { UserEvent } from "@vitest/browser/context";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -95,6 +96,7 @@ const setupTest = (
 	): TestFormItem<ClearCutFormInput> => {
 		const formReport: FormReport = {
 			report: reportMock.response,
+			etag: faker.git.commitSha(),
 			...formMock.response,
 			hasEcologicalZonings: true,
 		};

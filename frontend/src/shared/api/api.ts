@@ -1,9 +1,18 @@
+import { isUndefined } from "es-toolkit";
 import ky from "ky";
 import z from "zod";
+import { type TokenResponse, tokenSchema } from "@/features/user/store/me";
 import type { RequestedContent } from "@/shared/api/types";
+import { localStorageRepository } from "@/shared/localStorage";
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized";
+const tokenStorage = localStorageRepository<TokenResponse>("token");
+
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
+	retry: {
+		statusCodes: [408, 413, 429, 500, 502, 503, 504, 401],
+		methods: ["get", "post", "put", "head", "delete", "options", "trace"],
+	},
 	hooks: {
 		beforeError: [
 			async (error) => {
@@ -12,6 +21,29 @@ export const api = ky.extend({
 					error.name = UNAUTHORIZED_ERROR_NAME;
 				}
 				return error;
+			},
+		],
+		beforeRetry: [
+			async ({ request }) => {
+				const refreshToken =
+					tokenStorage.getFromLocalStorage(tokenSchema)?.refreshToken;
+				if (
+					request.url.includes("token/refresh") ||
+					isUndefined(refreshToken)
+				) {
+					return;
+				}
+				const tokenResponse = await ky
+					.post(`api/v1/token/refresh`, {
+						prefixUrl: import.meta.env.VITE_API,
+						json: {
+							refreshToken,
+						},
+					})
+					.json();
+				const token = tokenSchema.parse(tokenResponse);
+				tokenStorage.setToLocalStorage(token);
+				request.headers.set("Authorization", `Bearer ${token.accessToken}`);
 			},
 		],
 	},

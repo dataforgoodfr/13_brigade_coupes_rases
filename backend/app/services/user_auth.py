@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
-from fastapi import Depends, status
+from fastapi import Depends, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ConfigDict
@@ -27,12 +27,15 @@ def authenticate_user(db: Session, email: str, password: str):
 
 SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 24 * 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
+REFRESH_TOKEN_SECRET_KEY = settings.JWT_SECRET_KEY
 
 
 class TokenSnakeCase(BaseModel):
     access_token: str
     token_type: str
+    refresh_token: str
     model_config = ConfigDict(
         alias_generator=to_snake,
         populate_by_name=True,
@@ -42,6 +45,7 @@ class TokenSnakeCase(BaseModel):
 
 class Token(BaseSchema):
     access_token: str
+    refresh_token: str
     token_type: str
 
 
@@ -135,4 +139,37 @@ def create_token(db: Session, email: str, password: str):
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")
+    return Token(
+        access_token=access_token,
+        refresh_token=create_refresh_token(data={"email": email}),
+        token_type="bearer",
+    )
+
+
+def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, REFRESH_TOKEN_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+def decode_token(
+    token: str, key: str | None = None, type: str = "access"
+) -> str | None:
+    try:
+        if type == "refresh":
+            payload = jwt.decode(
+                token, REFRESH_TOKEN_SECRET_KEY, algorithms=[ALGORITHM]
+            )
+        else:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if key:
+            return payload.get(key)
+        return payload.get("sub")
+    except jwt.PyJWTError as e:
+        print(e)
+        return None
