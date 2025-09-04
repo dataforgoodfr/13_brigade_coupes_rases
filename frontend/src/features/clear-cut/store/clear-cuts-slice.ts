@@ -198,6 +198,7 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 		await api()
 			.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
 				json: formData,
+				headers: { etag: formData.etag },
 			})
 			.json();
 		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }));
