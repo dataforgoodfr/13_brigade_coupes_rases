@@ -1,11 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { isUndefined, uniqBy } from "es-toolkit";
+import { HTTPError } from "ky";
 import { useEffect } from "react";
 import type { FiltersRequest } from "@/features/clear-cut/store/filters";
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice";
 import type { Bounds } from "@/features/clear-cut/store/types";
 import { getMeThunk } from "@/features/user/store/me.slice";
 import { isNetworkError, parseParam } from "@/shared/api/api";
+import {
+	type EtagMismatchError,
+	etagMismatchErrorSchema,
+} from "@/shared/api/errors";
 import type { RequestedContent } from "@/shared/api/types";
 import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
@@ -195,19 +200,31 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 >(
 	"submitClearCutForm",
 	async ({ reportId, formData }, { extra: { api }, dispatch }) => {
-		await api()
-			.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
-				json: formData,
-				headers: { etag: formData.etag },
-			})
-			.json();
+		try {
+			await api()
+				.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
+					json: formData,
+					headers: { etag: formData.etag },
+				})
+				.json();
+		} catch (e) {
+			if (
+				e instanceof HTTPError &&
+				e.response.status === 409 &&
+				etagMismatchErrorSchema.safeParse(await e.response.json()).success
+			) {
+				dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: false }));
+			}
+			throw e;
+		}
+
 		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }));
 	},
 );
 type State = {
 	clearCuts: RequestedContent<ClearCuts>;
 	detail: RequestedContent<ClearCutFormVersions>;
-	submission: RequestedContent<void>;
+	submission: RequestedContent<void, EtagMismatchError>;
 };
 const initialState: State = {
 	clearCuts: { status: "idle" },
