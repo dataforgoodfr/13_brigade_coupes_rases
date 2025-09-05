@@ -61,6 +61,7 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 	}
 	return HttpResponse.json({
 		accessToken: token,
+		refreshToken: token,
 	} satisfies TokenResponse);
 });
 
