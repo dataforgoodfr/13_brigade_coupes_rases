@@ -164,7 +164,7 @@ def add_clearcut_form_version(
     new_version: ClearCutFormCreate,
     db: Session = db_session,
     editor=Depends(get_current_user),
-    etag: Annotated[str | None, Header()] = None
+    etag: Annotated[str | None, Header()] = None,
 ):
     logger.info(db)
     form = add_clear_cut_form_entry(db, editor, report_id, new_version, etag)

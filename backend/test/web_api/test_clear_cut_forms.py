@@ -152,7 +152,10 @@ def test_form_submission_updates_report_status(client: TestClient, db: Session):
     response = client.post(
         "/api/v1/clear-cuts-reports/1/forms",
         json=form_data,
-        headers={"Authorization": f"Bearer {token}", "Etag": response["content"][0]["etag"]},
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Etag": response["content"][0]["etag"],
+        },
     )
     assert response.status_code == status.HTTP_201_CREATED
 
