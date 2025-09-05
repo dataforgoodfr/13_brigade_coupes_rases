@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header
 from fastapi.security import OAuth2PasswordRequestForm
-from pytest import Session
+from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.database import get_db
