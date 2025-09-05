@@ -13,14 +13,13 @@ import { filtersSlice } from "@/features/clear-cut/store/filters.slice";
 import { usersApi } from "@/features/user/store/api";
 import {
 	getStoredToken,
+	meSlice,
 	setStoredToken,
-	userSlice,
-} from "@/features/user/store/user.slice";
+} from "@/features/user/store/me.slice";
 import { api, UNAUTHORIZED_ERROR_NAME } from "@/shared/api/api";
 import { referentialSlice } from "@/shared/store/referential/referential.slice";
 
 const unauthorizedMiddleware = createListenerMiddleware();
-
 unauthorizedMiddleware.startListening({
 	predicate: (action) => isRejected(action),
 	effect: (action) => {
@@ -29,13 +28,14 @@ unauthorizedMiddleware.startListening({
 		}
 	},
 });
+
 const reducer = combineReducers({
 	[filtersSlice.reducerPath]: filtersSlice.reducer,
 	[rulesSlice.reducerPath]: rulesSlice.reducer,
 	[usersApi.reducerPath]: usersApi.reducer,
 	[referentialSlice.reducerPath]: referentialSlice.reducer,
 	[clearCutsSlice.reducerPath]: clearCutsSlice.reducer,
-	[userSlice.reducerPath]: userSlice.reducer,
+	[meSlice.reducerPath]: meSlice.reducer,
 	// Admin reducers
 	[usersFiltersSlice.reducerPath]: usersFiltersSlice.reducer,
 	[usersSlice.reducerPath]: usersSlice.reducer,
@@ -62,6 +62,7 @@ export const setupStore = (preloadedState?: Partial<RootState>) =>
 					},
 				},
 			})
+				// .concat(logger)
 				.concat(unauthorizedMiddleware.middleware)
 				.concat(usersApi.middleware),
 		preloadedState,

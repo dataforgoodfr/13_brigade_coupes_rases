@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { House, LogIn, LogOutIcon } from "lucide-react";
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
-import { useLoggedUser, userSlice } from "@/features/user/store/user.slice";
+import { meSlice, useConnectedMe } from "@/features/user/store/me.slice";
 import { NavbarItem } from "@/shared/components/NavbarItem";
 import { useAppDispatch } from "@/shared/hooks/store";
 
@@ -11,11 +11,11 @@ interface Props {
 	className?: string;
 }
 export function Navbar({ className }: Props) {
-	const user = useLoggedUser();
+	const user = useConnectedMe();
 	const router = useRouter();
 	const navigate = useNavigate();
 	const handleLogout = () => {
-		dispatch(userSlice.actions.logoutUser());
+		dispatch(meSlice.actions.logoutUser());
 		router.invalidate().finally(() => {
 			navigate({ to: "/" });
 		});

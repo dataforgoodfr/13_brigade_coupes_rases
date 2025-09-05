@@ -9,10 +9,12 @@ import { createPaginationOneElementMock } from "@/mocks/pagination";
 export const mockClearCutFormsResponse = (
 	override: Partial<ClearCutFormResponse> = {},
 ) => {
+	const createdAt = faker.date.recent();
 	const clearCut = {
 		id: faker.string.uuid(),
+		etag: createdAt.getTime().toString(10),
 		reportId: faker.string.uuid(),
-		createdAt: faker.date.recent().toJSON().split("T")[0],
+		createdAt: createdAt.toJSON(),
 		clearCutImages: [],
 		hasRemainingTrees: false,
 		plantingImages: [],

@@ -33,11 +33,18 @@ def add_clear_cut_form_entry(
     editor: User,
     report_id: int,
     new_version: ClearCutFormCreate,
+    etag: str | None,
 ) -> ClearCutForm:
+    last_form = find_last_clear_cut_form_by_report_id(db, report_id)
     new_clear_cut_form_entry = clear_cut_form_create_to_clear_cut_form(
         new_version, editor, report_id
     )
-
+    if last_form is not None and etag != last_form.etag:
+        raise AppHTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            type="ETAG_MISMATCH",
+            detail="The form has been modified since you last fetched it.",
+        )
     if editor.role == "admin":
         new_clear_cut_form_entry.relevant_for_pefc_complaint = (
             new_version.relevant_for_pefc_complaint
@@ -121,3 +128,11 @@ def find_clear_cut_form_by_report_id(
             page=page, size=size, total_count=forms_count, url=url
         ),
     )
+
+
+def find_last_clear_cut_form_by_report_id(
+    db: Session, report_id: int
+) -> ClearCutFormResponse | None:
+    return find_clear_cut_form_by_report_id(
+        db, report_id, url="", page=0, size=1
+    ).content[0]

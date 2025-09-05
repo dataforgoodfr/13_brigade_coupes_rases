@@ -73,6 +73,7 @@ class ClearCutFormResponse(
     id: str
     created_at: datetime
     report_id: str
+    etag: str
 
 
 class ClearCutFormCreate(
@@ -137,6 +138,7 @@ def clear_cut_form_response_from_clear_cut_form(
 ) -> ClearCutFormResponse:
     return ClearCutFormResponse(
         id=str(clear_cut_form.id),
+        etag=str(clear_cut_form.created_at.timestamp()),
         created_at=clear_cut_form.created_at,
         report_id=str(clear_cut_form.report_id),
         inspection_date=clear_cut_form.inspection_date,

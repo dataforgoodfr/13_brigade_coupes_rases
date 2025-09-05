@@ -55,6 +55,8 @@ class Filters(BaseSchema):
     statuses: list[str] = []
     has_ecological_zonings: bool | None = None
     excessive_slope: bool | None = None
+    in_reports_ids: list[str] | None = []
+    out_reports_ids: list[str] | None = []
 
 
 def query_clearcuts_filtered(db: Session, filters: Filters | None):
@@ -91,6 +93,11 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
 
     if filters is None:
         return reports
+
+    if filters.in_reports_ids:
+        reports = reports.filter(ClearCutReport.id.in_(filters.in_reports_ids))
+    if filters.out_reports_ids:
+        reports = reports.filter(ClearCutReport.id.notin_(filters.out_reports_ids))
     if filters.bounds is not None:
         envelope = ST_MakeEnvelope(
             filters.bounds.south_west_longitude,

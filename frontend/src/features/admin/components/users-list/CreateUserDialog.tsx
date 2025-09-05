@@ -43,11 +43,15 @@ export function CreateUserDialog() {
 	const [isOpen, setIsOpen] = useState(false);
 	useEffect(() => {
 		if (createdUser.status === "success") {
-			toast({ title: `Utilisateur ${createdUser.value?.login} créé` });
+			toast({
+				id: "user-created",
+				title: `Utilisateur ${createdUser.value?.login} créé`,
+			});
 			setIsOpen(false);
 			dispatch(usersSlice.actions.resetEditedUser());
 		} else if (createdUser.status === "error") {
 			toast({
+				id: "user-creation-failed",
 				title: "La création de l'utilisateur a échoué",
 				description: createdUser.error?.detail.content,
 				variant: "destructive",

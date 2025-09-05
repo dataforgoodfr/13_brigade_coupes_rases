@@ -6,6 +6,7 @@ import {
 	filtersResponseSchema,
 } from "@/features/clear-cut/store/filters";
 import type { Bounds } from "@/features/clear-cut/store/types";
+import { selectFavorites } from "@/features/user/store/me.slice";
 import {
 	booleanToSelectableItem,
 	DEFAULT_EVENTUALLY_BOOLEAN,
@@ -188,32 +189,41 @@ export const {
 
 const selectState = (state: RootState) => state.filters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
-	selectState,
-	({
-		cutYears,
-		geoBounds,
-		ecological_zoning,
-		statuses,
-		areas,
-		departments,
-		excessive_slope,
-		favorite,
-		with_points,
-	}): FiltersRequest | undefined => ({
-		geoBounds,
-		cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-		departmentsIds: departments
-			.filter((d) => d.isSelected)
-			.map((d) => d.item.id),
-		minAreaHectare: areas?.[0],
-		maxAreaHectare: areas?.[1],
-		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-		hasEcologicalZonings: ecological_zoning.find((item) => item.isSelected)
-			?.item,
-		excessiveSlope: excessive_slope.find((item) => item.isSelected)?.item,
-		favorite: favorite.find((item) => item.isSelected)?.item,
-		withPoints: with_points,
-	}),
+	[selectState, selectFavorites],
+	(
+		{
+			cutYears,
+			geoBounds,
+			ecological_zoning,
+			statuses,
+			areas,
+			departments,
+			excessive_slope,
+			favorite,
+			with_points,
+		},
+		favorites,
+	): FiltersRequest | undefined => {
+		const selectedFavoriteOption = favorite.find(
+			(item) => item.isSelected,
+		)?.item;
+		return {
+			geoBounds,
+			cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+			departmentsIds: departments
+				.filter((d) => d.isSelected)
+				.map((d) => d.item.id),
+			minAreaHectare: areas?.[0],
+			maxAreaHectare: areas?.[1],
+			statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
+			hasEcologicalZonings: ecological_zoning.find((item) => item.isSelected)
+				?.item,
+			excessiveSlope: excessive_slope.find((item) => item.isSelected)?.item,
+			inReportsIds: selectedFavoriteOption === true ? favorites : undefined,
+			outReportsIds: selectedFavoriteOption === false ? favorites : undefined,
+			withPoints: with_points,
+		};
+	},
 );
 
 export const selectCutYears = createTypedDraftSafeSelector(

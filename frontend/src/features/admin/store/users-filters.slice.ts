@@ -3,7 +3,7 @@ import type {
 	FiltersRequest,
 	SortableKeys,
 } from "@/features/admin/store/filters";
-import type { Role } from "@/features/user/store/user";
+import type { Role } from "@/features/user/store/me";
 import type { ServerSideRequestKeys } from "@/shared/api/types";
 import {
 	listToSelectableItems,

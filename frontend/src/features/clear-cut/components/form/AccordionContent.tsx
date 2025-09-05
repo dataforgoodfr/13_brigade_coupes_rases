@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
-import { useLoggedUser } from "@/features/user/store/user.slice";
+import { useConnectedMe } from "@/features/user/store/me.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
@@ -43,7 +43,7 @@ export default function AccordionContent({
 }: {
 	form: FormType<ClearCutFormInput>;
 }) {
-	const user = useLoggedUser();
+	const user = useConnectedMe();
 
 	useEffect(() => {
 		if (user && user.role === "admin") {

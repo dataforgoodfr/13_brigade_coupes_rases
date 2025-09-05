@@ -34,6 +34,12 @@ user_department = Table(
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
     Column("department_id", Integer, ForeignKey("departments.id"), primary_key=True),
 )
+user_clear_cut_report = Table(
+    "user_clear_cut_report",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("report_id", Integer, ForeignKey("clear_cuts_reports.id"), primary_key=True),
+)
 
 
 class ClearCutEcologicalZoning(Base):
@@ -132,6 +138,12 @@ class User(Base):
 
     reports = relationship(
         "ClearCutReport", back_populates="user", cascade="all, delete"
+    )
+    favorites = relationship(
+        "ClearCutReport",
+        secondary=user_clear_cut_report,
+        back_populates="favorited_by",
+        cascade="all, delete",
     )
     forms = relationship("ClearCutForm", back_populates="editor", cascade="all, delete")
 
@@ -344,6 +356,13 @@ class ClearCutReport(Base):
         "Rules",
         secondary=rules_clear_cut_reports,
         back_populates="clear_cuts_reports",
+        cascade="all, delete",
+    )
+
+    favorited_by = relationship(
+        "User",
+        secondary=user_clear_cut_report,
+        back_populates="favorites",
         cascade="all, delete",
     )
 

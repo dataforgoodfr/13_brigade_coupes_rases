@@ -39,7 +39,7 @@ import type {
 	ClearCutFormResponse,
 	ClearCutReportResponse,
 } from "@/features/clear-cut/store/clear-cuts";
-import type { User } from "@/features/user/store/user";
+import type { Me } from "@/features/user/store/me";
 import { worker } from "@/mocks/browser";
 import { mockClearCutReportResponse } from "@/mocks/clear-cuts";
 import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms";
@@ -239,7 +239,7 @@ describe.each(defaultSetup.sections)(
 );
 function isShouldNotDisplayAdminSection(
 	section: SectionForm,
-	connectedUser?: User,
+	connectedUser?: Me,
 ) {
 	it("should not display the accordion", async () => {
 		renderApp({
@@ -256,7 +256,7 @@ function isShouldNotDisplayAdminSection(
 function itShouldHaveValue(
 	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
-	connectedUser?: User,
+	connectedUser?: Me,
 ) {
 	return items
 		.filter((item) => item.renderConditions.length === 0)
@@ -283,7 +283,7 @@ function itShouldHaveDisabledState(
 	items: TestFormItem<ClearCutFormInput>[],
 	section: SectionForm,
 	state: boolean,
-	connectedUser?: User,
+	connectedUser?: Me,
 ) {
 	return items
 		.filter(

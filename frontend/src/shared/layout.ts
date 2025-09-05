@@ -1,12 +1,16 @@
-export type Position = "start" | "end";
+export const POSITIONS = ["start", "end"] as const;
+export type Position = (typeof POSITIONS)[number];
 
-export type Align =
-	| Position
-	| "end-safe"
-	| "center"
-	| "center-safe"
-	| "baseline"
-	| "baseline-last"
-	| "stretch";
+export const ALIGNMENTS = [
+	...POSITIONS,
+	"end-safe",
+	"center",
+	"center-safe",
+	"baseline",
+	"baseline-last",
+	"stretch",
+] as const;
+export type Align = (typeof ALIGNMENTS)[number];
 
-export type Orientation = "vertical" | "horizontal";
+export const ORIENTATIONS = ["vertical", "horizontal"] as const;
+export type Orientation = (typeof ORIENTATIONS)[number];

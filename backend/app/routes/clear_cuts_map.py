@@ -113,6 +113,18 @@ def get_clearcuts_map(
         description="Excessive slope",
         openapi_examples={"default": {"value": False}},
     ),
+    in_reports_ids: list[str] = Query(
+        [],
+        alias="inReportsIds",
+        description="List of report ids to include",
+        openapi_examples={"default": {"value": ["1"]}},
+    ),
+    out_reports_ids: list[str] = Query(
+        [],
+        alias="outReportsIds",
+        description="List of report ids to exclude",
+        openapi_examples={"default": {"value": ["1"]}},
+    ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     try:
@@ -141,6 +153,8 @@ def get_clearcuts_map(
                 departments_ids=departments_ids,
                 has_ecological_zonings=has_ecological_zonings,
                 excessive_slope=excessive_slope,
+                in_reports_ids=in_reports_ids,
+                out_reports_ids=out_reports_ids,
             ),
         )
 

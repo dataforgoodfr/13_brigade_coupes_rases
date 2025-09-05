@@ -4,7 +4,7 @@ import type {
 	UserResponse as AdminUserResponse,
 	PaginatedUsersResponse,
 } from "@/features/admin/store/users";
-import type { TokenResponse, UserResponse } from "@/features/user/store/user";
+import type { MeResponse, TokenResponse } from "@/features/user/store/me";
 import { fakeDepartments } from "@/mocks/referential";
 import { range } from "@/shared/array";
 
@@ -15,24 +15,27 @@ const volunteerToken =
 
 export const volunteerAssignedToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXItYXNzaWduZWRAZXhhbXBsZS5jb20iLCJleHAiOjE3NDQ0MDE1MzR9.PYc5hvIIuobVFt1TMb8EHdlK7iI5ZhsAqrOqKzFFAVw";
-export const volunteerAssignedMock: UserResponse = {
+export const volunteerAssignedMock: MeResponse = {
 	role: "volunteer",
 	departments: [],
 	email: "volunteer@example.com",
 	login: "volunteerVolunteers",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
-export const adminMock: UserResponse = {
+export const adminMock: MeResponse = {
 	role: "admin",
 	email: "admin@example.com",
 	login: "adminAdmin",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
-export const volunteerMock: UserResponse = {
+export const volunteerMock: MeResponse = {
 	role: "volunteer",
 	departments: [],
 	email: "volunteer@example.com",
 	login: "volunteerVolunteers",
+	favorites: [],
 	avatarUrl: faker.image.avatar(),
 };
 export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
@@ -58,6 +61,7 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 	}
 	return HttpResponse.json({
 		accessToken: token,
+		refreshToken: token,
 	} satisfies TokenResponse);
 });
 

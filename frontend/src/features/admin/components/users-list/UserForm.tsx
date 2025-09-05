@@ -6,7 +6,7 @@ import {
 	type UserForm as UserFormType,
 	userFormSchema,
 } from "@/features/admin/store/users";
-import { ROLES } from "@/features/user/store/user";
+import { ROLES } from "@/features/user/store/me";
 import { FormCombobox } from "@/shared/components/form/FormCombobox";
 import { FormInput } from "@/shared/components/form/FormInput";
 import { FormSelect } from "@/shared/components/form/FormSelect";

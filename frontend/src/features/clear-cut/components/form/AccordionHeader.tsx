@@ -1,5 +1,6 @@
 import { FormattedNumber } from "react-intl";
 import { Separator } from "@/components/ui/separator";
+import { FavoriteButton } from "@/features/clear-cut/components/shared/FavoriteButton";
 import type {
 	ClearCutFormInput,
 	ClearCutStatus,
@@ -33,8 +34,9 @@ export default function AccordionHeader({
 			))}
 
 			<div className="flex-1">
-				<div className="flex items-center gap-2 mb-4">
+				<div className="flex items-center justify-between gap-2 mb-4">
 					<StatusWithLabel status={status} />
+					<FavoriteButton reportId={form.getValues("report.id")} />
 				</div>
 				<div className="flex flex-col gap-2 flex-wrap mb-4">
 					{abusiveTags.map((tag) => (

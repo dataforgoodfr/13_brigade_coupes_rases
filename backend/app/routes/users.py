@@ -5,14 +5,17 @@ from sqlalchemy.orm import Session
 
 from app.deps import db_session
 from app.schemas.hateoas import PaginationResponseSchema
-from app.schemas.user import UserResponseSchema, UserUpdateSchema
+from app.schemas.user import (
+    UserResponseSchema,
+    UserUpdateSchema,
+    user_to_user_response_schema,
+)
 from app.services.user import (
     create_user,
     delete_user_by_id,
     get_user_by_id,
     get_users,
     update_user,
-    user_to_user_response_schema,
 )
 from app.services.user_auth import get_admin_user
 

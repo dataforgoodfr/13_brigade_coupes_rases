@@ -27,12 +27,16 @@ export function DeleteUserDialog({ user, onDeleted }: Props) {
 	const [isOpen, setIsOpen] = useState(false);
 	useEffect(() => {
 		if (deletedUser.status === "success") {
-			toast({ title: `Utilisateur ${user.login} supprimé` });
+			toast({
+				id: "user-deleted",
+				title: `Utilisateur ${user.login} supprimé`,
+			});
 			setIsOpen(false);
 			onDeleted();
 			dispatch(usersSlice.actions.resetDeletedUser());
 		} else if (deletedUser.status === "error") {
 			toast({
+				id: "user-deletion-failed",
 				title: "La suppression de l'utilisateur a échoué",
 				description: deletedUser.error?.detail.content,
 				variant: "destructive",

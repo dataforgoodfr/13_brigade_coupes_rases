@@ -1,13 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogInIcon } from "lucide-react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import largeLogo from "@/assets/logo-lg.png";
 import { Button } from "@/components/ui/button";
 import {
 	type LoginRequest,
 	loginRequestSchema,
-} from "@/features/user/store/user";
-import { loginThunk } from "@/features/user/store/user.slice";
+} from "@/features/user/store/me";
+import {
+	loginThunk,
+	meSlice,
+	selectLogin,
+} from "@/features/user/store/me.slice";
+import { useToast } from "@/hooks/use-toast";
 import {
 	FormControl,
 	FormField,
@@ -19,7 +25,7 @@ import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { Title } from "@/shared/components/typo/Title";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 
 type AuthenticationType = "password" | "sso";
@@ -42,6 +48,28 @@ export function LoginForm() {
 			},
 			{ isSelected: false, item: "sso", label: "SSO", value: "sso" },
 		]);
+	const login = useAppSelector(selectLogin);
+	const { toast } = useToast();
+	useEffect(() => {
+		if (login.status === "success") {
+			toast({
+				id: "login-success",
+				title: "Connexion réussie",
+				variant: "success",
+				description: "Vous êtes maintenant connecté.",
+			});
+		} else if (login.status === "error") {
+			toast({
+				id: "login-failed",
+				title: "Erreur de connexion",
+				description: "Identifiants invalides. Veuillez réessayer.",
+				variant: "destructive",
+			});
+		}
+		return () => {
+			dispatch(meSlice.actions.resetLogin());
+		};
+	}, [login, toast, dispatch]);
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
