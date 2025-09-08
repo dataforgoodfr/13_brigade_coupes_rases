@@ -1,8 +1,7 @@
-import type { ZoomAnimEventHandlerFn } from "leaflet";
 import * as L from "leaflet";
 import { Locate } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
-import { Circle, useMap, useMapEvents } from "react-leaflet";
+import { CircleMarker, useMap, useMapEvents } from "react-leaflet";
 import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview";
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
@@ -50,16 +49,18 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 		value: "satellite",
 	},
 ];
-const MAX_RADIUS = 10_000;
-function getPointRadius(pointsCnt: number, currentPointCnt: number) {
-	if (pointsCnt < 100) {
-		return 1000;
-	}
-	return MAX_RADIUS * ((currentPointCnt / pointsCnt) * 5);
+function getPointRadius(currentPointCnt: number, mapSize: L.Point) {
+	const size = Math.min(mapSize.x, mapSize.y);
+	const pointRadius = currentPointCnt / size;
+	const radius = pointRadius * 10;
+	return Math.max(radius, 3);
 }
 export function ClearCuts() {
 	const map = useMap();
-	const { setFocusedClearCutId, focusedClearCutId } = useMapInstance();
+	const { setFocusedClearCutId, focusedClearCutId, setMap } = useMapInstance();
+	useEffect(() => {
+		setMap(map);
+	}, [map, setMap]);
 	const { browserLocation } = useGeolocation();
 	const displayPoints = useAppSelector(selectWithPoints);
 	const [layer, layers, setLayer] = useSingleSelect<
@@ -104,14 +105,6 @@ export function ClearCuts() {
 		);
 	}, [map, dispatch]);
 
-	const onZoomChanged: ZoomAnimEventHandlerFn = (e) => {
-		if (e.zoom > DISPLAY_PREVIEW_ZOOM_LEVEL) {
-			dispatch(setWithPoints(false));
-		} else {
-			dispatch(setWithPoints(true));
-		}
-	};
-
 	const onZoomEnd = () => {
 		const currentZoom = map.getZoom();
 		if (currentZoom > DISPLAY_PREVIEW_ZOOM_LEVEL) {
@@ -123,7 +116,6 @@ export function ClearCuts() {
 	};
 
 	useMapEvents({
-		zoomanim: onZoomChanged,
 		zoomend: onZoomEnd,
 		dragend: () => {
 			dispatchGeoBounds();
@@ -147,22 +139,23 @@ export function ClearCuts() {
 			);
 		}
 	}, [displayPoints, value?.previews]);
+
 	const points = useMemo(() => {
 		if (displayPoints) {
 			return value?.points.content.map(({ point, count }) => (
-				<Circle
+				<CircleMarker
 					key={`${point.coordinates[0]},${point.coordinates[1]}`}
 					color="#ff6467"
 					center={{
 						lat: point.coordinates[1],
 						lng: point.coordinates[0],
 					}}
-					radius={getPointRadius(value.points.total, count)}
+					radius={getPointRadius(count, map.getSize())}
 					fillOpacity={0.7}
 				/>
 			));
 		}
-	}, [displayPoints, value?.points]);
+	}, [displayPoints, value?.points, map]);
 
 	return (
 		<>

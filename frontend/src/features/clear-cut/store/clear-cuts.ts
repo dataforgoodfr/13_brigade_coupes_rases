@@ -6,7 +6,7 @@ import {
 	ruleSchema,
 } from "@/shared/store/referential/referential";
 
-export const DISPLAY_PREVIEW_ZOOM_LEVEL = 10;
+export const DISPLAY_PREVIEW_ZOOM_LEVEL = 13;
 
 export const CLEAR_CUTTING_STATUSES = [
 	"to_validate",
