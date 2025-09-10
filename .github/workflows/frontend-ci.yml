@@ -6,6 +6,7 @@ name: Frontend CI
 on:
   workflow_dispatch:
   push:
+    branches: ["main"]
     paths:
       - "frontend/**"
   pull_request:
@@ -13,17 +14,14 @@ on:
     paths:
       - "frontend/**"
 
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.cache/ms-playwright
 jobs:
   build-test:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: frontend
-
-    strategy:
-      matrix:
-        node-version: [22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
       - uses: actions/checkout@v4
@@ -34,21 +32,23 @@ jobs:
           version: 10
           run_install: false
 
-      - name: Install Node.js ${{ matrix.node-version }}
+      - name: Install Node.js v22.11.0
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: "pnpm"
+          node-version: 22.11.0
 
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install playwright
+        run: pnpm install:playwright
+        
       - name: Build project
         run: pnpm run build
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test:ci
+
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"

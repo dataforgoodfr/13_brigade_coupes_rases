@@ -1,5 +1,8 @@
 from fastapi import status
 from fastapi.testclient import TestClient
+from pytest import Session
+
+from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
 def ensure_authentication(client: TestClient, verb: str, path: str):
@@ -16,18 +19,18 @@ def test_endpoint_authentication(client: TestClient):
 
 def test_post_report_success(client: TestClient):
     report_data = {
-        "slope_area_ratio_percentage": 15,
-        "city_zip_code": "75056",
-        "clear_cuts": [
+        "slopeAreaHectare": 6.5,
+        "cityZipCode": "75056",
+        "clearCuts": [
             {
-                "observation_start_date": "2023-01-01T00:00:00Z",
-                "observation_end_date": "2023-12-31T00:00:00Z",
-                "area_hectare": 10,
-                "bdf_resinous_area_hectare": 0.5,
-                "bdf_deciduous_area_hectare": 0.6,
-                "bdf_mixed_area_hectare": 0.7,
-                "bdf_poplar_area_hectare": 0.8,
-                "ecological_zoning_area_hectare": 0.9,
+                "observationStartDate": "2023-01-01T00:00:00Z",
+                "observationEndDate": "2023-12-31T00:00:00Z",
+                "areaHectare": 10,
+                "bdfResinousAreaHectare": 0.5,
+                "bdfDeciduousAreaHectare": 0.6,
+                "bdfMixedAreaHectare": 0.7,
+                "bdfPoplarAreaHectare": 0.8,
+                "ecologicalZoningAreaHectare": 0.9,
                 "location": {"type": "Point", "coordinates": [2.3522, 48.8566]},
                 "boundary": {
                     "type": "MultiPolygon",
@@ -42,8 +45,12 @@ def test_post_report_success(client: TestClient):
                         ]
                     ],
                 },
-                "ecological_zonings": [
+                "ecologicalZonings": [
                     {"type": "Natura2000", "code": "ABC", "name": "DEF"},
+                ],
+                "satelliteImages": [
+                    "https://example.com/image1.jpg",
+                    "https://example.com/image2.jpg",
                 ],
             }
         ],
@@ -54,27 +61,24 @@ def test_post_report_success(client: TestClient):
         json=report_data,
         headers={"x-imports-token": "test-token"},
     )
-    print(response)
     assert response.status_code == status.HTTP_201_CREATED
 
     location = response.headers["location"]
     data = client.get(location).json()
 
-    print(data)
-
     assert data["id"] == location.split("/")[-1]
-    assert data["slope_area_ratio_percentage"] == 15
+    assert data["slopeAreaHectare"] == 6.5
 
-    response = client.get(f"/api/v1/clear-cuts/{data['clear_cuts_ids'][0]}")
+    response = client.get(f"/api/v1/clear-cuts/{data['clearCutsIds'][0]}")
     assert response.status_code == status.HTTP_200_OK
     clear_cut_data = response.json()
 
     assert clear_cut_data["location"]["coordinates"] == [2.3522, 48.8566]
-    assert clear_cut_data["bdf_resinous_area_hectare"] == 0.5
-    assert clear_cut_data["bdf_deciduous_area_hectare"] == 0.6
-    assert clear_cut_data["bdf_mixed_area_hectare"] == 0.7
-    assert clear_cut_data["bdf_poplar_area_hectare"] == 0.8
-    assert clear_cut_data["ecological_zoning_area_hectare"] == 0.9
+    assert clear_cut_data["bdfResinousAreaHectare"] == 0.5
+    assert clear_cut_data["bdfDeciduousAreaHectare"] == 0.6
+    assert clear_cut_data["bdfMixedAreaHectare"] == 0.7
+    assert clear_cut_data["bdfPoplarAreaHectare"] == 0.8
+    assert clear_cut_data["ecologicalZoningAreaHectare"] == 0.9
 
     assert clear_cut_data["boundary"]["coordinates"] == [
         [
@@ -89,7 +93,7 @@ def test_post_report_success(client: TestClient):
 
 
 def test_post_report_invalid_data(client: TestClient):
-    invalid_data = {}
+    invalid_data: dict = {}
 
     response = client.post(
         "/api/v1/clear-cuts-reports",
@@ -116,3 +120,82 @@ def test_get_report(client: TestClient):
     data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert data["id"] == "1"
+
+
+def test_affect_me_using_connected_volunteer_should_work(
+    db: Session, client: TestClient
+):
+    token = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")[1]
+    updates = {"status": "validated"}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == "assigned-test@volunteer.com"
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_affect_other_using_connected_volunteer_should_return_forbidden(
+    db: Session, client: TestClient
+):
+    [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
+    new_user = create_user(db, login="foo-login")
+
+    updates = {"user_id": str(new_user.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_affect_me_using_connected_admin_should_work(db: Session, client: TestClient):
+    [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
+    updates = {"userId": str(me.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == "assigned-test@admin.com"
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_affect_other_using_connected_admin_should_work(
+    db: Session, client: TestClient
+):
+    [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
+    new_user = create_user(db, login="foo")
+    expected_email = new_user.email
+    updates = {"userId": str(new_user.id)}
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json=updates,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1",
+    )
+    data = response.json()
+    assert data["affectedUser"]["email"] == expected_email
+    assert response.status_code == status.HTTP_200_OK

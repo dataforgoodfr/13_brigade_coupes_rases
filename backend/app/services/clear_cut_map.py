@@ -1,8 +1,7 @@
 from logging import getLogger
 from math import sqrt
-from typing import Optional
 
-from fastapi import HTTPException, status
+from fastapi import status
 from geoalchemy2.functions import (
     ST_AsGeoJSON,
     ST_Centroid,
@@ -13,10 +12,10 @@ from geoalchemy2.functions import (
     ST_SetSRID,
 )
 from geojson_pydantic import Point
-from pydantic import BaseModel
 from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
+from app.common.errors import AppHTTPException
 from app.models import (
     SRID,
     City,
@@ -24,6 +23,7 @@ from app.models import (
     Department,
     Rules,
 )
+from app.schemas.base import BaseSchema
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     ClearCutReportPreviewSchema,
@@ -38,26 +38,28 @@ from app.services.rules import (
 logger = getLogger(__name__)
 
 
-class GeoBounds(BaseModel):
+class GeoBounds(BaseSchema):
     south_west_latitude: float
     south_west_longitude: float
     north_east_latitude: float
     north_east_longitude: float
 
 
-class Filters(BaseModel):
-    bounds: Optional[GeoBounds] = None
-    report_id: Optional[int] = None
-    min_area_hectare: Optional[float] = None
-    max_area_hectare: Optional[float] = None
+class Filters(BaseSchema):
+    bounds: GeoBounds | None = None
+    report_id: int | None = None
+    min_area_hectare: float | None = None
+    max_area_hectare: float | None = None
     cut_years: list[int] = []
-    departments_ids: list[int] = []
+    departments_ids: list[str] = []
     statuses: list[str] = []
-    has_ecological_zonings: Optional[bool] = None
-    excessive_slope: Optional[bool] = None
+    has_ecological_zonings: bool | None = None
+    excessive_slope: bool | None = None
+    in_reports_ids: list[str] | None = []
+    out_reports_ids: list[str] | None = []
 
 
-def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
+def query_clearcuts_filtered(db: Session, filters: Filters | None):
     rules = list_rules(db)
 
     reports_with_rules = (
@@ -91,6 +93,11 @@ def query_clearcuts_filtered(db: Session, filters: Optional[Filters]):
 
     if filters is None:
         return reports
+
+    if filters.in_reports_ids:
+        reports = reports.filter(ClearCutReport.id.in_(filters.in_reports_ids))
+    if filters.out_reports_ids:
+        reports = reports.filter(ClearCutReport.id.notin_(filters.out_reports_ids))
     if filters.bounds is not None:
         envelope = ST_MakeEnvelope(
             filters.bounds.south_west_longitude,
@@ -159,8 +166,9 @@ def get_report_preview_by_id(
 ) -> ClearCutReportPreviewSchema:
     report = query_clearcuts_filtered(db, Filters(report_id=report_id)).first()
     if report is None:
-        raise HTTPException(
+        raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
             detail=f"Clear cut report {report_id} not found",
         )
     return report_to_report_preview_schema(report)

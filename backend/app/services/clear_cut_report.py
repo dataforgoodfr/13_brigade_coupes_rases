@@ -1,35 +1,24 @@
 from logging import getLogger
 
-from fastapi import HTTPException, status
+from fastapi import status
 from geoalchemy2.elements import WKTElement
-from geoalchemy2.functions import (
-    ST_Centroid,
-    ST_Multi,
-    ST_Union,
-)
-from geoalchemy2.shape import to_shape
-from sqlalchemy import and_, case, func, or_
+from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
+from sqlalchemy import case, func, or_
 from sqlalchemy.orm import Session
 
-from app.models import (
-    SRID,
-    ClearCut,
-    ClearCutEcologicalZoning,
-    ClearCutReport,
-)
+from app.common.errors import AppHTTPException
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
 from app.schemas.clear_cut_report import (
-    ClearCutReportPatchSchema,
+    ClearCutReportPutRequestSchema,
     ClearCutReportResponseSchema,
-    CreateClearCutsReportCreateSchema,
+    CreateClearCutsReportCreateRequestSchema,
     report_to_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
 from app.schemas.rule import AllRules
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
-from app.services.rules import (
-    list_rules,
-)
+from app.services.rules import list_rules
 
 logger = getLogger(__name__)
 
@@ -89,25 +78,22 @@ def query_reports_with_additional_data(
         aggregated_cuts,
         case(
             (
-                aggregated_cuts.c.total_area_hectare > rules.area.threshold,
+                aggregated_cuts.c.total_area_hectare >= rules.area.threshold,
                 rules.area.id,
             ),
             else_=None,
         ).label("area_rule_id"),
         case(
             (
-                ClearCutReport.slope_area_ratio_percentage > rules.slope.threshold,
+                ClearCutReport.slope_area_hectare >= rules.slope.threshold,
                 rules.slope.id,
             ),
             else_=None,
         ).label("slope_rule_id"),
         case(
             (
-                and_(
-                    aggregated_cuts.c.total_ecological_zoning_area_hectare
-                    > rules.ecological_zoning.threshold,
-                    aggregated_cuts.c.total_ecological_zoning_rule_matches > 0,
-                ),
+                aggregated_cuts.c.total_ecological_zoning_area_hectare
+                >= rules.ecological_zoning.threshold,
                 rules.ecological_zoning.id,
             ),
             else_=None,
@@ -121,6 +107,7 @@ def sync_clear_cuts_reports(db: Session):
     rows = query_reports_with_additional_data(
         db, aggregated_cuts.subquery(), rules
     ).all()
+    report: ClearCutReport
     for row in rows:
         [
             report,
@@ -139,7 +126,6 @@ def sync_clear_cuts_reports(db: Session):
             slope_rule_id,
             ecological_zoning_rule_id,
         ] = row
-        report: ClearCutReport = report
         report.average_location = average_location
         report.total_area_hectare = total_area_hectare
         report.last_cut_date = cut_end
@@ -173,7 +159,7 @@ def sync_clear_cuts_reports(db: Session):
 
 
 def create_clear_cut_report(
-    db: Session, report: CreateClearCutsReportCreateSchema
+    db: Session, report: CreateClearCutsReportCreateRequestSchema
 ) -> ClearCutReport:
     intersecting_clearcut = (
         db.query(ClearCut)
@@ -219,7 +205,7 @@ def create_clear_cut_report(
             )
             for clear_cut in report.clear_cuts
         ],
-        slope_area_ratio_percentage=report.slope_area_ratio_percentage,
+        slope_area_hectare=report.slope_area_hectare,
         status="to_validate",
     )
 
@@ -229,18 +215,33 @@ def create_clear_cut_report(
     return db_item
 
 
-def update_clear_cut_report(id: int, db: Session, report: ClearCutReportPatchSchema):
-    clearcut = db.get(ClearCutReport, id)
-    if not clearcut:
-        raise HTTPException(status_code=404, detail="ClearCut not found")
-    update_data = report.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(clearcut, key, value)
+def update_clear_cut_report(
+    id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
+):
+    user_id = None
+    if connected_user.role == "volunteer":
+        if request.user_id is not None and request.user_id != connected_user.id:
+            raise AppHTTPException(
+                status_code=403,
+                type="INVALID_REQUESTER_RIGHTS",
+                detail="Volunteer could not assign an other user",
+            )
+        user_id = connected_user.id
+    if connected_user.role == "admin":
+        user_id = request.user_id
+    report = db.get(ClearCutReport, id)
+    if not report:
+        raise AppHTTPException(
+            status_code=404,
+            type="REPORT_NOT_FOUND",
+            detail="Clear cut report not found",
+        )
+
+    report.user_id = user_id
+
     db.commit()
-    db.refresh(clearcut)
-    clearcut.location = to_shape(clearcut.location, srid=SRID).wkt
-    clearcut.boundary = to_shape(clearcut.boundary, srid=SRID).wkt
-    return clearcut
+    db.refresh(report)
+    return report
 
 
 def find_clearcuts_reports(
@@ -248,23 +249,22 @@ def find_clearcuts_reports(
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
     reports = db.query(ClearCutReport).offset(page * size).limit(size).all()
     reports_count = db.query(ClearCutReport.id).count()
-    reports = map(
-        report_to_response_schema,
-        reports,
-    )
+    reports_response = map(report_to_response_schema, reports)
     return PaginationResponseSchema(
-        content=list(reports),
-        metadata=PaginationMetadataSchema(
+        content=list(reports_response),
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, total_count=reports_count, url=url
         ),
     )
 
 
 def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
-    report = db.get(ClearCutReport, report_id)
+    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if report is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Report not found by id {id}"
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
+            detail=f"Report not found by id {id}",
         )
     return report
 

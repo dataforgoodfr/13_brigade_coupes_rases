@@ -1,16 +1,16 @@
 import datetime
 from logging import getLogger
-from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from app.models import ClearCut, ClearCutReport
+from app.schemas.base import BaseSchema
 
 logger = getLogger(__name__)
 
 
-class ClearCutPreviewSchema(BaseModel):
+class ClearCutPreviewSchema(BaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
     location: Point
     boundary: MultiPolygon
@@ -27,10 +27,8 @@ class ClearCutPreviewSchema(BaseModel):
         json_schema_extra={"example": "[1,2,3]"},
     )
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class ClearCutReportPreviewSchema(BaseModel):
+class ClearCutReportPreviewSchema(BaseSchema):
     id: str = Field(json_schema_extra={"example": "1"})
     clear_cuts: list[ClearCutPreviewSchema]
     created_at: datetime.date = Field(
@@ -58,22 +56,21 @@ class ClearCutReportPreviewSchema(BaseModel):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
-    slope_area_ratio_percentage: Optional[float] = Field(
+    slope_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0},
     )
-    total_bdf_resinous_area_hectare: Optional[float] = Field(
+    total_bdf_resinous_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_deciduous_area_hectare: Optional[float] = Field(
+    total_bdf_deciduous_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_mixed_area_hectare: Optional[float] = Field(
+    total_bdf_mixed_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    total_bdf_poplar_area_hectare: Optional[float] = Field(
+    total_bdf_poplar_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0}
     )
-    model_config = ConfigDict(from_attributes=True)
 
 
 def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
@@ -104,11 +101,11 @@ def report_to_report_preview_schema(
         average_location=Point.model_validate_json(report.average_location_json),
         rules_ids=[str(rule.id) for rule in report.rules],
         status=report.status,
-        slope_area_ratio_percentage=report.slope_area_ratio_percentage,
+        slope_area_hectare=report.slope_area_hectare,
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name,
-        total_area_hectare=report.total_area_hectare,
+        total_area_hectare=report.total_area_hectare,  # type: ignore
         total_bdf_resinous_area_hectare=report.total_bdf_resinous_area_hectare,
         total_bdf_deciduous_area_hectare=report.total_bdf_deciduous_area_hectare,
         total_bdf_mixed_area_hectare=report.total_bdf_mixed_area_hectare,
@@ -119,18 +116,16 @@ def report_to_report_preview_schema(
     )
 
 
-class CountedPoint(BaseModel):
+class CountedPoint(BaseSchema):
     count: int
     point: Point
 
 
-class ClusterizedPointsResponseSchema(BaseModel):
+class ClusterizedPointsResponseSchema(BaseSchema):
     total: int
     content: list[CountedPoint]
 
 
-class ClearCutMapResponseSchema(BaseModel):
+class ClearCutMapResponseSchema(BaseSchema):
     points: ClusterizedPointsResponseSchema
     previews: list[ClearCutReportPreviewSchema]
-
-    model_config = ConfigDict(from_attributes=True)

@@ -1,10 +1,13 @@
-import type { PaginatedUsersResponse } from "@/features/admin/store/users";
-import type { UserResponse as AdminUserResponse } from "@/features/admin/store/users";
-import type { TokenResponse, UserResponse } from "@/features/user/store/user";
+import { fakerFR as faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
+import type {
+	UserResponse as AdminUserResponse,
+	PaginatedUsersResponse,
+} from "@/features/admin/store/users";
+import type { MeResponse, TokenResponse } from "@/features/user/store/me";
 import { fakeDepartments } from "@/mocks/referential";
 import { range } from "@/shared/array";
-import { fakerFR as faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
+
 const adminToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTc0Mjc2NjQxMn0.-rl7wbmum8v5kmbeW2l67K6hxas62Y8N9UpHAC0-A58";
 const volunteerToken =
@@ -12,32 +15,38 @@ const volunteerToken =
 
 export const volunteerAssignedToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXItYXNzaWduZWRAZXhhbXBsZS5jb20iLCJleHAiOjE3NDQ0MDE1MzR9.PYc5hvIIuobVFt1TMb8EHdlK7iI5ZhsAqrOqKzFFAVw";
+export const volunteerAssignedMock: MeResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
+export const adminMock: MeResponse = {
+	role: "admin",
+	email: "admin@example.com",
+	login: "adminAdmin",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
+export const volunteerMock: MeResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
 export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
 	const token = request.headers.get("Authorization");
-	const avatarUrl = faker.image.avatar();
 	if (token?.includes(adminToken)) {
-		return HttpResponse.json({
-			role: "admin",
-			email: "admin@example.com",
-			login: "adminAdmin",
-			avatarUrl,
-		} satisfies UserResponse);
+		return HttpResponse.json(adminMock);
 	}
 	if (token?.includes(volunteerAssignedToken)) {
-		return HttpResponse.json({
-			role: "volunteer",
-			email: "volunteer-assigned@example.com",
-			login: "assignedVolunteer",
-			avatarUrl,
-		} satisfies UserResponse);
+		return HttpResponse.json(volunteerAssignedMock);
 	}
-	return HttpResponse.json({
-		role: "volunteer",
-		departments: [],
-		email: "volunteer@example.com",
-		login: "volunteerVolunteers",
-		avatarUrl,
-	} satisfies UserResponse);
+	return HttpResponse.json(volunteerMock);
 });
 
 export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
@@ -51,16 +60,17 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 		token = volunteerAssignedToken;
 	}
 	return HttpResponse.json({
-		access_token: token,
+		accessToken: token,
+		refreshToken: token,
 	} satisfies TokenResponse);
 });
 
 const fakeUsers: AdminUserResponse[] = range(10, () => ({
 	id: faker.string.uuid(),
-	firstname: faker.person.firstName(),
-	lastname: faker.person.lastName(),
+	firstName: faker.person.firstName(),
+	lastName: faker.person.lastName(),
 	role: faker.helpers.arrayElement(["admin", "volunteer"]),
-	departments_ids: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
+	departments: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
 	login: faker.internet.username(),
 	email: faker.internet.email(),
 }));
@@ -69,8 +79,8 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
 	const roles = url.searchParams.getAll("roles");
-	const page = Number.parseInt(url.searchParams.get("page") as string);
-	const size = Number.parseInt(url.searchParams.get("size") as string);
+	const page = Number.parseInt(url.searchParams.get("page") as string, 10);
+	const size = Number.parseInt(url.searchParams.get("size") as string, 10);
 	const departments_ids = url.searchParams.getAll("departments_ids");
 
 	const users = fakeUsers.filter((user) => {
@@ -85,7 +95,7 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 
 		isValidUser &&=
 			departments_ids.length === 0 ||
-			departments_ids.some((r) => user.departments_ids?.includes(r));
+			departments_ids.some((r) => user.departments?.includes(r));
 
 		return isValidUser;
 	});
@@ -96,8 +106,8 @@ export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 			links: {},
 			page: page,
 			size: size,
-			pages_count: Math.ceil(users.length / size),
-			total_count: users.length,
+			pagesCount: Math.ceil(users.length / size),
+			totalCount: users.length,
 		},
 	} satisfies PaginatedUsersResponse);
 });

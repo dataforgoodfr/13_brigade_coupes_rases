@@ -1,23 +1,18 @@
 from logging import getLogger
-from typing import Dict
 
-from pydantic import BaseModel, ConfigDict
-
+from app.schemas.base import BaseSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.schemas.rule import RuleResponseSchemaWithoutIdSchema
 
 logger = getLogger(__name__)
 
 
-class ReferentialDepartmentSchema(BaseModel):
+class ReferentialDepartmentSchema(BaseSchema):
     code: str
     name: str
-    model_config = ConfigDict(from_attributes=True)
 
 
-class ReferentialResponseSchema(BaseModel):
-    departments: Dict[str, ReferentialDepartmentSchema]
-    ecological_zonings: Dict[str, EcologicalZoningSchema]
-    rules: Dict[str, RuleResponseSchemaWithoutIdSchema]
-
-    model_config = ConfigDict(from_attributes=True)
+class ReferentialResponseSchema(BaseSchema):
+    departments: dict[str, ReferentialDepartmentSchema]
+    ecological_zonings: dict[str, EcologicalZoningSchema]
+    rules: dict[str, RuleResponseSchemaWithoutIdSchema]

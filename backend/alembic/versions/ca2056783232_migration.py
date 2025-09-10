@@ -6,7 +6,7 @@ Create Date: 2025-04-26 09:29:01.384718
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 
@@ -14,9 +14,9 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "ca2056783232"
-down_revision: Union[str, None] = "891e397cd11c"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "891e397cd11c"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column("soil_state", sa.String(), nullable=True),
         sa.Column("ecological_zone", sa.Boolean(), nullable=True),
         sa.Column("ecological_zone_type", sa.String(), nullable=True),
-        sa.Column("nearby_zone", sa.String(), nullable=True),
+        sa.Column("nearby_zone", sa.Boolean(), nullable=True),
         sa.Column("nearby_zone_type", sa.String(), nullable=True),
         sa.Column("protected_species", sa.String(), nullable=True),
         sa.Column("protected_habitats", sa.String(), nullable=True),

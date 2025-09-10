@@ -1,7 +1,7 @@
-import { Button, type ButtonVariantsProps } from "@/components/ui/button";
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MailIcon } from "lucide-react";
+import { fn } from "storybook/test";
+import { Button, type ButtonVariantsProps } from "@/components/ui/button";
 
 const meta = {
 	title: "Button",

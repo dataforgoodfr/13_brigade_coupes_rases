@@ -1,16 +1,15 @@
-import type { ClearCutForm } from "@/features/clear-cut/store/clear-cuts";
-import { selectLoggedUser } from "@/features/user/store/user.slice";
+import { useEffect, useMemo } from "react";
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
+import { useConnectedMe } from "@/features/user/store/me.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
 import type { FormType } from "@/shared/components/form/Form";
 import { FormDatePicker } from "@/shared/components/form/FormDatePicker";
 import { FixedField } from "@/shared/components/form/FormFixedField";
-import { FormInputFile } from "@/shared/components/form/FormInputFile";
-import { FormInputText } from "@/shared/components/form/FormInputText";
+import { FormInput } from "@/shared/components/form/FormInput";
+import { FormS3ImageUpload } from "@/shared/components/form/FormS3ImageUpload";
 import { FormSwitch } from "@/shared/components/form/FormSwitch";
 import { FormTextArea } from "@/shared/components/form/FormTextArea";
 import { FormToggleGroup } from "@/shared/components/form/FormToggleGroup";
-import { useAppSelector } from "@/shared/hooks/store";
-import { useEffect, useMemo } from "react";
 import { actorsKey, actorsValue } from "./sections/ActorsSection";
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection";
 import {
@@ -26,18 +25,25 @@ import {
 } from "./sections/RegulationsSection";
 import type { SectionForm, SectionFormItem } from "./types";
 
-const ccForm: Map<SectionForm, SectionFormItem<ClearCutForm>[]> = new Map();
+const ccForm: Map<SectionForm, SectionFormItem<ClearCutFormInput>[]> =
+	new Map();
 ccForm.set(generalInfoKey, generalInfoValue);
 ccForm.set(onSiteKey, onSiteValue);
 ccForm.set(ecoZoneKey, ecoZoneValue);
 ccForm.set(actorsKey, actorsValue);
 ccForm.set(regulationsKey, regulationsValue);
 ccForm.set(otherInfoKey, otherInfoValue);
-
+const COMMON_PROPS = {
+	gap: 1,
+	orientation: "vertical",
+	align: "start",
+} as const;
 export default function AccordionContent({
 	form,
-}: { form: FormType<ClearCutForm> }) {
-	const user = useAppSelector(selectLoggedUser);
+}: {
+	form: FormType<ClearCutFormInput>;
+}) {
+	const user = useConnectedMe();
 
 	useEffect(() => {
 		if (user && user.role === "admin") {
@@ -47,18 +53,17 @@ export default function AccordionContent({
 		}
 	}, [user]);
 
-	const assignedUser = form.getValues("assignedUser");
+	const affectedUser = form.getValues("report.affectedUser");
 
 	const isDisabled = useMemo(() => {
 		if (!user) return true;
 
 		if (user.role === "volunteer") {
-			if (!assignedUser) return true;
-			if (assignedUser !== user.login) return true;
+			return (!affectedUser || affectedUser.login !== user.login) ?? false;
 		}
 
 		return false;
-	}, [user, assignedUser]);
+	}, [user, affectedUser]);
 
 	return (
 		<>
@@ -92,7 +97,9 @@ export default function AccordionContent({
 									) : null;
 								case "inputText":
 									return render ? (
-										<FormInputText
+										<FormInput
+											{...COMMON_PROPS}
+											type="text"
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -104,12 +111,14 @@ export default function AccordionContent({
 									) : null;
 								case "inputFile":
 									return render ? (
-										<FormInputFile
+										<FormS3ImageUpload
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
 											label={item.label}
 											disabled={isDisabled}
+											reportId={form.getValues("report.id")}
 										/>
 									) : item.fallBack ? (
 										item.fallBack(item.name)
@@ -117,6 +126,7 @@ export default function AccordionContent({
 								case "datePicker":
 									return render ? (
 										<FormDatePicker
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -129,6 +139,7 @@ export default function AccordionContent({
 								case "switch":
 									return render ? (
 										<FormSwitch
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -141,6 +152,7 @@ export default function AccordionContent({
 								case "textArea":
 									return render ? (
 										<FormTextArea
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}
@@ -153,6 +165,7 @@ export default function AccordionContent({
 								case "toggleGroup":
 									return render ? (
 										<FormToggleGroup
+											{...COMMON_PROPS}
 											key={item.name}
 											control={form.control}
 											name={item.name}

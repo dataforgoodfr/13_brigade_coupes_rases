@@ -1,30 +1,26 @@
 import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
+	type ComponentPropsWithoutRef,
+	type ComponentRef,
+	createContext,
+	forwardRef,
+	type HTMLAttributes,
+	useContext,
+	useId,
+} from "react";
+import {
 	type Control,
 	Controller,
 	type ControllerProps,
 	type FieldPath,
 	type FieldValues,
-	FormProvider,
 	type Path,
 	type UseFormReturn,
 	useFormContext,
 } from "react-hook-form";
-
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-	type ComponentPropsWithoutRef,
-	type ComponentRef,
-	type HTMLAttributes,
-	createContext,
-	forwardRef,
-	useContext,
-	useId,
-} from "react";
-
-export const Form = FormProvider;
 
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
@@ -32,6 +28,13 @@ type FormFieldContextValue<
 > = {
 	name: TName;
 };
+export type FormFieldRenderProps<
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+	TTransformedValues = TFieldValues,
+> = Parameters<
+	ControllerProps<TFieldValues, TName, TTransformedValues>["render"]
+>[0];
 
 const FormFieldContext = createContext<FormFieldContextValue>(
 	{} as FormFieldContextValue,
@@ -176,9 +179,9 @@ export const FormMessage = forwardRef<
 });
 FormMessage.displayName = "FormMessage";
 
-export type FormProps<T extends FieldValues> = {
+export type FormProps<T extends FieldValues, N extends Path<T> = Path<T>> = {
 	control: Control<T>;
-	name: Path<T>;
+	name: N;
 	label?: string;
 	disabled?: boolean;
 	placeholder?: string;

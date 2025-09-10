@@ -1,10 +1,11 @@
-import { Button } from "@/components/ui/button";
-import type { Sort } from "@/shared/api/api";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import type { Sort } from "@/shared/types/list";
 
 type Props = {
 	onClick: () => void;
-	children: React.ReactNode;
+	children?: ReactNode;
 	sort?: Sort;
 };
 

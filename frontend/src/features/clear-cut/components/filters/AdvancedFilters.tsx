@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import { type FC, type PropsWithChildren, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
 import {
@@ -22,8 +24,6 @@ import {
 	selectableItemToString,
 	useEnhancedItems,
 } from "@/shared/items";
-import clsx from "clsx";
-import { type FC, type PropsWithChildren, useEffect } from "react";
 
 interface Props {
 	className?: string;
@@ -58,38 +58,38 @@ const FAVORITE = {
 };
 export function AdvancedFilters({ className }: Props) {
 	const dispatch = useAppDispatch();
-	const cutYears = useEnhancedItems(
-		useAppSelector(selectCutYears),
-		selectableItemToString,
-		selectableItemToString,
-	);
-	const departments = useEnhancedItems(
-		useAppSelector(selectDepartments),
-		namedIdTranslator,
-		namedIdTranslator,
-	);
+	const cutYears = useEnhancedItems({
+		items: useAppSelector(selectCutYears),
+		getItemLabel: selectableItemToString,
+		getItemValue: selectableItemToString,
+	});
+	const departments = useEnhancedItems({
+		items: useAppSelector(selectDepartments),
+		getItemLabel: namedIdTranslator,
+		getItemValue: namedIdTranslator,
+	});
 	const areaRange = useAppSelector(selectAreaRange);
 	const areas = useAppSelector(selectAreas);
-	const statuses = useEnhancedItems(
-		useAppSelector(selectStatuses),
-		(status) => <StatusWithLabel status={status.item} />,
-		selectableItemToString,
-	);
-	const excessive_slop = useEnhancedItems(
-		useAppSelector(selectExcessiveSlop),
-		booleanSelectableToString,
-		booleanSelectableToString,
-	);
-	const favorite = useEnhancedItems(
-		useAppSelector(selectFavorite),
-		booleanSelectableToString,
-		booleanSelectableToString,
-	);
-	const ecological_zoning = useEnhancedItems(
-		useAppSelector(selectEcologicalZoning),
-		booleanSelectableToString,
-		booleanSelectableToString,
-	);
+	const statuses = useEnhancedItems({
+		items: useAppSelector(selectStatuses),
+		getItemLabel: (status) => <StatusWithLabel status={status.item} />,
+		getItemValue: selectableItemToString,
+	});
+	const excessive_slop = useEnhancedItems({
+		items: useAppSelector(selectExcessiveSlop),
+		getItemLabel: booleanSelectableToString,
+		getItemValue: booleanSelectableToString,
+	});
+	const favorite = useEnhancedItems({
+		items: useAppSelector(selectFavorite),
+		getItemLabel: booleanSelectableToString,
+		getItemValue: booleanSelectableToString,
+	});
+	const ecological_zoning = useEnhancedItems({
+		items: useAppSelector(selectEcologicalZoning),
+		getItemLabel: booleanSelectableToString,
+		getItemValue: booleanSelectableToString,
+	});
 
 	useEffect(() => {
 		dispatch(getFiltersThunk());

@@ -1,7 +1,6 @@
 from datetime import date
 
 import pytest
-from common.clear_cut import new_clear_cut_report
 from geoalchemy2.shape import from_shape
 from geojson_pydantic import MultiPolygon, Point
 from shapely.geometry import MultiPolygon as DbMultiPolygon
@@ -9,9 +8,10 @@ from shapely.geometry import Point as DbPoint
 
 from app.models import ClearCut
 from app.schemas.clear_cut import ClearCutCreateSchema
-from app.schemas.clear_cut_report import CreateClearCutsReportCreateSchema
+from app.schemas.clear_cut_report import CreateClearCutsReportCreateRequestSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 from app.services.clear_cut_report import create_clear_cut_report
+from test.common.clear_cut import new_clear_cut_report
 
 
 def test_create_report_with_intersection(db):
@@ -49,9 +49,9 @@ def test_create_report_with_intersection(db):
     db.add(report)
     db.commit()
 
-    intersecting_report = CreateClearCutsReportCreateSchema(
+    intersecting_report = CreateClearCutsReportCreateRequestSchema(
         city_zip_code="75056",
-        slope_area_ratio_percentage=10,
+        slope_area_hectare=7.2,
         clear_cuts=[
             ClearCutCreateSchema(
                 observation_start_date=date.today(),
@@ -91,9 +91,9 @@ def test_create_report_with_intersection(db):
 
 
 def test_create_report_success(db):
-    report = CreateClearCutsReportCreateSchema(
+    report = CreateClearCutsReportCreateRequestSchema(
         city_zip_code="75056",
-        slope_area_ratio_percentage=10,
+        slope_area_hectare=7.2,
         clear_cuts=[
             ClearCutCreateSchema(
                 observation_start_date=date.today(),
@@ -127,9 +127,7 @@ def test_create_report_success(db):
     )
     created_report = create_clear_cut_report(db, report)
     assert created_report.city.zip_code == report.city_zip_code
-    assert (
-        created_report.slope_area_ratio_percentage == report.slope_area_ratio_percentage
-    )
+    assert created_report.slope_area_hectare == report.slope_area_hectare
     ecological_zoning = (
         created_report.clear_cuts[0].ecological_zonings[0].ecological_zoning
     )

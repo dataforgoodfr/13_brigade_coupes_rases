@@ -1,10 +1,10 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 import {
 	ToggleGroup,
 	ToggleGroupItem,
 	type ToggleGroupProps,
 } from "@/components/ui/toggle-group";
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
 
 const meta = {
 	title: "Toggle group",

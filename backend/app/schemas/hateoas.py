@@ -1,21 +1,19 @@
 import math
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from app.schemas.base import BaseSchema
 
 M = TypeVar("M")
 C = TypeVar("C")
 
 
-class HateaosResponse(BaseModel, Generic[M, C]):
+class HateaosResponse(BaseSchema, Generic[M, C]):
     metadata: M
     content: C
-    model_config = ConfigDict(from_attributes=True)
 
 
-class Metadata(BaseModel):
+class Metadata(BaseSchema):
     links: dict[str, str]
-    model_config = ConfigDict(from_attributes=True)
 
 
 class PaginationMetadataSchema(Metadata):
@@ -24,7 +22,10 @@ class PaginationMetadataSchema(Metadata):
     pages_count: int
     total_count: int
 
-    def __init__(self, page: int, size: int, total_count: int, url: str):
+    @classmethod
+    def create(
+        cls, page: int, size: int, total_count: int, url: str
+    ) -> "PaginationMetadataSchema":
         links = {
             "self": f"{url}?page={page}&size={size}",
         }
@@ -33,7 +34,7 @@ class PaginationMetadataSchema(Metadata):
         if page > 0:
             links["previous"] = f"{url}?page={page - 1}&size={size}"
 
-        super().__init__(
+        return cls(
             pages_count=math.ceil(total_count / size),
             total_count=total_count,
             size=size,

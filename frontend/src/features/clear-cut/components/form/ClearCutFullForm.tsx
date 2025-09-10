@@ -1,48 +1,89 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { isUndefined } from "es-toolkit";
+import { Accordion } from "radix-ui";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	type ClearCutForm,
 	clearCutFormSchema,
 } from "@/features/clear-cut/store/clear-cuts";
-import { Form } from "@/shared/components/form/Form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Accordion } from "radix-ui";
-import { useForm } from "react-hook-form";
+import {
+	persistClearCutCurrentForm,
+	selectSubmission,
+	submitClearCutFormThunk,
+} from "@/features/clear-cut/store/clear-cuts-slice";
+import { useMe } from "@/features/user/store/me.slice";
+import { useToast } from "@/hooks/use-toast";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
 
 export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
-	const form = useForm<ClearCutForm>({
+	const dispatch = useAppDispatch();
+	const submission = useAppSelector(selectSubmission);
+	const loggedUser = useMe();
+	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
-		defaultValues: clearCutFormSchema.parse({
-			...clearCut,
-			status: clearCut.status,
-		}),
+		values: clearCut,
 	});
+	form.watch((value) => {
+		const clearCutForm = clearCutFormSchema.safeParse(value).data;
+		if (!isUndefined(clearCutForm)) {
+			dispatch(persistClearCutCurrentForm(clearCutForm));
+		}
+	});
+	const { toast } = useToast();
+
+	const handleSubmit = (formData: ClearCutForm) => {
+		dispatch(
+			submitClearCutFormThunk({
+				reportId: clearCut.report.id,
+				formData,
+			}),
+		);
+	};
+
+	useEffect(() => {
+		if (submission.status === "success") {
+			toast({ id: "edited-form", title: "Formulaire modifié" });
+		} else if (submission.status === "error") {
+			toast({
+				id: "form-edition-error",
+				title: "Erreur lors de la sauvegarde du formulaire !",
+			});
+		}
+	}, [submission.status, toast]);
 
 	return (
 		<>
 			<AccordionHeader
 				form={form}
-				tags={clearCut.rules}
-				status={clearCut.status}
+				tags={clearCut.report.rules}
+				status={clearCut.report.status}
 			/>
-			<Form {...form}>
+			<FormProvider {...form}>
 				<form
-					onSubmit={form.handleSubmit((form) => console.log(form))}
+					onSubmit={form.handleSubmit(handleSubmit)}
 					className="p-1 flex flex-col grow px-4 h-0"
 				>
 					<Accordion.Root type="multiple" className="grow overflow-auto">
 						<AccordionContent form={form} />
 					</Accordion.Root>
+					{!!loggedUser && (
+						<Button
+							type="submit"
+							className="mx-auto my-1 text-xl font-bold cursor-pointer"
+							size="lg"
+							disabled={submission.status === "loading"}
+						>
+							{submission.status === "loading"
+								? "Envoi en cours..."
+								: "Valider"}
+						</Button>
+					)}
 				</form>
-				<Button
-					type="submit"
-					className="mx-auto my-1 text-xl font-bold  cursor-pointer"
-					size="lg"
-				>
-					Valider
-				</Button>
-			</Form>
+			</FormProvider>
 		</>
 	);
 }

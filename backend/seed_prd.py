@@ -2,7 +2,7 @@ import traceback
 
 from app.database import SessionLocal
 from app.models import Department, User
-from app.services.user_auth import get_password_hash
+from app.services.get_password_hash import get_password_hash
 from common_seed import seed_cities_departments
 
 SRID = 4326
@@ -14,8 +14,8 @@ def seed_database():
         seed_cities_departments(db)
         paris = db.query(Department).filter_by(code="75").first()
         admin = User(
-            firstname="Crysta",
-            lastname="Faerie",
+            first_name="Crysta",
+            last_name="Faerie",
             login="CrystaFaerie",
             email="admin@example.com",
             role="admin",

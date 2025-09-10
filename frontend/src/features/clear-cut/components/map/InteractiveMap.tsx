@@ -1,4 +1,5 @@
 import type { LatLngExpression } from "leaflet";
+
 const franceCenter: LatLngExpression = [46.695554, 2.440236];
 const wholeFranceZoom = 7;
 

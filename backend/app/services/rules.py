@@ -1,8 +1,8 @@
 from functools import reduce
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Query, Session
 
+from app.common.errors import AppHTTPException
 from app.models import Rules
 from app.schemas.rule import (
     AllRules,
@@ -45,14 +45,19 @@ def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
     db.flush()
     return reduce(
         lambda has_changed, current_changed: has_changed and current_changed,
-        update_rules,
+        updated_rules,
+        False,
     )
 
 
 def find_rule_by_id(db: Session, id: int) -> Rules:
     found_rule = db.get(Rules, id)
     if found_rule is None:
-        raise HTTPException(status_code=404, detail=f"Rule with id {id} not found")
+        raise AppHTTPException(
+            status_code=404,
+            type="RULE_NOT_FOUND",
+            detail=f"Rule with id {id} not found",
+        )
     return found_rule
 
 
@@ -69,8 +74,19 @@ def query_area_rule(db: Session) -> Query[Rules]:
 
 
 def list_rules(db: Session) -> AllRules:
+    area_rule = query_area_rule(db).first()
+    slope_rule = query_slope_rule(db).first()
+    ecological_zoning_rule = query_ecological_zoning_rule(db).first()
+
+    if area_rule is None or slope_rule is None or ecological_zoning_rule is None:
+        raise AppHTTPException(
+            status_code=404,
+            type="RULE_NOT_FOUND",
+            detail="One or more required rules not found",
+        )
+
     return AllRules(
-        area=query_area_rule(db).first(),
-        slope=query_slope_rule(db).first(),
-        ecological_zoning=query_ecological_zoning_rule(db).first(),
+        area=area_rule,
+        slope=slope_rule,
+        ecological_zoning=ecological_zoning_rule,
     )

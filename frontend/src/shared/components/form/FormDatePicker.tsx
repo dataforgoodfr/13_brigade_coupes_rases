@@ -1,3 +1,7 @@
+import { fr } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import type { FieldValues } from "react-hook-form";
+import { FormattedDate } from "react-intl";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -6,38 +10,33 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
-import type { FieldValues } from "react-hook-form";
-import { FormattedDate } from "react-intl";
 import {
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	type FormProps,
-} from "./Form";
+	FormFieldLayout,
+	type FormFieldLayoutProps,
+} from "@/shared/components/form/FormFieldLayout";
+import { FormControl, FormField, type FormProps } from "./Form";
 
+export type FormDatePickerProps<T extends FieldValues> = FormProps<T> &
+	FormFieldLayoutProps;
 export function FormDatePicker<T extends FieldValues = FieldValues>({
 	control,
 	name,
-	label,
 	disabled = false,
-}: FormProps<T>) {
+	...props
+}: FormDatePickerProps<T>) {
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormItem className="flex flex-col">
-					{label && <FormLabel className="font-bold">{label}</FormLabel>}
+				<FormFieldLayout {...props} withControl={false}>
 					<Popover>
 						<PopoverTrigger asChild disabled={disabled}>
 							<FormControl>
 								<Button
 									disabled={disabled}
-									variant={"outline"}
+									type="button"
+									variant="outline"
 									className={cn(
 										"w-[240px] pl-3 text-left font-normal",
 										!field.value && "text-muted-foreground",
@@ -57,16 +56,12 @@ export function FormDatePicker<T extends FieldValues = FieldValues>({
 								mode="single"
 								locale={fr}
 								selected={field.value}
-								onSelect={field.onChange}
-								disabled={(date) =>
-									date > new Date() || date < new Date("1900-01-01")
-								}
-								initialFocus
+								onSelect={(v) => field.onChange(v?.toISOString())}
+								captionLayout="dropdown"
 							/>
 						</PopoverContent>
 					</Popover>
-					<FormMessage />
-				</FormItem>
+				</FormFieldLayout>
 			)}
 		/>
 	);

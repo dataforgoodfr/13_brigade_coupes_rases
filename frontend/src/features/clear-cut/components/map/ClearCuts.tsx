@@ -1,3 +1,8 @@
+import type { ZoomAnimEventHandlerFn } from "leaflet";
+import * as L from "leaflet";
+import { Locate } from "lucide-react";
+import { useCallback, useEffect, useMemo } from "react";
+import { Circle, useMap, useMapEvents } from "react-leaflet";
 import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview";
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl";
@@ -13,11 +18,6 @@ import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
 import { useGeolocation } from "@/shared/hooks/geolocation";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
-import type { ZoomAnimEventHandlerFn } from "leaflet";
-import * as L from "leaflet";
-import { Locate } from "lucide-react";
-import { useCallback, useEffect, useMemo } from "react";
-import { Circle, useMap, useMapEvents } from "react-leaflet";
 
 const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
@@ -112,11 +112,19 @@ export function ClearCuts() {
 		}
 	};
 
+	const onZoomEnd = () => {
+		const currentZoom = map.getZoom();
+		if (currentZoom > DISPLAY_PREVIEW_ZOOM_LEVEL) {
+			dispatch(setWithPoints(false));
+		} else {
+			dispatch(setWithPoints(true));
+		}
+		dispatchGeoBounds();
+	};
+
 	useMapEvents({
 		zoomanim: onZoomChanged,
-		zoomend: () => {
-			dispatchGeoBounds();
-		},
+		zoomend: onZoomEnd,
 		dragend: () => {
 			dispatchGeoBounds();
 		},
@@ -133,7 +141,7 @@ export function ClearCuts() {
 	const previews = useMemo(() => {
 		if (!displayPoints) {
 			return value?.previews.flatMap((clearCut) =>
-				clearCut.clear_cuts.map((cut) => (
+				clearCut.clearCuts.map((cut) => (
 					<ClearCutPreview key={cut.id} report={clearCut} clearCut={cut} />
 				)),
 			);

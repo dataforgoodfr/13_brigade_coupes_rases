@@ -1,25 +1,28 @@
+import { faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
 import {
 	CLEAR_CUTTING_STATUSES,
-	type ClearCutFormResponse,
 	type ClearCutReportResponse,
 	type ClearCutResponse,
 	type ClearCutsResponse,
 	type MultiPolygon,
 	type Point,
+	type PublicUser,
 } from "@/features/clear-cut/store/clear-cuts";
 import {
 	fakeDepartments,
 	fakeEcologicalZonings,
 	fakeRules,
 } from "@/mocks/referential";
-import { volunteerAssignedToken } from "@/mocks/users";
+import { volunteerAssignedMock, volunteerAssignedToken } from "@/mocks/users";
 import { range } from "@/shared/array";
 import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
-import { faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
+
+type ClearCutResponseMockOptions = { ecologicalZoningsCount?: number };
 
 export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},
+	options: ClearCutResponseMockOptions = {},
 ): ClearCutResponse => {
 	const startDate = faker.date.anytime();
 	const location = override.location ?? franceRandomPointMock();
@@ -30,112 +33,73 @@ export const createClearCutResponseMock = (
 	return {
 		id: faker.string.uuid(),
 		boundary: randomMultiPolygonFromLocation(location.coordinates, 3.5, 7),
-		ecological_zoning_ids: faker.helpers.arrayElements(
+		ecologicalZoningIds: faker.helpers.arrayElements(
 			Object.keys(fakeEcologicalZonings),
+			options.ecologicalZoningsCount,
 		),
-		observation_start_date: startDate.toJSON().split("T")[0],
-		observation_end_date: endDate.toJSON().split("T")[0],
-		area_hectare: faker.number.int({ min: 5, max: 20 }),
+		observationStartDate: startDate.toJSON().split("T")[0],
+		observationEndDate: endDate.toJSON().split("T")[0],
+		areaHectare: faker.number.int({ min: 5, max: 20 }),
 		location,
 		...override,
 	};
 };
-export const createClearCutReportBaseMock = (
+type ClearCutReportResponseMockOptions = {
+	clearCutsCount?: number;
+} & ClearCutResponseMockOptions;
+export const createClearCutReportResponseBaseMock = (
 	override: Partial<ClearCutReportResponse> = {},
+	options: ClearCutReportResponseMockOptions = {},
 ): ClearCutReportResponse => {
 	const date = faker.date.anytime();
 	const randomLocation = franceRandomPointMock();
 	const clear_cuts = [
-		...range<ClearCutResponse>(1, () =>
-			createClearCutResponseMock({
-				location: override.average_location ?? randomLocation,
-			}),
+		...range<ClearCutResponse>(options.clearCutsCount ?? 1, () =>
+			createClearCutResponseMock(
+				{
+					location: override.averageLocation ?? randomLocation,
+				},
+				options,
+			),
 		),
-		...(override.clear_cuts ?? []),
+		...(override.clearCuts ?? []),
 	];
 	const total_area_hectare = clear_cuts.reduce(
-		(acc, cut) => acc + cut.area_hectare,
+		(acc, cut) => acc + cut.areaHectare,
 		0,
 	);
 	return {
 		id: faker.string.uuid(),
-		average_location: override.average_location ?? randomLocation,
+		averageLocation: override.averageLocation ?? randomLocation,
 		name: faker.animal.dog(),
 		comment: faker.lorem.paragraph(),
-		department_id: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
+		departmentId: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
 		city: faker.location.city(),
-		created_at: faker.date.past().toJSON().split("T")[0],
-		slope_area_ratio_percentage: faker.number.int({ min: 1, max: 60 }),
+		createdAt: faker.date.past().toJSON().split("T")[0],
+		slopeAreaHectare: faker.number.float({ min: 0, max: total_area_hectare }),
 		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
-		rules_ids: faker.helpers.arrayElements(Object.keys(fakeRules)),
-		total_area_hectare,
-		total_bdf_deciduous_area_hectare: faker.number.float({
+		rulesIds: faker.helpers.arrayElements(Object.keys(fakeRules)),
+		totalAreaHectare: total_area_hectare,
+		totalBdfDeciduousAreaHectare: faker.number.float({
 			max: total_area_hectare / 4,
 		}),
-		total_bdf_mixed_area_hectare: faker.number.float({
+		totalBdfMixedAreaHectare: faker.number.float({
 			max: total_area_hectare / 4,
 		}),
-		total_bdf_poplar_area_hectare: faker.number.float({
+		totalBdfPoplarAreaHectare: faker.number.float({
 			max: total_area_hectare / 4,
 		}),
-		total_bdf_resinous_area_hectare: faker.number.float({
+		totalBdfResinousAreaHectare: faker.number.float({
 			max: total_area_hectare / 4,
 		}),
-		clear_cuts,
-		last_cut_date: clear_cuts.reduce(
+		clearCuts: clear_cuts,
+		lastCutDate: clear_cuts.reduce(
 			(acc, cut) =>
-				cut.observation_end_date > acc ? cut.observation_end_date : acc,
-			clear_cuts[0].observation_end_date,
+				cut.observationEndDate > acc ? cut.observationEndDate : acc,
+			clear_cuts[0].observationEndDate,
 		),
-		updated_at: date.toJSON().split("T")[0],
+		updatedAt: date.toJSON().split("T")[0],
 		...override,
-	};
-};
-export const mockClearCut = (override: Partial<ClearCutFormResponse> = {}) => {
-	const clearCut = {
-		...createClearCutReportBaseMock(),
-		imageUrls: [],
-		imgSatelliteCC: faker.image.url(),
-
-		onSiteDate: faker.date.anytime().toISOString(),
-		isPlantationPresentACC: false,
-		imgsPlantation: [],
-		isWorksiteSignPresent: false,
-		imgsTreeTrunks: [],
-		imgsSoilState: [],
-		imgsAccessRoad: [],
-
-		isNatura2000: false,
-		isOtherEcoZone: false,
-		isNearEcoZone: false,
-		isDDT: false,
-
-		isCCOrCompanyCertified: null,
-		isMoreThan20ha: null,
-		isSubjectToPSG: null,
-
-		isRelevantComplaintPEFC: false,
-		isRelevantComplaintREDIII: false,
-		isRelevantComplaintOFB: false,
-		isRelevantAlertSRGS: false,
-		isRelevantAlertPSG: false,
-		isRelevantRequestPSG: false,
-
-		...override,
-	} satisfies ClearCutFormResponse;
-	return {
-		handler: http.get("*/api/v1/clear-cuts-map/:id", ({ params, request }) => {
-			const { id } = params as { id: string };
-			const token = request.headers.get("Authorization");
-			if (token?.includes(volunteerAssignedToken)) {
-				clearCut.assignedUser = "assignedVolunteer";
-			}
-			return HttpResponse.json({
-				...clearCut,
-				id: override.id ?? id,
-			} satisfies ClearCutFormResponse);
-		}),
-		response: clearCut,
 	};
 };
 
@@ -188,7 +152,7 @@ const randomMultiPolygonFromLocation = (
 const randomPoints = range<Point>(100, franceRandomPointMock);
 
 const clearCutPreviews = randomPoints.map((center) =>
-	createClearCutReportBaseMock({ average_location: center }),
+	createClearCutReportResponseBaseMock({ averageLocation: center }),
 );
 
 export const mockClearCutsResponse = (
@@ -221,10 +185,7 @@ export const mockClearCutsResponse = (
 			previews:
 				boundaries && filterInArea
 					? previews.filter((ccp) =>
-							isPointInsidePolygon(
-								boundaries,
-								ccp.average_location.coordinates,
-							),
+							isPointInsidePolygon(boundaries, ccp.averageLocation.coordinates),
 						)
 					: previews,
 			points: {
@@ -233,3 +194,26 @@ export const mockClearCutsResponse = (
 			},
 		} satisfies ClearCutsResponse);
 	});
+
+export const mockClearCutReportResponse = (
+	override: Partial<ClearCutReportResponse> = {},
+	options: ClearCutReportResponseMockOptions = {},
+) => {
+	const baseMock = createClearCutReportResponseBaseMock(override, options);
+	return {
+		handler: http.get("*/api/v1/clear-cuts-map/:id", ({ params, request }) => {
+			const { id } = params as { id: string };
+			const authHeader = request.headers.get("Authorization");
+			let affectedUser: PublicUser | undefined;
+			if (authHeader?.includes(volunteerAssignedToken)) {
+				affectedUser = volunteerAssignedMock;
+			}
+			return HttpResponse.json({
+				...baseMock,
+				id,
+				affectedUser: affectedUser ?? baseMock.affectedUser,
+			} satisfies ClearCutReportResponse);
+		}),
+		response: baseMock,
+	};
+};

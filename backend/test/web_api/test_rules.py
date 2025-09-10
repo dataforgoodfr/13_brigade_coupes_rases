@@ -1,7 +1,8 @@
-from common.user import get_admin_user_token
 from fastapi import status
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
+
+from test.common.user import get_admin_user_token
 
 
 def test_get_rules(client: TestClient):
@@ -10,7 +11,7 @@ def test_get_rules(client: TestClient):
 
 
 def test_update_rules(client: TestClient, db: Session):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
 
     response = client.put(
         "api/v1/rules/1",

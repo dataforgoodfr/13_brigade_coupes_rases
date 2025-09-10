@@ -1,7 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { useLayout } from "@/features/clear-cut/components/Layout.context";
-import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
-import { IconButton } from "@/shared/components/button/Button";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -10,6 +6,11 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Filter, ListIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import { Button } from "@/components/ui/button";
+import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
+import { useLayout } from "@/features/clear-cut/components/Layout.context";
+import { IconButton } from "@/shared/components/button/Button";
+
 type Props = PropsWithChildren<{ clearCutId?: string }>;
 export function MobileControl({ clearCutId, children }: Props) {
 	const { setLayout } = useLayout();

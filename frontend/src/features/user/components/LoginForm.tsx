@@ -1,12 +1,20 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LogInIcon } from "lucide-react";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import largeLogo from "@/assets/logo-lg.png";
 import { Button } from "@/components/ui/button";
 import {
 	type LoginRequest,
 	loginRequestSchema,
-} from "@/features/user/store/user";
-import { loginThunk } from "@/features/user/store/user.slice";
+} from "@/features/user/store/me";
 import {
-	Form,
+	loginThunk,
+	meSlice,
+	selectLogin,
+} from "@/features/user/store/me.slice";
+import { useToast } from "@/hooks/use-toast";
+import {
 	FormControl,
 	FormField,
 	FormItem,
@@ -16,11 +24,9 @@ import {
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { Title } from "@/shared/components/typo/Title";
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LogInIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
 
 type AuthenticationType = "password" | "sso";
 export function LoginForm() {
@@ -42,12 +48,32 @@ export function LoginForm() {
 			},
 			{ isSelected: false, item: "sso", label: "SSO", value: "sso" },
 		]);
+	const login = useAppSelector(selectLogin);
+	const { toast } = useToast();
+	useEffect(() => {
+		if (login.status === "success") {
+			toast({
+				id: "login-success",
+				title: "Connexion réussie",
+				variant: "success",
+				description: "Vous êtes maintenant connecté.",
+			});
+		} else if (login.status === "error") {
+			toast({
+				id: "login-failed",
+				title: "Erreur de connexion",
+				description: "Identifiants invalides. Veuillez réessayer.",
+				variant: "destructive",
+			});
+		}
+		return () => {
+			dispatch(meSlice.actions.resetLogin());
+		};
+	}, [login, toast, dispatch]);
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
-			<h1 className="text-2xl font-poppins font-semibold text-primary">
-				Connexion
-			</h1>
+			<Title className=" text-primary">Connexion</Title>
 			<h3 className="text-neutral-600 font-light">
 				Merci de saisir vos identifiants
 			</h3>
@@ -59,8 +85,8 @@ export function LoginForm() {
 				allowEmptyValue={false}
 				onValueChange={setAuthenticationType}
 			/>
-			{authenticationType?.item === "password" ? (
-				<Form {...form}>
+			{authenticationType?.item === "password" && (
+				<FormProvider {...form}>
 					<form
 						onSubmit={form.handleSubmit((login) => dispatch(loginThunk(login)))}
 						className="space-y-4 mt-4"
@@ -104,9 +130,7 @@ export function LoginForm() {
 							Connexion
 						</Button>
 					</form>
-				</Form>
-			) : (
-				<></>
+				</FormProvider>
 			)}
 		</>
 	);

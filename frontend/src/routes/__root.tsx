@@ -1,6 +1,12 @@
+import { createRootRouteWithContext, Navigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
-import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa";
+
+const useReloadPwa: () => void = (
+	await import(/* @vite-ignore */ import.meta.env.VITE_USE_RELOAD_PWA_PATH)
+).useReloadPwa;
+
 import type { AuthContext } from "@/features/user/components/Auth.context";
 import { AppLayout } from "@/shared/components/AppLayout";
 import { AppMobileLayout } from "@/shared/components/AppMobileLayout";
@@ -11,8 +17,6 @@ import {
 	getReferentialThunk,
 	selectReferentialStatus,
 } from "@/shared/store/referential/referential.slice";
-import { Navigate, createRootRouteWithContext } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 interface RouterContext {
 	auth?: AuthContext;

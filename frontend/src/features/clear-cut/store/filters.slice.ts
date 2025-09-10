@@ -1,3 +1,4 @@
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts";
 import {
 	type FiltersRequest,
@@ -5,13 +6,14 @@ import {
 	filtersResponseSchema,
 } from "@/features/clear-cut/store/filters";
 import type { Bounds } from "@/features/clear-cut/store/types";
+import { selectFavorites } from "@/features/user/store/me.slice";
 import {
+	booleanToSelectableItem,
 	DEFAULT_EVENTUALLY_BOOLEAN,
 	type EventuallyBooleanSelectableItems,
+	listToSelectableItems,
 	type NamedId,
 	type SelectableItem,
-	booleanToSelectableItem,
-	listToSelectableItems,
 	updateEventuallyBooleanSelectableItem,
 } from "@/shared/items";
 import type { Department, Rule } from "@/shared/store/referential/referential";
@@ -23,7 +25,6 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
 import type { Range } from "@/shared/types/range";
-import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 export interface FiltersState {
 	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
@@ -53,8 +54,8 @@ export const getFiltersThunk = createAppAsyncThunk(
 	async (_arg, { getState, extra: { api } }) => {
 		const result = await api().get<FiltersResponse>("api/v1/filters").json();
 		const {
-			departments_ids,
-			rules_ids: tags_ids,
+			departmentsIds: departments_ids,
+			rulesIds: tags_ids,
 			...response
 		} = filtersResponseSchema.parse(result);
 		const state = getState();
@@ -157,13 +158,13 @@ export const filtersSlice = createSlice({
 				state,
 				{
 					payload: {
-						cut_years: cutYears,
+						cutYears,
 						rules,
 						departments,
-						area_range,
+						areaRange: area_range,
 						statuses,
-						excessive_slope,
-						has_ecological_zonings: ecological_zoning,
+						excessiveSlope: excessive_slope,
+						hasEcologicalZonings: ecological_zoning,
 						favorite,
 					},
 				},
@@ -188,32 +189,41 @@ export const {
 
 const selectState = (state: RootState) => state.filters;
 export const selectFiltersRequest = createTypedDraftSafeSelector(
-	selectState,
-	({
-		cutYears,
-		geoBounds,
-		ecological_zoning,
-		statuses,
-		areas,
-		departments,
-		excessive_slope,
-		favorite,
-		with_points,
-	}): FiltersRequest | undefined => ({
-		geoBounds,
-		cut_years: cutYears.filter((y) => y.isSelected).map((y) => y.item),
-		departments_ids: departments
-			.filter((d) => d.isSelected)
-			.map((d) => d.item.id),
-		min_area_hectare: areas?.[0],
-		max_area_hectare: areas?.[1],
-		statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
-		has_ecological_zonings: ecological_zoning.find((item) => item.isSelected)
-			?.item,
-		excessive_slope: excessive_slope.find((item) => item.isSelected)?.item,
-		favorite: favorite.find((item) => item.isSelected)?.item,
-		with_points,
-	}),
+	[selectState, selectFavorites],
+	(
+		{
+			cutYears,
+			geoBounds,
+			ecological_zoning,
+			statuses,
+			areas,
+			departments,
+			excessive_slope,
+			favorite,
+			with_points,
+		},
+		favorites,
+	): FiltersRequest | undefined => {
+		const selectedFavoriteOption = favorite.find(
+			(item) => item.isSelected,
+		)?.item;
+		return {
+			geoBounds,
+			cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+			departmentsIds: departments
+				.filter((d) => d.isSelected)
+				.map((d) => d.item.id),
+			minAreaHectare: areas?.[0],
+			maxAreaHectare: areas?.[1],
+			statuses: statuses.filter((s) => s.isSelected).map((s) => s.item),
+			hasEcologicalZonings: ecological_zoning.find((item) => item.isSelected)
+				?.item,
+			excessiveSlope: excessive_slope.find((item) => item.isSelected)?.item,
+			inReportsIds: selectedFavoriteOption === true ? favorites : undefined,
+			outReportsIds: selectedFavoriteOption === false ? favorites : undefined,
+			withPoints: with_points,
+		};
+	},
 );
 
 export const selectCutYears = createTypedDraftSafeSelector(

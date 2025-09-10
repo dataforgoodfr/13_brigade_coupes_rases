@@ -1,11 +1,12 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import EmailStr, Field, field_validator
 
 from app.models import User
+from app.schemas.base import BaseSchema
 
 
-class UserBaseSchema(BaseModel):
-    firstname: str = Field(default_factory=str, json_schema_extra={"example": "John"})
-    lastname: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
+class UserBaseSchema(BaseSchema):
+    first_name: str = Field(default_factory=str, json_schema_extra={"example": "John"})
+    last_name: str = Field(default_factory=str, json_schema_extra={"example": "Tree"})
     login: str = Field(default_factory=str, json_schema_extra={"example": "JognTree78"})
     email: EmailStr = Field(
         default_factory=EmailStr, json_schema_extra={"example": "john.tree@canope.com"}
@@ -17,5 +18,3 @@ class UserBaseSchema(BaseModel):
         if value is not None and value not in User.ROLES:
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
-
-    model_config = ConfigDict(from_attributes=True)

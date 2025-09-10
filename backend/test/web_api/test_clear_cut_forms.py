@@ -1,97 +1,166 @@
-from common.user import get_admin_user_token
 from fastapi import status
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
+
+from test.common.user import get_admin_user_token
 
 
 def test_create_version_success(client: TestClient, db: Session):
-    token = get_admin_user_token(client, db)
+    token = get_admin_user_token(client, db)[1]
 
     report_data = {
-        "compagny": "Company",
-        "ddt_request_owner": "Request owner",
-        "ecological_zone": False,
-        "ecological_zone_type": "Ecological Zone Type",
-        "forest_description": "Wild forest",
-        "inspection_date": "2025-04-23T14:00:00",
-        "landlord": "Land lord",
-        "nearby_zone": "Nearby Zone",
-        "nearby_zone_type": "Nearby Zone Type",
-        "other": "Other",
-        "over_20_ha": False,
-        "pefc_fsc_certified": False,
-        "protected_habitats": "Protected Habitats",
-        "protected_species": "Protected Species",
-        "protected_zone_description": "RAS",
-        "psg_required_plot": True,
-        "relevant_for_alert_cnpf_ddt_psg_thresholds": False,
-        "relevant_for_alert_cnpf_ddt_srgs": False,
-        "relevant_for_ofb_complaint": False,
-        "relevant_for_psg_request": False,
-        "relevant_for_rediii_complaint": False,
-        "remainingTrees": True,
-        "request_engaged": "Request",
-        "soil_state": "Muddy",
-        "species": "Chênes",
-        "subcontractor": "Sub contractor",
-        "waterzone_description": "small lake",
-        "weather": "Rainy",
-        "workSignVisible": False,
+        "relevantForPefcComplaint": True,
+        "relevantForRediiiComplaint": True,
+        "relevantForOfbComplaint": True,
+        "relevantForAlertCnpfDdtSrgs": True,
+        "relevantForAlertCnpfDdtPsgThresholds": True,
+        "relevantForPsgRequest": True,
+        "requestEngaged": "string",
+        "other": "string",
+        "isPefcFscCertified": True,
+        "isOver20Ha": True,
+        "isPsgRequiredPlot": True,
+        "company": "string",
+        "subcontractor": "string",
+        "landlord": "string",
+        "hasOtherEcologicalZone": True,
+        "otherEcologicalZoneType": "string",
+        "hasNearbyEcologicalZone": True,
+        "nearbyEcologicalZoneType": "string",
+        "protectedSpecies": "string",
+        "protectedHabitats": "string",
+        "hasDdtRequest": True,
+        "ddtRequestOwner": "string",
+        "inspectionDate": "2025-07-31T20:16:13.358000",
+        "weather": "string",
+        "forest": "string",
+        "hasRemainingTrees": True,
+        "treesSpecies": "string",
+        "hasConstructionPanel": True,
+        "constructionPanelImages": ["string"],
+        "wetland": "string",
+        "destructionClues": "string",
+        "soilState": "string",
+        "clearCutImages": ["string"],
+        "treeTrunksImages": ["string"],
+        "soilStateImages": ["string"],
+        "accessRoadImages": ["string"],
     }
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1/forms",
+    ).json()
 
     response = client.post(
         "/api/v1/clear-cuts-reports/1/forms",
         json=report_data,
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Etag": response["content"][0]["etag"],
+        },
     )
-    print(response)
+
     assert response.status_code == status.HTTP_201_CREATED
 
     location = response.headers["location"]
     data = client.get(location).json()
 
-    print(data)
-
-    assert data["id"] == int(location.split("/")[-1])
-    assert data["compagny"] == report_data["compagny"]
-    assert data["ddt_request_owner"] == report_data["ddt_request_owner"]
-    assert data["ecological_zone"] == report_data["ecological_zone"]
-    assert data["ecological_zone_type"] == report_data["ecological_zone_type"]
-    assert data["forest_description"] == report_data["forest_description"]
-    assert data["inspection_date"] == report_data["inspection_date"]
+    assert data["id"] == location.split("/")[-1]
+    assert data["company"] == report_data["company"]
+    assert data["ddtRequestOwner"] == report_data["ddtRequestOwner"]
+    assert data["hasOtherEcologicalZone"] == report_data["hasOtherEcologicalZone"]
+    assert data["otherEcologicalZoneType"] == report_data["otherEcologicalZoneType"]
+    assert data["forest"] == report_data["forest"]
+    assert data["inspectionDate"] == report_data["inspectionDate"]
     assert data["landlord"] == report_data["landlord"]
-    assert data["nearby_zone"] == report_data["nearby_zone"]
-    assert data["nearby_zone_type"] == report_data["nearby_zone_type"]
+    assert data["hasNearbyEcologicalZone"] == report_data["hasNearbyEcologicalZone"]
+    assert data["nearbyEcologicalZoneType"] == report_data["nearbyEcologicalZoneType"]
     assert data["other"] == report_data["other"]
-    assert data["over_20_ha"] == report_data["over_20_ha"]
-    assert data["pefc_fsc_certified"] == report_data["pefc_fsc_certified"]
-    assert data["protected_habitats"] == report_data["protected_habitats"]
-    assert data["protected_species"] == report_data["protected_species"]
+    assert data["isOver20Ha"] == report_data["isOver20Ha"]
+    assert data["isPefcFscCertified"] == report_data["isPefcFscCertified"]
+    assert data["protectedHabitats"] == report_data["protectedHabitats"]
+    assert data["protectedSpecies"] == report_data["protectedSpecies"]
+    # If your API returns a protectedZoneDescription field, add it here
+    assert data["isPsgRequiredPlot"] == report_data["isPsgRequiredPlot"]
     assert (
-        data["protected_zone_description"] == report_data["protected_zone_description"]
-    )
-    assert data["psg_required_plot"] == report_data["psg_required_plot"]
-    assert (
-        data["relevant_for_alert_cnpf_ddt_psg_thresholds"]
-        == report_data["relevant_for_alert_cnpf_ddt_psg_thresholds"]
+        data["relevantForAlertCnpfDdtPsgThresholds"]
+        == report_data["relevantForAlertCnpfDdtPsgThresholds"]
     )
     assert (
-        data["relevant_for_alert_cnpf_ddt_srgs"]
-        == report_data["relevant_for_alert_cnpf_ddt_srgs"]
+        data["relevantForAlertCnpfDdtSrgs"]
+        == report_data["relevantForAlertCnpfDdtSrgs"]
     )
+    assert data["relevantForOfbComplaint"] == report_data["relevantForOfbComplaint"]
+    assert data["relevantForPsgRequest"] == report_data["relevantForPsgRequest"]
     assert (
-        data["relevant_for_ofb_complaint"] == report_data["relevant_for_ofb_complaint"]
+        data["relevantForRediiiComplaint"] == report_data["relevantForRediiiComplaint"]
     )
-    assert data["relevant_for_psg_request"] == report_data["relevant_for_psg_request"]
-    assert (
-        data["relevant_for_rediii_complaint"]
-        == report_data["relevant_for_rediii_complaint"]
-    )
-    assert data["remainingTrees"] == report_data["remainingTrees"]
-    assert data["request_engaged"] == report_data["request_engaged"]
-    assert data["soil_state"] == report_data["soil_state"]
-    assert data["species"] == report_data["species"]
+    assert data["hasRemainingTrees"] == report_data["hasRemainingTrees"]
+    assert data["requestEngaged"] == report_data["requestEngaged"]
+    assert data["soilState"] == report_data["soilState"]
+    assert data["treesSpecies"] == report_data["treesSpecies"]
     assert data["subcontractor"] == report_data["subcontractor"]
-    assert data["waterzone_description"] == report_data["waterzone_description"]
+    # If your API returns waterzoneDescription, add it here
     assert data["weather"] == report_data["weather"]
-    assert data["workSignVisible"] == report_data["workSignVisible"]
+    # If your API returns workSignVisible, add it here
+
+
+def test_form_submission_updates_report_status(client: TestClient, db: Session):
+    """Test that submitting a form updates the report status from 'to_validate' to 'validated'"""
+    token = get_admin_user_token(client, db)[1]
+
+    # Verify initial report status is "to_validate"
+    report_response = client.get("/api/v1/clear-cuts-reports/1")
+    assert report_response.status_code == status.HTTP_200_OK
+    initial_report_data = report_response.json()
+    assert initial_report_data["status"] == "to_validate"
+
+    # Submit a form
+    form_data = {
+        "company": "Test Company",
+        "ddtRequestOwner": "Test Owner",
+        "ecologicalZone": False,
+        "ecologicalZoneType": "Test Zone",
+        "forestDescription": "Test Forest",
+        "inspectionDate": "2025-04-23T14:00:00",
+        "landlord": "Test Landlord",
+        "nearbyZone": False,
+        "nearbyZoneType": "Test Nearby Zone Type",
+        "other": "Test Other",
+        "over20Ha": False,
+        "pefcFscCertified": False,
+        "protectedHabitats": "Test Habitats",
+        "protectedSpecies": "Test Species",
+        "protectedZoneDescription": "Test Description",
+        "psgRequiredPlot": True,
+        "relevantForAlertCnpfDdtPsgThresholds": False,
+        "relevantForAlertCnpfDdtSrgs": False,
+        "relevantForOfbComplaint": False,
+        "relevantForPsgRequest": False,
+        "relevantForRediiiComplaint": False,
+        "remainingTrees": True,
+        "requestEngaged": "Test Request",
+        "soilState": "Test Soil",
+        "species": "Test Species",
+        "subcontractor": "Test Subcontractor",
+        "waterzoneDescription": "Test Water Zone",
+        "weather": "Test Weather",
+        "workSignVisible": False,
+    }
+    response = client.get(
+        "/api/v1/clear-cuts-reports/1/forms",
+    ).json()
+    response = client.post(
+        "/api/v1/clear-cuts-reports/1/forms",
+        json=form_data,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Etag": response["content"][0]["etag"],
+        },
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+
+    # Verify report status is now "validated"
+    updated_report_response = client.get("/api/v1/clear-cuts-reports/1")
+    assert updated_report_response.status_code == status.HTTP_200_OK
+    updated_report_data = updated_report_response.json()
+    assert updated_report_data["status"] == "validated"

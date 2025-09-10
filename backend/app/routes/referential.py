@@ -13,7 +13,10 @@ router = APIRouter(prefix="/api/v1/referential", tags=["Referential"])
 
 
 @router.get(
-    "/", response_model=ReferentialResponseSchema, summary="Returns referential data"
+    "/",
+    response_model=ReferentialResponseSchema,
+    summary="Returns referential data",
+    response_model_exclude_none=True,
 )
 def get_referential(db: Session = db_session):
     logger.info(db)

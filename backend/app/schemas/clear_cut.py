@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import Optional
 
 from geojson_pydantic import MultiPolygon, Point
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from app.models import ClearCut
+from app.schemas.base import BaseSchema
 from app.schemas.ecological_zoning import EcologicalZoningSchema
 
 
-class ClearCutBaseSchema(BaseModel):
+class ClearCutBaseSchema(BaseSchema):
     location: Point = Field(
         json_schema_extra={
             "example": {"type": "Point", "coordinates": [2.3522, 48.8566]},
@@ -46,31 +46,31 @@ class ClearCutBaseSchema(BaseModel):
             "example": "2023-01-01T00:00:00Z",
         }
     )
-    bdf_resinous_area_hectare: Optional[float] = Field(
+    bdf_resinous_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_deciduous_area_hectare: Optional[float] = Field(
+    bdf_deciduous_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_mixed_area_hectare: Optional[float] = Field(
+    bdf_mixed_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    bdf_poplar_area_hectare: Optional[float] = Field(
+    bdf_poplar_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
         },
     )
-    ecological_zoning_area_hectare: Optional[float] = Field(
+    ecological_zoning_area_hectare: float | None = Field(
         None,
         json_schema_extra={
             "example": 15,
@@ -111,12 +111,8 @@ def clear_cut_to_clear_cut_response_schema(
     return ClearCutResponseSchema(
         id=str(clear_cut.id),
         report_id=str(clear_cut.report_id),
-        boundary=MultiPolygon.model_validate_json(clear_cut.boundary),
-        location=Point.model_validate_json(clear_cut.location),
-        ecological_zonings_ids=[
-            str(ecological_zoning.ecological_zoning_id)
-            for ecological_zoning in clear_cut.ecological_zonings
-        ],
+        boundary=MultiPolygon.model_validate_json(clear_cut.boundary_json),
+        location=Point.model_validate_json(clear_cut.location_json),
         created_at=clear_cut.created_at,
         observation_start_date=clear_cut.observation_start_date,
         observation_end_date=clear_cut.observation_end_date,

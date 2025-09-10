@@ -1,5 +1,15 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { HTMLInputTypeAttribute } from "react";
 import {
-	Form,
+	type ControllerProps,
+	type FieldPath,
+	type FieldValues,
+	FormProvider,
+	useForm,
+} from "react-hook-form";
+import { z } from "zod";
+import {
 	FormControl,
 	FormDescription,
 	FormField,
@@ -9,16 +19,7 @@ import {
 } from "@/shared/components/form/Form";
 import { Input } from "@/shared/components/input/Input";
 import { PasswordInput } from "@/shared/components/input/PasswordInput";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Meta, StoryObj } from "@storybook/react";
-import type { HTMLInputTypeAttribute } from "react";
-import {
-	type ControllerProps,
-	type FieldPath,
-	type FieldValues,
-	useForm,
-} from "react-hook-form";
-import { z } from "zod";
+
 type FormFieldInForm<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -51,7 +52,7 @@ const meta: Meta<FormFieldInForm> = {
 		});
 
 		return (
-			<Form {...form}>
+			<FormProvider {...form}>
 				<FormField
 					{...props}
 					name="field"
@@ -76,7 +77,7 @@ const meta: Meta<FormFieldInForm> = {
 						);
 					}}
 				/>
-			</Form>
+			</FormProvider>
 		);
 	},
 };

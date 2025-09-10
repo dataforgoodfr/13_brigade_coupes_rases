@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import type { Position } from "@/shared/position";
-import type { ReactNode } from "@tanstack/react-router";
+import type { Position } from "@/shared/layout";
 
 interface Props extends ButtonProps {
 	icon: ReactNode;

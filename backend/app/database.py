@@ -6,7 +6,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from app.config import settings
 
 logging.basicConfig()
-logging.getLogger("sqlalchemy.engine").setLevel(logging.ERROR)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 DATABASE_URL = settings.DATABASE_URL
 

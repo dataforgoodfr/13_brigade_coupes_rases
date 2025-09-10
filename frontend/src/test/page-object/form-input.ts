@@ -1,3 +1,7 @@
+import { screen } from "@testing-library/react";
+import type { UserEvent } from "@vitest/browser/context";
+import type { FieldValues } from "react-hook-form";
+import { expect } from "vitest";
 import type {
 	DatePickerItem,
 	FixedItem,
@@ -8,13 +12,13 @@ import type {
 	TextAreaItem,
 	ToggleGroupItem,
 } from "@/features/clear-cut/components/form/types";
-import { screen } from "@testing-library/react";
-import type { UserEvent } from "@testing-library/user-event";
-import { expect } from "vitest";
-export type TestFormItem<Form, Value = unknown> = SectionFormItem<Form> & {
+export type TestFormItem<
+	Form extends FieldValues,
+	Value = unknown,
+> = SectionFormItem<Form> & {
 	expected: Value;
 };
-type Options<Form, Value = unknown> = {
+type Options<Form extends FieldValues, Value = unknown> = {
 	user: UserEvent;
 	item: TestFormItem<Form, Value>;
 };
@@ -33,16 +37,17 @@ export interface FieldInput<
 	isDisabled: () => Promise<boolean>;
 	expectDisabledState: (state: boolean) => Promise<void>;
 }
-function findInputByLabel<Form, Element extends HTMLElement>(
-	item: Exclude<SectionFormItem<Form>, FixedItem<Form>>,
-) {
+function findInputByLabel<
+	Form extends FieldValues,
+	Element extends HTMLElement,
+>(item: Exclude<SectionFormItem<Form>, FixedItem<Form>>) {
 	return screen.findByLabelText<Element>(item.label ?? item.name);
 }
 function findElementByLabel<Element extends HTMLElement>(label: string) {
 	const findLabel = () => screen.findByText(label);
 	return async () => (await findLabel()).nextElementSibling as Element;
 }
-export function formField<Form, Value = unknown>({
+export function formField<Form extends FieldValues, Value = unknown>({
 	item,
 }: Options<Form, Value>) {
 	switch (item.type) {
@@ -63,7 +68,7 @@ export function formField<Form, Value = unknown>({
 	}
 }
 
-function fixedItemField<Form>(
+function fixedItemField<Form extends FieldValues>(
 	item: FixedItem<Form>,
 ): Field<string | null, HTMLParagraphElement> {
 	const findElement = findElementByLabel<HTMLParagraphElement>(
@@ -75,7 +80,7 @@ function fixedItemField<Form>(
 	};
 }
 
-function fieldWithTextContentValue<Form>(
+function fieldWithTextContentValue<Form extends FieldValues>(
 	item: DatePickerItem<Form> | TextAreaItem<Form>,
 ): FieldInput<string | null, HTMLButtonElement | HTMLTextAreaElement> {
 	const field = fieldWithLabel<
@@ -91,7 +96,7 @@ function fieldWithTextContentValue<Form>(
 		},
 	};
 }
-function fieldWithValue<Form>(
+function fieldWithValue<Form extends FieldValues>(
 	item: InputTextItem<Form> | InputFileItem<Form>,
 ): FieldInput<string | null, HTMLInputElement> {
 	const field = fieldWithLabel<Form, string | null, HTMLInputElement>(item);
@@ -104,7 +109,7 @@ function fieldWithValue<Form>(
 	};
 }
 
-function switchField<Form>(
+function switchField<Form extends FieldValues>(
 	item: SwitchItem<Form>,
 ): FieldInput<boolean, HTMLInputElement> {
 	const field = fieldWithLabel<Form, boolean, HTMLInputElement>(item);
@@ -112,11 +117,11 @@ function switchField<Form>(
 		...field,
 		findValue: async () => {
 			const element = await field.findElement();
-			return element.getAttribute("checked") != null;
+			return element.getAttribute("aria-checked") === "true";
 		},
 	};
 }
-function toggleGroupField<Form>(
+function toggleGroupField<Form extends FieldValues>(
 	item: ToggleGroupItem<Form>,
 ): FieldInput<boolean | null, HTMLDivElement> {
 	const findElement = findElementByLabel<HTMLDivElement>(
@@ -124,7 +129,7 @@ function toggleGroupField<Form>(
 	);
 	const allDisabled = async () => {
 		const buttonsGroup = await findElement();
-		return Array.from(buttonsGroup.children).every((button) =>
+		return Array.from(buttonsGroup.children[0].children).every((button) =>
 			button.hasAttribute("disabled"),
 		);
 	};
@@ -151,7 +156,11 @@ function toggleGroupField<Form>(
 	};
 }
 
-function fieldWithLabel<Form, Value, Element extends HTMLElement>(
+function fieldWithLabel<
+	Form extends FieldValues,
+	Value,
+	Element extends HTMLElement,
+>(
 	item:
 		| DatePickerItem<Form>
 		| TextAreaItem<Form>
@@ -165,11 +174,9 @@ function fieldWithLabel<Form, Value, Element extends HTMLElement>(
 			return (await findInputByLabel(item)).hasAttribute("disabled");
 		},
 		expectDisabledState: async (state) => {
-			if (state === true) {
-				expect(await findInputByLabel(item)).toBeDisabled();
-			} else {
-				expect(await findInputByLabel(item)).toBeEnabled();
-			}
+			expect(await findInputByLabel(item))[
+				state === true ? "to" : "not"
+			].toBeDisabled();
 		},
 	};
 }

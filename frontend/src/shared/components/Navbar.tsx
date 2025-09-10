@@ -1,32 +1,21 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	DropdownMenuContent,
-	DropdownMenuItem,
-} from "@/shared/components/dropdown/DropdownMenu";
-
-import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
-import { selectLoggedUser, userSlice } from "@/features/user/store/user.slice";
-import { NavbarLink } from "@/shared/components/NavbarLink";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import {
-	DropdownMenu,
-	DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
-
+import { House, LogIn, LogOutIcon } from "lucide-react";
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
-import { House, LogIn, SettingsIcon } from "lucide-react";
+import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
+import { meSlice, useConnectedMe } from "@/features/user/store/me.slice";
+import { NavbarItem } from "@/shared/components/NavbarItem";
+import { useAppDispatch } from "@/shared/hooks/store";
 
 interface Props {
 	className?: string;
 }
 export function Navbar({ className }: Props) {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useConnectedMe();
 	const router = useRouter();
 	const navigate = useNavigate();
 	const handleLogout = () => {
-		dispatch(userSlice.actions.logoutUser());
+		dispatch(meSlice.actions.logoutUser());
 		router.invalidate().finally(() => {
 			navigate({ to: "/" });
 		});
@@ -39,37 +28,30 @@ export function Navbar({ className }: Props) {
 				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
 			)}
 		>
-			<div className="flex flex-col items-center gap-16 ">
+			<div className="flex flex-col items-center ">
 				<img
 					alt="Canopée"
 					src={canopeeWhiteIcon}
-					className="h-auto aspect-square object-cover mt-6 size-11"
+					className="h-auto aspect-square object-cover my-7 size-11"
 				/>
 				<div className="flex flex-col gap-10 items-center">
-					<NavbarLink to="/clear-cuts" Icon={House} title="Carte" />
-					{!user && <NavbarLink to="/login" Icon={LogIn} title="Connexion" />}
-
-					{user?.role === "admin" && <NavbarItems />}
+					<NavbarItem type="link" to="/clear-cuts" Icon={House} title="Carte" />
 				</div>
 			</div>
-
-			{user && (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild className="size-11 ">
-						<Avatar>
-							<AvatarImage alt="Avatar" src={user.avatarUrl} />
-							<AvatarFallback>
-								<SettingsIcon />
-							</AvatarFallback>
-						</Avatar>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent className="w-56">
-						<DropdownMenuItem onClick={handleLogout}>
-							Déconnexion
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			)}
+			<div className="flex flex-col items-center gap-5 ">
+				{!user && (
+					<NavbarItem type="link" to="/login" Icon={LogIn} title="Connexion" />
+				)}
+				{user?.role === "admin" && <NavbarItems />}
+				{user && (
+					<NavbarItem
+						Icon={LogOutIcon}
+						onClick={handleLogout}
+						type="button"
+						title="Déconnexion"
+					/>
+				)}
+			</div>
 		</nav>
 	);
 }
