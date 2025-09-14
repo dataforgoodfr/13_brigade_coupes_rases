@@ -120,38 +120,38 @@ const clearCutsSchema = clearCutsResponseSchema.omit({ previews: true }).and(
 export type ClearCuts = z.infer<typeof clearCutsSchema>;
 
 const clearCutFormGroundSchema = z.object({
-	inspectionDate: z.string().optional(),
-	weather: z.string().optional(),
-	forest: z.string().optional(),
-	hasRemainingTrees: z.boolean().default(false),
-	treesSpecies: z.string().optional(),
-	plantingImages: z.array(z.string()).default([]),
-	hasConstructionPanel: z.boolean().default(false),
+	inspectionDate: z.string().nullish().prefault(null),
+	weather: z.string().nullish().prefault(null),
+	forest: z.string().nullish().prefault(null),
+	hasRemainingTrees: z.boolean().prefault(false),
+	treesSpecies: z.string().nullish().prefault(null),
+	plantingImages: z.array(z.string()).prefault([]),
+	hasConstructionPanel: z.boolean().prefault(false),
 	constructionPanelImages: z.array(z.string()).optional(),
-	wetland: z.string().optional(),
-	destructionClues: z.string().optional(),
-	soilState: z.string().optional(),
-	clearCutImages: z.array(z.string()).default([]),
-	treeTrunksImages: z.array(z.string()).default([]),
-	soilStateImages: z.array(z.string()).default([]),
-	accessRoadImages: z.array(z.string()).default([]),
+	wetland: z.string().nullish().prefault(null),
+	destructionClues: z.string().nullish().prefault(null),
+	soilState: z.string().nullish().prefault(null),
+	clearCutImages: z.array(z.string()).prefault([]),
+	treeTrunksImages: z.array(z.string()).prefault([]),
+	soilStateImages: z.array(z.string()).prefault([]),
+	accessRoadImages: z.array(z.string()).prefault([]),
 });
 
 const clearCutFormEcologicalZoningSchema = z.object({
-	hasOtherEcologicalZone: z.boolean().default(false),
-	otherEcologicalZoneType: z.string().optional(),
-	hasNearbyEcologicalZone: z.boolean().default(false),
-	nearbyEcologicalZoneType: z.string().optional(),
-	protectedSpecies: z.string().optional(),
-	protectedHabitats: z.string().optional(),
-	hasDdtRequest: z.boolean().default(false),
-	ddtRequestOwner: z.string().optional(),
+	hasOtherEcologicalZone: z.boolean().prefault(false),
+	otherEcologicalZoneType: z.string().nullish().prefault(null),
+	hasNearbyEcologicalZone: z.boolean().prefault(false),
+	nearbyEcologicalZoneType: z.string().nullish().prefault(null),
+	protectedSpecies: z.string().nullish().prefault(null),
+	protectedHabitats: z.string().nullish().prefault(null),
+	hasDdtRequest: z.boolean().prefault(false),
+	ddtRequestOwner: z.string().nullish().prefault(null),
 });
 
 const clearCutFormActorsSchema = z.object({
-	company: z.string().optional(),
-	subcontractor: z.string().optional(),
-	landlord: z.string().optional(),
+	company: z.string().nullish().prefault(null),
+	subcontractor: z.string().nullish().prefault(null),
+	landlord: z.string().nullish().prefault(null),
 });
 
 const clearCutFormRegulationSchema = z.object({
@@ -161,13 +161,13 @@ const clearCutFormRegulationSchema = z.object({
 });
 
 const clearCutFormLegalStrategySchema = z.object({
-	relevantForPefcComplaint: z.boolean().default(false),
-	relevantForRediiiComplaint: z.boolean().default(false),
-	relevantForOfbComplaint: z.boolean().default(false),
-	relevantForAlertCnpfDdtSrgs: z.boolean().default(false),
-	relevantForAlertCnpfDdtPsgThresholds: z.boolean().default(false),
-	relevantForPsgRequest: z.boolean().default(false),
-	requestEngaged: z.string().optional(),
+	relevantForPefcComplaint: z.boolean().prefault(false),
+	relevantForRediiiComplaint: z.boolean().prefault(false),
+	relevantForOfbComplaint: z.boolean().prefault(false),
+	relevantForAlertCnpfDdtSrgs: z.boolean().prefault(false),
+	relevantForAlertCnpfDdtPsgThresholds: z.boolean().prefault(false),
+	relevantForPsgRequest: z.boolean().prefault(false),
+	requestEngaged: z.string().nullish().prefault(null),
 });
 
 const clearCutFormOtherSchema = z.object({
@@ -197,8 +197,8 @@ export const clearCutFormSchema = clearCutFormSectionsResponseSchema.and(
 	z
 		.object({
 			report: clearCutReportSchema,
-			ecologicalZonings: ecologicalZoningSchema.array().default([]),
-			hasEcologicalZonings: z.boolean().default(false),
+			ecologicalZonings: ecologicalZoningSchema.array().prefault([]),
+			hasEcologicalZonings: z.boolean().prefault(false),
 		})
 		.and(
 			existingClearCurFormSchema

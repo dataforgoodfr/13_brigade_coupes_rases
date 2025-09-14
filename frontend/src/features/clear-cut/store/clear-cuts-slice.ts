@@ -60,7 +60,7 @@ const mapReport = (
 });
 
 export const persistClearCutCurrentForm = createAppAsyncThunk<
-	void,
+	ClearCutForm | undefined,
 	ClearCutForm
 >("persistClearCutForm", async (form, { getState }) => {
 	const versions = selectDetail(getState());
@@ -71,6 +71,7 @@ export const persistClearCutCurrentForm = createAppAsyncThunk<
 		...versions.value,
 		current: form,
 	});
+	return form;
 });
 
 export const getClearCutFormThunk = createAppAsyncThunk<
@@ -126,12 +127,11 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 			);
 
 			const shouldShowDisclaimer = versions?.current.etag !== formReport.etag;
-			const form = hasBeenCreated
-				? formReport
-				: (versions?.original ?? formReport);
+			const form = (type: "current" | "original") =>
+				hasBeenCreated ? formReport : (versions?.[type] ?? formReport);
 			return {
-				original: form,
-				current: form,
+				original: form("original"),
+				current: form("current"),
 				latest: formReport,
 				versionMismatchDisclaimerShown:
 					hasBeenCreated ?? (!shouldShowDisclaimer || isUndefined(versions)),

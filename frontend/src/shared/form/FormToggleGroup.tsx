@@ -1,28 +1,27 @@
 import type { FieldValues } from "react-hook-form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { FormFieldLayout } from "@/shared/components/form/FormFieldLayout";
+import { FormFieldLayout } from "@/shared/form/FormFieldLayout";
 import { FormField, type FormProps } from "./Form";
 
 const toggleGroupItemClass =
 	"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)";
 
 export function FormToggleGroup<T extends FieldValues = FieldValues>({
-	control,
+	form,
 	name,
-	disabled = false,
 	...props
 }: FormProps<T>) {
 	return (
 		<FormField
-			control={control}
+			control={form.control}
 			name={name}
 			render={({ field }) => {
 				return (
-					<FormFieldLayout {...props} control={control} name={name}>
+					<FormFieldLayout {...props} form={form} name={name}>
 						<ToggleGroup
 							className="shadow-[0px_2px_6px_0px_#00000033] max-w-fit ml-1 my-2"
 							type="single"
-							disabled={disabled}
+							disabled={field.disabled}
 							value={field.value === null ? "null" : String(field.value)}
 							onValueChange={(newValue: string) => {
 								const valueMap: Record<string, boolean | null> = {

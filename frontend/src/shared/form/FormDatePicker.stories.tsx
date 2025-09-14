@@ -3,18 +3,18 @@ import { FormProvider, useForm } from "react-hook-form";
 import {
 	FormDatePicker,
 	type FormDatePickerProps,
-} from "@/shared/components/form/FormDatePicker";
+} from "@/shared/form/FormDatePicker";
 
 type Props = { date?: string };
 
 const FormDatePickerStory = ({
 	date,
 	...props
-}: Props & Omit<FormDatePickerProps<Props>, "control" | "name">) => {
+}: Props & Omit<FormDatePickerProps<Props>, "form" | "name">) => {
 	const form = useForm({ values: { date } });
 	return (
 		<FormProvider {...form}>
-			<FormDatePicker control={form.control} name="date" {...props} />
+			<FormDatePicker name="date" {...props} form={form} />
 		</FormProvider>
 	);
 };

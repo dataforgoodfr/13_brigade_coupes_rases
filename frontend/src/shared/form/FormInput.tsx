@@ -1,28 +1,27 @@
 import type { HTMLInputTypeAttribute } from "react";
-import { type FieldValues } from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
-} from "@/shared/components/form/FormFieldLayout";
+} from "@/shared/form/FormFieldLayout";
 import { FormField, type FormProps } from "./Form";
 
 export function FormInput<Form extends FieldValues = FieldValues>({
-	control,
+	form,
 	name,
 	type,
-	disabled = false,
 	...props
 }: FormProps<Form> & {
 	type: HTMLInputTypeAttribute;
 } & FormFieldLayoutProps<Form>) {
 	return (
 		<FormField
-			control={control}
+			control={form.control}
 			name={name}
 			render={({ field }) => (
-				<FormFieldLayout {...props} name={name} control={control}>
-					<Input type={type} disabled={disabled} {...field} {...props} />
+				<FormFieldLayout {...props} name={name} form={form}>
+					<Input type={type} {...field} {...props} />
 				</FormFieldLayout>
 			)}
 		/>

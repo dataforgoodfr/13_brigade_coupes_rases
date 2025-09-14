@@ -5,12 +5,12 @@ import type {
 	FieldValues,
 	Path,
 } from "react-hook-form";
+import { Combobox } from "@/shared/components/select/Combobox";
+import type { ComboboxFilterProps } from "@/shared/components/select/ComboboxFilter";
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
-} from "@/shared/components/form/FormFieldLayout";
-import { Combobox } from "@/shared/components/select/Combobox";
-import type { ComboboxFilterProps } from "@/shared/components/select/ComboboxFilter";
+} from "@/shared/form/FormFieldLayout";
 import { type UseEnhancedItemsOptions, useEnhancedItems } from "@/shared/items";
 import { FormField, type FormProps } from "./Form";
 
@@ -36,17 +36,16 @@ export function FormCombobox<
 	TLabel extends ReactNode,
 	TValue extends string,
 >({
-	control,
+	form,
 	name,
-	disabled = false,
 	...props
 }: Props<Form, Name, TLabel, TValue>) {
 	return (
 		<FormField
-			control={control}
+			control={form.control}
 			name={name}
 			render={({ field }) => (
-				<Renderer {...props} control={control} name={name} field={field} />
+				<Renderer {...props} form={form} name={name} field={field} />
 			)}
 		/>
 	);

@@ -2,14 +2,20 @@ import clsx from "clsx";
 import { RefreshCcwDotIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import {
-	type Control,
 	type FieldValues,
+	get,
 	type Path,
 	useController,
 } from "react-hook-form";
 import { IconButton } from "@/shared/components/button/Button";
 import type { Align, Orientation } from "@/shared/layout";
-import { FormControl, FormItem, FormLabel, FormMessage } from "./Form";
+import {
+	FormControl,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	type FormType,
+} from "./Form";
 
 export type Props<
 	Form extends FieldValues,
@@ -21,7 +27,7 @@ export type Props<
 	withControl?: boolean;
 	align?: Align;
 	gap?: number;
-	control: Control<Form>;
+	form: FormType<Form>;
 	name: Name;
 };
 
@@ -40,9 +46,10 @@ export function FormFieldLayout<
 	orientation = "horizontal",
 	withControl = true,
 	name,
-	control,
+	form,
 }: Props<Form, Name>) {
-	const fieldController = useController({ name, control });
+	const fieldController = useController({ name, control: form.control });
+
 	return (
 		<FormItem
 			className={clsx(`flex gap-${gap} items-${align}`, {
@@ -53,7 +60,21 @@ export function FormFieldLayout<
 				<FormLabel className="font-bold min-w-2/8">
 					{label}{" "}
 					{fieldController.fieldState.isDirty && (
-						<IconButton variant="ghost" icon={<RefreshCcwDotIcon />} />
+						<IconButton
+							variant="ghost"
+							onClick={() => {
+								console.log(form.formState.defaultValues);
+								console.log(
+									"Resetting field",
+									name,
+									"to default",
+									get(form.formState.defaultValues, name),
+								);
+
+								form.resetField(name);
+							}}
+							icon={<RefreshCcwDotIcon />}
+						/>
 					)}
 				</FormLabel>
 			)}

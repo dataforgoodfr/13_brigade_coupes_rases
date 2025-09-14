@@ -1,5 +1,4 @@
 import type { FieldValues } from "react-hook-form";
-import { FormFieldLayout } from "@/shared/components/form/FormFieldLayout";
 import {
 	Select,
 	SelectContent,
@@ -7,11 +6,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/shared/components/Select";
+import { FormFieldLayout } from "@/shared/form/FormFieldLayout";
 import type { LabelledValue } from "@/shared/items";
 import { FormField, type FormProps } from "./Form";
 
 export function FormSelect<T extends FieldValues = FieldValues>({
-	control,
+	form,
 	name,
 	placeholder,
 	availableValues,
@@ -21,11 +21,11 @@ export function FormSelect<T extends FieldValues = FieldValues>({
 }) {
 	return (
 		<FormField
-			control={control}
+			control={form.control}
 			name={name}
 			render={({ field }) => {
 				return (
-					<FormFieldLayout {...props} name={name} control={control}>
+					<FormFieldLayout {...props} name={name} form={form}>
 						<Select value={field.value} onValueChange={field.onChange}>
 							<SelectTrigger>
 								<SelectValue placeholder={placeholder} />

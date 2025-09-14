@@ -3,23 +3,22 @@ import { Switch } from "@/components/ui/switch";
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
-} from "@/shared/components/form/FormFieldLayout";
+} from "@/shared/form/FormFieldLayout";
 import { FormField, type FormProps } from "./Form";
 
 export function FormSwitch<T extends FieldValues = FieldValues>({
-	control,
+	form,
 	name,
-	disabled = false,
 	...props
 }: FormProps<T> & FormFieldLayoutProps<T>) {
 	return (
 		<FormField
-			control={control}
+			control={form.control}
 			name={name}
 			render={({ field }) => (
-				<FormFieldLayout {...props} name={name} control={control}>
+				<FormFieldLayout {...props} name={name} form={form}>
 					<Switch
-						disabled={disabled}
+						disabled={field.disabled}
 						checked={field.value}
 						onCheckedChange={field.onChange}
 					/>

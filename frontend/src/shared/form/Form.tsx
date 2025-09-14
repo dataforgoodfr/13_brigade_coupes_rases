@@ -10,7 +10,6 @@ import {
 	useId,
 } from "react";
 import {
-	type Control,
 	Controller,
 	type ControllerProps,
 	type FieldPath,
@@ -180,10 +179,9 @@ export const FormMessage = forwardRef<
 FormMessage.displayName = "FormMessage";
 
 export type FormProps<T extends FieldValues, N extends Path<T> = Path<T>> = {
-	control: Control<T>;
+	form: FormType<T>;
 	name: N;
 	label?: string;
-	disabled?: boolean;
 	placeholder?: string;
 };
 
