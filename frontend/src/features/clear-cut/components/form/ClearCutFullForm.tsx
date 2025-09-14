@@ -19,14 +19,20 @@ import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
 
-export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
+type Props = {
+	original: ClearCutForm;
+	current: ClearCutForm;
+};
+export function ClearCutFullForm({ current, original }: Props) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
 	const loggedUser = useMe();
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
-		values: clearCut,
+		values: current,
+		defaultValues: original,
 	});
+
 	form.watch((value) => {
 		const clearCutForm = clearCutFormSchema.safeParse(value).data;
 		if (!isUndefined(clearCutForm)) {
@@ -38,7 +44,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 	const handleSubmit = (formData: ClearCutForm) => {
 		dispatch(
 			submitClearCutFormThunk({
-				reportId: clearCut.report.id,
+				reportId: current.report.id,
 				formData,
 			}),
 		);
@@ -59,8 +65,8 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 		<>
 			<AccordionHeader
 				form={form}
-				tags={clearCut.report.rules}
-				status={clearCut.report.status}
+				tags={current.report.rules}
+				status={current.report.status}
 			/>
 			<FormProvider {...form}>
 				<form

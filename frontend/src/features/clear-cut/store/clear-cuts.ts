@@ -215,6 +215,7 @@ export const clearCutFormSchema = clearCutFormSectionsResponseSchema.and(
 
 export const clearCutFormVersionsSchema = z.object({
 	latest: clearCutFormSchema.optional(),
+	original: clearCutFormSchema,
 	current: clearCutFormSchema,
 	versionMismatchDisclaimerShown: z.boolean(),
 });

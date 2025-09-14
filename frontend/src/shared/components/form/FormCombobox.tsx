@@ -15,24 +15,24 @@ import { type UseEnhancedItemsOptions, useEnhancedItems } from "@/shared/items";
 import { FormField, type FormProps } from "./Form";
 
 type Props<
-	T extends FieldValues,
-	Name extends Path<T>,
+	Form extends FieldValues,
+	Name extends Path<Form>,
 	TLabel extends ReactNode,
 	TValue extends string,
-> = FormProps<T, Name> &
+> = FormProps<Form, Name> &
 	Omit<
 		UseEnhancedItemsOptions<
-			FieldPathValue<T, Name>[number]["item"],
+			FieldPathValue<Form, Name>[number]["item"],
 			TLabel,
 			TValue
 		>,
 		"items"
 	> &
-	FormFieldLayoutProps &
+	FormFieldLayoutProps<Form> &
 	Omit<ComboboxFilterProps<unknown>, "items" | "onChanged">;
 export function FormCombobox<
-	T extends FieldValues,
-	Name extends Path<T>,
+	Form extends FieldValues,
+	Name extends Path<Form>,
 	TLabel extends ReactNode,
 	TValue extends string,
 >({
@@ -40,19 +40,21 @@ export function FormCombobox<
 	name,
 	disabled = false,
 	...props
-}: Props<T, Name, TLabel, TValue>) {
+}: Props<Form, Name, TLabel, TValue>) {
 	return (
 		<FormField
 			control={control}
 			name={name}
-			render={({ field }) => <Renderer {...props} field={field} />}
+			render={({ field }) => (
+				<Renderer {...props} control={control} name={name} field={field} />
+			)}
 		/>
 	);
 }
 
 function Renderer<
-	T extends FieldValues,
-	Name extends Path<T>,
+	Form extends FieldValues,
+	Name extends Path<Form>,
 	TLabel extends ReactNode,
 	TValue extends string,
 >({
@@ -60,15 +62,15 @@ function Renderer<
 	...props
 }: Omit<
 	UseEnhancedItemsOptions<
-		FieldPathValue<T, Name>[number]["item"],
+		FieldPathValue<Form, Name>[number]["item"],
 		TLabel,
 		TValue
 	>,
 	"items"
 > &
-	FormFieldLayoutProps &
+	FormFieldLayoutProps<Form> &
 	Omit<ComboboxFilterProps<unknown>, "items" | "onChanged"> & {
-		field: ControllerRenderProps<T, Name>;
+		field: ControllerRenderProps<Form, Name>;
 	}) {
 	const items = useEnhancedItems({ items: field.value, ...props });
 	return (

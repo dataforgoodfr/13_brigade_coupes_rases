@@ -16,20 +16,25 @@ import {
 } from "@/shared/components/form/FormFieldLayout";
 import { FormControl, FormField, type FormProps } from "./Form";
 
-export type FormDatePickerProps<T extends FieldValues> = FormProps<T> &
-	FormFieldLayoutProps;
-export function FormDatePicker<T extends FieldValues = FieldValues>({
+export type FormDatePickerProps<Form extends FieldValues> = FormProps<Form> &
+	FormFieldLayoutProps<Form>;
+export function FormDatePicker<Form extends FieldValues = FieldValues>({
 	control,
 	name,
 	disabled = false,
 	...props
-}: FormDatePickerProps<T>) {
+}: FormDatePickerProps<Form>) {
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormFieldLayout {...props} withControl={false}>
+				<FormFieldLayout
+					{...props}
+					name={name}
+					control={control}
+					withControl={false}
+				>
 					<Popover>
 						<PopoverTrigger asChild disabled={disabled}>
 							<FormControl>

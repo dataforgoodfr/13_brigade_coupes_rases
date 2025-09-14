@@ -126,10 +126,12 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 			);
 
 			const shouldShowDisclaimer = versions?.current.etag !== formReport.etag;
+			const form = hasBeenCreated
+				? formReport
+				: (versions?.original ?? formReport);
 			return {
-				current: hasBeenCreated
-					? formReport
-					: (versions?.current ?? formReport),
+				original: form,
+				current: form,
 				latest: formReport,
 				versionMismatchDisclaimerShown:
 					hasBeenCreated ?? (!shouldShowDisclaimer || isUndefined(versions)),
@@ -245,9 +247,11 @@ export const clearCutsSlice = createSlice({
 		replaceCurrentVersionByLatest: (state) => {
 			if (
 				!isUndefined(state.detail.value?.current) &&
+				!isUndefined(state.detail.value?.original) &&
 				!isUndefined(state.detail.value?.latest)
 			) {
 				state.detail.value.current = state.detail.value?.latest;
+				state.detail.value.original = state.detail.value?.latest;
 				state.detail.value.versionMismatchDisclaimerShown = true;
 			}
 		},

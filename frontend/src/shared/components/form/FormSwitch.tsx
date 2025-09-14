@@ -11,13 +11,13 @@ export function FormSwitch<T extends FieldValues = FieldValues>({
 	name,
 	disabled = false,
 	...props
-}: FormProps<T> & FormFieldLayoutProps) {
+}: FormProps<T> & FormFieldLayoutProps<T>) {
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormFieldLayout {...props}>
+				<FormFieldLayout {...props} name={name} control={control}>
 					<Switch
 						disabled={disabled}
 						checked={field.value}

@@ -18,7 +18,7 @@ export function FormToggleGroup<T extends FieldValues = FieldValues>({
 			name={name}
 			render={({ field }) => {
 				return (
-					<FormFieldLayout {...props}>
+					<FormFieldLayout {...props} control={control} name={name}>
 						<ToggleGroup
 							className="shadow-[0px_2px_6px_0px_#00000033] max-w-fit ml-1 my-2"
 							type="single"

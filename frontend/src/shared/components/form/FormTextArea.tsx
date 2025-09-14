@@ -6,19 +6,19 @@ import {
 } from "@/shared/components/form/FormFieldLayout";
 import { FormField, type FormProps } from "./Form";
 
-export function FormTextArea<T extends FieldValues = FieldValues>({
+export function FormTextArea<Form extends FieldValues = FieldValues>({
 	control,
 	name,
 	disabled = false,
 	placeholder,
 	...props
-}: FormProps<T> & FormFieldLayoutProps) {
+}: FormProps<Form> & FormFieldLayoutProps<Form>) {
 	return (
 		<FormField
 			control={control}
 			name={name}
 			render={({ field }) => (
-				<FormFieldLayout {...props}>
+				<FormFieldLayout {...props} name={name} control={control}>
 					<Textarea
 						{...field}
 						disabled={disabled}

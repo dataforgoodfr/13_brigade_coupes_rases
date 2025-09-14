@@ -88,7 +88,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 						<X size={30} />
 					</Link>
 				</div>
-				<ClearCutFullForm clearCut={value.current} />
+				<ClearCutFullForm {...value} />
 			</div>
 		)
 	);

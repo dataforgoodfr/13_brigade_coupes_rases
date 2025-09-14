@@ -25,7 +25,7 @@ export function FormSelect<T extends FieldValues = FieldValues>({
 			name={name}
 			render={({ field }) => {
 				return (
-					<FormFieldLayout {...props}>
+					<FormFieldLayout {...props} name={name} control={control}>
 						<Select value={field.value} onValueChange={field.onChange}>
 							<SelectTrigger>
 								<SelectValue placeholder={placeholder} />
