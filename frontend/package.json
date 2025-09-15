@@ -8,7 +8,7 @@
     "dev:cloud": "vite --mode cloud",
     "dev:mock": "vite --mode mock",
     "dev:mock:win": "set VITE_MOCK=true && vite",
-    "cleanup": "biome check --write",
+    "cleanup": "biome check --write --unsafe",
     "cleanup:tsc": "biome check --write && tsc",
     "build:ci": "vite build",
     "build": "pnpm cleanup && tsc -b && vite build",

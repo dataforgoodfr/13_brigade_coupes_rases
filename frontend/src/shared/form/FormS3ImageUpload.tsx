@@ -14,13 +14,12 @@ import { useImageUpload } from "@/shared/hooks/useImageUpload";
 import { useImageViewer } from "@/shared/hooks/useImageViewer";
 import {
 	FormControl,
-	FormField,
 	type FormFieldRenderProps,
 	FormItem,
 	FormLabel,
 	FormMessage,
-	type FormProps,
 } from "./Form";
+import type { FormProps } from "./types";
 
 type Forms3ImageUploadProps<T extends FieldValues> = FormProps<T> & {
 	reportId: string;
@@ -32,7 +31,7 @@ type FormS3ImageFieldProps<T extends FieldValues> = FormFieldRenderProps<T> & {
 	onSelectedImageIndexChanged: (index: number) => void;
 } & Forms3ImageUploadProps<T>;
 
-const EMPTY_ARRAY: string[] = [];
+const _EMPTY_ARRAY: string[] = [];
 function FormS3ImageField<T extends FieldValues>({
 	onPreviewUrlsChanged,
 	previewUrls,
@@ -255,20 +254,13 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 
 	return (
 		<>
-			<FormField
-				control={form.control}
+			<FormS3ImageField
+				{...props}
+				form={form}
 				name={name}
-				render={(renderProps) => (
-					<FormS3ImageField
-						{...renderProps}
-						{...props}
-						form={form}
-						name={name}
-						previewUrls={previewUrls}
-						onPreviewUrlsChanged={setPreviewUrls}
-						onSelectedImageIndexChanged={setSelectedImageIndex}
-					/>
-				)}
+				previewUrls={previewUrls}
+				onPreviewUrlsChanged={setPreviewUrls}
+				onSelectedImageIndexChanged={setSelectedImageIndex}
 			/>
 
 			{/* Image Preview Modal */}

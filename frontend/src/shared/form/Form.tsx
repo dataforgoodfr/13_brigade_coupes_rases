@@ -14,8 +14,6 @@ import {
 	type ControllerProps,
 	type FieldPath,
 	type FieldValues,
-	type Path,
-	type UseFormReturn,
 	useFormContext,
 } from "react-hook-form";
 import { Label } from "@/components/ui/label";
@@ -177,13 +175,3 @@ export const FormMessage = forwardRef<
 	);
 });
 FormMessage.displayName = "FormMessage";
-
-export type FormProps<T extends FieldValues, N extends Path<T> = Path<T>> = {
-	form: FormType<T>;
-	name: N;
-	label?: string;
-	placeholder?: string;
-};
-
-export type FormType<TFormValues extends FieldValues> =
-	UseFormReturn<TFormValues>;

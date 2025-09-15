@@ -5,7 +5,8 @@ import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
 } from "@/shared/form/FormFieldLayout";
-import { FormField, type FormProps } from "./Form";
+import { FormField } from "./Form";
+import type { FormProps } from "./types";
 
 export function FormInput<Form extends FieldValues = FieldValues>({
 	form,

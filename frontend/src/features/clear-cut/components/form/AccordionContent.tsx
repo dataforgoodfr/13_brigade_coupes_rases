@@ -2,7 +2,7 @@ import { AccordionItem } from "@/features/clear-cut/components/form/AccordionIte
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import { useConnectedMe } from "@/features/user/store/me.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
-import type { FormType } from "@/shared/form/Form";
+import type { FormType } from "@/shared/form/types";
 import { actorsKey, actorsValue } from "./sections/ActorsSection";
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection";
 import {
@@ -27,11 +27,11 @@ ccForm.set(actorsKey, actorsValue);
 ccForm.set(regulationsKey, regulationsValue);
 ccForm.set(otherInfoKey, otherInfoValue);
 
-export default function AccordionContent({
-	form,
-}: {
+type Props = {
 	form: FormType<ClearCutFormInput>;
-}) {
+	originalForm: ClearCutFormInput;
+};
+export default function AccordionContent({ form, originalForm }: Props) {
 	const user = useConnectedMe();
 
 	return (
@@ -47,7 +47,12 @@ export default function AccordionContent({
 						{...section}
 					>
 						{sectionContent.map((item) => (
-							<AccordionItem form={form} item={item} key={item.name} />
+							<AccordionItem
+								form={form}
+								item={item}
+								key={item.name}
+								originalForm={originalForm}
+							/>
 						))}
 					</AccordionFullItem>
 				);

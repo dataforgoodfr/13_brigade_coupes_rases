@@ -1,62 +1,27 @@
-import { isEqual } from "es-toolkit";
-import { createContext, useContext, useEffect } from "react";
-import {
-	type FieldValues,
-	get,
-	type Path,
-	type UseFormReturn,
-} from "react-hook-form";
-import type { FormType } from "@/shared/form/Form";
+import { isEqual, isUndefined } from "es-toolkit";
+import { useMemo } from "react";
+import { type FieldValues, get, type Path } from "react-hook-form";
+import type { FormType } from "@/shared/form/types";
 
-type Options<Form extends FieldValues> = {
-	form: UseFormReturn<Form>;
-	defaultValues: Form;
-	excludedPaths?: Path<Form>[];
+type UseHasChangedOptions<Form extends FieldValues, Name extends Path<Form>> = {
+	original?: Form;
+	name: Name;
+	form: FormType<Form>;
 };
-export function useTriggerForm<Form extends FieldValues>({
-	form,
-	defaultValues,
-	excludedPaths,
-}: Options<Form>) {
-	useEffect(() => {
-		for (const [key, value] of Object.entries(form.getValues())) {
-			const path = key as Path<Form>;
-			const defaultValue = get(defaultValues, path);
-			if (excludedPaths?.includes(path) || isEqual(defaultValue, value))
-				continue;
-			form.setValue(path, value, {
-				shouldDirty: true,
-			});
+export function useHasChanged<
+	Form extends FieldValues,
+	Name extends Path<Form>,
+>({ original, name, form }: UseHasChangedOptions<Form, Name>) {
+	const currentValue = form.getValues(name);
+	return useMemo(() => {
+		if (isUndefined(original)) {
+			return;
 		}
-	}, [form, defaultValues, excludedPaths]);
+		const originalValue = get(original, name);
+		return {
+			hasChanged: !isEqual(currentValue, originalValue),
+			originalValue,
+			currentValue,
+		};
+	}, [currentValue, name, original]);
 }
-
-export type AppFormContextType<Form extends FieldValues = FieldValues> = {
-	form: FormType<Form>;
-	originalForm: Form;
-};
-const AppFormContext = createContext<AppFormContextType>(
-	undefined as unknown as AppFormContextType,
-);
-
-
-export function AppFormProvider<Form extends FieldValues>({
-	form,
-	originalForm,
-	children,
-}: {
-	form: FormType<Form>;
-	originalForm: Form;
-	children: React.ReactNode;
-}) {
-	return (
-		<AppFormContext.Provider
-			value={{ form, originalForm } as AppFormContextType}
-		>
-			{children}
-		</AppFormContext.Provider>
-	);
-}
-
-export const useAppForm = <Form extends FieldValues = FieldValues>() =>
-	useContext(AppFormContext) as AppFormContextType<Form>;

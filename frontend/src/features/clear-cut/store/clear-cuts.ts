@@ -120,17 +120,17 @@ const clearCutsSchema = clearCutsResponseSchema.omit({ previews: true }).and(
 export type ClearCuts = z.infer<typeof clearCutsSchema>;
 
 const clearCutFormGroundSchema = z.object({
-	inspectionDate: z.string().nullish().prefault(null),
-	weather: z.string().nullish().prefault(null),
-	forest: z.string().nullish().prefault(null),
+	inspectionDate: z.string().optional().prefault(""),
+	weather: z.string().optional().prefault(""),
+	forest: z.string().optional().prefault(""),
 	hasRemainingTrees: z.boolean().prefault(false),
-	treesSpecies: z.string().nullish().prefault(null),
+	treesSpecies: z.string().optional().prefault(""),
 	plantingImages: z.array(z.string()).prefault([]),
 	hasConstructionPanel: z.boolean().prefault(false),
 	constructionPanelImages: z.array(z.string()).optional(),
-	wetland: z.string().nullish().prefault(null),
-	destructionClues: z.string().nullish().prefault(null),
-	soilState: z.string().nullish().prefault(null),
+	wetland: z.string().optional().prefault(""),
+	destructionClues: z.string().optional().prefault(""),
+	soilState: z.string().optional().prefault(""),
 	clearCutImages: z.array(z.string()).prefault([]),
 	treeTrunksImages: z.array(z.string()).prefault([]),
 	soilStateImages: z.array(z.string()).prefault([]),
@@ -139,19 +139,19 @@ const clearCutFormGroundSchema = z.object({
 
 const clearCutFormEcologicalZoningSchema = z.object({
 	hasOtherEcologicalZone: z.boolean().prefault(false),
-	otherEcologicalZoneType: z.string().nullish().prefault(null),
+	otherEcologicalZoneType: z.string().optional().prefault(""),
 	hasNearbyEcologicalZone: z.boolean().prefault(false),
-	nearbyEcologicalZoneType: z.string().nullish().prefault(null),
-	protectedSpecies: z.string().nullish().prefault(null),
-	protectedHabitats: z.string().nullish().prefault(null),
+	nearbyEcologicalZoneType: z.string().optional().prefault(""),
+	protectedSpecies: z.string().optional().prefault(""),
+	protectedHabitats: z.string().optional().prefault(""),
 	hasDdtRequest: z.boolean().prefault(false),
-	ddtRequestOwner: z.string().nullish().prefault(null),
+	ddtRequestOwner: z.string().optional().prefault(""),
 });
 
 const clearCutFormActorsSchema = z.object({
-	company: z.string().nullish().prefault(null),
-	subcontractor: z.string().nullish().prefault(null),
-	landlord: z.string().nullish().prefault(null),
+	company: z.string().optional().prefault(""),
+	subcontractor: z.string().optional().prefault(""),
+	landlord: z.string().optional().prefault(""),
 });
 
 const clearCutFormRegulationSchema = z.object({
@@ -167,7 +167,7 @@ const clearCutFormLegalStrategySchema = z.object({
 	relevantForAlertCnpfDdtSrgs: z.boolean().prefault(false),
 	relevantForAlertCnpfDdtPsgThresholds: z.boolean().prefault(false),
 	relevantForPsgRequest: z.boolean().prefault(false),
-	requestEngaged: z.string().nullish().prefault(null),
+	requestEngaged: z.string().optional().prefault(""),
 });
 
 const clearCutFormOtherSchema = z.object({

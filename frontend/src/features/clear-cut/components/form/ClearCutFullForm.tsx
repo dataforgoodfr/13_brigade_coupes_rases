@@ -15,7 +15,6 @@ import {
 } from "@/features/clear-cut/store/clear-cuts-slice";
 import { useConnectedMe, useMe } from "@/features/user/store/me.slice";
 import { useToast } from "@/hooks/use-toast";
-import { useTriggerForm } from "@/shared/form/hooks";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
 import AccordionHeader from "./AccordionHeader";
@@ -48,8 +47,6 @@ export function ClearCutFullForm({ current, original }: Props) {
 		defaultValues: original,
 		disabled: isDisabled,
 	});
-
-	useTriggerForm({ form, defaultValues: original, excludedPaths: ["report"] });
 
 	useEffect(() => {
 		form.watch((values) => {
@@ -95,7 +92,7 @@ export function ClearCutFullForm({ current, original }: Props) {
 					className="p-1 flex flex-col grow px-4 h-0"
 				>
 					<Accordion.Root type="multiple" className="grow overflow-auto">
-						<AccordionContent form={form} />
+						<AccordionContent originalForm={original} form={form} />
 					</Accordion.Root>
 					{!!loggedUser && (
 						<Button

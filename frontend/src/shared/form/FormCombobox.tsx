@@ -12,7 +12,8 @@ import {
 	type FormFieldLayoutProps,
 } from "@/shared/form/FormFieldLayout";
 import { type UseEnhancedItemsOptions, useEnhancedItems } from "@/shared/items";
-import { FormField, type FormProps } from "./Form";
+import { FormField } from "./Form";
+import type { FormProps } from "./types";
 
 type Props<
 	Form extends FieldValues,
@@ -35,11 +36,7 @@ export function FormCombobox<
 	Name extends Path<Form>,
 	TLabel extends ReactNode,
 	TValue extends string,
->({
-	form,
-	name,
-	...props
-}: Props<Form, Name, TLabel, TValue>) {
+>({ form, name, ...props }: Props<Form, Name, TLabel, TValue>) {
 	return (
 		<FormField
 			control={form.control}

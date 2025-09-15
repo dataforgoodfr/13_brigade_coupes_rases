@@ -1,21 +1,12 @@
 import clsx from "clsx";
 import { RefreshCcwDotIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import {
-	type FieldValues,
-	get,
-	type Path,
-	useController,
-} from "react-hook-form";
+import type { FieldValues, Path } from "react-hook-form";
 import { IconButton } from "@/shared/components/button/Button";
+import { useHasChanged } from "@/shared/form/hooks";
 import type { Align, Orientation } from "@/shared/layout";
-import {
-	FormControl,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	type FormType,
-} from "./Form";
+import { FormControl, FormItem, FormLabel, FormMessage } from "./Form";
+import type { FormType } from "./types";
 
 export type Props<
 	Form extends FieldValues,
@@ -28,6 +19,7 @@ export type Props<
 	align?: Align;
 	gap?: number;
 	form: FormType<Form>;
+	originalForm?: Form;
 	name: Name;
 };
 
@@ -47,9 +39,9 @@ export function FormFieldLayout<
 	withControl = true,
 	name,
 	form,
+	originalForm,
 }: Props<Form, Name>) {
-	const fieldController = useController({ name, control: form.control });
-
+	const hasChanged = useHasChanged({ original: originalForm, name, form });
 	return (
 		<FormItem
 			className={clsx(`flex gap-${gap} items-${align}`, {
@@ -59,19 +51,16 @@ export function FormFieldLayout<
 			{label && (
 				<FormLabel className="font-bold min-w-2/8">
 					{label}{" "}
-					{fieldController.fieldState.isDirty && (
+					{hasChanged?.hasChanged && (
 						<IconButton
+							type="button"
 							variant="ghost"
+							className="text-primary"
+							title="Revenir à la valeur initiale"
 							onClick={() => {
-								console.log(form.formState.defaultValues);
-								console.log(
-									"Resetting field",
-									name,
-									"to default",
-									get(form.formState.defaultValues, name),
-								);
-
-								form.resetField(name);
+								form.resetField(name, {
+									defaultValue: hasChanged.originalValue,
+								});
 							}}
 							icon={<RefreshCcwDotIcon />}
 						/>
