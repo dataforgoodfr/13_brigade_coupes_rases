@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	type ClearCutForm,
+	type ClearCutFormVersions,
 	clearCutFormSchema,
 } from "@/features/clear-cut/store/clear-cuts";
 import {
@@ -17,12 +18,9 @@ import { useConnectedMe, useMe } from "@/features/user/store/me.slice";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
-import AccordionHeader from "./AccordionHeader";
+import { AccordionHeader } from "./AccordionHeader";
 
-type Props = {
-	original: ClearCutForm;
-	current: ClearCutForm;
-};
+type Props = ClearCutFormVersions;
 export function ClearCutFullForm({ current, original }: Props) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
@@ -92,7 +90,7 @@ export function ClearCutFullForm({ current, original }: Props) {
 					className="p-1 flex flex-col grow px-4 h-0"
 				>
 					<Accordion.Root type="multiple" className="grow overflow-auto">
-						<AccordionContent originalForm={original} form={form} />
+						<AccordionContent original={original} form={form} />
 					</Accordion.Root>
 					{!!loggedUser && (
 						<Button

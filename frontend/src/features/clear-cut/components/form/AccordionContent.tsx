@@ -29,9 +29,10 @@ ccForm.set(otherInfoKey, otherInfoValue);
 
 type Props = {
 	form: FormType<ClearCutFormInput>;
-	originalForm: ClearCutFormInput;
+	original: ClearCutFormInput;
+	latest?: ClearCutFormInput;
 };
-export default function AccordionContent({ form, originalForm }: Props) {
+export default function AccordionContent({ form, original, latest }: Props) {
 	const user = useConnectedMe();
 
 	return (
@@ -48,10 +49,11 @@ export default function AccordionContent({ form, originalForm }: Props) {
 					>
 						{sectionContent.map((item) => (
 							<AccordionItem
+								latest={latest}
 								form={form}
 								item={item}
 								key={item.name}
-								originalForm={originalForm}
+								original={original}
 							/>
 						))}
 					</AccordionFullItem>

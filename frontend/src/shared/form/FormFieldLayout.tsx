@@ -20,6 +20,7 @@ export type Props<
 	gap?: number;
 	form: FormType<Form>;
 	originalForm?: Form;
+	latestForm?: Form;
 	name: Name;
 };
 

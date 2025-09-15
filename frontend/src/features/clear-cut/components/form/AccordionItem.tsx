@@ -17,7 +17,8 @@ import type { FormType } from "@/shared/form/types";
 type Props = {
 	item: SectionFormItem<ClearCutFormInput>;
 	form: FormType<ClearCutFormInput>;
-	originalForm: ClearCutFormInput;
+	original: ClearCutFormInput;
+	latest?: ClearCutFormInput;
 };
 const COMMON_PROPS = {
 	gap: 1,
@@ -43,7 +44,7 @@ function getFormComponent(type: FormItemType) {
 			return undefined;
 	}
 }
-export function AccordionItem({ item, form, originalForm }: Props) {
+export function AccordionItem({ item, form, original, latest }: Props) {
 	const render = item.renderConditions.every(
 		(value) => !!form.getValues(value),
 	);
@@ -79,7 +80,8 @@ export function AccordionItem({ item, form, originalForm }: Props) {
 							{...rendererProps}
 							{...COMMON_PROPS}
 							{...item}
-							originalForm={originalForm}
+							originalForm={original}
+							latestForm={latest}
 							type="text"
 							reportId={form.getValues("report.id")}
 							field={rendererProps.field}
