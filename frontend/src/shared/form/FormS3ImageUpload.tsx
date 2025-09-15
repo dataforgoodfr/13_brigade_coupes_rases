@@ -31,7 +31,6 @@ type FormS3ImageFieldProps<T extends FieldValues> = FormFieldRenderProps<T> & {
 	onSelectedImageIndexChanged: (index: number) => void;
 } & Forms3ImageUploadProps<T>;
 
-const _EMPTY_ARRAY: string[] = [];
 function FormS3ImageField<T extends FieldValues>({
 	onPreviewUrlsChanged,
 	previewUrls,

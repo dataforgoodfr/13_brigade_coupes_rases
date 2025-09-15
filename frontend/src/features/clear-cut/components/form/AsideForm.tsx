@@ -81,7 +81,7 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 							<FormattedDate value={value.current.report.lastCutDate} />
 						</span>
 						<span className="font-[Roboto] italic font-light text-xs">
-							v{value.current.id}
+							v{value.current.id ?? 0}
 						</span>
 					</div>
 					<Link to="/clear-cuts">
