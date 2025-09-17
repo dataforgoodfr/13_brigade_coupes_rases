@@ -366,6 +366,8 @@ class ClearCutReport(Base):
         cascade="all, delete",
     )
 
+    anomaly: Mapped[str] = mapped_column(String, nullable=True)
+
     @validates("status")
     def validate_status(self, key, value):
         if value not in CLEARCUT_STATUSES:

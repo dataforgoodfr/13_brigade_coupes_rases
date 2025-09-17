@@ -110,7 +110,8 @@ Approche : étudier la **tendance temporelle** des indices de végétation.
 - Application de **Lowess** (régression locale lissée)
 - Calcul de nouvelles features :
   - `Max lowess – Min lowess`
-  - `Dernière valeur lowess – Moyenne lowess` que l'on retiendra dans la suite
+  - `Dernière valeur lowess – Moyenne lowess` 
+  - `Moyenne roulante sur 1 an (courbe lowess interpolée) -> Dernière année - moyenne des précédentes` que l'on retiendra dans la suite
 
 ➡️ Script :  
 ```
@@ -177,5 +178,5 @@ Les anomalies détectées permettent de **séparer raisonnablement** les forêts
 
 #### ❓ Prochaines étapes
 
-- Déterminer **quels types d’anomalies** sont les plus pertinents à cibler
-- Visualiser **l’impact réel** des anomalies sur des **images satellites**
+- On n'est pas capable de déterminer si les anomalies sont des dépérissements
+- Solution sans labelisation ?

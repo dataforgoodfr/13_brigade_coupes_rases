@@ -18,11 +18,13 @@ def isolation_forest(df, features, plot=True):
     return df
 
 if __name__ == "__main__":
-    df_path = "../../data/vegetationData/indices_vegetation_1000_coupes_rases_enriched_csv.pkl"
+    df_path = "../../data/vegetationData/indices_vegetation_2024_coupes_rases_05ha_enriched_csv.pkl"
     df = pd.read_pickle(df_path)
 
+    features = ["CRSWIR", "NDVI", "BSI", "NDWI", "NBR", "NDMI"]
     # features = [feature+"_max_min_lowess_diff" for feature in features]
-    features = [feature+"_last_value_mean_lowess_diff" for feature in features]
+    # features = [feature+"_last_value_mean_lowess_diff" for feature in features]
+    features = [feature + "_mean_lowess_over_year" for feature in features]
 
     df_features = df.dropna()
 

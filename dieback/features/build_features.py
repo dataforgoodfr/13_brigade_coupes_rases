@@ -17,9 +17,10 @@ def convert_columns(df):
 
     return df
 
-def add_lowess(df):
+def add_lowess(df, frac=0.5):
+    print("Start calcul lowess")
     def apply_lowess(indice, row):
-        return lowess(endog=row[indice], exog=row["dates"], frac=0.5, return_sorted=False)
+        return lowess(endog=row[indice], exog=row["dates"], frac=frac, return_sorted=False)
 
     # calcul tendance
     list_of_indices_vegetation = ["CRSWIR", "NDVI", "BSI", "NDWI", "NBR", "NDMI"]
@@ -56,21 +57,85 @@ def add_last_value_mean_diff(df):
 
     return df
 
+def add_mean_over_years(df, overlap=0.5, window_days=365, freq="5D"):
+    """
+    Calcule la différence entre la dernière moyenne roulante (1 an)
+    et la moyenne des moyennes précédentes, après interpolation régulière.
+
+    Args:
+        df (pd.DataFrame): Doit contenir une colonne "dates" + colonnes trend_lowess_x.
+        overlap (float): Recouvrement (0 = aucun, 0.5 = 50%, etc.).
+        window_days (int): Taille de la fenêtre en jours (par défaut 365).
+        freq (str): Fréquence pour interpolation ('D' = jours, 'W' = semaines, etc.)
+    """
+
+    print("Start calculating mean rolling over years")
+
+    def mean_over_year(values, dates, indice):
+        dates = pd.to_datetime(dates)
+        values = np.array(values)
+
+        # construire une série régulière par interpolation
+        ts = pd.Series(values, index=dates).sort_index()
+        # gérer les doublons en faisant la moyenne
+        ts = ts.groupby(ts.index).mean()
+        regular_index = pd.date_range(start=dates.min(), end=dates.max(), freq=freq)
+        ts_interp = ts.reindex(regular_index).interpolate(method="time")
+
+        # calcul des moyennes roulantes par fenêtre glissante
+        means = []
+        step_days = int(window_days * (1 - overlap)) if overlap < 1 else 1
+
+        current_end = ts_interp.index.max()
+        while True:
+            current_start = current_end - pd.Timedelta(days=window_days)
+            window = ts_interp.loc[current_start:current_end]
+            if len(window) == 0:
+                break
+            means.append(window.mean())
+            # reculer la fenêtre
+            current_end -= pd.Timedelta(days=step_days)
+            if current_end < ts_interp.index.min():
+                break
+
+        if len(means) < 2:
+            return np.nan
+
+        last_mean = means[0]  # fenêtre la plus récente
+        previous_mean = np.mean(means[1:])  # toutes les autres
+        diff = last_mean - previous_mean
+
+        if indice in ["CRSWIR", "BSI"]:
+            return max(0, diff)
+        else:  # NDVI, NDWI, NBR, NDMI
+            return min(0, diff)
+
+    list_of_indices_vegetation = ["CRSWIR", "NDVI", "BSI", "NDWI", "NBR", "NDMI"]
+
+    for indice in list_of_indices_vegetation:
+        df[indice + '_mean_lowess_over_year'] = df.apply(
+            lambda row: mean_over_year(row[f'trend_lowess_{indice}'], row['dates'], indice),
+            axis=1
+        )
+
+    return df
+
 def add_informations(csv_path_input, csv_path_output):
     df = pd.read_csv(csv_path_input)
 
     df = convert_columns(df)
-    df = add_lowess(df)
-    df = add_max_min_diff(df)
-    df = add_last_value_mean_diff(df)
+    df = add_lowess(df, 0.1)
+    # df = add_max_min_diff(df)
+    # df = add_last_value_mean_diff(df)
+    df = add_mean_over_years(df, overlap=0.5)
 
     df.to_pickle(csv_path_output)
 
 
 if __name__ == "__main__":
     # Charger le fichier CSV
-    csv_path_input = "../data/vegetationData/indices_vegetation_1000_coupes_rases.csv"
-    csv_path_output = "../data/vegetationData/indices_vegetation_1000_coupes_rases_enriched_csv.pkl"
+    csv_path_input = "../data/vegetationData/indices_vegetation_2024_coupes_rases_05ha.csv"
+    csv_path_output = "../data/vegetationData/indices_vegetation_2024_coupes_rases_05ha_enriched_csv.pkl"
 
     add_informations(csv_path_input, csv_path_output)
 

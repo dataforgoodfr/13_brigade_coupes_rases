@@ -1,14 +1,14 @@
 import ee
 import os
+import json
 import pandas as pd
 import geopandas as gpd
-import json
 from shapely.geometry import mapping
 
 ee.Initialize(project='ringed-tempo-379310') # nom du projet sur GCP
 
 
-def build_indexvegetation_from_GEE(date, polygon, coupe_rase_id):
+def build_indexvegetation_from_GEE(date, polygon, clear_cut_group):
 
     start_date = '2018-01-01'
     end_date = date
@@ -16,7 +16,7 @@ def build_indexvegetation_from_GEE(date, polygon, coupe_rase_id):
 
     zone = ee.Geometry(mapping(polygon))
 
-    # DICTIONNAIRE DES INDICES PROVENANT DE FORDEAD
+    # DICTIONNAIRE DES INDICES
     dict_vi = {
         "CRSWIR": {'formula': 'B11/(B8A+((B12-B8A)/(2185.7-864))*(1610.4-864))', 'dieback_change_direction': '+'},
         "NDVI": {'formula': '(B8-B4)/(B8+B4)', 'dieback_change_direction': '-'},
@@ -29,8 +29,7 @@ def build_indexvegetation_from_GEE(date, polygon, coupe_rase_id):
     # MASQUES
     def mask_s2_clouds(image):
         scl = image.select('SCL')
-        # mask = scl.eq(4)
-        mask = scl.eq(4).And(scl.neq(8)).And(scl.neq(9)).And(scl.neq(10)).And(scl.neq(11))
+        mask = scl.eq(4)
         return image.updateMask(mask)
 
     def custom_mask(image):
@@ -82,7 +81,6 @@ def build_indexvegetation_from_GEE(date, polygon, coupe_rase_id):
 
     features = working_collection.map(extract_means).getInfo()
 
-    # MISE EN FORME DES RESULTATS
     index_series = {k: [] for k in dict_vi.keys()}
     dates = []
 
@@ -95,50 +93,52 @@ def build_indexvegetation_from_GEE(date, polygon, coupe_rase_id):
 
     result = {k: json.dumps(index_series[k]) for k in dict_vi.keys()}
     result["dates"] = json.dumps(dates)
-    result["coupe_rase_id"] = coupe_rase_id
+    result["clear_cut_group"] = clear_cut_group
 
     return result
 
 
-if __name__ == "__main__":
-    '''
-    Récupération des moyennes d'indices de vegetation sur différentes coupes rases
-    '''
-    OUTPUT_PATH = "../data/vegetationData/indices_vegetation_1000_coupes_rases.csv"
 
-    # Chargement du fichier coupe rase téléchargé au préalable sur aws s3
-    gdf = gpd.read_file("../data/sufosat_clusters_enriched.fgb")
-    # On récupére des coupes rases récentes pour une période temporelle historique plus grande
-    gdf = gdf[gdf["date_min"] > "2024-01-01"]
-    gdf_sample = gdf.sample(n=1000, random_state=42).to_crs("EPSG:4326")
-    gdf_sample.reset_index(drop=True, inplace=True)
+'''
+Récupération des moyennes d'indices de vegetation sur différentes coupes rases
+'''
+OUTPUT_PATH = "../../data/vegetationData/indices_vegetation_2024_coupes_rases_05ha.csv"
 
-    # Créer l'en-tête si le fichier n'existe pas
-    if not os.path.exists(OUTPUT_PATH):
-        with open(OUTPUT_PATH, "w") as f:
-            f.write("CRSWIR,NDVI,BSI,NDWI,NBR,NDMI,dates,coupe_rase_id\n")
-        print("🆕 Nouveau fichier créé")
+gdf = gpd.read_file("../../data\sufosat_clusters_enriched_last.fgb")
+gdf = gdf[(gdf["date_min"] >= "2024-01-01") & (gdf["area_ha"] > 0.5)]
+gdf_sample = gdf.to_crs("EPSG:4326")
+gdf_sample.reset_index(drop=True, inplace=True)
 
-    # Charger les identifiants déjà traités
-    existing_ids = set()
+# Créer l'en-tête si le fichier n'existe pas
+if not os.path.exists(OUTPUT_PATH):
+    with open(OUTPUT_PATH, "w") as f:
+        f.write("CRSWIR,NDVI,BSI,NDWI,NBR,NDMI,dates,clear_cut_group,date_debut_coupe_rase,area_ha\n")
+    print("🆕 Nouveau fichier créé")
+
+# Charger les identifiants déjà traités
+existing_ids = set()
+if os.path.exists(OUTPUT_PATH):
     df_existing = pd.read_csv(OUTPUT_PATH)
-    existing_ids = set(df_existing["coupe_rase_id"].values)
+    existing_ids = set(df_existing["clear_cut_group"].values)
     print(f"🔁 Reprise en ignorant {len(existing_ids)} polygones déjà traités")
 
-    # Traitement
-    for i, row in gdf_sample.iterrows():
-        idx = row["clear_cut_group"]
-        end_date = row["date_min"]
-        if idx in existing_ids:
-            continue
+# Traitement
+for i, row in gdf_sample.iterrows():
+    idx = row["clear_cut_group"]
+    end_date = row["date_min"]
+    if idx in existing_ids:
+        continue
 
-        try:
-            print(f"▶ Traitement de l'index {i}")
-            stats = build_indexvegetation_from_GEE(end_date, row.geometry, idx)
-            df_row = pd.DataFrame([stats])
-            df_row.to_csv(OUTPUT_PATH, mode='a', header=False, index=False)
-        except Exception as e:
-            print(f"❌ Erreur à l'index {i} : {e}")
-            break
+    try:
+        print(f"▶ Traitement du polygone {i}")
+        stats = build_indexvegetation_from_GEE(end_date, row.geometry, idx)
+        stats["date_debut_coupe_rase"] = row["date_min"]
+        stats["area_ha"] = row["area_ha"]
+        df_row = pd.DataFrame([stats])
+        df_row["date_debut_coupe_rase"] = pd.to_datetime(df_row["date_debut_coupe_rase"]).dt.date
+        df_row.to_csv(OUTPUT_PATH, mode='a', header=False, index=False)
+    except Exception as e:
+        print(f"❌ Erreur à polygon_id {i} : {e}")
+        break
 
-    print("✅ Script terminé (ou interrompu)")
+print("✅ Script terminé (ou interrompu)")
