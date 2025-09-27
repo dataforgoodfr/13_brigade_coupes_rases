@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
-} from "@/shared/form/FormFieldLayout";
+} from "@/shared/form/components/FormFieldLayout";
+import type { FormProps } from "../types";
 import { FormControl } from "./Form";
-import type { FormProps } from "./types";
 
 export type FormDatePickerProps<Form extends FieldValues> = FormProps<Form> &
 	FormFieldLayoutProps<Form>;
@@ -26,7 +26,7 @@ export function FormDatePicker<Form extends FieldValues = FieldValues>({
 	...props
 }: FormDatePickerProps<Form>) {
 	return (
-		<FormFieldLayout {...props} name={name} form={form} withControl={false}>
+		<FormFieldLayout {...props} name={name} withControl={false}>
 			<Popover>
 				<PopoverTrigger asChild disabled={field.disabled}>
 					<FormControl>

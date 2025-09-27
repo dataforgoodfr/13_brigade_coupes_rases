@@ -14,6 +14,8 @@ export const buttonVariants = cva(
 					"bg-zinc-100 shadow-xs hover:bg-zinc-200/90 hover:border hover:border-zinc-300 ",
 				destructive:
 					"bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
+				warning:
+					"bg-warning text-warning-foreground shadow-xs hover:bg-warning/90",
 				outline:
 					"border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
 				secondary:

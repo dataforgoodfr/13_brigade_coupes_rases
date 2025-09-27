@@ -4,21 +4,19 @@ import type {
 	SectionFormItem,
 } from "@/features/clear-cut/components/form/types";
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
-import { FormField } from "@/shared/form/Form";
-import { FormDatePicker } from "@/shared/form/FormDatePicker";
-import { FixedField } from "@/shared/form/FormFixedField";
-import { FormInput } from "@/shared/form/FormInput";
-import { FormS3ImageUpload } from "@/shared/form/FormS3ImageUpload";
-import { FormSwitch } from "@/shared/form/FormSwitch";
-import { FormTextArea } from "@/shared/form/FormTextArea";
-import { FormToggleGroup } from "@/shared/form/FormToggleGroup";
+import { FormField } from "@/shared/form/components/Form";
+import { FormDatePicker } from "@/shared/form/components/FormDatePicker";
+import { FixedField } from "@/shared/form/components/FormFixedField";
+import { FormInput } from "@/shared/form/components/FormInput";
+import { FormS3ImageUpload } from "@/shared/form/components/FormS3ImageUpload";
+import { FormSwitch } from "@/shared/form/components/FormSwitch";
+import { FormTextArea } from "@/shared/form/components/FormTextArea";
+import { FormToggleGroup } from "@/shared/form/components/FormToggleGroup";
 import type { FormType } from "@/shared/form/types";
 
 type Props = {
 	item: SectionFormItem<ClearCutFormInput>;
 	form: FormType<ClearCutFormInput>;
-	original: ClearCutFormInput;
-	latest?: ClearCutFormInput;
 };
 const COMMON_PROPS = {
 	gap: 1,
@@ -44,7 +42,7 @@ function getFormComponent(type: FormItemType) {
 			return undefined;
 	}
 }
-export function AccordionItem({ item, form, original, latest }: Props) {
+export function AccordionItem({ item, form }: Props) {
 	const render = item.renderConditions.every(
 		(value) => !!form.getValues(value),
 	);
@@ -71,6 +69,7 @@ export function AccordionItem({ item, form, original, latest }: Props) {
 	return (
 		<FormField<ClearCutFormInput>
 			name={item.name}
+			form={form}
 			render={(rendererProps) => {
 				const Component = getFormComponent(item.type);
 
@@ -80,12 +79,9 @@ export function AccordionItem({ item, form, original, latest }: Props) {
 							{...rendererProps}
 							{...COMMON_PROPS}
 							{...item}
-							originalForm={original}
-							latestForm={latest}
 							type="text"
 							reportId={form.getValues("report.id")}
 							field={rendererProps.field}
-							form={form}
 						/>
 					);
 				}

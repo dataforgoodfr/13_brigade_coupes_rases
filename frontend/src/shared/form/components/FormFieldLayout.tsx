@@ -1,12 +1,11 @@
 import clsx from "clsx";
-import { RefreshCcwDotIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import type { FieldValues, Path } from "react-hook-form";
-import { IconButton } from "@/shared/components/button/Button";
-import { useHasChanged } from "@/shared/form/hooks";
+import { DownloadOutdatedButton } from "@/shared/form/components/DownloadOutdatedButton";
+import { UndoButton } from "@/shared/form/components/UndoButton";
+import { useChangeTrackingFormContext } from "@/shared/form/context/ChangeTrackingForm";
 import type { Align, Orientation } from "@/shared/layout";
 import { FormControl, FormItem, FormLabel, FormMessage } from "./Form";
-import type { FormType } from "./types";
 
 export type Props<
 	Form extends FieldValues,
@@ -18,9 +17,6 @@ export type Props<
 	withControl?: boolean;
 	align?: Align;
 	gap?: number;
-	form: FormType<Form>;
-	originalForm?: Form;
-	latestForm?: Form;
 	name: Name;
 };
 
@@ -39,10 +35,16 @@ export function FormFieldLayout<
 	orientation = "horizontal",
 	withControl = true,
 	name,
-	form,
-	originalForm,
 }: Props<Form, Name>) {
-	const hasChanged = useHasChanged({ original: originalForm, name, form });
+	const { hasChanged, resetTrackedFieldFromOther } =
+		useChangeTrackingFormContext<
+			Form,
+			Name,
+			Record<"original" | "current" | "latest", Form>
+		>();
+	const changedFromOriginal = hasChanged(name, "original");
+	const changedFromLatest = hasChanged(name, "latest");
+
 	return (
 		<FormItem
 			className={clsx(`flex gap-${gap} items-${align}`, {
@@ -52,18 +54,18 @@ export function FormFieldLayout<
 			{label && (
 				<FormLabel className="font-bold min-w-2/8">
 					{label}{" "}
-					{hasChanged?.hasChanged && (
-						<IconButton
-							type="button"
-							variant="ghost"
-							className="text-primary"
-							title="Revenir à la valeur initiale"
+					{changedFromOriginal?.hasChanged && (
+						<UndoButton
 							onClick={() => {
-								form.resetField(name, {
-									defaultValue: hasChanged.originalValue,
-								});
+								resetTrackedFieldFromOther(name, "original");
 							}}
-							icon={<RefreshCcwDotIcon />}
+						/>
+					)}{" "}
+					{changedFromLatest?.hasChanged && (
+						<DownloadOutdatedButton
+							onClick={() => {
+								resetTrackedFieldFromOther(name, "latest");
+							}}
 						/>
 					)}
 				</FormLabel>

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         ..., json_schema_extra={"env": "DATABASE_URL", "secret": True}
     )
     ENVIRONMENT: str = Field(..., json_schema_extra={"env": "ENVIRONMENT"})
+    PORT: int = Field(..., json_schema_extra={"env": "PORT"})
     JWT_SECRET_KEY: str = Field(
         ..., json_schema_extra={"env": "JWT_SECRET_KEY", "secret": True}
     )

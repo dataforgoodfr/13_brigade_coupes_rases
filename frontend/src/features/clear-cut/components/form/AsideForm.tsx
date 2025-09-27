@@ -70,7 +70,6 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 			});
 		}
 	}, [toast, value, dispatch]);
-
 	return (
 		value && (
 			<div className="flex flex-col w-full">

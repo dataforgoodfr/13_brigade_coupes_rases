@@ -33,6 +33,7 @@ import {
 	type ClearCutReport,
 	type ClearCutReportResponse,
 	type ClearCuts,
+	clearCutFormCreateSchema,
 	clearCutFormSchema,
 	clearCutFormsResponseSchema,
 	clearCutFormVersionsSchema,
@@ -201,12 +202,14 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 	{ reportId: string; formData: ClearCutForm }
 >(
 	"submitClearCutForm",
-	async ({ reportId, formData }, { extra: { api }, dispatch }) => {
+	async ({ reportId, formData }, { extra: { api }, dispatch, getState }) => {
+		const state = getState();
+		const detail = selectDetail(state);
 		try {
 			await api()
 				.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
-					json: formData,
-					headers: { etag: formData.etag },
+					json: clearCutFormCreateSchema.parse(formData),
+					headers: { etag: detail.value?.latest?.etag ?? formData.etag },
 				})
 				.json();
 		} catch (e) {

@@ -2,6 +2,7 @@ import { AccordionItem } from "@/features/clear-cut/components/form/AccordionIte
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
 import { useConnectedMe } from "@/features/user/store/me.slice";
 import { AccordionFullItem } from "@/shared/components/accordion/FullAccordionItem";
+import { ChangeTrackingProvider } from "@/shared/form/context/ChangeTrackingForm";
 import type { FormType } from "@/shared/form/types";
 import { actorsKey, actorsValue } from "./sections/ActorsSection";
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection";
@@ -9,7 +10,7 @@ import {
 	generalInfoKey,
 	generalInfoValue,
 } from "./sections/GeneralInfoSection";
-import { legalKey } from "./sections/LegalSection";
+import { legalKey, legalValue } from "./sections/LegalSection";
 import { onSiteKey, onSiteValue } from "./sections/OnSiteSection";
 import { otherInfoKey, otherInfoValue } from "./sections/OtherInfoSection";
 import {
@@ -26,37 +27,35 @@ ccForm.set(ecoZoneKey, ecoZoneValue);
 ccForm.set(actorsKey, actorsValue);
 ccForm.set(regulationsKey, regulationsValue);
 ccForm.set(otherInfoKey, otherInfoValue);
-
+ccForm.set(legalKey, legalValue);
 type Props = {
 	form: FormType<ClearCutFormInput>;
 	original: ClearCutFormInput;
 	latest?: ClearCutFormInput;
 };
+
 export default function AccordionContent({ form, original, latest }: Props) {
 	const user = useConnectedMe();
 
 	return (
 		<>
 			{[...ccForm].map(([section, sectionContent]) => {
-				if (user?.role === "admin" && section === legalKey) {
+				if (user?.role !== "admin" && section === legalKey) {
 					return undefined;
 				}
 				return (
-					<AccordionFullItem
+					<ChangeTrackingProvider
 						key={section.name}
-						title={section.name}
-						{...section}
+						form={form}
+						others={{ original, latest }}
+						trackedFields={sectionContent.map((item) => item.name)}
 					>
-						{sectionContent.map((item) => (
-							<AccordionItem
-								latest={latest}
-								form={form}
-								item={item}
-								key={item.name}
-								original={original}
-							/>
-						))}
-					</AccordionFullItem>
+						<AccordionFullItem title={section.name} {...section}>
+							{sectionContent.map((item) => (
+								<AccordionItem form={form} item={item} key={item.name} />
+							))}
+						</AccordionFullItem>
+					</ChangeTrackingProvider>
 				);
 			})}
 		</>

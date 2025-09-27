@@ -6,9 +6,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/shared/components/Select";
-import { FormFieldLayout } from "@/shared/form/FormFieldLayout";
+import { FormFieldLayout } from "@/shared/form/components/FormFieldLayout";
 import type { LabelledValue } from "@/shared/items";
-import type { FormProps } from "./types";
+import type { FormProps } from "../types";
 
 export function FormSelect<T extends FieldValues = FieldValues>({
 	form,
@@ -21,7 +21,7 @@ export function FormSelect<T extends FieldValues = FieldValues>({
 	availableValues: LabelledValue[];
 }) {
 	return (
-		<FormFieldLayout {...props} name={name} form={form}>
+		<FormFieldLayout {...props} name={name}>
 			<Select value={field.value} onValueChange={field.onChange}>
 				<SelectTrigger>
 					<SelectValue placeholder={placeholder} />

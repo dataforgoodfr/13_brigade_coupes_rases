@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { FormProvider, useForm } from "react-hook-form";
-import { FormField } from "@/shared/form/Form";
+import { FormField } from "@/shared/form/components/Form";
 import {
 	FormDatePicker,
 	type FormDatePickerProps,
-} from "@/shared/form/FormDatePicker";
+} from "@/shared/form/components/FormDatePicker";
 import type { FormRenderProps } from "@/shared/form/types";
 
 type Props = { date?: string };
@@ -20,12 +20,11 @@ const FormDatePickerStory = ({
 	const form = useForm<Props>({ values: { date } });
 	return (
 		<FormProvider {...form}>
-			<FormField
+			<FormField<Props, "date">
 				name="date"
-				control={form.control}
+				form={form}
 				render={(renderProps) => (
 					<FormDatePicker<Props>
-						name="date"
 						label="Date"
 						{...renderProps}
 						{...props}

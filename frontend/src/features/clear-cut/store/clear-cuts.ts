@@ -47,10 +47,10 @@ const clearCutSchema = clearCutResponseSchema
 	.omit({
 		ecologicalZoningIds: true,
 	})
-	.and(
+	.extend(
 		z.object({
 			ecologicalZonings: ecologicalZoningSchema.array(),
-		}),
+		}).shape,
 	);
 export type ClearCut = z.infer<typeof clearCutSchema>;
 
@@ -87,12 +87,12 @@ export type ClearCutReportResponse = z.infer<
 
 export const clearCutReportSchema = clearCutReportResponseSchema
 	.omit({ rulesIds: true, clearCuts: true, departmentId: true })
-	.and(
+	.extend(
 		z.object({
 			department: departmentSchema,
 			rules: ruleSchema.array(),
 			clearCuts: z.array(clearCutSchema),
-		}),
+		}).shape,
 	);
 
 export type ClearCutReport = z.infer<typeof clearCutReportSchema>;
@@ -112,15 +112,15 @@ export const clearCutsResponseSchema = z.object({
 
 export type ClearCutsResponse = z.infer<typeof clearCutsResponseSchema>;
 
-const clearCutsSchema = clearCutsResponseSchema.omit({ previews: true }).and(
+const clearCutsSchema = clearCutsResponseSchema.omit({ previews: true }).extend(
 	z.object({
 		previews: z.array(clearCutReportSchema),
-	}),
+	}).shape,
 );
 export type ClearCuts = z.infer<typeof clearCutsSchema>;
 
 const clearCutFormGroundSchema = z.object({
-	inspectionDate: z.string().optional().prefault(""),
+	inspectionDate: z.iso.datetime({ local: true }).optional(),
 	weather: z.string().optional().prefault(""),
 	forest: z.string().optional().prefault(""),
 	hasRemainingTrees: z.boolean().prefault(false),
@@ -174,43 +174,43 @@ const clearCutFormOtherSchema = z.object({
 	other: z.string().optional(),
 });
 
-const existingClearCurFormSchema = z.object({
+const existingClearCutFormSchema = z.object({
 	id: z.string(),
 	reportId: z.string(),
 	createdAt: z.iso.datetime({ local: true }),
 	etag: z.string(),
 });
 const clearCutFormSectionsResponseSchema = clearCutFormOtherSchema
-	.and(clearCutFormGroundSchema)
-	.and(clearCutFormEcologicalZoningSchema)
-	.and(clearCutFormActorsSchema)
-	.and(clearCutFormRegulationSchema)
-	.and(clearCutFormLegalStrategySchema);
+	.extend(clearCutFormGroundSchema.shape)
+	.extend(clearCutFormEcologicalZoningSchema.shape)
+	.extend(clearCutFormActorsSchema.shape)
+	.extend(clearCutFormRegulationSchema.shape)
+	.extend(clearCutFormLegalStrategySchema.shape);
 
-export const clearCutFormResponseSchema = existingClearCurFormSchema.and(
-	clearCutFormSectionsResponseSchema,
+export const clearCutFormResponseSchema = existingClearCutFormSchema.extend(
+	clearCutFormSectionsResponseSchema.shape,
 );
 
 export type ClearCutFormResponse = z.infer<typeof clearCutFormResponseSchema>;
 
-export const clearCutFormSchema = clearCutFormSectionsResponseSchema.and(
+export const clearCutFormSchema = clearCutFormSectionsResponseSchema.extend(
 	z
 		.object({
 			report: clearCutReportSchema,
 			ecologicalZonings: ecologicalZoningSchema.array().prefault([]),
 			hasEcologicalZonings: z.boolean().prefault(false),
 		})
-		.and(
-			existingClearCurFormSchema
+		.extend(
+			existingClearCutFormSchema
 				.omit({ etag: true, id: true, createdAt: true })
-				.and(
+				.extend(
 					z.object({
-						etag: existingClearCurFormSchema.shape.etag.optional(),
-						id: existingClearCurFormSchema.shape.id.optional(),
-						createdAt: existingClearCurFormSchema.shape.createdAt.optional(),
-					}),
-				),
-		),
+						etag: existingClearCutFormSchema.shape.etag.optional(),
+						id: existingClearCutFormSchema.shape.id.optional(),
+						createdAt: existingClearCutFormSchema.shape.createdAt.optional(),
+					}).shape,
+				).shape,
+		).shape,
 );
 
 export const clearCutFormVersionsSchema = z.object({
@@ -227,3 +227,12 @@ export const clearCutFormsResponseSchema = paginationResponseSchema(
 );
 
 export type ClearCutFormsResponse = z.infer<typeof clearCutFormsResponseSchema>;
+
+export const clearCutFormCreateSchema = clearCutFormResponseSchema.omit({
+	id: true,
+	createdAt: true,
+	etag: true,
+	reportId: true,
+});
+
+export type ClearCutFormCreate = z.infer<typeof clearCutFormCreateSchema>;

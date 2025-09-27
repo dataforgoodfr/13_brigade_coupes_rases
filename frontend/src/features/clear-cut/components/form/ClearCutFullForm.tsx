@@ -21,7 +21,7 @@ import AccordionContent from "./AccordionContent";
 import { AccordionHeader } from "./AccordionHeader";
 
 type Props = ClearCutFormVersions;
-export function ClearCutFullForm({ current, original }: Props) {
+export function ClearCutFullForm({ current, original, latest }: Props) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
 	const loggedUser = useMe();
@@ -90,7 +90,7 @@ export function ClearCutFullForm({ current, original }: Props) {
 					className="p-1 flex flex-col grow px-4 h-0"
 				>
 					<Accordion.Root type="multiple" className="grow overflow-auto">
-						<AccordionContent original={original} form={form} />
+						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion.Root>
 					{!!loggedUser && (
 						<Button

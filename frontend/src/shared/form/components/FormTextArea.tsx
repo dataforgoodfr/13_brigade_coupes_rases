@@ -3,8 +3,8 @@ import { Textarea } from "@/components/ui/text-area";
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps,
-} from "@/shared/form/FormFieldLayout";
-import type { FormProps } from "./types";
+} from "@/shared/form/components/FormFieldLayout";
+import type { FormProps } from "../types";
 
 export function FormTextArea<Form extends FieldValues = FieldValues>({
 	form,
@@ -14,7 +14,7 @@ export function FormTextArea<Form extends FieldValues = FieldValues>({
 	...props
 }: FormProps<Form> & FormFieldLayoutProps<Form>) {
 	return (
-		<FormFieldLayout {...props} name={name} form={form}>
+		<FormFieldLayout {...props} name={name}>
 			<Textarea
 				{...field}
 				className="mt-2 max-w-[98%] mx-auto"

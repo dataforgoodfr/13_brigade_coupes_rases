@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useImageUpload } from "@/shared/hooks/useImageUpload";
 import { useImageViewer } from "@/shared/hooks/useImageViewer";
+import type { FormProps } from "../types";
 import {
 	FormControl,
 	type FormFieldRenderProps,
@@ -19,7 +20,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "./Form";
-import type { FormProps } from "./types";
 
 type Forms3ImageUploadProps<T extends FieldValues> = FormProps<T> & {
 	reportId: string;

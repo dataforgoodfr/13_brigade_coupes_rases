@@ -11,13 +11,18 @@ import {
 } from "react";
 import {
 	Controller,
+	type ControllerFieldState,
 	type ControllerProps,
+	type ControllerRenderProps,
 	type FieldPath,
 	type FieldValues,
+	type UseControllerProps,
+	type UseFormStateReturn,
 	useFormContext,
 } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import type { FormType } from "@/shared/form/types";
 
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
@@ -37,15 +42,62 @@ const FormFieldContext = createContext<FormFieldContextValue>(
 	{} as FormFieldContextValue,
 );
 
+type CustomControllerProps<
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> = UseControllerProps<TFieldValues, TName> &
+	(
+		| {
+				form: FormType<TFieldValues>;
+				// control: undefined;
+				render: (p: {
+					form: FormType<TFieldValues>;
+					field: ControllerRenderProps<TFieldValues, TName>;
+					fieldState: ControllerFieldState;
+					formState: UseFormStateReturn<TFieldValues>;
+					name: TName;
+				}) => React.ReactElement;
+		  }
+		| {
+				form: undefined;
+				// control?: Control<TFieldValues, TName>;
+				render: ({
+					field,
+					fieldState,
+					formState,
+					name,
+				}: {
+					field: ControllerRenderProps<TFieldValues, TName>;
+					fieldState: ControllerFieldState;
+					formState: UseFormStateReturn<TFieldValues>;
+					name: TName;
+				}) => React.ReactElement;
+		  }
+	);
+
 export const FormField = <
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
 	...props
-}: ControllerProps<TFieldValues, TName>) => {
+}: CustomControllerProps<TFieldValues, TName>) => {
 	return (
 		<FormFieldContext.Provider value={{ name: props.name }}>
-			<Controller {...props} />
+			<Controller<TFieldValues, TName>
+				{...props}
+				control={props.form?.control ?? props.control}
+				render={(renderProps) => {
+					if (props.form) {
+						return props.render({
+							...renderProps,
+							name: props.name,
+							form: props.form,
+						});
+					} else {
+						return props.render({ ...renderProps, name: props.name });
+					}
+				}}
+			/>
 		</FormFieldContext.Provider>
 	);
 };
