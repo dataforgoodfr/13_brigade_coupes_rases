@@ -52,8 +52,8 @@ export function FormFieldLayout<
 			})}
 		>
 			{label && (
-				<FormLabel className="font-bold min-w-2/8">
-					{label}{" "}
+				<div className="flex items-center justify-start min-w-2/8">
+					<FormLabel className="font-bold">{label}</FormLabel>
 					{changedFromOriginal?.hasChanged && (
 						<UndoButton
 							onClick={() => {
@@ -68,7 +68,7 @@ export function FormFieldLayout<
 							}}
 						/>
 					)}
-				</FormLabel>
+				</div>
 			)}
 			<div className="flex flex-grow-1 flex-col">
 				{withControl ? <FormControl>{children}</FormControl> : children}

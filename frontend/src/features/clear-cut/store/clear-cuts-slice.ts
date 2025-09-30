@@ -127,15 +127,17 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 				clearCutFormVersionsSchema,
 			);
 
-			const shouldShowDisclaimer = versions?.current.etag !== formReport.etag;
 			const form = (type: "current" | "original") =>
 				hasBeenCreated ? formReport : (versions?.[type] ?? formReport);
+			const current = form("current");
+			const differentFromLatest = current.etag !== formReport.etag;
+
 			return {
 				original: form("original"),
-				current: form("current"),
-				latest: formReport,
+				current,
+				latest: differentFromLatest === true ? formReport : undefined,
 				versionMismatchDisclaimerShown:
-					hasBeenCreated ?? (!shouldShowDisclaimer || isUndefined(versions)),
+					hasBeenCreated ?? (!differentFromLatest || isUndefined(versions)),
 			};
 		},
 		{
