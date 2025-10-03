@@ -209,7 +209,7 @@ function changeTrackingLabel(label: string, user: UserEvent) {
 	return {
 		applyLatest: async () => {
 			const button = await within(await findLabel()).findByTitle(
-				"Appliquer la dernière valeur",
+				"Utiliser la dernière valeur",
 			);
 			await user.click(button);
 		},

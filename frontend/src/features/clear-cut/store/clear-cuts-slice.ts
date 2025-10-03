@@ -122,6 +122,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 					...computedProperties,
 				} as ClearCutForm);
 			}
+
 			const versions = formStorage.getFromLocalStorageById(
 				formReport.report.id,
 				clearCutFormVersionsSchema,
@@ -131,11 +132,12 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 				hasBeenCreated ? formReport : (versions?.[type] ?? formReport);
 			const current = form("current");
 			const differentFromLatest = current.etag !== formReport.etag;
+			const latest = differentFromLatest === true ? formReport : undefined;
 
 			return {
 				original: form("original"),
 				current,
-				latest: differentFromLatest === true ? formReport : undefined,
+				latest,
 				versionMismatchDisclaimerShown:
 					hasBeenCreated ?? (!differentFromLatest || isUndefined(versions)),
 			};
