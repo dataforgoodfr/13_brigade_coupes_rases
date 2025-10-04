@@ -5,12 +5,12 @@ import type {
 	ClearCutFormInput,
 	ClearCutStatus,
 } from "@/features/clear-cut/store/clear-cuts";
-import type { FormType } from "@/shared/components/form/Form";
+import type { FormType } from "@/shared/form/types";
 import type { Rule } from "@/shared/store/referential/referential";
 import { RuleBadge } from "../RuleBadge";
 import { StatusWithLabel } from "../StatusWithLabel";
 
-export default function AccordionHeader({
+export function AccordionHeader({
 	form,
 	tags: abusiveTags,
 	status,

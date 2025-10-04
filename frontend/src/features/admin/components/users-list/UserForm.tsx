@@ -7,9 +7,10 @@ import {
 	userFormSchema,
 } from "@/features/admin/store/users";
 import { ROLES } from "@/features/user/store/me";
-import { FormCombobox } from "@/shared/components/form/FormCombobox";
-import { FormInput } from "@/shared/components/form/FormInput";
-import { FormSelect } from "@/shared/components/form/FormSelect";
+import { FormField } from "@/shared/form/components/Form";
+import { FormCombobox } from "@/shared/form/components/FormCombobox";
+import { FormInput } from "@/shared/form/components/FormInput";
+import { FormSelect } from "@/shared/form/components/FormSelect";
 import { type LabelledValue, namedIdTranslator } from "@/shared/items";
 import { useSelectSelectableDepartments } from "@/shared/store/referential/referential.slice";
 
@@ -45,47 +46,59 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				{header}
 				<div className="flex flex-col gap-2">
-					<FormInput
-						control={form.control}
-						label="Prénom"
-						name="firstName"
-						type="text"
+					<FormField<UserFormType>
+						form={form}
+						name={"firstName"}
+						render={(props) => (
+							<FormInput {...props} label="Prénom" type="text" />
+						)}
 					/>
-					<FormInput
-						control={form.control}
-						label="Nom"
-						name="lastName"
-						type="text"
+					<FormField<UserFormType>
+						name={"lastName"}
+						form={form}
+						render={(props) => <FormInput {...props} label="Nom" type="text" />}
 					/>
-					<FormInput
-						control={form.control}
-						label="Email"
-						name="email"
-						type="email"
+					<FormField<UserFormType>
+						form={form}
+						name={"email"}
+						render={(props) => (
+							<FormInput {...props} label="Email" type="text" />
+						)}
 					/>
-					<FormInput
-						control={form.control}
-						label="Pseudo"
-						name="login"
-						type="text"
+					<FormField<UserFormType>
+						form={form}
+						name={"login"}
+						render={(props) => (
+							<FormInput {...props} label="Pseudo" type="text" />
+						)}
 					/>
-					<FormSelect
-						control={form.control}
-						name="role"
-						placeholder="Sélectionner un rôle"
-						label="Rôle"
-						availableValues={AVAILABLE_ITEMS}
+					<FormField<UserFormType>
+						form={form}
+						name={"role"}
+						render={(props) => (
+							<FormSelect
+								{...props}
+								availableValues={AVAILABLE_ITEMS}
+								placeholder="Sélectionner un rôle"
+								label="Rôle"
+							/>
+						)}
 					/>
-					<FormCombobox
-						countPreview
-						buttonProps={{ className: "w-full justify-end" }}
-						getItemLabel={namedIdTranslator}
-						getItemValue={namedIdTranslator}
-						hasInput
-						type="multiple"
-						control={form.control}
-						label="Départements"
+					<FormField<UserFormType, "departments">
+						form={form}
 						name="departments"
+						render={(props) => (
+							<FormCombobox
+								{...props}
+								countPreview
+								buttonProps={{ className: "w-full justify-end" }}
+								getItemLabel={namedIdTranslator}
+								getItemValue={namedIdTranslator}
+								hasInput
+								type="multiple"
+								label="Départements"
+							/>
+						)}
 					/>
 				</div>
 

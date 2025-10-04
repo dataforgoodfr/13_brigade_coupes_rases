@@ -12,14 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useImageUpload } from "@/shared/hooks/useImageUpload";
 import { useImageViewer } from "@/shared/hooks/useImageViewer";
+import type { FormProps } from "../types";
 import {
 	FormControl,
-	FormField,
 	type FormFieldRenderProps,
 	FormItem,
 	FormLabel,
 	FormMessage,
-	type FormProps,
 } from "./Form";
 
 type Forms3ImageUploadProps<T extends FieldValues> = FormProps<T> & {
@@ -32,13 +31,11 @@ type FormS3ImageFieldProps<T extends FieldValues> = FormFieldRenderProps<T> & {
 	onSelectedImageIndexChanged: (index: number) => void;
 } & Forms3ImageUploadProps<T>;
 
-const EMPTY_ARRAY: string[] = [];
 function FormS3ImageField<T extends FieldValues>({
 	onPreviewUrlsChanged,
 	previewUrls,
 	reportId,
 	label,
-	disabled,
 	placeholder,
 	onSelectedImageIndexChanged,
 	field,
@@ -94,8 +91,8 @@ function FormS3ImageField<T extends FieldValues>({
 				});
 			}
 		} else if (!field.value || field.value.length === 0) {
-			setUploadedImages(EMPTY_ARRAY);
-			onPreviewUrlsChanged(EMPTY_ARRAY);
+			// setUploadedImages(EMPTY_ARRAY);
+			// onPreviewUrlsChanged(EMPTY_ARRAY);
 		}
 	}, [field.value, getViewableUrls, onPreviewUrlsChanged]);
 
@@ -107,7 +104,7 @@ function FormS3ImageField<T extends FieldValues>({
 					type="file"
 					accept="image/*"
 					multiple
-					disabled={disabled || uploading}
+					disabled={field.disabled || uploading}
 					onChange={handleFileUploadWithField}
 					placeholder={placeholder}
 					className="max-w-fit"
@@ -209,7 +206,7 @@ function FormS3ImageField<T extends FieldValues>({
 }
 
 export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
-	control,
+	form,
 	name,
 	...props
 }: Forms3ImageUploadProps<T>) {
@@ -256,20 +253,13 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 
 	return (
 		<>
-			<FormField
-				control={control}
+			<FormS3ImageField
+				{...props}
+				form={form}
 				name={name}
-				render={(renderProps) => (
-					<FormS3ImageField
-						{...renderProps}
-						{...props}
-						control={control}
-						name={name}
-						previewUrls={previewUrls}
-						onPreviewUrlsChanged={setPreviewUrls}
-						onSelectedImageIndexChanged={setSelectedImageIndex}
-					/>
-				)}
+				previewUrls={previewUrls}
+				onPreviewUrlsChanged={setPreviewUrls}
+				onSelectedImageIndexChanged={setSelectedImageIndex}
 			/>
 
 			{/* Image Preview Modal */}

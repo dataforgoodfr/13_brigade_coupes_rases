@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { FieldValues, Path, PathValue } from "react-hook-form";
-import type { FormType } from "@/shared/components/form/Form";
+import type { FormType } from "@/shared/form/types";
 
 type BaseFormItem<
 	Form extends FieldValues,
@@ -12,7 +12,7 @@ type BaseFormItem<
 	}) => ReactNode | null | undefined;
 	label?: string;
 	renderConditions: Path<Form>[];
-	fallBack?: (key: string | number) => React.ReactNode;
+	fallBack?: (key: string | number) => React.ReactElement;
 	className?: string;
 	disabled?: boolean;
 };
@@ -83,7 +83,7 @@ export type SectionFormItem<
 	| ToggleGroupItem<Form, Name>
 	| CustomizedItem<Form, Name>;
 
-export type FormItemType<Form extends FieldValues> =
+export type FormItemType<Form extends FieldValues = FieldValues> =
 	SectionFormItem<Form>["type"];
 
 export type SectionForm = {

@@ -42,6 +42,7 @@ function getFromLocalStorage<Value>(
 			return schema.parse(JSON.parse(item));
 		}
 	} catch (_e) {
+		console.error("Failed to parse localStorage item", key, item);
 		localStorage.removeItem(key);
 	}
 }
@@ -69,7 +70,8 @@ function getFromLocalStorageById<Value>(
 	id: string,
 	schema: z.ZodType<Value>,
 ): Value | undefined {
-	return getRecordFromStorage(key, schema)[id];
+	const record = getRecordFromStorage(key, schema);
+	return record[id];
 }
 
 function getFromLocalStorageOrDefaultById<Value>(

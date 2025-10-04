@@ -1,5 +1,5 @@
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
-import type { FormType } from "@/shared/components/form/Form";
+import type { FormType } from "@/shared/form/types";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const ecoZoneKey: SectionForm = {

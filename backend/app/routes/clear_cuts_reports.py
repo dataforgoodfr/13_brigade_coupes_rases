@@ -38,7 +38,7 @@ router = APIRouter(prefix="/api/v1/clear-cuts-reports", tags=["ClearcutsReports"
 
 # TODO: (unsecure) Workaround to sync the clear cuts after seeding
 @router.post("/sync-reports", status_code=204)
-def sync_clear_cut_reports(db=db_session):
+def sync_clear_cut_reports(db: Session = db_session):
     sync_clear_cuts_reports(db)
 
 
@@ -163,7 +163,7 @@ def add_clearcut_form_version(
     response: Response,
     new_version: ClearCutFormCreate,
     db: Session = db_session,
-    editor=Depends(get_current_user),
+    editor: User = Depends(get_current_user),
     etag: Annotated[str | None, Header()] = None,
 ):
     logger.info(db)

@@ -70,7 +70,6 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 			});
 		}
 	}, [toast, value, dispatch]);
-
 	return (
 		value && (
 			<div className="flex flex-col w-full">
@@ -81,14 +80,14 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 							<FormattedDate value={value.current.report.lastCutDate} />
 						</span>
 						<span className="font-[Roboto] italic font-light text-xs">
-							v{value.current.id}
+							v{value.current.id ?? 0}
 						</span>
 					</div>
 					<Link to="/clear-cuts">
 						<X size={30} />
 					</Link>
 				</div>
-				<ClearCutFullForm clearCut={value.current} />
+				<ClearCutFullForm {...value} />
 			</div>
 		)
 	);

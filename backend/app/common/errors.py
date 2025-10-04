@@ -32,7 +32,7 @@ class AppHTTPException(HTTPException):
                 """
             ),
         ] = None,
-        type: str = None,
+        type: str | None = None,
     ) -> None:
         super().__init__(
             status_code=status_code,
