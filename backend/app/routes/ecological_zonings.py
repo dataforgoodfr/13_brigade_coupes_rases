@@ -1,10 +1,11 @@
-from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
-from app.schemas.hateoas import PaginationResponseSchema
-from fastapi import APIRouter
-from sqlalchemy.orm import Session
-from app.deps import db_session
 from logging import getLogger
 
+from fastapi import APIRouter
+from sqlalchemy.orm import Session
+
+from app.deps import db_session
+from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
+from app.schemas.hateoas import PaginationResponseSchema
 from app.services.ecological_zoning import find_paginated_ecological_zonings
 
 logger = getLogger(__name__)
@@ -12,7 +13,11 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/ecological-zonings", tags=["EcologicalZoning"])
 
 
-@router.get("/", response_model=PaginationResponseSchema[EcologicalZoningResponseSchema])
+@router.get(
+    "/",
+    response_model=PaginationResponseSchema[EcologicalZoningResponseSchema],
+    response_model_exclude_none=True,
+)
 def list_ecological_zonings(db: Session = db_session, page: int = 0, size: int = 10):
     logger.info(db)
     return find_paginated_ecological_zonings(

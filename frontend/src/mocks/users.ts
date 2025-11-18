@@ -1,29 +1,52 @@
-import type { TokenResponse, UserResponse } from "@/features/user/store/user";
-import { range } from "@/shared/array";
 import { fakerFR as faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
+import type {
+	UserResponse as AdminUserResponse,
+	PaginatedUsersResponse,
+} from "@/features/admin/store/users";
+import type { MeResponse, TokenResponse } from "@/features/user/store/me";
+import { fakeDepartments } from "@/mocks/referential";
+import { range } from "@/shared/array";
+
 const adminToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsImV4cCI6MTc0Mjc2NjQxMn0.-rl7wbmum8v5kmbeW2l67K6hxas62Y8N9UpHAC0-A58";
 const volunteerToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXJAZXhhbXBsZS5jb20iLCJleHAiOjE3NDI4MDA0MDh9.eXwl9kBRFRxb_OjzfUkU2_jZwBJ23vFkYWKhXql2n24";
+
+export const volunteerAssignedToken =
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXItYXNzaWduZWRAZXhhbXBsZS5jb20iLCJleHAiOjE3NDQ0MDE1MzR9.PYc5hvIIuobVFt1TMb8EHdlK7iI5ZhsAqrOqKzFFAVw";
+export const volunteerAssignedMock: MeResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
+export const adminMock: MeResponse = {
+	role: "admin",
+	email: "admin@example.com",
+	login: "adminAdmin",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
+export const volunteerMock: MeResponse = {
+	role: "volunteer",
+	departments: [],
+	email: "volunteer@example.com",
+	login: "volunteerVolunteers",
+	favorites: [],
+	avatarUrl: faker.image.avatar(),
+};
 export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
 	const token = request.headers.get("Authorization");
-	const avatarUrl = faker.image.avatar();
 	if (token?.includes(adminToken)) {
-		return HttpResponse.json({
-			role: "admin",
-			email: "admin@example.com",
-			login: "adminAdmin",
-			avatarUrl,
-		} satisfies UserResponse);
+		return HttpResponse.json(adminMock);
 	}
-	return HttpResponse.json({
-		role: "volunteer",
-		departments: [],
-		email: "volunteer@example.com",
-		login: "volunteerVolunteers",
-		avatarUrl,
-	} satisfies UserResponse);
+	if (token?.includes(volunteerAssignedToken)) {
+		return HttpResponse.json(volunteerAssignedMock);
+	}
+	return HttpResponse.json(volunteerMock);
 });
 
 export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
@@ -33,52 +56,58 @@ export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 	if (email?.includes("admin")) {
 		token = adminToken;
 	}
+	if (email?.includes("assigned")) {
+		token = volunteerAssignedToken;
+	}
 	return HttpResponse.json({
-		access_token: token,
+		accessToken: token,
+		refreshToken: token,
 	} satisfies TokenResponse);
 });
 
-const fakeUsers: UserResponse[] = range(10, () => ({
+const fakeUsers: AdminUserResponse[] = range(10, () => ({
+	id: faker.string.uuid(),
+	firstName: faker.person.firstName(),
+	lastName: faker.person.lastName(),
+	role: faker.helpers.arrayElement(["admin", "volunteer"]),
+	departments: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
 	login: faker.internet.username(),
 	email: faker.internet.email(),
-	...faker.helpers.arrayElement([
-		{ role: "volunteer", affectedDepartments: [] },
-		{ role: "admin" },
-	]),
-	avatarUrl: faker.image.avatar(),
 }));
 
 export const mockUsers = http.get("*/api/v1/users", ({ request }) => {
 	const url = new URL(request.url);
 	const name = url.searchParams.get("name");
-	const role = url.searchParams.get("role");
-	const departmentsParam = url.searchParams.get("departments");
-	const departments = departmentsParam ? departmentsParam.split(",") : [];
+	const roles = url.searchParams.getAll("roles");
+	const page = Number.parseInt(url.searchParams.get("page") as string, 10);
+	const size = Number.parseInt(url.searchParams.get("size") as string, 10);
+	const departments_ids = url.searchParams.getAll("departments_ids");
 
-	let users = fakeUsers;
-
-	users = users.filter((user) => {
+	const users = fakeUsers.filter((user) => {
 		let isValidUser = true;
+		if (name) {
+			isValidUser &&=
+				user.login.toLowerCase().includes(name.toLowerCase()) ||
+				user.email.toLowerCase().includes(name.toLowerCase());
+		}
 
-		if (name)
-			isValidUser =
-				(isValidUser &&
-					// For testing purposes, basic filter users by name or email TODO: unaccent
-					user.login
-						.toLowerCase()
-						.includes(name.toLowerCase() || "")) ||
-				user.email.toLowerCase().includes(name.toLowerCase() || "");
+		isValidUser &&= roles.length === 0 || roles.includes(user.role);
 
-		if (role) isValidUser = isValidUser && user.role === role;
-
-		if (departments?.length && user.role === "volunteer")
-			isValidUser =
-				isValidUser && departments.some((r) => user?.departments?.includes(r));
+		isValidUser &&=
+			departments_ids.length === 0 ||
+			departments_ids.some((r) => user.departments?.includes(r));
 
 		return isValidUser;
 	});
 
 	return HttpResponse.json({
-		users,
-	});
+		content: users.slice(page * size, (page + 1) * size),
+		metadata: {
+			links: {},
+			page: page,
+			size: size,
+			pagesCount: Math.ceil(users.length / size),
+			totalCount: users.length,
+		},
+	} satisfies PaginatedUsersResponse);
 });

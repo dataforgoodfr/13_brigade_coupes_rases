@@ -1,10 +1,9 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { action } from "storybook/actions";
 import {
 	ComboboxFilter,
 	type ComboboxFilterProps,
 } from "@/shared/components/select/ComboboxFilter";
-
-import { action } from "@storybook/addon-actions";
-import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
 	title: "Combobox filter",

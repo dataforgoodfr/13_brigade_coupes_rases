@@ -18,6 +18,7 @@ pre-commit = "^2.20.0"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
+mypy = "^1.16.1"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.13"
@@ -28,69 +29,28 @@ pydantic-settings = "^2.7.1"
 uvicorn = "^0.34.0"
 geoalchemy2 = "^0.17.1"
 alembic = "^1.14.1"
-pydantic = {extras = ["email"], version = "^2.7.1"}
+pydantic = { extras = ["email"], version = "^2.7.1" }
 shapely = "^2.0.7"
 pyjwt = "^2.10.1"
 bcrypt = "^4.3.0"
 python-multipart = "^0.0.20"
 geojson-pydantic = "^1.2.0"
+boto3 = "^1.35.0"
 
 [tool.poetry.scripts]
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
-# Go to https://docs.astral.sh/ruff/settings for more information
+# See https://docs.astral.sh/ruff/settings
 [tool.ruff]
-# Same as Black.
-line-length = 96
 target-version = "py313"
 
 [tool.ruff.lint]
-mccabe.max-complexity = 7
-
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F", "B"]
-ignore = ["E501"]
-
-[tool.ruff.format]
-# Automatically detect the appropriate line ending.
-line-ending = "auto"
-
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "venv",
-]
+# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
+extend-select = ["I", "B", "UP"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 
 [tool.pytest.ini_options]
-markers = [
-    "focus: run only these tests"
-]
+markers = ["focus: run only these tests"]

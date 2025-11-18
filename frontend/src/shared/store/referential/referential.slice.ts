@@ -1,5 +1,8 @@
+import { createSlice } from "@reduxjs/toolkit";
 import type { RequiredRequestedContent } from "@/shared/api/types";
 import type { ItemFromRecord } from "@/shared/array";
+import { useAppSelector } from "@/shared/hooks/store";
+import type { NamedId, SelectableItem } from "@/shared/items";
 import {
 	type ReferentialResponse,
 	referentialSchemaResponse,
@@ -7,7 +10,6 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector";
 import type { RootState } from "@/shared/store/store";
 import { createAppAsyncThunk } from "@/shared/store/thunk";
-import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
@@ -21,7 +23,7 @@ export const getReferentialThunk = createAppAsyncThunk(
 type State = RequiredRequestedContent<Required<ReferentialResponse>>;
 const initialState: State = {
 	status: "idle",
-	value: { departments: {}, tags: {}, ecological_zonings: {} },
+	value: { departments: {}, rules: {}, ecologicalZonings: {} },
 };
 export const referentialSlice = createSlice({
 	name: "referential",
@@ -31,13 +33,12 @@ export const referentialSlice = createSlice({
 			state.status = "success";
 			state.value = {
 				departments: payload.departments ?? {},
-				tags: payload.tags ?? {},
-				ecological_zonings: payload.ecological_zonings ?? {},
+				rules: payload.rules ?? {},
+				ecologicalZonings: payload.ecologicalZonings ?? {},
 			};
 		});
-		builder.addCase(getReferentialThunk.rejected, (state, error) => {
+		builder.addCase(getReferentialThunk.rejected, (state) => {
 			state.status = "error";
-			console.error(error);
 		});
 		builder.addCase(getReferentialThunk.pending, (state) => {
 			state.status = "loading";
@@ -55,7 +56,7 @@ function selectByIds<
 	T extends keyof State["value"],
 	K extends keyof State["value"][T],
 >(property: T) {
-	return createSelector(
+	return createTypedDraftSafeSelector(
 		[selectState, (_s: RootState, ids: K[] = []) => ids],
 		(referential: State, ids: K[] = []) =>
 			ids
@@ -71,6 +72,43 @@ function selectByIds<
 	);
 }
 
+function selectByIdsDifferent<
+	T extends keyof State["value"],
+	K extends keyof State["value"][T],
+>(property: T) {
+	return createTypedDraftSafeSelector(
+		[selectState, (_s: RootState, ids: K[] = []) => ids],
+		(referential: State, ids: K[] = []) =>
+			Object.entries(referential.value[property])
+				.filter(([id]) => !ids.includes(id as K))
+				.map(
+					([id, value]) =>
+						({ id, ...value }) as State["value"][T][K] & { id: K },
+				),
+	);
+}
+
+const selectSelectableItemsNamedId = createTypedDraftSafeSelector(
+	[selectState, (_s, property) => property],
+	<K extends "departments">(s: State, property: K) => {
+		return Object.entries(s.value[property]).map(
+			([k, v]) =>
+				({
+					isSelected: false,
+					item: { id: k, name: v.name },
+				}) satisfies SelectableItem<NamedId>,
+		);
+	},
+);
+export const useSelectSelectableDepartments = () =>
+	useAppSelector((s) => selectSelectableItemsNamedId(s, "departments"));
+
 export const selectDepartmentsByIds = selectByIds("departments");
-export const selectTagsByIds = selectByIds("tags");
-export const selectEcologicalZoningByIds = selectByIds("ecological_zonings");
+export const selectRulesByIds = selectByIds("rules");
+export const selectEcologicalZoningByIds = selectByIds("ecologicalZonings");
+
+export const selectDepartmentsByIdsDifferent =
+	selectByIdsDifferent("departments");
+export const selectRulesByIdsDifferent = selectByIdsDifferent("rules");
+export const selectEcologicalZoningByIdsDifferent =
+	selectByIdsDifferent("ecologicalZonings");

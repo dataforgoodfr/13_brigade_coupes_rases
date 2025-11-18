@@ -1,17 +1,26 @@
-from datetime import datetime, timedelta
 import os
-from geoalchemy2.shape import from_shape
-from shapely.geometry import Point, MultiPolygon
-from app.database import Base, SessionLocal
-from app.models import ClearCut, ClearCutEcologicalZoning, User, ClearCutReport
-from sqlalchemy import text
 import traceback
+from datetime import datetime, timedelta
 
-from app.services.user_auth import get_password_hash
+from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, Point
+from sqlalchemy import text
+
+from app.database import Base, SessionLocal
+from app.models import (
+    ClearCut,
+    ClearCutEcologicalZoning,
+    ClearCutForm,
+    ClearCutReport,
+    User,
+)
+from app.services.clear_cut_report import sync_clear_cuts_reports
+from app.services.get_password_hash import get_password_hash
 from common_seed import (
+    get_cities,
     seed_cities_departments,
     seed_ecological_zonings,
-    get_cities,
+    seed_rules,
 )
 
 SRID = 4326
@@ -40,17 +49,18 @@ def seed_database():
         seed_cities_departments(db)
         [marseille, paris] = get_cities(db)
         [natura1, natura2] = seed_ecological_zonings(db)
+        seed_rules(db, [natura1, natura2])
         admin = User(
-            firstname="Crysta",
-            lastname="Faerie",
+            first_name="Crysta",
+            last_name="Faerie",
             login="CrystaFaerie",
             email="admin@example.com",
             role="admin",
             password=get_password_hash("admin"),
         )
         volunteer = User(
-            firstname="Pips",
-            lastname="Sprite",
+            first_name="Pips",
+            last_name="Sprite",
             login="PipsSprite",
             email="volunteer@example.com",
             role="volunteer",
@@ -66,12 +76,17 @@ def seed_database():
         clear_cuts = [
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=15,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_deciduous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
+                        ecological_zoning_area_hectare=5,
                         location=from_shape(Point(2.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -98,18 +113,19 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura2.id, area_hectare=20
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura2.id),
                         ],
                     ),
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
                         observation_end_date=datetime.now() - timedelta(days=5),
                         area_hectare=10,
+                        ecological_zoning_area_hectare=0.3,
+                        bdf_resinous_area_hectare=0.5,
+                        bdf_deciduous_area_hectare=0.5,
+                        bdf_mixed_area_hectare=0.5,
+                        bdf_poplar_area_hectare=0.5,
                         location=from_shape(Point(1.380192, 48.878899), SRID),
                         boundary=from_shape(
                             MultiPolygon(
@@ -136,9 +152,7 @@ def seed_database():
                             srid=SRID,
                         ),
                         ecological_zonings=[
-                            ClearCutEcologicalZoning(
-                                ecological_zoning_id=natura1.id, area_hectare=10
-                            ),
+                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
                         ],
                     ),
                 ],
@@ -147,7 +161,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=10,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -211,7 +225,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=paris,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=6.8,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=5),
@@ -245,7 +259,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=marseille,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=4.2,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=15),
@@ -279,7 +293,7 @@ def seed_database():
             ),
             ClearCutReport(
                 city=marseille,
-                slope_area_ratio_percentage=10.5,
+                slope_area_hectare=5.7,
                 clear_cuts=[
                     ClearCut(
                         observation_start_date=datetime.now() - timedelta(days=10),
@@ -341,7 +355,7 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=14.3,
+                slope_area_hectare=8.1,
                 status="validated",
                 user=admin,
             ),
@@ -375,12 +389,68 @@ def seed_database():
                         ),
                     )
                 ],
-                slope_area_ratio_percentage=10.8,
+                slope_area_hectare=3.9,
                 status="to_validate",
                 user=volunteer,
             ),
         ]
         db.add_all(clear_cuts)
+
+        db.flush()
+
+        reportform = ClearCutForm(
+            report_id=clear_cuts[0].id,
+            editor_id=admin.id,
+            inspection_date=datetime.now(),
+            weather="Sunny",
+            forest="Dense pine forest",
+            has_remaining_trees=True,
+            trees_species="Pinus sylvestris",
+            planting_images=["planting_image_1.jpg", "planting_image_2.jpg"],
+            has_construction_panel=False,
+            construction_panel_images=[
+                "construction_panel_image_1.jpg",
+                "construction_panel_image_2.jpg",
+            ],
+            wetland="Yes",
+            destruction_clues="None",
+            soil_state="Healthy",
+            clear_cut_images=["clear_cut_image_1.jpg", "clear_cut_image_2.jpg"],
+            tree_trunks_images=["tree_trunks_image_1.jpg", "tree_trunks_image_2.jpg"],
+            soil_state_images=["soil_state_image_1.jpg", "soil_state_image_2.jpg"],
+            access_road_images=["access_road_image_1.jpg", "access_road_image_2.jpg"],
+            # Ecological informations
+            has_other_ecological_zone=False,
+            other_ecological_zone_type="N/A",
+            has_nearby_ecological_zone=True,
+            nearby_ecological_zone_type="Wetland",
+            protected_species="None",
+            protected_habitats="None",
+            has_ddt_request=False,
+            ddt_request_owner="N/A",
+            # Stakeholders
+            company="EcoTree",
+            subcontractor="TreeServices",
+            landlord="John Doe",
+            # Reglementation
+            is_pefc_fsc_certified=True,
+            is_over_20_ha=False,
+            is_psg_required_plot=True,
+            # Legal strategy
+            relevant_for_pefc_complaint=False,
+            relevant_for_rediii_complaint=False,
+            relevant_for_ofb_complaint=False,
+            relevant_for_alert_cnpf_ddt_srgs=False,
+            relevant_for_alert_cnpf_ddt_psg_thresholds=False,
+            relevant_for_psg_request=False,
+            request_engaged="None",
+            # Miscellaneous
+            other="No additional information",
+        )
+
+        db.add(reportform)
+
+        sync_clear_cuts_reports(db)
 
         db.commit()
 

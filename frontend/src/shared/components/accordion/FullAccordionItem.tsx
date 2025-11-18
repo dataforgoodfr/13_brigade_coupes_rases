@@ -1,30 +1,79 @@
+import { isUndefined } from "es-toolkit";
+import type React from "react";
+import { useId } from "react";
+import type { Path } from "react-hook-form";
 import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import React from "react";
+import type {
+	ClearCutFormInput,
+	ClearCutFormVersions,
+} from "@/features/clear-cut/store/clear-cuts";
+import { cn } from "@/lib/utils";
+import { DownloadOutdatedButton } from "@/shared/form/components/DownloadOutdatedButton";
+import { UndoButton } from "@/shared/form/components/UndoButton";
+import { useChangeTrackingFormContext } from "@/shared/form/context/ChangeTrackingForm";
 
 type AccordionFullItemProps = {
 	title: string;
 	children?: React.ReactNode;
+	className?: string;
 };
 
-export function AccordionFullItem({ title, children }: AccordionFullItemProps) {
-	const val = React.useId();
-
+export function AccordionFullItem({
+	title,
+	children,
+	className,
+}: AccordionFullItemProps) {
+	const val = useId();
+	const { changedFields, resetTrackedFieldsFromOther } =
+		useChangeTrackingFormContext<
+			ClearCutFormInput,
+			Path<ClearCutFormInput>,
+			Pick<ClearCutFormVersions, "original" | "latest">
+		>();
 	return (
-		<>
-			<AccordionItem
-				value={val}
-				className="data-[state=closed]:border-b-2 data-[state=closed]:border-(--border) data-[state=open]:border-b-0"
+		<AccordionItem
+			value={val}
+			className="data-[state=closed]:border-b-1 data-[state=closed]:border-(--border) data-[state=open]:border-b-0 overflow-hidden"
+		>
+			<div className="flex items-center">
+				{!isUndefined(changedFields.original) && changedFields.original > 0 && (
+					<UndoButton
+						onClick={() => {
+							resetTrackedFieldsFromOther("original");
+						}}
+					>
+						{changedFields.original}
+					</UndoButton>
+				)}
+				{!isUndefined(changedFields.latest) && changedFields.latest > 0 && (
+					<DownloadOutdatedButton
+						onClick={() => {
+							resetTrackedFieldsFromOther("latest");
+						}}
+					>
+						{changedFields.latest}
+					</DownloadOutdatedButton>
+				)}
+				<AccordionTrigger
+					className="cursor-pointer ms-1 text-lg font-bold font-[Roboto]"
+					headerClassName="grow"
+				>
+					{title}
+				</AccordionTrigger>
+			</div>
+
+			<AccordionContent
+				className={cn(
+					"font-[Roboto] border-t-1 pt-4 overflow-hidden",
+					className,
+				)}
 			>
-				<AccordionTrigger className="cursor-pointer">{title}</AccordionTrigger>
-				<AccordionContent>
-					{children ??
-						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."}
-				</AccordionContent>
-			</AccordionItem>
-		</>
+				{children}
+			</AccordionContent>
+		</AccordionItem>
 	);
 }

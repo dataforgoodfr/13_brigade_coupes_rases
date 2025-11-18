@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta
 
 from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, Point
+
 from app.models import (
     SRID,
     ClearCut,
     ClearCutEcologicalZoning,
     ClearCutReport,
 )
-from shapely.geometry import Point, MultiPolygon
 
 
 def new_clear_cut_report(
     status: str = "to_validate", city_id: int = 31482, ecological_zoning_id=1
 ):
     return ClearCutReport(
-        slope_area_ratio_percentage=15.5,
+        slope_area_hectare=6.8,
         city_id=city_id,
         status=status,
         clear_cuts=[
@@ -22,6 +23,11 @@ def new_clear_cut_report(
                 observation_start_date=datetime.now() - timedelta(days=10),
                 observation_end_date=datetime.now() - timedelta(days=5),
                 area_hectare=10,
+                ecological_zoning_area_hectare=0.3,
+                bdf_resinous_area_hectare=0.5,
+                bdf_deciduous_area_hectare=0.5,
+                bdf_mixed_area_hectare=0.5,
+                bdf_poplar_area_hectare=0.5,
                 location=from_shape(Point(2.380192, 48.878899), srid=SRID),
                 boundary=from_shape(
                     MultiPolygon(
@@ -48,9 +54,7 @@ def new_clear_cut_report(
                     srid=SRID,
                 ),
                 ecological_zonings=[
-                    ClearCutEcologicalZoning(
-                        ecological_zoning_id=ecological_zoning_id, area_hectare=10
-                    )
+                    ClearCutEcologicalZoning(ecological_zoning_id=ecological_zoning_id)
                 ],
             )
         ],

@@ -2,11 +2,11 @@
 
 // Inspired by react-hot-toast library
 
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 import { type ReactNode, useEffect, useState } from "react";
+import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 6000;
 
 type ToasterToast = ToastProps & {
 	id: string;
@@ -138,10 +138,10 @@ function dispatch(action: Action) {
 	}
 }
 
-type Toast = Omit<ToasterToast, "id">;
+type Toast = Omit<ToasterToast, "id"> & { id?: string };
 
 function toast({ ...props }: Toast) {
-	const id = genId();
+	const id = props.id ?? genId();
 
 	const update = (props: ToasterToast) =>
 		dispatch({

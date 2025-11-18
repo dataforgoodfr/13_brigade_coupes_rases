@@ -45,7 +45,69 @@ export type RequestedContent<TValue, TError = unknown> = {
 	value?: TValue;
 };
 
+export type EmptyRequestedContent<Error> =
+	| ErrorContent<Error>
+	| LoadingContent
+	| IdleContent;
 export type RequiredRequestedContent<TValue, TError = unknown> = Omit<
 	RequestedContent<TValue, TError>,
 	"value"
 > & { value: TValue };
+
+const hateaosMetadataSchema = z.object({
+	links: z.record(z.string(), z.string()),
+});
+export const hateaosResponseSchema = <TValue extends z.ZodType>(
+	valueSchema: TValue,
+) =>
+	z.object({
+		content: valueSchema,
+		metadata: hateaosMetadataSchema,
+	});
+
+export const paginationResponseSchema = <TValue extends z.ZodType>(
+	valueSchema: TValue,
+) =>
+	hateaosResponseSchema(valueSchema.array()).and(
+		z.object({
+			metadata: hateaosMetadataSchema.and(
+				z.object({
+					pagesCount: z.number(),
+					totalCount: z.number(),
+					page: z.number(),
+					size: z.number(),
+				}),
+			),
+		}),
+	);
+
+export type PaginationResponse<TValue> = z.infer<
+	ReturnType<typeof paginationResponseSchema<z.ZodType<TValue>>>
+>;
+
+export function sortedRequest<T extends z.ZodType>(keySchema: T) {
+	return z.object({
+		ascSort: keySchema,
+		descSort: keySchema,
+	});
+}
+export const paginatedRequestSchema = z.object({
+	page: z.number(),
+	size: z.number(),
+});
+
+export function serverSideRequestSchema<
+	Base extends z.ZodObject,
+	Key extends z.ZodType,
+>(baseSchema: Base, keySchema: Key) {
+	return baseSchema
+		.extend(paginatedRequestSchema)
+		.extend(sortedRequest(keySchema));
+}
+const emptySortedRequestSchemaKeys = sortedRequest(z.string())
+	.keyof()
+	.or(paginatedRequestSchema.keyof());
+
+export type ServerSideRequestKeys = z.infer<
+	typeof emptySortedRequestSchemaKeys
+>;

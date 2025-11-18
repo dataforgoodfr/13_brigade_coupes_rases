@@ -1,10 +1,10 @@
+import { type PropsWithChildren, useState } from "react";
 import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/shared/components/dropdown/DropdownMenu";
-import { type PropsWithChildren, useState } from "react";
 
 interface Props extends PropsWithChildren {
 	filter: string;

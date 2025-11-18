@@ -1,151 +1,253 @@
-from typing import Optional
+from logging import getLogger
+from math import sqrt
+
+from fastapi import status
+from geoalchemy2.functions import (
+    ST_AsGeoJSON,
+    ST_Centroid,
+    ST_ClusterWithin,
+    ST_Contains,
+    ST_MakeEnvelope,
+    ST_NumGeometries,
+    ST_SetSRID,
+)
 from geojson_pydantic import Point
-from pydantic import BaseModel
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, case, and_
+
+from app.common.errors import AppHTTPException
 from app.models import (
     SRID,
     City,
-    ClearCut,
-    ClearCutEcologicalZoning,
     ClearCutReport,
     Department,
+    Rules,
 )
-from logging import getLogger
-from geoalchemy2.functions import (
-    ST_Contains,
-    ST_MakeEnvelope,
-    ST_SetSRID,
-    ST_AsGeoJSON,
-    ST_Union,
-    ST_Centroid,
-    ST_Multi,
-)
-
+from app.schemas.base import BaseSchema
 from app.schemas.clear_cut_map import (
     ClearCutMapResponseSchema,
     ClearCutReportPreviewSchema,
-    row_to_report_preview_schema,
+    ClusterizedPointsResponseSchema,
+    CountedPoint,
+    report_to_report_preview_schema,
+)
+from app.services.rules import (
+    list_rules,
 )
 
 logger = getLogger(__name__)
 
 
-class Filters(BaseModel):
+class GeoBounds(BaseSchema):
     south_west_latitude: float
     south_west_longitude: float
     north_east_latitude: float
     north_east_longitude: float
-    min_area_hectare: Optional[float] = None
-    max_area_hectare: Optional[float] = None
-    cut_years: list[int] = None
-    departments_ids: list[int]
-    statuses: list[str]
-    has_ecological_zonings: Optional[bool] = None
 
 
-def query_aggregated_clear_cuts(db: Session):
-    return (
+class Filters(BaseSchema):
+    bounds: GeoBounds | None = None
+    report_id: int | None = None
+    min_area_hectare: float | None = None
+    max_area_hectare: float | None = None
+    cut_years: list[int] = []
+    departments_ids: list[str] = []
+    statuses: list[str] = []
+    has_ecological_zonings: bool | None = None
+    excessive_slope: bool | None = None
+    in_reports_ids: list[str] | None = []
+    out_reports_ids: list[str] | None = []
+
+
+def query_clearcuts_filtered(db: Session, filters: Filters | None):
+    rules = list_rules(db)
+
+    reports_with_rules = (
         db.query(
-            ClearCut.report_id,
-            func.sum(ClearCut.area_hectare).label("total_area_hectare"),
-            func.min(ClearCut.observation_start_date).label("cut_start"),
-            func.max(ClearCut.observation_end_date).label("cut_end"),
-            func.max(ClearCut.updated_at).label("last_update"),
-            func.sum(case((ClearCutEcologicalZoning.clear_cut_id is None, 0), else_=1)).label(
-                "ecological_zonings_count"
+            ClearCutReport.id,
+            func.count(case((Rules.id == rules.area.id, 1), else_=None)).label(
+                "area_rule_count"
             ),
-            func.count(ClearCutEcologicalZoning.clear_cut_id).label(
-                "clear_cuts_ecological_zonings_count"
+            func.count(
+                case((Rules.id == rules.ecological_zoning.id, 1), else_=None)
+            ).label("ecological_zoning_rule_count"),
+            func.count(case((Rules.id == rules.slope.id, 1), else_=None)).label(
+                "slope_rule_count"
             ),
-            ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label("average_location"),
         )
-        .join(
-            ClearCutEcologicalZoning,
-            ClearCutEcologicalZoning.clear_cut_id == ClearCut.id,
-            isouter=True,
-        )
-        .group_by(ClearCut.report_id)
-    )
-
-
-def query_reports(db: Session, aggregated_cuts):
-    return (
-        db.query(
-            ST_AsGeoJSON(aggregated_cuts.c.average_location),
-            ClearCutReport,
-            aggregated_cuts,
-        )
-        .join(
-            aggregated_cuts,
-            aggregated_cuts.c.report_id == ClearCutReport.id,
-        )
-        .join(City, ClearCutReport.city)
-        .join(Department, City.department)
-    )
-
-
-def get_report_preview_by_id(db: Session, report_id: int) -> ClearCutReportPreviewSchema:
-    aggregated_cuts = (
-        query_aggregated_clear_cuts(db).filter(ClearCut.report_id == report_id).subquery()
-    )
-    report = query_reports(db, aggregated_cuts).filter(ClearCutReport.id == report_id).first()
-    return row_to_report_preview_schema(report)
-
-
-def build_clearcuts_map(db: Session, filters: Filters) -> ClearCutMapResponseSchema:
-    envelope = ST_MakeEnvelope(
-        filters.south_west_longitude,
-        filters.south_west_latitude,
-        filters.north_east_longitude,
-        filters.north_east_latitude,
-        SRID,
-    )
-    square = ST_SetSRID(envelope, SRID)
-    aggregated_cuts_in_boundary = (
-        query_aggregated_clear_cuts(db)
-        .filter(ST_Contains(square, ClearCut.location))
+        .join(Rules, ClearCutReport.rules, isouter=True)
+        .group_by(ClearCutReport.id)
         .subquery()
     )
+    reports = (
+        db.query(ClearCutReport)
+        .join(reports_with_rules, ClearCutReport.id == reports_with_rules.c.id)
+        .filter(
+            or_(
+                reports_with_rules.c.area_rule_count > 0,
+                reports_with_rules.c.ecological_zoning_rule_count > 0,
+                reports_with_rules.c.slope_rule_count > 0,
+            )
+        )
+    )
 
-    reports = query_reports(db, aggregated_cuts_in_boundary)
+    if filters is None:
+        return reports
+
+    if filters.in_reports_ids:
+        reports = reports.filter(ClearCutReport.id.in_(filters.in_reports_ids))
+    if filters.out_reports_ids:
+        reports = reports.filter(ClearCutReport.id.notin_(filters.out_reports_ids))
+    if filters.bounds is not None:
+        envelope = ST_MakeEnvelope(
+            filters.bounds.south_west_longitude,
+            filters.bounds.south_west_latitude,
+            filters.bounds.north_east_longitude,
+            filters.bounds.north_east_latitude,
+            SRID,
+        )
+        square = ST_SetSRID(envelope, SRID)
+        reports = reports.filter(ST_Contains(square, ClearCutReport.average_location))
+
+    if filters.report_id is not None:
+        reports = reports.filter(ClearCutReport.id == filters.report_id)
     if filters.has_ecological_zonings:
         reports = reports.filter(
-            aggregated_cuts_in_boundary.c.ecological_zonings_count
-            == aggregated_cuts_in_boundary.c.clear_cuts_ecological_zonings_count
+            reports_with_rules.c.ecological_zoning_rule_count > 0,
         )
     elif filters.has_ecological_zonings is not None:
-        reports = reports.filter(aggregated_cuts_in_boundary.c.ecological_zonings_count == 0)
+        reports = reports.filter(
+            reports_with_rules.c.ecological_zoning_rule_count == 0,
+        )
+    if filters.excessive_slope:
+        reports = reports.filter(
+            reports_with_rules.c.slope_rule_count > 0,
+        )
+    elif filters.excessive_slope is not None:
+        reports = reports.filter(
+            reports_with_rules.c.slope_rule_count == 0,
+        )
+
     if len(filters.cut_years) > 0:
         cut_years_intervals = [
             and_(
-                func.extract("year", aggregated_cuts_in_boundary.c.cut_start) <= year,
-                func.extract("year", aggregated_cuts_in_boundary.c.cut_end) >= year,
+                func.extract("year", ClearCutReport.first_cut_date) <= year,
+                func.extract("year", ClearCutReport.last_cut_date) >= year,
             )
             for year in filters.cut_years
         ]
         reports = reports.filter(or_(*cut_years_intervals))
 
-    if filters.departments_ids and len(filters.departments_ids) > 0:
-        reports = reports.filter(Department.id.in_(map(int, filters.departments_ids)))
+    if len(filters.departments_ids) > 0:
+        reports = (
+            reports.join(City, ClearCutReport.city)
+            .join(Department, City.department)
+            .filter(Department.id.in_(map(int, filters.departments_ids)))
+        )
 
     if len(filters.statuses) > 0:
         reports = reports.filter(ClearCutReport.status.in_(filters.statuses))
 
     if filters.min_area_hectare is not None:
+        print(f"Filtering by min area: {filters.min_area_hectare}")
         reports = reports.filter(
-            aggregated_cuts_in_boundary.c.total_area_hectare >= filters.min_area_hectare
+            ClearCutReport.total_area_hectare >= filters.min_area_hectare
         )
 
     if filters.max_area_hectare is not None:
         reports = reports.filter(
-            aggregated_cuts_in_boundary.c.total_area_hectare <= filters.max_area_hectare
+            ClearCutReport.total_area_hectare <= filters.max_area_hectare
         )
-    points = reports.all()
-    reports = reports.order_by(ClearCutReport.updated_at.desc()).limit(30).all()
+    return reports
 
+
+def get_report_preview_by_id(
+    db: Session, report_id: int
+) -> ClearCutReportPreviewSchema:
+    report = query_clearcuts_filtered(db, Filters(report_id=report_id)).first()
+    if report is None:
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
+            detail=f"Clear cut report {report_id} not found",
+        )
+    return report_to_report_preview_schema(report)
+
+
+def build_clearcuts_map(
+    db: Session, with_points: bool, filters: Filters
+) -> ClearCutMapResponseSchema:
+    reports_with_filters = query_clearcuts_filtered(db, filters)
+    clusterized_points = ClusterizedPointsResponseSchema(total=0, content=[])
+
+    if with_points is True:
+        if filters.bounds is not None:
+            area = (
+                filters.bounds.south_west_longitude
+                - filters.bounds.north_east_longitude
+            ) * (
+                filters.bounds.south_west_latitude - filters.bounds.north_east_latitude
+            )
+            # Needs to clusterized because with estimate that points are too many
+            if area > 1:
+                reports_cnt = reports_with_filters.count()
+                print(f"COUNT {reports_cnt}")
+                if reports_cnt == 0:
+                    clusterized_points = ClusterizedPointsResponseSchema(
+                        total=reports_cnt, content=[]
+                    )
+                else:
+                    # Distance calculated to estimate the clusters size,
+                    # if we have many points in an area the distance used by the cluster while be bigger
+                    distance = sqrt(area / reports_cnt / 2)
+                    clusters = db.query(
+                        func.unnest(
+                            ST_ClusterWithin(
+                                reports_with_filters.subquery().c.average_location,
+                                distance,
+                            )
+                        ).label("cluster"),
+                    ).subquery()
+                    clusterized_points = ClusterizedPointsResponseSchema(
+                        total=reports_cnt,
+                        content=[
+                            CountedPoint(
+                                count=row[0], point=Point.model_validate_json(row[1])
+                            )
+                            for row in db.query(
+                                ST_NumGeometries(clusters.c.cluster).label(
+                                    "points_cnt"
+                                ),
+                                ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
+                            ).all()
+                        ],
+                    )
+            else:
+                # If area is little clusters are useless
+                clusterized_points = process_points_from_reports(reports_with_filters)
+        else:
+            # If area doesnt exists clusters are useless
+            clusterized_points = process_points_from_reports(reports_with_filters)
+
+    reports_with_filters = reports_with_filters.limit(30).all()
     map_response = ClearCutMapResponseSchema(
-        points=[Point.model_validate_json(point[0]) for point in points],
-        previews=list(map(row_to_report_preview_schema, reports)),
+        points=clusterized_points,
+        previews=list(map(report_to_report_preview_schema, reports_with_filters)),
     )
     return map_response
+
+
+def process_points_from_reports(reports_with_filters):
+    all_reports = reports_with_filters.all()
+    clusterized_points = ClusterizedPointsResponseSchema(
+        total=len(all_reports),
+        content=[
+            CountedPoint(
+                count=1,
+                point=Point.model_validate_json(report.average_location_json),
+            )
+            for report in all_reports
+        ],
+    )
+
+    return clusterized_points

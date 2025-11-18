@@ -1,17 +1,17 @@
 from logging import getLogger
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from app.models import Department
+from app.schemas.base import BaseSchema
 
 logger = getLogger(__name__)
 
 
-class DepartmentBaseSchema(BaseModel):
+class DepartmentBaseSchema(BaseSchema):
     id: str
     code: str = Field(json_schema_extra={"example": "01"})
     name: str = Field(json_schema_extra={"example": "Ain"})
-    model_config = ConfigDict(from_attributes=True)
 
 
 def department_to_department_base_schema(

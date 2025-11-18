@@ -1,34 +1,36 @@
+import { faker } from "@faker-js/faker";
+import { HttpResponse, http } from "msw";
 import type {
 	DepartmentResponse,
 	EcologicalZoningResponse,
 	ReferentialResponse,
-	TagResponse,
+	RuleResponse,
 } from "@/shared/store/referential/referential";
-import { faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
 
-export const fakeTags: TagResponse = {
-	[faker.string.uuid()]: { type: "ecological_zoning" },
+export const fakeRules: RuleResponse = {
 	[faker.string.uuid()]: {
-		type: "excessive_area",
-		value: faker.number.int({ min: 0, max: 100 }),
+		type: "ecological_zoning",
+		ecologicalZoningsIds: [],
 	},
 	[faker.string.uuid()]: {
-		type: "excessive_slop",
-		value: faker.number.int({ min: 0, max: 100 }),
+		type: "area",
+		threshold: faker.number.int({ min: 0, max: 100 }),
+	},
+	[faker.string.uuid()]: {
+		type: "slope",
+		threshold: faker.number.int({ min: 0, max: 100 }),
 	},
 };
 
 export const fakeEcologicalZonings: EcologicalZoningResponse = {
 	"1": {
 		type: "Natura2000",
-		sub_type: "ZSC",
+		subType: "ZSC",
 		name: "Forêt de Rambouillet",
 		code: "FR1100796",
 	},
 	"2": {
 		type: "Natura2000",
-		sub_type: null,
 		name: "Etands de canal d'Ille et Rance",
 		code: "FR5300050",
 	},
@@ -143,7 +145,7 @@ export const fakeDepartments: DepartmentResponse = [
 export const mockReferential = http.get("*/api/v1/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
-		ecological_zonings: fakeEcologicalZonings,
-		tags: fakeTags,
+		ecologicalZonings: fakeEcologicalZonings,
+		rules: fakeRules,
 	} satisfies ReferentialResponse);
 });

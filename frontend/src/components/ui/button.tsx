@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
@@ -9,14 +9,19 @@ export const buttonVariants = cva(
 			variant: {
 				default:
 					"bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
+				zinc: "bg-zinc-200 shadow-xs hover:bg-zinc-300/90 hover:border hover:border-zinc-500 ",
+				white:
+					"bg-zinc-100 shadow-xs hover:bg-zinc-200/90 hover:border hover:border-zinc-300 ",
 				destructive:
 					"bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90",
+				warning:
+					"bg-warning text-warning-foreground shadow-xs hover:bg-warning/90",
 				outline:
 					"border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
 				secondary:
 					"bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
 				ghost: "hover:bg-accent hover:text-accent-foreground",
-				link: "text-primary underline-offset-4 hover:underline",
+				link: "underline-offset-4 hover:underline",
 			},
 			size: {
 				default: "h-9 px-4 py-2 has-[>svg]:px-3",

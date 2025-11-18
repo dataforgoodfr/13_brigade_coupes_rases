@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import type { ButtonProps } from "@/components/ui/button";
 import {
 	Command,
@@ -19,9 +21,6 @@ import { ExpandButton } from "@/shared/components/button/ExpandButton";
 import { ResetButton } from "@/shared/components/button/ResetButton";
 import type { SelectableItemEnhanced } from "@/shared/items";
 
-import { Check } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-
 export type SingleSelectComboboxProps<TItem> = {
 	type: "single";
 	onChanged?: (item: SelectableItemEnhanced<TItem>) => void;
@@ -39,12 +38,13 @@ export type ComboboxProps<TItem> = {
 	commandInputProps?: Omit<CommandInputProps, "children">;
 	commandEmptyProps?: CommandEmptyProps;
 	buttonProps?: ButtonProps;
-	items: SelectableItemEnhanced<TItem>[];
+	items?: SelectableItemEnhanced<TItem>[];
 	closeAfterToggle?: boolean;
 } & (SingleSelectComboboxProps<TItem> | MultiSelectComboboxProps<TItem>);
 
+const EMPTY_ARRAY: unknown[] = [];
 export function Combobox<TItem>({
-	items,
+	items = EMPTY_ARRAY as SelectableItemEnhanced<TItem>[],
 	buttonProps,
 	commandInputProps,
 	commandEmptyProps,
@@ -134,39 +134,37 @@ export function Combobox<TItem>({
 			</PopoverTrigger>
 
 			<PopoverContent>
-				<>
-					<Command>
-						{commandInputProps && <CommandInput {...commandInputProps} />}
-						<CommandList>
-							{commandEmptyProps && <CommandEmpty {...commandEmptyProps} />}
-							<CommandGroup>
-								{localItems.map((enhancedItem) => (
-									<CommandItem
-										key={enhancedItem.value}
-										value={enhancedItem.value}
-										onSelect={() => {
-											toggle(enhancedItem);
-											if (closeAfterToggle) {
-												close();
-											}
-										}}
-									>
-										{enhancedItem.label}
-										<Check
-											className={cn(
-												"ml-auto",
-												enhancedItem.isSelected ? "opacity-100" : "opacity-0",
-											)}
-										/>
-									</CommandItem>
-								))}
-							</CommandGroup>
-						</CommandList>
-					</Command>
-					{hasReset && (
-						<ResetButton disabled={selectedItemsCount === 0} onClick={reset} />
-					)}
-				</>
+				<Command>
+					{commandInputProps && <CommandInput {...commandInputProps} />}
+					<CommandList>
+						{commandEmptyProps && <CommandEmpty {...commandEmptyProps} />}
+						<CommandGroup>
+							{localItems.map((enhancedItem) => (
+								<CommandItem
+									key={enhancedItem.value}
+									value={enhancedItem.value}
+									onSelect={() => {
+										toggle(enhancedItem);
+										if (closeAfterToggle) {
+											close();
+										}
+									}}
+								>
+									{enhancedItem.label}
+									<Check
+										className={cn(
+											"ml-auto",
+											enhancedItem.isSelected ? "opacity-100" : "opacity-0",
+										)}
+									/>
+								</CommandItem>
+							))}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+				{hasReset && (
+					<ResetButton disabled={selectedItemsCount === 0} onClick={reset} />
+				)}
 			</PopoverContent>
 		</Popover>
 	);

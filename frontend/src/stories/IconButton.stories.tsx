@@ -1,7 +1,7 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { MailIcon } from "lucide-react";
 import type { ButtonProps } from "@/components/ui/button";
 import { IconButton } from "@/shared/components/button/Button";
-import type { Meta, StoryObj } from "@storybook/react";
-import { MailIcon } from "lucide-react";
 
 const meta = {
 	title: "IconButton",

@@ -42,6 +42,7 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - "8080:8080"
+      - "54112:54112"
     depends_on:
       - db
 

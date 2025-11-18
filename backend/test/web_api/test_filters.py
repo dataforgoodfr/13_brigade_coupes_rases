@@ -1,5 +1,5 @@
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
 
 
 def test_get_filters(client: TestClient):

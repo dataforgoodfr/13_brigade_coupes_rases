@@ -1,14 +1,12 @@
 from logging.config import fileConfig
+from typing import cast
 
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
-from app.models import Base
-
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app.config import settings
+from app.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,17 +21,17 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-configuration = config.get_section(config.config_ini_section)
+configuration = cast(dict[str, str], config.get_section(config.config_ini_section))
 configuration["sqlalchemy.url"] = settings.DATABASE_URL
 IGNORE_TABLES = ["spatial_ref_sys"]
 
 
 def render_item(obj_type, obj, autogen_context):
     """Apply custom rendering for selected items."""
-    if obj_type == "type" and isinstance(obj, (Geometry, Geography, Raster)):
+    if obj_type == "type" and isinstance(obj, Geometry | Geography | Raster):
         import_name = obj.__class__.__name__
         autogen_context.imports.add(f"from geoalchemy2 import {import_name}")
-        return "%r" % obj
+        return f"{obj!r}"
 
     # default rendering for other objects
     return False
@@ -46,7 +44,9 @@ def include_object(object, name, type_, reflected, compare_to):
             try:
                 col = object.expressions[0]
                 if (
-                    alembic_helpers._check_spatial_type(col.type, (Geometry, Geography, Raster))
+                    alembic_helpers._check_spatial_type(
+                        col.type, (Geometry, Geography, Raster)
+                    )
                     and col.type.spatial_index
                 ):
                     return False
@@ -76,7 +76,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = configuration.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,

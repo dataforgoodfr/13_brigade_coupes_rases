@@ -4,7 +4,7 @@
 
 ### Critical features
 
-Review clear cuttings on a map or a list view  
+Review clear cuts on a map or a list view  
 Allow users to edit clear cutting form to add extra information
 
 ## CI/CD
@@ -57,7 +57,7 @@ We use register type "prompt" to allow user prompting before updating installed 
 
 ### /features
 
-On subfolder by feature e.g : clear-cutting handle all features relative to clear cuttings, visualization, edition etc...
+On subfolder by feature e.g : clear-cutting handle all features relative to clear cuts, visualization, edition etc...
 
 ### /routes
 

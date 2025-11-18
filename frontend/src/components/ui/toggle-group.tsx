@@ -1,12 +1,11 @@
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import type { VariantProps } from "class-variance-authority";
-
+import { type ComponentProps, createContext, useContext } from "react";
 import { cn } from "@/lib/utils";
 import {
 	type ToggleVariantsProps,
 	toggleVariants,
 } from "@/shared/components/Toggle";
-import { type ComponentProps, createContext, useContext } from "react";
 
 interface ToggleGroupImplSingleProps<T extends string = string> {
 	type: "single";

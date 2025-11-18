@@ -1,16 +1,18 @@
-from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from app.models import NATURA_2000, ClearCutEcologicalZoning, EcologicalZoning
+from app.schemas.base import BaseSchema
 
 
-class EcologicalZoningSchema(BaseModel):
+class EcologicalZoningSchema(BaseSchema):
     type: str = Field(json_schema_extra={"example": NATURA_2000}, default=NATURA_2000)
-    sub_type: Optional[str] = Field(
+    sub_type: str | None = Field(
         json_schema_extra={"example": "Protection des oiseaux"}, default=None
     )
     name: str = Field(
-        json_schema_extra={"example": "Site à chauves-souris de La Guerche-sur-l'Aubois"}
+        json_schema_extra={
+            "example": "Site à chauves-souris de La Guerche-sur-l'Aubois"
+        }
     )
     code: str = Field(json_schema_extra={"example": "FR2402003"})
 
@@ -24,10 +26,6 @@ def ecological_zoning_to_ecological_zoning_schema(
         sub_type=ecological_zoning.sub_type,
         name=ecological_zoning.name,
     )
-
-
-class CreateEcologicalZoningSchema(EcologicalZoningSchema):
-    area_hectare: float = Field(json_schema_extra={"example": 15})
 
 
 class ClearCutEcologicalZoningResponseSchema(EcologicalZoningSchema):

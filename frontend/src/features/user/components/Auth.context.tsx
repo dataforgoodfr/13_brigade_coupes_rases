@@ -1,10 +1,10 @@
+import { createContext, type ReactNode, useContext, useEffect } from "react";
 import {
 	getMeThunk,
 	getStoredToken,
-	selectLoggedUser,
-} from "@/features/user/store/user.slice";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { type ReactNode, createContext, useContext, useEffect } from "react";
+	useConnectedMe,
+} from "@/features/user/store/me.slice";
+import { useAppDispatch } from "@/shared/hooks/store";
 
 export type AuthContext = { isAuthenticated: boolean; isAdmin: boolean };
 const AuthCtx = createContext<AuthContext>({
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function AuthProvider({ children }: Props) {
-	const user = useAppSelector(selectLoggedUser);
+	const user = useConnectedMe();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		if (user !== undefined) {

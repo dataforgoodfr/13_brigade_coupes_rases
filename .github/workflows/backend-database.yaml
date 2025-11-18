@@ -14,6 +14,7 @@ on:
       database-action:
         required: true
         options:
+          - upgrade-database
           - setup-database
           - reset-database
         type: choice
@@ -24,7 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  seed-database:
+  apply:
     env:
       DATABASE_URL: ${{secrets.DATABASE_URL}}
       ENVIRONMENT: development
@@ -46,13 +47,19 @@ jobs:
       - name: Install development dependencies
         run: make install-dev-dependencies
         working-directory: backend
-        
+
       - name: Setup and seed database
         working-directory: backend
         if: ${{ inputs.database-action == 'setup-database' }}
         run: |
           make upgrade-db
           make seed-${{ inputs.env }}-db
+
+      - name: Upgrade database
+        working-directory: backend
+        if: ${{ inputs.database-action == 'upgrade-database' }}
+        run: |
+          make upgrade-db
 
       - name: Reset database
         working-directory: backend

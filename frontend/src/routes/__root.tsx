@@ -1,15 +1,22 @@
+import { createRootRouteWithContext, Navigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa";
+import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
+
+const useReloadPwa: () => void = (
+	await import(/* @vite-ignore */ import.meta.env.VITE_USE_RELOAD_PWA_PATH)
+).useReloadPwa;
+
 import type { AuthContext } from "@/features/user/components/Auth.context";
 import { AppLayout } from "@/shared/components/AppLayout";
+import { AppMobileLayout } from "@/shared/components/AppMobileLayout";
 import { TimeProgress } from "@/shared/components/TimeProgress";
+import { useBreakpoint } from "@/shared/hooks/breakpoint";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import {
 	getReferentialThunk,
 	selectReferentialStatus,
 } from "@/shared/store/referential/referential.slice";
-import { Navigate, createRootRouteWithContext } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 interface RouterContext {
 	auth?: AuthContext;
@@ -26,10 +33,12 @@ function RootComponent() {
 		dispatch(getReferentialThunk());
 	}, [dispatch]);
 	const referentialStatus = useAppSelector(selectReferentialStatus);
-
+	const { breakpoint } = useBreakpoint();
 	return referentialStatus === "success" ? (
 		<>
-			<AppLayout />
+			<MapProvider>
+				{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+			</MapProvider>
 			<Toaster />
 		</>
 	) : (

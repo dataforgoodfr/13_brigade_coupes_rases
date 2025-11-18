@@ -1,42 +1,57 @@
-from typing import Optional
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from app.models import Department, User
-from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
-from app.schemas.user import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+import secrets
+from datetime import datetime
 from logging import getLogger
+
+from fastapi import status
+from pydantic.alias_generators import to_snake
+from sqlalchemy.orm import Session, aliased
+
+from app.common.errors import AppHTTPException
+from app.models import ClearCutReport, Department, User, user_department
+from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.schemas.user import (
+    MeUpdateSchema,
+    UserResponseSchema,
+    UserUpdateSchema,
+    user_to_user_response_schema,
+)
+from app.services.get_password_hash import get_password_hash
 
 logger = getLogger(__name__)
 
 
-def user_to_user_response_schema(user: User) -> UserResponseSchema:
-    return UserResponseSchema(
-        id=str(user.id),
-        deleted_at=user.deleted_at,
-        created_at=user.created_at,
-        role=user.role,
-        updated_at=user.updated_at,
-        firstname=user.firstname,
-        lastname=user.lastname,
-        login=user.login,
-        email=user.email,
-        departments=[str(department.id) for department in user.departments],
+def create_user(db: Session, user: UserUpdateSchema) -> User:
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email or User.login == user.login)
+        .first()
     )
+    password = secrets.token_urlsafe(10)
+    new_user: User = existing_user if existing_user is not None else User()
+    if existing_user is not None and existing_user.deleted_at is None:
+        raise AppHTTPException(
+            status_code=409,
+            type="USER_ALREADY_EXISTS",
+            detail="A user already has the same login or the same email",
+        )
+    new_user.created_at = datetime.now()
+    new_user.updated_at = datetime.now()
+    new_user.first_name = user.first_name
+    new_user.last_name = user.last_name
+    new_user.login = user.login
+    new_user.email = user.email
+    new_user.role = user.role
+    new_user.password = get_password_hash(password)
 
-
-def create_user(db: Session, user: UserCreateSchema) -> User:
-    new_user = User(
-        firstname=user.firstname,
-        lastname=user.lastname,
-        login=user.login,
-        email=user.email,
-        role=user.role,
-    )
     for department_id in user.departments:
-        department_db = db.query(Department).filter(Department.id == department_id).first()
+        department_db = (
+            db.query(Department).filter(Department.id == int(department_id)).first()
+        )
         if department_db is None:
-            raise HTTPException(
-                status_code=404, detail=f"Item with id {department_db} not found"
+            raise AppHTTPException(
+                status_code=404,
+                type="DEPARTMENT_NOT_FOUND",
+                detail=f"Department with id {department_db} not found",
             )
         new_user.departments.append(department_db)
     db.add(new_user)
@@ -46,12 +61,51 @@ def create_user(db: Session, user: UserCreateSchema) -> User:
 
 
 def get_users(
-    db: Session, url: str, page: int = 0, size: int = 10
+    db: Session,
+    url: str,
+    page: int,
+    size: int,
+    full_text_search: str,
+    email: str,
+    login: str,
+    first_name: str,
+    last_name: str,
+    roles: list[str],
+    departments_ids: list[str],
+    asc_sort: list[str],
+    desc_sort: list[str],
 ) -> PaginationResponseSchema[UserResponseSchema]:
-    users = db.query(User).offset(page * size).limit(size).all()
-    users_count = db.query(User.id).count()
+    query = db.query(User).filter(User.deleted_at.__eq__(None))
+    for sort in asc_sort:
+        query = query.order_by(User.__table__.c[to_snake(sort)])
+    for sort in desc_sort:
+        query = query.order_by(User.__table__.c[to_snake(sort)].desc())
+    if email is not None:
+        query = query = query.filter(User.email.ilike(f"%{email}%"))
+    if login is not None:
+        query = query.filter(User.login.ilike(f"%{login}%"))
+    if first_name is not None:
+        query = query.filter(User.first_name.ilike(f"%{first_name}%"))
+    if last_name is not None:
+        query = query.filter(User.last_name.ilike(f"%{last_name}%"))
+    if roles is not None:
+        query = query.filter(User.role.in_(roles))
+    if full_text_search is not None:
+        print(full_text_search)
+        query = query.filter(User.search_vector.ilike(f"%{full_text_search}%"))
+
+    if departments_ids is not None and len(departments_ids) > 0:
+        matching_departments = (
+            db.query(user_department)
+            .filter(user_department.c.department_id.in_(departments_ids))
+            .subquery()
+        )
+        aliased(user_department, matching_departments, name="matching_departments")
+        query = query.join(matching_departments)
+    users = query.offset(page * size).limit(size).all()
+    users_count = query.count()
     return PaginationResponseSchema(
-        metadata=PaginationMetadataSchema(
+        metadata=PaginationMetadataSchema.create(
             page=page, size=size, url=url, total_count=users_count
         ),
         content=[user_to_user_response_schema(user) for user in users],
@@ -60,15 +114,36 @@ def get_users(
 
 def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
     user = db.get(User, id)
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if user is None or user.deleted_at is not None:
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="USER_NOT_FOUND",
+            detail=f"User {id} not found",
+        )
     return user_to_user_response_schema(user)
+
+
+def delete_user_by_id(id: int, db: Session):
+    user = db.get(User, id)
+    if user is None or user.deleted_at is not None:
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="USER_NOT_FOUND",
+            detail=f"User {id} not found",
+        )
+    user.deleted_at = datetime.now()
+    db.commit()
 
 
 def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     user_db = db.get(User, id)
-    if not user_db:
-        raise HTTPException(status_code=404, detail="user not found")
+    if user_db is None or user_db.deleted_at is not None:
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="USER_NOT_FOUND",
+            detail=f"User {id} not found",
+        )
+    user_db.updated_at = datetime.now()
     update_data = user_in.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
@@ -79,8 +154,9 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
                     db.query(Department).filter(Department.id == department_id).first()
                 )
                 if department_db is None:
-                    raise HTTPException(
+                    raise AppHTTPException(
                         status_code=404,
+                        type="DEPARTMENT_NOT_FOUND",
                         detail=f"Item with id {department_db} not found",
                     )
                 user_db.departments.append(department_db)
@@ -91,5 +167,12 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
     return user_db
 
 
-def get_user_by_email(db: Session, email: str) -> Optional[User]:
+def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter_by(email=email).first()
+
+
+def update_me(db: Session, user: User, request: MeUpdateSchema):
+    user.favorites = (
+        db.query(ClearCutReport).filter(ClearCutReport.id.in_(request.favorites)).all()
+    )
+    db.commit()
