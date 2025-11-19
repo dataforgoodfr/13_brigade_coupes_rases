@@ -2,6 +2,7 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import clsx from "clsx";
 import { House, LogIn, LogOutIcon } from "lucide-react";
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
+import dataForGoodIcon from "@/assets/dataforgoodLogo.png";
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
 import { meSlice, useConnectedMe } from "@/features/user/store/me.slice";
 import { NavbarItem } from "@/shared/components/NavbarItem";
@@ -30,9 +31,16 @@ export function Navbar({ className }: Props) {
 		>
 			<div className="flex flex-col items-center ">
 				<img
+					title="Data for Good"
+					alt="Data for Good"
+					src={dataForGoodIcon}
+					className="h-auto aspect-square object-cover size-11"
+				/>
+				<img
+					title="Canopée"
 					alt="Canopée"
 					src={canopeeWhiteIcon}
-					className="h-auto aspect-square object-cover my-7 size-11"
+					className="h-auto aspect-square object-cover mb-7 mt-8 size-11"
 				/>
 				<div className="flex flex-col gap-10 items-center">
 					<NavbarItem type="link" to="/clear-cuts" Icon={House} title="Carte" />
