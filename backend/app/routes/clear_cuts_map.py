@@ -84,6 +84,12 @@ def get_clearcuts_map(
         description="List of cut years",
         openapi_examples={"default": {"value": [2024, 2025, 2026]}},
     ),
+    cut_months: list[int] = Query(
+        [],
+        alias="cutMonths",
+        description="List of cut months",
+        openapi_examples={"default": {"value": [1, 2, 3]}},
+    ),
     statuses: list[str] = Query(
         [],
         description="List of statuses",
@@ -149,6 +155,7 @@ def get_clearcuts_map(
                 min_area_hectare=min_area_hectare,
                 max_area_hectare=max_area_hectare,
                 cut_years=cut_years,
+                cut_months=cut_months,
                 statuses=statuses,
                 departments_ids=departments_ids,
                 has_ecological_zonings=has_ecological_zonings,

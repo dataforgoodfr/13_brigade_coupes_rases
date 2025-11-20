@@ -28,6 +28,7 @@ import type { Range } from "@/shared/types/range";
 export interface FiltersState {
 	rules: SelectableItem<Rule>[];
 	cutYears: SelectableItem<number>[];
+	cutMonths: SelectableItem<number>[];
 	geoBounds?: Bounds;
 	area_range: Range;
 	departments: SelectableItem<Department>[];
@@ -40,6 +41,7 @@ export interface FiltersState {
 }
 export const initialState: FiltersState = {
 	cutYears: [],
+	cutMonths: [],
 	rules: [],
 	departments: [],
 	area_range: { min: 0, max: 0 },
@@ -83,6 +85,12 @@ export const filtersSlice = createSlice({
 			{ payload }: PayloadAction<SelectableItem<number>[]>,
 		) => {
 			state.cutYears = payload;
+		},
+		setCutMonths: (
+			state,
+			{ payload }: PayloadAction<SelectableItem<number>[]>,
+		) => {
+			state.cutMonths = payload;
 		},
 		setAreas: (
 			state,
@@ -171,6 +179,9 @@ export const filtersSlice = createSlice({
 			) => {
 				state.areas = [area_range.min, area_range.max];
 				state.cutYears = listToSelectableItems(cutYears);
+				state.cutMonths = listToSelectableItems([
+					1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+				]);
 				state.rules = listToSelectableItems(rules);
 				state.ecological_zoning = booleanToSelectableItem(ecological_zoning);
 				state.excessive_slope = booleanToSelectableItem(excessive_slope);
@@ -193,6 +204,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 	(
 		{
 			cutYears,
+			cutMonths,
 			geoBounds,
 			ecological_zoning,
 			statuses,
@@ -210,6 +222,7 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 		return {
 			geoBounds,
 			cutYears: cutYears.filter((y) => y.isSelected).map((y) => y.item),
+			cutMonths: cutMonths.filter((m) => m.isSelected).map((m) => m.item),
 			departmentsIds: departments
 				.filter((d) => d.isSelected)
 				.map((d) => d.item.id),
@@ -229,6 +242,10 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 export const selectCutYears = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.cutYears,
+);
+export const selectCutMonths = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.cutMonths,
 );
 export const selectDepartments = createTypedDraftSafeSelector(
 	selectState,

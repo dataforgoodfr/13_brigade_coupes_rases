@@ -4,6 +4,7 @@ import { boundsSchema } from "./types";
 
 const filtersRequestSchema = z.object({
 	cutYears: z.array(z.number()),
+	cutMonths: z.array(z.number()),
 	minAreaHectare: z.number().optional(),
 	maxAreaHectare: z.number().optional(),
 	geoBounds: boundsSchema.optional(),
