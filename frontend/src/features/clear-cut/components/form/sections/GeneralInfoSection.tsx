@@ -9,6 +9,26 @@ export const generalInfoKey: SectionForm = {
 
 export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
+		name: "report.firstCutDate",
+		label: "Début de la coupe",
+		type: "fixed",
+		renderConditions: [],
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<FormattedDate value={value as string} />
+			) : undefined,
+	},
+	{
+		name: "report.lastCutDate",
+		label: "Fin de la coupe",
+		type: "fixed",
+		renderConditions: [],
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<FormattedDate value={value as string} />
+			) : undefined,
+	},
+	{
 		name: "report.updatedAt",
 		transformValue: ({ value }) => <FormattedDate value={value as string} />,
 		label: "Date de signalement",
@@ -38,26 +58,6 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		label: "Longitude",
 		type: "fixed",
 		renderConditions: [],
-	},
-	{
-		name: "report.firstCutDate",
-		label: "Début de la coupe",
-		type: "fixed",
-		renderConditions: [],
-		transformValue: ({ value }) =>
-			value !== undefined ? (
-				<FormattedDate value={value as string} />
-			) : undefined,
-	},
-	{
-		name: "report.lastCutDate",
-		label: "Fin de la coupe",
-		type: "fixed",
-		renderConditions: [],
-		transformValue: ({ value }) =>
-			value !== undefined ? (
-				<FormattedDate value={value as string} />
-			) : undefined,
 	},
 	{
 		name: "report.totalAreaHectare",
