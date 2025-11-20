@@ -31,7 +31,7 @@ export const NavbarItem: React.FC<Props> = ({ Icon, ...props }) => {
 		<Link
 			{...props}
 			activeProps={{
-				className: "border-green-500  text-gray-900",
+				className: "border-transparent hover:border-gray-300 text-gray-900",
 			}}
 			inactiveProps={{
 				className: inactiveClassName,
