@@ -41,4 +41,3 @@ target-version = "py313"
 [tool.ruff.lint]
 # Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
 extend-select = ["I", "B", "UP"]
-ignore = ["UP038"] # https://github.com/astral-sh/ruff/issues/7871 https://github.com/astral-sh/ruff/pull/16681
