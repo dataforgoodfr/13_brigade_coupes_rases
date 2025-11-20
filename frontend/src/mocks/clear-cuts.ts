@@ -98,6 +98,11 @@ export const createClearCutReportResponseBaseMock = (
 				cut.observationEndDate > acc ? cut.observationEndDate : acc,
 			clear_cuts[0].observationEndDate,
 		),
+		firstCutDate: clear_cuts.reduce(
+			(acc, cut) =>
+				cut.observationStartDate < acc ? cut.observationStartDate : acc,
+			clear_cuts[0].observationStartDate,
+		),
 		updatedAt: date.toJSON().split("T")[0],
 		...override,
 	};

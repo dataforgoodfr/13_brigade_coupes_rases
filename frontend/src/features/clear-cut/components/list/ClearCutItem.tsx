@@ -43,7 +43,7 @@ const FavoriteButton = ({ reportId }: FavoriteButtonProps) => {
 };
 export function ClearCutItem({
 	id,
-	createdAt,
+	firstCutDate,
 	status,
 	comment,
 	rules: tags,
@@ -68,7 +68,11 @@ export function ClearCutItem({
 		>
 			<div className="flex justify-between">
 				<h3 className="me-auto text-lg font-bold text-gray-800">{city}</h3>
-				<FormattedDate value={createdAt} />
+				<FormattedDate value={firstCutDate}>
+					{(formattedDate) => (
+						<span title="Date de la première coupe">{formattedDate}</span>
+					)}
+				</FormattedDate>
 			</div>
 			<div className="flex justify-between items-center">
 				<StatusWithLabel status={status} />

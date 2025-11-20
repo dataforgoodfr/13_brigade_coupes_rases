@@ -77,6 +77,7 @@ export const clearCutReportResponseSchema = z.object({
 	totalBdfMixedAreaHectare: z.number().optional(),
 	totalBdfPoplarAreaHectare: z.number().optional(),
 	lastCutDate: z.iso.date(),
+	firstCutDate: z.iso.date(),
 	satelliteImages: z.array(z.url()).optional(),
 	rulesIds: z.array(z.string()),
 	affectedUser: publicUserSchema.optional(),

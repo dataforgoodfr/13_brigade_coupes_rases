@@ -56,6 +56,9 @@ class ClearCutReportPreviewSchema(BaseSchema):
     last_cut_date: datetime.date = Field(
         json_schema_extra={"example": "2023-10-01"},
     )
+    first_cut_date: datetime.date = Field(
+        json_schema_extra={"example": "2023-09-01"},
+    )
     slope_area_hectare: float | None = Field(
         json_schema_extra={"example": 10.0},
     )
@@ -112,6 +115,9 @@ def report_to_report_preview_schema(
         total_bdf_poplar_area_hectare=report.total_bdf_poplar_area_hectare,
         last_cut_date=max(
             clear_cut.observation_end_date for clear_cut in report.clear_cuts
+        ).date(),
+        first_cut_date=min(
+            clear_cut.observation_start_date for clear_cut in report.clear_cuts
         ).date(),
     )
 

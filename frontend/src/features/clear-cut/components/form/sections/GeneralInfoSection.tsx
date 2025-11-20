@@ -40,7 +40,7 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		renderConditions: [],
 	},
 	{
-		name: "report.lastCutDate",
+		name: "report.firstCutDate",
 		label: "Date de la coupe",
 		type: "fixed",
 		renderConditions: [],
