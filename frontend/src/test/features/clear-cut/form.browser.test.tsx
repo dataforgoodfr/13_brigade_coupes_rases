@@ -69,6 +69,7 @@ const setupTest = (
 			id: "ABC",
 			city: "Paris",
 			lastCutDate: "2024-03-19",
+			firstCutDate: "2024-02-03",
 			departmentId: Object.keys(fakeDepartments)[0],
 			updatedAt: "2026-03-13",
 			slopeAreaHectare: 0.54556,
@@ -142,6 +143,9 @@ const setupTest = (
 				break;
 			case "report.lastCutDate":
 				expected = "19/03/2024";
+				break;
+			case "report.firstCutDate":
+				expected = "03/02/2024";
 				break;
 			default:
 				break;
