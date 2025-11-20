@@ -1,5 +1,5 @@
-import { FormattedDate, FormattedNumber } from "react-intl";
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
+import { FormattedDate, FormattedNumber } from "react-intl";
 import type { SectionForm, SectionFormItem } from "../types";
 
 export const generalInfoKey: SectionForm = {
@@ -41,7 +41,17 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 	},
 	{
 		name: "report.firstCutDate",
-		label: "Date de la coupe",
+		label: "Début de la coupe",
+		type: "fixed",
+		renderConditions: [],
+		transformValue: ({ value }) =>
+			value !== undefined ? (
+				<FormattedDate value={value as string} />
+			) : undefined,
+	},
+	{
+		name: "report.lastCutDate",
+		label: "Fin de la coupe",
 		type: "fixed",
 		renderConditions: [],
 		transformValue: ({ value }) =>
