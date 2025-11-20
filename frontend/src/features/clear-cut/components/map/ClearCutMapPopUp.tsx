@@ -1,9 +1,9 @@
-import { useMemo } from "react";
-import { FormattedDate, FormattedNumber, useIntl } from "react-intl";
-import { Popup } from "react-leaflet";
 import { DotByStatus } from "@/features/clear-cut/components/DotByStatus";
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
+import { useMemo } from "react";
+import { FormattedDate, FormattedNumber, useIntl } from "react-intl";
+import { Popup } from "react-leaflet";
 
 type Props = {
 	totalAreaHectare: number;
@@ -56,6 +56,7 @@ export function ClearCutMapPopUp({
 		status,
 		rules: tags,
 		firstCutDate,
+		lastCutDate,
 		totalAreaHectare,
 		updatedAt,
 		slopeAreaHectare,
@@ -93,9 +94,15 @@ export function ClearCutMapPopUp({
 
 			<div className="flex flex-col gap-2.5 text-base text-secondary font-jakarta font-medium">
 				<div>
-					Date de la coupe :{" "}
+					Début de la coupe :{" "}
 					<strong>
 						<FormattedDate value={firstCutDate} />
+					</strong>
+				</div>
+				<div>
+					Fin de la coupe :{" "}
+					<strong>
+						<FormattedDate value={lastCutDate} />
 					</strong>
 				</div>
 				<div>
