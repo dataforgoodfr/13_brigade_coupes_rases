@@ -141,9 +141,23 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
 
     if len(filters.cut_months) > 0:
         cut_months_intervals = [
-            and_(
-                func.extract("month", ClearCutReport.first_cut_date) <= month,
-                func.extract("month", ClearCutReport.last_cut_date) >= month,
+            or_(
+                # Same year: month is between first and last cut month
+                and_(
+                    func.extract("year", ClearCutReport.first_cut_date)
+                    == func.extract("year", ClearCutReport.last_cut_date),
+                    func.extract("month", ClearCutReport.first_cut_date) <= month,
+                    func.extract("month", ClearCutReport.last_cut_date) >= month,
+                ),
+                # Multi-year: month is after first cut month in first year OR before last cut month in last year OR in any year in between
+                and_(
+                    func.extract("year", ClearCutReport.first_cut_date)
+                    < func.extract("year", ClearCutReport.last_cut_date),
+                    or_(
+                        func.extract("month", ClearCutReport.first_cut_date) <= month,
+                        func.extract("month", ClearCutReport.last_cut_date) >= month,
+                    ),
+                ),
             )
             for month in filters.cut_months
         ]
