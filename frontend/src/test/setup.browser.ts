@@ -18,6 +18,7 @@ configure({
 });
 beforeAll(() => worker.start());
 afterEach(() => {
+	localStorage.clear();
 	worker.resetHandlers();
 });
 afterAll(() => worker.stop());

@@ -98,9 +98,8 @@ def add_clear_cut_form_entry(
 
     # Update report status from "to_validate" to "validated" when form is submitted
     report = db.get(ClearCutReport, report_id)
-    if report and report.status == "to_validate":
-        if report.status != "validated":
-            report.status = "validated"
+    if report is not None and report.status == "to_validate":
+        report.status = "validated"
 
     db.commit()
     db.refresh(new_clear_cut_form_entry)
@@ -133,6 +132,7 @@ def find_clear_cut_form_by_report_id(
 def find_last_clear_cut_form_by_report_id(
     db: Session, report_id: int
 ) -> ClearCutFormResponse | None:
-    return find_clear_cut_form_by_report_id(
+    content = find_clear_cut_form_by_report_id(
         db, report_id, url="", page=0, size=1
-    ).content[0]
+    ).content
+    return content[0] if len(content) > 0 else None

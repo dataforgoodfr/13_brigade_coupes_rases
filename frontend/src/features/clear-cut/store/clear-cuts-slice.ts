@@ -33,6 +33,7 @@ import {
 	type ClearCutReport,
 	type ClearCutReportResponse,
 	type ClearCuts,
+	clearCutFormCreateSchema,
 	clearCutFormSchema,
 	clearCutFormsResponseSchema,
 	clearCutFormVersionsSchema,
@@ -60,7 +61,7 @@ const mapReport = (
 });
 
 export const persistClearCutCurrentForm = createAppAsyncThunk<
-	void,
+	ClearCutForm | undefined,
 	ClearCutForm
 >("persistClearCutForm", async (form, { getState }) => {
 	const versions = selectDetail(getState());
@@ -71,6 +72,7 @@ export const persistClearCutCurrentForm = createAppAsyncThunk<
 		...versions.value,
 		current: form,
 	});
+	return form;
 });
 
 export const getClearCutFormThunk = createAppAsyncThunk<
@@ -120,19 +122,24 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 					...computedProperties,
 				} as ClearCutForm);
 			}
+
 			const versions = formStorage.getFromLocalStorageById(
 				formReport.report.id,
 				clearCutFormVersionsSchema,
 			);
 
-			const shouldShowDisclaimer = versions?.current.etag !== formReport.etag;
+			const form = (type: "current" | "original") =>
+				hasBeenCreated ? formReport : (versions?.[type] ?? formReport);
+			const current = form("current");
+			const differentFromLatest = current.etag !== formReport.etag;
+			const latest = differentFromLatest === true ? formReport : undefined;
+
 			return {
-				current: hasBeenCreated
-					? formReport
-					: (versions?.current ?? formReport),
-				latest: formReport,
+				original: form("original"),
+				current,
+				latest,
 				versionMismatchDisclaimerShown:
-					hasBeenCreated ?? (!shouldShowDisclaimer || isUndefined(versions)),
+					hasBeenCreated ?? (!differentFromLatest || isUndefined(versions)),
 			};
 		},
 		{
@@ -199,12 +206,14 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 	{ reportId: string; formData: ClearCutForm }
 >(
 	"submitClearCutForm",
-	async ({ reportId, formData }, { extra: { api }, dispatch }) => {
+	async ({ reportId, formData }, { extra: { api }, dispatch, getState }) => {
+		const state = getState();
+		const detail = selectDetail(state);
 		try {
 			await api()
 				.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
-					json: formData,
-					headers: { etag: formData.etag },
+					json: clearCutFormCreateSchema.parse(formData),
+					headers: { etag: detail.value?.latest?.etag ?? formData.etag },
 				})
 				.json();
 		} catch (e) {
@@ -245,9 +254,11 @@ export const clearCutsSlice = createSlice({
 		replaceCurrentVersionByLatest: (state) => {
 			if (
 				!isUndefined(state.detail.value?.current) &&
+				!isUndefined(state.detail.value?.original) &&
 				!isUndefined(state.detail.value?.latest)
 			) {
 				state.detail.value.current = state.detail.value?.latest;
+				state.detail.value.original = state.detail.value?.latest;
 				state.detail.value.versionMismatchDisclaimerShown = true;
 			}
 		},

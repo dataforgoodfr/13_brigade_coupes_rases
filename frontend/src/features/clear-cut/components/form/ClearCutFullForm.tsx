@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isUndefined } from "es-toolkit";
 import { Accordion } from "radix-ui";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	type ClearCutForm,
+	type ClearCutFormVersions,
 	clearCutFormSchema,
 } from "@/features/clear-cut/store/clear-cuts";
 import {
@@ -13,32 +14,53 @@ import {
 	selectSubmission,
 	submitClearCutFormThunk,
 } from "@/features/clear-cut/store/clear-cuts-slice";
-import { useMe } from "@/features/user/store/me.slice";
+import { useConnectedMe, useMe } from "@/features/user/store/me.slice";
 import { useToast } from "@/hooks/use-toast";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import AccordionContent from "./AccordionContent";
-import AccordionHeader from "./AccordionHeader";
+import { AccordionHeader } from "./AccordionHeader";
 
-export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
+type Props = ClearCutFormVersions;
+export function ClearCutFullForm({ current, original, latest }: Props) {
 	const dispatch = useAppDispatch();
 	const submission = useAppSelector(selectSubmission);
 	const loggedUser = useMe();
+	const user = useConnectedMe();
+	const isDisabled = useMemo(() => {
+		if (!user) return true;
+
+		if (user.role === "volunteer") {
+			return (
+				(!current.report.affectedUser ||
+					current.report.affectedUser.login !== user.login) ??
+				false
+			);
+		}
+
+		return false;
+	}, [user, current.report.affectedUser]);
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
-		values: clearCut,
+		values: current,
+		defaultValues: original,
+		disabled: isDisabled,
 	});
-	form.watch((value) => {
-		const clearCutForm = clearCutFormSchema.safeParse(value).data;
-		if (!isUndefined(clearCutForm)) {
-			dispatch(persistClearCutCurrentForm(clearCutForm));
-		}
-	});
+
+	useEffect(() => {
+		form.watch((values) => {
+			const clearCutForm = clearCutFormSchema.safeParse(values).data;
+			if (!isUndefined(clearCutForm)) {
+				dispatch(persistClearCutCurrentForm(clearCutForm));
+			}
+		});
+	}, [form, dispatch]);
+
 	const { toast } = useToast();
 
 	const handleSubmit = (formData: ClearCutForm) => {
 		dispatch(
 			submitClearCutFormThunk({
-				reportId: clearCut.report.id,
+				reportId: current.report.id,
 				formData,
 			}),
 		);
@@ -59,8 +81,8 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 		<>
 			<AccordionHeader
 				form={form}
-				tags={clearCut.report.rules}
-				status={clearCut.report.status}
+				tags={current.report.rules}
+				status={current.report.status}
 			/>
 			<FormProvider {...form}>
 				<form
@@ -68,7 +90,7 @@ export function ClearCutFullForm({ clearCut }: { clearCut: ClearCutForm }) {
 					className="p-1 flex flex-col grow px-4 h-0"
 				>
 					<Accordion.Root type="multiple" className="grow overflow-auto">
-						<AccordionContent form={form} />
+						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion.Root>
 					{!!loggedUser && (
 						<Button

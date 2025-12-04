@@ -51,6 +51,7 @@ class Filters(BaseSchema):
     min_area_hectare: float | None = None
     max_area_hectare: float | None = None
     cut_years: list[int] = []
+    cut_months: list[int] = []
     departments_ids: list[str] = []
     statuses: list[str] = []
     has_ecological_zonings: bool | None = None
@@ -137,6 +138,16 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
             for year in filters.cut_years
         ]
         reports = reports.filter(or_(*cut_years_intervals))
+
+    if len(filters.cut_months) > 0:
+        cut_months_intervals = [
+            and_(
+                func.extract("month", ClearCutReport.first_cut_date) <= month,
+                func.extract("month", ClearCutReport.last_cut_date) >= month,
+            )
+            for month in filters.cut_months
+        ]
+        reports = reports.filter(or_(*cut_months_intervals))
 
     if len(filters.departments_ids) > 0:
         reports = (

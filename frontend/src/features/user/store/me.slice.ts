@@ -34,7 +34,7 @@ export const setStoredToken = (token: TokenResponse | undefined) =>
 export const getStoredToken = () =>
 	tokenStorage.getFromLocalStorage(tokenSchema);
 
-const meStorage = localStorageRepository<OfflineMe>("me");
+export const meStorage = localStorageRepository<OfflineMe>("me");
 
 const getMe = () =>
 	meStorage.getFromLocalStorageOrDefault(meSchema, {

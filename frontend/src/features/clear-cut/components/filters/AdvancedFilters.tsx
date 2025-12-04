@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { type FC, type PropsWithChildren, useEffect } from "react";
+import { FormattedDate } from "react-intl";
 import { Slider } from "@/components/ui/slider";
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
 import {
@@ -7,6 +8,7 @@ import {
 	getFiltersThunk,
 	selectAreaRange,
 	selectAreas,
+	selectCutMonths,
 	selectCutYears,
 	selectDepartments,
 	selectEcologicalZoning,
@@ -29,8 +31,12 @@ interface Props {
 	className?: string;
 }
 const CUT_YEARS = {
-	label: "Années de coupe",
+	label: "Années",
 	id: "cutYears",
+};
+const CUT_MONTHS = {
+	label: "Mois",
+	id: "cutMonths",
 };
 const DEPARTMENTS = {
 	id: "departments",
@@ -61,6 +67,15 @@ export function AdvancedFilters({ className }: Props) {
 	const cutYears = useEnhancedItems({
 		items: useAppSelector(selectCutYears),
 		getItemLabel: selectableItemToString,
+		getItemValue: selectableItemToString,
+	});
+	const cutMonths = useEnhancedItems({
+		items: useAppSelector(selectCutMonths),
+		getItemLabel: (month) => (
+			<FormattedDate value={new Date(2025, month.item - 1, 1)} month="long">
+				{(a) => <span className="capitalize">{a}</span>}
+			</FormattedDate>
+		),
 		getItemValue: selectableItemToString,
 	});
 	const departments = useEnhancedItems({
@@ -118,21 +133,35 @@ export function AdvancedFilters({ className }: Props) {
 						}
 					/>
 				</FieldWrapper>
-				<FieldWrapper>
-					<label htmlFor={CUT_YEARS.id}>{CUT_YEARS.label}</label>
-					<ComboboxFilter
-						type="multiple"
-						countPreview
-						hasInput
-						hasReset
-						id={CUT_YEARS.id}
-						label={CUT_YEARS.label}
-						items={cutYears}
-						changeOnClose={(cutYears) =>
-							dispatch(filtersSlice.actions.setCutYears(cutYears))
-						}
-					/>
-				</FieldWrapper>
+				<div className="flex flex-col gap-1">
+					<label htmlFor={CUT_MONTHS.id}>Date de coupe</label>
+					<div className="flex gap-1">
+						<ComboboxFilter
+							type="multiple"
+							countPreview
+							hasInput={false}
+							hasReset
+							id={CUT_MONTHS.id}
+							label={CUT_MONTHS.label}
+							items={cutMonths}
+							changeOnClose={(cutMonths) =>
+								dispatch(filtersSlice.actions.setCutMonths(cutMonths))
+							}
+						/>
+						<ComboboxFilter
+							type="multiple"
+							countPreview
+							hasInput
+							hasReset
+							id={CUT_YEARS.id}
+							label={CUT_YEARS.label}
+							items={cutYears}
+							changeOnClose={(cutYears) =>
+								dispatch(filtersSlice.actions.setCutYears(cutYears))
+							}
+						/>
+					</div>
+				</div>
 			</div>
 			<div className="flex gap-2">
 				<FieldWrapper>

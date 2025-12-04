@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     start_server(
         host=args.host,
-        port=args.port,
+        port=args.port if args.port else int(settings.PORT),
         reload=args.reload,
         proxy_headers=args.proxy_headers,
         forwarded_allow_ips=args.forwarded_allow_ips,

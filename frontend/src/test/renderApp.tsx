@@ -16,7 +16,7 @@ import {
 import type { Me } from "@/features/user/store/me";
 import { initialState } from "@/features/user/store/me.slice";
 import { routeTree } from "@/routeTree.gen";
-import type { Routes as Route } from "@/shared/router";
+import type { Routes as Route, Router } from "@/shared/router";
 import {
 	type AppStore,
 	type RootState,
@@ -47,7 +47,6 @@ interface Options<R extends Route = Route>
 }
 
 export function renderApp<R extends Route = Route>(options: Options<R>) {
-	localStorage.clear();
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
@@ -76,7 +75,7 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 				: route,
 		],
 	});
-	const router = createRouter({
+	const router: Router = createRouter({
 		routeTree,
 		history,
 		context: { auth: undefined as unknown as AuthContext },
@@ -102,8 +101,10 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 			</Provider>
 		</IntlProvider>
 	);
+	const renderResult = render(<Wrapper />, renderOptions);
 	return {
-		...render(<Wrapper />, renderOptions),
+		...renderResult,
+		rerender: () => renderResult.rerender(<Wrapper />),
 		store,
 		page,
 		router,

@@ -123,6 +123,7 @@ export function withEntityStorageActionCreator<
 		try {
 			const returned = (await innerCreator(arg, api)) as Returned;
 			storage.setToLocalStorageById(getId(arg), returned);
+
 			return returned;
 		} catch (e) {
 			const found = storage.getFromLocalStorageById(getId(arg), schema);

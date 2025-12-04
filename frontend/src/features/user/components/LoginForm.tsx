@@ -14,17 +14,18 @@ import {
 	selectLogin,
 } from "@/features/user/store/me.slice";
 import { useToast } from "@/hooks/use-toast";
+
+import { Input } from "@/shared/components/input/Input";
+import { PasswordInput } from "@/shared/components/input/PasswordInput";
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
+import { Title } from "@/shared/components/typo/Title";
 import {
 	FormControl,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/shared/components/form/Form";
-import { Input } from "@/shared/components/input/Input";
-import { PasswordInput } from "@/shared/components/input/PasswordInput";
-import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
-import { Title } from "@/shared/components/typo/Title";
+} from "@/shared/form/components/Form";
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
 
@@ -91,8 +92,8 @@ export function LoginForm() {
 						onSubmit={form.handleSubmit((login) => dispatch(loginThunk(login)))}
 						className="space-y-4 mt-4"
 					>
-						<FormField
-							control={form.control}
+						<FormField<LoginRequest, "email">
+							form={form}
 							name="email"
 							render={({ field }) => (
 								<FormItem>
@@ -104,8 +105,8 @@ export function LoginForm() {
 								</FormItem>
 							)}
 						/>
-						<FormField
-							control={form.control}
+						<FormField<LoginRequest, "password">
+							form={form}
 							name="password"
 							render={({ field }) => (
 								<FormItem>

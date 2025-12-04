@@ -44,6 +44,7 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 						),
 						cacheNetworkFirst(/^https?:\/\/.*\/api\/v1\/referential$/i),
 					],
+					disableDevLogs: true,
 				},
 				devOptions: {
 					enabled: mode === "development",

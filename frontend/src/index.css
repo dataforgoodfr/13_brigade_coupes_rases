@@ -12,12 +12,13 @@
 	--card-foreground: hsl(224 71.4% 4.1%);
 	--popover: hsl(0 0% 100%);
 	--popover-foreground: hsl(224 71.4% 4.1%);
-	--primary: var(--color-green-500);
+	--primary: #00A166;
 	--primary-foreground: hsl(210 20% 98%);
 	--secondary: hsl(148, 39%, 21%);
 	--secondary-foreground: hsl(220.9 39.3% 11%);
 	--third: hsl(12, 100%, 50%);
-	--fourth: hsl(41, 98%, 50%);
+	--warning: hsl(41, 98%, 50%);
+	--warning-foreground: hsl(210 20% 98%);
 	--muted: hsl(220 14.3% 95.9%);
 	--muted-foreground: hsl(220 8.9% 46.1%);
 	--accent: hsl(220 14.3% 95.9%);
@@ -82,6 +83,8 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
