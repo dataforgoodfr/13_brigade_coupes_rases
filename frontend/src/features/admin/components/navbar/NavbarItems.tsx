@@ -1,5 +1,6 @@
-import { SettingsIcon } from "lucide-react";
-import { NavbarItem } from "@/shared/components/NavbarItem";
+import { SettingsIcon } from "lucide-react"
+
+import { NavbarItem } from "@/shared/components/NavbarItem"
 
 export const NavbarItems: React.FC = () => {
 	return (
@@ -9,5 +10,5 @@ export const NavbarItems: React.FC = () => {
 			Icon={SettingsIcon}
 			title="Administration"
 		/>
-	);
-};
+	)
+}

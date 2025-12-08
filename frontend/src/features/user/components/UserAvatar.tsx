@@ -1,9 +1,9 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type UsersListProps = {
-	url: string | undefined;
-	fallbackName: string;
-};
+	url: string | undefined
+	fallbackName: string
+}
 
 export const UserAvatar: React.FC<UsersListProps> = ({ url, fallbackName }) => {
 	return (
@@ -11,5 +11,5 @@ export const UserAvatar: React.FC<UsersListProps> = ({ url, fallbackName }) => {
 			<AvatarImage alt="Avatar" src={url} />
 			<AvatarFallback>{fallbackName}</AvatarFallback>
 		</Avatar>
-	);
-};
+	)
+}

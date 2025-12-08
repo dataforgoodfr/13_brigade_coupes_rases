@@ -1,9 +1,9 @@
-import { DotByStatus } from "@/features/clear-cut/components/DotByStatus";
-import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts";
-import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status";
+import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
+import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts"
+import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
 
 interface Props {
-	status: ClearCutStatus;
+	status: ClearCutStatus
 }
 export function StatusWithLabel({ status }: Props) {
 	return (
@@ -11,5 +11,5 @@ export function StatusWithLabel({ status }: Props) {
 			<DotByStatus status={status} />
 			{CLEAR_CUTTING_STATUS_TRANSLATIONS[status]}
 		</div>
-	);
+	)
 }

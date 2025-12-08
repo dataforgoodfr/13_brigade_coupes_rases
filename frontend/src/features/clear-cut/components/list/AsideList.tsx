@@ -1,20 +1,21 @@
-import { Filter, MapIcon } from "lucide-react";
+import { Filter, MapIcon } from "lucide-react"
+
 import {
 	Collapsible,
 	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
-import { useLayout } from "@/features/clear-cut/components/Layout.context";
-import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem";
-import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice";
-import { IconButton } from "@/shared/components/button/Button";
-import { Title } from "@/shared/components/typo/Title";
-import { useAppSelector } from "@/shared/hooks/store";
+	CollapsibleTrigger
+} from "@/components/ui/collapsible"
+import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters"
+import { useLayout } from "@/features/clear-cut/components/Layout.context"
+import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem"
+import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice"
+import { IconButton } from "@/shared/components/button/Button"
+import { Title } from "@/shared/components/typo/Title"
+import { useAppSelector } from "@/shared/hooks/store"
 
 export function AsideList() {
-	const { value } = useAppSelector(selectClearCuts);
-	const { setLayout } = useLayout();
+	const { value } = useAppSelector(selectClearCuts)
+	const { setLayout } = useLayout()
 	return (
 		<div className="flex flex-col w-full">
 			<Collapsible>
@@ -47,5 +48,5 @@ export function AsideList() {
 				</ul>
 			</div>
 		</div>
-	);
+	)
 }

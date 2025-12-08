@@ -1,32 +1,33 @@
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import clsx from "clsx";
-import { House, LogIn, LogOutIcon } from "lucide-react";
-import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png";
-import dataForGoodIcon from "@/assets/dataforgoodLogo.png";
-import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems";
-import { meSlice, useConnectedMe } from "@/features/user/store/me.slice";
-import { NavbarItem } from "@/shared/components/NavbarItem";
-import { useAppDispatch } from "@/shared/hooks/store";
+import { useNavigate, useRouter } from "@tanstack/react-router"
+import clsx from "clsx"
+import { House, LogIn, LogOutIcon } from "lucide-react"
+
+import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png"
+import dataForGoodIcon from "@/assets/dataforgoodLogo.png"
+import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems"
+import { meSlice, useConnectedMe } from "@/features/user/store/me.slice"
+import { NavbarItem } from "@/shared/components/NavbarItem"
+import { useAppDispatch } from "@/shared/hooks/store"
 
 interface Props {
-	className?: string;
+	className?: string
 }
 export function Navbar({ className }: Props) {
-	const user = useConnectedMe();
-	const router = useRouter();
-	const navigate = useNavigate();
+	const user = useConnectedMe()
+	const router = useRouter()
+	const navigate = useNavigate()
 	const handleLogout = () => {
-		dispatch(meSlice.actions.logoutUser());
+		dispatch(meSlice.actions.logoutUser())
 		router.invalidate().finally(() => {
-			navigate({ to: "/" });
-		});
-	};
-	const dispatch = useAppDispatch();
+			navigate({ to: "/" })
+		})
+	}
+	const dispatch = useAppDispatch()
 	return (
 		<nav
 			className={clsx(
 				className,
-				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15",
+				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15"
 			)}
 		>
 			<div className="flex flex-col items-center ">
@@ -61,5 +62,5 @@ export function Navbar({ className }: Props) {
 				)}
 			</div>
 		</nav>
-	);
+	)
 }

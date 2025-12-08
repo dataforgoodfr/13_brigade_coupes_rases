@@ -1,10 +1,11 @@
-import { Undo2 } from "lucide-react";
+import { Undo2 } from "lucide-react"
+
 import {
 	IconButton,
-	type IconButtonProps,
-} from "@/shared/components/button/Button";
+	type IconButtonProps
+} from "@/shared/components/button/Button"
 
-type Props = Omit<IconButtonProps, "icon">;
+type Props = Omit<IconButtonProps, "icon">
 export function UndoButton({ ...props }: Props) {
 	return (
 		<IconButton
@@ -16,5 +17,5 @@ export function UndoButton({ ...props }: Props) {
 			title={props.title ?? "Revenir à la valeur initiale"}
 			icon={<Undo2 />}
 		/>
-	);
+	)
 }

@@ -1,50 +1,51 @@
-import { z } from "zod";
-import { toStringApiErrorSchema } from "@/shared/api/api";
-import { departmentSchema } from "@/shared/store/referential/referential";
+import { z } from "zod"
+
+import { toStringApiErrorSchema } from "@/shared/api/api"
+import { departmentSchema } from "@/shared/store/referential/referential"
 
 export const loginRequestSchema = z.object({
 	email: z.string().email(),
-	password: z.string(),
-});
-export type LoginRequest = z.infer<typeof loginRequestSchema>;
-export const ROLES = ["volunteer", "admin"] as const;
-export const roleSchema = z.enum(ROLES);
+	password: z.string()
+})
+export type LoginRequest = z.infer<typeof loginRequestSchema>
+export const ROLES = ["volunteer", "admin"] as const
+export const roleSchema = z.enum(ROLES)
 
-export type Role = z.infer<typeof roleSchema>;
+export type Role = z.infer<typeof roleSchema>
 
 export const offlineMeSchema = z.object({
-	favorites: z.string().array(),
-});
+	favorites: z.string().array()
+})
 const connectedMeBaseSchema = z
 	.object({
 		login: z.string(),
 		email: z.string(),
 		avatarUrl: z.string().url().optional(),
-		departments: z.array(z.string()).optional(),
+		departments: z.array(z.string()).optional()
 	})
-	.extend(offlineMeSchema.shape);
+	.extend(offlineMeSchema.shape)
 
 const volunteerResponseSchema = z.object({
-	role: roleSchema.extract(["volunteer"]),
-});
+	role: roleSchema.extract(["volunteer"])
+})
 const administratorResponseSchema = z.object({
-	role: roleSchema.extract(["admin"]),
-});
+	role: roleSchema.extract(["admin"])
+})
 const rolePropertiesSchema = z.discriminatedUnion("role", [
 	volunteerResponseSchema,
-	administratorResponseSchema,
-]);
+	administratorResponseSchema
+])
 
 export const meResponseSchema = connectedMeBaseSchema
 	.and(rolePropertiesSchema)
-	.and(offlineMeSchema);
+	.and(offlineMeSchema)
 
 export const updateMeRequestSchema = z.object({
-	favorites: z.string().array(),
-});
+	favorites: z.string().array()
+})
 const enrichedVolunteerSchema = z.object({
-	role: roleSchema.extract(["volunteer"]),
-});
+	role: roleSchema.extract(["volunteer"])
+})
 
 export const connectedMeSchema = connectedMeBaseSchema
 	.omit({ departments: true })
@@ -52,35 +53,35 @@ export const connectedMeSchema = connectedMeBaseSchema
 	.and(
 		z.discriminatedUnion("role", [
 			enrichedVolunteerSchema,
-			administratorResponseSchema,
-		]),
-	);
-export const meSchema = connectedMeSchema.or(offlineMeSchema);
+			administratorResponseSchema
+		])
+	)
+export const meSchema = connectedMeSchema.or(offlineMeSchema)
 export const tokenSchema = z.object({
 	accessToken: z.jwt(),
-	refreshToken: z.jwt(),
-});
-export type Me = z.infer<typeof meSchema>;
-export type ConnectedMe = z.infer<typeof connectedMeSchema>;
-export type OfflineMe = z.infer<typeof offlineMeSchema>;
-export type MeResponse = z.infer<typeof meResponseSchema>;
-export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>;
-export type TokenResponse = z.infer<typeof tokenSchema>;
-export type Volunteer = MeResponse & { role: "volunteer" };
-export type Administrator = MeResponse & { role: "admin" };
+	refreshToken: z.jwt()
+})
+export type Me = z.infer<typeof meSchema>
+export type ConnectedMe = z.infer<typeof connectedMeSchema>
+export type OfflineMe = z.infer<typeof offlineMeSchema>
+export type MeResponse = z.infer<typeof meResponseSchema>
+export type UpdateMeRequest = z.infer<typeof updateMeRequestSchema>
+export type TokenResponse = z.infer<typeof tokenSchema>
+export type Volunteer = MeResponse & { role: "volunteer" }
+export type Administrator = MeResponse & { role: "admin" }
 
 export const credentialErrorSchema = toStringApiErrorSchema(
-	z.literal("INVALID_CREDENTIALS"),
-);
+	z.literal("INVALID_CREDENTIALS")
+)
 
-export type CredentialError = z.infer<typeof credentialErrorSchema>;
+export type CredentialError = z.infer<typeof credentialErrorSchema>
 export const invalidTokenSchema = toStringApiErrorSchema(
-	z.literal("INVALID_TOKEN"),
-);
-export type TokenError = z.infer<typeof invalidTokenSchema>;
+	z.literal("INVALID_TOKEN")
+)
+export type TokenError = z.infer<typeof invalidTokenSchema>
 
 export const meErrorSchema = z.union([
 	credentialErrorSchema,
-	invalidTokenSchema,
-]);
-export type MeError = z.infer<typeof meErrorSchema>;
+	invalidTokenSchema
+])
+export type MeError = z.infer<typeof meErrorSchema>

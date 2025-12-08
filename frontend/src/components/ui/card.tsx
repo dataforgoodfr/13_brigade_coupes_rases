@@ -1,5 +1,6 @@
-import { forwardRef, type HTMLAttributes } from "react";
-import { cn } from "@/lib/utils";
+import { forwardRef, type HTMLAttributes } from "react"
+
+import { cn } from "@/lib/utils"
 
 const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
@@ -7,13 +8,13 @@ const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 			ref={ref}
 			className={cn(
 				"rounded-xl border bg-card text-card-foreground shadow",
-				className,
+				className
 			)}
 			{...props}
 		/>
-	),
-);
-Card.displayName = "Card";
+	)
+)
+Card.displayName = "Card"
 
 const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
@@ -22,9 +23,9 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 			className={cn("flex flex-col space-y-1.5 p-6", className)}
 			{...props}
 		/>
-	),
-);
-CardHeader.displayName = "CardHeader";
+	)
+)
+CardHeader.displayName = "CardHeader"
 
 const CardTitle = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
@@ -33,9 +34,9 @@ const CardTitle = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 			className={cn("font-semibold leading-none tracking-tight", className)}
 			{...props}
 		/>
-	),
-);
-CardTitle.displayName = "CardTitle";
+	)
+)
+CardTitle.displayName = "CardTitle"
 
 const CardDescription = forwardRef<
 	HTMLDivElement,
@@ -46,15 +47,15 @@ const CardDescription = forwardRef<
 		className={cn("text-sm text-muted-foreground", className)}
 		{...props}
 	/>
-));
-CardDescription.displayName = "CardDescription";
+))
+CardDescription.displayName = "CardDescription"
 
 const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
 		<div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-	),
-);
-CardContent.displayName = "CardContent";
+	)
+)
+CardContent.displayName = "CardContent"
 
 const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
@@ -63,15 +64,8 @@ const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 			className={cn("flex items-center p-6 pt-0", className)}
 			{...props}
 		/>
-	),
-);
-CardFooter.displayName = "CardFooter";
+	)
+)
+CardFooter.displayName = "CardFooter"
 
-export {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-};
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }

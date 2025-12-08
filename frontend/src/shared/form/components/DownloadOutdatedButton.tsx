@@ -1,10 +1,11 @@
-import { CloudDownload } from "lucide-react";
+import { CloudDownload } from "lucide-react"
+
 import {
 	IconButton,
-	type IconButtonProps,
-} from "@/shared/components/button/Button";
+	type IconButtonProps
+} from "@/shared/components/button/Button"
 
-type Props = Omit<IconButtonProps, "icon">;
+type Props = Omit<IconButtonProps, "icon">
 
 export function DownloadOutdatedButton(props: Props) {
 	return (
@@ -17,5 +18,5 @@ export function DownloadOutdatedButton(props: Props) {
 			title={props.title ?? "Utiliser la dernière valeur"}
 			icon={<CloudDownload />}
 		/>
-	);
+	)
 }

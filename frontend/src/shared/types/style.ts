@@ -6,7 +6,7 @@ const COLORS = [
 	"blue",
 	"indigo",
 	"purple",
-	"pink",
-] as const;
+	"pink"
+] as const
 
-export type Color = (typeof COLORS)[number];
+export type Color = (typeof COLORS)[number]

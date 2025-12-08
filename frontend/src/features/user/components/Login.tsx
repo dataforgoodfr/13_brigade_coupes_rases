@@ -1,5 +1,6 @@
-import preview from "@/assets/preview.png";
-import { LoginForm } from "@/features/user/components/LoginForm";
+import preview from "@/assets/preview.png"
+import { LoginForm } from "@/features/user/components/LoginForm"
+
 export function Login() {
 	return (
 		<div className="flex w-full h-full">
@@ -20,5 +21,5 @@ export function Login() {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

@@ -1,24 +1,26 @@
-import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
-import type { FieldValues } from "react-hook-form";
-import { FormattedDate } from "react-intl";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { fr } from "date-fns/locale"
+import { CalendarIcon } from "lucide-react"
+import type { FieldValues } from "react-hook-form"
+import { FormattedDate } from "react-intl"
+
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
 	Popover,
 	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+	PopoverTrigger
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 import {
 	FormFieldLayout,
-	type FormFieldLayoutProps,
-} from "@/shared/form/components/FormFieldLayout";
-import type { FormProps } from "../types";
-import { FormControl } from "./Form";
+	type FormFieldLayoutProps
+} from "@/shared/form/components/FormFieldLayout"
+
+import { FormControl } from "./Form"
+import type { FormProps } from "../types"
 
 export type FormDatePickerProps<Form extends FieldValues> = FormProps<Form> &
-	FormFieldLayoutProps<Form>;
+	FormFieldLayoutProps<Form>
 export function FormDatePicker<Form extends FieldValues = FieldValues>({
 	form,
 	name,
@@ -36,7 +38,7 @@ export function FormDatePicker<Form extends FieldValues = FieldValues>({
 							variant="outline"
 							className={cn(
 								"w-[240px] pl-3 text-left font-normal",
-								!field.value && "text-muted-foreground",
+								!field.value && "text-muted-foreground"
 							)}
 						>
 							{field.value ? (
@@ -59,5 +61,5 @@ export function FormDatePicker<Form extends FieldValues = FieldValues>({
 				</PopoverContent>
 			</Popover>
 		</FormFieldLayout>
-	);
+	)
 }

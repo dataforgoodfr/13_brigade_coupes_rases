@@ -1,19 +1,21 @@
-import clsx from "clsx";
-import type { ReactNode } from "react";
-import { Hint } from "@/shared/components/typo/Hint";
-import type { PropsWithChildrenClassName } from "@/shared/types/props";
+import clsx from "clsx"
+import type { ReactNode } from "react"
+
+import { Hint } from "@/shared/components/typo/Hint"
+import type { PropsWithChildrenClassName } from "@/shared/types/props"
 
 export type RuleLayoutProps = {
-	label: ReactNode;
-	hint: ReactNode;
-	inputId: string;
-} & PropsWithChildrenClassName;
+	label: ReactNode
+	hint: ReactNode
+	inputId: string
+} & PropsWithChildrenClassName
+
 export function RuleLayout({
 	label,
 	className,
 	inputId,
 	children,
-	hint,
+	hint
 }: RuleLayoutProps) {
 	return (
 		<div className={clsx(className, "flex flex-col gap-1")}>
@@ -21,5 +23,5 @@ export function RuleLayout({
 			<Hint>{hint}</Hint>
 			{children}
 		</div>
-	);
+	)
 }

@@ -1,39 +1,41 @@
-import { useRegisterSW } from "virtual:pwa-register/react";
-import { useEffect } from "react";
-import { ToastAction } from "@/components/ui/toast";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react"
+
+import { ToastAction } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
+
+import { useRegisterSW } from "virtual:pwa-register/react"
 
 export function useReloadPwa() {
 	const {
 		offlineReady: [offlineReady, setOfflineReady],
 		needRefresh: [needRefresh, setNeedRefresh],
-		updateServiceWorker,
+		updateServiceWorker
 	} = useRegisterSW({
 		onRegistered(r) {
 			// biome-ignore lint/suspicious/noConsole: Debug purpose
-			console.debug(`SW Registered: ${r}`);
+			console.debug(`SW Registered: ${r}`)
 		},
 		onRegisterError(error) {
 			// biome-ignore lint/suspicious/noConsole: Debug purpose
-			console.debug("SW registration error", error);
-		},
-	});
-	const { toast } = useToast();
+			console.debug("SW registration error", error)
+		}
+	})
+	const { toast } = useToast()
 	useEffect(() => {
 		if (offlineReady) {
 			toast({
 				id: "app-ready",
 				title: "L'application est prête",
-				description: "Utilisation en mode déconnecté disponible",
-			});
+				description: "Utilisation en mode déconnecté disponible"
+			})
 		} else if (needRefresh) {
 			toast({
 				id: "new-app-available",
 				title: "Nouveau contenu disponible",
 				description: "Cliquez sur Recharger l'application",
 				onClose: () => {
-					setOfflineReady(false);
-					setNeedRefresh(false);
+					setOfflineReady(false)
+					setNeedRefresh(false)
 				},
 				action: (
 					<>
@@ -44,8 +46,8 @@ export function useReloadPwa() {
 							Recharger l'application
 						</ToastAction>
 					</>
-				),
-			});
+				)
+			})
 		}
 	}, [
 		offlineReady,
@@ -53,6 +55,6 @@ export function useReloadPwa() {
 		updateServiceWorker,
 		setNeedRefresh,
 		setOfflineReady,
-		toast,
-	]);
+		toast
+	])
 }

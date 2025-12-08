@@ -1,7 +1,7 @@
-import type { PaginationResponse } from "@/shared/api/types";
+import type { PaginationResponse } from "@/shared/api/types"
 
 export function createPaginationOneElementMock<T>(
-	content: T,
+	content: T
 ): PaginationResponse<T> {
 	return {
 		content: [content],
@@ -10,7 +10,7 @@ export function createPaginationOneElementMock<T>(
 			page: 0,
 			size: 1,
 			pagesCount: 1,
-			totalCount: 1,
-		},
-	};
+			totalCount: 1
+		}
+	}
 }

@@ -1,56 +1,59 @@
-import clsx from "clsx";
-import { HeartIcon } from "lucide-react";
-import { FormattedDate } from "react-intl";
-import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
-import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
-import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
-import { useNavigateToClearCut } from "@/features/clear-cut/hooks";
-import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
+import clsx from "clsx"
+import { HeartIcon } from "lucide-react"
+import { FormattedDate } from "react-intl"
+
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
+import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
+import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel"
+import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
+import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 import {
 	addFavoriteThunk,
 	removeFavoriteThunk,
-	selectFavorites,
-} from "@/features/user/store/me.slice";
-import { IconButton } from "@/shared/components/button/Button";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+	selectFavorites
+} from "@/features/user/store/me.slice"
+import { IconButton } from "@/shared/components/button/Button"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type FavoriteButtonProps = {
-	reportId: string;
-};
+	reportId: string
+}
+
 const FavoriteButton = ({ reportId }: FavoriteButtonProps) => {
-	const dispatch = useAppDispatch();
-	const isFavorite = useAppSelector(selectFavorites).includes(reportId);
+	const dispatch = useAppDispatch()
+	const isFavorite = useAppSelector(selectFavorites).includes(reportId)
 	return (
 		<IconButton
 			variant="ghost"
 			icon={
 				<HeartIcon
 					className={clsx("text-destructive", {
-						"fill-destructive": isFavorite,
+						"fill-destructive": isFavorite
 					})}
 				/>
 			}
 			onClick={(e) => {
-				e.stopPropagation();
+				e.stopPropagation()
 				if (isFavorite) {
-					dispatch(removeFavoriteThunk(reportId));
+					dispatch(removeFavoriteThunk(reportId))
 				} else {
-					dispatch(addFavoriteThunk(reportId));
+					dispatch(addFavoriteThunk(reportId))
 				}
 			}}
 		/>
-	);
-};
+	)
+}
+
 export function ClearCutItem({
 	id,
 	firstCutDate,
 	status,
 	comment,
 	rules: tags,
-	city,
+	city
 }: ClearCutReport) {
-	const handleCardClick = useNavigateToClearCut(id);
-	const { focusedClearCutId, setFocusedClearCutId } = useMapInstance();
+	const handleCardClick = useNavigateToClearCut(id)
+	const { focusedClearCutId, setFocusedClearCutId } = useMapInstance()
 
 	return (
 		<li
@@ -59,11 +62,11 @@ export function ClearCutItem({
 			onMouseLeave={() => setFocusedClearCutId(undefined)}
 			onKeyUp={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
-					handleCardClick();
+					handleCardClick()
 				}
 			}}
 			className={clsx("p-3 flex flex-col cursor-pointer gap-2", {
-				"bg-zinc-200/50 rounded-2xl": focusedClearCutId === id,
+				"bg-zinc-200/50 rounded-2xl": focusedClearCutId === id
 			})}
 		>
 			<div className="flex justify-between">
@@ -85,5 +88,5 @@ export function ClearCutItem({
 				))}
 			</div>
 		</li>
-	);
+	)
 }

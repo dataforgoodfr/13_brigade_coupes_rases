@@ -1,8 +1,9 @@
-import clsx from "clsx";
-import { type FC, type PropsWithChildren, useEffect } from "react";
-import { FormattedDate } from "react-intl";
-import { Slider } from "@/components/ui/slider";
-import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel";
+import clsx from "clsx"
+import { type FC, type PropsWithChildren, useEffect } from "react"
+import { FormattedDate } from "react-intl"
+
+import { Slider } from "@/components/ui/slider"
+import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel"
 import {
 	filtersSlice,
 	getFiltersThunk,
@@ -14,61 +15,62 @@ import {
 	selectEcologicalZoning,
 	selectExcessiveSlop,
 	selectFavorite,
-	selectStatuses,
-} from "@/features/clear-cut/store/filters.slice";
-import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
-import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
-import { useDebounce } from "@/shared/hooks/debounce";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
+	selectStatuses
+} from "@/features/clear-cut/store/filters.slice"
+import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter"
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
+import { useDebounce } from "@/shared/hooks/debounce"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import {
 	booleanSelectableToString,
 	namedIdTranslator,
 	selectableItemToString,
-	useEnhancedItems,
-} from "@/shared/items";
+	useEnhancedItems
+} from "@/shared/items"
 
 interface Props {
-	className?: string;
+	className?: string
 }
 const CUT_YEARS = {
 	label: "Années",
-	id: "cutYears",
-};
+	id: "cutYears"
+}
 const CUT_MONTHS = {
 	label: "Mois",
-	id: "cutMonths",
-};
+	id: "cutMonths"
+}
 const DEPARTMENTS = {
 	id: "departments",
-	label: "Départements",
-};
+	label: "Départements"
+}
 const AREA = {
 	id: "area",
-	label: "Superficie",
-};
+	label: "Superficie"
+}
 const STATUS = {
 	id: "status",
-	label: "Etat",
-};
+	label: "Etat"
+}
 const ECOLOGICAL_ZONING = {
 	id: "ecological_zoning",
-	label: "Zone protégée",
-};
+	label: "Zone protégée"
+}
 const EXCESSIVE_SLOP = {
 	id: "excessive_slop",
-	label: "Pente excessive",
-};
+	label: "Pente excessive"
+}
 const FAVORITE = {
 	id: "favorite",
-	label: "Favoris",
-};
+	label: "Favoris"
+}
+
 export function AdvancedFilters({ className }: Props) {
-	const dispatch = useAppDispatch();
+	const dispatch = useAppDispatch()
 	const cutYears = useEnhancedItems({
 		items: useAppSelector(selectCutYears),
 		getItemLabel: selectableItemToString,
-		getItemValue: selectableItemToString,
-	});
+		getItemValue: selectableItemToString
+	})
 	const cutMonths = useEnhancedItems({
 		items: useAppSelector(selectCutMonths),
 		getItemLabel: (month) => (
@@ -76,46 +78,46 @@ export function AdvancedFilters({ className }: Props) {
 				{(a) => <span className="capitalize">{a}</span>}
 			</FormattedDate>
 		),
-		getItemValue: selectableItemToString,
-	});
+		getItemValue: selectableItemToString
+	})
 	const departments = useEnhancedItems({
 		items: useAppSelector(selectDepartments),
 		getItemLabel: namedIdTranslator,
-		getItemValue: namedIdTranslator,
-	});
-	const areaRange = useAppSelector(selectAreaRange);
-	const areas = useAppSelector(selectAreas);
+		getItemValue: namedIdTranslator
+	})
+	const areaRange = useAppSelector(selectAreaRange)
+	const areas = useAppSelector(selectAreas)
 	const statuses = useEnhancedItems({
 		items: useAppSelector(selectStatuses),
 		getItemLabel: (status) => <StatusWithLabel status={status.item} />,
-		getItemValue: selectableItemToString,
-	});
+		getItemValue: selectableItemToString
+	})
 	const excessive_slop = useEnhancedItems({
 		items: useAppSelector(selectExcessiveSlop),
 		getItemLabel: booleanSelectableToString,
-		getItemValue: booleanSelectableToString,
-	});
+		getItemValue: booleanSelectableToString
+	})
 	const favorite = useEnhancedItems({
 		items: useAppSelector(selectFavorite),
 		getItemLabel: booleanSelectableToString,
-		getItemValue: booleanSelectableToString,
-	});
+		getItemValue: booleanSelectableToString
+	})
 	const ecological_zoning = useEnhancedItems({
 		items: useAppSelector(selectEcologicalZoning),
 		getItemLabel: booleanSelectableToString,
-		getItemValue: booleanSelectableToString,
-	});
+		getItemValue: booleanSelectableToString
+	})
 
 	useEffect(() => {
-		dispatch(getFiltersThunk());
-	}, [dispatch]);
+		dispatch(getFiltersThunk())
+	}, [dispatch])
 	const [currentAreas, onAreasChanged] = useDebounce(
 		areas,
 		(newAreas: number[] | undefined) =>
 			dispatch(
-				filtersSlice.actions.setAreas(newAreas as [number, number] | undefined),
-			),
-	);
+				filtersSlice.actions.setAreas(newAreas as [number, number] | undefined)
+			)
+	)
 	return (
 		<div className={clsx("flex flex-col gap-2 py-3", className)}>
 			<div className="flex gap-2">
@@ -241,9 +243,9 @@ export function AdvancedFilters({ className }: Props) {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }
 
 const FieldWrapper: FC<PropsWithChildren> = ({ children }) => {
-	return <div className="flex w-1/2 flex-col gap-1"> {children}</div>;
-};
+	return <div className="flex w-1/2 flex-col gap-1"> {children}</div>
+}

@@ -1,11 +1,13 @@
-import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
-import { FormattedDate, FormattedNumber } from "react-intl";
-import type { SectionForm, SectionFormItem } from "../types";
+import { FormattedDate, FormattedNumber } from "react-intl"
+
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
+
+import type { SectionForm, SectionFormItem } from "../types"
 
 export const generalInfoKey: SectionForm = {
 	name: "Informations générales",
-	className: "grid grid-cols-2 gap-2",
-};
+	className: "grid grid-cols-2 gap-2"
+}
 
 export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
@@ -16,7 +18,7 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		transformValue: ({ value }) =>
 			value !== undefined ? (
 				<FormattedDate value={value as string} />
-			) : undefined,
+			) : undefined
 	},
 	{
 		name: "report.lastCutDate",
@@ -26,38 +28,38 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		transformValue: ({ value }) =>
 			value !== undefined ? (
 				<FormattedDate value={value as string} />
-			) : undefined,
+			) : undefined
 	},
 	{
 		name: "report.updatedAt",
 		transformValue: ({ value }) => <FormattedDate value={value as string} />,
 		label: "Date de signalement",
 		type: "fixed",
-		renderConditions: [],
+		renderConditions: []
 	},
 	{
 		name: "report.city",
 		label: "Commune",
 		type: "fixed",
-		renderConditions: [],
+		renderConditions: []
 	},
 	{
 		name: "report.department.name",
 		label: "Département",
 		type: "fixed",
-		renderConditions: [],
+		renderConditions: []
 	},
 	{
 		name: "report.averageLocation.coordinates.0",
 		label: "Latitude",
 		type: "fixed",
-		renderConditions: [],
+		renderConditions: []
 	},
 	{
 		name: "report.averageLocation.coordinates.1",
 		label: "Longitude",
 		type: "fixed",
-		renderConditions: [],
+		renderConditions: []
 	},
 	{
 		name: "report.totalAreaHectare",
@@ -69,7 +71,7 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 				<>
 					<FormattedNumber value={value as number} /> ha
 				</>
-			) : undefined,
+			) : undefined
 	},
 	{
 		name: "report.slopeAreaHectare",
@@ -82,6 +84,6 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 					<FormattedNumber value={value as number} maximumFractionDigits={2} />{" "}
 					ha
 				</>
-			) : undefined,
-	},
-];
+			) : undefined
+	}
+]

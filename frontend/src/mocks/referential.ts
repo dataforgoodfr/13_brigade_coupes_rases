@@ -1,40 +1,41 @@
-import { faker } from "@faker-js/faker";
-import { HttpResponse, http } from "msw";
+import { faker } from "@faker-js/faker"
+import { HttpResponse, http } from "msw"
+
 import type {
 	DepartmentResponse,
 	EcologicalZoningResponse,
 	ReferentialResponse,
-	RuleResponse,
-} from "@/shared/store/referential/referential";
+	RuleResponse
+} from "@/shared/store/referential/referential"
 
 export const fakeRules: RuleResponse = {
 	[faker.string.uuid()]: {
 		type: "ecological_zoning",
-		ecologicalZoningsIds: [],
+		ecologicalZoningsIds: []
 	},
 	[faker.string.uuid()]: {
 		type: "area",
-		threshold: faker.number.int({ min: 0, max: 100 }),
+		threshold: faker.number.int({ min: 0, max: 100 })
 	},
 	[faker.string.uuid()]: {
 		type: "slope",
-		threshold: faker.number.int({ min: 0, max: 100 }),
-	},
-};
+		threshold: faker.number.int({ min: 0, max: 100 })
+	}
+}
 
 export const fakeEcologicalZonings: EcologicalZoningResponse = {
 	"1": {
 		type: "Natura2000",
 		subType: "ZSC",
 		name: "Forêt de Rambouillet",
-		code: "FR1100796",
+		code: "FR1100796"
 	},
 	"2": {
 		type: "Natura2000",
 		name: "Etands de canal d'Ille et Rance",
-		code: "FR5300050",
-	},
-};
+		code: "FR5300050"
+	}
+}
 export const fakeDepartments: DepartmentResponse = [
 	"Ain",
 	"Aisne",
@@ -136,16 +137,16 @@ export const fakeDepartments: DepartmentResponse = [
 	"Martinique",
 	"Guyane",
 	"La Réunion",
-	"Mayotte",
+	"Mayotte"
 ].reduce<DepartmentResponse>((acc, department) => {
-	acc[faker.string.uuid()] = { name: department };
-	return acc;
-}, {});
+	acc[faker.string.uuid()] = { name: department }
+	return acc
+}, {})
 
 export const mockReferential = http.get("*/api/v1/referential", () => {
 	return HttpResponse.json({
 		departments: fakeDepartments,
 		ecologicalZonings: fakeEcologicalZonings,
-		rules: fakeRules,
-	} satisfies ReferentialResponse);
-});
+		rules: fakeRules
+	} satisfies ReferentialResponse)
+})

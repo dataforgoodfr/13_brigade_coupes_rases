@@ -1,10 +1,11 @@
-import type { LatLngExpression } from "leaflet";
+import type { LatLngExpression } from "leaflet"
 
-const franceCenter: LatLngExpression = [46.695554, 2.440236];
-const wholeFranceZoom = 7;
+const franceCenter: LatLngExpression = [46.695554, 2.440236]
+const wholeFranceZoom = 7
 
-import { MapContainer, TileLayer } from "react-leaflet";
-import { ClearCuts } from "./ClearCuts";
+import { MapContainer, TileLayer } from "react-leaflet"
+
+import { ClearCuts } from "./ClearCuts"
 
 export function InteractiveMap() {
 	return (
@@ -20,5 +21,5 @@ export function InteractiveMap() {
 			/>
 			<ClearCuts />
 		</MapContainer>
-	);
+	)
 }

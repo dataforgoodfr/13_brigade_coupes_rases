@@ -1,20 +1,22 @@
 import {
 	Collapsible,
 	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
-import { useNavigate } from "@tanstack/react-router";
-import { Filter, ListIcon } from "lucide-react";
-import type { PropsWithChildren } from "react";
-import { Button } from "@/components/ui/button";
-import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters";
-import { useLayout } from "@/features/clear-cut/components/Layout.context";
-import { IconButton } from "@/shared/components/button/Button";
+	CollapsibleTrigger
+} from "@radix-ui/react-collapsible"
+import { useNavigate } from "@tanstack/react-router"
+import { Filter, ListIcon } from "lucide-react"
+import type { PropsWithChildren } from "react"
 
-type Props = PropsWithChildren<{ clearCutId?: string }>;
+import { Button } from "@/components/ui/button"
+import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters"
+import { useLayout } from "@/features/clear-cut/components/Layout.context"
+import { IconButton } from "@/shared/components/button/Button"
+
+type Props = PropsWithChildren<{ clearCutId?: string }>
+
 export function MobileControl({ clearCutId, children }: Props) {
-	const { setLayout } = useLayout();
-	const navigate = useNavigate();
+	const { setLayout } = useLayout()
+	const navigate = useNavigate()
 	return (
 		<Collapsible>
 			<div className="flex justify-end sm:hidden">
@@ -25,8 +27,8 @@ export function MobileControl({ clearCutId, children }: Props) {
 						onClick={() => {
 							navigate({
 								to: "/clear-cuts/$clearCutId",
-								params: { clearCutId },
-							});
+								params: { clearCutId }
+							})
 						}}
 					>
 						Détail
@@ -52,5 +54,5 @@ export function MobileControl({ clearCutId, children }: Props) {
 				<AdvancedFilters className="mt-6 px-5 bg-zinc-50" />
 			</CollapsibleContent>
 		</Collapsible>
-	);
+	)
 }

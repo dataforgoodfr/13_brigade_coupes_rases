@@ -1,52 +1,56 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { useEffect } from "react";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import { useEffect } from "react"
+
 import {
 	type RulesResponse,
 	rulesResponseSchema,
 	type UpdateRulesRequest,
-	type VariableRuleResponse,
-} from "@/features/admin/store/rules";
-import type { RequestedContent } from "@/shared/api/types";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { listToSelectableItems, type SelectableItem } from "@/shared/items";
+	type VariableRuleResponse
+} from "@/features/admin/store/rules"
+import type { RequestedContent } from "@/shared/api/types"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import { listToSelectableItems, type SelectableItem } from "@/shared/items"
 import type {
 	EcologicalZoning,
 	EcologicalZoningType,
 	RuleType,
-	VariableRulesType as VariableRuleType,
-} from "@/shared/store/referential/referential";
+	VariableRulesType as VariableRuleType
+} from "@/shared/store/referential/referential"
 import {
 	selectEcologicalZoningByIds,
-	selectEcologicalZoningByIdsDifferent,
-} from "@/shared/store/referential/referential.slice";
-import { createTypedDraftSafeSelector } from "@/shared/store/selector";
-import type { RootState } from "@/shared/store/store";
+	selectEcologicalZoningByIdsDifferent
+} from "@/shared/store/referential/referential.slice"
+import { createTypedDraftSafeSelector } from "@/shared/store/selector"
+import type { RootState } from "@/shared/store/store"
 import {
 	addRequestedContentCases,
-	createAppAsyncThunk,
-} from "@/shared/store/thunk";
+	createAppAsyncThunk
+} from "@/shared/store/thunk"
+
 export type EcologicalZoningRule = {
-	type: EcologicalZoningType;
-	ecologicalZonings: SelectableItem<EcologicalZoning>[];
-};
+	type: EcologicalZoningType
+	ecologicalZonings: SelectableItem<EcologicalZoning>[]
+}
+
 type Rule =
 	| VariableRuleResponse
 	| {
-			id: string;
-			type: EcologicalZoningType;
-			ecologicalZonings: SelectableItem<EcologicalZoning>[];
-	  };
+			id: string
+			type: EcologicalZoningType
+			ecologicalZonings: SelectableItem<EcologicalZoning>[]
+	  }
+
 type State = {
-	rules: RequestedContent<Rule[]>;
-};
+	rules: RequestedContent<Rule[]>
+}
 
 export const updateRulesThunk = createAppAsyncThunk<void, void>(
 	"rules/updateRules",
 	async (_, { getState, extra: { api }, dispatch }) => {
-		const state = getState();
-		const rules = selectRules(state);
+		const state = getState()
+		const rules = selectRules(state)
 		if (rules === undefined) {
-			throw new Error("Rules are not loaded");
+			throw new Error("Rules are not loaded")
 		}
 		await api().put("api/v1/rules", {
 			json: {
@@ -58,19 +62,20 @@ export const updateRulesThunk = createAppAsyncThunk<void, void>(
 							? r.ecologicalZonings
 									.filter((item) => item.isSelected)
 									.map((item) => item.item.id)
-							: [],
-				})),
-			} satisfies UpdateRulesRequest,
-		});
-		dispatch(getRulesThunk());
-	},
-);
+							: []
+				}))
+			} satisfies UpdateRulesRequest
+		})
+		dispatch(getRulesThunk())
+	}
+)
+
 export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 	"rules/getRules",
 	async (_, { getState, extra: { api } }) => {
-		const result = await api().get<RulesResponse>("api/v1/rules").json();
-		const response = rulesResponseSchema.parse(result);
-		const state = getState();
+		const result = await api().get<RulesResponse>("api/v1/rules").json()
+		const response = rulesResponseSchema.parse(result)
+		const state = getState()
 		return response.map((rule) =>
 			rule.type === "ecological_zoning"
 				? {
@@ -79,20 +84,20 @@ export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 						ecologicalZonings: [
 							...listToSelectableItems(
 								selectEcologicalZoningByIds(state, rule.ecologicalZoningsIds),
-								true,
+								true
 							),
 							...listToSelectableItems(
 								selectEcologicalZoningByIdsDifferent(
 									state,
-									rule.ecologicalZoningsIds,
-								),
-							),
-						],
+									rule.ecologicalZoningsIds
+								)
+							)
+						]
 					}
-				: rule,
-		);
-	},
-);
+				: rule
+		)
+	}
+)
 
 export const rulesSlice = createSlice({
 	initialState: { rules: { status: "idle" } } as State,
@@ -100,51 +105,52 @@ export const rulesSlice = createSlice({
 	reducers: {
 		updateEcologicalZoningRule: (
 			state,
-			{ payload }: PayloadAction<SelectableItem<EcologicalZoning>[]>,
+			{ payload }: PayloadAction<SelectableItem<EcologicalZoning>[]>
 		) => {
 			if (state.rules.value) {
 				state.rules.value = state.rules.value.map((rule) => {
 					if (rule.type === "ecological_zoning") {
 						return {
 							...rule,
-							ecologicalZonings: payload,
-						} satisfies EcologicalZoningRule;
+							ecologicalZonings: payload
+						} satisfies EcologicalZoningRule
 					}
-					return rule;
-				});
+					return rule
+				})
 			}
 		},
 		updateVariableRule: (
 			state,
-			{ payload }: PayloadAction<{ type: VariableRuleType; value: number }>,
+			{ payload }: PayloadAction<{ type: VariableRuleType; value: number }>
 		) => {
 			if (state.rules.value) {
 				state.rules.value = state.rules.value.map((rule) => {
 					if (rule.type === payload.type) {
-						return { ...rule, threshold: payload.value };
+						return { ...rule, threshold: payload.value }
 					}
-					return rule;
-				});
+					return rule
+				})
 			}
-		},
+		}
 	},
 	extraReducers: (builder) => {
-		addRequestedContentCases(builder, getRulesThunk, (state) => state.rules);
-	},
-});
+		addRequestedContentCases(builder, getRulesThunk, (state) => state.rules)
+	}
+})
 
-const selectState = (state: RootState) => state.rules;
+const selectState = (state: RootState) => state.rules
+
 const selectRules = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.rules.value,
-);
+	(state) => state.rules.value
+)
 
 export const useGetRules = (order: RuleType[]) => {
-	const dispatch = useAppDispatch();
-	const rules = useAppSelector(selectRules);
+	const dispatch = useAppDispatch()
+	const rules = useAppSelector(selectRules)
 	useEffect(() => {
-		dispatch(getRulesThunk());
-	}, [dispatch]);
-	const findByType = (type: RuleType) => rules?.find((r) => r.type === type);
-	return order.map(findByType).filter((r) => r !== undefined);
-};
+		dispatch(getRulesThunk())
+	}, [dispatch])
+	const findByType = (type: RuleType) => rules?.find((r) => r.type === type)
+	return order.map(findByType).filter((r) => r !== undefined)
+}

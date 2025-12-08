@@ -1,6 +1,8 @@
-import { z } from "zod";
-import { clearCutStatusSchema } from "@/features/clear-cut/store/clear-cuts";
-import { boundsSchema } from "./types";
+import { z } from "zod"
+
+import { clearCutStatusSchema } from "@/features/clear-cut/store/clear-cuts"
+
+import { boundsSchema } from "./types"
 
 const filtersRequestSchema = z.object({
 	cutYears: z.array(z.number()),
@@ -14,10 +16,10 @@ const filtersRequestSchema = z.object({
 	inReportsIds: z.string().array().optional(),
 	outReportsIds: z.string().array().optional(),
 	hasEcologicalZonings: z.boolean().optional(),
-	withPoints: z.boolean().optional(),
-});
+	withPoints: z.boolean().optional()
+})
 
-export type FiltersRequest = z.infer<typeof filtersRequestSchema>;
+export type FiltersRequest = z.infer<typeof filtersRequestSchema>
 
 export const filtersResponseSchema = z.object({
 	rulesIds: z.array(z.string()).optional(),
@@ -27,7 +29,7 @@ export const filtersResponseSchema = z.object({
 	areaRange: z.object({ min: z.number(), max: z.number() }),
 	excessiveSlope: z.boolean().optional(),
 	favorite: z.boolean().optional(),
-	hasEcologicalZonings: z.boolean().optional(),
-});
+	hasEcologicalZonings: z.boolean().optional()
+})
 
-export type FiltersResponse = z.infer<typeof filtersResponseSchema>;
+export type FiltersResponse = z.infer<typeof filtersResponseSchema>

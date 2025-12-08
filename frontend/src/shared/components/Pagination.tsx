@@ -1,5 +1,6 @@
-import { take } from "es-toolkit";
-import { useState } from "react";
+import { take } from "es-toolkit"
+import { useState } from "react"
+
 import {
 	PaginationContent,
 	PaginationEllipsis,
@@ -7,27 +8,27 @@ import {
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
-	Pagination as PaginationUI,
-} from "@/components/ui/pagination";
+	Pagination as PaginationUI
+} from "@/components/ui/pagination"
 
-const DISPLAYED_PAGES_CHUNK = 5;
+const DISPLAYED_PAGES_CHUNK = 5
 
 type Props = {
-	currentPage: number;
-	setCurrentPage: (page: number) => void;
-	pagesCount: number;
-	className?: string;
-};
+	currentPage: number
+	setCurrentPage: (page: number) => void
+	pagesCount: number
+	className?: string
+}
 
 export const Pagination: React.FC<Props> = ({
 	currentPage,
 	setCurrentPage,
 	pagesCount,
-	className,
+	className
 }) => {
 	const [nbOfDisplayedPages, setNbOfDisplayedPages] = useState(
-		DISPLAYED_PAGES_CHUNK,
-	);
+		DISPLAYED_PAGES_CHUNK
+	)
 
 	return (
 		<PaginationUI className={className}>
@@ -35,7 +36,7 @@ export const Pagination: React.FC<Props> = ({
 				<PaginationItem>
 					<PaginationPrevious
 						onClick={() => {
-							if (currentPage - 1 >= 0) setCurrentPage(currentPage - 1);
+							if (currentPage - 1 >= 0) setCurrentPage(currentPage - 1)
 						}}
 						aria-disabled={currentPage === 0}
 						className="cursor-pointer"
@@ -44,10 +45,10 @@ export const Pagination: React.FC<Props> = ({
 
 				{take(
 					Array.from({ length: nbOfDisplayedPages }),
-					nbOfDisplayedPages,
+					nbOfDisplayedPages
 				).map((_, index) => {
 					if (index + 1 >= pagesCount) {
-						return null;
+						return null
 					}
 
 					return (
@@ -61,7 +62,7 @@ export const Pagination: React.FC<Props> = ({
 								{index + 1}
 							</PaginationLink>
 						</PaginationItem>
-					);
+					)
 				})}
 
 				{pagesCount > nbOfDisplayedPages && (
@@ -69,8 +70,8 @@ export const Pagination: React.FC<Props> = ({
 						<PaginationEllipsis
 							onClick={() => {
 								setNbOfDisplayedPages(
-									nbOfDisplayedPages + DISPLAYED_PAGES_CHUNK,
-								);
+									nbOfDisplayedPages + DISPLAYED_PAGES_CHUNK
+								)
 							}}
 							className="cursor-pointer"
 						/>
@@ -80,12 +81,12 @@ export const Pagination: React.FC<Props> = ({
 				<PaginationItem>
 					<PaginationNext
 						onClick={() => {
-							if (currentPage + 1 < pagesCount) setCurrentPage(currentPage + 1);
+							if (currentPage + 1 < pagesCount) setCurrentPage(currentPage + 1)
 
 							if (currentPage + 1 > nbOfDisplayedPages) {
 								setNbOfDisplayedPages(
-									nbOfDisplayedPages + DISPLAYED_PAGES_CHUNK,
-								);
+									nbOfDisplayedPages + DISPLAYED_PAGES_CHUNK
+								)
 							}
 						}}
 						aria-disabled={currentPage + 1 === pagesCount}
@@ -94,7 +95,7 @@ export const Pagination: React.FC<Props> = ({
 				</PaginationItem>
 			</PaginationContent>
 		</PaginationUI>
-	);
-};
+	)
+}
 
-export default Pagination;
+export default Pagination

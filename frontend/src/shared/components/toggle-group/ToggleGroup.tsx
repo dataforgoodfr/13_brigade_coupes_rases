@@ -2,34 +2,34 @@ import {
 	ToggleGroup as ShadcnToggleGroup,
 	ToggleGroupItem,
 	type ToggleGroupItemProps,
-	type ToggleGroupProps,
-} from "@/components/ui/toggle-group";
-import type { SelectableItemEnhanced } from "@/shared/items";
+	type ToggleGroupProps
+} from "@/components/ui/toggle-group"
+import type { SelectableItemEnhanced } from "@/shared/items"
 
 export type ToggleGroupInputProps<TItem> = Omit<
 	ToggleGroupProps<string>,
 	"value" | "onValueChange"
 > & {
-	value: readonly SelectableItemEnhanced<TItem>[];
-	itemProps?: Omit<ToggleGroupItemProps, "value" | "children">;
+	value: readonly SelectableItemEnhanced<TItem>[]
+	itemProps?: Omit<ToggleGroupItemProps, "value" | "children">
 } & (
 		| {
-				type: "multiple";
-				onValueChange: (items: SelectableItemEnhanced<TItem>[]) => void;
+				type: "multiple"
+				onValueChange: (items: SelectableItemEnhanced<TItem>[]) => void
 		  }
 		| {
-				type: "single";
-				allowEmptyValue: true;
+				type: "single"
+				allowEmptyValue: true
 
-				onValueChange: (item?: SelectableItemEnhanced<TItem>) => void;
+				onValueChange: (item?: SelectableItemEnhanced<TItem>) => void
 		  }
 		| {
-				type: "single";
-				allowEmptyValue: false | undefined;
+				type: "single"
+				allowEmptyValue: false | undefined
 
-				onValueChange: (item: SelectableItemEnhanced<TItem>) => void;
+				onValueChange: (item: SelectableItemEnhanced<TItem>) => void
 		  }
-	);
+	)
 export function ToggleGroup<TItem>({
 	className,
 	children,
@@ -41,11 +41,11 @@ export function ToggleGroup<TItem>({
 		<ToggleGroupItem key={value} value={value} {...itemProps}>
 			{label}
 		</ToggleGroupItem>
-	));
+	))
 	if (props.type === "multiple") {
 		const value = items
 			.filter(({ isSelected }) => isSelected)
-			.map(({ value }) => value);
+			.map(({ value }) => value)
 		return (
 			<ShadcnToggleGroup
 				{...props}
@@ -57,16 +57,16 @@ export function ToggleGroup<TItem>({
 						items.map((item) =>
 							selectedValues.includes(item.value)
 								? { ...item, isSelected: true }
-								: { ...item, isSelected: false },
-						),
+								: { ...item, isSelected: false }
+						)
 					)
 				}
 			>
 				{Items}
 			</ShadcnToggleGroup>
-		);
+		)
 	}
-	const value = items.find(({ isSelected }) => isSelected)?.value;
+	const value = items.find(({ isSelected }) => isSelected)?.value
 	return (
 		<ShadcnToggleGroup
 			{...props}
@@ -75,19 +75,19 @@ export function ToggleGroup<TItem>({
 			value={props.allowEmptyValue ? undefined : value}
 			onValueChange={(v) => {
 				if (!v && !props.allowEmptyValue) {
-					return;
+					return
 				}
-				const item = items.find((item) => item.value === v);
+				const item = items.find((item) => item.value === v)
 				if (item === undefined) {
 					if (props.allowEmptyValue) {
-						props.onValueChange(undefined);
+						props.onValueChange(undefined)
 					}
 				} else {
-					props.onValueChange({ ...item, isSelected: !item.isSelected });
+					props.onValueChange({ ...item, isSelected: !item.isSelected })
 				}
 			}}
 		>
 			{Items}
 		</ShadcnToggleGroup>
-	);
+	)
 }

@@ -1,13 +1,14 @@
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import type { Sort } from "@/shared/types/list";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import type { ReactNode } from "react"
+
+import { Button } from "@/components/ui/button"
+import type { Sort } from "@/shared/types/list"
 
 type Props = {
-	onClick: () => void;
-	children?: ReactNode;
-	sort?: Sort;
-};
+	onClick: () => void
+	children?: ReactNode
+	sort?: Sort
+}
 
 export const SortingButton: React.FC<Props> = ({ onClick, children, sort }) => {
 	return (
@@ -17,5 +18,5 @@ export const SortingButton: React.FC<Props> = ({ onClick, children, sort }) => {
 			{sort === "asc" && <ArrowUp />}
 			{sort === "desc" && <ArrowDown />}
 		</Button>
-	);
-};
+	)
+}

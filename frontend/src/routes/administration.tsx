@@ -1,8 +1,9 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RulesTab } from "@/features/admin/components/rules/RulesTab";
-import { UsersListTab } from "@/features/admin/components/users-list/UsersListTab";
-import { Title } from "@/shared/components/typo/Title";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { RulesTab } from "@/features/admin/components/rules/RulesTab"
+import { UsersListTab } from "@/features/admin/components/users-list/UsersListTab"
+import { Title } from "@/shared/components/typo/Title"
 
 export const Route = createFileRoute("/administration")({
 	beforeLoad: async ({ context, location }) => {
@@ -10,18 +11,18 @@ export const Route = createFileRoute("/administration")({
 		if (!context?.auth?.isAuthenticated) {
 			throw redirect({
 				to: "/login",
-				search: { redirect: location.href },
-			});
+				search: { redirect: location.href }
+			})
 		}
 		// If authenticated but not admin, redirect to home (prevents infinite loop)
 		if (!context?.auth?.isAdmin) {
 			throw redirect({
-				to: "/",
-			});
+				to: "/"
+			})
 		}
 	},
-	component: RouteComponent,
-});
+	component: RouteComponent
+})
 
 function RouteComponent() {
 	return (
@@ -41,5 +42,5 @@ function RouteComponent() {
 				</TabsContent>
 			</Tabs>
 		</div>
-	);
+	)
 }

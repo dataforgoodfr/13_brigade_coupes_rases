@@ -1,39 +1,40 @@
-import { isUndefined } from "es-toolkit";
-import type React from "react";
-import { useId } from "react";
-import type { Path } from "react-hook-form";
+import { isUndefined } from "es-toolkit"
+import type React from "react"
+import { useId } from "react"
+import type { Path } from "react-hook-form"
+
 import {
 	AccordionContent,
 	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+	AccordionTrigger
+} from "@/components/ui/accordion"
 import type {
 	ClearCutFormInput,
-	ClearCutFormVersions,
-} from "@/features/clear-cut/store/clear-cuts";
-import { cn } from "@/lib/utils";
-import { DownloadOutdatedButton } from "@/shared/form/components/DownloadOutdatedButton";
-import { UndoButton } from "@/shared/form/components/UndoButton";
-import { useChangeTrackingFormContext } from "@/shared/form/context/ChangeTrackingForm";
+	ClearCutFormVersions
+} from "@/features/clear-cut/store/clear-cuts"
+import { cn } from "@/lib/utils"
+import { DownloadOutdatedButton } from "@/shared/form/components/DownloadOutdatedButton"
+import { UndoButton } from "@/shared/form/components/UndoButton"
+import { useChangeTrackingFormContext } from "@/shared/form/context/ChangeTrackingForm"
 
 type AccordionFullItemProps = {
-	title: string;
-	children?: React.ReactNode;
-	className?: string;
-};
+	title: string
+	children?: React.ReactNode
+	className?: string
+}
 
 export function AccordionFullItem({
 	title,
 	children,
-	className,
+	className
 }: AccordionFullItemProps) {
-	const val = useId();
+	const val = useId()
 	const { changedFields, resetTrackedFieldsFromOther } =
 		useChangeTrackingFormContext<
 			ClearCutFormInput,
 			Path<ClearCutFormInput>,
 			Pick<ClearCutFormVersions, "original" | "latest">
-		>();
+		>()
 	return (
 		<AccordionItem
 			value={val}
@@ -43,7 +44,7 @@ export function AccordionFullItem({
 				{!isUndefined(changedFields.original) && changedFields.original > 0 && (
 					<UndoButton
 						onClick={() => {
-							resetTrackedFieldsFromOther("original");
+							resetTrackedFieldsFromOther("original")
 						}}
 					>
 						{changedFields.original}
@@ -52,7 +53,7 @@ export function AccordionFullItem({
 				{!isUndefined(changedFields.latest) && changedFields.latest > 0 && (
 					<DownloadOutdatedButton
 						onClick={() => {
-							resetTrackedFieldsFromOther("latest");
+							resetTrackedFieldsFromOther("latest")
 						}}
 					>
 						{changedFields.latest}
@@ -69,11 +70,11 @@ export function AccordionFullItem({
 			<AccordionContent
 				className={cn(
 					"font-[Roboto] border-t-1 pt-4 overflow-hidden",
-					className,
+					className
 				)}
 			>
 				{children}
 			</AccordionContent>
 		</AccordionItem>
-	);
+	)
 }
