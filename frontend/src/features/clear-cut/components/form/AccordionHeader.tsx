@@ -1,26 +1,28 @@
-import { FormattedNumber } from "react-intl";
-import { Separator } from "@/components/ui/separator";
-import { FavoriteButton } from "@/features/clear-cut/components/shared/FavoriteButton";
+import { FormattedNumber } from "react-intl"
+
+import { Separator } from "@/components/ui/separator"
+import { FavoriteButton } from "@/features/clear-cut/components/shared/FavoriteButton"
 import type {
 	ClearCutFormInput,
-	ClearCutStatus,
-} from "@/features/clear-cut/store/clear-cuts";
-import type { FormType } from "@/shared/form/types";
-import type { Rule } from "@/shared/store/referential/referential";
-import { RuleBadge } from "../RuleBadge";
-import { StatusWithLabel } from "../StatusWithLabel";
+	ClearCutStatus
+} from "@/features/clear-cut/store/clear-cuts"
+import type { FormType } from "@/shared/form/types"
+import type { Rule } from "@/shared/store/referential/referential"
+
+import { RuleBadge } from "../RuleBadge"
+import { StatusWithLabel } from "../StatusWithLabel"
 
 export function AccordionHeader({
 	form,
 	tags: abusiveTags,
-	status,
+	status
 }: {
-	form: FormType<ClearCutFormInput>;
-	tags: Rule[];
-	status: ClearCutStatus;
+	form: FormType<ClearCutFormInput>
+	tags: Rule[]
+	status: ClearCutStatus
 }) {
-	const areaHectare = form.getValues("report.totalAreaHectare");
-	const ecologicalZonings = form.getValues("ecologicalZonings");
+	const areaHectare = form.getValues("report.totalAreaHectare")
+	const ecologicalZonings = form.getValues("ecologicalZonings")
 	return (
 		<div className="flex items-center mx-4 mt-4 gap-6 text-sm">
 			{form.getValues("report.satelliteImages")?.map((image) => (
@@ -56,5 +58,5 @@ export function AccordionHeader({
 				)}
 			</div>
 		</div>
-	);
+	)
 }

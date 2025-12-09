@@ -1,32 +1,36 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { upperFirst } from "es-toolkit";
-import type { ReactNode } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { upperFirst } from "es-toolkit"
+import type { ReactNode } from "react"
+import { FormProvider, useForm } from "react-hook-form"
+
 import {
 	type UserForm as UserFormType,
-	userFormSchema,
-} from "@/features/admin/store/users";
-import { ROLES } from "@/features/user/store/me";
-import { FormField } from "@/shared/form/components/Form";
-import { FormCombobox } from "@/shared/form/components/FormCombobox";
-import { FormInput } from "@/shared/form/components/FormInput";
-import { FormSelect } from "@/shared/form/components/FormSelect";
-import { type LabelledValue, namedIdTranslator } from "@/shared/items";
-import { useSelectSelectableDepartments } from "@/shared/store/referential/referential.slice";
+	userFormSchema
+} from "@/features/admin/store/users"
+import { ROLES } from "@/features/user/store/me"
+import { FormField } from "@/shared/form/components/Form"
+import { FormCombobox } from "@/shared/form/components/FormCombobox"
+import { FormInput } from "@/shared/form/components/FormInput"
+import { FormSelect } from "@/shared/form/components/FormSelect"
+import { type LabelledValue, namedIdTranslator } from "@/shared/items"
+import { useSelectSelectableDepartments } from "@/shared/store/referential/referential.slice"
 
 type Props = {
-	user?: UserFormType;
-	header: ReactNode;
-	footer: ReactNode;
-	onSubmit: (user: UserFormType) => void;
-};
+	user?: UserFormType
+	header: ReactNode
+	footer: ReactNode
+	onSubmit: (user: UserFormType) => void
+}
+
 const AVAILABLE_ITEMS: LabelledValue[] = ROLES.map((r) => ({
 	value: r,
-	label: upperFirst(r),
-}));
-const formResolver = zodResolver(userFormSchema);
+	label: upperFirst(r)
+}))
+
+const formResolver = zodResolver(userFormSchema)
+
 export function UserForm({ user, footer, header, onSubmit }: Props) {
-	const departments = useSelectSelectableDepartments();
+	const departments = useSelectSelectableDepartments()
 	const form = useForm({
 		resolver: formResolver,
 		values: user
@@ -37,9 +41,9 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 					firstName: "",
 					lastName: "",
 					login: "",
-					departments: departments,
-				},
-	});
+					departments: departments
+				}
+	})
 
 	return (
 		<FormProvider {...form}>
@@ -105,5 +109,5 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 				{footer}
 			</form>
 		</FormProvider>
-	);
+	)
 }

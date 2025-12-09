@@ -1,28 +1,30 @@
-import { nanoid } from "nanoid";
-import { RuleLayout } from "@/features/admin/components/rules/RuleLayout";
-import type { EcologicalZoningRule } from "@/features/admin/store/rules.slice";
-import { Badge } from "@/shared/components/Badge";
-import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter";
-import { type SelectableItem, useEnhancedItems } from "@/shared/items";
-import type { EcologicalZoning } from "@/shared/store/referential/referential";
+import { nanoid } from "nanoid"
+
+import { RuleLayout } from "@/features/admin/components/rules/RuleLayout"
+import type { EcologicalZoningRule } from "@/features/admin/store/rules.slice"
+import { Badge } from "@/shared/components/Badge"
+import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter"
+import { type SelectableItem, useEnhancedItems } from "@/shared/items"
+import type { EcologicalZoning } from "@/shared/store/referential/referential"
 
 type Props = {
-	className?: string;
+	className?: string
 	updateEcologicalZonings: (
-		ecologicalZonings: SelectableItem<EcologicalZoning>[],
-	) => void;
-} & EcologicalZoningRule;
+		ecologicalZonings: SelectableItem<EcologicalZoning>[]
+	) => void
+} & EcologicalZoningRule
+
 export function EcologicalZoningRuleComponent({
 	ecologicalZonings,
 	className,
-	updateEcologicalZonings,
+	updateEcologicalZonings
 }: Props) {
 	const items = useEnhancedItems({
 		items: ecologicalZonings,
 		getItemLabel: (item) => item.item.name,
-		getItemValue: (item) => item.item.id,
-	});
-	const id = `ecologicalZoning${nanoid()}`;
+		getItemValue: (item) => item.item.id
+	})
+	const id = `ecologicalZoning${nanoid()}`
 	return (
 		<RuleLayout
 			className={className}
@@ -50,7 +52,7 @@ export function EcologicalZoningRuleComponent({
 							className="mt-2 text-zinc-500"
 							onDismiss={() =>
 								updateEcologicalZonings(
-									items.filter((i) => i.value !== item.value),
+									items.filter((i) => i.value !== item.value)
 								)
 							}
 						>
@@ -59,5 +61,5 @@ export function EcologicalZoningRuleComponent({
 					))}
 			</div>
 		</RuleLayout>
-	);
+	)
 }

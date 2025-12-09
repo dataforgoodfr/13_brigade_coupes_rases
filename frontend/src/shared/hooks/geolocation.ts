@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 
 interface GeolocationResult {
-	browserLocation?: GeolocationPosition;
-	error?: GeolocationPositionError;
+	browserLocation?: GeolocationPosition
+	error?: GeolocationPositionError
 }
 export function useGeolocation() {
-	const [result, setResult] = useState<GeolocationResult>({});
+	const [result, setResult] = useState<GeolocationResult>({})
 	useEffect(() => {
 		const id = navigator.geolocation.watchPosition(
 			(location) => {
-				setResult({ browserLocation: location });
+				setResult({ browserLocation: location })
 			},
-			(error) => setResult({ browserLocation: undefined, error }),
-		);
-		return () => navigator.geolocation.clearWatch(id);
-	}, []);
-	return result;
+			(error) => setResult({ browserLocation: undefined, error })
+		)
+		return () => navigator.geolocation.clearWatch(id)
+	}, [])
+	return result
 }

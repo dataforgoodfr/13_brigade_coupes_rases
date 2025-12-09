@@ -1,14 +1,16 @@
-import type { FieldValues } from "react-hook-form";
+import type { FieldValues } from "react-hook-form"
+
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
-} from "@/shared/components/Select";
-import { FormFieldLayout } from "@/shared/form/components/FormFieldLayout";
-import type { LabelledValue } from "@/shared/items";
-import type { FormProps } from "../types";
+	SelectValue
+} from "@/shared/components/Select"
+import { FormFieldLayout } from "@/shared/form/components/FormFieldLayout"
+import type { LabelledValue } from "@/shared/items"
+
+import type { FormProps } from "../types"
 
 export function FormSelect<T extends FieldValues = FieldValues>({
 	form,
@@ -18,7 +20,7 @@ export function FormSelect<T extends FieldValues = FieldValues>({
 	field,
 	...props
 }: FormProps<T> & {
-	availableValues: LabelledValue[];
+	availableValues: LabelledValue[]
 }) {
 	return (
 		<FormFieldLayout {...props} name={name}>
@@ -35,5 +37,5 @@ export function FormSelect<T extends FieldValues = FieldValues>({
 				</SelectContent>
 			</Select>
 		</FormFieldLayout>
-	);
+	)
 }

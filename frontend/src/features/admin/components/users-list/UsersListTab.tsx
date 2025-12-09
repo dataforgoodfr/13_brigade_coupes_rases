@@ -1,11 +1,11 @@
-import { CreateUserDialog } from "@/features/admin/components/users-list/CreateUserDialog";
-import { Filters } from "@/features/admin/components/users-list/Filters";
-import { Pagination } from "@/features/admin/components/users-list/Pagination";
-import { UsersList } from "@/features/admin/components/users-list/UsersList";
-import { useGetUsers } from "@/features/admin/store/users.slice";
+import { CreateUserDialog } from "@/features/admin/components/users-list/CreateUserDialog"
+import { Filters } from "@/features/admin/components/users-list/Filters"
+import { Pagination } from "@/features/admin/components/users-list/Pagination"
+import { UsersList } from "@/features/admin/components/users-list/UsersList"
+import { useGetUsers } from "@/features/admin/store/users.slice"
 
 export const UsersListTab: React.FC = () => {
-	useGetUsers();
+	useGetUsers()
 
 	return (
 		<>
@@ -20,5 +20,5 @@ export const UsersListTab: React.FC = () => {
 			</div>
 			<Pagination />
 		</>
-	);
-};
+	)
+}

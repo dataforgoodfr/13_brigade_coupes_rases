@@ -1,7 +1,8 @@
-import { isEqual, isUndefined } from "es-toolkit";
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-import { type FieldValues, get, type Path } from "react-hook-form";
-import type { FormType } from "@/shared/form/types";
+import { isEqual, isUndefined } from "es-toolkit"
+import { createContext, type ReactNode, useContext, useMemo } from "react"
+import { type FieldValues, get, type Path } from "react-hook-form"
+
+import type { FormType } from "@/shared/form/types"
 
 type ChangeTracking<
 	Form extends FieldValues = FieldValues,
@@ -10,8 +11,8 @@ type ChangeTracking<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
-> = Record<Name, ChangeTrackingEntries<Form, Name, Others, OtherKey>>;
+	OtherKey extends keyof Others & string = keyof Others & string
+> = Record<Name, ChangeTrackingEntries<Form, Name, Others, OtherKey>>
 
 type ChangeTrackingEntries<
 	Form extends FieldValues = FieldValues,
@@ -20,17 +21,17 @@ type ChangeTrackingEntries<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
-> = Record<OtherKey, ChangeTrackingEntry<Form, Name>>;
+	OtherKey extends keyof Others & string = keyof Others & string
+> = Record<OtherKey, ChangeTrackingEntry<Form, Name>>
 
 type ChangeTrackingEntry<
 	Form extends FieldValues = FieldValues,
-	Name extends Path<Form> = Path<Form>,
+	Name extends Path<Form> = Path<Form>
 > = {
-	hasChanged: boolean;
-	otherValue: Form[Name];
-	currentValue: Form[Name];
-};
+	hasChanged: boolean
+	otherValue: Form[Name]
+	currentValue: Form[Name]
+}
 type ChangeTrackingFormContextType<
 	Form extends FieldValues = FieldValues,
 	Name extends Path<Form> = Path<Form>,
@@ -38,23 +39,23 @@ type ChangeTrackingFormContextType<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
+	OtherKey extends keyof Others & string = keyof Others & string
 > = {
-	others: Others;
-	form: FormType<Form>;
-	changedFields: Partial<Record<OtherKey, number>>;
-	trackedFields?: Name[];
-	resetTrackedFieldsFromOther: (otherKey: OtherKey) => void;
-	resetTrackedFieldFromOther: (field: Name, otherKey: OtherKey) => void;
+	others: Others
+	form: FormType<Form>
+	changedFields: Partial<Record<OtherKey, number>>
+	trackedFields?: Name[]
+	resetTrackedFieldsFromOther: (otherKey: OtherKey) => void
+	resetTrackedFieldFromOther: (field: Name, otherKey: OtherKey) => void
 	hasChanged: (
 		field: Name,
-		other: OtherKey,
-	) => ChangeTracking<Form, Name, Others, OtherKey>[Name][OtherKey] | undefined;
-};
+		other: OtherKey
+	) => ChangeTracking<Form, Name, Others, OtherKey>[Name][OtherKey] | undefined
+}
 
 const ChangeTrackingFormContext = createContext<ChangeTrackingFormContextType>(
-	undefined as unknown as ChangeTrackingFormContextType,
-);
+	undefined as unknown as ChangeTrackingFormContextType
+)
 type ContextReturn<
 	Form extends FieldValues = FieldValues,
 	Name extends Path<Form> = Path<Form>,
@@ -62,12 +63,12 @@ type ContextReturn<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
+	OtherKey extends keyof Others & string = keyof Others & string
 > = ReturnType<
 	typeof createContext<
 		ChangeTrackingFormContextType<Form, Name, Others, OtherKey>
 	>
->;
+>
 
 type Props<
 	Form extends FieldValues = FieldValues,
@@ -76,13 +77,13 @@ type Props<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
+	OtherKey extends keyof Others & string = keyof Others & string
 > = Pick<
 	ChangeTrackingFormContextType<Form, Name, Others, OtherKey>,
 	"others" | "form" | "trackedFields"
 > & {
-	children: ReactNode;
-};
+	children: ReactNode
+}
 
 export function ChangeTrackingProvider<
 	Form extends FieldValues,
@@ -91,80 +92,80 @@ export function ChangeTrackingProvider<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
+	OtherKey extends keyof Others & string = keyof Others & string
 >({
 	others,
 	form,
 	trackedFields = [],
-	children,
+	children
 }: Props<Form, Name, Others, OtherKey>) {
 	const otherKeys = Object.keys(others).filter(
-		(k) => !isUndefined(others[k]),
-	) as OtherKey[];
+		(k) => !isUndefined(others[k])
+	) as OtherKey[]
 	const changeTrackingFields = useMemo(() => {
 		return Object.fromEntries(
 			trackedFields.map((field) => {
-				const currentValue = form.getValues(field);
+				const currentValue = form.getValues(field)
 				const t = [
 					field as Name,
 					Object.fromEntries(
 						otherKeys.map((other) => {
-							const otherValue = get(others[other], field);
+							const otherValue = get(others[other], field)
 							return [
 								other as OtherKey,
 								{
 									otherValue: otherValue as Form[Name],
 									currentValue,
-									hasChanged: !isEqual(otherValue, currentValue),
-								} as ChangeTrackingEntries<Form, Name, Others, OtherKey>,
-							] as const;
-						}),
-					),
-				] as const;
-				return t;
-			}),
-		) as ChangeTracking<Form, Name, Others, OtherKey>;
-	}, [trackedFields, others, form, otherKeys]);
+									hasChanged: !isEqual(otherValue, currentValue)
+								} as ChangeTrackingEntries<Form, Name, Others, OtherKey>
+							] as const
+						})
+					)
+				] as const
+				return t
+			})
+		) as ChangeTracking<Form, Name, Others, OtherKey>
+	}, [trackedFields, others, form, otherKeys])
 	const changedFields = useMemo(() => {
 		return Object.entries(changeTrackingFields).reduce(
 			(acc, [_, changes]) => {
 				Object.entries(
-					changes as ChangeTrackingEntries<Form, Name, Others, OtherKey>,
+					changes as ChangeTrackingEntries<Form, Name, Others, OtherKey>
 				).forEach(([otherKey, change]) => {
 					if ((change as ChangeTrackingEntry<Form, Name>).hasChanged) {
-						acc[otherKey as OtherKey] = (acc[otherKey as OtherKey] || 0) + 1;
+						acc[otherKey as OtherKey] = (acc[otherKey as OtherKey] || 0) + 1
 					}
-				});
-				return acc;
+				})
+				return acc
 			},
-			{} as Partial<Record<OtherKey, number>>,
-		);
-	}, [changeTrackingFields]);
+			{} as Partial<Record<OtherKey, number>>
+		)
+	}, [changeTrackingFields])
 	const FormContext = ChangeTrackingFormContext as unknown as ContextReturn<
 		Form,
 		Name,
 		Others,
 		OtherKey
-	>;
+	>
 
 	const hasChanged = (field: Name, otherKey: OtherKey) => {
-		return changeTrackingFields[field]?.[otherKey];
-	};
+		return changeTrackingFields[field]?.[otherKey]
+	}
 	const resetTrackedFieldsFromOther = (otherKey: OtherKey) => {
 		trackedFields.forEach((field) => {
-			const other = others[otherKey];
+			const other = others[otherKey]
 			if (!isUndefined(other)) {
 				form.resetField(field, {
-					defaultValue: get(other, field),
-				});
+					defaultValue: get(other, field)
+				})
 			}
-		});
-	};
+		})
+	}
 	const resetTrackedFieldFromOther = (field: Name, otherKey: OtherKey) => {
 		form.resetField(field, {
-			defaultValue: get(others[otherKey], field),
-		});
-	};
+			defaultValue: get(others[otherKey], field)
+		})
+	}
 	return (
 		<FormContext.Provider
 			value={{
@@ -174,12 +175,12 @@ export function ChangeTrackingProvider<
 				changedFields,
 				resetTrackedFieldFromOther,
 				resetTrackedFieldsFromOther,
-				trackedFields,
+				trackedFields
 			}}
 		>
 			{children}
 		</FormContext.Provider>
-	);
+	)
 }
 
 export function useChangeTrackingFormContext<
@@ -189,7 +190,7 @@ export function useChangeTrackingFormContext<
 		string,
 		Form | undefined
 	>,
-	OtherKey extends keyof Others & string = keyof Others & string,
+	OtherKey extends keyof Others & string = keyof Others & string
 >() {
 	return useContext(
 		ChangeTrackingFormContext as unknown as ContextReturn<
@@ -197,6 +198,6 @@ export function useChangeTrackingFormContext<
 			Name,
 			Others,
 			OtherKey
-		>,
-	);
+		>
+	)
 }

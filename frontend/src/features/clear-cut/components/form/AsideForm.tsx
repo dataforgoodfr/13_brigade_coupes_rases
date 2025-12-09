@@ -1,26 +1,27 @@
-import { Title } from "@radix-ui/react-toast";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { X } from "lucide-react";
-import { useEffect } from "react";
-import { FormattedDate } from "react-intl";
-import { Button } from "@/components/ui/button";
-import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutFullForm";
-import { useMapInstance } from "@/features/clear-cut/components/map/Map.context";
+import { Title } from "@radix-ui/react-toast"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { X } from "lucide-react"
+import { useEffect } from "react"
+import { FormattedDate } from "react-intl"
+
+import { Button } from "@/components/ui/button"
+import { ClearCutFullForm } from "@/features/clear-cut/components/form/ClearCutFullForm"
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import {
 	clearCutsSlice,
-	useGetClearCut,
-} from "@/features/clear-cut/store/clear-cuts-slice";
-import { useToast } from "@/hooks/use-toast";
-import { useBreakpoint } from "@/shared/hooks/breakpoint";
-import { useAppDispatch } from "@/shared/hooks/store";
+	useGetClearCut
+} from "@/features/clear-cut/store/clear-cuts-slice"
+import { useToast } from "@/hooks/use-toast"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
+import { useAppDispatch } from "@/shared/hooks/store"
 
 export function AsideForm({ clearCutId }: { clearCutId: string }) {
-	const { value, status } = useGetClearCut(clearCutId);
-	const { map } = useMapInstance();
-	const { toast } = useToast();
-	const navigate = useNavigate();
-	const { breakpoint } = useBreakpoint();
-	const dispatch = useAppDispatch();
+	const { value, status } = useGetClearCut(clearCutId)
+	const { map } = useMapInstance()
+	const { toast } = useToast()
+	const navigate = useNavigate()
+	const { breakpoint } = useBreakpoint()
+	const dispatch = useAppDispatch()
 	useEffect(() => {
 		if (status === "error") {
 			toast({
@@ -28,11 +29,11 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 				title: "Fiche non trouvée",
 				description: "Fermer pour retourner à la carte",
 				onClose: () => {
-					navigate({ to: "/clear-cuts" });
-				},
-			});
+					navigate({ to: "/clear-cuts" })
+				}
+			})
 		}
-	}, [status, navigate, toast]);
+	}, [status, navigate, toast])
 
 	useEffect(() => {
 		if (
@@ -43,13 +44,13 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 			map.flyTo(
 				[
 					value.current.report.averageLocation.coordinates[1],
-					value.current.report.averageLocation.coordinates[0],
+					value.current.report.averageLocation.coordinates[0]
 				],
 				15,
-				{ duration: 1 },
-			);
+				{ duration: 1 }
+			)
 		}
-	}, [breakpoint, map, value]);
+	}, [breakpoint, map, value])
 
 	useEffect(() => {
 		if (value?.versionMismatchDisclaimerShown === false) {
@@ -60,16 +61,16 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 				action: (
 					<Button
 						onClick={() => {
-							dismiss();
-							dispatch(clearCutsSlice.actions.replaceCurrentVersionByLatest());
+							dismiss()
+							dispatch(clearCutsSlice.actions.replaceCurrentVersionByLatest())
 						}}
 					>
 						Mettre à jour
 					</Button>
-				),
-			});
+				)
+			})
 		}
-	}, [toast, value, dispatch]);
+	}, [toast, value, dispatch])
 	return (
 		value && (
 			<div className="flex flex-col w-full">
@@ -90,5 +91,5 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 				<ClearCutFullForm {...value} />
 			</div>
 		)
-	);
+	)
 }

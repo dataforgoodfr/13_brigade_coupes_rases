@@ -1,16 +1,22 @@
-import { X } from "lucide-react";
-import { Dialog as RadixDialog } from "radix-ui";
+import { X } from "lucide-react"
+import { Dialog as RadixDialog } from "radix-ui"
 import {
 	type ComponentPropsWithoutRef,
 	type ComponentRef,
 	forwardRef,
-	type HTMLAttributes,
-} from "react";
-import { cn } from "@/lib/utils";
-export const DialogClose = RadixDialog.Close;
-export const DialogPortal = RadixDialog.Portal;
-export const DialogTrigger = RadixDialog.Trigger;
-export const Dialog = RadixDialog.Dialog;
+	type HTMLAttributes
+} from "react"
+
+import { cn } from "@/lib/utils"
+
+export const DialogClose = RadixDialog.Close
+
+export const DialogPortal = RadixDialog.Portal
+
+export const DialogTrigger = RadixDialog.Trigger
+
+export const Dialog = RadixDialog.Dialog
+
 export const DialogOverlay = forwardRef<
 	ComponentRef<typeof RadixDialog.Overlay>,
 	ComponentPropsWithoutRef<typeof RadixDialog.Overlay>
@@ -19,12 +25,12 @@ export const DialogOverlay = forwardRef<
 		ref={ref}
 		className={cn(
 			"fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-			className,
+			className
 		)}
 		{...props}
 	/>
-));
-DialogOverlay.displayName = RadixDialog.Overlay.displayName;
+))
+DialogOverlay.displayName = RadixDialog.Overlay.displayName
 
 export const DialogContent = forwardRef<
 	ComponentRef<typeof RadixDialog.Content>,
@@ -36,7 +42,7 @@ export const DialogContent = forwardRef<
 			ref={ref}
 			className={cn(
 				"fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-				className,
+				className
 			)}
 			{...props}
 		>
@@ -47,8 +53,8 @@ export const DialogContent = forwardRef<
 			</RadixDialog.Close>
 		</RadixDialog.Content>
 	</RadixDialog.Portal>
-));
-DialogContent.displayName = RadixDialog.Content.displayName;
+))
+DialogContent.displayName = RadixDialog.Content.displayName
 
 export const DialogHeader = ({
 	className,
@@ -57,12 +63,12 @@ export const DialogHeader = ({
 	<div
 		className={cn(
 			"flex flex-col space-y-1.5 text-center sm:text-left",
-			className,
+			className
 		)}
 		{...props}
 	/>
-);
-DialogHeader.displayName = "DialogHeader";
+)
+DialogHeader.displayName = "DialogHeader"
 
 export const DialogFooter = ({
 	className,
@@ -71,12 +77,12 @@ export const DialogFooter = ({
 	<div
 		className={cn(
 			"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-			className,
+			className
 		)}
 		{...props}
 	/>
-);
-DialogFooter.displayName = "DialogFooter";
+)
+DialogFooter.displayName = "DialogFooter"
 
 export const DialogTitle = forwardRef<
 	ComponentRef<typeof RadixDialog.Title>,
@@ -86,12 +92,12 @@ export const DialogTitle = forwardRef<
 		ref={ref}
 		className={cn(
 			"text-lg font-semibold leading-none tracking-tight",
-			className,
+			className
 		)}
 		{...props}
 	/>
-));
-DialogTitle.displayName = RadixDialog.Title.displayName;
+))
+DialogTitle.displayName = RadixDialog.Title.displayName
 
 export const DialogDescription = forwardRef<
 	ComponentRef<typeof RadixDialog.Description>,
@@ -102,5 +108,5 @@ export const DialogDescription = forwardRef<
 		className={cn("text-sm text-muted-foreground", className)}
 		{...props}
 	/>
-));
-DialogDescription.displayName = RadixDialog.Description.displayName;
+))
+DialogDescription.displayName = RadixDialog.Description.displayName

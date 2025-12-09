@@ -1,126 +1,126 @@
-import { type ReactNode, useMemo, useState } from "react";
-import z from "zod";
+import { type ReactNode, useMemo, useState } from "react"
+import z from "zod"
 
 export interface NamedId<
 	TId extends string = string,
-	TName extends string = string,
+	TName extends string = string
 > {
-	id: TId;
-	name: TName;
+	id: TId
+	name: TName
 }
 export const toSelectableItemSchema = <T extends z.ZodType>(itemSchema: T) =>
-	z.object({ isSelected: z.boolean(), item: itemSchema });
+	z.object({ isSelected: z.boolean(), item: itemSchema })
 export interface SelectableItem<T> {
-	isSelected: boolean;
-	item: T;
+	isSelected: boolean
+	item: T
 }
 
 export type EventuallyBooleanSelectableItems = [
 	SelectableItem<true>,
 	SelectableItem<false>,
-	SelectableItem<undefined>,
-];
+	SelectableItem<undefined>
+]
 export const DEFAULT_EVENTUALLY_BOOLEAN: EventuallyBooleanSelectableItems = [
 	{ isSelected: false, item: true },
 	{ isSelected: false, item: false },
-	{ isSelected: true, item: undefined },
-];
+	{ isSelected: true, item: undefined }
+]
 export const updateEventuallyBooleanSelectableItem = (
 	item: SelectableItem<boolean | undefined>,
-	items: EventuallyBooleanSelectableItems,
+	items: EventuallyBooleanSelectableItems
 ): EventuallyBooleanSelectableItems => {
 	return items.map((i) =>
 		i.item === item.item
 			? { ...i, isSelected: true }
-			: { ...i, isSelected: false },
-	) as EventuallyBooleanSelectableItems;
-};
+			: { ...i, isSelected: false }
+	) as EventuallyBooleanSelectableItems
+}
 export function listToSelectableItems<T>(
 	items?: T[],
-	isSelected = false,
+	isSelected = false
 ): SelectableItem<T>[] {
-	return items?.map((item) => ({ isSelected: isSelected, item })) ?? [];
+	return items?.map((item) => ({ isSelected: isSelected, item })) ?? []
 }
 export function booleanToSelectableItem(
-	value?: boolean,
+	value?: boolean
 ): EventuallyBooleanSelectableItems {
 	switch (value) {
 		case true:
 			return [
 				{ isSelected: true, item: true },
 				{ isSelected: false, item: false },
-				{ isSelected: false, item: undefined },
-			];
+				{ isSelected: false, item: undefined }
+			]
 		case false:
 			return [
 				{ isSelected: false, item: true },
 				{ isSelected: true, item: false },
-				{ isSelected: false, item: undefined },
-			];
+				{ isSelected: false, item: undefined }
+			]
 		case undefined:
 			return [
 				{ isSelected: false, item: true },
 				{ isSelected: false, item: false },
-				{ isSelected: true, item: undefined },
-			];
+				{ isSelected: true, item: undefined }
+			]
 	}
 }
 
 export function recordToSelectableItems<T>(
-	items?: Record<string, T>,
+	items?: Record<string, T>
 ): SelectableItem<T>[] {
 	return items === undefined
 		? []
-		: Object.entries(items).map(([, item]) => ({ isSelected: false, item }));
+		: Object.entries(items).map(([, item]) => ({ isSelected: false, item }))
 }
 
 export function recordToSelectableItemsTransformed<TItem, TTransformed = TItem>(
 	items: Record<string, TItem>,
-	transform: (key: string, item: TItem) => TTransformed,
+	transform: (key: string, item: TItem) => TTransformed
 ): SelectableItem<TTransformed>[] {
 	return items === undefined
 		? []
 		: Object.entries(items).map(([key, item]) => ({
 				isSelected: false,
-				item: transform(key, item),
-			}));
+				item: transform(key, item)
+			}))
 }
-const labelledValueSchema = z.object({ label: z.string(), value: z.string() });
+const labelledValueSchema = z.object({ label: z.string(), value: z.string() })
 
-export type LabelledValue = { label: ReactNode; value: string };
+export type LabelledValue = { label: ReactNode; value: string }
 export type SelectableItemEnhanced<T> = SelectableItem<T> & {
-	prefix?: ReactNode;
-} & LabelledValue;
+	prefix?: ReactNode
+} & LabelledValue
 export const toSelectableItemEnhancedSchema = <T extends z.ZodType>(
-	itemSchema: T,
+	itemSchema: T
 ) =>
 	z
 		.object({ isSelected: z.boolean(), item: itemSchema, prefix: z.string() })
-		.and(labelledValueSchema);
+		.and(labelledValueSchema)
 export function recordToNamedId(record?: Record<string, string>): NamedId[] {
 	return record === undefined
 		? []
-		: Object.entries(record).map(([k, v]) => ({ id: k, name: v }));
+		: Object.entries(record).map(([k, v]) => ({ id: k, name: v }))
 }
-const EMPTY_ITEMS: unknown[] = [];
+const EMPTY_ITEMS: unknown[] = []
 
 export type UseEnhancedItemsOptions<
 	TItem,
 	TLabel extends ReactNode,
-	TValue extends string = string,
+	TValue extends string = string
 > = {
-	items: readonly SelectableItem<TItem>[] | undefined;
-	getItemLabel: (item: SelectableItem<TItem>) => TLabel;
-	getItemValue: (item: SelectableItem<TItem>) => TValue;
-};
+	items: readonly SelectableItem<TItem>[] | undefined
+	getItemLabel: (item: SelectableItem<TItem>) => TLabel
+	getItemValue: (item: SelectableItem<TItem>) => TValue
+}
 export const useEnhancedItems = <
 	TItem,
 	TLabel extends ReactNode,
-	TValue extends string = string,
+	TValue extends string = string
 >({
 	items,
 	getItemLabel,
-	getItemValue,
+	getItemValue
 }: UseEnhancedItemsOptions<
 	TItem,
 	TLabel,
@@ -131,53 +131,53 @@ export const useEnhancedItems = <
 			items?.map((item) => ({
 				...item,
 				label: getItemLabel(item),
-				value: getItemValue(item),
+				value: getItemValue(item)
 			})) ?? (EMPTY_ITEMS as SelectableItemEnhanced<TItem>[]),
-		[items, getItemLabel, getItemValue],
-	);
+		[items, getItemLabel, getItemValue]
+	)
 
 export const useSingleSelect = <
 	TItem,
-	TSelectableItem extends SelectableItem<TItem>,
+	TSelectableItem extends SelectableItem<TItem>
 >(
-	items: TSelectableItem[],
+	items: TSelectableItem[]
 ) => {
-	const [singleItems, setSingleItems] = useState(items);
+	const [singleItems, setSingleItems] = useState(items)
 
 	const onChange = (item?: TSelectableItem) => {
 		if (item === undefined) {
 			setSingleItems(
-				singleItems.map((singleItem) => ({ ...singleItem, isSelected: false })),
-			);
+				singleItems.map((singleItem) => ({ ...singleItem, isSelected: false }))
+			)
 		} else {
 			setSingleItems(
 				singleItems.map((singleItem) =>
 					singleItem.item === item.item
 						? item
-						: { ...singleItem, isSelected: !item.isSelected },
-				),
-			);
+						: { ...singleItem, isSelected: !item.isSelected }
+				)
+			)
 		}
-	};
-	const selectedItem = singleItems.find((i) => i.isSelected);
-	return [selectedItem, singleItems, onChange] as const;
-};
+	}
+	const selectedItem = singleItems.find((i) => i.isSelected)
+	return [selectedItem, singleItems, onChange] as const
+}
 
 export const selectableItemToString = <TItem>({
-	item,
-}: SelectableItem<TItem>) => JSON.stringify(item);
+	item
+}: SelectableItem<TItem>) => JSON.stringify(item)
 export const booleanSelectableToString = ({
-	item,
+	item
 }: SelectableItem<boolean | undefined>) => {
 	switch (item) {
 		case true:
-			return "Oui";
+			return "Oui"
 		case false:
-			return "Non";
+			return "Non"
 		default:
-			return "Tout";
+			return "Tout"
 	}
-};
+}
 
 export const namedIdTranslator = ({ item }: SelectableItem<NamedId>) =>
-	item.name.toString();
+	item.name.toString()

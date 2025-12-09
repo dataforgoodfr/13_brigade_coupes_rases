@@ -1,54 +1,54 @@
-import { isUndefined } from "es-toolkit";
+import { isUndefined } from "es-toolkit"
+
 import type {
 	FormItemType,
-	SectionFormItem,
-} from "@/features/clear-cut/components/form/types";
-import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts";
-import { FormField } from "@/shared/form/components/Form";
-import { FormDatePicker } from "@/shared/form/components/FormDatePicker";
-import { FixedField } from "@/shared/form/components/FormFixedField";
-import { FormInput } from "@/shared/form/components/FormInput";
-import { FormS3ImageUpload } from "@/shared/form/components/FormS3ImageUpload";
-import { FormSwitch } from "@/shared/form/components/FormSwitch";
-import { FormTextArea } from "@/shared/form/components/FormTextArea";
-import { FormToggleGroup } from "@/shared/form/components/FormToggleGroup";
-import type { FormType } from "@/shared/form/types";
+	SectionFormItem
+} from "@/features/clear-cut/components/form/types"
+import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
+import { FormField } from "@/shared/form/components/Form"
+import { FormDatePicker } from "@/shared/form/components/FormDatePicker"
+import { FixedField } from "@/shared/form/components/FormFixedField"
+import { FormInput } from "@/shared/form/components/FormInput"
+import { FormS3ImageUpload } from "@/shared/form/components/FormS3ImageUpload"
+import { FormSwitch } from "@/shared/form/components/FormSwitch"
+import { FormTextArea } from "@/shared/form/components/FormTextArea"
+import { FormToggleGroup } from "@/shared/form/components/FormToggleGroup"
+import type { FormType } from "@/shared/form/types"
 
 type Props = {
-	item: SectionFormItem<ClearCutFormInput>;
-	form: FormType<ClearCutFormInput>;
-};
+	item: SectionFormItem<ClearCutFormInput>
+	form: FormType<ClearCutFormInput>
+}
 const COMMON_PROPS = {
 	gap: 1,
 	orientation: "vertical",
-	align: "start",
-} as const;
+	align: "start"
+} as const
 
 function getFormComponent(type: FormItemType) {
 	switch (type) {
 		case "switch":
-			return FormSwitch<ClearCutFormInput>;
+			return FormSwitch<ClearCutFormInput>
 		case "datePicker":
-			return FormDatePicker<ClearCutFormInput>;
+			return FormDatePicker<ClearCutFormInput>
 		case "textArea":
-			return FormTextArea<ClearCutFormInput>;
+			return FormTextArea<ClearCutFormInput>
 		case "inputFile":
-			return FormS3ImageUpload<ClearCutFormInput>;
+			return FormS3ImageUpload<ClearCutFormInput>
 		case "inputText":
-			return FormInput<ClearCutFormInput>;
+			return FormInput<ClearCutFormInput>
 		case "toggleGroup":
-			return FormToggleGroup<ClearCutFormInput>;
+			return FormToggleGroup<ClearCutFormInput>
 		default:
-			return undefined;
+			return undefined
 	}
 }
+
 export function AccordionItem({ item, form }: Props) {
-	const render = item.renderConditions.every(
-		(value) => !!form.getValues(value),
-	);
+	const render = item.renderConditions.every((value) => !!form.getValues(value))
 	const value = item.transformValue
 		? item.transformValue({ value: form.getValues(item.name) })
-		: form.getValues(item.name)?.toString();
+		: form.getValues(item.name)?.toString()
 	if (item.type === "fixed") {
 		return render ? (
 			<FixedField
@@ -59,19 +59,19 @@ export function AccordionItem({ item, form }: Props) {
 			/>
 		) : (
 			item.fallBack?.(item.name)
-		);
+		)
 	}
 	if (item.type === "customized") {
 		return render
 			? item.customizeRender?.(form, item.name)
-			: item.fallBack?.(item.name);
+			: item.fallBack?.(item.name)
 	}
 	return (
 		<FormField<ClearCutFormInput>
 			name={item.name}
 			form={form}
 			render={(rendererProps) => {
-				const Component = getFormComponent(item.type);
+				const Component = getFormComponent(item.type)
 
 				if (!isUndefined(Component) && render) {
 					return (
@@ -83,10 +83,10 @@ export function AccordionItem({ item, form }: Props) {
 							reportId={form.getValues("report.id")}
 							field={rendererProps.field}
 						/>
-					);
+					)
 				}
-				return item.fallBack?.(item.name) ?? <span />;
+				return item.fallBack?.(item.name) ?? <span />
 			}}
 		/>
-	);
+	)
 }

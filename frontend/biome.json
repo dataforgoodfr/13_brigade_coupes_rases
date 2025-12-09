@@ -27,7 +27,20 @@
 	},
 	"assist": {
 		"actions": {
-			"source": { "organizeImports": "on" }
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							":PACKAGE:",
+							":BLANK_LINE:",
+							["@/**"],
+							":BLANK_LINE:",
+							["./**"]
+						]
+					}
+				}
+			}
 		}
 	},
 	"linter": {
@@ -37,16 +50,22 @@
 			"suspicious": {
 				"noConsole": {
 					"level": "error",
-					"options": { "allow": ["warn", "error"] }
+					"options": {
+						"allow": ["warn", "error"]
+					}
 				},
 				"noUnknownAtRules": "off"
 			},
-			"correctness": { "noUnusedImports": "error" }
+			"correctness": {
+				"noUnusedImports": "error"
+			}
 		}
 	},
 	"javascript": {
 		"formatter": {
-			"quoteStyle": "double"
+			"quoteStyle": "double",
+			"trailingCommas": "none",
+			"semicolons": "asNeeded"
 		}
 	}
 }

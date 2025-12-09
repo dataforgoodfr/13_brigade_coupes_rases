@@ -1,15 +1,16 @@
 import {
 	RuleLayout,
-	type RuleLayoutProps,
-} from "@/features/admin/components/rules/RuleLayout";
-import type { VariableRuleResponse } from "@/features/admin/store/rules";
-import { Input } from "@/shared/components/input/Input";
+	type RuleLayoutProps
+} from "@/features/admin/components/rules/RuleLayout"
+import type { VariableRuleResponse } from "@/features/admin/store/rules"
+import { Input } from "@/shared/components/input/Input"
 
 type Props = VariableRuleResponse &
 	RuleLayoutProps & {
-		onThresholdUpdated: (value: number) => void;
-		value?: number;
-	};
+		onThresholdUpdated: (value: number) => void
+		value?: number
+	}
+
 export function VariableRule({
 	onThresholdUpdated,
 	value,
@@ -25,5 +26,5 @@ export function VariableRule({
 				onChange={(e) => onThresholdUpdated(e.target.valueAsNumber)}
 			/>
 		</RuleLayout>
-	);
+	)
 }

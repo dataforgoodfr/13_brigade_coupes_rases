@@ -1,13 +1,14 @@
-import { screen, type waitForOptions } from "@testing-library/react";
-import type { UserEvent } from "@vitest/browser/context";
-import { clearCutItem } from "@/test/page-object/clear-cuts-item";
+import { screen, type waitForOptions } from "@testing-library/react"
+import type { UserEvent } from "@vitest/browser/context"
 
-type Options = { user: UserEvent } & waitForOptions;
+import { clearCutItem } from "@/test/page-object/clear-cuts-item"
+
+type Options = { user: UserEvent } & waitForOptions
 export function clearCuts({ user, ...options }: Options) {
-	const findTitle = () => screen.findByText("COUPES RASES", undefined, options);
+	const findTitle = () => screen.findByText("COUPES RASES", undefined, options)
 	const findContainer = async () =>
 		(await findTitle()).parentElement?.parentElement?.nextElementSibling
-			?.firstChild as HTMLElement;
+			?.firstChild as HTMLElement
 	return {
 		filters: {},
 		list: {
@@ -17,8 +18,8 @@ export function clearCuts({ user, ...options }: Options) {
 					user,
 					findContainer: findContainer,
 					title,
-					...options,
-				}),
-		},
-	};
+					...options
+				})
+		}
+	}
 }

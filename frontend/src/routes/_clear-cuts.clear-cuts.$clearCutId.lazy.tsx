@@ -1,17 +1,18 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
-import { AsideForm } from "@/features/clear-cut/components/form/AsideForm";
-import { LayoutProvider } from "@/features/clear-cut/components/Layout.context";
-import { useBreakpoint } from "@/shared/hooks/breakpoint";
+import { createLazyFileRoute } from "@tanstack/react-router"
+
+import { AsideForm } from "@/features/clear-cut/components/form/AsideForm"
+import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
 
 export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/$clearCutId")(
 	{
-		component: RouteComponent,
-	},
-);
+		component: RouteComponent
+	}
+)
 
 function RouteComponent() {
-	const { breakpoint } = useBreakpoint();
-	const params = Route.useParams();
+	const { breakpoint } = useBreakpoint()
+	const params = Route.useParams()
 	return (
 		<LayoutProvider>
 			{breakpoint === "mobile" ? (
@@ -22,5 +23,5 @@ function RouteComponent() {
 				</div>
 			)}
 		</LayoutProvider>
-	);
+	)
 }

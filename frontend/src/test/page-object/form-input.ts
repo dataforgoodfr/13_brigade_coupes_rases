@@ -1,7 +1,8 @@
-import { screen, within } from "@testing-library/react";
-import type { UserEvent } from "@vitest/browser/context";
-import type { FieldValues } from "react-hook-form";
-import { expect } from "vitest";
+import { screen, within } from "@testing-library/react"
+import type { UserEvent } from "@vitest/browser/context"
+import type { FieldValues } from "react-hook-form"
+import { expect } from "vitest"
+
 import type {
 	DatePickerItem,
 	FixedItem,
@@ -10,222 +11,222 @@ import type {
 	SectionFormItem,
 	SwitchItem,
 	TextAreaItem,
-	ToggleGroupItem,
-} from "@/features/clear-cut/components/form/types";
+	ToggleGroupItem
+} from "@/features/clear-cut/components/form/types"
 export type TestFormItem<
 	Form extends FieldValues,
-	Value = unknown,
+	Value = unknown
 > = SectionFormItem<Form> & {
-	expected: Value;
-};
+	expected: Value
+}
 type Options<Form extends FieldValues, Value = unknown> = {
-	user: UserEvent;
-	item: TestFormItem<Form, Value>;
-};
+	user: UserEvent
+	item: TestFormItem<Form, Value>
+}
 
 export interface Field<
 	Value = unknown,
-	Element extends HTMLElement = HTMLElement,
+	Element extends HTMLElement = HTMLElement
 > {
-	findValue: () => Promise<Value>;
-	findElement: () => Promise<Element>;
+	findValue: () => Promise<Value>
+	findElement: () => Promise<Element>
 }
 export interface FieldInput<
 	Value = unknown,
-	Element extends HTMLElement = HTMLElement,
+	Element extends HTMLElement = HTMLElement
 > extends Field<Value, Element> {
-	isDisabled: () => Promise<boolean>;
-	expectDisabledState: (state: boolean) => Promise<void>;
-	setValue: (value: Value) => Promise<void>;
-	resetToOriginal: () => Promise<void>;
-	applyLatest: () => Promise<void>;
+	isDisabled: () => Promise<boolean>
+	expectDisabledState: (state: boolean) => Promise<void>
+	setValue: (value: Value) => Promise<void>
+	resetToOriginal: () => Promise<void>
+	applyLatest: () => Promise<void>
 }
 function findInputByLabel<
 	Form extends FieldValues,
-	Element extends HTMLElement,
+	Element extends HTMLElement
 >(item: Exclude<SectionFormItem<Form>, FixedItem<Form>>) {
-	return screen.findByLabelText<Element>(item.label ?? item.name);
+	return screen.findByLabelText<Element>(item.label ?? item.name)
 }
 function findElementByLabel<Element extends HTMLElement>(label: string) {
-	const findLabel = () => screen.findByText(label);
+	const findLabel = () => screen.findByText(label)
 	return async () =>
-		(await findLabel()).parentElement?.nextElementSibling as Element;
+		(await findLabel()).parentElement?.nextElementSibling as Element
 }
 
 export function formField<Form extends FieldValues, Value = unknown>({
 	item,
-	user,
+	user
 }: Options<Form, Value>) {
 	switch (item.type) {
 		case "fixed":
-			return fixedItemField<Form>(item);
+			return fixedItemField<Form>(item)
 		case "datePicker":
 		case "textArea":
-			return fieldWithTextContentValue<Form>(item, user);
+			return fieldWithTextContentValue<Form>(item, user)
 		case "inputFile":
 		case "inputText":
-			return fieldWithValue<Form>(item, user);
+			return fieldWithValue<Form>(item, user)
 		case "switch":
-			return switchField<Form>(item, user);
+			return switchField<Form>(item, user)
 		case "toggleGroup":
-			return toggleGroupField<Form>(item, user);
+			return toggleGroupField<Form>(item, user)
 		default:
-			return;
+			return
 	}
 }
 
 function fixedItemField<Form extends FieldValues>(
-	item: FixedItem<Form>,
+	item: FixedItem<Form>
 ): Field<string | null, HTMLParagraphElement> {
 	const findElement = async () => {
-		const findLabel = () => screen.findByText(`${item.label ?? item.name} :`);
-		return (await findLabel()).nextElementSibling as HTMLParagraphElement;
-	};
+		const findLabel = () => screen.findByText(`${item.label ?? item.name} :`)
+		return (await findLabel()).nextElementSibling as HTMLParagraphElement
+	}
 	return {
 		findElement,
-		findValue: async () => (await findElement()).textContent,
-	};
+		findValue: async () => (await findElement()).textContent
+	}
 }
 
 function fieldWithTextContentValue<Form extends FieldValues>(
 	item: DatePickerItem<Form> | TextAreaItem<Form>,
-	user: UserEvent,
+	user: UserEvent
 ): FieldInput<string | null, HTMLButtonElement | HTMLTextAreaElement> {
 	const field = fieldWithLabel<
 		Form,
 		string | null,
 		HTMLButtonElement | HTMLTextAreaElement
-	>(item, user);
+	>(item, user)
 	return {
 		...field,
 		findValue: async () => {
-			const element = await field.findElement();
-			return element.textContent;
+			const element = await field.findElement()
+			return element.textContent
 		},
 		setValue: async (value: string | null) => {
-			const element = await field.findElement();
+			const element = await field.findElement()
 			if (element.tagName === "TEXTAREA") {
-				await user.clear(element);
+				await user.clear(element)
 				if (value) {
-					await user.type(element, value);
+					await user.type(element, value)
 				}
 			}
-		},
-	};
+		}
+	}
 }
 function fieldWithValue<Form extends FieldValues>(
 	item: InputTextItem<Form> | InputFileItem<Form>,
-	user: UserEvent,
+	user: UserEvent
 ): FieldInput<string | null, HTMLInputElement> {
 	const field = fieldWithLabel<Form, string | null, HTMLInputElement>(
 		item,
-		user,
-	);
+		user
+	)
 	return {
 		...field,
 		findValue: async () => {
-			const element = await field.findElement();
-			return element.getAttribute("value");
+			const element = await field.findElement()
+			return element.getAttribute("value")
 		},
 		setValue: async (value: string | null) => {
-			const element = await field.findElement();
-			await user.type(element, value ?? "");
-		},
-	};
+			const element = await field.findElement()
+			await user.type(element, value ?? "")
+		}
+	}
 }
 
 function switchField<Form extends FieldValues>(
 	item: SwitchItem<Form>,
-	user: UserEvent,
+	user: UserEvent
 ): FieldInput<boolean, HTMLInputElement> {
-	const field = fieldWithLabel<Form, boolean, HTMLInputElement>(item, user);
+	const field = fieldWithLabel<Form, boolean, HTMLInputElement>(item, user)
 	return {
 		...field,
 		findValue: async () => {
-			const element = await field.findElement();
-			return element.getAttribute("aria-checked") === "true";
+			const element = await field.findElement()
+			return element.getAttribute("aria-checked") === "true"
 		},
 		setValue: async (value: boolean) => {
-			const element = await field.findElement();
+			const element = await field.findElement()
 			if ((element.getAttribute("aria-checked") === "true") !== value) {
-				await user.click(element);
+				await user.click(element)
 			}
-		},
-	};
+		}
+	}
 }
 function toggleGroupField<Form extends FieldValues>(
 	item: ToggleGroupItem<Form>,
-	user: UserEvent,
+	user: UserEvent
 ): FieldInput<boolean | null, HTMLDivElement> {
 	const findElement = findElementByLabel<HTMLDivElement>(
-		item.label ?? item.name,
-	);
+		item.label ?? item.name
+	)
 
 	const allDisabled = async () => {
-		const buttonsGroup = await findElement();
+		const buttonsGroup = await findElement()
 		return Array.from(buttonsGroup.children[0].children).every((button) =>
-			button.hasAttribute("disabled"),
-		);
-	};
+			button.hasAttribute("disabled")
+		)
+	}
 	return {
 		findElement,
 		...changeTrackingLabel(item.label ?? item.name, user),
 		isDisabled: allDisabled,
 		expectDisabledState: async (state) => {
-			expect(await allDisabled()).toBe(state);
+			expect(await allDisabled()).toBe(state)
 		},
 		setValue: async (value: boolean | null) => {
-			const buttonsGroup = await findElement();
+			const buttonsGroup = await findElement()
 			const buttonToClick = Array.from(buttonsGroup.children).find(
 				(button) =>
 					(value === true && button.textContent === "Oui") ||
-					(value === false && button.textContent === "Non"),
-			);
+					(value === false && button.textContent === "Non")
+			)
 			if (buttonToClick) {
-				await user.click(buttonToClick);
+				await user.click(buttonToClick)
 			}
 		},
 		findValue: async () => {
-			const buttonsGroup = await findElement();
+			const buttonsGroup = await findElement()
 			const checkedButton = Array.from(buttonsGroup.children).find(
-				(button) => button.getAttribute("aria-checked") === "on",
-			);
+				(button) => button.getAttribute("aria-checked") === "on"
+			)
 			switch (checkedButton?.textContent) {
 				case "Oui":
-					return true;
+					return true
 				case "Non":
-					return false;
+					return false
 				default:
-					return null;
+					return null
 			}
-		},
-	};
+		}
+	}
 }
 function changeTrackingLabel(label: string, user: UserEvent) {
 	const findLabel = async () => {
-		const element = await screen.findByText(label, { selector: "label" });
-		return element.parentElement as HTMLElement;
-	};
+		const element = await screen.findByText(label, { selector: "label" })
+		return element.parentElement as HTMLElement
+	}
 	return {
 		applyLatest: async () => {
 			const button = await within(await findLabel()).findByTitle(
-				"Utiliser la dernière valeur",
-			);
-			await user.click(button);
+				"Utiliser la dernière valeur"
+			)
+			await user.click(button)
 		},
 		resetToOriginal: async () => {
 			const button = await within(await findLabel()).findByTitle(
-				"Revenir à la valeur initiale",
-			);
-			await user.click(button);
-		},
-	};
+				"Revenir à la valeur initiale"
+			)
+			await user.click(button)
+		}
+	}
 }
 
 function fieldWithLabel<
 	Form extends FieldValues,
 	Value,
-	Element extends HTMLElement,
+	Element extends HTMLElement
 >(
 	item:
 		| DatePickerItem<Form>
@@ -233,18 +234,18 @@ function fieldWithLabel<
 		| InputFileItem<Form>
 		| InputTextItem<Form>
 		| SwitchItem<Form>,
-	user: UserEvent,
+	user: UserEvent
 ): Omit<FieldInput<Value, Element>, "findValue" | "setValue"> {
 	return {
 		...changeTrackingLabel(item.label ?? item.name, user),
 		findElement: () => findInputByLabel<Form, Element>(item),
 		isDisabled: async () => {
-			return (await findInputByLabel(item)).hasAttribute("disabled");
+			return (await findInputByLabel(item)).hasAttribute("disabled")
 		},
 		expectDisabledState: async (state) => {
 			expect(await findInputByLabel(item))[
 				state === true ? "to" : "not"
-			].toBeDisabled();
-		},
-	};
+			].toBeDisabled()
+		}
+	}
 }

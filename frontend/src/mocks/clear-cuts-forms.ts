@@ -1,16 +1,17 @@
-import { faker } from "@faker-js/faker";
-import { HttpResponse, http } from "msw";
+import { faker } from "@faker-js/faker"
+import { HttpResponse, http } from "msw"
+
 import {
 	type ClearCutFormResponse,
 	type ClearCutFormsResponse,
-	clearCutFormResponseSchema,
-} from "@/features/clear-cut/store/clear-cuts";
-import { createPaginationOneElementMock } from "@/mocks/pagination";
+	clearCutFormResponseSchema
+} from "@/features/clear-cut/store/clear-cuts"
+import { createPaginationOneElementMock } from "@/mocks/pagination"
 
 export const mockClearCutFormsResponse = (
-	override: Partial<ClearCutFormResponse> = {},
+	override: Partial<ClearCutFormResponse> = {}
 ) => {
-	const createdAt = faker.date.recent();
+	const createdAt = faker.date.recent()
 	const clearCut: ClearCutFormResponse = clearCutFormResponseSchema.parse({
 		id: faker.string.uuid(),
 		etag: createdAt.getTime().toString(10),
@@ -32,18 +33,18 @@ export const mockClearCutFormsResponse = (
 		relevantForAlertCnpfDdtSrgs: false,
 		relevantForAlertCnpfDdtPsgThresholds: false,
 		relevantForPsgRequest: false,
-		...override,
-	} as ClearCutFormResponse);
+		...override
+	} as ClearCutFormResponse)
 	return {
 		handler: http.get("*/api/v1/clear-cuts-reports/:id/forms", ({ params }) => {
-			const { id } = params as { id: string };
+			const { id } = params as { id: string }
 			return HttpResponse.json(
 				createPaginationOneElementMock({
 					...clearCut,
-					reportId: id,
-				}) satisfies ClearCutFormsResponse,
-			);
+					reportId: id
+				}) satisfies ClearCutFormsResponse
+			)
 		}),
-		response: clearCut,
-	};
-};
+		response: clearCut
+	}
+}

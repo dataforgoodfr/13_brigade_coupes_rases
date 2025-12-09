@@ -1,6 +1,6 @@
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 function Tabs({
 	className,
@@ -12,7 +12,7 @@ function Tabs({
 			className={cn("flex flex-col gap-2", className)}
 			{...props}
 		/>
-	);
+	)
 }
 
 function TabsList({
@@ -25,7 +25,7 @@ function TabsList({
 			className={cn("border-b border-gray-200", className)}
 			{...props}
 		/>
-	);
+	)
 }
 
 function TabsTrigger({
@@ -37,11 +37,11 @@ function TabsTrigger({
 			data-slot="tabs-trigger"
 			className={cn(
 				"data-[state=active]:border-foreground data-[state=active]:text-foreground  dark:data-[state=active]:border-background dark:data-[state=active]:text-background  focus-visible:border-ring border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium",
-				className,
+				className
 			)}
 			{...props}
 		/>
-	);
+	)
 }
 
 function TabsContent({
@@ -54,7 +54,7 @@ function TabsContent({
 			className={cn("flex-1 outline-none", className)}
 			{...props}
 		/>
-	);
+	)
 }
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+export { Tabs, TabsContent, TabsList, TabsTrigger }

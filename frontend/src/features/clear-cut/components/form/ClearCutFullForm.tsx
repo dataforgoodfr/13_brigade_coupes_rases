@@ -1,81 +1,84 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { isUndefined } from "es-toolkit";
-import { Accordion } from "radix-ui";
-import { useEffect, useMemo } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { isUndefined } from "es-toolkit"
+import { Accordion } from "radix-ui"
+import { useEffect, useMemo } from "react"
+import { FormProvider, useForm } from "react-hook-form"
+
+import { Button } from "@/components/ui/button"
 import {
 	type ClearCutForm,
 	type ClearCutFormVersions,
-	clearCutFormSchema,
-} from "@/features/clear-cut/store/clear-cuts";
+	clearCutFormSchema
+} from "@/features/clear-cut/store/clear-cuts"
 import {
 	persistClearCutCurrentForm,
 	selectSubmission,
-	submitClearCutFormThunk,
-} from "@/features/clear-cut/store/clear-cuts-slice";
-import { useConnectedMe, useMe } from "@/features/user/store/me.slice";
-import { useToast } from "@/hooks/use-toast";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import AccordionContent from "./AccordionContent";
-import { AccordionHeader } from "./AccordionHeader";
+	submitClearCutFormThunk
+} from "@/features/clear-cut/store/clear-cuts-slice"
+import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
+import { useToast } from "@/hooks/use-toast"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
-type Props = ClearCutFormVersions;
+import AccordionContent from "./AccordionContent"
+import { AccordionHeader } from "./AccordionHeader"
+
+type Props = ClearCutFormVersions
+
 export function ClearCutFullForm({ current, original, latest }: Props) {
-	const dispatch = useAppDispatch();
-	const submission = useAppSelector(selectSubmission);
-	const loggedUser = useMe();
-	const user = useConnectedMe();
+	const dispatch = useAppDispatch()
+	const submission = useAppSelector(selectSubmission)
+	const loggedUser = useMe()
+	const user = useConnectedMe()
 	const isDisabled = useMemo(() => {
-		if (!user) return true;
+		if (!user) return true
 
 		if (user.role === "volunteer") {
 			return (
 				(!current.report.affectedUser ||
 					current.report.affectedUser.login !== user.login) ??
 				false
-			);
+			)
 		}
 
-		return false;
-	}, [user, current.report.affectedUser]);
+		return false
+	}, [user, current.report.affectedUser])
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: current,
 		defaultValues: original,
-		disabled: isDisabled,
-	});
+		disabled: isDisabled
+	})
 
 	useEffect(() => {
 		form.watch((values) => {
-			const clearCutForm = clearCutFormSchema.safeParse(values).data;
+			const clearCutForm = clearCutFormSchema.safeParse(values).data
 			if (!isUndefined(clearCutForm)) {
-				dispatch(persistClearCutCurrentForm(clearCutForm));
+				dispatch(persistClearCutCurrentForm(clearCutForm))
 			}
-		});
-	}, [form, dispatch]);
+		})
+	}, [form, dispatch])
 
-	const { toast } = useToast();
+	const { toast } = useToast()
 
 	const handleSubmit = (formData: ClearCutForm) => {
 		dispatch(
 			submitClearCutFormThunk({
 				reportId: current.report.id,
-				formData,
-			}),
-		);
-	};
+				formData
+			})
+		)
+	}
 
 	useEffect(() => {
 		if (submission.status === "success") {
-			toast({ id: "edited-form", title: "Formulaire modifié" });
+			toast({ id: "edited-form", title: "Formulaire modifié" })
 		} else if (submission.status === "error") {
 			toast({
 				id: "form-edition-error",
-				title: "Erreur lors de la sauvegarde du formulaire !",
-			});
+				title: "Erreur lors de la sauvegarde du formulaire !"
+			})
 		}
-	}, [submission.status, toast]);
+	}, [submission.status, toast])
 
 	return (
 		<>
@@ -107,5 +110,5 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 				</form>
 			</FormProvider>
 		</>
-	);
+	)
 }

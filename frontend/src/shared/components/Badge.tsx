@@ -1,9 +1,10 @@
-import { XIcon } from "lucide-react";
-import type { BadgeProps } from "@/components/ui/badge";
-import { Badge as UIBadge } from "@/components/ui/badge";
-import { IconButton } from "@/shared/components/button/Button";
+import { XIcon } from "lucide-react"
 
-type Props = BadgeProps & { onDismiss?: () => void };
+import type { BadgeProps } from "@/components/ui/badge"
+import { Badge as UIBadge } from "@/components/ui/badge"
+import { IconButton } from "@/shared/components/button/Button"
+
+type Props = BadgeProps & { onDismiss?: () => void }
 export function Badge({ onDismiss, children, ...props }: Props) {
 	return (
 		<UIBadge {...props}>
@@ -17,5 +18,5 @@ export function Badge({ onDismiss, children, ...props }: Props) {
 			)}
 			{children}
 		</UIBadge>
-	);
+	)
 }

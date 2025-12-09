@@ -1,13 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { MailIcon } from "lucide-react";
-import { fn } from "storybook/test";
-import { Button, type ButtonVariantsProps } from "@/components/ui/button";
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { MailIcon } from "lucide-react"
+import { fn } from "storybook/test"
+
+import { Button, type ButtonVariantsProps } from "@/components/ui/button"
 
 const meta = {
 	title: "Button",
 	component: Button,
 	parameters: {
-		layout: "centered",
+		layout: "centered"
 	},
 	argTypes: {
 		variant: {
@@ -18,8 +19,8 @@ const meta = {
 				"ghost",
 				"link",
 				"outline",
-				"secondary",
-			] satisfies ButtonVariantsProps["variant"][],
+				"secondary"
+			] satisfies ButtonVariantsProps["variant"][]
 		},
 		size: {
 			control: "select",
@@ -27,24 +28,24 @@ const meta = {
 				"default",
 				"icon",
 				"lg",
-				"sm",
-			] satisfies ButtonVariantsProps["size"][],
-		},
+				"sm"
+			] satisfies ButtonVariantsProps["size"][]
+		}
 	},
-	args: { onClick: fn() },
-} satisfies Meta<typeof Button>;
+	args: { onClick: fn() }
+} satisfies Meta<typeof Button>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Default: Story = {
 	args: {
 		variant: "default",
 		children: "Button",
-		size: "default",
-	},
-};
+		size: "default"
+	}
+}
 
 export const WithIcon: Story = {
 	args: {
@@ -55,6 +56,6 @@ export const WithIcon: Story = {
 				Button
 			</>
 		),
-		size: "default",
-	},
-};
+		size: "default"
+	}
+}

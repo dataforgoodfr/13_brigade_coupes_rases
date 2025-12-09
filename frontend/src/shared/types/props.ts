@@ -1,8 +1,8 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react"
 
 export type PropsWithChildrenClassName = PropsWithChildren<{
-	className?: string;
-}>;
+	className?: string
+}>
 export type ClassNameProps = {
-	className?: string;
-};
+	className?: string
+}

@@ -1,5 +1,6 @@
-import { Outlet } from "@tanstack/react-router";
-import { Navbar } from "./Navbar";
+import { Outlet } from "@tanstack/react-router"
+
+import { Navbar } from "./Navbar"
 
 export function AppLayout() {
 	return (
@@ -7,5 +8,5 @@ export function AppLayout() {
 			<Navbar />
 			<Outlet />
 		</div>
-	);
+	)
 }

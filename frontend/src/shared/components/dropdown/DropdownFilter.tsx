@@ -1,16 +1,17 @@
-import { type PropsWithChildren, useState } from "react";
-import { ExpandButton } from "@/shared/components/button/ExpandButton";
+import { type PropsWithChildren, useState } from "react"
+
+import { ExpandButton } from "@/shared/components/button/ExpandButton"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/shared/components/dropdown/DropdownMenu";
+	DropdownMenuTrigger
+} from "@/shared/components/dropdown/DropdownMenu"
 
 interface Props extends PropsWithChildren {
-	filter: string;
+	filter: string
 }
 export function DropdownFilter({ children, filter }: Props) {
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(false)
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger asChild>
@@ -19,5 +20,5 @@ export function DropdownFilter({ children, filter }: Props) {
 
 			<DropdownMenuContent>{children}</DropdownMenuContent>
 		</DropdownMenu>
-	);
+	)
 }

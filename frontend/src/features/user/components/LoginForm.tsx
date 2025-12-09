@@ -1,41 +1,39 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LogInIcon } from "lucide-react";
-import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import largeLogo from "@/assets/logo-lg.png";
-import { Button } from "@/components/ui/button";
-import {
-	type LoginRequest,
-	loginRequestSchema,
-} from "@/features/user/store/me";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { LogInIcon } from "lucide-react"
+import { useEffect } from "react"
+import { FormProvider, useForm } from "react-hook-form"
+
+import largeLogo from "@/assets/logo-lg.png"
+import { Button } from "@/components/ui/button"
+import { type LoginRequest, loginRequestSchema } from "@/features/user/store/me"
 import {
 	loginThunk,
 	meSlice,
-	selectLogin,
-} from "@/features/user/store/me.slice";
-import { useToast } from "@/hooks/use-toast";
-
-import { Input } from "@/shared/components/input/Input";
-import { PasswordInput } from "@/shared/components/input/PasswordInput";
-import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup";
-import { Title } from "@/shared/components/typo/Title";
+	selectLogin
+} from "@/features/user/store/me.slice"
+import { useToast } from "@/hooks/use-toast"
+import { Input } from "@/shared/components/input/Input"
+import { PasswordInput } from "@/shared/components/input/PasswordInput"
+import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
+import { Title } from "@/shared/components/typo/Title"
 import {
 	FormControl,
 	FormField,
 	FormItem,
 	FormLabel,
-	FormMessage,
-} from "@/shared/form/components/Form";
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store";
-import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items";
+	FormMessage
+} from "@/shared/form/components/Form"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
 
-type AuthenticationType = "password" | "sso";
+type AuthenticationType = "password" | "sso"
+
 export function LoginForm() {
 	const form = useForm<LoginRequest>({
 		resolver: zodResolver(loginRequestSchema),
-		defaultValues: { email: "", password: "" },
-	});
-	const dispatch = useAppDispatch();
+		defaultValues: { email: "", password: "" }
+	})
+	const dispatch = useAppDispatch()
 	const [authenticationType, authenticationTypes, setAuthenticationType] =
 		useSingleSelect<
 			AuthenticationType,
@@ -45,32 +43,32 @@ export function LoginForm() {
 				isSelected: true,
 				item: "password",
 				label: "Mot de passe",
-				value: "password",
+				value: "password"
 			},
-			{ isSelected: false, item: "sso", label: "SSO", value: "sso" },
-		]);
-	const login = useAppSelector(selectLogin);
-	const { toast } = useToast();
+			{ isSelected: false, item: "sso", label: "SSO", value: "sso" }
+		])
+	const login = useAppSelector(selectLogin)
+	const { toast } = useToast()
 	useEffect(() => {
 		if (login.status === "success") {
 			toast({
 				id: "login-success",
 				title: "Connexion réussie",
 				variant: "success",
-				description: "Vous êtes maintenant connecté.",
-			});
+				description: "Vous êtes maintenant connecté."
+			})
 		} else if (login.status === "error") {
 			toast({
 				id: "login-failed",
 				title: "Erreur de connexion",
 				description: "Identifiants invalides. Veuillez réessayer.",
-				variant: "destructive",
-			});
+				variant: "destructive"
+			})
 		}
 		return () => {
-			dispatch(meSlice.actions.resetLogin());
-		};
-	}, [login, toast, dispatch]);
+			dispatch(meSlice.actions.resetLogin())
+		}
+	}, [login, toast, dispatch])
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
@@ -134,5 +132,5 @@ export function LoginForm() {
 				</FormProvider>
 			)}
 		</>
-	);
+	)
 }

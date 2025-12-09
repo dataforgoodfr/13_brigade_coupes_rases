@@ -1,54 +1,56 @@
-import { DotByStatus } from "@/features/clear-cut/components/DotByStatus";
-import { RuleBadge } from "@/features/clear-cut/components/RuleBadge";
-import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts";
-import { useMemo } from "react";
-import { FormattedDate, FormattedNumber, useIntl } from "react-intl";
-import { Popup } from "react-leaflet";
+import { useMemo } from "react"
+import { FormattedDate, FormattedNumber, useIntl } from "react-intl"
+import { Popup } from "react-leaflet"
+
+import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
+import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
+import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 
 type Props = {
-	totalAreaHectare: number;
-	totalBdfDeciduousAreaHectare?: number;
-	totalBdfMixedAreaHectare?: number;
-	totalBdfPoplarAreaHectare?: number;
-	totalBdfResinousAreaHectare?: number;
-};
+	totalAreaHectare: number
+	totalBdfDeciduousAreaHectare?: number
+	totalBdfMixedAreaHectare?: number
+	totalBdfPoplarAreaHectare?: number
+	totalBdfResinousAreaHectare?: number
+}
+
 function BDFLabel({
 	totalAreaHectare,
 	totalBdfDeciduousAreaHectare,
 	totalBdfMixedAreaHectare,
 	totalBdfPoplarAreaHectare,
-	totalBdfResinousAreaHectare,
+	totalBdfResinousAreaHectare
 }: Props) {
-	const { formatNumber } = useIntl();
+	const { formatNumber } = useIntl()
 	const types = {
 		Feuillus: totalBdfDeciduousAreaHectare,
 		Mélangée: totalBdfMixedAreaHectare,
 		Peupleraie: totalBdfPoplarAreaHectare,
-		Résineux: totalBdfResinousAreaHectare,
-	};
+		Résineux: totalBdfResinousAreaHectare
+	}
 
 	const relevantTypes = Object.entries(types)
 		.map(([label, value]) => ({
 			label,
-			percentage: (value || 0) / totalAreaHectare,
+			percentage: (value || 0) / totalAreaHectare
 		}))
 		// Only display types with a coverage > 1%
 		.filter(({ percentage }) => percentage >= 0.01)
 		// Display types in coverage descending order
-		.sort((a, b) => b.percentage - a.percentage);
+		.sort((a, b) => b.percentage - a.percentage)
 
 	const labelString = relevantTypes
 		.map(
 			({ label, percentage }) =>
-				`${label} (${formatNumber(percentage, { style: "percent" })})`,
+				`${label} (${formatNumber(percentage, { style: "percent" })})`
 		)
-		.join(" / ");
+		.join(" / ")
 
 	return (
 		<div>
 			Type de forêt : <strong>{labelString || "Non renseigné"}</strong>
 		</div>
-	);
+	)
 }
 
 export function ClearCutMapPopUp({
@@ -66,17 +68,17 @@ export function ClearCutMapPopUp({
 		totalBdfDeciduousAreaHectare,
 		totalBdfMixedAreaHectare,
 		totalBdfPoplarAreaHectare,
-		totalBdfResinousAreaHectare,
-	},
+		totalBdfResinousAreaHectare
+	}
 }: {
-	report: ClearCutReport;
+	report: ClearCutReport
 }) {
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
-			clearCuts.flatMap((z) => z.ecologicalZonings).map((z) => z.name),
-		);
-		return Array.from(uniqNames).join(",");
-	}, [clearCuts]);
+			clearCuts.flatMap((z) => z.ecologicalZonings).map((z) => z.name)
+		)
+		return Array.from(uniqNames).join(",")
+	}, [clearCuts])
 	return (
 		<Popup closeButton={false} maxWidth={350}>
 			<div className="flex justify-between items-center mb-5 w-full font-inter">
@@ -145,5 +147,5 @@ export function ClearCutMapPopUp({
 				/>
 			</div>
 		</Popup>
-	);
+	)
 }

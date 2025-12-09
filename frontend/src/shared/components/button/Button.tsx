@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
-import type { Position } from "@/shared/layout";
+import type { ReactNode } from "react"
+
+import { Button, type ButtonProps } from "@/components/ui/button"
+import type { Position } from "@/shared/layout"
 
 export interface IconButtonProps extends ButtonProps {
-	icon: ReactNode;
-	position?: Position;
+	icon: ReactNode
+	position?: Position
 }
 export function IconButton({
 	icon,
@@ -17,5 +18,5 @@ export function IconButton({
 			{props.children}
 			{position === "end" && icon}
 		</Button>
-	);
+	)
 }

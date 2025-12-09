@@ -1,10 +1,12 @@
-import type { FieldValues } from "react-hook-form";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { FormFieldLayout } from "@/shared/form/components/FormFieldLayout";
-import type { FormProps } from "../types";
+import type { FieldValues } from "react-hook-form"
+
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { FormFieldLayout } from "@/shared/form/components/FormFieldLayout"
+
+import type { FormProps } from "../types"
 
 const toggleGroupItemClass =
-	"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)";
+	"data-[state=on]:bg-(--color-primary) data-[state=on]:text-(--color-primary-foreground)"
 
 export function FormToggleGroup<T extends FieldValues = FieldValues>({
 	form,
@@ -24,9 +26,9 @@ export function FormToggleGroup<T extends FieldValues = FieldValues>({
 						true: true,
 						false: false,
 						null: null,
-						"": null,
-					};
-					field.onChange(valueMap[newValue]);
+						"": null
+					}
+					field.onChange(valueMap[newValue])
 				}}
 			>
 				<ToggleGroupItem className={toggleGroupItemClass} value="true">
@@ -40,5 +42,5 @@ export function FormToggleGroup<T extends FieldValues = FieldValues>({
 				</ToggleGroupItem>
 			</ToggleGroup>
 		</FormFieldLayout>
-	);
+	)
 }

@@ -1,5 +1,6 @@
-import { faker } from "@faker-js/faker";
-import { HttpResponse, http } from "msw";
+import { faker } from "@faker-js/faker"
+import { HttpResponse, http } from "msw"
+
 import {
 	CLEAR_CUTTING_STATUSES,
 	type ClearCutReportResponse,
@@ -7,67 +8,65 @@ import {
 	type ClearCutsResponse,
 	type MultiPolygon,
 	type Point,
-	type PublicUser,
-} from "@/features/clear-cut/store/clear-cuts";
+	type PublicUser
+} from "@/features/clear-cut/store/clear-cuts"
 import {
 	fakeDepartments,
 	fakeEcologicalZonings,
-	fakeRules,
-} from "@/mocks/referential";
-import { volunteerAssignedMock, volunteerAssignedToken } from "@/mocks/users";
-import { range } from "@/shared/array";
-import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry";
+	fakeRules
+} from "@/mocks/referential"
+import { volunteerAssignedMock, volunteerAssignedToken } from "@/mocks/users"
+import { range } from "@/shared/array"
+import { type Boundaries, isPointInsidePolygon } from "@/shared/geometry"
 
-type ClearCutResponseMockOptions = { ecologicalZoningsCount?: number };
+type ClearCutResponseMockOptions = { ecologicalZoningsCount?: number }
 
 export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},
-	options: ClearCutResponseMockOptions = {},
+	options: ClearCutResponseMockOptions = {}
 ): ClearCutResponse => {
-	const startDate = faker.date.anytime();
-	const location = override.location ?? franceRandomPointMock();
-	const endDate = new Date(startDate);
-	endDate.setMonth(
-		startDate.getMonth() + faker.number.int({ min: 1, max: 12 }),
-	);
+	const startDate = faker.date.anytime()
+	const location = override.location ?? franceRandomPointMock()
+	const endDate = new Date(startDate)
+	endDate.setMonth(startDate.getMonth() + faker.number.int({ min: 1, max: 12 }))
 	return {
 		id: faker.string.uuid(),
 		boundary: randomMultiPolygonFromLocation(location.coordinates, 3.5, 7),
 		ecologicalZoningIds: faker.helpers.arrayElements(
 			Object.keys(fakeEcologicalZonings),
-			options.ecologicalZoningsCount,
+			options.ecologicalZoningsCount
 		),
 		observationStartDate: startDate.toJSON().split("T")[0],
 		observationEndDate: endDate.toJSON().split("T")[0],
 		areaHectare: faker.number.int({ min: 5, max: 20 }),
 		location,
-		...override,
-	};
-};
+		...override
+	}
+}
 type ClearCutReportResponseMockOptions = {
-	clearCutsCount?: number;
-} & ClearCutResponseMockOptions;
+	clearCutsCount?: number
+} & ClearCutResponseMockOptions
 export const createClearCutReportResponseBaseMock = (
 	override: Partial<ClearCutReportResponse> = {},
-	options: ClearCutReportResponseMockOptions = {},
+	options: ClearCutReportResponseMockOptions = {}
 ): ClearCutReportResponse => {
-	const date = faker.date.anytime();
-	const randomLocation = franceRandomPointMock();
+	const date = faker.date.anytime()
+	const randomLocation = franceRandomPointMock()
 	const clear_cuts = [
 		...range<ClearCutResponse>(options.clearCutsCount ?? 1, () =>
 			createClearCutResponseMock(
 				{
-					location: override.averageLocation ?? randomLocation,
+					location: override.averageLocation ?? randomLocation
 				},
-				options,
-			),
+				options
+			)
 		),
-		...(override.clearCuts ?? []),
-	];
+		...(override.clearCuts ?? [])
+	]
 	const total_area_hectare = clear_cuts.reduce(
 		(acc, cut) => acc + cut.areaHectare,
-		0,
-	);
+		0
+	)
 	return {
 		id: faker.string.uuid(),
 		averageLocation: override.averageLocation ?? randomLocation,
@@ -81,144 +80,144 @@ export const createClearCutReportResponseBaseMock = (
 		rulesIds: faker.helpers.arrayElements(Object.keys(fakeRules)),
 		totalAreaHectare: total_area_hectare,
 		totalBdfDeciduousAreaHectare: faker.number.float({
-			max: total_area_hectare / 4,
+			max: total_area_hectare / 4
 		}),
 		totalBdfMixedAreaHectare: faker.number.float({
-			max: total_area_hectare / 4,
+			max: total_area_hectare / 4
 		}),
 		totalBdfPoplarAreaHectare: faker.number.float({
-			max: total_area_hectare / 4,
+			max: total_area_hectare / 4
 		}),
 		totalBdfResinousAreaHectare: faker.number.float({
-			max: total_area_hectare / 4,
+			max: total_area_hectare / 4
 		}),
 		clearCuts: clear_cuts,
 		lastCutDate: clear_cuts.reduce(
 			(acc, cut) =>
 				cut.observationEndDate > acc ? cut.observationEndDate : acc,
-			clear_cuts[0].observationEndDate,
+			clear_cuts[0].observationEndDate
 		),
 		firstCutDate: clear_cuts.reduce(
 			(acc, cut) =>
 				cut.observationStartDate < acc ? cut.observationStartDate : acc,
-			clear_cuts[0].observationStartDate,
+			clear_cuts[0].observationStartDate
 		),
 		updatedAt: date.toJSON().split("T")[0],
-		...override,
-	};
-};
+		...override
+	}
+}
 
 const franceRandomPointMock = (): Point => ({
 	type: "Point",
 	coordinates: [
 		faker.location.longitude({
 			min: -0.3899356021470268,
-			max: 5.666435865557435,
+			max: 5.666435865557435
 		}),
 		faker.location.latitude({
 			min: 43.883918307385926,
-			max: 49.33292664908802,
-		}),
-	],
-});
+			max: 49.33292664908802
+		})
+	]
+})
 const randomMultiPolygonFromLocation = (
 	point: [number, number],
 	radius = 10,
-	size = 10,
+	size = 10
 ): MultiPolygon => {
 	if (size < 3) {
 		throw new Error(
-			"Invalid polygon size: maximum polygon size can not be less than 3",
-		);
+			"Invalid polygon size: maximum polygon size can not be less than 3"
+		)
 	}
 
 	if (radius <= 0) {
-		throw new Error("Invalid radius size: must be grater to 0");
+		throw new Error("Invalid radius size: must be grater to 0")
 	}
 
-	const earthRadius = 6371; // Earth radius
-	const coordinates: [number, number][] = [];
-	const angleStep = (2 * Math.PI) / size;
+	const earthRadius = 6371 // Earth radius
+	const coordinates: [number, number][] = []
+	const angleStep = (2 * Math.PI) / size
 
 	for (let i = 0; i < size; i++) {
-		const angle = i * angleStep;
+		const angle = i * angleStep
 
-		const deltaLat = (radius / earthRadius) * (180 / Math.PI) * Math.sin(angle);
+		const deltaLat = (radius / earthRadius) * (180 / Math.PI) * Math.sin(angle)
 		const deltaLng =
 			((radius / earthRadius) * (180 / Math.PI) * Math.cos(angle)) /
-			Math.cos((point[1] * Math.PI) / 180);
+			Math.cos((point[1] * Math.PI) / 180)
 
-		coordinates.push([point[0] + deltaLng, point[1] + deltaLat]);
+		coordinates.push([point[0] + deltaLng, point[1] + deltaLat])
 	}
 
-	return { type: "MultiPolygon", coordinates: [[coordinates]] };
-};
+	return { type: "MultiPolygon", coordinates: [[coordinates]] }
+}
 
-const randomPoints = range<Point>(100, franceRandomPointMock);
+const randomPoints = range<Point>(100, franceRandomPointMock)
 
 const clearCutPreviews = randomPoints.map((center) =>
-	createClearCutReportResponseBaseMock({ averageLocation: center }),
-);
+	createClearCutReportResponseBaseMock({ averageLocation: center })
+)
 
 export const mockClearCutsResponse = (
 	override: Partial<ClearCutsResponse> = {},
-	filterInArea = false,
+	filterInArea = false
 ) =>
 	http.get("*/api/v1/clear-cuts-map", ({ request }) => {
-		const url = new URL(request.url);
-		const southWestLat = url.searchParams.get("sw_lat");
-		const southWestLng = url.searchParams.get("sw_lng");
-		const northEastLat = url.searchParams.get("ne_lat");
-		const northEastLng = url.searchParams.get("ne_lng");
-		let boundaries: Boundaries | undefined;
-		const previews = [...(override.previews ?? []), ...clearCutPreviews];
+		const url = new URL(request.url)
+		const southWestLat = url.searchParams.get("sw_lat")
+		const southWestLng = url.searchParams.get("sw_lng")
+		const northEastLat = url.searchParams.get("ne_lat")
+		const northEastLng = url.searchParams.get("ne_lng")
+		let boundaries: Boundaries | undefined
+		const previews = [...(override.previews ?? []), ...clearCutPreviews]
 		if (southWestLat && southWestLng && northEastLat && northEastLng) {
 			boundaries = [
 				[Number.parseFloat(southWestLng), Number.parseFloat(southWestLat)],
 				[Number.parseFloat(northEastLng), Number.parseFloat(southWestLat)],
 				[Number.parseFloat(northEastLng), Number.parseFloat(northEastLat)],
-				[Number.parseFloat(southWestLng), Number.parseFloat(northEastLat)],
-			];
+				[Number.parseFloat(southWestLng), Number.parseFloat(northEastLat)]
+			]
 		}
 		const points =
 			boundaries && filterInArea
 				? randomPoints.filter((point) =>
-						isPointInsidePolygon(boundaries, point.coordinates),
+						isPointInsidePolygon(boundaries, point.coordinates)
 					)
-				: randomPoints;
+				: randomPoints
 		return HttpResponse.json({
 			previews:
 				boundaries && filterInArea
 					? previews.filter((ccp) =>
-							isPointInsidePolygon(boundaries, ccp.averageLocation.coordinates),
+							isPointInsidePolygon(boundaries, ccp.averageLocation.coordinates)
 						)
 					: previews,
 			points: {
 				content: points.map((p) => ({ count: 1, point: p })),
-				total: points.length,
-			},
-		} satisfies ClearCutsResponse);
-	});
+				total: points.length
+			}
+		} satisfies ClearCutsResponse)
+	})
 
 export const mockClearCutReportResponse = (
 	override: Partial<ClearCutReportResponse> = {},
-	options: ClearCutReportResponseMockOptions = {},
+	options: ClearCutReportResponseMockOptions = {}
 ) => {
-	const baseMock = createClearCutReportResponseBaseMock(override, options);
+	const baseMock = createClearCutReportResponseBaseMock(override, options)
 	return {
 		handler: http.get("*/api/v1/clear-cuts-map/:id", ({ params, request }) => {
-			const { id } = params as { id: string };
-			const authHeader = request.headers.get("Authorization");
-			let affectedUser: PublicUser | undefined;
+			const { id } = params as { id: string }
+			const authHeader = request.headers.get("Authorization")
+			let affectedUser: PublicUser | undefined
 			if (authHeader?.includes(volunteerAssignedToken)) {
-				affectedUser = volunteerAssignedMock;
+				affectedUser = volunteerAssignedMock
 			}
 			return HttpResponse.json({
 				...baseMock,
 				id,
-				affectedUser: affectedUser ?? baseMock.affectedUser,
-			} satisfies ClearCutReportResponse);
+				affectedUser: affectedUser ?? baseMock.affectedUser
+			} satisfies ClearCutReportResponse)
 		}),
-		response: baseMock,
-	};
-};
+		response: baseMock
+	}
+}

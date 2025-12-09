@@ -1,27 +1,24 @@
 import {
 	createMemoryHistory,
 	createRouter,
-	RouterProvider,
-} from "@tanstack/react-router";
-import { page, userEvent } from "@vitest/browser/context";
-import { IntlProvider } from "react-intl";
-import { Provider } from "react-redux";
-import { type ComponentRenderOptions, render } from "vitest-browser-react";
-import { MapProvider } from "@/features/clear-cut/components/map/Map.context";
+	RouterProvider
+} from "@tanstack/react-router"
+import { page, userEvent } from "@vitest/browser/context"
+import { IntlProvider } from "react-intl"
+import { Provider } from "react-redux"
+import { type ComponentRenderOptions, render } from "vitest-browser-react"
+
+import { MapProvider } from "@/features/clear-cut/components/map/Map.context"
 import {
 	type AuthContext,
 	AuthProvider,
-	useAuth,
-} from "@/features/user/components/Auth.context";
-import type { Me } from "@/features/user/store/me";
-import { initialState } from "@/features/user/store/me.slice";
-import { routeTree } from "@/routeTree.gen";
-import type { Routes as Route, Router } from "@/shared/router";
-import {
-	type AppStore,
-	type RootState,
-	setupStore,
-} from "@/shared/store/store";
+	useAuth
+} from "@/features/user/components/Auth.context"
+import type { Me } from "@/features/user/store/me"
+import { initialState } from "@/features/user/store/me.slice"
+import { routeTree } from "@/routeTree.gen"
+import type { Routes as Route, Router } from "@/shared/router"
+import { type AppStore, type RootState, setupStore } from "@/shared/store/store"
 
 type Split<S extends string, D extends string> = string extends S
 	? string[]
@@ -29,21 +26,22 @@ type Split<S extends string, D extends string> = string extends S
 		? []
 		: S extends `${infer T}${D}${infer U}`
 			? [T, ...Split<U, D>]
-			: [S];
-type RouteSegment<R extends Route> = Split<R, "/">[number];
-type RouteParam<T extends string> = T extends `$${string}` ? T : never;
-type RouteSplit<R extends Route> = RouteParam<RouteSegment<R>>;
+			: [S]
+
+type RouteSegment<R extends Route> = Split<R, "/">[number]
+type RouteParam<T extends string> = T extends `$${string}` ? T : never
+type RouteSplit<R extends Route> = RouteParam<RouteSegment<R>>
 type RouteParams<R extends Route> = {
-	[T in RouteSplit<R>]: string;
-};
+	[T in RouteSplit<R>]: string
+}
 
 interface Options<R extends Route = Route>
 	extends Omit<ComponentRenderOptions, "queries"> {
-	preloadedState?: Partial<RootState>;
-	store?: AppStore;
-	route?: R;
-	params?: RouteParams<R>;
-	user?: Me;
+	preloadedState?: Partial<RootState>
+	store?: AppStore
+	route?: R
+	params?: RouteParams<R>
+	user?: Me
 }
 
 export function renderApp<R extends Route = Route>(options: Options<R>) {
@@ -54,17 +52,17 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 		route = options.route ?? "/",
 		params,
 		...renderOptions
-	} = options;
-	preloadedState.me ??= initialState;
+	} = options
+	preloadedState.me ??= initialState
 	const store = setupStore({
 		...preloadedState,
 		me: {
 			...(preloadedState.me as RootState["me"]),
 			me: options.user
 				? { status: "success", value: options.user }
-				: (preloadedState.me?.me as RootState["me"]["me"]),
-		},
-	});
+				: (preloadedState.me?.me as RootState["me"]["me"])
+		}
+	})
 	const history = createMemoryHistory({
 		initialEntries: [
 			params
@@ -72,14 +70,14 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 						.split("/")
 						.map((segment) => params[segment as RouteSplit<R>] ?? segment)
 						.join("/")
-				: route,
-		],
-	});
+				: route
+		]
+	})
 	const router: Router = createRouter({
 		routeTree,
 		history,
-		context: { auth: undefined as unknown as AuthContext },
-	});
+		context: { auth: undefined as unknown as AuthContext }
+	})
 	function TestApp() {
 		return (
 			<AuthProvider>
@@ -87,11 +85,11 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 					<InnerTestApp />
 				</MapProvider>
 			</AuthProvider>
-		);
+		)
 	}
 	function InnerTestApp() {
-		const auth = useAuth();
-		return <RouterProvider router={router} context={{ auth }} />;
+		const auth = useAuth()
+		return <RouterProvider router={router} context={{ auth }} />
 	}
 
 	const Wrapper = () => (
@@ -100,14 +98,14 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 				<TestApp />
 			</Provider>
 		</IntlProvider>
-	);
-	const renderResult = render(<Wrapper />, renderOptions);
+	)
+	const renderResult = render(<Wrapper />, renderOptions)
 	return {
 		...renderResult,
 		rerender: () => renderResult.rerender(<Wrapper />),
 		store,
 		page,
 		router,
-		user: userEvent.setup(),
-	};
+		user: userEvent.setup()
+	}
 }
