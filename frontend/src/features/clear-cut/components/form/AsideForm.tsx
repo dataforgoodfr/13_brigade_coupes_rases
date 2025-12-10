@@ -12,16 +12,24 @@ import {
 	useGetClearCut
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch } from "@/shared/hooks/store"
 
-export function AsideForm({ clearCutId }: { clearCutId: string }) {
+export function AsideForm({
+	clearCutId,
+	mobile
+}: {
+	clearCutId: string
+	mobile?: boolean
+}) {
 	const { value, status } = useGetClearCut(clearCutId)
 	const { map } = useMapInstance()
 	const { toast } = useToast()
 	const navigate = useNavigate()
 	const { breakpoint } = useBreakpoint()
 	const dispatch = useAppDispatch()
+
 	useEffect(() => {
 		if (status === "error") {
 			toast({
@@ -71,10 +79,15 @@ export function AsideForm({ clearCutId }: { clearCutId: string }) {
 			})
 		}
 	}, [toast, value, dispatch])
+
 	return (
 		value && (
-			<div className="flex flex-col w-full">
-				<div className=" pt-6 px-4 pb-1 border-b-1 flex align-middle justify-between">
+			<div
+				className={cn("flex flex-col w-full bg-background", {
+					"absolute top-0 left-0 right-0 bottom-12 z-10": mobile
+				})}
+			>
+				<div className="pt-4 px-4 pb-1 border-b-1 flex align-middle justify-between">
 					<div className="flex flex-col">
 						<Title>{`${value.current.report.city.toLocaleUpperCase()}`}</Title>
 						<span className="font-[Roboto]">

@@ -15,7 +15,7 @@ export const UsersListTab: React.FC = () => {
 				<CreateUserDialog />
 			</div>
 
-			<div className="flex gap-4 grow  overflow-auto h-0">
+			<div className="flex gap-4 grow overflow-auto h-0">
 				<UsersList />
 			</div>
 			<Pagination />

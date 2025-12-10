@@ -1,9 +1,11 @@
 import { createLazyFileRoute } from "@tanstack/react-router"
 
-import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
+import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { AsideList } from "@/features/clear-cut/components/list/AsideList"
-import { MobileLayout } from "@/features/clear-cut/components/MobileLayout"
+import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice"
+import { cn } from "@/lib/utils"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
+import { useAppSelector } from "@/shared/hooks/store"
 
 export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/")({
 	component: RouteComponent
@@ -11,15 +13,28 @@ export const Route = createLazyFileRoute("/_clear-cuts/clear-cuts/")({
 
 function RouteComponent() {
 	const { breakpoint } = useBreakpoint()
+	const { status } = useAppSelector(selectClearCuts)
+	const { layout } = useLayout()
 	return (
-		<LayoutProvider>
+		<>
+			{status === "loading" && (
+				<div className="h-1 w-full bg-zinc-200/50 overflow-hidden absolute top-0 z-100">
+					<div className="progress w-full h-full bg-primary left-right"></div>
+				</div>
+			)}
 			{breakpoint === "mobile" ? (
-				<MobileLayout />
+				<div className="flex h-full grow ">
+					<AsideList mobile />
+				</div>
 			) : (
-				<div className="sm:flex hidden xxl:w-1/4 w-3/4 lg:w-120">
+				<div
+					className={cn("xxl:w-1/4 w-3/4 lg:w-200", {
+						hidden: layout !== "list"
+					})}
+				>
 					<AsideList />
 				</div>
 			)}
-		</LayoutProvider>
+		</>
 	)
 }

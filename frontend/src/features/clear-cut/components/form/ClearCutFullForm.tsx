@@ -90,9 +90,9 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 			<FormProvider {...form}>
 				<form
 					onSubmit={form.handleSubmit(handleSubmit)}
-					className="p-1 flex flex-col grow px-4 h-0"
+					className="flex flex-col grow px-4 h-0"
 				>
-					<Accordion.Root type="multiple" className="grow overflow-auto">
+					<Accordion.Root type="multiple" className="grow overflow-y-auto">
 						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion.Root>
 					{!!loggedUser && (

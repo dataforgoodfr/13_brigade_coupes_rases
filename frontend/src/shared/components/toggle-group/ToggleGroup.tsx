@@ -1,5 +1,5 @@
 import {
-	ToggleGroup as ShadcnToggleGroup,
+	ToggleGroup as RadixToggleGroup,
 	ToggleGroupItem,
 	type ToggleGroupItemProps,
 	type ToggleGroupProps
@@ -30,6 +30,7 @@ export type ToggleGroupInputProps<TItem> = Omit<
 				onValueChange: (item: SelectableItemEnhanced<TItem>) => void
 		  }
 	)
+
 export function ToggleGroup<TItem>({
 	className,
 	children,
@@ -47,7 +48,7 @@ export function ToggleGroup<TItem>({
 			.filter(({ isSelected }) => isSelected)
 			.map(({ value }) => value)
 		return (
-			<ShadcnToggleGroup
+			<RadixToggleGroup
 				{...props}
 				type={"multiple"}
 				value={value}
@@ -63,12 +64,12 @@ export function ToggleGroup<TItem>({
 				}
 			>
 				{Items}
-			</ShadcnToggleGroup>
+			</RadixToggleGroup>
 		)
 	}
 	const value = items.find(({ isSelected }) => isSelected)?.value
 	return (
-		<ShadcnToggleGroup
+		<RadixToggleGroup
 			{...props}
 			type="single"
 			defaultValue={value}
@@ -88,6 +89,6 @@ export function ToggleGroup<TItem>({
 			}}
 		>
 			{Items}
-		</ShadcnToggleGroup>
+		</RadixToggleGroup>
 	)
 }

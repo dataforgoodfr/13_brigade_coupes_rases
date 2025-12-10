@@ -11,7 +11,6 @@ export function Slider({
 	value,
 	min = 0,
 	max = 100,
-
 	...props
 }: SliderProps) {
 	const _values = useMemo(

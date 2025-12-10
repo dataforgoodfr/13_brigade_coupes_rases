@@ -170,7 +170,7 @@ def clear_cut_form_response_from_clear_cut_form(
         is_pefc_fsc_certified=clear_cut_form.is_pefc_fsc_certified,
         is_over_20_ha=clear_cut_form.is_over_20_ha,
         is_psg_required_plot=clear_cut_form.is_psg_required_plot,
-        relevant_for_pefc_complaint=None,
+        relevant_for_pefc_complaint=clear_cut_form.relevant_for_pefc_complaint,
         relevant_for_rediii_complaint=clear_cut_form.relevant_for_rediii_complaint,
         relevant_for_ofb_complaint=clear_cut_form.relevant_for_ofb_complaint,
         relevant_for_alert_cnpf_ddt_srgs=clear_cut_form.relevant_for_alert_cnpf_ddt_srgs,

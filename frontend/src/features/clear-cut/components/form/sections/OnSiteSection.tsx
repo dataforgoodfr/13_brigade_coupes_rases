@@ -14,7 +14,7 @@ export const onSiteValue: SectionFormItem<ClearCutFormInput>[] = [
 		type: "fixed",
 		renderConditions: ["report.affectedUser"],
 		fallBack: (key: string | number) => (
-			<div key={key} className="flex gap-2 my-2">
+			<div key={key} className="sm:flex gap-2 my-2">
 				<p className="font-bold">Bénévole en charge du terrain : </p>
 				<p>Aucun bénévole n'est assigné</p>
 			</div>

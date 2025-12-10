@@ -8,6 +8,7 @@ const useReloadPwa: () => void = (
 	await import(/* @vite-ignore */ import.meta.env.VITE_USE_RELOAD_PWA_PATH)
 ).useReloadPwa
 
+import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
 import type { AuthContext } from "@/features/user/components/Auth.context"
 import { AppLayout } from "@/shared/components/AppLayout"
 import { AppMobileLayout } from "@/shared/components/AppMobileLayout"
@@ -38,7 +39,9 @@ function RootComponent() {
 	return referentialStatus === "success" ? (
 		<>
 			<MapProvider>
-				{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+				<LayoutProvider>
+					{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+				</LayoutProvider>
 			</MapProvider>
 			<Toaster />
 		</>

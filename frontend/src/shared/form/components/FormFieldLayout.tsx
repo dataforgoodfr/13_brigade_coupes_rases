@@ -26,6 +26,7 @@ export type FormFieldLayoutProps<
 	Form extends FieldValues,
 	Name extends Path<Form> = Path<Form>
 > = Omit<Props<Form, Name>, "children">
+
 export function FormFieldLayout<
 	Form extends FieldValues,
 	Name extends Path<Form>
@@ -54,14 +55,18 @@ export function FormFieldLayout<
 			})}
 		>
 			{label && (
-				<div className="flex items-center justify-start min-w-2/8">
+				<div className="flex items-center justify-start min-w-2/8 min-h-6.5">
 					<FormLabel className="font-bold">{label}</FormLabel>
 					{changedFromOriginal?.hasChanged && (
-						<UndoButton
-							onClick={() => {
-								resetTrackedFieldFromOther(name, "original")
-							}}
-						/>
+						<div className="relative">
+							<UndoButton
+								onClick={() => {
+									resetTrackedFieldFromOther(name, "original")
+								}}
+								className="overflow-visible"
+								size="xs"
+							/>
+						</div>
 					)}{" "}
 					{changedFromLatest?.hasChanged && (
 						<DownloadOutdatedButton

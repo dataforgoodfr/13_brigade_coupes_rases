@@ -55,7 +55,7 @@ export const ecoZoneValue: SectionFormItem<ClearCutFormInput>[] = [
 		name: "otherEcologicalZoneType",
 		label: "Type de zonages écologiques",
 		type: "textArea",
-		renderConditions: ["hasNearbyEcologicalZone"]
+		renderConditions: ["hasOtherEcologicalZone"]
 	},
 	{
 		name: "hasNearbyEcologicalZone",
