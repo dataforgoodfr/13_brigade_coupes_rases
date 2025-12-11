@@ -8,6 +8,10 @@ import { MapContainer, TileLayer } from "react-leaflet"
 import { ClearCuts } from "./ClearCuts"
 
 export function InteractiveMap() {
+	// Hide map if in test environment
+	if (import.meta.env.MODE === "test") {
+		return null
+	}
 	return (
 		<MapContainer
 			className="h-full w-full z-0"

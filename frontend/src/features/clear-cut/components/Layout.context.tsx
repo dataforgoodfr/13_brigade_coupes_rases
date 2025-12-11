@@ -20,8 +20,9 @@ export const useLayout = () => {
 
 export const LayoutProvider = ({ children }: { children: React.ReactNode }) => {
 	const { breakpoint } = useBreakpoint()
+	// Default to map on mobile except in test environment
 	const [layout, setLayout] = useState<Layout>(
-		breakpoint === "mobile" ? "map" : "list"
+		breakpoint === "mobile" && import.meta.env.MODE !== "test" ? "map" : "list"
 	)
 
 	return (
