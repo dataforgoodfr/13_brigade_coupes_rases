@@ -4,6 +4,7 @@ import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { AsideList } from "@/features/clear-cut/components/list/AsideList"
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice"
 import { cn } from "@/lib/utils"
+import { Loading } from "@/shared/components/Loading"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppSelector } from "@/shared/hooks/store"
 
@@ -17,11 +18,7 @@ function RouteComponent() {
 	const { layout } = useLayout()
 	return (
 		<>
-			{status === "loading" && (
-				<div className="h-1 w-full bg-zinc-200/50 overflow-hidden absolute top-0 z-100">
-					<div className="progress w-full h-full bg-primary left-right"></div>
-				</div>
-			)}
+			{status === "loading" && <Loading className="absolute top-0 z-100" />}
 			{breakpoint === "mobile" ? (
 				<div className="flex h-full grow ">
 					<AsideList mobile />
