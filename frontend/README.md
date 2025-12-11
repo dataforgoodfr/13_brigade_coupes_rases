@@ -18,8 +18,14 @@ Install [node](https://nodejs.org/fr)
 Install package manager [pnpm](https://pnpm.io/fr/installation)  
 Install dependencies : `pnpm i`  
 To run in development mode : `pnpm dev`  
-To run in development mode with mock service worker : `pnpm dev:mock`  
-To format and lint : `pnpm cleanup`
+To run in development mode with mock service worker: `pnpm dev:mock`  
+To run in development mode on a mobile device (same Wi-Fi network)  
+ - Run `pnpm dev:host`
+ - Copy the `Network URL` displayed in the terminal
+ - In `.env.development` file, set `VITE_API` to this Network URL with port `8080`.
+ - On your phone, navigate to the `Network URL`  
+
+To format and lint : `pnpm cleanup`  
 To start storybook: `pnpm storybook`
 
 ## VS Code configuration
