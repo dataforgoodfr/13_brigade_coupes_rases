@@ -36,6 +36,7 @@ function RootComponent() {
 	}, [dispatch])
 	const referentialStatus = useAppSelector(selectReferentialStatus)
 	const { breakpoint } = useBreakpoint()
+
 	return referentialStatus === "success" ? (
 		<>
 			<MapProvider>
@@ -46,7 +47,7 @@ function RootComponent() {
 			<Toaster />
 		</>
 	) : (
-		<div className="h-screen  justify-center flex  items-center">
+		<div className="h-screen justify-center flex items-center">
 			<TimeProgress className="w-1/4" durationMs={2000} />
 		</div>
 	)

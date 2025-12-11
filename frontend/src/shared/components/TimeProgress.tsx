@@ -1,30 +1,21 @@
-import { useEffect, useState } from "react"
+import { cn } from "@/lib/utils"
 
-import { Progress, type ProgressProps } from "@/components/ui/progress"
-
-interface Props extends Omit<ProgressProps, "value"> {
+interface Props {
 	durationMs: number
-	isFinished?: boolean
+	className?: React.HTMLAttributes<HTMLDivElement>["className"]
 }
-export function TimeProgress({
-	isFinished = false,
-	durationMs,
-	...props
-}: Props) {
-	const [value, setValue] = useState(0)
-	useEffect(() => {
-		if (isFinished) {
-			setValue(0)
-		}
-	}, [isFinished])
 
-	useEffect(() => {
-		const id = setInterval(() => setValue(value + 1), durationMs / 100)
-		return () => clearInterval(id)
-	}, [value, durationMs])
-	useEffect(() => {
-		const id = setTimeout(() => setValue(100), durationMs)
-		return () => clearTimeout(id)
-	}, [durationMs])
-	return <Progress {...props} value={value} />
+export function TimeProgress({ durationMs, className }: Props) {
+	return (
+		<div className={cn("h-1 w-full bg-zinc-200/50 overflow-hidden", className)}>
+			<div
+				className="progress-time w-full h-full bg-primary left-right"
+				style={
+					{
+						"--progress-time": `${durationMs / 1000}s`
+					} as React.CSSProperties
+				}
+			></div>
+		</div>
+	)
 }

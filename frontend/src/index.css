@@ -113,6 +113,19 @@
 	@apply opacity-50 cursor-not-allowed;
 }
 
+.progress-time {
+	animation: progress-time var(--progress-time) linear;
+}
+
+@keyframes progress-time {
+	0% {
+		transform: scaleX(0);
+	}
+	100% {
+		transform: scaleX(1);
+	}
+}
+
 .progress {
 	animation: progress 1s infinite linear;
 }
