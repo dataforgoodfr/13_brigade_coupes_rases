@@ -63,9 +63,16 @@ export const getFiltersThunk = createAppAsyncThunk(
 			...response
 		} = filtersResponseSchema.parse(result)
 		const state = getState()
+		const departments = selectDepartmentsByIds(state, departments_ids)
+			.map((d) => ({
+				id: d.id,
+				name: `${d.id} - ${d.name}`
+			}))
+			.sort((a, b) => a.name.localeCompare(b.name))
+
 		return {
 			...response,
-			departments: selectDepartmentsByIds(state, departments_ids ?? []),
+			departments,
 			rules: selectRulesByIds(state, tags_ids ?? [])
 		}
 	}
