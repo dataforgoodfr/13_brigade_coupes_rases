@@ -248,6 +248,8 @@ Voir les README des sous-répertoires pour plus de détails sur chaque partie du
 
 ## Base de données
 
+Prérequis : [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/)
+
 ```bash
 # Lancer PostgreSQL et pgAdmin
 docker compose up db pgadmin
@@ -259,9 +261,18 @@ Connectez-vous à pgAdmin sur [http://localhost:8888/](http://localhost:8888/) a
 - Email : `devuser@devuser.com`
 - Mot de passe : `devuser`
 
-Le site web est accessible à l'adresse [http://localhost:5173](http://localhost:5173)
+Ensuite, vous pouvez ajouter un nouveau serveur avec les informations suivantes :
+
+- Nom : `Dev Localhost`
+- Hôte : `db`
+- Port : `5432`
+- Maintenance database : `postgres`
+- Username : `devuser`
+- Password : `devuser`
 
 ## Backend
+
+Prérequis : [Python 3.13+](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation)
 
 ```bash
 # Aller dans le répertoire backend
@@ -273,16 +284,21 @@ poetry install
 # Activer l'environnement virtuel
 source .venv/bin/activate
 
+# Mettre à jour les tables de la base de données avec Alembic
+poetry run alembic upgrade head
+
+# Seeder la base de données avec des données de développement
+poetry run python -m seed_dev
+
 # Lancer le serveur de développement
 poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
-
-# Pour seeder la base de données avec des données de développement
-poetry run python -m seed_dev
 ```
 
-L'API du backend est accessible à l'adresse [http://localhost:8080](http://localhost:8080)
+L'API du backend est accessible à l'adresse [http://localhost:8080](http://localhost:8080/docs)
 
 ## Frontend
+
+Prérequis : [Node.js 23+](https://nodejs.org/en) et [pnpm](https://pnpm.io/installation)
 
 ```bash
 # Aller dans le répertoire frontend
@@ -300,6 +316,8 @@ pnpm run build
 # Pour lancer les tests
 pnpm test
 ```
+
+Le site web est accessible à l'adresse [http://localhost:5173](http://localhost:5173)
 
 ## Data pipeline
 
@@ -333,3 +351,21 @@ aws s3 rm s3://brigade-coupe-rase-s3/development/reports/ --recursive --profile 
 # Mettre à jour la configuration CORS du bucket S3
 aws s3api put-bucket-cors --bucket brigade-coupe-rase-s3 --cors-configuration file://s3cors.json --profile d4g-s13-brigade-coupes-rases
 ```
+
+# Comment déployer sur Clever Cloud
+
+Les workflows GitHub Actions peuvent être déclenchés manuellement via l'interface GitHub en utilisant le bouton "Run workflow".
+
+**Backend CI** : Tests du backend (Python, pytest) puis déploiement automatique de l'application complète.
+
+![](doc/images/backend_ci.png)
+
+**Frontend CI** : Tests du frontend (Node.js, Playwright) puis déploiement automatique de l'application complète.
+
+![](doc/images/frontend_ci.png)
+
+> **Note sur les déploiements** : Si le workflow de déploiement échoue avec l'erreur "The clever-cloud application is up-to-date", cela signifie qu'aucun nouveau commit n'a été créé depuis le dernier déploiement. C'est le cas dans le screenshot ci-dessus.
+
+**Database Actions** : Actions manuelles pour gérer la base de données (upgrade, setup ou reset).
+
+![](doc/images/database_ci.png)
