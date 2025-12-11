@@ -1,5 +1,4 @@
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
-import type { FormType } from "@/shared/form/types"
 
 import type { SectionForm, SectionFormItem } from "../types"
 
@@ -9,42 +8,6 @@ export const ecoZoneKey: SectionForm = {
 }
 
 export const ecoZoneValue: SectionFormItem<ClearCutFormInput>[] = [
-	{
-		name: "hasEcologicalZonings",
-		label: "Coupe au sein d'une zone Natura 2000 ?",
-		type: "switch",
-		renderConditions: [],
-		disabled: true
-	},
-	{
-		name: "ecologicalZonings",
-		type: "customized",
-		renderConditions: ["hasEcologicalZonings"],
-		customizeRender: (
-			_form: FormType<ClearCutFormInput>,
-			_key: string | number
-		) => {
-			// const zones = form
-			// 	.getValues("clear_cuts")
-			// 	.flatMap((c) => c.ecologicalZonings);
-			// if (zones.length === 0) {
-			// 	return (
-			// 		<p key={key} className="text-muted-foreground">
-			// 			Aucune zone Natura 2000 détectée
-			// 		</p>
-			// 	);
-			// }
-			return (
-				<>
-					{/* {uniqBy(zones, (z) => z.id).map((z) => (
-						<p key={z.id}>
-							${z.id} ${z.name}
-						</p>
-					))} */}
-				</>
-			)
-		}
-	},
 	{
 		name: "hasOtherEcologicalZone",
 		label: "Coupe au sein d'autres zone écologiques ?",
