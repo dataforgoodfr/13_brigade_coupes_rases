@@ -46,13 +46,13 @@ export const onSiteValue: SectionFormItem<ClearCutFormInput>[] = [
 	},
 	{
 		name: "treesSpecies",
-		label: "Essence plantée (si pertinant)",
+		label: "Essence plantée (si pertinent)",
 		type: "textArea",
 		renderConditions: []
 	},
 	{
 		name: "plantingImages",
-		label: "Photo de la plantation (si pertinant)",
+		label: "Photo de la plantation (si pertinent)",
 		type: "inputFile",
 		renderConditions: []
 	},
