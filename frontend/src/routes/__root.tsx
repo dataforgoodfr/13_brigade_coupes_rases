@@ -8,6 +8,8 @@ const useReloadPwa: () => void = (
 	await import(/* @vite-ignore */ import.meta.env.VITE_USE_RELOAD_PWA_PATH)
 ).useReloadPwa
 
+import { Button } from "@/components/ui/button"
+import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
 import type { AuthContext } from "@/features/user/components/Auth.context"
 import { AppLayout } from "@/shared/components/AppLayout"
 import { AppMobileLayout } from "@/shared/components/AppMobileLayout"
@@ -35,15 +37,33 @@ function RootComponent() {
 	}, [dispatch])
 	const referentialStatus = useAppSelector(selectReferentialStatus)
 	const { breakpoint } = useBreakpoint()
+
+	if (referentialStatus === "error") {
+		return (
+			<div className="h-screen justify-center flex flex-col items-center gap-4">
+				<p className="text-center">Erreur lors du chargement des données</p>
+				<Button
+					onClick={() => {
+						dispatch(getReferentialThunk())
+					}}
+				>
+					Rafraîchir la page
+				</Button>
+			</div>
+		)
+	}
+
 	return referentialStatus === "success" ? (
 		<>
 			<MapProvider>
-				{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+				<LayoutProvider>
+					{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+				</LayoutProvider>
 			</MapProvider>
 			<Toaster />
 		</>
 	) : (
-		<div className="h-screen  justify-center flex  items-center">
+		<div className="h-screen justify-center flex items-center">
 			<TimeProgress className="w-1/4" durationMs={2000} />
 		</div>
 	)

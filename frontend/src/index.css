@@ -34,6 +34,7 @@
 	--chart-4: hsl(43 74% 66%);
 	--chart-5: hsl(27 87% 67%);
 	--radius: 0.6rem;
+	--radix-content-height: 0px;
 }
 
 .dark {
@@ -108,32 +109,67 @@
 	}
 }
 
-/* Custom class to animate accordion */
-@keyframes slideDown {
-	from {
-		height: 0px;
-	}
-	to {
-		height: var(--radix-accordion-content-height);
-	}
-}
-@keyframes slideUp {
-	from {
-		height: var(--radix-accordion-content-height);
-	}
-	to {
-		height: 0px;
-	}
-}
-
-@utility slide-down {
-	animation: slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1);
-}
-
-@utility slide-up {
-	animation: slideUp 300ms cubic-bezier(0.87, 0, 0.13, 1);
-}
-
 [aria-disabled="true"] {
 	@apply opacity-50 cursor-not-allowed;
+}
+
+.progress-time {
+	animation: progress-time var(--progress-time) linear;
+}
+
+@keyframes progress-time {
+	0% {
+		transform: scaleX(0);
+	}
+	100% {
+		transform: scaleX(1);
+	}
+}
+
+.progress {
+	animation: progress 1s infinite linear;
+}
+
+.left-right {
+	transform-origin: 0% 50%;
+}
+
+@keyframes progress {
+	0% {
+		transform: translateX(0) scaleX(0);
+	}
+	40% {
+		transform: translateX(0) scaleX(0.4);
+	}
+	100% {
+		transform: translateX(100%) scaleX(0.6);
+	}
+}
+
+.slide-content {
+	overflow: hidden;
+}
+.slide-content[data-state="open"] {
+	animation: slideDown 300ms ease-out;
+}
+.slide-content[data-state="closed"] {
+	animation: slideUp 300ms ease-out;
+}
+
+@keyframes slideDown {
+	from {
+		height: 0;
+	}
+	to {
+		height: var(--radix-content-height);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		height: var(--radix-content-height);
+	}
+	to {
+		height: 0;
+	}
 }

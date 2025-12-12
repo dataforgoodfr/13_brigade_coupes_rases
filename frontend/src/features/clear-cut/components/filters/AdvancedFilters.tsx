@@ -202,12 +202,13 @@ export function AdvancedFilters({ className }: Props) {
 					/>
 				</FieldWrapper>
 			</div>
-			<div className="flex gap-4">
-				<div className=" flex flex-col gap-1">
+			<div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+				<div className="flex flex-col gap-1">
 					<label htmlFor={ECOLOGICAL_ZONING.id}>
 						{ECOLOGICAL_ZONING.label}
 					</label>
 					<ToggleGroup
+						variant="primary"
 						id={ECOLOGICAL_ZONING.id}
 						value={ecological_zoning}
 						type="single"
@@ -217,9 +218,10 @@ export function AdvancedFilters({ className }: Props) {
 						}
 					/>
 				</div>
-				<div className=" flex flex-col gap-1">
+				<div className="flex flex-col gap-1">
 					<label htmlFor={EXCESSIVE_SLOP.id}>{EXCESSIVE_SLOP.label}</label>
 					<ToggleGroup
+						variant="primary"
 						id={EXCESSIVE_SLOP.id}
 						value={excessive_slop}
 						type="single"
@@ -229,9 +231,10 @@ export function AdvancedFilters({ className }: Props) {
 						}
 					/>
 				</div>
-				<div className=" flex flex-col gap-1">
+				<div className="flex flex-col gap-1">
 					<label htmlFor={FAVORITE.id}>{FAVORITE.label}</label>
 					<ToggleGroup
+						variant="primary"
 						id={FAVORITE.id}
 						value={favorite}
 						type="single"

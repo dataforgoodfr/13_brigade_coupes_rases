@@ -1,7 +1,7 @@
 import type { HTMLInputTypeAttribute } from "react"
 import type { FieldValues } from "react-hook-form"
 
-import { Input } from "@/components/ui/input"
+import { Input } from "@/shared/components/input/Input"
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps

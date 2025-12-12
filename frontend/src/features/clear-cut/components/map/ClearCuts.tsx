@@ -1,8 +1,9 @@
 import * as L from "leaflet"
-import { Locate } from "lucide-react"
+import { ListIcon, Locate } from "lucide-react"
 import { useCallback, useEffect, useMemo } from "react"
 import { CircleMarker, useMap, useMapEvents } from "react-leaflet"
 
+import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview"
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl"
@@ -15,6 +16,7 @@ import {
 } from "@/features/clear-cut/store/filters.slice"
 import { IconButton } from "@/shared/components/button/Button"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useGeolocation } from "@/shared/hooks/geolocation"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
@@ -61,6 +63,8 @@ function getPointRadius(currentPointCnt: number, mapSize: L.Point) {
 export function ClearCuts() {
 	const map = useMap()
 	const { setFocusedClearCutId, focusedClearCutId, setMap } = useMapInstance()
+	const { layout, setLayout } = useLayout()
+	const { breakpoint } = useBreakpoint()
 	useEffect(() => {
 		setMap(map)
 	}, [map, setMap])
@@ -92,10 +96,13 @@ export function ClearCuts() {
 	}, [browserLocation, map.setView])
 
 	const dispatch = useAppDispatch()
+
 	useEffect(() => {
 		dispatch(setWithPoints(true))
 	}, [dispatch])
+
 	const { value } = useAppSelector(selectClearCuts)
+
 	const dispatchGeoBounds = useCallback(() => {
 		const bounds = map.getBounds()
 		const northEast = bounds.getNorthEast()
@@ -160,6 +167,16 @@ export function ClearCuts() {
 		}
 	}, [displayPoints, value?.points, map])
 
+	const iconButton = (
+		<IconButton
+			variant="white"
+			className="mx-1"
+			onClick={() => setLayout("list")}
+			icon={<ListIcon />}
+			title="Afficher la liste"
+			position="start"
+		/>
+	)
 	return (
 		<>
 			<div className="sm:p-1 justify-end leaflet-top flex  w-full z-10">
@@ -174,12 +191,14 @@ export function ClearCuts() {
 							Centrer sur ma position
 						</IconButton>
 					)}
+					{breakpoint === "all" && layout === "map" && iconButton}
 					<MobileControl clearCutId={focusedClearCutId}>
 						<IconButton
 							icon={<Locate />}
 							onClick={centerOnUserLocation}
 							position={"end"}
 						/>
+						{iconButton}
 					</MobileControl>
 				</div>
 			</div>

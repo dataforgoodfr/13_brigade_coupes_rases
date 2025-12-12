@@ -20,7 +20,7 @@ type Props = {
 	form: FormType<ClearCutFormInput>
 }
 const COMMON_PROPS = {
-	gap: 1,
+	gap: 0,
 	orientation: "vertical",
 	align: "start"
 } as const

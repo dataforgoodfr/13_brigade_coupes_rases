@@ -13,6 +13,7 @@ import {
 	selectFavorites
 } from "@/features/user/store/me.slice"
 import { IconButton } from "@/shared/components/button/Button"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type FavoriteButtonProps = {
@@ -54,19 +55,26 @@ export function ClearCutItem({
 }: ClearCutReport) {
 	const handleCardClick = useNavigateToClearCut(id)
 	const { focusedClearCutId, setFocusedClearCutId } = useMapInstance()
+	const { breakpoint } = useBreakpoint()
 
 	return (
 		<li
-			onClick={handleCardClick}
-			onMouseEnter={() => setFocusedClearCutId(id)}
-			onMouseLeave={() => setFocusedClearCutId(undefined)}
+			onClick={() => handleCardClick()}
+			onMouseEnter={
+				breakpoint !== "mobile" ? () => setFocusedClearCutId(id) : undefined
+			}
+			onMouseLeave={
+				breakpoint !== "mobile"
+					? () => setFocusedClearCutId(undefined)
+					: undefined
+			}
 			onKeyUp={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
 					handleCardClick()
 				}
 			}}
-			className={clsx("p-3 flex flex-col cursor-pointer gap-2", {
-				"bg-zinc-200/50 rounded-2xl": focusedClearCutId === id
+			className={clsx("p-3 flex flex-col cursor-pointer gap-1 border-b-1", {
+				"bg-zinc-200/50": focusedClearCutId === id
 			})}
 		>
 			<div className="flex justify-between">

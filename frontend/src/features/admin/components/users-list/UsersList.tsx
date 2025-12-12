@@ -162,8 +162,9 @@ export const UsersList: React.FC = () => {
 		getCoreRowModel: getCoreRowModel()
 	})
 	const headerGroups = useMemo(() => table.getHeaderGroups(), [table])
+
 	return (
-		<Table className="table-fixed">
+		<Table className="sm:table-fixed">
 			<TableHeader>
 				{headerGroups.map((headerGroup) => (
 					<TableRow key={headerGroup.id}>

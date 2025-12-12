@@ -16,7 +16,7 @@ export const actorsValue: SectionFormItem<ClearCutFormInput>[] = [
 	},
 	{
 		name: "subcontractor",
-		label: "Nom du sous-traitant (si pertinant)",
+		label: "Nom du sous-traitant (si pertinent)",
 		type: "inputText",
 		renderConditions: []
 	},

@@ -46,7 +46,12 @@ const AccordionContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
 	<AccordionPrimitive.Content
 		ref={ref}
-		className="overflow-hidden text-sm data-[state=closed]:slideUp data-[state=open]:slideDown"
+		className={"text-sm slide-content"}
+		style={
+			{
+				"--radix-content-height": "var(--radix-accordion-content-height)"
+			} as React.CSSProperties
+		}
 		{...props}
 	>
 		<div className={cn("pb-4 pt-0", className)}>{children}</div>

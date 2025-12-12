@@ -4,8 +4,10 @@ interface GeolocationResult {
 	browserLocation?: GeolocationPosition
 	error?: GeolocationPositionError
 }
+
 export function useGeolocation() {
 	const [result, setResult] = useState<GeolocationResult>({})
+
 	useEffect(() => {
 		const id = navigator.geolocation.watchPosition(
 			(location) => {
@@ -15,5 +17,6 @@ export function useGeolocation() {
 		)
 		return () => navigator.geolocation.clearWatch(id)
 	}, [])
+
 	return result
 }

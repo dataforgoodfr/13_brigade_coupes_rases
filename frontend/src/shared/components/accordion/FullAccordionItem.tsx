@@ -36,11 +36,8 @@ export function AccordionFullItem({
 			Pick<ClearCutFormVersions, "original" | "latest">
 		>()
 	return (
-		<AccordionItem
-			value={val}
-			className="data-[state=closed]:border-b-1 data-[state=closed]:border-(--border) data-[state=open]:border-b-0 overflow-hidden"
-		>
-			<div className="flex items-center">
+		<AccordionItem value={val} className="border-b-0">
+			<div className="flex items-center sticky top-0 bg-background z-10">
 				{!isUndefined(changedFields.original) && changedFields.original > 0 && (
 					<UndoButton
 						onClick={() => {
@@ -60,19 +57,14 @@ export function AccordionFullItem({
 					</DownloadOutdatedButton>
 				)}
 				<AccordionTrigger
-					className="cursor-pointer ms-1 text-lg font-bold font-[Roboto]"
+					className="cursor-pointer ms-1 text-lg font-bold font-[Roboto] sticky top-0 py-3 border-b-1"
 					headerClassName="grow"
 				>
 					{title}
 				</AccordionTrigger>
 			</div>
 
-			<AccordionContent
-				className={cn(
-					"font-[Roboto] border-t-1 pt-4 overflow-hidden",
-					className
-				)}
-			>
+			<AccordionContent className={cn("font-[Roboto] pt-4", className)}>
 				{children}
 			</AccordionContent>
 		</AccordionItem>

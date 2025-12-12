@@ -4,18 +4,16 @@ import {
 	CollapsibleTrigger
 } from "@radix-ui/react-collapsible"
 import { useNavigate } from "@tanstack/react-router"
-import { Filter, ListIcon } from "lucide-react"
+import { Filter } from "lucide-react"
 import type { PropsWithChildren } from "react"
 
 import { Button } from "@/components/ui/button"
 import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters"
-import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { IconButton } from "@/shared/components/button/Button"
 
 type Props = PropsWithChildren<{ clearCutId?: string }>
 
 export function MobileControl({ clearCutId, children }: Props) {
-	const { setLayout } = useLayout()
 	const navigate = useNavigate()
 	return (
 		<Collapsible>
@@ -34,15 +32,6 @@ export function MobileControl({ clearCutId, children }: Props) {
 						Détail
 					</Button>
 				)}
-
-				<IconButton
-					variant="white"
-					className="sm:hidden mx-1"
-					onClick={() => setLayout("list")}
-					icon={<ListIcon />}
-					title="Afficher la liste"
-					position="start"
-				/>
 				<CollapsibleTrigger asChild>
 					<IconButton variant="white" icon={<Filter />} position="start">
 						Filtres
@@ -51,7 +40,7 @@ export function MobileControl({ clearCutId, children }: Props) {
 			</div>
 
 			<CollapsibleContent>
-				<AdvancedFilters className="mt-6 px-5 bg-zinc-50" />
+				<AdvancedFilters className="mt-6 px-3 bg-background" />
 			</CollapsibleContent>
 		</Collapsible>
 	)

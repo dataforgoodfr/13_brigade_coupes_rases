@@ -6,7 +6,7 @@ import type { SectionForm, SectionFormItem } from "../types"
 
 export const generalInfoKey: SectionForm = {
 	name: "Informations générales",
-	className: "grid grid-cols-2 gap-2"
+	className: "grid sm:grid-cols-2 sm:gap-2"
 }
 
 export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [

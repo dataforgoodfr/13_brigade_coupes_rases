@@ -3,8 +3,8 @@ import { type ChangeEvent, useEffect, useState } from "react"
 import type { FieldValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
+import { Input } from "@/shared/components/input/Input"
 import { useImageUpload } from "@/shared/hooks/useImageUpload"
 import { useImageViewer } from "@/shared/hooks/useImageViewer"
 
