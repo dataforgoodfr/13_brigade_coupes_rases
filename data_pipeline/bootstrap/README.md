@@ -2,6 +2,8 @@
 
 This guide explains how to load historical SUFOSAT clear-cut detections into the database, including their enrichment with Natura 2000 zone information.
 
+> 📝 **Note**: Pour comprendre comment fonctionne le système de logging utilisé dans ces scripts, consultez [LOGGING.md](./LOGGING.md)
+
 ## Option 1: Process the Raw Data (2-3 hours)
 
 Run the complete pipeline to process raw data files into the enriched format required for database seeding:

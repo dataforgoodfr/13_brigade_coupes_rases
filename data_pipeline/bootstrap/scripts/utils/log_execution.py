@@ -12,8 +12,27 @@ T = TypeVar("T")
 
 def _format_time(timespan: float, precision: int = 3) -> str:
     """
-    Formats the timespan in a human readable form.
-    Code copied from IPython.core.magics.execution._format_time
+    Formate une durée en secondes dans un format lisible par l'humain.
+    
+    Exemples de sortie :
+    - 0.0015 secondes -> "1.50 ms"
+    - 45 secondes -> "45.0 s"
+    - 150 secondes -> "2min 30s"
+    - 7200 secondes -> "2h"
+    
+    Code inspiré de IPython.core.magics.execution._format_time
+    
+    Parameters
+    ----------
+    timespan : float
+        Durée en secondes
+    precision : int, optional
+        Nombre de chiffres significatifs pour l'affichage (par défaut: 3)
+    
+    Returns
+    -------
+    str
+        Durée formatée de manière lisible
     """
 
     if timespan >= 60.0:
@@ -56,7 +75,37 @@ def log_execution(
     result_filepath: str | Path | list[str | Path],
 ) -> Callable[[Callable[..., T]], Callable[..., T | None]]:
     """
-    Decorator for logging start, end, and duration
+    Décorateur pour automatiser le logging d'exécution d'une fonction.
+    
+    Ce décorateur ajoute trois fonctionnalités :
+    1. Vérifie si le(s) fichier(s) de résultat existe(nt) déjà et skip l'exécution si c'est le cas
+    2. Log le début et la fin de l'exécution de la fonction
+    3. Mesure et affiche la durée totale d'exécution
+    
+    Parameters
+    ----------
+    result_filepath : str | Path | list[str | Path]
+        Chemin(s) du/des fichier(s) de résultat. Si tous les fichiers existent,
+        la fonction décorée ne sera pas exécutée (pour éviter les re-calculs inutiles).
+    
+    Returns
+    -------
+    Callable
+        La fonction décorée avec les fonctionnalités de logging automatique.
+        Retourne None si le résultat existe déjà, sinon retourne le résultat de la fonction.
+    
+    Examples
+    --------
+    >>> @log_execution(["output1.fgb", "output2.fgb"])
+    >>> def process_data():
+    >>>     # Votre code de traitement
+    >>>     pass
+    
+    Notes
+    -----
+    - Si au moins un fichier de résultat est manquant, la fonction sera exécutée
+    - Les logs utilisent le format : [HH:MM:SS][INFO] message
+    - La durée est formatée de manière lisible (ex: "2h 15min 30s" ou "150 ms")
     """
     if not isinstance(result_filepath, list):
         result_filepath = [result_filepath]
