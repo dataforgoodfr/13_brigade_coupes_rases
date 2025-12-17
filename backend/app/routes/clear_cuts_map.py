@@ -1,4 +1,5 @@
 from logging import getLogger
+from time import time
 
 from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
@@ -133,6 +134,7 @@ def get_clearcuts_map(
     ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
+    t = time()
     try:
         bounds = None
         if (
@@ -167,5 +169,5 @@ def get_clearcuts_map(
 
     except Exception as e:
         raise AppHTTPException(status_code=500, detail=str(e)) from e
-
+    logger.error(f"=================== Finished in {round(time() - t, 2)} seconds")
     return clearcuts
