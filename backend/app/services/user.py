@@ -168,6 +168,7 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
+    email = email.strip()
     return db.query(User).filter_by(email=email).first()
 
 
