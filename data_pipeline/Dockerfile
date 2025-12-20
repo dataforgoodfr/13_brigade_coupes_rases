@@ -1,52 +1,48 @@
-# Use the base Python 3.11 slim image
-FROM python:3.11-slim
+# # # # # # # # # # # # 
+# Image docker de run #
+# # # # # # # # # # # # 
 
-# Update package lists and install GDAL, its dependencies, and Cron
-RUN apt-get update && apt-get install -y \
-    gdal-bin \          # GDAL binary tools
-    libgdal-dev \       # GDAL development libraries
-    g++ \               # C++ compiler
-    cron \              # Cron service for scheduled tasks
-    && rm -rf /var/lib/apt/lists/*  # Clean up package lists
+# Utilise une image de base avec conda
+FROM continuumio/miniconda3:latest
 
-# Upgrade pip, setuptools, and wheel for better dependency management
-RUN pip install --upgrade pip setuptools wheel
-
-# Install Poetry for managing project dependencies
-RUN pip install poetry
-
-# Set the working directory in the container
+# Définit le répertoire de travail
 WORKDIR /app
 
-# Copy pyproject.toml and poetry.lock to the container for dependency resolution
-COPY pyproject.toml poetry.lock* /app/
+# Installe les dépendances système nécessaires pour GDAL et PostgreSQL
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Configure Poetry to not create a virtual environment (use the global Python environment)
+# Crée l'environnement conda avec Python 3.13 et GDAL
+RUN conda create -n py3_13 python=3.13 -c conda-forge && \
+    conda install -n py3_13 -c conda-forge gdal && \
+    conda clean -afy
+
+# Active l'environnement conda
+SHELL ["conda", "run", "-n", "py3_13", "/bin/bash", "-c"]
+
+# Installe Poetry
+RUN pip install poetry
+
+# Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
 RUN poetry config virtualenvs.create false
 
-# Install project dependencies using Poetry in non-interactive mode without ANSI output
-RUN poetry install --no-interaction --no-ansi
+# Copie les fichiers de configuration Poetry
+COPY pyproject.toml poetry.lock* ./
 
-# Install the specific version of pygdal that matches the installed GDAL version
-RUN pip install "pygdal==$(gdal-config --version).*"
+# Installe les dépendances du projet
+RUN poetry install --no-interaction --no-ansi --no-root
 
-# Copy all project files into the container
-COPY . /app
+# Copie tout le code du projet
+COPY . .
 
-# Make run.sh executable
-RUN chmod +x /app/run.sh
+# Installe le projet lui-même
+RUN poetry install --no-interaction --no-ansi --only-root
 
-# Schedule a cron job to run run.sh every minute and log its output
-RUN echo "* * * * * /app/run.sh >> /app/logs/cron.log 2>&1" > /etc/cron.d/data_pipeline
+# CORRECTION: Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
+ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib:$LD_LIBRARY_PATH
 
-# Set appropriate permissions for the cron file
-RUN chmod 0644 /etc/cron.d/data_pipeline
-
-# Create a directory for temporary data storage and set appropriate permissions
-RUN mkdir -p /app/data_temp && chmod -R a+rwx /app/data_temp
-
-# Apply the scheduled cron job
-RUN crontab /etc/cron.d/data_pipeline
-
-# Start the Cron service in the foreground to keep the container running
-CMD ["cron", "-f"]
+# Commande par défaut pour lancer la pipeline
+CMD ["conda", "run", "--no-capture-output", "-n", "py3_13", "python", "-m", "pipeline.scripts.run_pipeline"]

@@ -1,3 +1,5 @@
+# type: ignore
+
 # Code from https://github.com/scipy/scipy/blob/v1.15.2/scipy/_lib/_disjoint_set.py#L0-L1
 # We could import it from scipy but that might be an unnecessary dependency for this simple data structure
 class DisjointSet:
