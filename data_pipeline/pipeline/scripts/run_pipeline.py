@@ -6,14 +6,15 @@ from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 # TODO : ajouter une méthode de récupération des fichiers de configuration pour les paramètres de la pipeline
 def run_pipeline() -> None:
     # Step : Extract
-    # get_sufosat_tiff() # Sufosat TIFF files
-    get_enrichment_data()  # Enrichment data (e.g., weather, soil)
+    get_sufosat_tiff() # Sufosat TIFF files
+    get_enrichment_data()  # Enrichment data 
 
     # Step : Transform
     # preprocess_sufosat() # first step (extract)
     # enrich_sufosat_clusters()  # Step 3: Enrich sufosat
 
     # Step : Load
+    # 
 
 
 
