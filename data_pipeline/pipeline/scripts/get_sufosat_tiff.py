@@ -31,7 +31,7 @@ def get_sufosat_version(data_id: str=15000970) -> dict | None:
 
 def local_sufosat_version(
     local_prefix: str="data_pipeline/bronze/sufosat/",
-) -> dict | None:
+    ) -> dict | None:
     """
         params: 
             local_prefix (str): path of the sufosat files in the bucket
@@ -54,7 +54,7 @@ def local_sufosat_version(
 
 def get_sufosat_tiff(
     local_prefix: str="data_pipeline/bronze/sufosat/",
-):
+    ):
     """
         Compare the local sufosat version with the zenodo one and download it if needed
         params: 
@@ -81,5 +81,7 @@ def get_sufosat_tiff(
             file_path=OUTPUT_DIR,
             s3_key=f"{local_prefix}{zenodo_version['version']}/{zenodo_version['filename_key']}"
         )
+        return True
     else:
         logging.info("Sufosat is up to date.")
+        return False
