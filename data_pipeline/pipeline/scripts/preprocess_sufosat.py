@@ -391,6 +391,7 @@ def preprocess_sufosat(
     max_meters_between_clear_cuts: int = 100,
     max_days_between_clear_cuts: int = 365,
     concave_hull_ratio: float = 0.42,
+    update_start_date: str = "2024-09-01",
 ) -> None:
     """
     Process forest clear-cut raster data into a vector layer of clear-cut clusters.
@@ -426,10 +427,11 @@ def preprocess_sufosat(
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
 
-    # To develop the update mechanism, we'll truncate the data up to 2025
-    # To test the mechanism, we can consider 2025+ data as new detections
-    # This is temporary
-    gdf = gdf[gdf["date"] < pd.Timestamp(2025, 1, 1)] # TODO : élément à modifier par rapport à la logique de mise à jour
+    # Update start 
+    update_timestamp = pd.Timestamp(update_start_date)
+    logging.info(f"Filtering data strictly after {update_start_date} for optimization.")
+
+    gdf = gdf[gdf["date"] >= update_timestamp]
 
     gdf = cluster_clear_cuts(
         gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
@@ -438,4 +440,3 @@ def preprocess_sufosat(
     gdf = add_concave_hull_score(gdf, concave_hull_ratio)
     gdf = add_area_ha(gdf)
     save_gdf(gdf, RESULT_FILEPATH, index=True)
-

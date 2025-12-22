@@ -10,23 +10,24 @@ from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 def run_pipeline() -> None:
     logging.info("Starting the pipeline...")
 
-    # Step 1 : Extract
-    # has_new_data = get_sufosat_tiff() # Sufosat TIFF files
+    # STEP 1 : Extract
+    has_new_data = get_sufosat_tiff()
+    if has_new_data:
+        get_enrichment_data()
 
-    # if has_new_data:
-    #     get_enrichment_data()  # Enrichment data from S3
-    # else: 
-    #     logging.info("Stopping pipeline: No new Sufosat data.")
+        # STEP 2 : Transform
+        for f in os.listdir(str(DATA_DIR / "sufosat")):
+            if f.endswith(".tif"):
+                sufosat_data = f  
+        
+        preprocess_sufosat(
+            input_raster_dates= str(DATA_DIR / "sufosat" / sufosat_data), 
+            polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb")),
+            update_start_date= "2024-09-01" #TODO: passer cette date dans les fichiers de configurations
+        )
+    else: 
+        logging.info("Stopping pipeline: No new Sufosat data.")
 
-    # Step 2 : Transform
-    for f in os.listdir(str(DATA_DIR / "sufosat")):
-        if f.endswith(".tif"):
-            sufosat_data = f  
-    
-    preprocess_sufosat(
-        input_raster_dates= str(DATA_DIR / "sufosat" / sufosat_data), 
-        polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb"))
-    )
 
     #enrich_sufosat_clusters()  # enrich sufosat DATA
 

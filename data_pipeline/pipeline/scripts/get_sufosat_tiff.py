@@ -21,7 +21,7 @@ def get_sufosat_version(data_id: str=15000970) -> dict | None:
         new_version = {
             "version": int(data['id']), 
             "filename_key": fichier['key'],
-            "file_url_key": 'https://zenodo.org/records/' + str(data['id']) + "/files/" + str(data['files'][0]['key']) + '?download=1'
+            "file_url_key": 'https://zenodo.org/records/' + str(data['id']) + "/files/" + str(data['files'][1]['key']) + '?download=1' # data[files[1]['key']]--> pour récupérer les dates les probabilités c'est l'index 0
         }
     except requests.exceptions.RequestException as e: 
         print("Requests error :", e)
