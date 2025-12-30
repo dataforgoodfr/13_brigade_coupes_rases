@@ -157,9 +157,9 @@ const clearCutFormActorsSchema = z.object({
 })
 
 const clearCutFormRegulationSchema = z.object({
-	isPefcFscCertified: z.boolean().optional(),
-	isOver20Ha: z.boolean().optional(),
-	isPsgRequiredPlot: z.boolean().optional()
+	isPefcFscCertified: z.boolean().nullable().optional().prefault(null),
+	isOver20Ha: z.boolean().nullable().optional().prefault(null),
+	isPsgRequiredPlot: z.boolean().nullable().optional().prefault(null)
 })
 
 const clearCutFormLegalStrategySchema = z.object({
