@@ -20,6 +20,7 @@ export type Props<
 	align?: Align
 	gap?: number
 	name: Name
+	disableChangeTracking?: boolean
 }
 
 export type FormFieldLayoutProps<
@@ -37,16 +38,18 @@ export function FormFieldLayout<
 	align = "center",
 	orientation = "horizontal",
 	withControl = true,
-	name
+	name,
+	disableChangeTracking = false,
 }: Props<Form, Name>) {
-	const { hasChanged, resetTrackedFieldFromOther } =
+	const { hasChanged, resetTrackedFieldFromOther } = !disableChangeTracking ?
 		useChangeTrackingFormContext<
 			Form,
 			Name,
 			Record<"original" | "current" | "latest", Form>
-		>()
-	const changedFromOriginal = hasChanged(name, "original")
-	const changedFromLatest = hasChanged(name, "latest")
+		>() : { hasChanged: () => undefined, resetTrackedFieldFromOther: () => undefined }
+
+	const changedFromOriginal = !disableChangeTracking ? hasChanged(name, "original") : undefined
+	const changedFromLatest = !disableChangeTracking ? hasChanged(name, "latest") : undefined
 
 	return (
 		<FormItem
