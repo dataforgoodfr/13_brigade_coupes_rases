@@ -15,6 +15,7 @@ import {
 	setWithPoints
 } from "@/features/clear-cut/store/filters.slice"
 import { IconButton } from "@/shared/components/button/Button"
+import { AddressInput } from "@/shared/components/input/AddressInput"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useGeolocation } from "@/shared/hooks/geolocation"
@@ -75,6 +76,7 @@ export function ClearCuts() {
 		SelectableItemEnhanced<L.TileLayer>
 	>(LAYERS)
 	map.attributionControl.setPosition("bottomleft")
+	map.zoomControl.setPosition("bottomright")
 
 	const handleLayerSelected = (
 		selectableItem: SelectableItemEnhanced<L.TileLayer>
@@ -114,6 +116,14 @@ export function ClearCuts() {
 			})
 		)
 	}, [map, dispatch])
+
+	const centerOnCoordinates = (coordinates: [number, number]) => {
+		map.setView({
+			lat: coordinates[1],
+			lng: coordinates[0]
+		})
+		dispatchGeoBounds()
+	}
 
 	const onZoomEnd = () => {
 		const currentZoom = map.getZoom()
@@ -179,36 +189,41 @@ export function ClearCuts() {
 	)
 	return (
 		<>
-			<div className="sm:p-1 justify-end leaflet-top flex  w-full z-10">
-				<div className="leaflet-control flex p-1 rounded-md justify-end z-10">
-					{browserLocation && (
-						<IconButton
-							icon={<Locate />}
-							className="hidden sm:flex"
-							onClick={centerOnUserLocation}
-							position={"end"}
-						>
-							Centrer sur ma position
-						</IconButton>
-					)}
-					{breakpoint === "all" && layout === "map" && iconButton}
-					<MobileControl clearCutId={focusedClearCutId}>
-						<IconButton
-							icon={<Locate />}
-							onClick={centerOnUserLocation}
-							position={"end"}
-						/>
-						{iconButton}
-					</MobileControl>
+			<div className="sm:p-1 justify-end leaflet-top flex w-full z-10">
+				<div className="leaflet-control flex p-1 rounded-md z-10 flex-col sm:flex-row gap-2 w-full">
+					<div className="w-full sm:max-w-100">
+						<AddressInput onSelect={centerOnCoordinates} />
+					</div>
+					<div className="justify-end w-full flex flex-row">
+						{browserLocation && (
+							<IconButton
+								icon={<Locate />}
+								className="hidden sm:flex"
+								onClick={centerOnUserLocation}
+								position={"end"}
+							>
+								Centrer sur ma position
+							</IconButton>
+						)}
+						{breakpoint === "all" && layout === "map" && iconButton}
+						<MobileControl clearCutId={focusedClearCutId}>
+							<IconButton
+								icon={<Locate />}
+								onClick={centerOnUserLocation}
+								position={"end"}
+							/>
+							{iconButton}
+						</MobileControl>
+					</div>
 				</div>
 			</div>
-			<div className="leaflet-bottom leaflet-right">
+			<div className="leaflet-bottom leaflet-left mb-3">
 				<div className="leaflet-control bg-zinc-100 p-1 rounded-md ">
 					<ToggleGroup
 						variant="primary"
 						type="single"
 						allowEmptyValue={false}
-						size="xl"
+						size="sm"
 						value={layers}
 						onValueChange={handleLayerSelected}
 					/>

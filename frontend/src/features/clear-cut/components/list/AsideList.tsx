@@ -31,14 +31,6 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 				<div className="flex justify-between items-center mt-1 sm:mt-2 border-b-1 border-zinc-200 px-3 py-2">
 					<Title className="text-primary">COUPES RASES</Title>
 					<div className="flex gap-2">
-						<IconButton
-							variant="outline"
-							// className="sm:hidden"
-							onClick={() => setLayout("map")}
-							icon={<MapIcon />}
-							title="Afficher la carte"
-							position="start"
-						/>
 						<CollapsibleTrigger asChild>
 							<IconButton
 								variant="outline"
@@ -49,6 +41,14 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 								Filtres
 							</IconButton>
 						</CollapsibleTrigger>
+						<IconButton
+							variant="outline"
+							// className="sm:hidden"
+							onClick={() => setLayout("map")}
+							icon={<MapIcon />}
+							title="Afficher la carte"
+							position="start"
+						/>
 					</div>
 				</div>
 				<CollapsibleContent
