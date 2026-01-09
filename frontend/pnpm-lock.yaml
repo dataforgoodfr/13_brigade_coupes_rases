@@ -98,6 +98,9 @@ importers:
       framer-motion:
         specifier: ^12.23.12
         version: 12.23.12(@emotion/is-prop-valid@1.4.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      geo-coordinates-parser:
+        specifier: ^1.7.4
+        version: 1.7.4
       ky:
         specifier: ^1.10.0
         version: 1.10.0
@@ -3397,6 +3400,9 @@ packages:
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
+
+  geo-coordinates-parser@1.7.4:
+    resolution: {integrity: sha512-gVGxBW+s1csexXVMf5bIwz3TH9n4sCEglOOOqmrPk8YazUI5f79jCowKjTw05m/0h1//3+Z2m/nv8IIozgZyUw==}
 
   get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
@@ -8382,6 +8388,8 @@ snapshots:
   functions-have-names@1.2.3: {}
 
   gensync@1.0.0-beta.2: {}
+
+  geo-coordinates-parser@1.7.4: {}
 
   get-caller-file@2.0.5: {}
 

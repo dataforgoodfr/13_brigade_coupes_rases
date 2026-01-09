@@ -87,30 +87,33 @@ export function AsideForm({
 				"absolute top-0 left-0 right-0 bottom-12 z-10": mobile
 			})}
 		>
+			<div
+				className={cn(
+					"pt-4 px-4 pb-1 border-b-1 flex align-middle justify-between",
+					status === "loading" && "justify-end"
+				)}
+			>
+				{status !== "loading" && value ? (
+					<div className="flex flex-col">
+						<Title>{`${value.current.report.city.toLocaleUpperCase()}`}</Title>
+						<span className="font-[Roboto]">
+							<FormattedDate value={value.current.report.firstCutDate} />
+						</span>
+						<span className="font-[Roboto] italic font-light text-xs">
+							v{value.current.id ?? 0}
+						</span>
+					</div>
+				) : null}
+				<Link to="/clear-cuts">
+					<X size={30} />
+				</Link>
+			</div>
 			{status === "loading" && (
 				<div className="flex h-full justify-center items-center">
 					<Loading className="w-1/2" />
 				</div>
 			)}
-			{value && (
-				<>
-					<div className="pt-4 px-4 pb-1 border-b-1 flex align-middle justify-between">
-						<div className="flex flex-col">
-							<Title>{`${value.current.report.city.toLocaleUpperCase()}`}</Title>
-							<span className="font-[Roboto]">
-								<FormattedDate value={value.current.report.firstCutDate} />
-							</span>
-							<span className="font-[Roboto] italic font-light text-xs">
-								v{value.current.id ?? 0}
-							</span>
-						</div>
-						<Link to="/clear-cuts">
-							<X size={30} />
-						</Link>
-					</div>
-					<ClearCutFullForm {...value} />
-				</>
-			)}
+			{status !== "loading" && value && <ClearCutFullForm {...value} />}
 		</div>
 	)
 }

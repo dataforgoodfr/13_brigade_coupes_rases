@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 type Props = {
 	suffix?: ReactNode
 	prefix?: ReactNode
+	suffixClassName?: string
 } & Omit<ComponentProps<"input">, "prefix">
 
 type InputAsideProps = { className: string } & PropsWithChildren
@@ -37,7 +38,11 @@ export const Input = forwardRef<HTMLInputElement, Props>(
 					ref={ref}
 					{...props}
 				/>
-				{suffix && <InputAside className="right-0">{suffix}</InputAside>}
+				{suffix && (
+					<InputAside className={cn("right-0", props.suffixClassName)}>
+						{suffix}
+					</InputAside>
+				)}
 			</div>
 		)
 	}

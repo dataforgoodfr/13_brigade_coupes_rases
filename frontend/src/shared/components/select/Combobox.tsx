@@ -44,6 +44,15 @@ export type ComboboxProps<TItem> = {
 } & (SingleSelectComboboxProps<TItem> | MultiSelectComboboxProps<TItem>)
 
 const EMPTY_ARRAY: unknown[] = []
+
+function normalizeString(str: string) {
+	return str
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^A-Z0-9]+/gi, " ")
+		.toLowerCase()
+}
+
 export function Combobox<TItem>({
 	items = EMPTY_ARRAY as SelectableItemEnhanced<TItem>[],
 	buttonProps,
@@ -135,7 +144,16 @@ export function Combobox<TItem>({
 			</PopoverTrigger>
 
 			<PopoverContent>
-				<Command>
+				<Command
+					filter={(value, search, keywords) => {
+						const extendValue = normalizeString(
+							`${value} ${keywords ? keywords.join(" ") : ""}`
+						)
+						if (extendValue?.includes(normalizeString(search))) return 1
+
+						return 0
+					}}
+				>
 					{commandInputProps && <CommandInput {...commandInputProps} />}
 					<CommandList>
 						{commandEmptyProps && <CommandEmpty {...commandEmptyProps} />}
