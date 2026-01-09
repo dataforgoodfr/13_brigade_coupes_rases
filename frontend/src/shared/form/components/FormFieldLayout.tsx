@@ -39,18 +39,8 @@ export function FormFieldLayout<
 	orientation = "horizontal",
 	withControl = true,
 	name,
-	disableChangeTracking = false,
+	disableChangeTracking = false
 }: Props<Form, Name>) {
-	const { hasChanged, resetTrackedFieldFromOther } = !disableChangeTracking ?
-		useChangeTrackingFormContext<
-			Form,
-			Name,
-			Record<"original" | "current" | "latest", Form>
-		>() : { hasChanged: () => undefined, resetTrackedFieldFromOther: () => undefined }
-
-	const changedFromOriginal = !disableChangeTracking ? hasChanged(name, "original") : undefined
-	const changedFromLatest = !disableChangeTracking ? hasChanged(name, "latest") : undefined
-
 	return (
 		<FormItem
 			className={clsx(`flex gap-${gap} items-${align}`, {
@@ -60,24 +50,9 @@ export function FormFieldLayout<
 			{label && (
 				<div className="flex items-center justify-start min-w-2/8 min-h-6.5">
 					<FormLabel className="font-bold">{label}</FormLabel>
-					{changedFromOriginal?.hasChanged && (
-						<div className="relative">
-							<UndoButton
-								onClick={() => {
-									resetTrackedFieldFromOther(name, "original")
-								}}
-								className="overflow-visible"
-								size="xs"
-							/>
-						</div>
-					)}{" "}
-					{changedFromLatest?.hasChanged && (
-						<DownloadOutdatedButton
-							onClick={() => {
-								resetTrackedFieldFromOther(name, "latest")
-							}}
-						/>
-					)}
+					{!disableChangeTracking ? (
+						<ChangeTracking<Form, Name> name={name} />
+					) : null}
 				</div>
 			)}
 			<div className="flex flex-grow-1 flex-col">
@@ -85,5 +60,43 @@ export function FormFieldLayout<
 				<FormMessage />
 			</div>
 		</FormItem>
+	)
+}
+
+function ChangeTracking<Form extends FieldValues, Name extends Path<Form>>({
+	name
+}: {
+	name: Name
+}) {
+	const { hasChanged, resetTrackedFieldFromOther } =
+		useChangeTrackingFormContext<
+			Form,
+			Name,
+			Record<"original" | "current" | "latest", Form>
+		>()
+
+	const changedFromOriginal = hasChanged(name, "original")
+	const changedFromLatest = hasChanged(name, "latest")
+	return (
+		<>
+			{changedFromOriginal?.hasChanged && (
+				<div className="relative">
+					<UndoButton
+						onClick={() => {
+							resetTrackedFieldFromOther(name, "original")
+						}}
+						className="overflow-visible"
+						size="xs"
+					/>
+				</div>
+			)}{" "}
+			{changedFromLatest?.hasChanged && (
+				<DownloadOutdatedButton
+					onClick={() => {
+						resetTrackedFieldFromOther(name, "latest")
+					}}
+				/>
+			)}
+		</>
 	)
 }
