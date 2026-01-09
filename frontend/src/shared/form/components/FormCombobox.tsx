@@ -1,8 +1,10 @@
 import type { ReactNode } from "react"
 import type { FieldPathValue, FieldValues, Path } from "react-hook-form"
 
-import { Combobox } from "@/shared/components/select/Combobox"
-import type { ComboboxFilterProps } from "@/shared/components/select/ComboboxFilter"
+import {
+	ComboboxFilter,
+	type ComboboxFilterProps
+} from "@/shared/components/select/ComboboxFilter"
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps
@@ -35,7 +37,7 @@ export function FormCombobox<
 	const items = useEnhancedItems({ items: field.value, ...props })
 	return (
 		<FormFieldLayout name={name} {...props}>
-			<Combobox {...props} onChanged={field.onChange} items={items} />
+			<ComboboxFilter {...props} onChanged={field.onChange} items={items} />
 		</FormFieldLayout>
 	)
 }

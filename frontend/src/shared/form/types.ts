@@ -15,6 +15,7 @@ export type FormProps<
 	name: Name
 	label?: string
 	placeholder?: string
+	disableChangeTracking?: boolean
 } & FormRenderProps<Form, Name>
 export type FormRenderProps<
 	Form extends FieldValues = FieldValues,
