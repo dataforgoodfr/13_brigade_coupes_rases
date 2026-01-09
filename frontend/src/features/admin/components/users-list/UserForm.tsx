@@ -36,13 +36,13 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 		values: user
 			? user
 			: {
-				role: "volunteer" as const,
-				email: "",
-				firstName: "",
-				lastName: "",
-				login: "",
-				departments: departments
-			}
+					role: "volunteer" as const,
+					email: "",
+					firstName: "",
+					lastName: "",
+					login: "",
+					departments: departments
+				}
 	})
 
 	return (
@@ -54,26 +54,48 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 						form={form}
 						name={"firstName"}
 						render={(props) => (
-							<FormInput {...props} label="Prénom" type="text" disableChangeTracking />
+							<FormInput
+								{...props}
+								label="Prénom"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>
 						name={"lastName"}
 						form={form}
-						render={(props) => <FormInput {...props} label="Nom" type="text" disableChangeTracking />}
+						render={(props) => (
+							<FormInput
+								{...props}
+								label="Nom"
+								type="text"
+								disableChangeTracking
+							/>
+						)}
 					/>
 					<FormField<UserFormType>
 						form={form}
 						name={"email"}
 						render={(props) => (
-							<FormInput {...props} label="Email" type="text" disableChangeTracking />
+							<FormInput
+								{...props}
+								label="Email"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>
 						form={form}
 						name={"login"}
 						render={(props) => (
-							<FormInput {...props} label="Pseudo" type="text" disableChangeTracking />
+							<FormInput
+								{...props}
+								label="Pseudo"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>

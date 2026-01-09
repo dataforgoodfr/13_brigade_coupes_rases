@@ -1,7 +1,10 @@
 import type { ReactNode } from "react"
 import type { FieldPathValue, FieldValues, Path } from "react-hook-form"
 
-import { ComboboxFilter, type ComboboxFilterProps } from "@/shared/components/select/ComboboxFilter"
+import {
+	ComboboxFilter,
+	type ComboboxFilterProps
+} from "@/shared/components/select/ComboboxFilter"
 import {
 	FormFieldLayout,
 	type FormFieldLayoutProps
