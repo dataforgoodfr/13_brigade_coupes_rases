@@ -6,6 +6,7 @@ from pipeline.scripts.get_sufosat_tiff import get_sufosat_tiff
 from pipeline.scripts.get_reference_data import get_enrichment_data
 from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 from pipeline.scripts.get_last_version import get_last_version
+from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters, upadte_geometries
 #from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
 
 # TODO : ajouter une méthode de récupération des fichiers de configuration pour les paramètres de la pipeline
@@ -33,6 +34,15 @@ def run_pipeline() -> None:
             polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb")),
             update_start_date= last_version_date_str 
         )
+
+        gdf_updated, gdf_new = split_new_and_updated_clusters(
+            str(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched.fgb"), 
+            str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"), 
+            distance_threshold=50
+        )
+
+        # upadte_geometries()
+
     else: 
         logging.info("Stopping pipeline: No new Sufosat data.")
 
