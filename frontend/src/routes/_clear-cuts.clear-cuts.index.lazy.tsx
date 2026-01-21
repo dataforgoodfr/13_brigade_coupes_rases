@@ -25,7 +25,7 @@ function RouteComponent() {
 				</div>
 			) : (
 				<div
-					className={cn("xxl:w-1/4 w-3/4 lg:w-200", {
+					className={cn("flex xxl:w-1/4 w-3/4 lg:w-200", {
 						hidden: layout !== "list"
 					})}
 				>
