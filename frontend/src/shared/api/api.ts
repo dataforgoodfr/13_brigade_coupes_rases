@@ -7,6 +7,7 @@ import type { RequestedContent } from "@/shared/api/types"
 import { localStorageRepository } from "@/shared/localStorage"
 export const UNAUTHORIZED_ERROR_NAME = "Unauthorized"
 const tokenStorage = localStorageRepository<TokenResponse>("token")
+const meStorage = localStorageRepository<TokenResponse>("me")
 
 export const api = ky.extend({
 	prefixUrl: import.meta.env.VITE_API,
@@ -34,17 +35,25 @@ export const api = ky.extend({
 				) {
 					return
 				}
-				const tokenResponse = await ky
-					.post(`api/v1/token/refresh`, {
-						prefixUrl: import.meta.env.VITE_API,
-						json: {
-							refreshToken
-						}
-					})
-					.json()
-				const token = tokenSchema.parse(tokenResponse)
-				tokenStorage.setToLocalStorage(token)
-				request.headers.set("Authorization", `Bearer ${token.accessToken}`)
+				try {
+					const tokenResponse = await ky
+						.post(`api/v1/token/refresh/`, {
+							prefixUrl: import.meta.env.VITE_API,
+							json: {
+								refreshToken
+							}
+						})
+						.json()
+					const token = tokenSchema.parse(tokenResponse)
+					tokenStorage.setToLocalStorage(token)
+					request.headers.set("Authorization", `Bearer ${token.accessToken}`)
+				} catch (err) {
+					// Logout user if refresh fails
+					tokenStorage.setToLocalStorage(undefined)
+					meStorage.setToLocalStorage(undefined)
+					// Go to login page
+					window.location.href = "/login"
+				}
 			}
 		]
 	}
