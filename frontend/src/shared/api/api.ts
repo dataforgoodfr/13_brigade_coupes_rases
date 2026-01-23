@@ -47,7 +47,7 @@ export const api = ky.extend({
 					const token = tokenSchema.parse(tokenResponse)
 					tokenStorage.setToLocalStorage(token)
 					request.headers.set("Authorization", `Bearer ${token.accessToken}`)
-				} catch (err) {
+				} catch (_err) {
 					// Logout user if refresh fails
 					tokenStorage.setToLocalStorage(undefined)
 					meStorage.setToLocalStorage(undefined)

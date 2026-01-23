@@ -96,8 +96,8 @@ const selectSelectableItemsNamedId = createTypedDraftSafeSelector(
 			([k, v]) =>
 				({
 					isSelected: false,
-					item: { id: k, name: v.name }
-				}) satisfies SelectableItem<NamedId>
+					item: { id: k, name: v.name, code: v.code }
+				}) satisfies SelectableItem<NamedId & { code: string }>
 		)
 	}
 )
