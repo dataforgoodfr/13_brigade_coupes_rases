@@ -56,7 +56,7 @@ export const initialState: FiltersState = {
 export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
 	async (_arg, { getState, extra: { api } }) => {
-		const result = await api().get<FiltersResponse>("api/v1/filters").json()
+		const result = await api().get<FiltersResponse>("api/v1/filters/").json()
 		const {
 			departmentsIds: departments_ids,
 			rulesIds: tags_ids,
@@ -66,7 +66,6 @@ export const getFiltersThunk = createAppAsyncThunk(
 		const departments = selectDepartmentsByIds(state, departments_ids)
 			.map((d) => ({
 				id: d.id,
-				name: `${d.id} - ${d.name}`
 			}))
 			.sort((a, b) => a.name.localeCompare(b.name))
 

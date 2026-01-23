@@ -85,7 +85,7 @@ export function useImageUpload(): UseImageUploadResult {
 				})
 
 				const response = await authenticatedApi
-					.post("api/v1/images/upload-url", {
+					.post("api/v1/images/upload-url/", {
 						json: uploadRequest
 					})
 					.json<ImageUploadResponse>()

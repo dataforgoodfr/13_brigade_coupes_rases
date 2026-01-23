@@ -43,7 +43,7 @@ type State = {
 export const deleteUserThunk = createAppAsyncThunk<void, string>(
 	"deleteUser",
 	async (request, { extra: { api }, dispatch }) => {
-		await api().delete(`api/v1/users/${request}`)
+		await api().delete(`api/v1/users/${request}/`)
 		dispatch(getUsersThunk())
 	}
 )
@@ -51,7 +51,7 @@ export const deleteUserThunk = createAppAsyncThunk<void, string>(
 export const createUserThunk = createAppAsyncThunk<UserResponse, UserForm>(
 	"createUser",
 	async (request, { extra: { api }, dispatch }) => {
-		const response = await api().post<PaginatedUsersResponse>("api/v1/users", {
+		const response = await api().post<PaginatedUsersResponse>("api/v1/users/", {
 			json: {
 				...request,
 				departments: request.departments
@@ -72,7 +72,7 @@ export const updateUserThunk = createAppAsyncThunk<
 	UserResponse,
 	UserForm & { id: string }
 >("updateUser", async (request, { extra: { api }, dispatch }) => {
-	const url = `api/v1/users/${request.id}`
+	const url = `api/v1/users/${request.id}/`
 	await api().put<PaginatedUsersResponse>(url, {
 		json: {
 			...request,
@@ -92,7 +92,7 @@ export const getUsersThunk = createAppAsyncThunk<
 	FiltersRequest | undefined
 >("getUsers", async (request, { extra: { api }, getState }) => {
 	const result = await api()
-		.get<PaginatedUsersResponse>("api/v1/users", {
+		.get<PaginatedUsersResponse>("api/v1/users/", {
 			searchParams: requestToParams(request ?? selectFiltersRequest(getState()))
 		})
 		.json()

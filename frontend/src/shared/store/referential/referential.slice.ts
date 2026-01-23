@@ -16,7 +16,7 @@ export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
 	async (_, { extra: { api } }) => {
 		const result = await api()
-			.get<ReferentialResponse>("api/v1/referential")
+			.get<ReferentialResponse>("api/v1/referential/")
 			.json()
 		return referentialSchemaResponse.parse(result)
 	}
