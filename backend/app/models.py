@@ -271,7 +271,7 @@ class ClearCut(Base):
         nullable=True,
     )
     report_id: Mapped[int] = mapped_column(
-        ForeignKey("clear_cuts_reports.id"), nullable=False
+        ForeignKey("clear_cuts_reports.id"), index=True, nullable=False
     )
     report: Mapped["ClearCutReport"] = relationship(
         back_populates="clear_cuts", cascade="all, delete"

@@ -221,7 +221,6 @@ def build_clearcuts_map(
             # Needs to clusterized because with estimate that points are too many
             if area > 1:
                 reports_cnt = reports_with_filters.count()
-                print(f"COUNT {reports_cnt}")
                 if reports_cnt == 0:
                     clusterized_points = ClusterizedPointsResponseSchema(
                         total=reports_cnt, content=[]
