@@ -112,7 +112,6 @@ def find_clear_cut_form_by_report_id(
     forms = (
         db.query(ClearCutForm)
         .join(ClearCutReport)
-        .join(User)
         .filter(ClearCutForm.report_id == report_id)
         .order_by(ClearCutForm.created_at.desc())
         .offset(page * size)
