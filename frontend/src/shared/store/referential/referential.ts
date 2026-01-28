@@ -30,7 +30,7 @@ export const ruleSchema = recordWithId(ruleResponseSchema)
 export type Rule = z.infer<typeof ruleSchema>
 export const departmentResponseSchema = record(
 	z.string(),
-	z.object({ name: z.string() })
+	z.object({ name: z.string(), code: z.string() })
 )
 
 export type DepartmentResponse = z.infer<typeof departmentResponseSchema>

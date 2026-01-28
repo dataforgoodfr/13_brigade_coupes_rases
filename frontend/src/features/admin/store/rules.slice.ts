@@ -52,7 +52,7 @@ export const updateRulesThunk = createAppAsyncThunk<void, void>(
 		if (rules === undefined) {
 			throw new Error("Rules are not loaded")
 		}
-		await api().put("api/v1/rules", {
+		await api().put("api/v1/rules/", {
 			json: {
 				rules: rules?.map((r) => ({
 					id: r.id,
@@ -73,7 +73,7 @@ export const updateRulesThunk = createAppAsyncThunk<void, void>(
 export const getRulesThunk = createAppAsyncThunk<Rule[], void>(
 	"rules/getRules",
 	async (_, { getState, extra: { api } }) => {
-		const result = await api().get<RulesResponse>("api/v1/rules").json()
+		const result = await api().get<RulesResponse>("api/v1/rules/").json()
 		const response = rulesResponseSchema.parse(result)
 		const state = getState()
 		return response.map((rule) =>

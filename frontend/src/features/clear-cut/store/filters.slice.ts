@@ -56,17 +56,19 @@ export const initialState: FiltersState = {
 export const getFiltersThunk = createAppAsyncThunk(
 	"filters/get",
 	async (_arg, { getState, extra: { api } }) => {
-		const result = await api().get<FiltersResponse>("api/v1/filters").json()
+		const result = await api().get<FiltersResponse>("api/v1/filters/").json()
 		const {
 			departmentsIds: departments_ids,
 			rulesIds: tags_ids,
 			...response
 		} = filtersResponseSchema.parse(result)
 		const state = getState()
+
 		const departments = selectDepartmentsByIds(state, departments_ids)
 			.map((d) => ({
+				...d,
 				id: d.id,
-				name: `${d.id} - ${d.name}`
+				name: `${d.code} - ${d.name}`
 			}))
 			.sort((a, b) => a.name.localeCompare(b.name))
 
@@ -110,7 +112,7 @@ export const filtersSlice = createSlice({
 		},
 		updateDepartment: (
 			state,
-			{ payload }: PayloadAction<SelectableItem<NamedId>>
+			{ payload }: PayloadAction<SelectableItem<NamedId & { code: string }>>
 		) => {
 			state.departments = state.departments.map((d) =>
 				d.item.id === payload.item.id ? payload : d
@@ -118,7 +120,7 @@ export const filtersSlice = createSlice({
 		},
 		setDepartments: (
 			state,
-			{ payload }: PayloadAction<SelectableItem<NamedId>[]>
+			{ payload }: PayloadAction<SelectableItem<NamedId & { code: string }>[]>
 		) => {
 			state.departments = payload
 		},

@@ -139,7 +139,7 @@ export const fakeDepartments: DepartmentResponse = [
 	"La Réunion",
 	"Mayotte"
 ].reduce<DepartmentResponse>((acc, department) => {
-	acc[faker.string.uuid()] = { name: department }
+	acc[faker.string.uuid()] = { name: department, code: faker.string.numeric(2) }
 	return acc
 }, {})
 

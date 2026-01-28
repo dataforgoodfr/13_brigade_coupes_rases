@@ -57,7 +57,7 @@ export const loginThunk = createAppAsyncThunk(
 		setStoredToken(undefined)
 
 		const tokenResult = await api()
-			.post<TokenResponse>("api/v1/token", { body: formData })
+			.post<TokenResponse>("api/v1/token/", { body: formData })
 			.json()
 		const tokenResponse = tokenSchema.parse(tokenResult)
 
@@ -70,7 +70,7 @@ export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
 	withStorageActionCreator(
 		async (_, { getState, extra: { api } }) => {
-			const userResult = await api().get<MeResponse>("api/v1/me").json()
+			const userResult = await api().get<MeResponse>("api/v1/me/").json()
 			const user = meResponseSchema.parse(userResult)
 			const departments = selectDepartmentsByIds(
 				getState(),
@@ -88,7 +88,7 @@ export const addFavoriteThunk = createAppAsyncThunk<void, string>(
 		const me = meSchema.parse(selectMe(getState()))
 		const connectedMe = connectedMeSchema.safeParse(me)
 		if (connectedMe.success) {
-			await api().put("api/v1/me", {
+			await api().put("api/v1/me/", {
 				json: {
 					favorites: [...connectedMe.data.favorites, favorite]
 				} satisfies UpdateMeRequest
@@ -110,7 +110,7 @@ export const removeFavoriteThunk = createAppAsyncThunk<void, string>(
 		const me = meSchema.parse(selectMe(getState()))
 		const connectedMe = connectedMeSchema.safeParse(me)
 		if (connectedMe.success) {
-			await api().put("api/v1/me", {
+			await api().put("api/v1/me/", {
 				json: {
 					favorites: connectedMe.data.favorites.filter((id) => id !== favorite)
 				} satisfies UpdateMeRequest

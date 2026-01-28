@@ -85,14 +85,16 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 	withEntityStorageActionCreator(
 		async ({ id, hasBeenCreated }, { getState, extra: { api } }) => {
 			// Get the base report data
-			const reportResult = await api().get(`api/v1/clear-cuts-map/${id}`).json()
+			const reportResult = await api()
+				.get(`api/v1/clear-cuts-map/${id}/`)
+				.json()
 			const report = clearCutReportResponseSchema.parse(reportResult)
 			const state = getState()
 			const baseReport = mapReport(state, report)
 
 			const formsResult = clearCutFormsResponseSchema.parse(
 				await api()
-					.get(`api/v1/clear-cuts-reports/${id}/forms`, {
+					.get(`api/v1/clear-cuts-reports/${id}/forms/`, {
 						searchParams: { page: "0", size: "1" }
 					})
 					.json()
@@ -169,7 +171,7 @@ const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 		}
 		try {
 			const result = await api()
-				.get("api/v1/clear-cuts-map", {
+				.get("api/v1/clear-cuts-map/", {
 					searchParams
 				})
 				.json()

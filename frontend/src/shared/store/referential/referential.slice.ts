@@ -16,7 +16,7 @@ export const getReferentialThunk = createAppAsyncThunk(
 	"referential/get",
 	async (_, { extra: { api } }) => {
 		const result = await api()
-			.get<ReferentialResponse>("api/v1/referential")
+			.get<ReferentialResponse>("api/v1/referential/")
 			.json()
 		return referentialSchemaResponse.parse(result)
 	}
@@ -96,8 +96,8 @@ const selectSelectableItemsNamedId = createTypedDraftSafeSelector(
 			([k, v]) =>
 				({
 					isSelected: false,
-					item: { id: k, name: v.name }
-				}) satisfies SelectableItem<NamedId>
+					item: { id: k, name: v.name, code: v.code }
+				}) satisfies SelectableItem<NamedId & { code: string }>
 		)
 	}
 )
