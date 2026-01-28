@@ -54,26 +54,48 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 						form={form}
 						name={"firstName"}
 						render={(props) => (
-							<FormInput {...props} label="Prénom" type="text" />
+							<FormInput
+								{...props}
+								label="Prénom"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>
 						name={"lastName"}
 						form={form}
-						render={(props) => <FormInput {...props} label="Nom" type="text" />}
+						render={(props) => (
+							<FormInput
+								{...props}
+								label="Nom"
+								type="text"
+								disableChangeTracking
+							/>
+						)}
 					/>
 					<FormField<UserFormType>
 						form={form}
 						name={"email"}
 						render={(props) => (
-							<FormInput {...props} label="Email" type="text" />
+							<FormInput
+								{...props}
+								label="Email"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>
 						form={form}
 						name={"login"}
 						render={(props) => (
-							<FormInput {...props} label="Pseudo" type="text" />
+							<FormInput
+								{...props}
+								label="Pseudo"
+								type="text"
+								disableChangeTracking
+							/>
 						)}
 					/>
 					<FormField<UserFormType>
@@ -85,6 +107,7 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 								availableValues={AVAILABLE_ITEMS}
 								placeholder="Sélectionner un rôle"
 								label="Rôle"
+								disableChangeTracking
 							/>
 						)}
 					/>
@@ -101,6 +124,7 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 								hasInput
 								type="multiple"
 								label="Départements"
+								disableChangeTracking
 							/>
 						)}
 					/>

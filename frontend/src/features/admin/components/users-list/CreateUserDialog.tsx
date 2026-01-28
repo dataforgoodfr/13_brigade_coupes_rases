@@ -71,7 +71,7 @@ export function CreateUserDialog() {
 					onSubmit={(form) => dispatch(createUserThunk(form))}
 					header={<Header />}
 					footer={<Footer />}
-				></UserForm>
+				/>
 			</DialogContent>
 		</Dialog>
 	)
