@@ -7,49 +7,68 @@ from pipeline.scripts.get_reference_data import get_enrichment_data
 from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 from pipeline.scripts.get_last_version import get_last_version
 from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters, update_geometries
-#from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
+from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
 
 # TODO : ajouter une méthode de récupération des fichiers de configuration pour les paramètres de la pipeline
 def run_pipeline() -> None:
     logging.info("Starting the pipeline...")
     
-    # Récupération de la dernière date de la version gold
-    last_version_date = get_last_version()
-    next_date = last_version_date + timedelta(days=1)
-    last_version_date_str = next_date.strftime('%Y-%m-%d')
-    logging.info(f"Last version date: {last_version_date_str}")
+    # # Récupération de la dernière date de la version gold
+    # last_version_date = get_last_version()
+    # next_date = last_version_date + timedelta(days=1)
+    # last_version_date_str = next_date.strftime('%Y-%m-%d')
+    # logging.info(f"Last version date: {last_version_date_str}")
 
-    # STEP 1 : Extract
-    has_new_data = get_sufosat_tiff()
-    if has_new_data:
-        get_enrichment_data()
+    # # STEP 1 : Extract
+    # has_new_data = get_sufosat_tiff()
+    
+    # TEST export data from DB
+    import sys
+    from pipeline.scripts.simple_db_export import export_database
+    
+    database_url = "postgresql://u8jhjikkyhen5eq6xym9:98Kw81ZlszzpOjM87X8jM9bg97P1v7@b6ao2wmae6vkjcmuqdol-postgresql.services.clever-cloud.com:7155/bew9lfjlnszrnrlflm53"
+    output_file = str(DATA_DIR / "sufosat_reference" /"enriched_clear_cuts_export.fgb")
 
-        # STEP 2 : Transform
-        for f in os.listdir(str(DATA_DIR / "sufosat")):
-            if f.endswith(".tif"):
-                sufosat_data = f  
-        
-        preprocess_sufosat(
-            input_raster_dates= str(DATA_DIR / "sufosat" / sufosat_data), 
-            polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb")),
-            update_start_date= last_version_date_str 
-        )
-        
-        ref_path = str(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched.fgb")
-        new_path = str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb")
-        
-        gdf_updated, gdf_new = split_new_and_updated_clusters(
-            gdf_new=new_path,
-            gdf_ref=ref_path,
-            distance_threshold=50
-        )
-        
-        gdf_ref_updated, gdf_final = update_geometries(
-            distance_threshold=50
-        )
+    print(database_url)
+    print(output_file)
+    
+    export_database(database_url, output_file)
 
-    else: 
-        logging.info("Stopping pipeline: No new Sufosat data.")
+
+
+    # if has_new_data:
+        # get_enrichment_data()
+
+        # # STEP 2 : Transform
+        # for f in os.listdir(str(DATA_DIR / "sufosat")):
+        #     if f.endswith(".tif"):
+        #         sufosat_data = f  
+        
+        # preprocess_sufosat(
+        #     input_raster_dates= str(DATA_DIR / "sufosat" / sufosat_data), 
+        #     polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb")),
+        #     update_start_date= last_version_date_str 
+        # )
+        
+        # === A PRENDRE QUAND C'EST OK COTE BACKEND
+        # ref_path = str(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched.fgb")
+        # new_path = str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb")
+        
+        # gdf_updated, gdf_new = split_new_and_updated_clusters(
+        #     gdf_new=new_path,
+        #     gdf_ref=ref_path,
+        #     distance_threshold=50
+        # )
+        
+        # gdf_ref_updated, gdf_final = update_geometries(
+        #     distance_threshold=50
+        # )
+
+        # Enrichissement des données
+
+
+    # else: 
+    #     logging.info("Stopping pipeline: No new Sufosat data.")
 
 
     #enrich_sufosat_clusters()  # enrich sufosat DATA

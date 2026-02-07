@@ -5,6 +5,11 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import S3Manager
 
 
+# TODO: Faire une fonction qui récupère les données depuis la base de données
+def save_last_version():
+    return None
+
+# Récupération de ces données dans la base de données
 def get_last_version():
     logging.info("Getting last version...")
     s3_manager = S3Manager()

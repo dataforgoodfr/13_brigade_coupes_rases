@@ -105,7 +105,7 @@ def update_geometries(distance_threshold=50):
     gdf_updated = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_updated.fgb"))
     gdf_new = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_new.fgb"))
     
-    print(f"📂 Chargement:")
+    print(f"Chargement:")
     print(f"   - Référence: {len(gdf_ref)} clusters")
     print(f"   - Updated: {len(gdf_updated)} clusters")
     print(f"   - New: {len(gdf_new)} clusters\n")
@@ -187,14 +187,14 @@ def update_geometries(distance_threshold=50):
     
     # Statistiques
     n_updated = len(updates)
-    print(f"📊 Mise à jour des géométries:")
+    print(f"Mise à jour des géométries:")
     print(f"   - Clusters de référence mis à jour: {n_updated}/{len(gdf_ref)}")
     print(f"   - Clusters de référence inchangés: {len(gdf_ref) - n_updated}")
     
     # Combiner référence updated + nouveaux clusters
     gdf_final = pd.concat([gdf_ref_updated, gdf_new], ignore_index=True)
     
-    print(f"\n✅ Dataset final:")
+    print(f"\n Dataset final:")
     print(f"   - gdf_ref_updated: {len(gdf_ref_updated)} clusters")
     print(f"   - gdf_final: {len(gdf_final)} clusters (ref_updated + new)")
     
@@ -202,7 +202,7 @@ def update_geometries(distance_threshold=50):
     gdf_ref_updated.to_file(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched_UPDATED.fgb", driver="FlatGeobuf")
     gdf_final.to_file(DATA_DIR / "sufosat" / "clusters_final.fgb", driver="FlatGeobuf")
     
-    print(f"\n💾 Fichiers sauvegardés:")
+    print(f"\n Fichiers sauvegardés:")
     print(f"   - {DATA_DIR / 'sufosat_reference' / 'filtered_clusters_enriched_UPDATED.fgb'}")
     print(f"   - {DATA_DIR / 'sufosat' / 'clusters_final.fgb'}")
     
