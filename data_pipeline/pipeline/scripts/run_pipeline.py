@@ -14,26 +14,13 @@ def run_pipeline() -> None:
     logging.info("Starting the pipeline...")
     
     # # Récupération de la dernière date de la version gold
-    # last_version_date = get_last_version()
-    # next_date = last_version_date + timedelta(days=1)
-    # last_version_date_str = next_date.strftime('%Y-%m-%d')
-    # logging.info(f"Last version date: {last_version_date_str}")
+    last_version_date = get_last_version()
+    next_date = last_version_date + timedelta(days=1)
+    last_version_date_str = next_date.strftime('%Y-%m-%d')
+    logging.info(f"Last version date: {last_version_date_str}")
 
     # # STEP 1 : Extract
-    # has_new_data = get_sufosat_tiff()
-    
-    # TEST export data from DB
-    import sys
-    from pipeline.scripts.simple_db_export import export_database
-    
-    database_url = "postgresql://u8jhjikkyhen5eq6xym9:98Kw81ZlszzpOjM87X8jM9bg97P1v7@b6ao2wmae6vkjcmuqdol-postgresql.services.clever-cloud.com:7155/bew9lfjlnszrnrlflm53"
-    output_file = str(DATA_DIR / "sufosat_reference" /"enriched_clear_cuts_export.fgb")
-
-    print(database_url)
-    print(output_file)
-    
-    export_database(database_url, output_file)
-
+    has_new_data = get_sufosat_tiff()
 
 
     # if has_new_data:

@@ -2,6 +2,42 @@ import pandas as pd
 import geopandas as gpd
 from shapely.ops import unary_union
 from pipeline.scripts import DATA_DIR
+from pipeline.scripts.db_export import (
+    connect_db, get_export_query, 
+    extract_data, convert_arrays_to_strings, 
+    reorder_columns, save_to_file, 
+    print_summary
+)
+
+
+e = "postgresql://u8jhjikkyhen5eq6xym9:98Kw81ZlszzpOjM87X8jM9bg97P1v7@b6ao2wmae6vkjcmuqdol-postgresql.services.clever-cloud.com:7155/bew9lfjlnszrnrlflm53"
+
+def export_database(database_url: str, output_file: str) -> None:
+    """
+    Main export function.
+    
+    Args:
+        database_url: PostgreSQL connection string
+        output_file: Output FlatGeobuf file path
+    """
+    # Connect
+    engine = connect_db(database_url)
+    
+    # Extract
+    gdf = extract_data(engine)
+    
+    # Transform
+    gdf = convert_arrays_to_strings(gdf)
+    gdf = reorder_columns(gdf)
+    
+    # Load (save)
+    output_path = Path(output_file)
+    save_to_file(gdf, output_path)
+    
+    # Summary
+    print_summary(gdf)
+    
+    print(f"\n🎉 Export complete: {output_path.absolute()}")
 
 def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     """
@@ -81,7 +117,6 @@ def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     print(f"   - {DATA_DIR / 'sufosat' / 'clusters_new.fgb'}")
 
     return gdf_updated, gdf_truly_new
-
 
 def update_geometries(distance_threshold=50):
     """

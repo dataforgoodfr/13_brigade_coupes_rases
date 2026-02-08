@@ -1,9 +1,5 @@
 """
 Simple functional script to export database to FlatGeobuf file.
-Pure functions, no classes, straightforward.
-
-Usage:
-    python3 simple_export.py postgresql://user:pass@host:5432/dbname output.fgb
 """
 
 import sys
@@ -133,6 +129,7 @@ def reorder_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'bdf_poplar_area_ha',
         'bdf_resinous_area_ha',
         'slope_area_ha',
+        'geometry'
     ]
     
     # Keep only columns that exist (geometry handled by geopandas)
@@ -146,15 +143,17 @@ def save_to_file(gdf: gpd.GeoDataFrame, output_path: Path) -> None:
     """Save GeoDataFrame to FlatGeobuf file."""
     print(f"💾 Saving to {output_path}...")
     
+    # Sécurisation de la pipeline
+    gdf = gpd.GeoDataFrame(gdf)
+    
     # Create output directory if needed
-    # output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Save to FlatGeobuf
-    # gdf.to_file(output_path, driver="FlatGeobuf")
+    gdf.to_file(output_path, driver="FlatGeobuf")
     
     # Get file size
-    # file_size_mb = output_path.stat().st_size / (1024 * 1024)
-    # print(f"✅ Saved {len(gdf)} records ({file_size_mb:.2f} MB)")
+    file_size_mb = output_path.stat().st_size / (1024 * 1024)
     print(f"✅ Saved {len(gdf)}")
 
 
@@ -169,33 +168,4 @@ def print_summary(gdf: gpd.GeoDataFrame) -> None:
     print(f"With Natura 2000:  {gdf['natura2000_codes'].notna().sum()}")
     print(f"CRS:               {gdf.crs}")
     print("="*50)
-
-
-def export_database(database_url: str, output_file: str) -> None:
-    """
-    Main export function.
-    
-    Args:
-        database_url: PostgreSQL connection string
-        output_file: Output FlatGeobuf file path
-    """
-    # Connect
-    engine = connect_db(database_url)
-    
-    # Extract
-    gdf = extract_data(engine)
-    
-    # Transform
-    gdf = convert_arrays_to_strings(gdf)
-    gdf = reorder_columns(gdf)
-    
-    # Load (save)
-    output_path = Path(output_file)
-    save_to_file(gdf, output_path)
-    
-    # Summary
-    print_summary(gdf)
-    
-    print(f"\n🎉 Export complete: {output_path.absolute()}")
-
 
