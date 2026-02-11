@@ -11,15 +11,15 @@ export interface ImageUploadRequest {
 }
 
 export interface ImageUploadResponse {
-	upload_url: string
+	uploadUrl: string
 	fields: Record<string, string>
-	file_url: string
-	expires_in: number
+	fileUrl: string
+	expiresIn: number
 	key: string
 }
 
 export interface UploadedImage {
-	file_url: string
+	fileUrl: string
 	key: string
 	filename: string
 }
@@ -101,7 +101,7 @@ export function useImageUpload(): UseImageUploadResult {
 				// Add the file last
 				formData.append("file", file)
 
-				const uploadResponse = await fetch(response.upload_url, {
+				const uploadResponse = await fetch(response.uploadUrl, {
 					method: "POST",
 					body: formData
 				})
@@ -113,7 +113,7 @@ export function useImageUpload(): UseImageUploadResult {
 				}
 
 				uploadedImages.push({
-					file_url: response.file_url,
+					fileUrl: response.fileUrl,
 					key: response.key,
 					filename: file.name
 				})

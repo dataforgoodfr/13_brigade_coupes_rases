@@ -54,7 +54,7 @@ function FormS3ImageField<T extends FieldValues>({
 
 			// Update form field immediately
 			field.onChange(newUploadedImages)
-		} catch (_e) {}
+		} catch (_e) { }
 	}
 
 	const removeImageWithField = (indexToRemove: number) => {
