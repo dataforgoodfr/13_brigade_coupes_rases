@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { isUndefined, uniqBy } from "es-toolkit"
 import { HTTPError } from "ky"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import type { FiltersRequest } from "@/features/clear-cut/store/filters"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
@@ -311,9 +311,15 @@ export const useGetClearCuts = () => {
 	const filters = useAppSelector(selectFiltersRequest)
 	const dispatch = useAppDispatch()
 	const { breakpoint } = useBreakpoint()
+	const ref = useRef<NodeJS.Timeout | undefined>(undefined)
 	useEffect(() => {
+		clearTimeout(ref.current);
 		if ((breakpoint === "mobile" && filters) || filters?.geoBounds) {
-			dispatch(getClearCutsThunk(filters))
+			// Debounce to avoid multiple calls when dragging, resizing, or zooming the map
+			ref.current = setTimeout(() => {
+				dispatch(getClearCutsThunk(filters))
+				clearTimeout(ref.current);
+			}, 100);
 		}
 	}, [filters, breakpoint, dispatch])
 }
