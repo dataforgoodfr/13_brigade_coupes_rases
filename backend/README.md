@@ -63,6 +63,7 @@ PostgreSQL Database : postgresql://u8jhjikkyhen5eq6xym9:<password in keepass>@bf
 DATABASE_URL = Connection string to connect to postgres database.
 ENVIRONMENT = development
 ALLOWED_ORIGINS = domain names used to allow CORS
+S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY = s3 keys to set for image upload
 
 ## Database schema
 

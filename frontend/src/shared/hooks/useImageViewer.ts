@@ -4,8 +4,8 @@ import { getStoredToken } from "@/features/user/store/me.slice"
 import { api } from "@/shared/api/api"
 
 export interface ImageViewResponse {
-	view_url: string
-	expires_in: number
+	viewUrl: string
+	expiresIn: number
 }
 
 export interface UseImageViewerResult {
@@ -42,12 +42,13 @@ export function useImageViewer(): UseImageViewerResult {
 						const response = await authenticatedApi
 							.get(`api/v1/images/view/${encodeURIComponent(s3Key)}`)
 							.json<ImageViewResponse>()
-						return response.view_url
+						return response.viewUrl
 					} catch (_e) {
 						return ""
 					}
 				})
 			)
+
 
 			return viewableUrls.filter((url) => url !== "")
 		} catch (err) {

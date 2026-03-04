@@ -1,3 +1,4 @@
+import logging
 import re
 import uuid
 
@@ -22,6 +23,10 @@ class S3Service:
     """Service for handling S3 operations and pre-signed URLs"""
 
     def __init__(self):
+        if not settings.S3_ACCESS_KEY_ID:
+            logging.error("S3_ACCESS_KEY_ID is not set, image uploads will fail!")
+        if not settings.S3_SECRET_ACCESS_KEY:
+            logging.error("S3_SECRET_ACCESS_KEY is not set, image uploads will fail!")
         self.client = boto3.client(
             "s3",
             aws_access_key_id=settings.S3_ACCESS_KEY_ID,
@@ -82,8 +87,6 @@ class S3Service:
 
             # Define conditions for the pre-signed POST
             conditions = [
-                {"bucket": self.bucket_name},
-                {"key": s3_key},
                 {"Content-Type": content_type},
                 ["content-length-range", 1, max_file_size],  # File size limits
             ]

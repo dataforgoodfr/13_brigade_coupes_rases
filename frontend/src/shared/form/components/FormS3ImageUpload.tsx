@@ -90,7 +90,7 @@ function FormS3ImageField<T extends FieldValues>({
 			// setUploadedImages(EMPTY_ARRAY);
 			// onPreviewUrlsChanged(EMPTY_ARRAY);
 		}
-	}, [field.value, getViewableUrls, onPreviewUrlsChanged])
+	}, [field.value])
 
 	return (
 		<FormItem>
@@ -173,7 +173,7 @@ function FormS3ImageField<T extends FieldValues>({
 													"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='12' fill='%23666' text-anchor='middle' dy='0.3em'>Image</text></svg>"
 											}}
 										/>
-										<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-30 rounded">
+										<div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-opacity-30 rounded">
 											<ZoomIn className="h-6 w-6 text-white" />
 										</div>
 									</button>
@@ -181,7 +181,7 @@ function FormS3ImageField<T extends FieldValues>({
 										type="button"
 										variant="destructive"
 										size="sm"
-										className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+										className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
 										onClick={(e) => {
 											e.stopPropagation()
 											removeImageWithField(index)
