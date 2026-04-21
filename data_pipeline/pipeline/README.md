@@ -109,3 +109,6 @@ pipeline/scripts/
     ├── s3_utils.py            # S3Manager (Scaleway)
     └── ...
 ```
+
+
+  docker build -t data-pipeline:latest . && docker run --rm --env-file .env -e PYTHONUNBUFFERED=1 data-pipeline:latest

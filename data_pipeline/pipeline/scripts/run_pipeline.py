@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import geopandas as gpd
 from datetime import timedelta
 from pipeline.scripts import DATA_DIR
 from pipeline.scripts.get_last_version import get_last_version
@@ -25,10 +26,7 @@ def run_pipeline() -> None:
 
     logging.info(f"Last version date: {last_version_date}, update_start_date: {update_start_date}")
 
-    has_new_data = get_sufosat_tiff()
-    if not has_new_data:
-        logging.info("Sufosat is up to date, stopping pipeline.")
-        return
+    get_sufosat_tiff()
 
     get_enrichment_data()
 
@@ -41,6 +39,11 @@ def run_pipeline() -> None:
         polygonized_raster_output_layer=str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"),
         update_start_date=update_start_date,
     )
+
+    clusters_path = DATA_DIR / "sufosat" / "sufosat_clusters.fgb"
+    if not clusters_path.exists() or len(gpd.read_file(str(clusters_path))) == 0:
+        logging.info("No new clusters after preprocessing, pipeline is up to date.")
+        return
 
     enrich_sufosat_clusters()
 
