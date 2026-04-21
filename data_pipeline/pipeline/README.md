@@ -62,19 +62,20 @@ https://s3.fr-par.scw.cloud/brigade-coupe-rase-s3/data_pipeline/gold/sufosat/cur
 
 ### En local avec Docker
 
+Depuis le dossier `data_pipeline/` :
+
 ```bash
 # Build
 docker build -t data-pipeline:latest .
 
 # Run
-docker run -it --rm \
-  --env-file .env \
-  -v $(pwd):/app \
-  data-pipeline:latest bash
+docker run --rm --env-file .env -e PYTHONUNBUFFERED=1 data-pipeline:latest
 ```
 
-Dans le conteneur :
+En mode interactif pour débugger :
 ```bash
+docker run -it --rm --env-file .env data-pipeline:latest bash
+# puis dans le conteneur :
 conda activate py3_13
 python -m pipeline.scripts.run_pipeline
 ```
