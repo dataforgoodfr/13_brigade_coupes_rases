@@ -1,71 +1,71 @@
 import os
+import shutil
 import logging
 from datetime import timedelta
 from pipeline.scripts import DATA_DIR
+from pipeline.scripts.get_last_version import get_last_version
 from pipeline.scripts.get_sufosat_tiff import get_sufosat_tiff
 from pipeline.scripts.get_reference_data import get_enrichment_data
 from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
-from pipeline.scripts.get_last_version import get_last_version
-from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters, update_geometries
 from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
+from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters, update_geometries
+from pipeline.scripts.upload_gold import upload_gold_to_s3
+from pipeline.scripts.db_export import export_database
 
-# TODO : ajouter une méthode de récupération des fichiers de configuration pour les paramètres de la pipeline
+
 def run_pipeline() -> None:
     logging.info("Starting the pipeline...")
-    
-    # # Récupération de la dernière date de la version gold
+
     last_version_date = get_last_version()
-    next_date = last_version_date + timedelta(days=1)
-    last_version_date_str = next_date.strftime('%Y-%m-%d')
-    logging.info(f"Last version date: {last_version_date_str}")
 
-    # # STEP 1 : Extract
+    if last_version_date is None:
+        update_start_date = None
+    else:
+        update_start_date = (last_version_date + timedelta(days=1)).strftime('%Y-%m-%d')
+
+    logging.info(f"Last version date: {last_version_date}, update_start_date: {update_start_date}")
+
     has_new_data = get_sufosat_tiff()
+    if not has_new_data:
+        logging.info("Sufosat is up to date, stopping pipeline.")
+        return
 
+    get_enrichment_data()
 
-    # if has_new_data:
-        # get_enrichment_data()
+    sufosat_tif_filename = next(
+        f for f in os.listdir(str(DATA_DIR / "sufosat")) if f.endswith(".tif")
+    )
 
-        # # STEP 2 : Transform
-        # for f in os.listdir(str(DATA_DIR / "sufosat")):
-        #     if f.endswith(".tif"):
-        #         sufosat_data = f  
-        
-        # preprocess_sufosat(
-        #     input_raster_dates= str(DATA_DIR / "sufosat" / sufosat_data), 
-        #     polygonized_raster_output_layer= str(DATA_DIR / "sufosat" / sufosat_data.replace(".tif", ".fgb")),
-        #     update_start_date= last_version_date_str 
-        # )
-        
-        # === A PRENDRE QUAND C'EST OK COTE BACKEND
-        # ref_path = str(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched.fgb")
-        # new_path = str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb")
-        
-        # gdf_updated, gdf_new = split_new_and_updated_clusters(
-        #     gdf_new=new_path,
-        #     gdf_ref=ref_path,
-        #     distance_threshold=50
-        # )
-        
-        # gdf_ref_updated, gdf_final = update_geometries(
-        #     distance_threshold=50
-        # )
+    preprocess_sufosat(
+        input_raster_dates=str(DATA_DIR / "sufosat" / sufosat_tif_filename),
+        polygonized_raster_output_layer=str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"),
+        update_start_date=update_start_date,
+    )
 
-        # Enrichissement des données
+    enrich_sufosat_clusters()
 
+    if last_version_date is None:
+        # Premier run : pas de données en base, le fichier enrichi devient directement le gold final
+        shutil.copy(
+            str(DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"),
+            str(DATA_DIR / "sufosat" / "clusters_final.fgb"),
+        )
+    else:
+        db_reference_path = str(DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb")
+        export_database(
+            database_url=os.getenv("DATABASE_URL"),
+            output_file=db_reference_path,
+        )
 
-    # else: 
-    #     logging.info("Stopping pipeline: No new Sufosat data.")
+        split_new_and_updated_clusters(
+            gdf_new=str(DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"),
+            gdf_ref=db_reference_path,
+        )
+        update_geometries()
 
+    upload_gold_to_s3()
 
-    #enrich_sufosat_clusters()  # enrich sufosat DATA
-
-    # Step 3 : Load
-
-    logging.info("The pipeline has run successfully.")
-
-
-
+    logging.info("Pipeline completed successfully.")
 
 
 if __name__ == "__main__":

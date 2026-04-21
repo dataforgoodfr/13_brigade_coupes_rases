@@ -2,42 +2,6 @@ import pandas as pd
 import geopandas as gpd
 from shapely.ops import unary_union
 from pipeline.scripts import DATA_DIR
-from pipeline.scripts.db_export import (
-    connect_db, get_export_query, 
-    extract_data, convert_arrays_to_strings, 
-    reorder_columns, save_to_file, 
-    print_summary
-)
-
-
-e = "postgresql://u8jhjikkyhen5eq6xym9:98Kw81ZlszzpOjM87X8jM9bg97P1v7@b6ao2wmae6vkjcmuqdol-postgresql.services.clever-cloud.com:7155/bew9lfjlnszrnrlflm53"
-
-def export_database(database_url: str, output_file: str) -> None:
-    """
-    Main export function.
-    
-    Args:
-        database_url: PostgreSQL connection string
-        output_file: Output FlatGeobuf file path
-    """
-    # Connect
-    engine = connect_db(database_url)
-    
-    # Extract
-    gdf = extract_data(engine)
-    
-    # Transform
-    gdf = convert_arrays_to_strings(gdf)
-    gdf = reorder_columns(gdf)
-    
-    # Load (save)
-    output_path = Path(output_file)
-    save_to_file(gdf, output_path)
-    
-    # Summary
-    print_summary(gdf)
-    
-    print(f"\n🎉 Export complete: {output_path.absolute()}")
 
 def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     """
@@ -136,7 +100,7 @@ def update_geometries(distance_threshold=50):
     """
     
     # Chargement des données
-    gdf_ref = gpd.read_file(str(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched.fgb"))
+    gdf_ref = gpd.read_file(str(DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb"))
     gdf_updated = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_updated.fgb"))
     gdf_new = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_new.fgb"))
     
@@ -234,11 +198,11 @@ def update_geometries(distance_threshold=50):
     print(f"   - gdf_final: {len(gdf_final)} clusters (ref_updated + new)")
     
     # Sauvegarde
-    gdf_ref_updated.to_file(DATA_DIR / "sufosat_reference" / "filtered_clusters_enriched_UPDATED.fgb", driver="FlatGeobuf")
+    gdf_ref_updated.to_file(DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched_UPDATED.fgb", driver="FlatGeobuf")
     gdf_final.to_file(DATA_DIR / "sufosat" / "clusters_final.fgb", driver="FlatGeobuf")
     
     print(f"\n Fichiers sauvegardés:")
-    print(f"   - {DATA_DIR / 'sufosat_reference' / 'filtered_clusters_enriched_UPDATED.fgb'}")
+    print(f"   - {DATA_DIR / 'sufosat_reference' / 'sufosat_clusters_enriched_UPDATED.fgb'}")
     print(f"   - {DATA_DIR / 'sufosat' / 'clusters_final.fgb'}")
     
     return gdf_ref_updated, gdf_final

@@ -2,10 +2,18 @@
 Simple functional script to export database to FlatGeobuf file.
 """
 
-import sys
 from pathlib import Path
 import geopandas as gpd
 from sqlalchemy import create_engine
+
+
+def export_database(database_url: str, output_file: str) -> None:
+    engine = connect_db(database_url)
+    gdf = extract_data(engine)
+    gdf = convert_arrays_to_strings(gdf)
+    gdf = reorder_columns(gdf)
+    save_to_file(gdf, Path(output_file))
+    print_summary(gdf)
 
 
 def connect_db(database_url: str):

@@ -42,7 +42,7 @@ COPY . .
 RUN poetry install --no-interaction --no-ansi --only-root
 
 # CORRECTION: Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
-ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
 
 # Commande par défaut pour lancer la pipeline
 CMD ["conda", "run", "--no-capture-output", "-n", "py3_13", "python", "-m", "pipeline.scripts.run_pipeline"]
