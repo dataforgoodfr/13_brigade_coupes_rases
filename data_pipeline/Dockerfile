@@ -17,6 +17,8 @@ ARG HTTP_PROXY
 ARG HTTPS_PROXY
 ARG NO_PROXY
 ARG PIP_INDEX_URL=https://pypi.org/simple
+# Mettre à 1 uniquement si le curl de pré-vol échoue à tort (ex. filtre HTTP bizarre) ; Poetry a toujours besoin d’atteindre l’index pip.
+ARG SKIP_PYPI_PREFLIGHT=0
 ENV HTTP_PROXY=${HTTP_PROXY} \
     HTTPS_PROXY=${HTTPS_PROXY} \
     NO_PROXY=${NO_PROXY} \
@@ -53,10 +55,14 @@ ENV PATH="/opt/conda/envs/py3_13/bin:/opt/conda/bin:${PATH}" \
     SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 # Vérif réseau explicite (même hôte que PIP_INDEX_URL, donc compatible miroir d’entreprise)
-RUN curl -fsSIL --connect-timeout 15 --max-time 45 -o /dev/null "${PIP_INDEX_URL}" \
-    || (echo "ERROR: HTTPS vers PIP_INDEX_URL impossible depuis le build Docker." && \
-        echo "Essayez: docker build --network=host -f data_pipeline/Dockerfile ." && \
-        echo "Ou définissez HTTPS_PROXY / HTTP_PROXY / PIP_INDEX_URL (miroir PyPI)." && exit 1)
+RUN if [ "${SKIP_PYPI_PREFLIGHT}" = "1" ]; then \
+      echo "SKIP_PYPI_PREFLIGHT=1: pré-vol PyPI ignoré."; \
+    else \
+      curl -fsSIL --connect-timeout 15 --max-time 45 -o /dev/null "${PIP_INDEX_URL}" \
+      || (echo "ERROR: HTTPS vers PIP_INDEX_URL impossible depuis le build Docker." && \
+          echo "Essayez: docker build --network=host -f data_pipeline/Dockerfile ." && \
+          echo "Ou définissez HTTPS_PROXY / HTTP_PROXY / PIP_INDEX_URL (miroir PyPI)." && exit 1); \
+    fi
 
 # Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
 RUN poetry config virtualenvs.create false
