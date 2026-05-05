@@ -9,6 +9,7 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import display_df, load_gdf, log_execution, save_gdf
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
+MIN_CLEARCUT_DATE = pd.Timestamp("2026-01-01")
 
 
 def overlay(
@@ -215,6 +216,36 @@ def enrich_with_bdforet(
     return sufosat
 
 
+def apply_business_filters(sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    logging.info("Applying business filters (date, area/Natura/slope, IGN forest mark)")
+
+    bdf_area_columns = [
+        "bdf_deciduous_area_ha",
+        "bdf_mixed_area_ha",
+        "bdf_poplar_area_ha",
+        "bdf_resinous_area_ha",
+    ]
+    for col in bdf_area_columns:
+        if col not in sufosat.columns:
+            sufosat[col] = 0.0
+
+    sufosat["ign_forest_mark"] = sufosat[bdf_area_columns].fillna(0).sum(axis=1) > 0
+
+    date_condition = sufosat["date_max"] >= MIN_CLEARCUT_DATE
+    area_or_context_condition = (
+        (sufosat["area_ha"] >= 10)
+        | (sufosat["natura2000_area_ha"].fillna(0) > 0)
+        | (sufosat["slope_area_ha"].fillna(0) > 0)
+    )
+    forest_condition = sufosat["ign_forest_mark"]
+
+    before_count = len(sufosat)
+    sufosat = sufosat[date_condition & area_or_context_condition & forest_condition]
+    logging.info("Business filtering kept %s / %s clusters", len(sufosat), before_count)
+
+    return sufosat
+
+
 @log_execution(ENRICHED_CLUSTERS_RESULT_FILEPATH)
 def enrich_sufosat_clusters() -> None:
     """
@@ -242,6 +273,7 @@ def enrich_sufosat_clusters() -> None:
     sufosat = enrich_with_natura2000_codes(sufosat, sufosat_dask)
     sufosat = enrich_with_bdforet(sufosat, sufosat_dask)
     sufosat = enrich_with_slope_information(sufosat, sufosat_dask)
+    sufosat = apply_business_filters(sufosat)
 
     # Save the enriched SUFOSAT clusters
     sufosat = sufosat.sort_values("area_ha")

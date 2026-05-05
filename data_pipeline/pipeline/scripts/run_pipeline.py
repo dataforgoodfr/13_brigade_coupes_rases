@@ -26,16 +26,12 @@ def run_pipeline() -> None:
 
     logging.info(f"Last version date: {last_version_date}, update_start_date: {update_start_date}")
 
-    get_sufosat_tiff()
+    sufosat_tif_path = get_sufosat_tiff()
 
     get_enrichment_data()
 
-    sufosat_tif_filename = next(
-        f for f in os.listdir(str(DATA_DIR / "sufosat")) if f.endswith(".tif")
-    )
-
     preprocess_sufosat(
-        input_raster_dates=str(DATA_DIR / "sufosat" / sufosat_tif_filename),
+        input_raster_dates=str(sufosat_tif_path),
         polygonized_raster_output_layer=str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"),
         update_start_date=update_start_date,
     )
