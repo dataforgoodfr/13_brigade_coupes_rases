@@ -1,4 +1,3 @@
 # Used when building from repo root, e.g.:
 #   docker build -f data_pipeline/Dockerfile -t data-pipeline .
-# Host poetry.lock can lag pyproject.toml; the image runs `poetry lock` instead.
-data_pipeline/poetry.lock
+# poetry.lock is copied into the image for reproducible installs (commit lock with pyproject).
