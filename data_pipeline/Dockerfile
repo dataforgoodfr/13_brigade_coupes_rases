@@ -5,8 +5,9 @@
 # Utilise une image de base avec conda
 FROM continuumio/miniconda3:latest
 
-# Définit le répertoire de travail
-WORKDIR /app
+# Clever (and most CI) use the git repo root as Docker build context while
+# CC_DOCKERFILE points at this file — paths must be prefixed with data_pipeline/.
+WORKDIR /app/data_pipeline
 
 # Installe les dépendances système nécessaires pour GDAL et PostgreSQL
 RUN apt-get update && apt-get install -y \
@@ -15,9 +16,10 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Crée l'environnement conda avec Python 3.13 et GDAL
-RUN conda create -n py3_13 python=3.13 -c conda-forge && \
-    conda install -n py3_13 -c conda-forge gdal && \
+# Crée l'environnement conda avec Python 3.13 et GDAL (non-interactive)
+ENV CONDA_ALWAYS_YES=true
+RUN conda create -y -n py3_13 python=3.13 -c conda-forge && \
+    conda install -y -n py3_13 -c conda-forge gdal && \
     conda clean -afy
 
 # Active l'environnement conda
@@ -29,14 +31,14 @@ RUN pip install poetry
 # Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
 RUN poetry config virtualenvs.create false
 
-# Copie les fichiers de configuration Poetry
-COPY pyproject.toml poetry.lock* ./
+# Copie les fichiers de configuration Poetry (context = repo root)
+COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
 
 # Installe les dépendances du projet
 RUN poetry install --no-interaction --no-ansi --no-root
 
-# Copie tout le code du projet
-COPY . .
+# Copie le code du sous-projet pipeline
+COPY data_pipeline/ ./
 
 # Installe le projet lui-même
 RUN poetry install --no-interaction --no-ansi --only-root
