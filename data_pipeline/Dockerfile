@@ -31,16 +31,15 @@ RUN pip install poetry
 # Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
 RUN poetry config virtualenvs.create false
 
-# Copie les fichiers de configuration Poetry (context = repo root)
-COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
-
-# Installe les dépendances du projet
+# Lock file must match pyproject.toml; host copy is excluded via root .dockerignore
+# so we always resolve deps in-image (avoids "pyproject.toml changed since poetry.lock").
+COPY data_pipeline/pyproject.toml ./
+RUN poetry lock --no-interaction
 RUN poetry install --no-interaction --no-ansi --no-root
 
-# Copie le code du sous-projet pipeline
+# Copie le code du sous-projet pipeline (poetry.lock excluded from context)
 COPY data_pipeline/ ./
 
-# Installe le projet lui-même
 RUN poetry install --no-interaction --no-ansi --only-root
 
 # CORRECTION: Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
