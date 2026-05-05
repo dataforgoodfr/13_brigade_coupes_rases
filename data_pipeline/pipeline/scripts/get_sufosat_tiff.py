@@ -21,11 +21,21 @@ EE_EXPORT_POLL_SECONDS = 20
 
 
 def initialize_earth_engine() -> None:
+    """Use OAuth credentials from ``ee.Authenticate()`` / ``earthengine authenticate`` and a registered Cloud project."""
+    project = os.environ.get("EARTH_ENGINE_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
     try:
-        ee.Initialize()
+        if project:
+            ee.Initialize(project=project)
+        else:
+            ee.Initialize()
     except Exception as exc:
         raise RuntimeError(
-            "Earth Engine authentication is required. Run ee.Authenticate() once, then rerun."
+            "Earth Engine failed to initialize. "
+            "One-time: run `earthengine authenticate` (or `python -c \"import ee; ee.Authenticate()\"`) "
+            "and sign in with the Google account that has EE access. "
+            "Set EARTH_ENGINE_PROJECT (or GOOGLE_CLOUD_PROJECT) to a GCP project id where the "
+            "Earth Engine API is enabled (non-commercial / free tier is fine). "
+            "See https://developers.google.com/earth-engine/guides/auth"
         ) from exc
 
 
