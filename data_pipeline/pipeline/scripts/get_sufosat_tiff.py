@@ -41,7 +41,8 @@ def initialize_earth_engine() -> None:
     except Exception as exc:
         raise RuntimeError(
             "Earth Engine failed to initialize. "
-            "One-time: run `earthengine authenticate` (or `python -c \"import ee; ee.Authenticate()\"`) "
+            "One-time from data_pipeline: `poetry run earthengine authenticate` "
+            "(or `poetry run python -c \"import ee; ee.Authenticate()\"`) "
             "and sign in with the Google account that has EE access. "
             "Set EARTH_ENGINE_PROJECT (or GOOGLE_CLOUD_PROJECT) to a GCP project id where the "
             "Earth Engine API is enabled. Optionally set EARTH_ENGINE_CLOUD_API_KEY (or "

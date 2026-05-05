@@ -65,6 +65,24 @@ cd data_pipeline
 make install-dev-deps
 ```
 
+### Earth Engine login (one-time, for RADD / `get_sufosat_tiff`)
+
+There is **no Homebrew formula** for Earth Engine. The `earthengine` program is installed **inside this project’s Poetry environment** with the `earthengine-api` package. Until you run `poetry install`, your shell will not find `earthengine` as a global command.
+
+From the `data_pipeline` folder:
+
+```bash
+poetry run earthengine authenticate
+```
+
+Same flow without using the CLI entrypoint:
+
+```bash
+poetry run python -c "import ee; ee.Authenticate()"
+```
+
+Follow the browser prompts, then configure `.env` (see `.env.example`): `EARTH_ENGINE_PROJECT`, and optionally `EARTH_ENGINE_CLOUD_API_KEY`.
+
 ### 4. Set Up Docker (Optional)
 If you prefer using Docker for running the pipeline, follow these steps:
 
