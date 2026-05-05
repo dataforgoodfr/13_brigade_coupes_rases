@@ -21,26 +21,23 @@ ENV CONDA_ALWAYS_YES=true
 RUN mamba create -y -n py3_13 python=3.13 gdal -c conda-forge && \
     mamba clean -afy
 
-# Python du projet en premier, puis conda base (où se trouve poetry)
-ENV PATH="/opt/conda/envs/py3_13/bin:/opt/conda/bin:${PATH}"
-
-# Installe Poetry dans l'env de base
-RUN conda install -y -n base -c conda-forge poetry && conda clean -afy
-
-# Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
-RUN poetry config virtualenvs.create false
+# Installe Poetry dans py3_13 pour que les packages atterrissent dans le bon env
+RUN /opt/conda/envs/py3_13/bin/pip install poetry
+RUN /opt/conda/envs/py3_13/bin/poetry config virtualenvs.create false
 
 # Copie les fichiers de configuration Poetry (context = repo root)
 COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
 
-# Installe les dépendances du projet
-RUN poetry install --no-interaction --no-ansi --no-root
+# Installe les dépendances du projet dans py3_13
+RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --no-root
 
 # Copie le code du sous-projet pipeline
 COPY data_pipeline/ ./
 
-# Installe le projet lui-même
-RUN poetry install --no-interaction --no-ansi --only-root
+# Installe le projet lui-même dans py3_13
+RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --only-root
+
+ENV PATH="/opt/conda/envs/py3_13/bin:${PATH}"
 
 # Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
 ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
