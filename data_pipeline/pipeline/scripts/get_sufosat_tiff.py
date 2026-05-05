@@ -21,11 +21,21 @@ EE_EXPORT_POLL_SECONDS = 20
 
 
 def initialize_earth_engine() -> None:
-    """Use OAuth credentials from ``ee.Authenticate()`` / ``earthengine authenticate`` and a registered Cloud project."""
+    """Initialize EE: OAuth (``earthengine authenticate``) + optional Cloud project and Cloud API key from env."""
     project = os.environ.get("EARTH_ENGINE_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
+    cloud_api_key = (
+        os.environ.get("EARTH_ENGINE_CLOUD_API_KEY")
+        or os.environ.get("EARTH_ENGINE_API_KEY")
+        or os.environ.get("GOOGLE_CLOUD_API_KEY")
+    )
+    init_kwargs: dict = {}
+    if project:
+        init_kwargs["project"] = project
+    if cloud_api_key:
+        init_kwargs["cloud_api_key"] = cloud_api_key
     try:
-        if project:
-            ee.Initialize(project=project)
+        if init_kwargs:
+            ee.Initialize(**init_kwargs)
         else:
             ee.Initialize()
     except Exception as exc:
@@ -34,7 +44,8 @@ def initialize_earth_engine() -> None:
             "One-time: run `earthengine authenticate` (or `python -c \"import ee; ee.Authenticate()\"`) "
             "and sign in with the Google account that has EE access. "
             "Set EARTH_ENGINE_PROJECT (or GOOGLE_CLOUD_PROJECT) to a GCP project id where the "
-            "Earth Engine API is enabled (non-commercial / free tier is fine). "
+            "Earth Engine API is enabled. Optionally set EARTH_ENGINE_CLOUD_API_KEY (or "
+            "EARTH_ENGINE_API_KEY) for ee.Initialize(cloud_api_key=...). "
             "See https://developers.google.com/earth-engine/guides/auth"
         ) from exc
 
