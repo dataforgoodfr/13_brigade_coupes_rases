@@ -1,9 +1,26 @@
 # # # # # # # # # # # # 
 # Image docker de run #
 # # # # # # # # # # # # 
+#
+# Si le build échoue sur « All attempts to connect to pypi.org failed » :
+#   docker build --network=host -f data_pipeline/Dockerfile -t data-pipeline .
+# Ou derrière proxy / miroir PyPI d’entreprise :
+#   docker build -f data_pipeline/Dockerfile \
+#     --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg HTTP_PROXY=$HTTP_PROXY \
+#     --build-arg PIP_INDEX_URL=https://…/simple/ -t data-pipeline .
 
 # Conda-forge-based image (maintained); avoids deprecated continuumio/miniconda3.
 FROM condaforge/miniforge3:latest
+
+# Fournis ces build-args si ton réseau / Docker bloque PyPI ou impose un proxy.
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ARG PIP_INDEX_URL=https://pypi.org/simple
+ENV HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY} \
+    NO_PROXY=${NO_PROXY} \
+    PIP_INDEX_URL=${PIP_INDEX_URL}
 
 # Clever (and most CI) use the git repo root as Docker build context while
 # CC_DOCKERFILE points at this file — paths must be prefixed with data_pipeline/.
@@ -11,23 +28,35 @@ WORKDIR /app/data_pipeline
 
 # Installe les dépendances système nécessaires pour GDAL et PostgreSQL
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
     build-essential \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Crée l'environnement conda avec Python 3.13, GDAL et Poetry (conda-forge; évite pip pour Poetry)
+# Environnement d’exécution : Python + GDAL seulement (évite les paquets conda en conflit avec le lock Poetry).
 ENV CONDA_ALWAYS_YES=true
 RUN conda create -y -n py3_13 python=3.13 -c conda-forge && \
-    conda install -y -n py3_13 -c conda-forge gdal poetry && \
+    conda install -y -n py3_13 -c conda-forge gdal && \
     conda clean -afy
 
-# Active l'environnement conda
-SHELL ["conda", "run", "-n", "py3_13", "/bin/bash", "-c"]
+# Poetry dans l’env « base » ; pip/Poetry utilisent les build-args proxy ci-dessus.
+RUN conda install -y -n base -c conda-forge poetry && conda clean -afy
 
-# Poetry déclenche pip pour les wheels — timeouts plus tolérants sur réseaux lents / CI
-ENV PIP_DEFAULT_TIMEOUT=120 \
-    PIP_RETRIES=5
+# Python du projet en premier, puis conda base (où se trouve poetry).
+ENV PATH="/opt/conda/envs/py3_13/bin:/opt/conda/bin:${PATH}" \
+    POETRY_HTTP_TIMEOUT=300 \
+    PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=8 \
+    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# Vérif réseau explicite (même hôte que PIP_INDEX_URL, donc compatible miroir d’entreprise)
+RUN curl -fsSIL --connect-timeout 15 --max-time 45 -o /dev/null "${PIP_INDEX_URL}" \
+    || (echo "ERROR: HTTPS vers PIP_INDEX_URL impossible depuis le build Docker." && \
+        echo "Essayez: docker build --network=host -f data_pipeline/Dockerfile ." && \
+        echo "Ou définissez HTTPS_PROXY / HTTP_PROXY / PIP_INDEX_URL (miroir PyPI)." && exit 1)
 
 # Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
 RUN poetry config virtualenvs.create false
@@ -49,4 +78,4 @@ RUN python -c "import dask_geopandas; import geopandas"
 ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
 
 # Commande par défaut pour lancer la pipeline
-CMD ["conda", "run", "--no-capture-output", "-n", "py3_13", "python", "-m", "pipeline.scripts.run_pipeline"]
+CMD ["python", "-m", "pipeline.scripts.run_pipeline"]
