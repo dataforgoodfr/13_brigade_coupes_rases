@@ -897,14 +897,14 @@ test = ["pandas[test]", "pre-commit", "pytest", "pytest-cov", "pytest-mock", "py
 
 [[package]]
 name = "dask-geopandas"
-version = "0.4.3"
+version = "0.5.0"
 description = "Parallel GeoPandas with Dask"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "dask_geopandas-0.4.3-py3-none-any.whl", hash = "sha256:1cc159aecee7b3adc79383f1acc7c7e7c68130c57aea0643e190ac0149ef5bc4"},
-    {file = "dask_geopandas-0.4.3.tar.gz", hash = "sha256:95d1a08fcb0dc47454628b89dee2e89dd63df6c31183746a58b4908a2dc21e96"},
+    {file = "dask_geopandas-0.5.0-py3-none-any.whl", hash = "sha256:0b6c2a8f7fae94667c4af539e591fa7fb59c5c3206188fa51e461d395ef80240"},
+    {file = "dask_geopandas-0.5.0.tar.gz", hash = "sha256:b1fc2a041550d609b87db9fcfad2e8217f7336e3436415da11ba9dc8437272b1"},
 ]
 
 [package.dependencies]
@@ -4837,4 +4837,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "239930338a8a5f291fd4352f0b19b4261be3f32d3772fb1b45264cfba9bdcf8d"
+content-hash = "379823b9479e5a4d1ed60a47bd7f730a76ff7b172ae607547ad9e8270d71de88"

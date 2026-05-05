@@ -10,7 +10,8 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.13"
 boto3 = "^1.37.12"
-dask-geopandas = "^0.4.3"
+# >=0.5.0 required for geopandas 1.x (0.4.x expects GeoPandasBase.geom_almost_equals, removed upstream)
+dask-geopandas = "^0.5.0"
 fiona = "^1.10.1"
 geoalchemy2 = "^0.17.1"
 geopandas = "^1.0.1"
