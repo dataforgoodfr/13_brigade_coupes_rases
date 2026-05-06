@@ -44,4 +44,4 @@ ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
 
 # Lance un serveur HTTP minimaliste sur 8080 (exigé par Clever Cloud)
 # en parallèle de la pipeline ; le container s'arrête quand la pipeline finit.
-CMD python -m http.server 8080 & python -m pipeline.scripts.run_pipeline ; kill %1
+CMD python -m http.server 8080 & python -m pipeline.scripts.run_pipeline
