@@ -17,6 +17,7 @@ on:
           - upgrade-database
           - setup-database
           - reset-database
+          - stamp-and-upgrade
         type: choice
         description: "Seed the database with test data"
 
@@ -59,6 +60,13 @@ jobs:
         working-directory: backend
         if: ${{ inputs.database-action == 'upgrade-database' }}
         run: |
+          make upgrade-db
+
+      - name: Stamp and upgrade database (repair broken migration head)
+        working-directory: backend
+        if: ${{ inputs.database-action == 'stamp-and-upgrade' }}
+        run: |
+          poetry run alembic stamp 19e644f11e20
           make upgrade-db
 
       - name: Reset database
