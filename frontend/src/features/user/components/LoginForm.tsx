@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link } from "@tanstack/react-router"
 import { LogInIcon } from "lucide-react"
 import { useEffect } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -58,11 +59,14 @@ export function LoginForm() {
 				description: "Vous êtes maintenant connecté."
 			})
 		} else if (login.status === "error") {
+			const isInactive = (login.error?.detail as { type: string } | undefined)?.type === "USER_INACTIVE"
 			toast({
 				id: "login-failed",
-				title: "Erreur de connexion",
-				description: "Identifiants invalides. Veuillez réessayer.",
-				variant: "destructive"
+				title: isInactive ? "Compte en attente" : "Erreur de connexion",
+				description: isInactive
+					? login.error?.detail.content
+					: "Identifiants invalides. Veuillez réessayer.",
+				variant: isInactive ? "default" : "destructive"
 			})
 		}
 		return () => {
@@ -120,6 +124,14 @@ export function LoginForm() {
 								</FormItem>
 							)}
 						/>
+						<div className="flex justify-end !mt-1">
+							<Link
+								to="/forgot-password"
+								className="text-xs text-primary hover:underline"
+							>
+								Mot de passe oublié ?
+							</Link>
+						</div>
 						<Button
 							className="w-full"
 							type="submit"
@@ -131,6 +143,15 @@ export function LoginForm() {
 					</form>
 				</FormProvider>
 			)}
+			<div className="mt-6 text-center text-sm">
+				Pas encore de compte ?{" "}
+				<Link
+					to="/register"
+					className="text-primary hover:underline font-semibold"
+				>
+					S'inscrire
+				</Link>
+			</div>
 		</>
 	)
 }

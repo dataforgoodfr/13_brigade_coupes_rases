@@ -19,9 +19,11 @@ from app.services.user import get_user_by_email
 def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
     if not user:
-        return False
+        return None
     if not verify_password(password, user.password):
-        return False
+        return None
+    if not user.is_active:
+        return "inactive"
     return user
 
 
@@ -128,6 +130,13 @@ def get_admin_user(
 
 def create_token(db: Session, email: str, password: str):
     user = authenticate_user(db, email, password)
+    if user == "inactive":
+        raise AppHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            type="USER_INACTIVE",
+            detail="Votre compte est en attente de validation par un administrateur.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not user:
         raise AppHTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -9,7 +9,6 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import (
     DisjointSet,
     display_df,
-    download_file,
     load_gdf,
     log_execution,
     polygonize_raster,
@@ -427,7 +426,7 @@ def preprocess_sufosat(
     gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
     gdf = parse_sufosat_date(gdf)
 
-    # Update start 
+    # Update start
     update_timestamp = pd.Timestamp(update_start_date)
     logging.info(f"Filtering data strictly after {update_start_date} for optimization.")
 

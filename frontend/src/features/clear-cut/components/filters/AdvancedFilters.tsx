@@ -4,7 +4,10 @@ import { FormattedDate } from "react-intl"
 
 import { Slider } from "@/components/ui/slider"
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel"
+import { Button } from "@/components/ui/button"
 import {
+	commitFilters,
+	resetFilters,
 	filtersSlice,
 	getFiltersThunk,
 	selectAreaRange,
@@ -244,6 +247,12 @@ export function AdvancedFilters({ className }: Props) {
 						}
 					/>
 				</div>
+			</div>
+			<div className="flex justify-end gap-2 pt-1">
+				<Button variant="outline" onClick={() => dispatch(resetFilters())}>
+					Réinitialiser
+				</Button>
+				<Button onClick={() => dispatch(commitFilters())}>OK</Button>
 			</div>
 		</div>
 	)

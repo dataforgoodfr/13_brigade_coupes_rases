@@ -69,7 +69,7 @@ def test_post_report_success(client: TestClient):
     assert data["id"] == location.split("/")[-1]
     assert data["slopeAreaHectare"] == 6.5
 
-    response = client.get(f"/api/v1/clear-cuts/{data['clearCutsIds'][0]}")
+    response = client.get(f"/api/v1/clear-cuts/{data['clearCuts'][0]['id']}")
     assert response.status_code == status.HTTP_200_OK
     clear_cut_data = response.json()
 
@@ -126,7 +126,7 @@ def test_affect_me_using_connected_volunteer_should_work(
     db: Session, client: TestClient
 ):
     token = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")[1]
-    updates = {"status": "validated"}
+    updates = {}
 
     response = client.put(
         "/api/v1/clear-cuts-reports/1",
@@ -137,6 +137,7 @@ def test_affect_me_using_connected_volunteer_should_work(
 
     response = client.get(
         "/api/v1/clear-cuts-reports/1",
+        headers={"Authorization": f"Bearer {token}"},
     )
     data = response.json()
     assert data["affectedUser"]["email"] == "assigned-test@volunteer.com"
@@ -172,6 +173,7 @@ def test_affect_me_using_connected_admin_should_work(db: Session, client: TestCl
 
     response = client.get(
         "/api/v1/clear-cuts-reports/1",
+        headers={"Authorization": f"Bearer {token}"},
     )
     data = response.json()
     assert data["affectedUser"]["email"] == "assigned-test@admin.com"
@@ -195,6 +197,7 @@ def test_affect_other_using_connected_admin_should_work(
 
     response = client.get(
         "/api/v1/clear-cuts-reports/1",
+        headers={"Authorization": f"Bearer {token}"},
     )
     data = response.json()
     assert data["affectedUser"]["email"] == expected_email

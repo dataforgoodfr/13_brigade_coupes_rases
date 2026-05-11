@@ -1,7 +1,9 @@
 import logging
+
 import requests
+
 from pipeline.scripts import DATA_DIR
-from pipeline.scripts.utils import download_file, S3Manager
+from pipeline.scripts.utils import S3Manager, download_file
 
 LOCAL_PREFIX = "data_pipeline/bronze/sufosat/"
 
@@ -52,14 +54,20 @@ def get_sufosat_tiff() -> bool:
     BASE_DIR.mkdir(parents=True, exist_ok=True)
 
     local_path = BASE_DIR / zenodo_version["filename_key"]
-    s3_key = f"{LOCAL_PREFIX}{zenodo_version['version']}/{zenodo_version['filename_key']}"
+    s3_key = (
+        f"{LOCAL_PREFIX}{zenodo_version['version']}/{zenodo_version['filename_key']}"
+    )
 
     if local_version is None or zenodo_version["version"] != local_version["version"]:
-        logging.info(f"New Zenodo version detected ({zenodo_version['version']}). Downloading...")
+        logging.info(
+            f"New Zenodo version detected ({zenodo_version['version']}). Downloading..."
+        )
         download_file(url=zenodo_version["file_url"], output_filepath=local_path)
         s3_manager.upload_to_s3(str(local_path), s3_key)
     else:
-        logging.info(f"Zenodo version {zenodo_version['version']} already in S3 bronze.")
+        logging.info(
+            f"Zenodo version {zenodo_version['version']} already in S3 bronze."
+        )
         if not local_path.exists():
             logging.info("Downloading tiff from S3 bronze to local...")
             s3_manager.download_from_s3(s3_key, str(local_path))

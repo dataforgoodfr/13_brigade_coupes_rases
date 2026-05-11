@@ -33,15 +33,17 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		if (!user) return true
 
 		if (user.role === "volunteer") {
-			return (
-				(!current.report.affectedUser ||
-					current.report.affectedUser.login !== user.login) ??
-				false
-			)
+			const isAffectedUser =
+				current.report.affectedUser &&
+				current.report.affectedUser.login === user.login
+			const isAssignmentRequester =
+				current.report.assignmentRequestedById === user.id
+
+			return !isAffectedUser && !isAssignmentRequester
 		}
 
 		return false
-	}, [user, current.report.affectedUser])
+	}, [user, current.report.affectedUser, current.report.assignmentRequestedById])
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: current,
@@ -100,7 +102,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 							type="submit"
 							className="mx-auto my-1 text-xl font-bold cursor-pointer"
 							size="lg"
-							disabled={submission.status === "loading"}
+							disabled={isDisabled || submission.status === "loading"}
 						>
 							{submission.status === "loading"
 								? "Envoi en cours..."

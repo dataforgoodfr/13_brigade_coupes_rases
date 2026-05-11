@@ -2,9 +2,19 @@ import { useMemo } from "react"
 import { FormattedDate, FormattedNumber, useIntl } from "react-intl"
 import { Popup } from "react-leaflet"
 
+import { Button } from "@/components/ui/button"
 import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
+import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
+import {
+	requestAssignReportThunk,
+	getClearCutsThunk,
+	unassignReportThunk
+} from "@/features/clear-cut/store/clear-cuts-slice"
+import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
+import { useConnectedMe } from "@/features/user/store/me.slice"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type Props = {
 	totalAreaHectare: number
@@ -68,11 +78,18 @@ export function ClearCutMapPopUp({
 		totalBdfDeciduousAreaHectare,
 		totalBdfMixedAreaHectare,
 		totalBdfPoplarAreaHectare,
-		totalBdfResinousAreaHectare
+		totalBdfResinousAreaHectare,
+		id,
+		userId
 	}
 }: {
 	report: ClearCutReport
 }) {
+	const dispatch = useAppDispatch()
+	const user = useConnectedMe()
+	const filters = useAppSelector(selectFiltersRequest)
+	const navigateToDetail = useNavigateToClearCut(id)
+
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
 			clearCuts.flatMap((z) => z.ecologicalZonings).map((z) => z.name)
@@ -145,6 +162,65 @@ export function ClearCutMapPopUp({
 					totalBdfPoplarAreaHectare={totalBdfPoplarAreaHectare}
 					totalBdfResinousAreaHectare={totalBdfResinousAreaHectare}
 				/>
+			</div>
+
+			<div className="flex flex-col gap-2 mt-4 pt-3 border-t border-neutral-100">
+				{user &&
+					(!userId ? (
+						<Button
+							onClick={(e) => {
+								e.stopPropagation()
+								if (
+									window.confirm(
+										"Voulez-vous vous attribuer cette coupe rase ?"
+									)
+								) {
+									dispatch(requestAssignReportThunk(id)).then(() => {
+										if (filters) dispatch(getClearCutsThunk(filters))
+									})
+								}
+							}}
+							className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white"
+							size="sm"
+						>
+							Demander l'attribution
+						</Button>
+					) : userId === user.id ? (
+						<Button
+							onClick={(e) => {
+								e.stopPropagation()
+								if (
+									window.confirm(
+										"Voulez-vous annuler l'attribution de cette coupe rase ?"
+									)
+								) {
+									dispatch(unassignReportThunk(id)).then(() => {
+										if (filters) dispatch(getClearCutsThunk(filters))
+									})
+								}
+							}}
+							className="w-full text-xs h-8"
+							variant="destructive"
+							size="sm"
+						>
+							Annuler l'attribution
+						</Button>
+					) : (
+						<p className="text-xs text-center text-neutral-500 italic mb-1">
+							Déjà attribuée à un autre bénévole
+						</p>
+					))}
+
+				<Button
+					onClick={(e) => {
+						e.stopPropagation()
+						navigateToDetail()
+					}}
+					className="w-full text-xs h-8"
+					variant="outline"
+				>
+					Renseigner les informations
+				</Button>
 			</div>
 		</Popup>
 	)

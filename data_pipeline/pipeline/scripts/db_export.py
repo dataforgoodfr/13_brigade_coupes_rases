@@ -3,6 +3,7 @@ Simple functional script to export database to FlatGeobuf file.
 """
 
 from pathlib import Path
+
 import geopandas as gpd
 from sqlalchemy import create_engine
 
@@ -18,7 +19,7 @@ def export_database(database_url: str, output_file: str) -> None:
 
 def connect_db(database_url: str):
     """Create database connection."""
-    print(f"📡 Connecting to database...")
+    print("📡 Connecting to database...")
     engine = create_engine(database_url, plugins=["geoalchemy2"])
     print("✅ Connected!")
     return engine
@@ -80,20 +81,15 @@ def extract_data(engine) -> gpd.GeoDataFrame:
     """Extract data from database as GeoDataFrame."""
     print("📥 Extracting data from database...")
     query = get_export_query()
-    
+
     # Read from database
-    gdf = gpd.read_postgis(
-        query, 
-        con=engine, 
-        geom_col='geometry',
-        crs='EPSG:4326'
-    )
-    
+    gdf = gpd.read_postgis(query, con=engine, geom_col="geometry", crs="EPSG:4326")
+
     # FORCE conversion to ensure it's really a GeoDataFrame
     print(f"   Initial type: {type(gdf)}")
-    if 'geometry' in gdf.columns:
-        gdf = gpd.GeoDataFrame(gdf, geometry='geometry', crs='EPSG:4326')
-    
+    if "geometry" in gdf.columns:
+        gdf = gpd.GeoDataFrame(gdf, geometry="geometry", crs="EPSG:4326")
+
     print(f"✅ Extracted {len(gdf)} records")
     print(f"   Final type: {type(gdf)}")
     print(f"   CRS: {gdf.crs}")
@@ -105,41 +101,41 @@ def extract_data(engine) -> gpd.GeoDataFrame:
 def convert_arrays_to_strings(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Convert array columns to strings for FlatGeobuf compatibility."""
     print("🔄 Converting arrays to strings...")
-    
-    if 'natura2000_codes' in gdf.columns:
-        gdf['natura2000_codes'] = gdf['natura2000_codes'].apply(
+
+    if "natura2000_codes" in gdf.columns:
+        gdf["natura2000_codes"] = gdf["natura2000_codes"].apply(
             lambda x: str(list(x)) if x is not None and len(x) > 0 else None
         )
-    
-    if 'cities' in gdf.columns:
-        gdf['cities'] = gdf['cities'].apply(
+
+    if "cities" in gdf.columns:
+        gdf["cities"] = gdf["cities"].apply(
             lambda x: str(list(x)) if x is not None and len(x) > 0 else None
         )
-    
+
     return gdf
 
 
 def reorder_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Reorder columns to match original format."""
     column_order = [
-        'clear_cut_group',
-        'date_min',
-        'date_max',
-        'days_delta',
-        'clear_cut_group_size',
-        'concave_hull_score',
-        'area_ha',
-        'cities',
-        'natura2000_area_ha',
-        'natura2000_codes',
-        'bdf_deciduous_area_ha',
-        'bdf_mixed_area_ha',
-        'bdf_poplar_area_ha',
-        'bdf_resinous_area_ha',
-        'slope_area_ha',
-        'geometry'
+        "clear_cut_group",
+        "date_min",
+        "date_max",
+        "days_delta",
+        "clear_cut_group_size",
+        "concave_hull_score",
+        "area_ha",
+        "cities",
+        "natura2000_area_ha",
+        "natura2000_codes",
+        "bdf_deciduous_area_ha",
+        "bdf_mixed_area_ha",
+        "bdf_poplar_area_ha",
+        "bdf_resinous_area_ha",
+        "slope_area_ha",
+        "geometry",
     ]
-    
+
     # Keep only columns that exist (geometry handled by geopandas)
     existing_cols = [col for col in column_order if col in gdf.columns]
     print("AVANT EXPORT")
@@ -150,30 +146,27 @@ def reorder_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 def save_to_file(gdf: gpd.GeoDataFrame, output_path: Path) -> None:
     """Save GeoDataFrame to FlatGeobuf file."""
     print(f"💾 Saving to {output_path}...")
-    
+
     # Sécurisation de la pipeline
     gdf = gpd.GeoDataFrame(gdf)
-    
+
     # Create output directory if needed
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Save to FlatGeobuf
     gdf.to_file(output_path, driver="FlatGeobuf")
-    
-    # Get file size
-    file_size_mb = output_path.stat().st_size / (1024 * 1024)
+
     print(f"✅ Saved {len(gdf)}")
 
 
 def print_summary(gdf: gpd.GeoDataFrame) -> None:
     """Print summary statistics."""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("📊 SUMMARY")
-    print("="*50)
+    print("=" * 50)
     print(f"Total records:     {len(gdf)}")
     print(f"Total area (ha):   {gdf['area_ha'].sum():.2f}")
     print(f"Date range:        {gdf['date_min'].min()} to {gdf['date_max'].max()}")
     print(f"With Natura 2000:  {gdf['natura2000_codes'].notna().sum()}")
     print(f"CRS:               {gdf.crs}")
-    print("="*50)
-
+    print("=" * 50)

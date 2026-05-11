@@ -9,6 +9,7 @@ import { AdvancedFilters } from "@/features/clear-cut/components/filters/Advance
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem"
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice"
+import { selectResetVersion } from "@/features/clear-cut/store/filters.slice"
 import { cn } from "@/lib/utils"
 import { IconButton } from "@/shared/components/button/Button"
 import { Title } from "@/shared/components/typo/Title"
@@ -17,13 +18,14 @@ import { useAppSelector } from "@/shared/hooks/store"
 export function AsideList({ mobile = false }: { mobile?: boolean }) {
 	const { value } = useAppSelector(selectClearCuts)
 	const { layout, setLayout } = useLayout()
+	const resetVersion = useAppSelector(selectResetVersion)
 	const isShown = layout === "list"
 
 	return (
 		<div
 			className={cn("flex flex-col w-full bg-background", {
 				hidden: !isShown,
-				"absolute top-0 left-0 right-0 bottom-0 z-10": isShown && mobile,
+				"absolute top-0 left-0 right-0 bottom-12 z-10": isShown && mobile,
 				"h-auto": !(isShown && mobile)
 			})}
 		>
@@ -60,7 +62,7 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 						} as React.CSSProperties
 					}
 				>
-					<AdvancedFilters className="px-3" />
+					<AdvancedFilters key={resetVersion} className="px-3" />
 				</CollapsibleContent>
 			</Collapsible>
 

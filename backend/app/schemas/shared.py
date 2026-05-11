@@ -12,6 +12,7 @@ class UserBaseSchema(BaseSchema):
         default_factory=EmailStr, json_schema_extra={"example": "john.tree@canope.com"}
     )
     role: str = Field(default_factory=str, json_schema_extra={"example": "volunteer"})
+    is_active: bool = Field(default=False, json_schema_extra={"example": True})
 
     @field_validator("role")
     def validate_role(cls, value: str) -> str:

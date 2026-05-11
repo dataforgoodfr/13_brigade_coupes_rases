@@ -4,6 +4,7 @@ import {
 	type CredentialError,
 	connectedMeSchema,
 	credentialErrorSchema,
+	type ForgotPasswordRequest,
 	type LoginRequest,
 	type Me,
 	type MeError,
@@ -12,6 +13,8 @@ import {
 	meResponseSchema,
 	meSchema,
 	type OfflineMe,
+	type RegisterRequest,
+	type ResetPasswordRequest,
 	type TokenResponse,
 	tokenSchema,
 	type UpdateMeRequest
@@ -65,7 +68,30 @@ export const loginThunk = createAppAsyncThunk(
 		dispatch(getMeThunk())
 	}
 )
+export const registerThunk = createAppAsyncThunk(
+	"users/register",
+	async (registerRequest: RegisterRequest, { extra: { api } }) => {
+		await api().post("api/v1/auth/register", { json: registerRequest }).json()
+	}
+)
 
+export const forgotPasswordThunk = createAppAsyncThunk(
+	"users/forgotPassword",
+	async (forgotRequest: ForgotPasswordRequest, { extra: { api } }) => {
+		await api()
+			.post("api/v1/auth/forgot-password", { json: forgotRequest })
+			.json()
+	}
+)
+
+export const resetPasswordThunk = createAppAsyncThunk(
+	"users/resetPassword",
+	async (resetRequest: ResetPasswordRequest, { extra: { api } }) => {
+		await api()
+			.post("api/v1/auth/reset-password", { json: resetRequest })
+			.json()
+	}
+)
 export const getMeThunk = createAppAsyncThunk(
 	"users/getMe",
 	withStorageActionCreator(
@@ -131,12 +157,18 @@ type State = {
 	me: RequestedContent<Me, MeError>
 	login: RequestedContent<void, CredentialError>
 	updateMe: RequestedContent<void, MeError>
+	register: RequestedContent<void, string>
+	forgotPassword: RequestedContent<void, string>
+	resetPassword: RequestedContent<void, string>
 }
 
 export const initialState: State = {
 	login: { status: "idle" },
 	me: { status: "idle", value: getMe() },
-	updateMe: { status: "idle" }
+	updateMe: { status: "idle" },
+	register: { status: "idle" },
+	forgotPassword: { status: "idle" },
+	resetPassword: { status: "idle" }
 }
 
 export const meSlice = createSlice({
@@ -155,6 +187,15 @@ export const meSlice = createSlice({
 		},
 		resetLogin: (state) => {
 			setIdle(state.login)
+		},
+		resetRegister: (state) => {
+			setIdle(state.register)
+		},
+		resetForgotPassword: (state) => {
+			setIdle(state.forgotPassword)
+		},
+		resetResetPassword: (state) => {
+			setIdle(state.resetPassword)
 		}
 	},
 	extraReducers: (builder) => {
@@ -164,6 +205,17 @@ export const meSlice = createSlice({
 		addRequestedContentCases(builder, loginThunk, (state) => state.login, {
 			errorSchema: credentialErrorSchema
 		})
+		addRequestedContentCases(builder, registerThunk, (state) => state.register)
+		addRequestedContentCases(
+			builder,
+			forgotPasswordThunk,
+			(state) => state.forgotPassword
+		)
+		addRequestedContentCases(
+			builder,
+			resetPasswordThunk,
+			(state) => state.resetPassword
+		)
 		addRequestedContentCases(
 			builder,
 			addFavoriteThunk,
@@ -193,6 +245,21 @@ export const selectFavorites = createTypedDraftSafeSelector(
 export const selectLogin = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.login
+)
+
+export const selectRegister = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.register
+)
+
+export const selectForgotPassword = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.forgotPassword
+)
+
+export const selectResetPassword = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.resetPassword
 )
 
 export const selectIsInFavorites = createTypedDraftSafeSelector(

@@ -57,6 +57,7 @@ def seed_database():
             email="admin@example.com",
             role="admin",
             password=get_password_hash("admin"),
+            is_active=True,
         )
         volunteer = User(
             first_name="Pips",
@@ -65,6 +66,7 @@ def seed_database():
             email="volunteer@example.com",
             role="volunteer",
             password=get_password_hash("volunteer"),
+            is_active=True,
         )
 
         admin.departments.append(paris.department)
@@ -224,7 +226,7 @@ def seed_database():
                 user=admin,
             ),
             ClearCutReport(
-                city=paris,
+                city=marseille,
                 slope_area_hectare=6.8,
                 clear_cuts=[
                     ClearCut(

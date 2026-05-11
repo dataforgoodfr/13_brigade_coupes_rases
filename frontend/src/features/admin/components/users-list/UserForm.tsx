@@ -12,6 +12,7 @@ import { FormField } from "@/shared/form/components/Form"
 import { FormCombobox } from "@/shared/form/components/FormCombobox"
 import { FormInput } from "@/shared/form/components/FormInput"
 import { FormSelect } from "@/shared/form/components/FormSelect"
+import { FormSwitch } from "@/shared/form/components/FormSwitch"
 import { type LabelledValue, namedIdTranslator } from "@/shared/items"
 import { useSelectSelectableDepartments } from "@/shared/store/referential/referential.slice"
 
@@ -41,6 +42,7 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 					firstName: "",
 					lastName: "",
 					login: "",
+					isActive: false,
 					departments: departments
 				}
 	})
@@ -126,6 +128,13 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 								label="Départements"
 								disableChangeTracking
 							/>
+						)}
+					/>
+					<FormField<UserFormType>
+						form={form}
+						name={"isActive"}
+						render={(props) => (
+							<FormSwitch {...props} label="Compte actif" disableChangeTracking />
 						)}
 					/>
 				</div>

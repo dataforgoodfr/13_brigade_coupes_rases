@@ -49,7 +49,6 @@ export function useImageViewer(): UseImageViewerResult {
 				})
 			)
 
-
 			return viewableUrls.filter((url) => url !== "")
 		} catch (err) {
 			const errorMessage =

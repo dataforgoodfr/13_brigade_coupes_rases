@@ -114,6 +114,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[str] = mapped_column(String, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False
     )
@@ -137,7 +138,10 @@ class User(Base):
     )
 
     reports = relationship(
-        "ClearCutReport", back_populates="user", cascade="all, delete"
+        "ClearCutReport",
+        back_populates="user",
+        cascade="all, delete",
+        foreign_keys="ClearCutReport.user_id",
     )
     favorites = relationship(
         "ClearCutReport",
@@ -233,6 +237,7 @@ CLEARCUT_STATUSES = [
     "legal_validated",
     "validated",
     "final_validated",
+    "rejected",
 ]
 
 
@@ -322,7 +327,16 @@ class ClearCutReport(Base):
         back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    user: Mapped["User"] = relationship(back_populates="reports", cascade="all, delete")
+    user: Mapped["User"] = relationship(
+        back_populates="reports", foreign_keys="ClearCutReport.user_id"
+    )
+
+    assignment_requested_by_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    assignment_requested_by: Mapped["User"] = relationship(
+        foreign_keys="ClearCutReport.assignment_requested_by_id"
+    )
 
     total_area_hectare: Mapped[float | None] = mapped_column(Float, nullable=True)
     total_ecological_zoning_area_hectare: Mapped[float | None] = mapped_column(

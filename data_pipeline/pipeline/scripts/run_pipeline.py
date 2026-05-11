@@ -1,17 +1,22 @@
+import logging
 import os
 import shutil
-import logging
-import geopandas as gpd
 from datetime import timedelta
+
+import geopandas as gpd
+
 from pipeline.scripts import DATA_DIR
-from pipeline.scripts.get_last_version import get_last_version
-from pipeline.scripts.get_sufosat_tiff import get_sufosat_tiff
-from pipeline.scripts.get_reference_data import get_enrichment_data
-from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
-from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
-from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters, update_geometries
-from pipeline.scripts.upload_gold import upload_gold_to_s3
 from pipeline.scripts.db_export import export_database
+from pipeline.scripts.enrich_sufosat_clusters import enrich_sufosat_clusters
+from pipeline.scripts.get_last_version import get_last_version
+from pipeline.scripts.get_new_and_update import (
+    split_new_and_updated_clusters,
+    update_geometries,
+)
+from pipeline.scripts.get_reference_data import get_enrichment_data
+from pipeline.scripts.get_sufosat_tiff import get_sufosat_tiff
+from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
+from pipeline.scripts.upload_gold import upload_gold_to_s3
 
 
 def run_pipeline() -> None:
@@ -22,9 +27,11 @@ def run_pipeline() -> None:
     if last_version_date is None:
         update_start_date = None
     else:
-        update_start_date = (last_version_date + timedelta(days=1)).strftime('%Y-%m-%d')
+        update_start_date = (last_version_date + timedelta(days=1)).strftime("%Y-%m-%d")
 
-    logging.info(f"Last version date: {last_version_date}, update_start_date: {update_start_date}")
+    logging.info(
+        f"Last version date: {last_version_date}, update_start_date: {update_start_date}"
+    )
 
     get_sufosat_tiff()
 
@@ -36,7 +43,9 @@ def run_pipeline() -> None:
 
     preprocess_sufosat(
         input_raster_dates=str(DATA_DIR / "sufosat" / sufosat_tif_filename),
-        polygonized_raster_output_layer=str(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"),
+        polygonized_raster_output_layer=str(
+            DATA_DIR / "sufosat" / "sufosat_clusters.fgb"
+        ),
         update_start_date=update_start_date,
     )
 
@@ -54,7 +63,9 @@ def run_pipeline() -> None:
             str(DATA_DIR / "sufosat" / "clusters_final.fgb"),
         )
     else:
-        db_reference_path = str(DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb")
+        db_reference_path = str(
+            DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
+        )
         export_database(
             database_url=os.getenv("DATABASE_URL"),
             output_file=db_reference_path,

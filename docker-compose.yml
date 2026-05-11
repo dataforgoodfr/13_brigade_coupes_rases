@@ -8,6 +8,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/postgres/Dockerfile
+    platform: linux/amd64
     volumes:
       - coupes-rases-data:/var/lib/postgresql/data
     container_name: coupes-rases-database
@@ -30,19 +31,23 @@ services:
         - pgadmin-data:/var/lib/pgadmin
   backend:
     platform: ${BACKEND_DOCKER_DEFAULT_PLATFORM}
-    working_dir: /app/backend
+    working_dir: /app
     build:
       target: development
       context: backend
       dockerfile: ./Dockerfile
     volumes:
-      - ./:/app
+      - ./backend:/app
+      - /app/.venv
     container_name: coupes-rases-backend
     user: devuser
-    command: /bin/sh -c "while sleep 1000; do :; done"
+    command: poetry run python -m app.main --host=0.0.0.0 --port=8080 --reload --proxy-headers --forwarded-allow-ips=*
     ports:
       - "8080:8080"
       - "54112:54112"
+    environment:
+      DATABASE_URL: postgresql://devuser:devuser@db:5432/local
+      ALLOWED_ORIGINS: http://localhost:8081
     depends_on:
       - db
 
@@ -55,5 +60,8 @@ services:
       container_name: coupes-rases-frontend
       ports:
         - "8081:8000"
+      volumes:
+        - ./frontend:/app
+        - /app/node_modules
       depends_on:
         - backend

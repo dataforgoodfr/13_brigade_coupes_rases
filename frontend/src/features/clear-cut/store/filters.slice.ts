@@ -26,8 +26,20 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector"
 import type { RootState } from "@/shared/store/store"
 import { createAppAsyncThunk } from "@/shared/store/thunk"
 import type { Range } from "@/shared/types/range"
+interface PendingFilters {
+	cutYears: SelectableItem<number>[]
+	cutMonths: SelectableItem<number>[]
+	departments: SelectableItem<Department>[]
+	statuses: SelectableItem<ClearCutStatus>[]
+	areas?: [number, number]
+	excessive_slope: EventuallyBooleanSelectableItems
+	ecological_zoning: EventuallyBooleanSelectableItems
+	favorite: EventuallyBooleanSelectableItems
+}
+
 export interface FiltersState {
 	rules: SelectableItem<Rule>[]
+	// committed (applied to map, updated only on OK)
 	cutYears: SelectableItem<number>[]
 	cutMonths: SelectableItem<number>[]
 	geoBounds?: Bounds
@@ -39,6 +51,20 @@ export interface FiltersState {
 	ecological_zoning: EventuallyBooleanSelectableItems
 	favorite: EventuallyBooleanSelectableItems
 	with_points?: boolean
+	// pending (UI editing state, not yet applied)
+	isInitialized: boolean
+	resetVersion: number
+	pendingFilters: PendingFilters
+}
+
+const emptyPending: PendingFilters = {
+	cutYears: [],
+	cutMonths: [],
+	departments: [],
+	statuses: [],
+	excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN,
+	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
+	favorite: DEFAULT_EVENTUALLY_BOOLEAN
 }
 
 export const initialState: FiltersState = {
@@ -50,7 +76,10 @@ export const initialState: FiltersState = {
 	statuses: [],
 	excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN,
 	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
-	favorite: DEFAULT_EVENTUALLY_BOOLEAN
+	favorite: DEFAULT_EVENTUALLY_BOOLEAN,
+	isInitialized: false,
+	resetVersion: 0,
+	pendingFilters: emptyPending
 }
 
 export const getFiltersThunk = createAppAsyncThunk(
@@ -96,39 +125,77 @@ export const filtersSlice = createSlice({
 			state,
 			{ payload }: PayloadAction<SelectableItem<number>[]>
 		) => {
-			state.cutYears = payload
+			state.pendingFilters.cutYears = payload
 		},
 		setCutMonths: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<number>[]>
 		) => {
-			state.cutMonths = payload
+			state.pendingFilters.cutMonths = payload
 		},
 		setAreas: (
 			state,
 			{ payload }: PayloadAction<[number, number] | undefined>
 		) => {
-			state.areas = payload
+			state.pendingFilters.areas = payload
 		},
 		updateDepartment: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<NamedId & { code: string }>>
 		) => {
-			state.departments = state.departments.map((d) =>
-				d.item.id === payload.item.id ? payload : d
+			state.pendingFilters.departments = state.pendingFilters.departments.map(
+				(d) => (d.item.id === payload.item.id ? payload : d)
 			)
 		},
 		setDepartments: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<NamedId & { code: string }>[]>
 		) => {
-			state.departments = payload
+			state.pendingFilters.departments = payload
 		},
 		setStatuses: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<ClearCutStatus>[]>
 		) => {
-			state.statuses = payload
+			state.pendingFilters.statuses = payload
+		},
+		commitFilters: (state) => {
+			state.cutYears = state.pendingFilters.cutYears
+			state.cutMonths = state.pendingFilters.cutMonths
+			state.departments = state.pendingFilters.departments
+			state.statuses = state.pendingFilters.statuses
+			state.areas = state.pendingFilters.areas
+			state.excessive_slope = state.pendingFilters.excessive_slope
+			state.ecological_zoning = state.pendingFilters.ecological_zoning
+			state.favorite = state.pendingFilters.favorite
+		},
+		resetFilters: (state) => {
+			const cleared = {
+				cutYears: state.cutYears.map((y) => ({ ...y, isSelected: false })),
+				cutMonths: state.cutMonths.map((m) => ({ ...m, isSelected: false })),
+				departments: state.departments.map((d) => ({ ...d, isSelected: false })),
+				statuses: state.statuses.map((s) => ({ ...s, isSelected: false })),
+				areas: [state.area_range.min, state.area_range.max] as [number, number],
+				excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN.map((x) => ({
+					...x
+				})) as typeof DEFAULT_EVENTUALLY_BOOLEAN,
+				ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN.map((x) => ({
+					...x
+				})) as typeof DEFAULT_EVENTUALLY_BOOLEAN,
+				favorite: DEFAULT_EVENTUALLY_BOOLEAN.map((x) => ({
+					...x
+				})) as typeof DEFAULT_EVENTUALLY_BOOLEAN
+			}
+			state.pendingFilters = cleared
+			state.cutYears = cleared.cutYears
+			state.cutMonths = cleared.cutMonths
+			state.departments = cleared.departments
+			state.statuses = cleared.statuses
+			state.areas = cleared.areas
+			state.excessive_slope = cleared.excessive_slope
+			state.ecological_zoning = cleared.ecological_zoning
+			state.favorite = cleared.favorite
+			state.resetVersion += 1
 		},
 		setGeoBounds: (state, { payload }: PayloadAction<Bounds>) => {
 			if (
@@ -144,27 +211,29 @@ export const filtersSlice = createSlice({
 			state,
 			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>
 		) => {
-			state.ecological_zoning = updateEventuallyBooleanSelectableItem(
-				payload,
-				state.ecological_zoning
-			)
+			state.pendingFilters.ecological_zoning =
+				updateEventuallyBooleanSelectableItem(
+					payload,
+					state.pendingFilters.ecological_zoning
+				)
 		},
 		setExcessiveSlop: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>
 		) => {
-			state.excessive_slope = updateEventuallyBooleanSelectableItem(
-				payload,
-				state.excessive_slope
-			)
+			state.pendingFilters.excessive_slope =
+				updateEventuallyBooleanSelectableItem(
+					payload,
+					state.pendingFilters.excessive_slope
+				)
 		},
 		setFavorite: (
 			state,
 			{ payload }: PayloadAction<SelectableItem<boolean | undefined>>
 		) => {
-			state.favorite = updateEventuallyBooleanSelectableItem(
+			state.pendingFilters.favorite = updateEventuallyBooleanSelectableItem(
 				payload,
-				state.favorite
+				state.pendingFilters.favorite
 			)
 		},
 		setWithPoints: (state, { payload }: PayloadAction<boolean>) => {
@@ -189,25 +258,44 @@ export const filtersSlice = createSlice({
 					}
 				}
 			) => {
-				state.areas = [area_range.min, area_range.max]
-				state.cutYears = listToSelectableItems(cutYears)
-				state.cutMonths = listToSelectableItems([
-					1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-				])
+				if (state.isInitialized) return
+				state.isInitialized = true
+				const initial: PendingFilters = {
+					cutYears: listToSelectableItems(cutYears),
+					cutMonths: listToSelectableItems([
+						1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+					]),
+					ecological_zoning: booleanToSelectableItem(ecological_zoning),
+					excessive_slope: booleanToSelectableItem(excessive_slope),
+					favorite: booleanToSelectableItem(favorite),
+					departments: listToSelectableItems(departments),
+					statuses: listToSelectableItems(statuses),
+					areas: [area_range.min, area_range.max]
+				}
+				state.pendingFilters = initial
+				state.cutYears = initial.cutYears
+				state.cutMonths = initial.cutMonths
+				state.ecological_zoning = initial.ecological_zoning
+				state.excessive_slope = initial.excessive_slope
+				state.favorite = initial.favorite
+				state.departments = initial.departments
+				state.statuses = initial.statuses
+				state.areas = initial.areas
 				state.rules = listToSelectableItems(rules)
-				state.ecological_zoning = booleanToSelectableItem(ecological_zoning)
-				state.excessive_slope = booleanToSelectableItem(excessive_slope)
-				state.favorite = booleanToSelectableItem(favorite)
-				state.departments = listToSelectableItems(departments)
 				state.area_range = area_range
-				state.statuses = listToSelectableItems(statuses)
 			}
 		)
 	}
 })
 
 export const {
-	actions: { updateCutYear: toggleCutYear, setGeoBounds, setWithPoints }
+	actions: {
+		updateCutYear: toggleCutYear,
+		setGeoBounds,
+		setWithPoints,
+		commitFilters,
+		resetFilters
+	}
 } = filtersSlice
 
 const selectState = (state: RootState) => state.filters
@@ -253,22 +341,22 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 
 export const selectCutYears = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.cutYears
+	(state) => state.pendingFilters.cutYears
 )
 
 export const selectCutMonths = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.cutMonths
+	(state) => state.pendingFilters.cutMonths
 )
 
 export const selectDepartments = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.departments
+	(state) => state.pendingFilters.departments
 )
 
 export const selectStatuses = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.statuses
+	(state) => state.pendingFilters.statuses
 )
 
 export const selectTags = createTypedDraftSafeSelector(
@@ -278,7 +366,7 @@ export const selectTags = createTypedDraftSafeSelector(
 
 export const selectAreas = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.areas
+	(state) => state.pendingFilters.areas
 )
 
 export const selectAreaRange = createTypedDraftSafeSelector(
@@ -288,20 +376,25 @@ export const selectAreaRange = createTypedDraftSafeSelector(
 
 export const selectEcologicalZoning = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.ecological_zoning
+	(state) => state.pendingFilters.ecological_zoning
 )
 
 export const selectExcessiveSlop = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.excessive_slope
+	(state) => state.pendingFilters.excessive_slope
 )
 
 export const selectFavorite = createTypedDraftSafeSelector(
 	selectState,
-	(state) => state.favorite
+	(state) => state.pendingFilters.favorite
 )
 
 export const selectWithPoints = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.with_points
+)
+
+export const selectResetVersion = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.resetVersion
 )

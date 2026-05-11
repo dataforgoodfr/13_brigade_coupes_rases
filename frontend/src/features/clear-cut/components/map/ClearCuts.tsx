@@ -118,10 +118,13 @@ export function ClearCuts() {
 	}, [map, dispatch])
 
 	const centerOnCoordinates = (coordinates: [number, number]) => {
-		map.setView({
-			lat: coordinates[1],
-			lng: coordinates[0]
-		})
+		map.setView(
+			{
+				lat: coordinates[1],
+				lng: coordinates[0]
+			},
+			DISPLAY_PREVIEW_ZOOM_LEVEL + 1
+		)
 		dispatchGeoBounds()
 	}
 

@@ -215,6 +215,77 @@ def create_clear_cut_report(
     return db_item
 
 
+def volunteer_create_clear_cut_report(
+    db: Session, polygon_geojson: dict, city_zip_code: str, volunteer: User
+) -> ClearCutReport:
+    """Create a new report from a volunteer-drawn polygon.
+
+    Accepts a GeoJSON Polygon or MultiPolygon and wraps it into a ClearCutReport
+    with status 'to_validate'. The volunteer is set as creator.
+    Area is estimated from geometry using a simple spherical approximation.
+    """
+    import math
+    from datetime import datetime as dt
+
+    from shapely.geometry import shape
+
+    geom_type = polygon_geojson.get("type")
+
+    # Support Polygon or MultiPolygon from Geoman
+    if geom_type not in ("Polygon", "MultiPolygon"):
+        raise ValueError(f"Unsupported geometry type: {geom_type}")
+
+    shapely_geom = shape(polygon_geojson)
+    centroid = shapely_geom.centroid
+
+    # Approximate area in hectares using degrees → meters conversion at centroid latitude
+    # 1 degree latitude ≈ 111_320 m, 1 degree longitude ≈ 111_320 * cos(lat) m
+    lat_rad = math.radians(centroid.y)
+    meters_per_deg_lat = 111_320.0
+    meters_per_deg_lng = 111_320.0 * math.cos(lat_rad)
+    area_deg2 = shapely_geom.area  # in degrees²
+    area_m2 = area_deg2 * meters_per_deg_lat * meters_per_deg_lng
+    area_ha = round(area_m2 / 10_000, 4)
+
+    centroid_wkt = f"POINT({centroid.x} {centroid.y})"
+
+    # Build MultiPolygon WKT — Geoman always gives Polygon, wrap it
+    if geom_type == "Polygon":
+        exterior = shapely_geom.exterior.coords
+        coords_str = ", ".join(f"{x} {y}" for x, y in exterior)
+        boundary_wkt = f"MULTIPOLYGON((({coords_str})))"
+    else:
+        boundary_wkt = shapely_geom.wkt  # already MultiPolygon
+
+    today = dt.utcnow()
+    city = get_city_by_zip_code(db, city_zip_code)
+
+    cut = ClearCut(
+        location=WKTElement(centroid_wkt, srid=SRID),
+        boundary=WKTElement(boundary_wkt, srid=SRID),
+        observation_start_date=today,
+        observation_end_date=today,
+        area_hectare=area_ha,
+    )
+
+    report = ClearCutReport(
+        city=city,
+        clear_cuts=[cut],
+        status="to_validate",
+        user_id=None,
+        assignment_requested_by_id=volunteer.id,
+        average_location=WKTElement(centroid_wkt, srid=SRID),
+        total_area_hectare=area_ha,
+        last_cut_date=today,
+        first_cut_date=today,
+    )
+
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+
 def update_clear_cut_report(
     id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
 ):
@@ -238,6 +309,18 @@ def update_clear_cut_report(
         )
 
     report.user_id = user_id
+    if user_id is not None:
+        report.assignment_requested_by_id = None
+
+    if request.status is not None:
+        if connected_user.role == "admin":
+            report.status = request.status
+        else:
+            raise AppHTTPException(
+                status_code=403,
+                type="INVALID_REQUESTER_RIGHTS",
+                detail="Only admins can update report status directly",
+            )
 
     db.commit()
     db.refresh(report)
@@ -245,11 +328,36 @@ def update_clear_cut_report(
 
 
 def find_clearcuts_reports(
-    db: Session, url: str, page: int = 0, size: int = 10
+    db: Session,
+    url: str,
+    page: int = 0,
+    size: int = 10,
+    current_user: "User | None" = None,
+    assigned_to_me: bool = False,
+    admin_action_required: bool = False,
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
-    reports = db.query(ClearCutReport).offset(page * size).limit(size).all()
-    reports_count = db.query(ClearCutReport.id).count()
-    reports_response = map(report_to_response_schema, reports)
+    from sqlalchemy.orm import joinedload
+
+    query = db.query(ClearCutReport).options(
+        joinedload(ClearCutReport.user),
+        joinedload(ClearCutReport.assignment_requested_by),
+    )
+    if assigned_to_me and current_user:
+        query = query.filter(ClearCutReport.user_id == current_user.id)
+    if admin_action_required:
+        query = query.filter(
+            or_(
+                ClearCutReport.status == "to_validate",
+                ClearCutReport.assignment_requested_by_id.is_not(None),
+            )
+        )
+
+    query = query.order_by(ClearCutReport.updated_at.desc())
+    reports = query.offset(page * size).limit(size).all()
+    reports_count = query.count()
+    reports_response = map(
+        lambda r: report_to_response_schema(r, current_user), reports
+    )
     return PaginationResponseSchema(
         content=list(reports_response),
         metadata=PaginationMetadataSchema.create(
@@ -264,10 +372,12 @@ def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
         raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             type="REPORT_NOT_FOUND",
-            detail=f"Report not found by id {id}",
+            detail=f"Report not found by id {report_id}",
         )
     return report
 
 
-def get_report_response_by_id(id: int, db: Session) -> ClearCutReportResponseSchema:
-    return report_to_response_schema(get_report_by_id(db, id))
+def get_report_response_by_id(
+    id: int, db: Session, current_user: "User | None" = None
+) -> ClearCutReportResponseSchema:
+    return report_to_response_schema(get_report_by_id(db, id), current_user)

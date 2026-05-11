@@ -25,11 +25,16 @@ export function AsideForm({
 	mobile?: boolean
 }) {
 	const { value, status } = useGetClearCut(clearCutId)
-	const { map } = useMapInstance()
+	const { map, setFocusedClearCutId } = useMapInstance()
 	const { toast } = useToast()
 	const navigate = useNavigate()
 	const { breakpoint } = useBreakpoint()
 	const dispatch = useAppDispatch()
+
+	useEffect(() => {
+		setFocusedClearCutId(clearCutId)
+		return () => setFocusedClearCutId(undefined)
+	}, [clearCutId, setFocusedClearCutId])
 
 	useEffect(() => {
 		if (status === "error") {

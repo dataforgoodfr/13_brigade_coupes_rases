@@ -80,15 +80,23 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None):
         .group_by(ClearCutReport.id)
         .subquery()
     )
-    reports = (
-        db.query(ClearCutReport)
-        .join(reports_with_rules, ClearCutReport.id == reports_with_rules.c.id)
-        .filter(
-            or_(
-                reports_with_rules.c.area_rule_count > 0,
-                reports_with_rules.c.ecological_zoning_rule_count > 0,
-                reports_with_rules.c.slope_rule_count > 0,
-            )
+    reports = db.query(ClearCutReport).join(
+        reports_with_rules, ClearCutReport.id == reports_with_rules.c.id
+    )
+
+    if filters and filters.report_id is not None:
+        # Bypassing rule filtering for specific report lookup
+        return reports.filter(ClearCutReport.id == filters.report_id)
+
+    reports = reports.filter(
+        or_(
+            reports_with_rules.c.area_rule_count > 0,
+            reports_with_rules.c.ecological_zoning_rule_count > 0,
+            reports_with_rules.c.slope_rule_count > 0,
+            # Human activity or explicit status change
+            ClearCutReport.assignment_requested_by_id.is_not(None),
+            ClearCutReport.user_id.is_not(None),
+            ClearCutReport.status.notin_(["to_validate", "rejected"]),
         )
     )
 

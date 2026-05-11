@@ -40,7 +40,8 @@ import {
 	clearCutFormsResponseSchema,
 	clearCutFormVersionsSchema,
 	clearCutReportResponseSchema,
-	clearCutsResponseSchema
+	clearCutsResponseSchema,
+	myAssignedReportsResponseSchema
 } from "./clear-cuts"
 
 const formStorage =
@@ -153,7 +154,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 	)
 )
 
-const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
+export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
 	async (filters, { getState, extra: { api } }) => {
 		const searchParams = new URLSearchParams()
@@ -234,16 +235,142 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 	}
 )
 
+export const getMyAssignedReportsThunk = createAppAsyncThunk<
+	{ content: ClearCutReport[]; totalCount: number },
+	{ page: number; size: number }
+>(
+	"getMyAssignedReports",
+	async ({ page, size }, { getState, extra: { api } }) => {
+		const result = await api()
+			.get("api/v1/clear-cuts-reports/", {
+				searchParams: { page, size, assigned_to_me: true }
+			})
+			.json()
+		const parsed = myAssignedReportsResponseSchema.parse(result)
+		const state = getState()
+		const reports = parsed.content.map((report) => mapReport(state, report))
+		return {
+			content: reports,
+			totalCount: parsed.metadata.totalCount
+		}
+	}
+)
+
+export const getAdminActionRequiredReportsThunk = createAppAsyncThunk<
+	{ content: ClearCutReport[]; totalCount: number },
+	{ page: number; size: number }
+>(
+	"getAdminActionRequiredReports",
+	async ({ page, size }, { getState, extra: { api } }) => {
+		const result = await api()
+			.get("api/v1/clear-cuts-reports/", {
+				searchParams: { page, size, admin_action_required: true }
+			})
+			.json()
+		const parsed = myAssignedReportsResponseSchema.parse(result)
+		const state = getState()
+		const reports = parsed.content.map((report) => mapReport(state, report))
+		return {
+			content: reports,
+			totalCount: parsed.metadata.totalCount
+		}
+	}
+)
+
+export const getAdminAllReportsThunk = createAppAsyncThunk<
+	{ content: ClearCutReport[]; totalCount: number },
+	{ page: number; size: number }
+>(
+	"getAdminAllReports",
+	async ({ page, size }, { getState, extra: { api } }) => {
+		const result = await api()
+			.get("api/v1/clear-cuts-reports/", {
+				searchParams: { page, size }
+			})
+			.json()
+		const parsed = myAssignedReportsResponseSchema.parse(result)
+		const state = getState()
+		const reports = parsed.content.map((report) => mapReport(state, report))
+		return {
+			content: reports,
+			totalCount: parsed.metadata.totalCount
+		}
+	}
+)
+
+export const requestAssignReportThunk = createAppAsyncThunk<void, string>(
+	"requestAssignReport",
+	async (reportId, { extra: { api } }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/request-assignment`)
+			.json()
+	}
+)
+
+export const cancelAssignRequestThunk = createAppAsyncThunk<void, string>(
+	"cancelAssignRequest",
+	async (reportId, { extra: { api } }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/cancel-request`)
+			.json()
+	}
+)
+
+export const approveAssignmentThunk = createAppAsyncThunk<void, string>(
+	"approveAssignment",
+	async (reportId, { extra: { api } }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/approve-assignment`)
+			.json()
+	}
+)
+
+export const rejectAssignmentThunk = createAppAsyncThunk<void, string>(
+	"rejectAssignment",
+	async (reportId, { extra: { api } }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/reject-assignment`)
+			.json()
+	}
+)
+
+export const unassignReportThunk = createAppAsyncThunk<void, string>(
+	"clear-cuts/unassign",
+	async (id, { extra: { api } }) => await api().post(`api/v1/clear-cuts-reports/${id}/unassign`).json()
+)
+
+export const updateReportStatusThunk = createAppAsyncThunk<void, { id: string, status: string }>(
+	"clear-cuts/updateStatus",
+	async ({ id, status }, { extra: { api } }) => await api().put(`api/v1/clear-cuts-reports/${id}`, { json: { status } }).json()
+)
+
 type State = {
 	clearCuts: RequestedContent<ClearCuts>
 	detail: RequestedContent<ClearCutFormVersions>
 	submission: RequestedContent<void, EtagMismatchError>
+	myAssignedReports: RequestedContent<{
+		content: ClearCutReport[]
+		totalCount: number
+	}>
+	adminActionRequiredReports: RequestedContent<{
+		content: ClearCutReport[]
+		totalCount: number
+	}>
+	adminAllReports: RequestedContent<{
+		content: ClearCutReport[]
+		totalCount: number
+	}>
+	assignation: RequestedContent<void, string>
 }
 
 const initialState: State = {
 	clearCuts: { status: "idle" },
 	detail: { status: "idle" },
-	submission: { status: "idle" }
+	submission: { status: "idle" },
+	myAssignedReports: { status: "idle" },
+	adminActionRequiredReports: { status: "idle" },
+	adminAllReports: { status: "idle" },
+	assignation: { status: "idle" }
 }
 
 export const clearCutsSlice = createSlice({
@@ -284,6 +411,51 @@ export const clearCutsSlice = createSlice({
 			submitClearCutFormThunk,
 			(state) => state.submission
 		)
+		addRequestedContentCases(
+			builder,
+			getMyAssignedReportsThunk,
+			(state) => state.myAssignedReports
+		)
+		addRequestedContentCases(
+			builder,
+			getAdminActionRequiredReportsThunk,
+			(state) => state.adminActionRequiredReports
+		)
+		addRequestedContentCases(
+			builder,
+			getAdminAllReportsThunk,
+			(state) => state.adminAllReports
+		)
+		addRequestedContentCases(
+			builder,
+			requestAssignReportThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			cancelAssignRequestThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			approveAssignmentThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			rejectAssignmentThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			unassignReportThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			updateReportStatusThunk,
+			(state) => state.assignation // Reuse assignation loading state for simplicity
+		)
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
 			formStorage.syncStorage(favorites, clearCutFormVersionsSchema)
 		})
@@ -302,9 +474,29 @@ export const selectClearCuts = createTypedDraftSafeSelector(
 	(state) => state.clearCuts
 )
 
+export const selectMyAssignedReports = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.myAssignedReports
+)
+
 export const selectSubmission = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.submission
+)
+
+export const selectAdminAllReports = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.adminAllReports
+)
+
+export const selectAdminActionRequiredReports = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.adminActionRequiredReports
+)
+
+export const selectAssignation = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.assignation
 )
 
 export const useGetClearCuts = () => {
@@ -313,13 +505,13 @@ export const useGetClearCuts = () => {
 	const { breakpoint } = useBreakpoint()
 	const ref = useRef<NodeJS.Timeout | undefined>(undefined)
 	useEffect(() => {
-		clearTimeout(ref.current);
+		clearTimeout(ref.current)
 		if ((breakpoint === "mobile" && filters) || filters?.geoBounds) {
 			// Debounce to avoid multiple calls when dragging, resizing, or zooming the map
 			ref.current = setTimeout(() => {
 				dispatch(getClearCutsThunk(filters))
-				clearTimeout(ref.current);
-			}, 100);
+				clearTimeout(ref.current)
+			}, 100)
 		}
 	}, [filters, breakpoint, dispatch])
 }

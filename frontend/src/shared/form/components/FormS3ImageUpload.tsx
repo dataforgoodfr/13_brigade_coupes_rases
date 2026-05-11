@@ -54,7 +54,7 @@ function FormS3ImageField<T extends FieldValues>({
 
 			// Update form field immediately
 			field.onChange(newUploadedImages)
-		} catch (_e) { }
+		} catch (_e) {}
 	}
 
 	const removeImageWithField = (indexToRemove: number) => {
@@ -90,7 +90,7 @@ function FormS3ImageField<T extends FieldValues>({
 			// setUploadedImages(EMPTY_ARRAY);
 			// onPreviewUrlsChanged(EMPTY_ARRAY);
 		}
-	}, [field.value])
+	}, [field.value, getViewableUrls, onPreviewUrlsChanged])
 
 	return (
 		<FormItem>

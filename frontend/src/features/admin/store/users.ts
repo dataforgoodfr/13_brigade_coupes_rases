@@ -13,18 +13,28 @@ export const userResponseSchema = z.object({
 	firstName: z.string().min(1),
 	lastName: z.string().min(1),
 	role: roleSchema,
+	isActive: z.boolean(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 	departments: z.array(z.string())
 })
 
-export const editUserRequestSchema = userResponseSchema.omit({ id: true })
+export const editUserRequestSchema = userResponseSchema.omit({
+	id: true,
+	createdAt: true,
+	updatedAt: true
+})
 
 export type EditUserRequest = z.infer<typeof editUserRequestSchema>
 
 export const userFormSchema = userResponseSchema
 	.omit({
-		id: true
+		id: true,
+		createdAt: true,
+		updatedAt: true
 	})
 	.extend({
+		isActive: z.boolean(),
 		departments: toSelectableItemSchema(departmentSchema).array()
 	})
 
