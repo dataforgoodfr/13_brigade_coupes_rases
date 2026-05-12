@@ -66,7 +66,7 @@ jobs:
         working-directory: backend
         if: ${{ inputs.database-action == 'stamp-and-upgrade' }}
         run: |
-          poetry run alembic stamp 19e644f11e20
+          poetry run alembic stamp --purge 19e644f11e20
           make upgrade-db
 
       - name: Reset database
