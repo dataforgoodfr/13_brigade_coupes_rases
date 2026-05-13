@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { isUndefined } from "es-toolkit"
-import { Accordion } from "radix-ui"
+import { Accordion } from "@/components/ui/accordion"
 import { useEffect, useMemo } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
@@ -34,8 +34,8 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 
 		if (user.role === "volunteer") {
 			const isAffectedUser =
-				current.report.affectedUser &&
-				current.report.affectedUser.login === user.login
+				current.report.userId === user.id ||
+				(current.report.affectedUser?.login === user.login)
 			const isAssignmentRequester =
 				current.report.assignmentRequestedById === user.id
 
@@ -43,7 +43,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		}
 
 		return false
-	}, [user, current.report.affectedUser, current.report.assignmentRequestedById])
+	}, [user, current.report.userId, current.report.affectedUser, current.report.assignmentRequestedById])
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: current,
@@ -94,9 +94,9 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 					onSubmit={form.handleSubmit(handleSubmit)}
 					className="flex flex-col grow px-4 h-0"
 				>
-					<Accordion.Root type="multiple" className="grow overflow-y-auto">
+					<Accordion type="multiple" className="grow overflow-y-auto">
 						<AccordionContent original={original} form={form} latest={latest} />
-					</Accordion.Root>
+					</Accordion>
 					{!!loggedUser && (
 						<Button
 							type="submit"

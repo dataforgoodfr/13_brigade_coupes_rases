@@ -85,9 +85,9 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 	"getClearCutForm",
 	withEntityStorageActionCreator(
 		async ({ id, hasBeenCreated }, { getState, extra: { api } }) => {
-			// Get the base report data
+			// Get the base report data (full endpoint returns affectedUser/assignmentRequestedBy)
 			const reportResult = await api()
-				.get(`api/v1/clear-cuts-map/${id}/`)
+				.get(`api/v1/clear-cuts-reports/${id}`)
 				.json()
 			const report = clearCutReportResponseSchema.parse(reportResult)
 			const state = getState()
@@ -131,8 +131,18 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 				clearCutFormVersionsSchema
 			)
 
-			const form = (type: "current" | "original") =>
-				hasBeenCreated ? formReport : (versions?.[type] ?? formReport)
+			// Always use the fresh report from the server (assignment status, userId, etc.)
+			// while keeping user's locally-cached form field edits.
+			const withFreshReport = (cached: ClearCutForm) => ({
+				...cached,
+				report: formReport.report
+			})
+
+			const form = (type: "current" | "original") => {
+				if (hasBeenCreated) return formReport
+				const cached = versions?.[type]
+				return cached ? withFreshReport(cached) : formReport
+			}
 			const current = form("current")
 			const differentFromLatest = current.etag !== formReport.etag
 			const latest = differentFromLatest === true ? formReport : undefined
@@ -341,7 +351,9 @@ export const unassignReportThunk = createAppAsyncThunk<void, string>(
 
 export const updateReportStatusThunk = createAppAsyncThunk<void, { id: string, status: string }>(
 	"clear-cuts/updateStatus",
-	async ({ id, status }, { extra: { api } }) => await api().put(`api/v1/clear-cuts-reports/${id}`, { json: { status } }).json()
+	async ({ id, status }, { extra: { api } }) => {
+		await api().put(`api/v1/clear-cuts-reports/${id}`, { json: { status } })
+	}
 )
 
 type State = {
