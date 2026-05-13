@@ -1,13 +1,13 @@
-import os
-import boto3
 import logging
-import geopandas as gpd
-from io import StringIO
+import os
+
+import boto3
 from dotenv import load_dotenv
 
 
 class S3Manager:
     load_dotenv()
+
     def __init__(self, region="eu-west-3"):
         self.bucket_name = os.getenv("S3_BUCKET_NAME")
         self.s3 = boto3.client(
@@ -15,7 +15,7 @@ class S3Manager:
             region_name="PAR",
             endpoint_url=os.getenv("S3_ENDPOINT"),
             aws_access_key_id=os.getenv("SCW_ACCESS_KEY"),
-            aws_secret_access_key=os.getenv("SCW_SECRET_KEY")
+            aws_secret_access_key=os.getenv("SCW_SECRET_KEY"),
         )
 
     def list_bucket_contents(self):
@@ -34,7 +34,7 @@ class S3Manager:
 
     def download_from_s3(self, s3_key, download_path):
         try:
-            with open(download_path, 'wb') as f:
+            with open(download_path, "wb") as f:
                 self.s3.download_fileobj(self.bucket_name, s3_key, f)
             logging.info(f"File downloaded from S3: {download_path}")
         except Exception as e:

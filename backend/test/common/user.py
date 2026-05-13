@@ -17,6 +17,7 @@ def new_user(
         login="HoubaHouba" if login is None else login,
         email="houba.houba@marsupilami.com" if email is None else email,
         role="volunteer" if role is None else role,
+        is_active=True,
         password=get_password_hash("password" if password is None else password),
     )
 

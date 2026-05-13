@@ -163,6 +163,10 @@ export const selectUsers = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.users.value?.content ?? EMPTY_USERS
 )
+export const selectPendingUsers = createTypedDraftSafeSelector(
+	selectUsers,
+	(users) => users.filter((u) => !u.isActive)
+)
 
 export const selectMetadata = createTypedDraftSafeSelector(
 	selectState,

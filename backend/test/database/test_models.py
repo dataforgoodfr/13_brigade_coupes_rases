@@ -70,7 +70,7 @@ def test_report_creation(db):
         )
     assert (
         str(exc_info.value)
-        == "Status must be one of: to_validate, waiting_for_validation, legal_validated, validated, final_validated"
+        == "Status must be one of: to_validate, waiting_for_validation, legal_validated, validated, final_validated, rejected"
     )
 
     assert report.id is not None

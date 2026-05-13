@@ -1,7 +1,8 @@
-import os
 import logging
-from sqlalchemy import create_engine, text
+import os
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 
 def get_last_version() -> str | None:

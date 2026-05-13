@@ -26,6 +26,7 @@ import {
 	usersFiltersSlice
 } from "@/features/admin/store/users-filters.slice"
 import { Badge } from "@/shared/components/Badge"
+import { Dot } from "@/shared/components/Dot"
 import { SortingButton } from "@/shared/components/button/SortingButton"
 import { Input } from "@/shared/components/input/Input"
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter"
@@ -153,6 +154,16 @@ export const UsersList: React.FC = () => {
 					</span>
 				)
 			}
+		}),
+		columnHelper.accessor("isActive", {
+			id: "isActive",
+			header: "Statut",
+			cell: (info) => (
+				<div className="flex items-center gap-2">
+					<Dot color={info.getValue() ? "green" : "red"} />
+					{info.getValue() ? "Actif" : "En attente"}
+				</div>
+			)
 		}),
 		columnHelper.display({ id: "action" })
 	]

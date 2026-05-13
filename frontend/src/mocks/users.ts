@@ -17,6 +17,7 @@ const volunteerToken =
 export const volunteerAssignedToken =
 	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2b2x1bnRlZXItYXNzaWduZWRAZXhhbXBsZS5jb20iLCJleHAiOjE3NDQ0MDE1MzR9.PYc5hvIIuobVFt1TMb8EHdlK7iI5ZhsAqrOqKzFFAVw"
 export const volunteerAssignedMock: MeResponse = {
+	id: "volunteer-assigned-id",
 	role: "volunteer",
 	departments: [],
 	email: "volunteer@example.com",
@@ -25,6 +26,7 @@ export const volunteerAssignedMock: MeResponse = {
 	avatarUrl: faker.image.avatar()
 }
 export const adminMock: MeResponse = {
+	id: "admin-id",
 	role: "admin",
 	email: "admin@example.com",
 	login: "adminAdmin",
@@ -32,6 +34,7 @@ export const adminMock: MeResponse = {
 	avatarUrl: faker.image.avatar()
 }
 export const volunteerMock: MeResponse = {
+	id: "volunteer-id",
 	role: "volunteer",
 	departments: [],
 	email: "volunteer@example.com",
@@ -71,6 +74,9 @@ const fakeUsers: AdminUserResponse[] = range(10, () => ({
 	firstName: faker.person.firstName(),
 	lastName: faker.person.lastName(),
 	role: faker.helpers.arrayElement(["admin", "volunteer"]),
+	isActive: faker.datatype.boolean(),
+	createdAt: faker.date.recent().toISOString(),
+	updatedAt: faker.date.recent().toISOString(),
 	departments: faker.helpers.arrayElements(Object.keys(fakeDepartments)),
 	login: faker.internet.username(),
 	email: faker.internet.email()

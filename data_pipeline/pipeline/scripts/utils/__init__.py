@@ -13,5 +13,5 @@ __all__ = [
     "log_execution",
     "polygonize_raster",
     "save_gdf",
-    "S3Manager"
+    "S3Manager",
 ]

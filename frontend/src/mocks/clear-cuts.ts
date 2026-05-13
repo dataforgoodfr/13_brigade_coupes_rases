@@ -205,7 +205,7 @@ export const mockClearCutReportResponse = (
 ) => {
 	const baseMock = createClearCutReportResponseBaseMock(override, options)
 	return {
-		handler: http.get("*/api/v1/clear-cuts-map/:id", ({ params, request }) => {
+		handler: http.get("*/api/v1/clear-cuts-reports/:id", ({ params, request }) => {
 			const { id } = params as { id: string }
 			const authHeader = request.headers.get("Authorization")
 			let affectedUser: PublicUser | undefined

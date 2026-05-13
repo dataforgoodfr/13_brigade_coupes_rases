@@ -12,7 +12,7 @@ WORKDIR /app
 COPY "${SRC_DIR}/pyproject.toml" "${SRC_DIR}/poetry.lock" ./
 RUN touch README.md
 
-RUN  poetry install --without dev --no-root
+RUN  poetry install --without dev --no-root --with backend
 
 FROM builder as development 
 
@@ -22,7 +22,7 @@ RUN  useradd -ms /bin/bash devuser \
 
 USER devuser
 
-RUN  poetry install
+RUN  poetry install --with backend
 
 FROM python:3.13-slim as runtime
 

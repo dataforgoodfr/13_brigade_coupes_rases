@@ -1,8 +1,10 @@
 import logging
+
 from tqdm import tqdm
-from pathlib import Path
+
 from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import S3Manager
+
 
 def get_enrichment_data():
     logging.info("Getting enrichment data...")
@@ -24,7 +26,7 @@ def get_enrichment_data():
             logging.info(f"File already exists, skipping: {local_path.name}")
             continue
 
-        local_path.parent.mkdir(parents=True, exist_ok=True)        
+        local_path.parent.mkdir(parents=True, exist_ok=True)
         s3_manager.download_from_s3(data_path, str(local_path))
-    
+
     logging.info("Enrichment data downloaded.")

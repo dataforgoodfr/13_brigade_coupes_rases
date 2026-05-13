@@ -1,4 +1,5 @@
 import logging
+
 from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import S3Manager
 
@@ -12,7 +13,11 @@ def upload_gold_to_s3():
 
     if current_key in bucket_contents:
         logging.info("Rotating current gold to previous...")
-        tmp_path = DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched_current_backup.fgb"
+        tmp_path = (
+            DATA_DIR
+            / "sufosat_reference"
+            / "sufosat_clusters_enriched_current_backup.fgb"
+        )
         tmp_path.parent.mkdir(parents=True, exist_ok=True)
 
         s3_manager.download_from_s3(current_key, str(tmp_path))

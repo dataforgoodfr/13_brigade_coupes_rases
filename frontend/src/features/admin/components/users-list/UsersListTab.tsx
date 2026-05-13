@@ -10,7 +10,7 @@ export const UsersListTab: React.FC = () => {
 	return (
 		<>
 			<h1 className="text-2xl font-bold">Liste des utilisateurs</h1>
-			<div className="flex justify-between">
+			<div className="flex flex-col sm:flex-row sm:justify-between gap-2">
 				<Filters />
 				<CreateUserDialog />
 			</div>

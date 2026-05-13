@@ -8,6 +8,26 @@ export const loginRequestSchema = z.object({
 	password: z.string()
 })
 export type LoginRequest = z.infer<typeof loginRequestSchema>
+
+export const registerRequestSchema = z.object({
+	first_name: z.string().min(1, "Prénom requis"),
+	last_name: z.string().min(1, "Nom requis"),
+	login: z.string().min(3, "Login d'au moins 3 caractères"),
+	email: z.string().email("Email invalide"),
+	password: z.string().min(8, "Mot de passe d'au moins 8 caractères")
+})
+export type RegisterRequest = z.infer<typeof registerRequestSchema>
+
+export const forgotPasswordRequestSchema = z.object({
+	email: z.string().email("Email invalide")
+})
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>
+
+export const resetPasswordRequestSchema = z.object({
+	token: z.string(),
+	new_password: z.string().min(8, "Mot de passe d'au moins 8 caractères")
+})
+export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>
 export const ROLES = ["volunteer", "admin"] as const
 export const roleSchema = z.enum(ROLES)
 
@@ -18,6 +38,7 @@ export const offlineMeSchema = z.object({
 })
 const connectedMeBaseSchema = z
 	.object({
+		id: z.string(),
 		login: z.string(),
 		email: z.string(),
 		avatarUrl: z.string().url().optional(),

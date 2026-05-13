@@ -49,6 +49,7 @@ def user_to_user_response_schema(user: User) -> UserResponseSchema:
         last_name=user.last_name,
         login=user.login,
         email=user.email,
+        is_active=user.is_active,
         departments=[str(department.id) for department in user.departments],
     )
 
@@ -64,6 +65,7 @@ def user_to_me_response_schema(user: User) -> MeResponseSchema:
         last_name=user.last_name,
         login=user.login,
         email=user.email,
+        is_active=user.is_active,
         departments=[str(department.id) for department in user.departments],
         favorites=[str(favorite.id) for favorite in user.favorites],
     )

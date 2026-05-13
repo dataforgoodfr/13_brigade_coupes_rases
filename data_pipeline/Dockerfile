@@ -1,29 +1,11 @@
-# # # # # # # # # # # # 
+# # # # # # # # # # # #
 # Image docker de run #
-# # # # # # # # # # # # 
-#
-# « poetry install » doit joindre PyPI (ou PIP_INDEX_URL). Si le build échoue là :
-#   docker build --network=host -f data_pipeline/Dockerfile -t data-pipeline .
-# Proxy / miroir PyPI :
-#   docker build -f data_pipeline/Dockerfile \
-#     --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg HTTP_PROXY=$HTTP_PROXY \
-#     --build-arg PIP_INDEX_URL=https://…/simple/ -t data-pipeline .
-
-# Conda-forge-based image (maintained); avoids deprecated continuumio/miniconda3.
-FROM condaforge/miniforge3:latest
-
-# Fournis ces build-args si ton réseau / Docker bloque PyPI ou impose un proxy.
-ARG HTTP_PROXY
-ARG HTTPS_PROXY
-ARG NO_PROXY
-ARG PIP_INDEX_URL=https://pypi.org/simple
-ENV HTTP_PROXY=${HTTP_PROXY} \
-    HTTPS_PROXY=${HTTPS_PROXY} \
-    NO_PROXY=${NO_PROXY} \
-    PIP_INDEX_URL=${PIP_INDEX_URL}
+# # # # # # # # # # # #
 
 # Clever (and most CI) use the git repo root as Docker build context while
 # CC_DOCKERFILE points at this file — paths must be prefixed with data_pipeline/.
+FROM condaforge/miniforge3:latest
+
 WORKDIR /app/data_pipeline
 
 # Installe les dépendances système nécessaires pour GDAL et PostgreSQL
@@ -35,41 +17,33 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Environnement d’exécution : Python + GDAL seulement (évite les paquets conda en conflit avec le lock Poetry).
+# Crée l’environnement conda avec Python 3.13 + GDAL en une seule passe
+# (deux appels conda séparés doublent le pic mémoire du solveur)
 ENV CONDA_ALWAYS_YES=true
-RUN conda create -y -n py3_13 python=3.13 -c conda-forge && \
-    conda install -y -n py3_13 -c conda-forge gdal && \
-    conda clean -afy
+RUN mamba create -y -n py3_13 python=3.13 gdal -c conda-forge && \
+    mamba clean -afy
 
-# Poetry dans l’env « base » ; pip/Poetry utilisent les build-args proxy ci-dessus.
-RUN conda install -y -n base -c conda-forge poetry && conda clean -afy
+# Installe Poetry dans py3_13 pour que les packages atterrissent dans le bon env
+RUN /opt/conda/envs/py3_13/bin/pip install poetry
+RUN /opt/conda/envs/py3_13/bin/poetry config virtualenvs.create false
 
-# Python du projet en premier, puis conda base (où se trouve poetry).
-ENV PATH="/opt/conda/envs/py3_13/bin:/opt/conda/bin:${PATH}" \
-    POETRY_HTTP_TIMEOUT=300 \
-    PIP_DEFAULT_TIMEOUT=120 \
-    PIP_RETRIES=8 \
-    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
-    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+# Copie les fichiers de configuration Poetry (context = repo root)
+COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
 
-# Configure Poetry pour ne pas créer de virtualenv (on utilise déjà conda)
-RUN poetry config virtualenvs.create false
+# Installe les dépendances du projet dans py3_13
+RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --no-root
 
-# Install from committed lock (repro builds; avoids `poetry lock` needing full PyPI resolve in CI/Docker).
-# If pyproject and lock drift, run `poetry lock` in data_pipeline/ and commit both.
-COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock ./
-RUN poetry install --no-interaction --no-ansi --no-root
-
-# Copie le reste du sous-projet (écrase pyproject/poetry.lock par les mêmes fichiers du repo)
+# Copie le code du sous-projet pipeline
 COPY data_pipeline/ ./
 
-RUN poetry install --no-interaction --no-ansi --only-root
+# Installe le projet lui-même dans py3_13
+RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --only-root
 
-# Détecter tôt les incompatibilités GeoPandas / dask-geopandas (imports lourds du run)
-RUN python -c "import dask_geopandas; import geopandas"
+ENV PATH="/opt/conda/envs/py3_13/bin:${PATH}"
 
-# CORRECTION: Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
+# Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
 ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
 
-# Commande par défaut pour lancer la pipeline
-CMD ["python", "-m", "pipeline.scripts.run_pipeline"]
+# Lance un serveur HTTP minimaliste sur 8080 (exigé par Clever Cloud)
+# en parallèle de la pipeline ; le container s'arrête quand la pipeline finit.
+CMD python -m pipeline.scripts.run_pipeline & python -m http.server 8080

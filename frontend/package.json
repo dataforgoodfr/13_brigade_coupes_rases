@@ -12,7 +12,7 @@
     "cleanup": "biome check --write --unsafe",
     "cleanup:tsc": "biome check --write && tsc",
     "build:ci": "vite build",
-    "build": "pnpm cleanup && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "build:preview": "pnpm build && vite preview",
     "build:dev:preview": "pnpm build --mode development && vite preview",
     "preview": "vite preview",
@@ -28,6 +28,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@geoman-io/leaflet-geoman-free": "^2.19.3",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.10",

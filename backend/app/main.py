@@ -1,8 +1,12 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routes import (
+    auth,
+    cities,
     clear_cuts,
     clear_cuts_map,
     clear_cuts_reports,
@@ -17,10 +21,21 @@ from app.routes import (
     users,
 )
 
-app = FastAPI(
-    title="Brigades Coupes Rases", swagger_ui_parameters={"operationsSorter": "method"}
-)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from app.tasks import start_scheduler, stop_scheduler
+
+    start_scheduler()
+    yield
+    stop_scheduler()
+
+
+app = FastAPI(
+    title="Brigades Coupes Rases",
+    swagger_ui_parameters={"operationsSorter": "method"},
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,9 +47,11 @@ app.add_middleware(
 )
 
 # Include routes
+app.include_router(cities.router)
 app.include_router(clear_cuts_reports.router)
 app.include_router(departments.router)
 app.include_router(token.router)
+app.include_router(auth.router)
 app.include_router(clear_cuts_map.router)
 app.include_router(users.router)
 app.include_router(filters.router)

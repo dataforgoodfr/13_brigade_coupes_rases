@@ -1,11 +1,14 @@
-from datetime import datetime
 from logging import getLogger
 
 from pydantic import EmailStr, Field, field_validator
 
-from app.models import CLEARCUT_STATUSES, ClearCutReport
+from app.models import CLEARCUT_STATUSES, ClearCutReport, User
 from app.schemas.base import BaseSchema
 from app.schemas.clear_cut import ClearCutCreateSchema
+from app.schemas.clear_cut_map import (
+    ClearCutReportPreviewSchema,
+    report_to_report_preview_schema,
+)
 
 logger = getLogger(__name__)
 
@@ -32,55 +35,56 @@ class ClearCutReportPutRequestSchema(BaseSchema):
 
     @field_validator("status")
     def validate_status(cls, value):
-        if value not in CLEARCUT_STATUSES:
-            raise ValueError("Status must be one of: pending, validated")
+        if value is not None and value not in CLEARCUT_STATUSES:
+            raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
 
 
-class ClearCutReportResponseSchema(BaseSchema):
-    id: str = Field(json_schema_extra={"example": "1"})
-
+class ClearCutReportResponseSchema(ClearCutReportPreviewSchema):
     statellite_images: list[str] | None = Field(
         json_schema_extra={"example": '["image1.jpg", "image2.jpg"]'},
     )
-    slope_area_hectare: float | None = Field(
-        json_schema_extra={"example": "10.0"},
-    )
-    status: str = Field(
-        json_schema_extra={"example": "validated"},
-    )
-    user_id: str | None = Field(
-        json_schema_extra={"example": "1"},
-    )
-    clear_cuts_ids: list[str] = Field(
-        json_schema_extra={"example": "[1,2,3]"},
-    )
-    created_at: datetime = Field(
-        json_schema_extra={"example": "2023-10-10T00:00:00Z"},
-    )
-    updated_at: datetime = Field(
-        json_schema_extra={"example": "2023-10-10T00:00:00Z"},
-    )
     affected_user: PublicUserResponseSchema | None = None
+    assignment_requested_by_id: str | None = None
+    assignment_requested_by: PublicUserResponseSchema | None = None
 
 
-def report_to_response_schema(report: ClearCutReport) -> ClearCutReportResponseSchema:
+def report_to_response_schema(
+    report: ClearCutReport, current_user: "User | None" = None
+) -> ClearCutReportResponseSchema:
+    """Build a full ClearCutReportResponseSchema from a ORM report instance.
+
+    Delegates common fields to report_to_report_preview_schema, then adds the
+    user-visibility-gated fields (affected_user, assignment_requested_by_id,
+    statellite_images).
+    """
+    show_user_info = False
+    if current_user is not None:
+        if current_user.role == "admin" or current_user.id == report.user_id:
+            show_user_info = True
+
+    # Build the base preview dict and reuse it to avoid duplication
+    preview = report_to_report_preview_schema(report)
+
     return ClearCutReportResponseSchema(
-        id=str(report.id),
+        **preview.model_dump(),
+        statellite_images=report.statellite_images,
         affected_user=(
             None
-            if report.user_id is None
+            if report.user_id is None or not show_user_info
             else PublicUserResponseSchema(
                 id=str(report.user.id),
                 email=report.user.email,
                 login=report.user.login,
             )
         ),
-        clear_cuts_ids=[str(clearcut.id) for clearcut in report.clear_cuts],
-        created_at=report.created_at,
-        status=report.status,
-        slope_area_hectare=report.slope_area_hectare,
-        statellite_images=report.statellite_images,
-        updated_at=report.updated_at,
-        user_id=str(report.user_id) if report.user_id is not None else None,
+        assignment_requested_by=(
+            None
+            if report.assignment_requested_by_id is None or not show_user_info
+            else PublicUserResponseSchema(
+                id=str(report.assignment_requested_by.id),
+                email=report.assignment_requested_by.email,
+                login=report.assignment_requested_by.login,
+            )
+        ),
     )

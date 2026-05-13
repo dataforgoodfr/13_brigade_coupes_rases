@@ -1,10 +1,21 @@
 import { useMemo } from "react"
 import { FormattedDate, FormattedNumber, useIntl } from "react-intl"
-import { Popup } from "react-leaflet"
+import { Popup, useMap } from "react-leaflet"
 
+import { Button } from "@/components/ui/button"
 import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
+import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
+import {
+	requestAssignReportThunk,
+	getClearCutsThunk,
+	unassignReportThunk
+} from "@/features/clear-cut/store/clear-cuts-slice"
+import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
+import { useConnectedMe } from "@/features/user/store/me.slice"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import { useToast } from "@/hooks/use-toast"
 
 type Props = {
 	totalAreaHectare: number
@@ -34,9 +45,7 @@ function BDFLabel({
 			label,
 			percentage: (value || 0) / totalAreaHectare
 		}))
-		// Only display types with a coverage > 1%
 		.filter(({ percentage }) => percentage >= 0.01)
-		// Display types in coverage descending order
 		.sort((a, b) => b.percentage - a.percentage)
 
 	const labelString = relevantTypes
@@ -68,17 +77,116 @@ export function ClearCutMapPopUp({
 		totalBdfDeciduousAreaHectare,
 		totalBdfMixedAreaHectare,
 		totalBdfPoplarAreaHectare,
-		totalBdfResinousAreaHectare
+		totalBdfResinousAreaHectare,
+		id,
+		userId,
+		assignmentRequestedById
 	}
 }: {
 	report: ClearCutReport
 }) {
+	const dispatch = useAppDispatch()
+	const user = useConnectedMe()
+	const filters = useAppSelector(selectFiltersRequest)
+	const navigateToDetail = useNavigateToClearCut(id)
+	const { toast } = useToast()
+	const map = useMap()
+
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
 			clearCuts.flatMap((z) => z.ecologicalZonings).map((z) => z.name)
 		)
 		return Array.from(uniqNames).join(",")
 	}, [clearCuts])
+
+	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
+		const action = await dispatch(thunk)
+		if (action.type.endsWith("/rejected")) {
+			toast({ id: "popup-error", title: "Erreur", description: errorMessage })
+		} else {
+			map.closePopup()
+			if (filters) dispatch(getClearCutsThunk(filters))
+		}
+	}
+
+	const isAdmin = user?.role === "admin"
+	const myId = user?.id
+
+	const renderAssignmentSection = () => {
+		if (!user) return null
+
+		// Already assigned
+		if (userId) {
+			if (userId === myId || isAdmin) {
+				return (
+					<>
+						<p className="text-xs text-green-700 font-semibold text-center">
+							✓ Coupe attribuée à un bénévole
+						</p>
+						<Button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation()
+								dispatchAndRefresh(
+									unassignReportThunk(id),
+									"Impossible d'annuler l'attribution."
+								)
+							}}
+							className="w-full text-xs h-8 cursor-pointer"
+							variant="destructive"
+							size="sm"
+						>
+							Annuler l'attribution
+						</Button>
+					</>
+				)
+			}
+			return (
+				<p className="text-xs text-center text-neutral-500 italic mb-1">
+					Déjà attribuée à un autre bénévole
+				</p>
+			)
+		}
+
+		// Pending request
+		if (assignmentRequestedById) {
+			if (assignmentRequestedById === myId || isAdmin) {
+				return (
+					<p className="text-xs text-amber-600 font-medium text-center">
+						⏳ Demande d'attribution en attente de validation
+					</p>
+				)
+			}
+			return (
+				<p className="text-xs text-center text-neutral-500 italic mb-1">
+					Demande en cours par un autre bénévole
+				</p>
+			)
+		}
+
+		// Free — volunteer can request, admin cannot
+		if (!isAdmin) {
+			return (
+				<Button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation()
+						dispatchAndRefresh(
+							requestAssignReportThunk(id),
+							"Impossible de demander l'attribution."
+						)
+					}}
+					className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+					size="sm"
+				>
+					Demander l'attribution
+				</Button>
+			)
+		}
+
+		return null
+	}
+
 	return (
 		<Popup closeButton={false} maxWidth={350}>
 			<div className="flex justify-between items-center mb-5 w-full font-inter">
@@ -145,6 +253,21 @@ export function ClearCutMapPopUp({
 					totalBdfPoplarAreaHectare={totalBdfPoplarAreaHectare}
 					totalBdfResinousAreaHectare={totalBdfResinousAreaHectare}
 				/>
+			</div>
+
+			<div className="flex flex-col gap-2 mt-4 pt-3 border-t border-neutral-100">
+				{renderAssignmentSection()}
+				<Button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation()
+						navigateToDetail()
+					}}
+					className="w-full text-xs h-8 cursor-pointer"
+					variant="outline"
+				>
+					Renseigner les informations
+				</Button>
 			</div>
 		</Popup>
 	)

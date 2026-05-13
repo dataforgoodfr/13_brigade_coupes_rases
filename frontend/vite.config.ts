@@ -19,6 +19,12 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 		preview: {
 			port: 8000
 		},
+		server: {
+			watch: {
+				usePolling: true,
+				interval: 1000
+			}
+		},
 		build: { sourcemap: true },
 		plugins: [
 			VitePWA({

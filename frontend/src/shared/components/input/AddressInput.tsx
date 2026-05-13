@@ -88,13 +88,15 @@ export function AddressInput({
 	}, [query])
 
 	return (
-		<Popover open={open && query.length >= 3}>
+		<Popover open={open && query.length >= 3} onOpenChange={setOpen}>
 			<PopoverAnchor asChild>
 				<Input
 					value={query}
-					onChange={(e) => setQuery(e.target.value)}
+					onChange={(e) => {
+						setQuery(e.target.value)
+						setOpen(true)
+					}}
 					onFocus={() => setOpen(true)}
-					onBlur={() => setOpen(false)}
 					placeholder={placeholder}
 					className="w-full bg-white"
 					suffix={

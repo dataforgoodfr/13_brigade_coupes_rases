@@ -170,3 +170,6 @@ cython_debug/
 backend/test.db
 
 env311
+
+# Documentation et Notes d'Agent Local
+LOCAL_DEV_*.md

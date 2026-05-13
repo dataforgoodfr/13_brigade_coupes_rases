@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import { House, LogIn, LogOutIcon } from "lucide-react"
+import { House, LogIn, LogOutIcon, User } from "lucide-react"
 
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png"
 import dataForGoodIcon from "@/assets/dataforgoodLogo.png"
@@ -37,6 +37,14 @@ export function Navbar({ className }: Props) {
 				/>
 				<div className="flex flex-col gap-10 items-center">
 					<NavbarItem type="link" to="/clear-cuts" Icon={House} title="Carte" />
+					{user && (
+						<NavbarItem
+							type="link"
+							to="/my-cuts"
+							Icon={User}
+							title="Mes Coupes"
+						/>
+					)}
 				</div>
 			</div>
 			<div className="flex flex-col items-center gap-5 ">
