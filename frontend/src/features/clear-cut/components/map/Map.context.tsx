@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react"
 
 export type MapContext = {
 	map: L.Map | null
-	setMap: (map: L.Map) => void
+	setMap: (map: L.Map | null) => void
 	focusedClearCutId?: string
 	setFocusedClearCutId: (id?: string) => void
 } | null

@@ -23,6 +23,7 @@ import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 
 export function AccordionHeader({
 	form,
@@ -36,14 +37,16 @@ export function AccordionHeader({
 	const dispatch = useAppDispatch()
 	const user = useConnectedMe()
 	const filters = useAppSelector(selectFiltersRequest)
+	const { toast } = useToast()
 
 	const areaHectare = form.getValues("report.totalAreaHectare")
 	const ecologicalZonings = form.getValues("ecologicalZonings")
 	const reportId = form.getValues("report.id")
 	const reportUserId = form.getValues("report.userId")
-	// assignmentRequestedById is stored in the report but not in ClearCutForm schema yet; read from raw form values
-	const assignmentRequestedById = (form.getValues("report") as any)
-		?.assignmentRequestedById as string | null | undefined
+	const report = form.getValues("report") as any
+	const assignmentRequestedById = report?.assignmentRequestedById as string | null | undefined
+	const affectedUserLogin = report?.affectedUser?.login as string | null | undefined
+	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login as string | null | undefined
 
 	const isAdmin = user?.role === "admin"
 	const myId = user?.id
@@ -53,6 +56,16 @@ export function AccordionHeader({
 		window.location.reload()
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
+		const action = await dispatch(thunk)
+		if (action.type.endsWith("/rejected")) {
+			toast({ id: "assignment-error", title: "Erreur", description: errorMessage })
+		} else {
+			refresh()
+		}
+	}
+
 	const renderAssignmentSection = () => {
 		if (!user) return null
 
@@ -60,19 +73,28 @@ export function AccordionHeader({
 		if (reportUserId) {
 			if (reportUserId === myId || isAdmin) {
 				return (
-					<Button
-						onClick={(e) => {
-							e.preventDefault()
-							if (window.confirm("Annuler l'attribution de cette coupe ?")) {
-								dispatch(unassignReportThunk(reportId)).then(refresh)
-							}
-						}}
-						className="w-full text-xs h-8"
-						variant="destructive"
-						size="sm"
-					>
-						Annuler l'attribution
-					</Button>
+					<div className="flex flex-col gap-1">
+						<p className="text-xs text-green-700 font-semibold">
+							✓ Attribuée à{" "}
+							<span className="font-bold">
+								{affectedUserLogin ?? (reportUserId === myId ? "vous" : "un bénévole")}
+							</span>
+						</p>
+						<Button
+							type="button"
+							onClick={() => {
+								dispatchAndRefresh(
+									unassignReportThunk(reportId),
+									"Impossible d'annuler l'attribution."
+								)
+							}}
+							className="w-full text-xs h-8 cursor-pointer"
+							variant="destructive"
+							size="sm"
+						>
+							Annuler l'attribution
+						</Button>
+					</div>
 				)
 			}
 			return (
@@ -85,29 +107,38 @@ export function AccordionHeader({
 		// Pending request exists
 		if (assignmentRequestedById) {
 			if (isAdmin) {
-				// Admin sees approve / reject buttons
 				return (
 					<div className="flex flex-col gap-1">
 						<p className="text-xs text-amber-600 font-medium">
-							⏳ Demande d'attribution en attente
+							⏳ Demande de{" "}
+							<span className="font-bold">
+								{assignmentRequestedByLogin ?? "un bénévole"}
+							</span>{" "}
+							en attente
 						</p>
 						<div className="flex gap-1">
 							<Button
-								onClick={(e) => {
-									e.preventDefault()
-									dispatch(approveAssignmentThunk(reportId)).then(refresh)
+								type="button"
+								onClick={() => {
+									dispatchAndRefresh(
+										approveAssignmentThunk(reportId),
+										"Impossible d'approuver la demande."
+									)
 								}}
-								className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white"
+								className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
 								size="sm"
 							>
 								Approuver
 							</Button>
 							<Button
-								onClick={(e) => {
-									e.preventDefault()
-									dispatch(rejectAssignmentThunk(reportId)).then(refresh)
+								type="button"
+								onClick={() => {
+									dispatchAndRefresh(
+										rejectAssignmentThunk(reportId),
+										"Impossible de refuser la demande."
+									)
 								}}
-								className="flex-1 text-xs h-8"
+								className="flex-1 text-xs h-8 cursor-pointer"
 								variant="destructive"
 								size="sm"
 							>
@@ -118,18 +149,20 @@ export function AccordionHeader({
 				)
 			}
 			if (assignmentRequestedById === myId) {
-				// Volunteer who made the request can cancel it
 				return (
 					<div className="flex flex-col gap-1">
 						<p className="text-xs text-amber-600 font-medium">
 							⏳ Demande envoyée, en attente de validation
 						</p>
 						<Button
-							onClick={(e) => {
-								e.preventDefault()
-								dispatch(cancelAssignRequestThunk(reportId)).then(refresh)
+							type="button"
+							onClick={() => {
+								dispatchAndRefresh(
+									cancelAssignRequestThunk(reportId),
+									"Impossible d'annuler la demande."
+								)
 							}}
-							className="w-full text-xs h-8"
+							className="w-full text-xs h-8 cursor-pointer"
 							variant="outline"
 							size="sm"
 						>
@@ -138,7 +171,6 @@ export function AccordionHeader({
 					</div>
 				)
 			}
-			// Another volunteer already requested it
 			return (
 				<p className="text-xs text-neutral-500 italic">
 					Une demande d'attribution est déjà en cours
@@ -149,17 +181,14 @@ export function AccordionHeader({
 		// No assignment and no pending request → volunteer can request
 		return (
 			<Button
-				onClick={(e) => {
-					e.preventDefault()
-					if (
-						window.confirm(
-							"Demander à vous faire attribuer cette coupe rase ? Un administrateur devra valider votre demande."
-						)
-					) {
-						dispatch(requestAssignReportThunk(reportId)).then(refresh)
-					}
+				type="button"
+				onClick={() => {
+					dispatchAndRefresh(
+						requestAssignReportThunk(reportId),
+						"Impossible de demander l'attribution."
+					)
 				}}
-				className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white"
+				className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
 				size="sm"
 			>
 				Demander l'attribution
@@ -177,25 +206,27 @@ export function AccordionHeader({
 				</p>
 				<div className="flex gap-1">
 					<Button
-						onClick={(e) => {
-							e.preventDefault()
-							if (window.confirm("Valider cette coupe rase ?")) {
-								dispatch(updateReportStatusThunk({ id: reportId, status: "validated" })).then(refresh)
-							}
+						type="button"
+						onClick={() => {
+							dispatchAndRefresh(
+								updateReportStatusThunk({ id: reportId, status: "validated" }),
+								"Impossible de valider le signalement."
+							)
 						}}
-						className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white"
+						className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
 						size="sm"
 					>
 						Valider
 					</Button>
 					<Button
-						onClick={(e) => {
-							e.preventDefault()
-							if (window.confirm("Rejeter ce signalement ?")) {
-								dispatch(updateReportStatusThunk({ id: reportId, status: "rejected" })).then(refresh)
-							}
+						type="button"
+						onClick={() => {
+							dispatchAndRefresh(
+								updateReportStatusThunk({ id: reportId, status: "rejected" }),
+								"Impossible de rejeter le signalement."
+							)
 						}}
-						className="flex-1 text-xs h-8"
+						className="flex-1 text-xs h-8 cursor-pointer"
 						variant="destructive"
 						size="sm"
 					>

@@ -68,15 +68,20 @@ export function ClearCuts() {
 	const { breakpoint } = useBreakpoint()
 	useEffect(() => {
 		setMap(map)
+		return () => setMap(null)
 	}, [map, setMap])
+
+	useEffect(() => {
+		map.attributionControl.setPosition("bottomleft")
+		map.zoomControl.setPosition("bottomright")
+	}, [map])
+
 	const { browserLocation } = useGeolocation()
 	const displayPoints = useAppSelector(selectWithPoints)
 	const [layer, layers, setLayer] = useSingleSelect<
 		L.TileLayer,
 		SelectableItemEnhanced<L.TileLayer>
 	>(LAYERS)
-	map.attributionControl.setPosition("bottomleft")
-	map.zoomControl.setPosition("bottomright")
 
 	const handleLayerSelected = (
 		selectableItem: SelectableItemEnhanced<L.TileLayer>

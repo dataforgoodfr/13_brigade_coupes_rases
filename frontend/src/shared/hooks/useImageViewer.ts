@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 import { getStoredToken } from "@/features/user/store/me.slice"
 import { api } from "@/shared/api/api"
@@ -18,7 +18,7 @@ export function useImageViewer(): UseImageViewerResult {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	const getViewableUrls = async (s3Keys: string[]): Promise<string[]> => {
+	const getViewableUrls = useCallback(async (s3Keys: string[]): Promise<string[]> => {
 		if (!s3Keys || s3Keys.length === 0) return []
 
 		setLoading(true)
@@ -58,7 +58,7 @@ export function useImageViewer(): UseImageViewerResult {
 		} finally {
 			setLoading(false)
 		}
-	}
+	}, [])
 
 	return {
 		getViewableUrls,
