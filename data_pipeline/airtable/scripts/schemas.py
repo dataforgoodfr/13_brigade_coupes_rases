@@ -26,7 +26,11 @@ CLEAR_CUT_REPORTS_FIELDS: list[dict] = [
     {"name": "fin_coupe", "type": "singleLineText"},
     {"name": "surface_totale_ha", "type": "number", "options": {"precision": 4}},
     {"name": "surface_pente_ha", "type": "number", "options": {"precision": 4}},
-    {"name": "surface_zone_ecologique_ha", "type": "number", "options": {"precision": 4}},
+    {
+        "name": "surface_zone_ecologique_ha",
+        "type": "number",
+        "options": {"precision": 4},
+    },
     {"name": "surface_feuillu_ha", "type": "number", "options": {"precision": 4}},
     {"name": "surface_resineux_ha", "type": "number", "options": {"precision": 4}},
     {"name": "surface_mixte_ha", "type": "number", "options": {"precision": 4}},

@@ -28,7 +28,6 @@ import psycopg2.extras
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api
-
 from schemas import CLEAR_CUT_REPORTS_FIELDS, USERS_FIELDS
 
 load_dotenv()
@@ -115,7 +114,9 @@ def _rename_fields_if_needed(
         # Vérification après rename
         table_after = _find_table(api, base_id, table_id)
         if table_after:
-            print(f"  Champs après rename: {sorted(f.name for f in table_after.fields)}")
+            print(
+                f"  Champs après rename: {sorted(f.name for f in table_after.fields)}"
+            )
 
 
 def _ensure_fields_exist(
@@ -146,7 +147,9 @@ def _ensure_fields_exist(
         time.sleep(2)
         table_after = _find_table(api, base_id, table_id)
         if table_after:
-            print(f"  Champs après création: {sorted(f.name for f in table_after.fields)}")
+            print(
+                f"  Champs après création: {sorted(f.name for f in table_after.fields)}"
+            )
 
 
 def get_or_create_table(api: Api, base_id: str, table_name: str, fields: list[dict]):
@@ -190,7 +193,9 @@ def sync_table(
     records = fetch_from_db(load_sql(sql_file))
     print(f"  {len(records)} enregistrements récupérés.")
 
-    table, table_schema = get_or_create_table(api, AIRTABLE_BASE_ID, table_name, fields_schema)
+    table, table_schema = get_or_create_table(
+        api, AIRTABLE_BASE_ID, table_name, fields_schema
+    )
 
     if field_renames:
         _rename_fields_if_needed(api, AIRTABLE_BASE_ID, table_schema.id, field_renames)
@@ -209,7 +214,9 @@ def main() -> None:
         AIRTABLE_TABLE_USER,
         "users.sql",
         USERS_FIELDS,
-        field_renames={"user_id": "id"},  # rollback du rename précédent (quirk Airtable primary field)
+        field_renames={
+            "user_id": "id"
+        },  # rollback du rename précédent (quirk Airtable primary field)
     )
     sync_table(
         api,
