@@ -21,8 +21,40 @@ EE_EXPORT_POLL_SECONDS = 20
 
 
 def initialize_earth_engine() -> None:
-    """Initialize EE: OAuth (``earthengine authenticate``) + optional Cloud project and Cloud API key from env."""
+    """Initialize EE with service account (headless) or OAuth (interactive).
+
+    For headless/VM usage, set GOOGLE_SERVICE_ACCOUNT_KEY to the JSON contents
+    of a GCP service account key file. The service account must be registered
+    with Earth Engine (https://signup.earthengine.google.com/#!/service_accounts).
+
+    For interactive/local usage, run ``earthengine authenticate`` once.
+    """
+    import json
+
     project = os.environ.get("EARTH_ENGINE_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
+    sa_key_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_KEY")
+
+    if sa_key_json:
+        # Headless: service account credentials (no browser needed)
+        logging.info("Initializing Earth Engine with service account credentials")
+        try:
+            key_data = json.loads(sa_key_json)
+            credentials = ee.ServiceAccountCredentials(
+                key_data["client_email"],
+                key_data=sa_key_json,
+            )
+            ee.Initialize(credentials=credentials, project=project)
+            return
+        except Exception as exc:
+            raise RuntimeError(
+                "Earth Engine service account initialization failed. "
+                "Check that GOOGLE_SERVICE_ACCOUNT_KEY contains valid JSON and that "
+                "the service account is registered with Earth Engine at "
+                "https://signup.earthengine.google.com/#!/service_accounts"
+            ) from exc
+
+    # Interactive: OAuth fallback
+    logging.info("Initializing Earth Engine with OAuth credentials")
     cloud_api_key = (
         os.environ.get("EARTH_ENGINE_CLOUD_API_KEY")
         or os.environ.get("EARTH_ENGINE_API_KEY")
@@ -34,19 +66,14 @@ def initialize_earth_engine() -> None:
     if cloud_api_key:
         init_kwargs["cloud_api_key"] = cloud_api_key
     try:
-        if init_kwargs:
-            ee.Initialize(**init_kwargs)
-        else:
-            ee.Initialize()
+        ee.Initialize(**init_kwargs)
     except Exception as exc:
         raise RuntimeError(
             "Earth Engine failed to initialize. "
-            "One-time from data_pipeline: `poetry run earthengine authenticate` "
-            "(or `poetry run python -c \"import ee; ee.Authenticate()\"`) "
-            "and sign in with the Google account that has EE access. "
-            "Set EARTH_ENGINE_PROJECT (or GOOGLE_CLOUD_PROJECT) to a GCP project id where the "
-            "Earth Engine API is enabled. Optionally set EARTH_ENGINE_CLOUD_API_KEY (or "
-            "EARTH_ENGINE_API_KEY) for ee.Initialize(cloud_api_key=...). "
+            "For headless/VM use: set GOOGLE_SERVICE_ACCOUNT_KEY env var to the JSON "
+            "contents of a GCP service account key. "
+            "For interactive use: run `earthengine authenticate` and set "
+            "EARTH_ENGINE_PROJECT to a GCP project with the Earth Engine API enabled. "
             "See https://developers.google.com/earth-engine/guides/auth"
         ) from exc
 
