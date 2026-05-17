@@ -232,6 +232,7 @@ def apply_business_filters(sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     sufosat["ign_forest_mark"] = sufosat[bdf_area_columns].fillna(0).sum(axis=1) > 0
 
     date_condition = sufosat["date_max"] >= MIN_CLEARCUT_DATE
+    min_area_condition = sufosat["area_ha"] >= 2
     area_or_context_condition = (
         (sufosat["area_ha"] >= 10)
         | (sufosat["natura2000_area_ha"].fillna(0) > 0)
@@ -240,7 +241,7 @@ def apply_business_filters(sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     forest_condition = sufosat["ign_forest_mark"]
 
     before_count = len(sufosat)
-    sufosat = sufosat[date_condition & area_or_context_condition & forest_condition]
+    sufosat = sufosat[date_condition & min_area_condition & area_or_context_condition & forest_condition]
     logging.info("Business filtering kept %s / %s clusters", len(sufosat), before_count)
 
     return sufosat
