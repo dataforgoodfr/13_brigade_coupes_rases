@@ -1,0 +1,43 @@
+name: Airtable Sync
+
+on:
+  # Déclenchement manuel depuis l'UI GitHub
+  workflow_dispatch:
+
+  # Cron en UTC — GitHub Actions n'accepte pas de timezone.
+  # Paris = UTC+1 en hiver (CET), UTC+2 en été (CEST).
+  # Ici calé sur l'heure d'été (CEST) :
+  #   06:00 UTC = 08h00 Paris (été) / 07h00 Paris (hiver)
+  #   10:00 UTC = 12h00 Paris (été) / 11h00 Paris (hiver)
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 10 * * *"
+
+concurrency:
+  group: airtable-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+      AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+      AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+      AIRTABLE_TABLE_USER: ${{ secrets.AIRTABLE_TABLE_USER }}
+      AIRTABLE_TABLE_CLEAR_CUT_REPORTS: ${{ secrets.AIRTABLE_TABLE_CLEAR_CUT_REPORTS }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: data_pipeline/airtable/requirements.txt
+
+      - name: Run sync
+        working-directory: data_pipeline/airtable
+        run: uv run --no-project --with-requirements requirements.txt scripts/sync_to_airtable.py
