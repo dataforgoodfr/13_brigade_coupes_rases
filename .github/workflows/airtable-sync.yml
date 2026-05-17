@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 30
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
       AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
       AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
       AIRTABLE_TABLE_USER: ${{ secrets.AIRTABLE_TABLE_USER }}
