@@ -15,7 +15,7 @@ WITH zones_eco AS (
       FROM clear_cuts cc
       JOIN clear_cut_ecological_zoning ccez ON ccez.clear_cut_id = cc.id
       JOIN ecological_zonings ez ON ez.id = ccez.ecological_zoning_id
-      WHERE ez.type = 'Natura2000'
+      WHERE ez.type = 'Natura 2000'
       GROUP BY cc.report_id
   ),
   derniers_formulaires AS (
