@@ -12,8 +12,11 @@ import {
 } from "@/features/clear-cut/store/clear-cuts"
 import {
 	persistClearCutCurrentForm,
+	requestAssignReportThunk,
+	selectAssignation,
 	selectSubmission,
-	submitClearCutFormThunk
+	submitClearCutFormThunk,
+	volunteerValidateThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
@@ -27,23 +30,46 @@ type Props = ClearCutFormVersions
 export function ClearCutFullForm({ current, original, latest }: Props) {
 	const dispatch = useAppDispatch()
 	const submission = useAppSelector(selectSubmission)
+	const assignation = useAppSelector(selectAssignation)
 	const loggedUser = useMe()
 	const user = useConnectedMe()
+
+	const isAssignedVolunteer = useMemo(() => {
+		if (!user || user.role !== "volunteer") return false
+		return (
+			current.report.userId === user.id ||
+			current.report.affectedUser?.login === user.login
+		)
+	}, [user, current.report.userId, current.report.affectedUser])
+
 	const isDisabled = useMemo(() => {
 		if (!user) return true
-
 		if (user.role === "volunteer") {
-			const isAffectedUser =
-				current.report.userId === user.id ||
-				(current.report.affectedUser?.login === user.login)
+			const lockedStatuses = ["waiting_for_validation", "validated", "legal_validated", "final_validated"]
+			if (lockedStatuses.includes(current.report.status)) return true
 			const isAssignmentRequester =
 				current.report.assignmentRequestedById === user.id
-
-			return !isAffectedUser && !isAssignmentRequester
+			return !isAssignedVolunteer && !isAssignmentRequester
 		}
-
 		return false
-	}, [user, current.report.userId, current.report.affectedUser, current.report.assignmentRequestedById])
+	}, [user, isAssignedVolunteer, current.report.assignmentRequestedById, current.report.status])
+
+	const canValidate =
+		isAssignedVolunteer && current.report.status === "in_progress"
+
+	const canRequestAssignment =
+		user?.role === "volunteer" &&
+		!current.report.userId &&
+		!current.report.assignmentRequestedById
+
+	const hasPendingRequest =
+		user?.role === "volunteer" &&
+		current.report.assignmentRequestedById === user.id
+
+	const handleRequestAssignment = () => {
+		dispatch(requestAssignReportThunk(current.report.id))
+	}
+
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
 		values: current,
@@ -71,9 +97,13 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		)
 	}
 
+	const handleValidate = () => {
+		dispatch(volunteerValidateThunk(current.report.id))
+	}
+
 	useEffect(() => {
 		if (submission.status === "success") {
-			toast({ id: "edited-form", title: "Formulaire modifié" })
+			toast({ id: "edited-form", title: "Formulaire sauvegardé" })
 		} else if (submission.status === "error") {
 			toast({
 				id: "form-edition-error",
@@ -81,6 +111,17 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 			})
 		}
 	}, [submission.status, toast])
+
+	useEffect(() => {
+		if (assignation.status === "success") {
+			toast({ id: "assignation-action", title: "Demande envoyée à l'administrateur" })
+		} else if (assignation.status === "error") {
+			toast({
+				id: "validation-error",
+				title: "Erreur lors de la demande de validation"
+			})
+		}
+	}, [assignation.status, toast])
 
 	return (
 		<>
@@ -98,16 +139,50 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion>
 					{!!loggedUser && (
-						<Button
-							type="submit"
-							className="mx-auto my-1 text-xl font-bold cursor-pointer"
-							size="lg"
-							disabled={isDisabled || submission.status === "loading"}
-						>
-							{submission.status === "loading"
-								? "Envoi en cours..."
-								: "Valider"}
-						</Button>
+						<div className="flex flex-col gap-2 py-2">
+							{canRequestAssignment && (
+								<Button
+									type="button"
+									className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+									size="lg"
+									disabled={assignation.status === "loading"}
+									onClick={handleRequestAssignment}
+								>
+									{assignation.status === "loading"
+										? "Envoi en cours..."
+										: "Demander l'attribution"}
+								</Button>
+							)}
+							{hasPendingRequest && (
+								<p className="text-sm text-amber-600 font-medium text-center py-2">
+									⏳ Demande d'attribution en attente de validation
+								</p>
+							)}
+							<Button
+								type="submit"
+								variant="outline"
+								className="w-full cursor-pointer"
+								size="lg"
+								disabled={isDisabled || submission.status === "loading"}
+							>
+								{submission.status === "loading"
+									? "Enregistrement..."
+									: "Sauvegarder"}
+							</Button>
+							{canValidate && (
+								<Button
+									type="button"
+									className="w-full font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+									size="lg"
+									disabled={assignation.status === "loading"}
+									onClick={handleValidate}
+								>
+									{assignation.status === "loading"
+										? "Envoi en cours..."
+										: "Valider la coupe"}
+								</Button>
+							)}
+						</div>
 					)}
 				</form>
 			</FormProvider>

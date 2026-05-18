@@ -11,6 +11,7 @@ export const DISPLAY_PREVIEW_ZOOM_LEVEL = 13
 
 export const CLEAR_CUTTING_STATUSES = [
 	"to_validate",
+	"in_progress",
 	"waiting_for_validation",
 	"validated",
 	"legal_validated",

@@ -31,6 +31,7 @@ from app.services.clear_cut_report import (
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
 )
+from app.services.email import send_validation_rejected_email
 from app.services.user_auth import get_current_user, get_optional_current_user
 
 logger = getLogger(__name__)
@@ -244,6 +245,8 @@ def approve_assignment(
         )
     report.user_id = report.assignment_requested_by_id
     report.assignment_requested_by_id = None
+    if report.status == "to_validate":
+        report.status = "in_progress"
     db.commit()
     return {"message": "Assignment approved"}
 
@@ -300,8 +303,108 @@ def unassign_report_from_me(
             detail="You are not assigned to this report",
         )
     report.user_id = None
+    if report.status == "in_progress":
+        report.status = "to_validate"
     db.commit()
     return {"message": "Unassigned successfully"}
+
+
+@router.post(
+    "/{report_id}/volunteer-validate",
+    status_code=status.HTTP_200_OK,
+)
+def volunteer_validate(
+    report_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = db_session,
+):
+    """Volunteer marks the form as complete and requests admin validation."""
+    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
+    if not report:
+        raise AppHTTPException(
+            status_code=404, type="NOT_FOUND", detail="Report not found"
+        )
+    if user.role == "volunteer" and report.user_id != user.id:
+        raise AppHTTPException(
+            status_code=403,
+            type="FORBIDDEN",
+            detail="You are not assigned to this report",
+        )
+    if report.status != "in_progress":
+        raise AppHTTPException(
+            status_code=400,
+            type="INVALID_STATUS",
+            detail="Report must be in_progress to be submitted for validation",
+        )
+    report.status = "waiting_for_validation"
+    db.commit()
+    return {"message": "Validation request submitted"}
+
+
+@router.post(
+    "/{report_id}/approve-validation",
+    status_code=status.HTTP_200_OK,
+)
+def approve_validation(
+    report_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = db_session,
+):
+    """Admin approves the volunteer's validation request."""
+    if user.role != "admin":
+        raise AppHTTPException(
+            status_code=403,
+            type="FORBIDDEN",
+            detail="Only admins can approve validations",
+        )
+    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
+    if not report:
+        raise AppHTTPException(
+            status_code=404, type="NOT_FOUND", detail="Report not found"
+        )
+    if report.status != "waiting_for_validation":
+        raise AppHTTPException(
+            status_code=400,
+            type="INVALID_STATUS",
+            detail="Report must be waiting_for_validation to be approved",
+        )
+    report.status = "validated"
+    db.commit()
+    return {"message": "Validation approved"}
+
+
+@router.post(
+    "/{report_id}/reject-validation",
+    status_code=status.HTTP_200_OK,
+)
+def reject_validation(
+    report_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = db_session,
+):
+    """Admin rejects the volunteer's validation request and notifies the volunteer."""
+    if user.role != "admin":
+        raise AppHTTPException(
+            status_code=403,
+            type="FORBIDDEN",
+            detail="Only admins can reject validations",
+        )
+    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
+    if not report:
+        raise AppHTTPException(
+            status_code=404, type="NOT_FOUND", detail="Report not found"
+        )
+    if report.status != "waiting_for_validation":
+        raise AppHTTPException(
+            status_code=400,
+            type="INVALID_STATUS",
+            detail="Report must be waiting_for_validation to be rejected",
+        )
+    report.status = "in_progress"
+    db.commit()
+    if report.user and report.user.email:
+        send_validation_rejected_email(report.user.email, report_id)
+    return {"message": "Validation rejected"}
 
 
 @router.get(

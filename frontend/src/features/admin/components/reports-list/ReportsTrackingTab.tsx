@@ -1,11 +1,12 @@
 import { useNavigate } from "@tanstack/react-router"
-import { ChevronRight, Users, UserMinus, UserCheck } from "lucide-react"
+import { ChevronRight, RotateCcw, Users, UserMinus, UserCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
 	getAdminAllReportsThunk,
-	selectAdminAllReports
+	selectAdminAllReports,
+	updateReportStatusThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
 import { TimeProgress } from "@/shared/components/TimeProgress"
@@ -21,6 +22,13 @@ export function ReportsTrackingTab() {
 	useEffect(() => {
 		dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
 	}, [dispatch])
+
+	const handleResetToInProgress = (e: React.MouseEvent, reportId: string) => {
+		e.stopPropagation()
+		dispatch(updateReportStatusThunk({ id: reportId, status: "in_progress" })).then(() => {
+			dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
+		})
+	}
 
 	if (reportsState.status === "idle" || reportsState.status === "loading") {
 		return (
@@ -134,9 +142,23 @@ export function ReportsTrackingTab() {
 									{report.totalAreaHectare?.toFixed(1) || 0} ha
 								</td>
 								<td className="px-6 py-4 text-right">
-									<Button variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
-										<ChevronRight size={20} />
-									</Button>
+									<div className="flex items-center justify-end gap-1">
+										{(report.status === "validated" || report.status === "legal_validated" || report.status === "final_validated") && (
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50 min-h-[36px] gap-1"
+												title="Remettre en traitement"
+												onClick={(e) => handleResetToInProgress(e, report.id)}
+											>
+												<RotateCcw size={13} />
+												<span className="hidden sm:inline">En traitement</span>
+											</Button>
+										)}
+										<Button variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
+											<ChevronRight size={20} />
+										</Button>
+									</div>
 								</td>
 							</tr>
 						))}

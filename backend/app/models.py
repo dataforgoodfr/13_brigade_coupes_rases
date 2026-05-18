@@ -233,6 +233,7 @@ class EcologicalZoning(Base):
 
 CLEARCUT_STATUSES = [
     "to_validate",
+    "in_progress",
     "waiting_for_validation",
     "legal_validated",
     "validated",
