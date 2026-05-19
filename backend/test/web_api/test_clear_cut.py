@@ -125,8 +125,8 @@ def test_get_report(client: TestClient):
 def test_affect_me_using_connected_volunteer_should_work(
     db: Session, client: TestClient
 ):
-    token = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")[1]
-    updates = {}
+    [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
+    updates = {"user_id": str(me.id)}
 
     response = client.put(
         "/api/v1/clear-cuts-reports/1",

@@ -1,5 +1,6 @@
 from logging import getLogger
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
@@ -56,7 +57,9 @@ def generate_upload_url(
     upload_request: ImageUploadRequest,
     _=Depends(get_current_user),
 ):
-    content_type = infer_content_type(upload_request.filename, upload_request.content_type)
+    content_type = infer_content_type(
+        upload_request.filename, upload_request.content_type
+    )
 
     if content_type not in ALLOWED_TYPES:
         raise AppHTTPException(
@@ -115,8 +118,8 @@ def generate_upload_url(
 
 @router.post("/local-upload", status_code=204)
 async def local_upload(
-    key: str = Form(...),
-    file: UploadFile = File(...),
+    key: Annotated[str, Form()],
+    file: Annotated[UploadFile, File()],
 ):
     """Fallback local file storage — utilisé uniquement en développement quand S3 n'est pas configuré."""
     relative_key = key.removeprefix("local/")

@@ -36,8 +36,17 @@ def add_clear_cut_form_entry(
     etag: str | None,
 ) -> ClearCutForm:
     report = db.get(ClearCutReport, report_id)
-    locked_statuses = ("waiting_for_validation", "validated", "legal_validated", "final_validated")
-    if report is not None and editor.role == "volunteer" and report.status in locked_statuses:
+    locked_statuses = (
+        "waiting_for_validation",
+        "validated",
+        "legal_validated",
+        "final_validated",
+    )
+    if (
+        report is not None
+        and editor.role == "volunteer"
+        and report.status in locked_statuses
+    ):
         raise AppHTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             type="FORM_LOCKED",
