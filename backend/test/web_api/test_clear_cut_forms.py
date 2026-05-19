@@ -104,7 +104,9 @@ def test_create_version_success(client: TestClient, db: Session):
     # If your API returns workSignVisible, add it here
 
 
-def test_form_submission_does_not_auto_update_report_status(client: TestClient, db: Session):
+def test_form_submission_does_not_auto_update_report_status(
+    client: TestClient, db: Session
+):
     """La soumission du formulaire ne change plus le statut : il faut passer par volunteer-validate puis approve-validation."""
     token = get_admin_user_token(client, db)[1]
 
