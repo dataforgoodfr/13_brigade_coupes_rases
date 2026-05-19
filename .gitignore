@@ -169,6 +169,9 @@ cython_debug/
 # Test db sqlite file
 backend/test.db
 
+# Local dev photo uploads (fallback when S3 not configured)
+backend/uploads/
+
 env311
 
 # Documentation et Notes d'Agent Local

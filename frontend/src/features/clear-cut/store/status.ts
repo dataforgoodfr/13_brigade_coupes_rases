@@ -1,7 +1,8 @@
 import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts"
 
 export const CLEAR_CUTTING_STATUS_COLORS = {
-	to_validate: "blue-500",
+	to_validate: "red-500",
+	in_progress: "blue-500",
 	waiting_for_validation: "orange-400",
 	legal_validated: "orange-500",
 	validated: "green-500",
@@ -10,7 +11,8 @@ export const CLEAR_CUTTING_STATUS_COLORS = {
 } as const
 
 export const CLEAR_CUTTING_STATUS_BACKGROUND_COLORS = {
-	to_validate: "bg-blue-500",
+	to_validate: "bg-red-500",
+	in_progress: "bg-blue-500",
 	waiting_for_validation: "bg-orange-400",
 	legal_validated: "bg-orange-500",
 	validated: "bg-green-500",
@@ -22,9 +24,10 @@ export type StatusColor = (typeof CLEAR_CUTTING_STATUS_COLORS)[ClearCutStatus]
 
 export const CLEAR_CUTTING_STATUS_TRANSLATIONS: Record<ClearCutStatus, string> =
 	{
-		to_validate: "À vérifier",
-		waiting_for_validation: "En attente de validation terrain",
-		validated: "Validé",
+		to_validate: "À traiter",
+		in_progress: "En traitement",
+		waiting_for_validation: "En attente de validation",
+		validated: "Traitée",
 		legal_validated: "Validé avec poursuites",
 		final_validated: "Validé sans poursuites",
 		rejected: "Rejeté"

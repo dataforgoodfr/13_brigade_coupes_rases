@@ -35,6 +35,24 @@ def add_clear_cut_form_entry(
     new_version: ClearCutFormCreate,
     etag: str | None,
 ) -> ClearCutForm:
+    report = db.get(ClearCutReport, report_id)
+    locked_statuses = (
+        "waiting_for_validation",
+        "validated",
+        "legal_validated",
+        "final_validated",
+    )
+    if (
+        report is not None
+        and editor.role == "volunteer"
+        and report.status in locked_statuses
+    ):
+        raise AppHTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            type="FORM_LOCKED",
+            detail="Le formulaire est verrouillé après validation. Seul un administrateur peut le modifier.",
+        )
+
     last_form = find_last_clear_cut_form_by_report_id(db, report_id)
     new_clear_cut_form_entry = clear_cut_form_create_to_clear_cut_form(
         new_version, editor, report_id
@@ -95,20 +113,6 @@ def add_clear_cut_form_entry(
             new_clear_cut_form_entry.request_engaged = last_form_entry.request_engaged
 
     db.add(new_clear_cut_form_entry)
-
-    # Update report status when form is submitted
-    report = db.get(ClearCutReport, report_id)
-    if report is not None and report.status == "to_validate":
-        report.status = (
-            "validated" if editor.role == "admin" else "waiting_for_validation"
-        )
-    elif (
-        report is not None
-        and report.status == "waiting_for_validation"
-        and editor.role == "admin"
-    ):
-        report.status = "validated"
-
     db.commit()
     db.refresh(new_clear_cut_form_entry)
     return new_clear_cut_form_entry

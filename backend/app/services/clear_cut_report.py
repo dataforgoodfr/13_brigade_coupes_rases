@@ -289,17 +289,6 @@ def volunteer_create_clear_cut_report(
 def update_clear_cut_report(
     id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
 ):
-    user_id = None
-    if connected_user.role == "volunteer":
-        if request.user_id is not None and request.user_id != connected_user.id:
-            raise AppHTTPException(
-                status_code=403,
-                type="INVALID_REQUESTER_RIGHTS",
-                detail="Volunteer could not assign an other user",
-            )
-        user_id = connected_user.id
-    if connected_user.role == "admin":
-        user_id = request.user_id
     report = db.get(ClearCutReport, id)
     if not report:
         raise AppHTTPException(
@@ -308,9 +297,20 @@ def update_clear_cut_report(
             detail="Clear cut report not found",
         )
 
-    report.user_id = user_id
-    if user_id is not None:
-        report.assignment_requested_by_id = None
+    # Only update user_id when explicitly included in the request body
+    if "user_id" in request.model_fields_set:
+        if connected_user.role == "volunteer":
+            if request.user_id is not None and request.user_id != connected_user.id:
+                raise AppHTTPException(
+                    status_code=403,
+                    type="INVALID_REQUESTER_RIGHTS",
+                    detail="Volunteer could not assign an other user",
+                )
+            report.user_id = connected_user.id
+        if connected_user.role == "admin":
+            report.user_id = request.user_id
+        if report.user_id is not None:
+            report.assignment_requested_by_id = None
 
     if request.status is not None:
         if connected_user.role == "admin":
@@ -348,6 +348,7 @@ def find_clearcuts_reports(
         query = query.filter(
             or_(
                 ClearCutReport.status == "to_validate",
+                ClearCutReport.status == "waiting_for_validation",
                 ClearCutReport.assignment_requested_by_id.is_not(None),
             )
         )

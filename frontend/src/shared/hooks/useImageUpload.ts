@@ -31,6 +31,22 @@ export interface UseImageUploadResult {
 	progress: number
 }
 
+const EXTENSION_TO_MIME: Record<string, string> = {
+	jpg: "image/jpeg",
+	jpeg: "image/jpeg",
+	png: "image/png",
+	gif: "image/gif",
+	webp: "image/webp",
+	heic: "image/jpeg",
+	heif: "image/jpeg"
+}
+
+function inferMimeType(file: File): string {
+	if (file.type && file.type.startsWith("image/")) return file.type
+	const ext = file.name.split(".").pop()?.toLowerCase() ?? ""
+	return EXTENSION_TO_MIME[ext] ?? "image/jpeg"
+}
+
 export function useImageUpload(): UseImageUploadResult {
 	const [uploading, setUploading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -50,55 +66,43 @@ export function useImageUpload(): UseImageUploadResult {
 
 			for (let i = 0; i < totalFiles; i++) {
 				const file = files[i]
+				const contentType = inferMimeType(file)
 
-				// Validate file type
-				if (!file.type.startsWith("image/")) {
-					throw new Error(`File ${file.name} is not an image`)
+				if (!contentType.startsWith("image/")) {
+					throw new Error(`Le fichier "${file.name}" n'est pas une image.`)
 				}
 
-				// Validate file size (10MB limit)
 				const maxSize = 10 * 1024 * 1024
 				if (file.size > maxSize) {
 					throw new Error(
-						`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB`
+						`Le fichier "${file.name}" est trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo). Taille maximale : 10 Mo.`
 					)
 				}
 
-				// Get pre-signed URL
+				const token = getStoredToken()
+				if (!token) {
+					throw new Error("Vous devez être connecté pour envoyer des photos.")
+				}
+
+				const authenticatedApi = api.extend({
+					headers: { Authorization: `Bearer ${token.accessToken}` }
+				})
+
 				const uploadRequest: ImageUploadRequest = {
 					filename: file.name,
-					content_type: file.type,
+					content_type: contentType,
 					file_size: file.size,
 					report_id: reportId
 				}
 
-				// Get authenticated API instance
-				const token = getStoredToken()
-				if (!token) {
-					throw new Error("Authentication required for image upload")
-				}
-
-				const authenticatedApi = api.extend({
-					headers: {
-						Authorization: `Bearer ${token.accessToken}`
-					}
-				})
-
 				const response = await authenticatedApi
-					.post("api/v1/images/upload-url", {
-						json: uploadRequest
-					})
+					.post("api/v1/images/upload-url", { json: uploadRequest })
 					.json<ImageUploadResponse>()
 
-				// Upload file directly to S3 using pre-signed POST
 				const formData = new FormData()
-
-				// Add all the fields from the pre-signed POST
 				for (const [key, value] of Object.entries(response.fields)) {
 					formData.append(key, value)
 				}
-
-				// Add the file last
 				formData.append("file", file)
 
 				const uploadResponse = await fetch(response.uploadUrl, {
@@ -108,7 +112,7 @@ export function useImageUpload(): UseImageUploadResult {
 
 				if (!uploadResponse.ok) {
 					throw new Error(
-						`Failed to upload ${file.name}: ${uploadResponse.statusText}`
+						`Échec de l'envoi de "${file.name}" (${uploadResponse.status} ${uploadResponse.statusText}).`
 					)
 				}
 
@@ -118,13 +122,13 @@ export function useImageUpload(): UseImageUploadResult {
 					filename: file.name
 				})
 
-				// Update progress
 				setProgress(((i + 1) / totalFiles) * 100)
 			}
 
 			return uploadedImages
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "Upload failed"
+			const errorMessage =
+				err instanceof Error ? err.message : "Erreur lors de l'envoi de la photo."
 			setError(errorMessage)
 			throw err
 		} finally {
@@ -132,10 +136,5 @@ export function useImageUpload(): UseImageUploadResult {
 		}
 	}
 
-	return {
-		uploadImages,
-		uploading,
-		error,
-		progress
-	}
+	return { uploadImages, uploading, error, progress }
 }

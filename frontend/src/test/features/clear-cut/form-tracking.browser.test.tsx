@@ -11,7 +11,8 @@ import { renderApp } from "@/test/renderApp"
 
 const reportMock = mockClearCutReportResponse({
 	id: "ABC",
-	affectedUser: volunteerMock
+	affectedUser: volunteerMock,
+	status: "in_progress"
 })
 const formMock = mockClearCutFormsResponse({
 	reportId: reportMock.response.id

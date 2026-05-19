@@ -10,7 +10,6 @@ import type {
 	ClearCutReport
 } from "@/features/clear-cut/store/clear-cuts"
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status"
-import { useBreakpoint } from "@/shared/hooks/breakpoint"
 
 type Props = { report: ClearCutReport; clearCut: ClearCut }
 
@@ -19,7 +18,6 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const ref = useRef<L.FeatureGroup>(null)
 	const location = useLocation()
 	const navigateToDetail = useNavigateToClearCut(report.id)
-	const { breakpoint } = useBreakpoint()
 	useEffect(() => {
 		if (focusedClearCutId === report.id) {
 			if (ref.current && (ref.current as any)._map) {
@@ -61,12 +59,8 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				dblclick: () => {
 					navigateToDetail()
 				},
-				click: (event) => {
-					if (breakpoint !== "mobile") {
-						navigateToDetail()
-					} else {
-						event.target.openPopup()
-					}
+				click: () => {
+					navigateToDetail()
 				},
 				popupopen: () => {
 					setFocusedClearCutId(report.id)

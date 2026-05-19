@@ -64,6 +64,7 @@ export function formField<Form extends FieldValues, Value = unknown>({
 		case "textArea":
 			return fieldWithTextContentValue<Form>(item, user)
 		case "inputFile":
+			return inputFileField<Form>(item, user)
 		case "inputText":
 			return fieldWithValue<Form>(item, user)
 		case "switch":
@@ -220,6 +221,37 @@ function changeTrackingLabel(label: string, user: UserEvent) {
 			)
 			await user.click(button)
 		}
+	}
+}
+
+function inputFileField<Form extends FieldValues>(
+	item: InputFileItem<Form>,
+	user: UserEvent
+): FieldInput<string | null, HTMLButtonElement> {
+	const label = item.label ?? item.name
+	const findFormItem = async () => {
+		const labelEl = await screen.findByText(label, { selector: "label" })
+		return labelEl.parentElement as HTMLElement
+	}
+	const findElement = async () => {
+		const formItem = await findFormItem()
+		return within(formItem).findByRole("button", {
+			name: /Galerie/
+		}) as Promise<HTMLButtonElement>
+	}
+	return {
+		...changeTrackingLabel(label, user),
+		findElement,
+		findValue: async () => null,
+		isDisabled: async () => {
+			const btn = await findElement()
+			return btn.hasAttribute("disabled")
+		},
+		expectDisabledState: async (state) => {
+			const btn = await findElement()
+			expect(btn)[state === true ? "to" : "not"].toBeDisabled()
+		},
+		setValue: async () => {}
 	}
 }
 

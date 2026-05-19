@@ -40,7 +40,7 @@ export function useImageViewer(): UseImageViewerResult {
 				s3Keys.map(async (s3Key) => {
 					try {
 						const response = await authenticatedApi
-							.get(`api/v1/images/view/${encodeURIComponent(s3Key)}`)
+							.get(`api/v1/images/view/${s3Key.split("/").map(encodeURIComponent).join("/")}`)
 							.json<ImageViewResponse>()
 						return response.viewUrl
 					} catch (_e) {

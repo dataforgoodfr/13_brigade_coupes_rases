@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { useMemo } from "react"
 import { FormattedDate, FormattedNumber, useIntl } from "react-intl"
 import { Popup, useMap } from "react-leaflet"
@@ -5,7 +6,6 @@ import { Popup, useMap } from "react-leaflet"
 import { Button } from "@/components/ui/button"
 import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
-import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 import {
 	requestAssignReportThunk,
@@ -88,7 +88,6 @@ export function ClearCutMapPopUp({
 	const dispatch = useAppDispatch()
 	const user = useConnectedMe()
 	const filters = useAppSelector(selectFiltersRequest)
-	const navigateToDetail = useNavigateToClearCut(id)
 	const { toast } = useToast()
 	const map = useMap()
 
@@ -127,12 +126,13 @@ export function ClearCutMapPopUp({
 							type="button"
 							onClick={(e) => {
 								e.stopPropagation()
+								e.nativeEvent.stopImmediatePropagation()
 								dispatchAndRefresh(
 									unassignReportThunk(id),
 									"Impossible d'annuler l'attribution."
 								)
 							}}
-							className="w-full text-xs h-8 cursor-pointer"
+							className="w-full text-xs min-h-[44px] cursor-pointer"
 							variant="destructive"
 							size="sm"
 						>
@@ -171,12 +171,13 @@ export function ClearCutMapPopUp({
 					type="button"
 					onClick={(e) => {
 						e.stopPropagation()
+						e.nativeEvent.stopImmediatePropagation()
 						dispatchAndRefresh(
 							requestAssignReportThunk(id),
 							"Impossible de demander l'attribution."
 						)
 					}}
-					className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+					className="w-full text-xs min-h-[44px] bg-green-600 hover:bg-green-700 text-white cursor-pointer"
 					size="sm"
 				>
 					Demander l'attribution
@@ -257,17 +258,13 @@ export function ClearCutMapPopUp({
 
 			<div className="flex flex-col gap-2 mt-4 pt-3 border-t border-neutral-100">
 				{renderAssignmentSection()}
-				<Button
-					type="button"
-					onClick={(e) => {
-						e.stopPropagation()
-						navigateToDetail()
-					}}
-					className="w-full text-xs h-8 cursor-pointer"
-					variant="outline"
+				<Link
+					to="/clear-cuts/$clearCutId"
+					params={{ clearCutId: id }}
+					className="flex items-center justify-center w-full min-h-[44px] text-xs rounded-md border border-input bg-background px-3 py-2 font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer"
 				>
 					Renseigner les informations
-				</Button>
+				</Link>
 			</div>
 		</Popup>
 	)

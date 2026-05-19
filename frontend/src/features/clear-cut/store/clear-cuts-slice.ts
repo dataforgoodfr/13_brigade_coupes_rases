@@ -356,6 +356,30 @@ export const updateReportStatusThunk = createAppAsyncThunk<void, { id: string, s
 	}
 )
 
+export const volunteerValidateThunk = createAppAsyncThunk<void, string>(
+	"clear-cuts/volunteerValidate",
+	async (reportId, { extra: { api }, dispatch }) => {
+		await api().post(`api/v1/clear-cuts-reports/${reportId}/volunteer-validate`).json()
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
+export const approveValidationThunk = createAppAsyncThunk<void, string>(
+	"clear-cuts/approveValidation",
+	async (reportId, { extra: { api }, dispatch }) => {
+		await api().post(`api/v1/clear-cuts-reports/${reportId}/approve-validation`).json()
+		dispatch(getClearCutFormThunk({ id: reportId }))
+	}
+)
+
+export const rejectValidationThunk = createAppAsyncThunk<void, string>(
+	"clear-cuts/rejectValidation",
+	async (reportId, { extra: { api }, dispatch }) => {
+		await api().post(`api/v1/clear-cuts-reports/${reportId}/reject-validation`).json()
+		dispatch(getClearCutFormThunk({ id: reportId }))
+	}
+)
+
 type State = {
 	clearCuts: RequestedContent<ClearCuts>
 	detail: RequestedContent<ClearCutFormVersions>
@@ -466,7 +490,22 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			updateReportStatusThunk,
-			(state) => state.assignation // Reuse assignation loading state for simplicity
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			volunteerValidateThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			approveValidationThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			rejectValidationThunk,
+			(state) => state.assignation
 		)
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
 			formStorage.syncStorage(favorites, clearCutFormVersionsSchema)

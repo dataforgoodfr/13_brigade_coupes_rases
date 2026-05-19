@@ -196,7 +196,7 @@ const defaultSetupServerBeforeEach = (setup: ReturnType<typeof setupTest>) => {
 		worker.use(setup.reportMock.handler, setup.formMock.handler)
 	})
 }
-const setupVolunteerAssigned = setupTest({ affectedUser: volunteerMock })
+const setupVolunteerAssigned = setupTest({ affectedUser: volunteerMock, status: "in_progress" })
 describe.each(setupVolunteerAssigned.sections)(
 	"$section.name section form when there is volunteer assigned",
 	({ section, items }) => {
