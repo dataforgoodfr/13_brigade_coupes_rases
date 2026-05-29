@@ -110,7 +110,7 @@ def test_get_reports(client: TestClient):
     )
     data = response.json()
     assert response.status_code == status.HTTP_200_OK
-    assert len(data["content"]) == 7
+    assert len(data["content"]) == 10
 
 
 def test_get_report(client: TestClient):
