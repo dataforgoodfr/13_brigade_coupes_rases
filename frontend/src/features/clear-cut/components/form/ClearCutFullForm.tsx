@@ -6,6 +6,16 @@ import { FormProvider, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger
+} from "@/components/ui/dialog"
+import {
 	type ClearCutForm,
 	type ClearCutFormVersions,
 	clearCutFormSchema
@@ -170,17 +180,41 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 									: "Sauvegarder"}
 							</Button>
 							{canValidate && (
-								<Button
-									type="button"
-									className="w-full font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
-									size="lg"
-									disabled={assignation.status === "loading"}
-									onClick={handleValidate}
-								>
-									{assignation.status === "loading"
-										? "Envoi en cours..."
-										: "Valider la coupe"}
-								</Button>
+								<Dialog>
+									<DialogTrigger asChild>
+										<Button
+											type="button"
+											className="w-full font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+											size="lg"
+											disabled={assignation.status === "loading"}
+										>
+											{assignation.status === "loading"
+												? "Envoi en cours..."
+												: "Valider la coupe"}
+										</Button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>Valider la coupe</DialogTitle>
+											<DialogDescription>
+												Êtes-vous sûr.e de vouloir valider ce formulaire ?
+											</DialogDescription>
+										</DialogHeader>
+										<DialogFooter>
+											<DialogClose asChild>
+												<Button variant="zinc">Annuler</Button>
+											</DialogClose>
+											<DialogClose asChild>
+												<Button
+													className="font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+													onClick={handleValidate}
+												>
+													Valider
+												</Button>
+											</DialogClose>
+										</DialogFooter>
+									</DialogContent>
+								</Dialog>
 							)}
 						</div>
 					)}
