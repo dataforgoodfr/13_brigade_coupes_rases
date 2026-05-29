@@ -1,6 +1,6 @@
 import * as L from "leaflet"
 import { ListIcon, Locate } from "lucide-react"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { CircleMarker, useMap, useMapEvents } from "react-leaflet"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
@@ -54,6 +54,25 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	}
 ]
 
+const OVERLAYS: SelectableItemEnhanced<L.TileLayer>[] = [
+	{
+		isSelected: false,
+		item: L.tileLayer(
+			"https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png",
+			{
+				id: "Cadastre",
+				attribution:
+					'&copy; <a href="https://geoservices.ign.fr/">IGN</a> - Parcellaire Express',
+				maxZoom: 20,
+				opacity: 0.7,
+				pane: "overlayPane"
+			}
+		),
+		label: "Cadastre",
+		value: "cadastre"
+	}
+]
+
 function getPointRadius(currentPointCnt: number, mapSize: L.Point) {
 	const size = Math.min(mapSize.x, mapSize.y)
 	const pointRadius = currentPointCnt / size
@@ -82,6 +101,7 @@ export function ClearCuts() {
 		L.TileLayer,
 		SelectableItemEnhanced<L.TileLayer>
 	>(LAYERS)
+	const [overlays, setOverlays] = useState(OVERLAYS)
 
 	const handleLayerSelected = (
 		selectableItem: SelectableItemEnhanced<L.TileLayer>
@@ -91,6 +111,27 @@ export function ClearCuts() {
 		}
 		map.addLayer(selectableItem.item)
 		setLayer(selectableItem)
+		for (const overlay of overlays) {
+			if (overlay.isSelected && map.hasLayer(overlay.item)) {
+				overlay.item.bringToFront()
+			}
+		}
+	}
+
+	const handleOverlaysChanged = (
+		selectedItems: SelectableItemEnhanced<L.TileLayer>[]
+	) => {
+		for (const overlay of selectedItems) {
+			if (overlay.isSelected) {
+				if (!map.hasLayer(overlay.item)) {
+					map.addLayer(overlay.item)
+				}
+				overlay.item.bringToFront()
+			} else if (map.hasLayer(overlay.item)) {
+				map.removeLayer(overlay.item)
+			}
+		}
+		setOverlays(selectedItems)
 	}
 
 	const centerOnUserLocation = useCallback(() => {
@@ -226,7 +267,7 @@ export function ClearCuts() {
 				</div>
 			</div>
 			<div className="leaflet-bottom leaflet-left mb-3">
-				<div className="leaflet-control bg-zinc-100 p-1 rounded-md ">
+				<div className="leaflet-control bg-zinc-100 p-1 rounded-md flex flex-col gap-1">
 					<ToggleGroup
 						variant="primary"
 						type="single"
@@ -234,6 +275,13 @@ export function ClearCuts() {
 						size="sm"
 						value={layers}
 						onValueChange={handleLayerSelected}
+					/>
+					<ToggleGroup
+						variant="primary"
+						type="multiple"
+						size="sm"
+						value={overlays}
+						onValueChange={handleOverlaysChanged}
 					/>
 				</div>
 			</div>
