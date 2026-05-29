@@ -47,7 +47,7 @@ services:
       - "54112:54112"
     environment:
       DATABASE_URL: postgresql://devuser:devuser@db:5432/local
-      ALLOWED_ORIGINS: http://localhost:8081
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:8081
     depends_on:
       - db
 
