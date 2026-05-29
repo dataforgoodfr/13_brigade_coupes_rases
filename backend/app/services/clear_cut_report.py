@@ -343,7 +343,12 @@ def find_clearcuts_reports(
         joinedload(ClearCutReport.assignment_requested_by),
     )
     if assigned_to_me and current_user:
-        query = query.filter(ClearCutReport.user_id == current_user.id)
+        query = query.filter(
+            or_(
+                ClearCutReport.user_id == current_user.id,
+                ClearCutReport.assignment_requested_by_id == current_user.id,
+            )
+        )
     if admin_action_required:
         query = query.filter(
             or_(
