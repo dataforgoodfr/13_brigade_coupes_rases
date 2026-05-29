@@ -28,7 +28,9 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 		item: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 			id: "OpenStreetMap.Mapnik",
 			attribution:
-				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			maxNativeZoom: 19,
+			maxZoom: 20
 		}),
 		label: "Standard",
 		value: "standard"
@@ -36,7 +38,9 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
 		isSelected: false,
 		item: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
-			id: "OpenTopoMap"
+			id: "OpenTopoMap",
+			maxNativeZoom: 17,
+			maxZoom: 20
 		}),
 		label: "Terrain",
 		value: "ground"
@@ -46,7 +50,9 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 		item: L.tileLayer(
 			"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 			{
-				id: "ArcGIS.WorldImagery"
+				id: "ArcGIS.WorldImagery",
+				maxNativeZoom: 19,
+				maxZoom: 20
 			}
 		),
 		label: "Satellite",
