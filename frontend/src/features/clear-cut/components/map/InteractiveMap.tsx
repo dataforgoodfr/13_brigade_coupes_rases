@@ -31,6 +31,7 @@ import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { useNavigate } from "@tanstack/react-router"
 
 import { ClearCuts } from "./ClearCuts"
+import { LocationButton } from "./LocationButton"
 
 function authedApi() {
 	const token = getStoredToken() as any
@@ -261,6 +262,7 @@ export function InteractiveMap() {
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			/>
 			<GeomanControls />
+			<LocationButton />
 			<ClearCuts />
 		</MapContainer>
 	)
