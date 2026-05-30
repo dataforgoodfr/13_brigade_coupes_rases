@@ -3,6 +3,7 @@
 }
 
 .leaflet-popup > .leaflet-popup-content-wrapper {
+	pointer-events: auto;
 	border-radius: 20px;
 	box-shadow: none;
 }
