@@ -1,5 +1,7 @@
-import { Link } from "@tanstack/react-router"
-import { useMemo } from "react"
+import { useNavigate } from "@tanstack/react-router"
+import L from "leaflet"
+import { X } from "lucide-react"
+import { useMemo, useRef } from "react"
 import { FormattedDate, FormattedNumber, useIntl } from "react-intl"
 import { Popup, useMap } from "react-leaflet"
 
@@ -8,14 +10,14 @@ import { DotByStatus } from "@/features/clear-cut/components/DotByStatus"
 import { RuleBadge } from "@/features/clear-cut/components/RuleBadge"
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 import {
-	requestAssignReportThunk,
 	getClearCutsThunk,
+	requestAssignReportThunk,
 	unassignReportThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { useToast } from "@/hooks/use-toast"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type Props = {
 	totalAreaHectare: number
@@ -90,6 +92,8 @@ export function ClearCutMapPopUp({
 	const filters = useAppSelector(selectFiltersRequest)
 	const { toast } = useToast()
 	const map = useMap()
+	const navigate = useNavigate()
+	const popupRef = useRef<L.Popup>(null)
 
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
@@ -188,13 +192,38 @@ export function ClearCutMapPopUp({
 		return null
 	}
 
+	const disablePopupPropagation = () => {
+		const el = popupRef.current?.getElement()
+		if (el) {
+			L.DomEvent.disableClickPropagation(el)
+			L.DomEvent.disableScrollPropagation(el)
+		}
+	}
+
 	return (
-		<Popup closeButton={false} maxWidth={350}>
-			<div className="flex justify-between items-center mb-5 w-full font-inter">
+		<Popup
+			ref={popupRef}
+			closeButton={false}
+			maxWidth={350}
+			eventHandlers={{ add: disablePopupPropagation }}
+		>
+			<div className="flex justify-between items-center gap-2 mb-5 w-full font-inter">
 				<div className="flex items-center">
 					<h2 className="font-semibold text-lg">{name ?? city}</h2>
 					<DotByStatus className="ml-2.5" status={status} />
 				</div>
+				<button
+					type="button"
+					aria-label="Fermer"
+					onClick={(e) => {
+						e.stopPropagation()
+						e.nativeEvent.stopImmediatePropagation()
+						map.closePopup()
+					}}
+					className="flex shrink-0 items-center justify-center -mr-2 -mt-2 h-11 w-11 rounded-full text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 active:bg-neutral-200 cursor-pointer touch-manipulation transition-colors"
+				>
+					<X className="h-5 w-5" strokeWidth={2.5} />
+				</button>
 			</div>
 
 			<div className="flex mb-5 gap-2 font-inter">
@@ -258,13 +287,22 @@ export function ClearCutMapPopUp({
 
 			<div className="flex flex-col gap-2 mt-4 pt-3 border-t border-neutral-100">
 				{renderAssignmentSection()}
-				<Link
-					to="/clear-cuts/$clearCutId"
-					params={{ clearCutId: id }}
-					className="flex items-center justify-center w-full min-h-[44px] text-xs rounded-md border border-input bg-background px-3 py-2 font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer"
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onClick={(e) => {
+						e.stopPropagation()
+						e.nativeEvent.stopImmediatePropagation()
+						navigate({
+							to: "/clear-cuts/$clearCutId",
+							params: { clearCutId: id }
+						})
+					}}
+					className="w-full text-xs min-h-[44px] cursor-pointer"
 				>
 					Renseigner les informations
-				</Link>
+				</Button>
 			</div>
 		</Popup>
 	)
