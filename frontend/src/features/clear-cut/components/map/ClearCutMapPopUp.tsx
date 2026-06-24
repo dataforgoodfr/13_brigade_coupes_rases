@@ -83,9 +83,11 @@ export function ClearCutMapPopUp({
 		id,
 		userId,
 		assignmentRequestedById
-	}
+	},
+	isReportPanelOpen = false
 }: {
 	report: ClearCutReport
+	isReportPanelOpen?: boolean
 }) {
 	const dispatch = useAppDispatch()
 	const user = useConnectedMe()
@@ -204,12 +206,13 @@ export function ClearCutMapPopUp({
 		<Popup
 			ref={popupRef}
 			closeButton={false}
-			maxWidth={350}
+			maxWidth={280}
+			autoPan={false}
 			eventHandlers={{ add: disablePopupPropagation }}
 		>
-			<div className="flex justify-between items-center gap-2 mb-5 w-full font-inter">
+			<div className="flex justify-between items-center gap-2 mb-3 w-full font-inter">
 				<div className="flex items-center">
-					<h2 className="font-semibold text-lg">{name ?? city}</h2>
+					<h2 className="font-semibold text-base">{name ?? city}</h2>
 					<DotByStatus className="ml-2.5" status={status} />
 				</div>
 				<button
@@ -226,13 +229,13 @@ export function ClearCutMapPopUp({
 				</button>
 			</div>
 
-			<div className="flex mb-5 gap-2 font-inter">
+			<div className="flex mb-3 gap-2 font-inter">
 				{tags.map((tag) => (
 					<RuleBadge key={tag.id} {...tag} />
 				))}
 			</div>
 
-			<div className="flex flex-col gap-2.5 text-base text-secondary font-jakarta font-medium">
+			<div className="flex flex-col gap-2 text-sm text-secondary font-jakarta font-medium">
 				<div>
 					Début de la coupe :{" "}
 					<strong>
@@ -285,24 +288,28 @@ export function ClearCutMapPopUp({
 				/>
 			</div>
 
-			<div className="flex flex-col gap-2 mt-4 pt-3 border-t border-neutral-100">
+			<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-neutral-100">
 				{renderAssignmentSection()}
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={(e) => {
-						e.stopPropagation()
-						e.nativeEvent.stopImmediatePropagation()
-						navigate({
-							to: "/clear-cuts/$clearCutId",
-							params: { clearCutId: id }
-						})
-					}}
-					className="w-full text-xs min-h-[44px] cursor-pointer"
-				>
-					Renseigner les informations
-				</Button>
+				{/* Hidden when the side info panel is already open for this report:
+				    the button would just re-open the panel it is already showing. */}
+				{!isReportPanelOpen && (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={(e) => {
+							e.stopPropagation()
+							e.nativeEvent.stopImmediatePropagation()
+							navigate({
+								to: "/clear-cuts/$clearCutId",
+								params: { clearCutId: id }
+							})
+						}}
+						className="w-full text-xs min-h-[44px] cursor-pointer"
+					>
+						Renseigner les informations
+					</Button>
+				)}
 			</div>
 		</Popup>
 	)
