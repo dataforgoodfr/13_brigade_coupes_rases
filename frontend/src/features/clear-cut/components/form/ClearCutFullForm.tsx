@@ -30,7 +30,9 @@ import {
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
+import { useUploadingTracker } from "@/shared/form/UploadingContext"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus"
 
 import AccordionContent from "./AccordionContent"
 import { AccordionHeader } from "./AccordionHeader"
@@ -43,6 +45,8 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 	const assignation = useAppSelector(selectAssignation)
 	const loggedUser = useMe()
 	const user = useConnectedMe()
+	const { isUploading } = useUploadingTracker()
+	const isOnline = useOnlineStatus()
 
 	const isAssignedVolunteer = useMemo(() => {
 		if (user?.role !== "volunteer") return false
@@ -125,10 +129,21 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		if (submission.status === "success") {
 			toast({ id: "edited-form", title: "Formulaire sauvegardé" })
 		} else if (submission.status === "error") {
-			toast({
-				id: "form-edition-error",
-				title: "Erreur lors de la sauvegarde du formulaire !"
-			})
+			// Distinguish a network outage from a server error: when offline the
+			// save simply can't reach the server, but the data is safe locally.
+			toast(
+				navigator.onLine
+					? {
+							id: "form-edition-error",
+							title: "Erreur lors de la sauvegarde du formulaire !"
+						}
+					: {
+							id: "form-edition-error",
+							title: "Sauvegarde impossible hors connexion",
+							description:
+								"Vos saisies restent enregistrées sur cet appareil. Réessayez une fois le réseau revenu."
+						}
+			)
 		}
 	}, [submission.status, toast])
 
@@ -181,16 +196,26 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 									⏳ Demande d'attribution en attente de validation
 								</p>
 							)}
+							{!isOnline && (
+								<p className="text-sm text-amber-600 font-medium text-center py-1">
+									📡 Hors connexion — vos saisies sont enregistrées sur cet
+									appareil.
+								</p>
+							)}
 							<Button
 								type="submit"
 								variant="outline"
 								className="w-full cursor-pointer"
 								size="lg"
-								disabled={isDisabled || submission.status === "loading"}
+								disabled={
+									isDisabled || submission.status === "loading" || isUploading
+								}
 							>
 								{submission.status === "loading"
 									? "Enregistrement..."
-									: "Sauvegarder"}
+									: isUploading
+										? "Envoi des photos en cours…"
+										: "Sauvegarder"}
 							</Button>
 							{canValidate && (
 								<Dialog>
@@ -199,7 +224,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 											type="button"
 											className="w-full font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
 											size="lg"
-											disabled={assignation.status === "loading"}
+											disabled={assignation.status === "loading" || isUploading}
 										>
 											{assignation.status === "loading"
 												? "Envoi en cours..."
