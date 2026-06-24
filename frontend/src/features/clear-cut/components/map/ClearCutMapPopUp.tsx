@@ -183,7 +183,7 @@ export function ClearCutMapPopUp({
 							"Impossible de demander l'attribution."
 						)
 					}}
-					className="w-full text-xs min-h-[44px] bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+					className="w-full text-xs min-h-[44px] cursor-pointer"
 					size="sm"
 				>
 					Demander l'attribution

@@ -177,11 +177,11 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion>
 					{!!loggedUser && (
-						<div className="flex flex-col gap-2 py-2">
+						<div className="flex flex-col gap-2 pt-2 pb-4">
 							{canRequestAssignment && (
 								<Button
 									type="button"
-									className="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+									className="w-full cursor-pointer"
 									size="lg"
 									disabled={assignation.status === "loading"}
 									onClick={handleRequestAssignment}
@@ -222,7 +222,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 									<DialogTrigger asChild>
 										<Button
 											type="button"
-											className="w-full font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+											className="w-full font-bold cursor-pointer"
 											size="lg"
 											disabled={assignation.status === "loading" || isUploading}
 										>
@@ -244,7 +244,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 											</DialogClose>
 											<DialogClose asChild>
 												<Button
-													className="font-bold cursor-pointer bg-green-600 hover:bg-green-700 text-white"
+													className="font-bold cursor-pointer"
 													onClick={handleValidate}
 												>
 													Valider

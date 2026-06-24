@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { ChevronRight, Clock, FileWarning } from "lucide-react"
+import { ChevronRight, Clock, FileWarning, LogOut } from "lucide-react"
 import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,9 @@ import {
 	selectMyAssignedReports
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
+import { IconButton } from "@/shared/components/button/Button"
 import { TimeProgress } from "@/shared/components/TimeProgress"
+import { useLogout } from "@/shared/hooks/auth"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function MyCuts() {
@@ -16,6 +18,7 @@ export function MyCuts() {
 	const navigate = useNavigate()
 	const reportsState = useAppSelector(selectMyAssignedReports)
 	const me = useConnectedMe()
+	const handleLogout = useLogout()
 
 	useEffect(() => {
 		dispatch(getMyAssignedReportsThunk({ page: 0, size: 50 }))
@@ -48,9 +51,21 @@ export function MyCuts() {
 
 	return (
 		<div className="flex flex-col w-full h-full p-6 sm:p-10 overflow-y-auto bg-neutral-50">
-			<h1 className="text-3xl font-bold text-primary font-poppins mb-2">
-				Mes Coupes
-			</h1>
+			<div className="flex items-start justify-between gap-4 mb-2">
+				<h1 className="text-3xl font-bold text-primary font-poppins">
+					Mes Coupes
+				</h1>
+				<IconButton
+					variant="outline"
+					size="sm"
+					className="sm:hidden shrink-0"
+					onClick={handleLogout}
+					icon={<LogOut />}
+					position="start"
+				>
+					Déconnexion
+				</IconButton>
+			</div>
 			<p className="text-neutral-600 mb-8 font-light">
 				Retrouvez ici toutes les coupes rases qui vous ont été attribuées pour
 				vérification.
@@ -80,54 +95,56 @@ export function MyCuts() {
 							report.assignmentRequestedById === me.id &&
 							report.userId !== me.id
 						return (
-						<div
-							key={report.id}
-							className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group"
-							onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
-						>
-							<div className="flex justify-between items-start mb-3 gap-2">
-								<h3
-									className="font-semibold text-lg text-neutral-800 truncate"
-									title={report.city}
-								>
-									{report.city}
-								</h3>
-								<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
-									{report.department.code}
+							<div
+								key={report.id}
+								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group"
+								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
+							>
+								<div className="flex justify-between items-start mb-3 gap-2">
+									<h3
+										className="font-semibold text-lg text-neutral-800 truncate"
+										title={report.city}
+									>
+										{report.city}
+									</h3>
+									<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
+										{report.department.code}
+									</div>
+								</div>
+
+								{isPendingAssignment && (
+									<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
+										<Clock className="h-3.5 w-3.5" />
+										En attente de validation de l'assignation
+									</div>
+								)}
+
+								<div className="space-y-1 mb-6 flex-grow">
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Surface :
+										</span>{" "}
+										{report.totalAreaHectare.toFixed(1)} ha
+									</p>
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Date approx. :
+										</span>{" "}
+										{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
+									</p>
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Statut :
+										</span>{" "}
+										{report.status === "to_validate" ? "À valider" : "En cours"}
+									</p>
+								</div>
+
+								<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
+									<span>Consulter le détail</span>
+									<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
 								</div>
 							</div>
-
-							{isPendingAssignment && (
-								<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
-									<Clock className="h-3.5 w-3.5" />
-									En attente de validation de l'assignation
-								</div>
-							)}
-
-							<div className="space-y-1 mb-6 flex-grow">
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">
-										Surface :
-									</span>{" "}
-									{report.totalAreaHectare.toFixed(1)} ha
-								</p>
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">
-										Date approx. :
-									</span>{" "}
-									{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
-								</p>
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">Statut :</span>{" "}
-									{report.status === "to_validate" ? "À valider" : "En cours"}
-								</p>
-							</div>
-
-							<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
-								<span>Consulter le détail</span>
-								<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-							</div>
-						</div>
 						)
 					})}
 				</div>

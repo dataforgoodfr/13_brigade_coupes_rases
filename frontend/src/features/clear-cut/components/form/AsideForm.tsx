@@ -90,7 +90,7 @@ export function AsideForm({
 	return (
 		<div
 			className={cn("flex flex-col w-full bg-background", {
-				"absolute top-0 left-0 right-0 bottom-12 z-10": mobile
+				"absolute top-0 left-0 right-0 bottom-16 z-10": mobile
 			})}
 		>
 			<div

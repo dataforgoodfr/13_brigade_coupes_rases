@@ -1,15 +1,10 @@
 import { FormattedNumber } from "react-intl"
 
+import { Button } from "@/components/ui/button"
 import type {
 	ClearCutFormInput,
 	ClearCutStatus
 } from "@/features/clear-cut/store/clear-cuts"
-import type { FormType } from "@/shared/form/types"
-import type { Rule } from "@/shared/store/referential/referential"
-
-import { RuleBadge } from "../RuleBadge"
-import { StatusWithLabel } from "../StatusWithLabel"
-
 import {
 	approveAssignmentThunk,
 	cancelAssignRequestThunk,
@@ -21,9 +16,13 @@ import {
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
-import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import type { FormType } from "@/shared/form/types"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import type { Rule } from "@/shared/store/referential/referential"
+
+import { RuleBadge } from "../RuleBadge"
+import { StatusWithLabel } from "../StatusWithLabel"
 
 export function AccordionHeader({
 	form,
@@ -44,9 +43,18 @@ export function AccordionHeader({
 	const reportId = form.getValues("report.id")
 	const reportUserId = form.getValues("report.userId")
 	const report = form.getValues("report") as any
-	const assignmentRequestedById = report?.assignmentRequestedById as string | null | undefined
-	const affectedUserLogin = report?.affectedUser?.login as string | null | undefined
-	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login as string | null | undefined
+	const assignmentRequestedById = report?.assignmentRequestedById as
+		| string
+		| null
+		| undefined
+	const affectedUserLogin = report?.affectedUser?.login as
+		| string
+		| null
+		| undefined
+	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login as
+		| string
+		| null
+		| undefined
 
 	const isAdmin = user?.role === "admin"
 	const myId = user?.id
@@ -60,7 +68,11 @@ export function AccordionHeader({
 	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
 		const action = await dispatch(thunk)
 		if (action.type.endsWith("/rejected")) {
-			toast({ id: "assignment-error", title: "Erreur", description: errorMessage })
+			toast({
+				id: "assignment-error",
+				title: "Erreur",
+				description: errorMessage
+			})
 		} else {
 			refresh()
 		}
@@ -77,7 +89,8 @@ export function AccordionHeader({
 						<p className="text-xs text-green-700 font-semibold">
 							✓ Attribuée à{" "}
 							<span className="font-bold">
-								{affectedUserLogin ?? (reportUserId === myId ? "vous" : "un bénévole")}
+								{affectedUserLogin ??
+									(reportUserId === myId ? "vous" : "un bénévole")}
 							</span>
 						</p>
 						<Button
@@ -125,7 +138,8 @@ export function AccordionHeader({
 										"Impossible d'approuver la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+								className="flex-1 text-xs h-8 border-green-600 text-green-700 hover:bg-green-50 cursor-pointer"
+								variant="outline"
 								size="sm"
 							>
 								Approuver
@@ -138,8 +152,8 @@ export function AccordionHeader({
 										"Impossible de refuser la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 cursor-pointer"
-								variant="destructive"
+								className="flex-1 text-xs h-8 border-destructive text-destructive hover:bg-destructive/10 cursor-pointer"
+								variant="outline"
 								size="sm"
 							>
 								Refuser
@@ -188,7 +202,8 @@ export function AccordionHeader({
 						"Impossible de demander l'attribution."
 					)
 				}}
-				className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+				className="w-full text-xs h-8 cursor-pointer"
+				variant="default"
 				size="sm"
 			>
 				Demander l'attribution
@@ -197,7 +212,11 @@ export function AccordionHeader({
 	}
 
 	const renderAdminValidationSection = () => {
-		if (!isAdmin || (status !== "to_validate" && status !== "waiting_for_validation")) return null
+		if (
+			!isAdmin ||
+			(status !== "to_validate" && status !== "waiting_for_validation")
+		)
+			return null
 
 		return (
 			<div className="flex flex-col gap-1 mb-2 mt-2 p-2 bg-amber-50 rounded-md border border-amber-200">
@@ -213,7 +232,8 @@ export function AccordionHeader({
 								"Impossible de valider le signalement."
 							)
 						}}
-						className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+						className="flex-1 text-xs h-8 cursor-pointer"
+						variant="default"
 						size="sm"
 					>
 						Valider

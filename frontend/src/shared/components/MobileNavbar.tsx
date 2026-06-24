@@ -1,21 +1,12 @@
 import { useRouterState } from "@tanstack/react-router"
-import {
-	House,
-	ListIcon,
-	LogIn,
-	LogOutIcon,
-	Settings,
-	User
-} from "lucide-react"
+import { House, ListIcon, LogIn, Settings, User } from "lucide-react"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { MobileNavbarLink } from "@/shared/components/MobileNavbarLink"
-import { useLogout } from "@/shared/hooks/auth"
 
 export function MobileNavbar() {
 	const user = useConnectedMe()
-	const handleLogout = useLogout()
 	const { layout, setLayout } = useLayout()
 	const location = useRouterState({ select: (s) => s.location })
 
@@ -23,8 +14,8 @@ export function MobileNavbar() {
 	const isOnClearCutsRoute = location.pathname.startsWith("/clear-cuts")
 
 	return (
-		<nav className="flex sm:hidden py-1 items-center shadow justify-around fixed bottom-0 left-0 right-0 bg-white z-[150] border-t h-12">
-			<div className="flex items-center justify-around w-full">
+		<nav className="flex sm:hidden items-center shadow justify-around fixed bottom-0 left-0 right-0 bg-white z-[150] border-t h-16 pb-[env(safe-area-inset-bottom)]">
+			<div className="flex items-center justify-around w-full h-full">
 				<MobileNavbarLink
 					to="/"
 					label="Accueil"
@@ -63,15 +54,6 @@ export function MobileNavbar() {
 						label="Connexion"
 						Icon={LogIn}
 						title="Connexion"
-					/>
-				)}
-				{user && (
-					<MobileNavbarLink
-						to="/login"
-						label="Déconnexion"
-						Icon={LogOutIcon}
-						onClick={handleLogout}
-						title="Déconnexion"
 					/>
 				)}
 			</div>

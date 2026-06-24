@@ -1,13 +1,9 @@
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger
-} from "@radix-ui/react-collapsible"
 import { useNavigate } from "@tanstack/react-router"
 import { Filter } from "lucide-react"
-import type { PropsWithChildren } from "react"
+import { type PropsWithChildren, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { AdvancedFilters } from "@/features/clear-cut/components/filters/AdvancedFilters"
 import { selectResetVersion } from "@/features/clear-cut/store/filters.slice"
 import { IconButton } from "@/shared/components/button/Button"
@@ -18,8 +14,9 @@ type Props = PropsWithChildren<{ clearCutId?: string }>
 export function MobileControl({ clearCutId, children }: Props) {
 	const navigate = useNavigate()
 	const resetVersion = useAppSelector(selectResetVersion)
+	const [open, setOpen] = useState(false)
 	return (
-		<Collapsible>
+		<Sheet open={open} onOpenChange={setOpen}>
 			<div className="flex justify-end sm:hidden">
 				{children}
 				{clearCutId && (
@@ -35,16 +32,22 @@ export function MobileControl({ clearCutId, children }: Props) {
 						Détail
 					</Button>
 				)}
-				<CollapsibleTrigger asChild>
+				<SheetTrigger asChild>
 					<IconButton variant="white" icon={<Filter />} position="start">
 						Filtres
 					</IconButton>
-				</CollapsibleTrigger>
+				</SheetTrigger>
 			</div>
 
-			<CollapsibleContent>
-				<AdvancedFilters key={resetVersion} className="mt-6 px-3 bg-background" />
-			</CollapsibleContent>
-		</Collapsible>
+			<SheetContent title="Filtres" className="sm:hidden">
+				<div className="overflow-y-auto">
+					<AdvancedFilters
+						key={resetVersion}
+						className="px-1 bg-background"
+						onClose={() => setOpen(false)}
+					/>
+				</div>
+			</SheetContent>
+		</Sheet>
 	)
 }
