@@ -6,7 +6,9 @@ type SwitchLabel = "Favoris" | "Zone protégée" | "Pente excessive"
 export function advancedFilters({ user }: Options) {
 	return {
 		open: async () => {
-			await user.click(await screen.findByText("Filtres"))
+			// The label text is hidden on narrow viewports; target the button by its
+			// accessible name (from the title attribute) so it works at any width.
+			await user.click(await screen.findByRole("button", { name: "Filtres" }))
 		},
 		favorite: toggleInput({ user, label: "Favoris" }),
 		excessive_slop: toggleInput({ user, label: "Pente excessive" }),
@@ -19,9 +21,13 @@ function toggleInput({ user, label }: SwitchOptions) {
 	return {
 		toggle: async (value: boolean | undefined) => {
 			const labelElement = await screen.findByText(label)
-			const button = await within(
-				labelElement.nextElementSibling as HTMLElement
-			).findByText(value === true ? "Oui" : value === false ? "Non" : "Tout")
+			// The label and its toggle group share a parent wrapper; scope the
+			// option lookup there (robust whether filters render inline or in a sheet).
+			const group = (labelElement.parentElement ??
+				labelElement.nextElementSibling) as HTMLElement
+			const button = await within(group).findByText(
+				value === true ? "Oui" : value === false ? "Non" : "Tout"
+			)
 			await user.click(button)
 		}
 	}

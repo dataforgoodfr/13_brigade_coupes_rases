@@ -46,16 +46,13 @@ def test_create_version_success(client: TestClient, db: Session):
         "soilStateImages": ["string"],
         "accessRoadImages": ["string"],
     }
-    response = client.get(
-        "/api/v1/clear-cuts-reports/1/forms",
-    ).json()
-
+    # Report 1 has no form yet in the seed, so the first version is created
+    # without an Etag (the optimistic-lock check is skipped when no form exists).
     response = client.post(
         "/api/v1/clear-cuts-reports/1/forms",
         json=report_data,
         headers={
             "Authorization": f"Bearer {token}",
-            "Etag": response["content"][0]["etag"],
         },
     )
 
@@ -148,15 +145,13 @@ def test_form_submission_does_not_auto_update_report_status(
         "weather": "Test Weather",
         "workSignVisible": False,
     }
-    response = client.get(
-        "/api/v1/clear-cuts-reports/1/forms",
-    ).json()
+    # Report 1 has no form yet in the seed, so the first version is created
+    # without an Etag (the optimistic-lock check is skipped when no form exists).
     response = client.post(
         "/api/v1/clear-cuts-reports/1/forms",
         json=form_data,
         headers={
             "Authorization": f"Bearer {token}",
-            "Etag": response["content"][0]["etag"],
         },
     )
     assert response.status_code == status.HTTP_201_CREATED

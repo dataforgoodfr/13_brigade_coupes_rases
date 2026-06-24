@@ -264,7 +264,9 @@ def seed_database():
             status="in_progress",
             user=alice,
             clear_cuts=[  # multi-cut, total 13 ha => area rule
-                cut("labouheyre", area=7, forest="resinous", days_start=20, days_end=10),
+                cut(
+                    "labouheyre", area=7, forest="resinous", days_start=20, days_end=10
+                ),
                 cut(
                     "labouheyre",
                     area=6,

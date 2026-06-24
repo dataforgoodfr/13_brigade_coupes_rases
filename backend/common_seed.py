@@ -58,9 +58,7 @@ def get_cities(db: Session) -> dict[str, City]:
     cities = db.query(City).filter(City.zip_code.in_(SEED_CITY_CODES.values())).all()
     by_code = {city.zip_code: city for city in cities}
     return {
-        name: by_code[code]
-        for name, code in SEED_CITY_CODES.items()
-        if code in by_code
+        name: by_code[code] for name, code in SEED_CITY_CODES.items() if code in by_code
     }
 
 

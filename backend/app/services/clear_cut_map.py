@@ -276,9 +276,7 @@ def build_clearcuts_map(
     sort_direction = (
         sort_column.asc() if filters.sort_order == "asc" else sort_column.desc()
     )
-    reports_with_filters = (
-        reports_with_filters.order_by(sort_direction).limit(30).all()
-    )
+    reports_with_filters = reports_with_filters.order_by(sort_direction).limit(30).all()
     map_response = ClearCutMapResponseSchema(
         points=clusterized_points,
         previews=list(map(report_to_report_preview_schema, reports_with_filters)),

@@ -54,7 +54,7 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 
 	const list = (
 		<div className="overflow-auto">
-			<ul className="flex flex-col">
+			<ul aria-label="Liste des coupes rases" className="flex flex-col">
 				{value?.previews.map((preview) => (
 					<ClearCutItem key={preview.id} {...preview} />
 				))}
