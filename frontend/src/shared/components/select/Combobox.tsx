@@ -143,7 +143,7 @@ export function Combobox<TItem>({
 				</ExpandButton>
 			</PopoverTrigger>
 
-			<PopoverContent>
+			<PopoverContent className="z-[210]">
 				<Command
 					filter={(value, search, keywords) => {
 						const extendValue = normalizeString(
