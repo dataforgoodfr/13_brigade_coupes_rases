@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Loading } from "@/shared/components/Loading"
 import { Title } from "@/shared/components/typo/Title"
+import { UploadingProvider } from "@/shared/form/UploadingContext"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch } from "@/shared/hooks/store"
 
@@ -118,7 +119,11 @@ export function AsideForm({
 					<Loading className="w-1/2" />
 				</div>
 			)}
-			{value && <ClearCutFullForm {...value} />}
+			{value && (
+				<UploadingProvider>
+					<ClearCutFullForm {...value} />
+				</UploadingProvider>
+			)}
 		</div>
 	)
 }
