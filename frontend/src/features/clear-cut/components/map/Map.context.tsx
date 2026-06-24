@@ -5,6 +5,9 @@ export type MapContext = {
 	setMap: (map: L.Map | null) => void
 	focusedClearCutId?: string
 	setFocusedClearCutId: (id?: string) => void
+	/** Report whose perimeter is currently being edited on the map, if any. */
+	editingPerimeterReportId?: string
+	setEditingPerimeterReportId: (id?: string) => void
 } | null
 const MapCtx = createContext<MapContext>(null)
 
@@ -18,11 +21,15 @@ export const useMapInstance = () => {
 export const MapProvider = ({ children }: { children: React.ReactNode }) => {
 	const [map, setMap] = useState<L.Map | null>(null)
 	const [focusedClearCutId, setFocusedClearCutId] = useState<string>()
+	const [editingPerimeterReportId, setEditingPerimeterReportId] =
+		useState<string>()
 	return (
 		<MapCtx.Provider
 			value={{
 				focusedClearCutId,
 				setFocusedClearCutId,
+				editingPerimeterReportId,
+				setEditingPerimeterReportId,
 				map,
 				setMap
 			}}
