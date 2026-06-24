@@ -1,4 +1,4 @@
-import { Filter, MapIcon } from "lucide-react"
+import { Filter } from "lucide-react"
 import { useState } from "react"
 
 import {
@@ -24,7 +24,7 @@ import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function AsideList({ mobile = false }: { mobile?: boolean }) {
 	const { value } = useAppSelector(selectClearCuts)
-	const { layout, setLayout } = useLayout()
+	const { layout } = useLayout()
 	const dispatch = useAppDispatch()
 	const resetVersion = useAppSelector(selectResetVersion)
 	const sortOrder = useAppSelector(selectSortOrder)
@@ -39,16 +39,6 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 			<span className="hidden min-[420px]:inline">Date de coupe</span>
 			<span className="min-[420px]:hidden">Date</span>
 		</SortingButton>
-	)
-
-	const mapToggle = (
-		<IconButton
-			variant="outline"
-			onClick={() => setLayout("map")}
-			icon={<MapIcon />}
-			title="Afficher la carte"
-			position="start"
-		/>
 	)
 
 	const filtersButton = (
@@ -93,7 +83,6 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 						<div className="flex gap-2 shrink-0">
 							{sortButton}
 							<SheetTrigger asChild>{filtersButton}</SheetTrigger>
-							{mapToggle}
 						</div>
 					</div>
 					<SheetContent title="Filtres">
@@ -121,7 +110,6 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 					<div className="flex gap-2 shrink-0">
 						{sortButton}
 						<CollapsibleTrigger asChild>{filtersButton}</CollapsibleTrigger>
-						{mapToggle}
 					</div>
 				</div>
 				<CollapsibleContent

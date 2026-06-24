@@ -1,5 +1,5 @@
 import { useRouterState } from "@tanstack/react-router"
-import { House, ListIcon, LogIn, Settings, User } from "lucide-react"
+import { ListIcon, LogIn, Map as MapIcon, Settings, User } from "lucide-react"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { useConnectedMe } from "@/features/user/store/me.slice"
@@ -17,18 +17,18 @@ export function MobileNavbar() {
 		<nav className="flex sm:hidden items-center shadow justify-around fixed bottom-0 left-0 right-0 bg-white z-[150] border-t h-16 pb-[env(safe-area-inset-bottom)]">
 			<div className="flex items-center justify-around w-full h-full">
 				<MobileNavbarLink
-					to="/"
-					label="Accueil"
-					Icon={House}
-					title="Accueil"
+					to="/clear-cuts"
+					label="Carte"
+					Icon={MapIcon}
+					title="Carte"
 					onClick={() => setLayout("map")}
 					forceActive={isOnClearCutsRoute && layout === "map"}
 				/>
 				<MobileNavbarLink
 					to="/clear-cuts"
-					label="Coupes"
+					label="Liste"
 					Icon={ListIcon}
-					title="Coupes"
+					title="Liste"
 					onClick={() => setLayout("list")}
 					forceActive={isOnClearCutsRoute && layout === "list"}
 				/>

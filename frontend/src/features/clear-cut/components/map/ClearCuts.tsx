@@ -1,5 +1,5 @@
 import * as L from "leaflet"
-import { Layers, ListIcon } from "lucide-react"
+import { Layers, ListIcon, Map as MapIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircleMarker, useMap, useMapEvents } from "react-leaflet"
 
@@ -22,10 +22,8 @@ import {
 	setWithPoints
 } from "@/features/clear-cut/store/filters.slice"
 import { cn } from "@/lib/utils"
-import { IconButton } from "@/shared/components/button/Button"
 import { AddressInput } from "@/shared/components/input/AddressInput"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
-import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
 
@@ -97,7 +95,6 @@ export function ClearCuts() {
 	const map = useMap()
 	const { setFocusedClearCutId, focusedClearCutId, setMap } = useMapInstance()
 	const { layout, setLayout } = useLayout()
-	const { breakpoint } = useBreakpoint()
 	useEffect(() => {
 		setMap(map)
 		return () => setMap(null)
@@ -237,15 +234,39 @@ export function ClearCuts() {
 		}
 	}, [displayPoints, value?.points, map])
 
-	const iconButton = (
-		<IconButton
-			variant="white"
-			className="mx-1"
-			onClick={() => setLayout("list")}
-			icon={<ListIcon />}
-			title="Afficher la liste"
-			position="start"
-		/>
+	// Desktop: a single persistent segmented control replaces the lone, ambiguous
+	// toggle icon. Mobile switches map/list via the bottom navbar instead.
+	const segmentClassName =
+		"inline-flex items-center gap-1.5 rounded h-8 px-3 text-sm font-medium transition-colors"
+	const layoutToggle = (
+		<div className="hidden sm:flex items-center gap-0.5 rounded-md border bg-white p-0.5 shadow-md">
+			<button
+				type="button"
+				onClick={() => setLayout("map")}
+				className={cn(
+					segmentClassName,
+					layout === "map"
+						? "bg-primary text-primary-foreground"
+						: "text-zinc-600 hover:bg-zinc-100"
+				)}
+			>
+				<MapIcon className="size-4" />
+				Carte
+			</button>
+			<button
+				type="button"
+				onClick={() => setLayout("list")}
+				className={cn(
+					segmentClassName,
+					layout === "list"
+						? "bg-primary text-primary-foreground"
+						: "text-zinc-600 hover:bg-zinc-100"
+				)}
+			>
+				<ListIcon className="size-4" />
+				Liste
+			</button>
+		</div>
 	)
 	return (
 		<>
@@ -256,10 +277,9 @@ export function ClearCuts() {
 					</div>
 					<div className="justify-end w-full flex flex-row gap-1">
 						<LocationButton className="hidden sm:flex" />
-						{breakpoint === "all" && layout === "map" && iconButton}
+						{layoutToggle}
 						<MobileControl clearCutId={focusedClearCutId}>
 							<LocationButton />
-							{iconButton}
 						</MobileControl>
 					</div>
 				</div>
