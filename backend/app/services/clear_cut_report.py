@@ -322,6 +322,52 @@ def update_clear_cut_report(
                 detail="Only admins can update report status directly",
             )
 
+    # Editing the initial report info (commune, date de signalement) is allowed
+    # for admins and for the volunteer assigned to the report.
+    edits_report_info = (
+        "reported_at" in request.model_fields_set
+        or "city_zip_code" in request.model_fields_set
+    )
+    if edits_report_info:
+        if connected_user.role != "admin" and report.user_id != connected_user.id:
+            raise AppHTTPException(
+                status_code=403,
+                type="INVALID_REQUESTER_RIGHTS",
+                detail="Only admins or the assigned volunteer can edit report info",
+            )
+        if "reported_at" in request.model_fields_set:
+            report.reported_at = request.reported_at
+        if "city_zip_code" in request.model_fields_set and request.city_zip_code:
+            report.city = get_city_by_zip_code(db, request.city_zip_code)
+
+    db.commit()
+    db.refresh(report)
+    return report
+
+
+def set_report_pipeline_override(
+    report_id: int, db: Session, connected_user: User, allow: bool
+) -> ClearCutReport:
+    """Toggle whether the data pipeline may overwrite the report's clear cuts.
+
+    Off by default once a cut has been manually edited, so corrections are not
+    lost on the next pipeline run. Admins or the assigned volunteer can flip it.
+    """
+    report = db.get(ClearCutReport, report_id)
+    if not report:
+        raise AppHTTPException(
+            status_code=404,
+            type="REPORT_NOT_FOUND",
+            detail="Clear cut report not found",
+        )
+    if connected_user.role != "admin" and report.user_id != connected_user.id:
+        raise AppHTTPException(
+            status_code=403,
+            type="INVALID_REQUESTER_RIGHTS",
+            detail="Only admins or the assigned volunteer can change this setting",
+        )
+    for clear_cut in report.clear_cuts:
+        clear_cut.allow_pipeline_override = allow
     db.commit()
     db.refresh(report)
     return report

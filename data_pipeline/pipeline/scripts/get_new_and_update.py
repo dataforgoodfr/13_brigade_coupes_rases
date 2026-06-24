@@ -5,6 +5,25 @@ from shapely.ops import unary_union
 from pipeline.scripts import DATA_DIR
 
 
+def locked_clusters_mask(gdf: gpd.GeoDataFrame) -> pd.Series:
+    """Reference clusters that were manually edited and must NOT be overwritten.
+
+    A cluster is locked when it has been corrected by hand
+    (``is_manually_edited``) and an admin has not re-enabled overriding
+    (``allow_pipeline_override`` is False). Locked clusters are excluded from the
+    matching buffer so the pipeline never merges new satellite detections into
+    them — those detections fall back to being brand-new clusters instead.
+    """
+    if "is_manually_edited" not in gdf.columns:
+        return pd.Series(False, index=gdf.index)
+    edited = gdf["is_manually_edited"].fillna(False).astype(bool)
+    if "allow_pipeline_override" in gdf.columns:
+        override = gdf["allow_pipeline_override"].fillna(False).astype(bool)
+    else:
+        override = pd.Series(False, index=gdf.index)
+    return edited & ~override
+
+
 def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     """
     Sépare les nouveaux clusters en deux catégories :
@@ -42,8 +61,10 @@ def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
             "Attention: CRS géographique détecté. Reprojection en mètres recommandée."
         )
 
-    # Créer un buffer de 50m autour des géométries de référence
-    gdf_ref_buffered = gdf_ref.copy()
+    # Créer un buffer de 50m autour des géométries de référence.
+    # On exclut les clusters verrouillés (édités manuellement) pour que les
+    # nouvelles détections proches soient classées "new" plutôt que fusionnées.
+    gdf_ref_buffered = gdf_ref[~locked_clusters_mask(gdf_ref)].copy()
     gdf_ref_buffered["geometry"] = gdf_ref_buffered.geometry.buffer(distance_threshold)
 
     # Ajouter un index unique pour tracker les correspondances
@@ -122,8 +143,10 @@ def update_geometries(distance_threshold=50):
     # Copie pour ne pas modifier l'original
     gdf_ref_updated = gdf_ref.copy()
 
-    # Créer un buffer pour le matching
-    gdf_ref_buffered = gdf_ref.copy()
+    # Créer un buffer pour le matching.
+    # Les clusters verrouillés (édités manuellement) sont exclus : ils ne sont
+    # jamais matchés, donc préservés tels quels dans la référence finale.
+    gdf_ref_buffered = gdf_ref[~locked_clusters_mask(gdf_ref)].copy()
     gdf_ref_buffered["geometry"] = gdf_ref_buffered.geometry.buffer(distance_threshold)
 
     # Ajouter un index pour tracker

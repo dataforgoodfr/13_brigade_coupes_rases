@@ -67,6 +67,8 @@ def get_export_query() -> str:
             cc.bdf_poplar_area_hectare as bdf_poplar_area_ha,
             cc.bdf_resinous_area_hectare as bdf_resinous_area_ha,
             ccr.slope_area_hectare as slope_area_ha,
+            cc.is_manually_edited as is_manually_edited,
+            cc.allow_pipeline_override as allow_pipeline_override,
             cc.boundary as geometry
         FROM clear_cuts cc
         LEFT JOIN clear_cuts_reports ccr ON cc.report_id = ccr.id
@@ -133,6 +135,8 @@ def reorder_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "bdf_poplar_area_ha",
         "bdf_resinous_area_ha",
         "slope_area_ha",
+        "is_manually_edited",
+        "allow_pipeline_override",
         "geometry",
     ]
 
