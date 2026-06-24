@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router"
-import { ChevronRight, Clock, FileWarning } from "lucide-react"
+import { ChevronRight, Clock, FileWarning, LogOut } from "lucide-react"
 import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,9 @@ import {
 	selectMyAssignedReports
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
+import { IconButton } from "@/shared/components/button/Button"
 import { TimeProgress } from "@/shared/components/TimeProgress"
+import { useLogout } from "@/shared/hooks/auth"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function MyCuts() {
@@ -16,6 +18,7 @@ export function MyCuts() {
 	const navigate = useNavigate()
 	const reportsState = useAppSelector(selectMyAssignedReports)
 	const me = useConnectedMe()
+	const handleLogout = useLogout()
 
 	useEffect(() => {
 		dispatch(getMyAssignedReportsThunk({ page: 0, size: 50 }))
@@ -48,9 +51,21 @@ export function MyCuts() {
 
 	return (
 		<div className="flex flex-col w-full h-full p-6 sm:p-10 overflow-y-auto bg-neutral-50">
-			<h1 className="text-3xl font-bold text-primary font-poppins mb-2">
-				Mes Coupes
-			</h1>
+			<div className="flex items-start justify-between gap-4 mb-2">
+				<h1 className="text-3xl font-bold text-primary font-poppins">
+					Mes Coupes
+				</h1>
+				<IconButton
+					variant="outline"
+					size="sm"
+					className="sm:hidden shrink-0"
+					onClick={handleLogout}
+					icon={<LogOut />}
+					position="start"
+				>
+					Déconnexion
+				</IconButton>
+			</div>
 			<p className="text-neutral-600 mb-8 font-light">
 				Retrouvez ici toutes les coupes rases qui vous ont été attribuées pour
 				vérification.

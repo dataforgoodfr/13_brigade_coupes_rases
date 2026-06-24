@@ -30,7 +30,6 @@ import { api } from "@/shared/api/api"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 import { ClearCuts } from "./ClearCuts"
-import { LocationButton } from "./LocationButton"
 
 function authedApi() {
 	const token = getStoredToken()
@@ -282,7 +281,6 @@ export function InteractiveMap() {
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			/>
 			<GeomanControls />
-			<LocationButton />
 			<ClearCuts />
 		</MapContainer>
 	)

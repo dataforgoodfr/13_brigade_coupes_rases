@@ -32,33 +32,36 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 		<div
 			className={cn("flex flex-col w-full bg-background", {
 				hidden: !isShown,
-				"absolute top-0 left-0 right-0 bottom-12 z-10": isShown && mobile,
+				"absolute top-0 left-0 right-0 bottom-16 z-10": isShown && mobile,
 				"h-auto": !(isShown && mobile)
 			})}
 		>
 			<Collapsible>
-				<div className="flex justify-between items-center mt-1 sm:mt-2 border-b-1 border-zinc-200 px-3 py-2">
-					<Title className="text-primary">COUPES RASES</Title>
-					<div className="flex gap-2">
+				<div className="flex justify-between items-center gap-2 mt-1 sm:mt-2 border-b-1 border-zinc-200 px-3 py-2">
+					<Title className="text-primary truncate min-w-0 text-lg sm:text-xl">
+						COUPES RASES
+					</Title>
+					<div className="flex gap-2 shrink-0">
 						<SortingButton
 							sort={sortOrder}
 							onClick={() => dispatch(filtersSlice.actions.toggleSortOrder())}
 						>
-							Date de coupe
+							<span className="hidden min-[420px]:inline">Date de coupe</span>
+							<span className="min-[420px]:hidden">Date</span>
 						</SortingButton>
 						<CollapsibleTrigger asChild>
 							<IconButton
 								variant="outline"
 								icon={<Filter />}
 								position="start"
+								title="Filtres"
 								className="[data-state=open]:bg-purple-400"
 							>
-								Filtres
+								<span className="hidden min-[420px]:inline">Filtres</span>
 							</IconButton>
 						</CollapsibleTrigger>
 						<IconButton
 							variant="outline"
-							// className="sm:hidden"
 							onClick={() => setLayout("map")}
 							icon={<MapIcon />}
 							title="Afficher la carte"

@@ -1,10 +1,17 @@
 import * as L from "leaflet"
-import { ListIcon, Locate } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Layers, ListIcon } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { CircleMarker, useMap, useMapEvents } from "react-leaflet"
 
+import { buttonVariants } from "@/components/ui/button"
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger
+} from "@/components/ui/popover"
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview"
+import { LocationButton } from "@/features/clear-cut/components/map/LocationButton"
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl"
 import { DISPLAY_PREVIEW_ZOOM_LEVEL } from "@/features/clear-cut/store/clear-cuts"
@@ -14,11 +21,11 @@ import {
 	setGeoBounds,
 	setWithPoints
 } from "@/features/clear-cut/store/filters.slice"
+import { cn } from "@/lib/utils"
 import { IconButton } from "@/shared/components/button/Button"
 import { AddressInput } from "@/shared/components/input/AddressInput"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
-import { useGeolocation } from "@/shared/hooks/geolocation"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
 
@@ -101,7 +108,14 @@ export function ClearCuts() {
 		map.zoomControl.setPosition("bottomright")
 	}, [map])
 
-	const { browserLocation } = useGeolocation()
+	// Keep clicks/scrolls on the layers control from bubbling into map pan/zoom.
+	const layersControlRef = useRef<HTMLDivElement>(null)
+	useEffect(() => {
+		if (!layersControlRef.current) return
+		L.DomEvent.disableClickPropagation(layersControlRef.current)
+		L.DomEvent.disableScrollPropagation(layersControlRef.current)
+	}, [])
+
 	const displayPoints = useAppSelector(selectWithPoints)
 	const [layer, layers, setLayer] = useSingleSelect<
 		L.TileLayer,
@@ -139,15 +153,6 @@ export function ClearCuts() {
 		}
 		setOverlays(selectedItems)
 	}
-
-	const centerOnUserLocation = useCallback(() => {
-		if (browserLocation) {
-			map.setView({
-				lat: browserLocation.coords.latitude,
-				lng: browserLocation.coords.longitude
-			})
-		}
-	}, [browserLocation, map.setView])
 
 	const dispatch = useAppDispatch()
 
@@ -249,46 +254,64 @@ export function ClearCuts() {
 					<div className="w-full sm:max-w-100">
 						<AddressInput onSelect={centerOnCoordinates} />
 					</div>
-					<div className="justify-end w-full flex flex-row">
-						{browserLocation && (
-							<IconButton
-								icon={<Locate />}
-								className="hidden sm:flex"
-								onClick={centerOnUserLocation}
-								position={"end"}
-							>
-								Centrer sur ma position
-							</IconButton>
-						)}
+					<div className="justify-end w-full flex flex-row gap-1">
+						<LocationButton className="hidden sm:flex" />
 						{breakpoint === "all" && layout === "map" && iconButton}
 						<MobileControl clearCutId={focusedClearCutId}>
-							<IconButton
-								icon={<Locate />}
-								onClick={centerOnUserLocation}
-								position={"end"}
-							/>
+							<LocationButton />
 							{iconButton}
 						</MobileControl>
 					</div>
 				</div>
 			</div>
 			<div className="leaflet-bottom leaflet-left mb-3">
-				<div className="leaflet-control bg-zinc-100 p-1 rounded-md flex flex-col gap-1">
-					<ToggleGroup
-						variant="primary"
-						type="single"
-						allowEmptyValue={false}
-						size="sm"
-						value={layers}
-						onValueChange={handleLayerSelected}
-					/>
-					<ToggleGroup
-						variant="primary"
-						type="multiple"
-						size="sm"
-						value={overlays}
-						onValueChange={handleOverlaysChanged}
-					/>
+				<div ref={layersControlRef} className="leaflet-control">
+					<Popover>
+						<PopoverTrigger asChild>
+							<button
+								type="button"
+								title="Fonds de carte et calques"
+								aria-label="Fonds de carte et calques"
+								className={cn(
+									buttonVariants({ variant: "white" }),
+									"size-10 p-0 shadow-md"
+								)}
+							>
+								<Layers className="size-5" />
+							</button>
+						</PopoverTrigger>
+						<PopoverContent
+							side="top"
+							align="start"
+							className="w-auto p-3 flex flex-col gap-3"
+						>
+							<div className="flex flex-col gap-1">
+								<span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+									Fond de carte
+								</span>
+								<ToggleGroup
+									variant="primary"
+									type="single"
+									allowEmptyValue={false}
+									size="sm"
+									value={layers}
+									onValueChange={handleLayerSelected}
+								/>
+							</div>
+							<div className="flex flex-col gap-1">
+								<span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+									Calques
+								</span>
+								<ToggleGroup
+									variant="primary"
+									type="multiple"
+									size="sm"
+									value={overlays}
+									onValueChange={handleOverlaysChanged}
+								/>
+							</div>
+						</PopoverContent>
+					</Popover>
 				</div>
 			</div>
 			{previews}
