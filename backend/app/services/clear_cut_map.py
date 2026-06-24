@@ -58,6 +58,8 @@ class Filters(BaseSchema):
     excessive_slope: bool | None = None
     in_reports_ids: list[str] | None = []
     out_reports_ids: list[str] | None = []
+    sort_by: str = "first_cut_date"
+    sort_order: str = "desc"
 
 
 def query_clearcuts_filtered(db: Session, filters: Filters | None):
@@ -266,7 +268,17 @@ def build_clearcuts_map(
             # If area doesnt exists clusters are useless
             clusterized_points = process_points_from_reports(reports_with_filters)
 
-    reports_with_filters = reports_with_filters.limit(30).all()
+    sortable_columns = {
+        "first_cut_date": ClearCutReport.first_cut_date,
+        "last_cut_date": ClearCutReport.last_cut_date,
+    }
+    sort_column = sortable_columns.get(filters.sort_by, ClearCutReport.first_cut_date)
+    sort_direction = (
+        sort_column.asc() if filters.sort_order == "asc" else sort_column.desc()
+    )
+    reports_with_filters = (
+        reports_with_filters.order_by(sort_direction).limit(30).all()
+    )
     map_response = ClearCutMapResponseSchema(
         points=clusterized_points,
         previews=list(map(report_to_report_preview_schema, reports_with_filters)),

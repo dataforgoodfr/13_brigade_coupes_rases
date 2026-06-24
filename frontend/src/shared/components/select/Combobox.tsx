@@ -1,7 +1,7 @@
 import { Check } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
-import type { ButtonProps } from "@/components/ui/button"
+import { Button, type ButtonProps } from "@/components/ui/button"
 import {
 	Command,
 	CommandEmpty,
@@ -181,8 +181,16 @@ export function Combobox<TItem>({
 						</CommandGroup>
 					</CommandList>
 				</Command>
-				{hasReset && (
-					<ResetButton disabled={selectedItemsCount === 0} onClick={reset} />
+				{(hasReset || changeOnClose) && (
+					<div className="flex justify-end gap-2 pt-2">
+						{hasReset && (
+							<ResetButton
+								disabled={selectedItemsCount === 0}
+								onClick={reset}
+							/>
+						)}
+						{changeOnClose && <Button onClick={close}>Valider</Button>}
+					</div>
 				)}
 			</PopoverContent>
 		</Popover>
