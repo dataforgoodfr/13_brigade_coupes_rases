@@ -43,7 +43,7 @@ class S3Service:
         content_type: str,
         report_id: str | None = None,
         expires_in: int = 3600,
-        max_file_size: int = 10 * 1024 * 1024,  # 10MB default
+        max_file_size: int = settings.MAX_UPLOAD_SIZE_BYTES,
     ) -> dict:
         """
         Generate a pre-signed URL for uploading a file to S3

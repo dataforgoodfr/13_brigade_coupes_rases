@@ -135,7 +135,7 @@ export function LoginForm() {
 						<Button
 							className="w-full"
 							type="submit"
-							disabled={!form.formState.isValid}
+							disabled={login.status === "loading"}
 						>
 							<LogInIcon />
 							Connexion

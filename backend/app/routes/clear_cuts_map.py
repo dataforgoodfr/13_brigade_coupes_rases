@@ -132,6 +132,18 @@ def get_clearcuts_map(
         description="List of report ids to exclude",
         openapi_examples={"default": {"value": ["1"]}},
     ),
+    sort_by: str = Query(
+        "first_cut_date",
+        alias="sortBy",
+        description="Field to sort the report previews by",
+        openapi_examples={"default": {"value": "first_cut_date"}},
+    ),
+    sort_order: str = Query(
+        "desc",
+        alias="sortOrder",
+        description="Sort direction: 'asc' or 'desc'",
+        openapi_examples={"default": {"value": "desc"}},
+    ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     t = time()
@@ -164,6 +176,8 @@ def get_clearcuts_map(
                 excessive_slope=excessive_slope,
                 in_reports_ids=in_reports_ids,
                 out_reports_ids=out_reports_ids,
+                sort_by=sort_by,
+                sort_order=sort_order,
             ),
         )
 

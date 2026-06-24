@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 
 import "@geoman-io/leaflet-geoman-free"
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"
+import { useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { useMap } from "react-leaflet"
 
@@ -20,18 +21,14 @@ import {
 	DialogTitle
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { useConnectedMe } from "@/features/user/store/me.slice"
-
 import { getClearCutsThunk } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
+import { getStoredToken, useConnectedMe } from "@/features/user/store/me.slice"
+import { useToast } from "@/hooks/use-toast"
 import { api } from "@/shared/api/api"
-import { getStoredToken } from "@/features/user/store/me.slice"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
-import { useNavigate } from "@tanstack/react-router"
 
 import { ClearCuts } from "./ClearCuts"
-import { LocationButton } from "./LocationButton"
 
 function authedApi() {
 	const token = getStoredToken() as any
@@ -47,8 +44,14 @@ function GeomanControls() {
 	const [isOpen, setIsOpen] = useState(false)
 	const [_geometry, setGeometry] = useState<any>(null)
 	const [citySearch, setCitySearch] = useState("")
-	const [cityResults, setCityResults] = useState<{ insee_code: string; name: string; department_code: string }[]>([])
-	const [selectedCity, setSelectedCity] = useState<{ insee_code: string; name: string; department_code: string } | null>(null)
+	const [cityResults, setCityResults] = useState<
+		{ insee_code: string; name: string; department_code: string }[]
+	>([])
+	const [selectedCity, setSelectedCity] = useState<{
+		insee_code: string
+		name: string
+		department_code: string
+	} | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const dispatch = useAppDispatch()
@@ -110,7 +113,9 @@ function GeomanControls() {
 			try {
 				const results = await authedApi()
 					.get("api/v1/cities/search", { searchParams: { q: citySearch } })
-					.json<{ insee_code: string; name: string; department_code: string }[]>()
+					.json<
+						{ insee_code: string; name: string; department_code: string }[]
+					>()
 				setCityResults(results)
 			} catch {
 				setCityResults([])
@@ -156,11 +161,15 @@ function GeomanControls() {
 			})
 			handleDialogClose(false)
 			if (filters) dispatch(getClearCutsThunk(filters))
-			navigate({ to: "/clear-cuts/$clearCutId", params: { clearCutId: response.id } })
+			navigate({
+				to: "/clear-cuts/$clearCutId",
+				params: { clearCutId: response.id }
+			})
 		} catch {
 			toast({
 				title: "Erreur",
-				description: "Impossible de créer le signalement. Vérifiez que la géométrie est valide.",
+				description:
+					"Impossible de créer le signalement. Vérifiez que la géométrie est valide.",
 				variant: "destructive"
 			})
 		} finally {
@@ -184,7 +193,11 @@ function GeomanControls() {
 							<input
 								id="citySearch"
 								placeholder="Ex: Limoges, Saint-Étienne..."
-								value={selectedCity ? `${selectedCity.name} (${selectedCity.department_code})` : citySearch}
+								value={
+									selectedCity
+										? `${selectedCity.name} (${selectedCity.department_code})`
+										: citySearch
+								}
 								onChange={(e: any) => {
 									setSelectedCity(null)
 									setCitySearch(e.target.value)
@@ -206,7 +219,9 @@ function GeomanControls() {
 											}}
 										>
 											{city.name}
-											<span className="ml-1 text-neutral-400 text-xs">({city.department_code})</span>
+											<span className="ml-1 text-neutral-400 text-xs">
+												({city.department_code})
+											</span>
 										</li>
 									))}
 								</ul>
@@ -222,7 +237,10 @@ function GeomanControls() {
 					>
 						Annuler
 					</Button>
-					<Button onClick={handleSubmit} disabled={isSubmitting || !selectedCity}>
+					<Button
+						onClick={handleSubmit}
+						disabled={isSubmitting || !selectedCity}
+					>
 						{isSubmitting ? "Envoi..." : "Valider le signalement"}
 					</Button>
 				</DialogFooter>
@@ -262,7 +280,6 @@ export function InteractiveMap() {
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			/>
 			<GeomanControls />
-			<LocationButton />
 			<ClearCuts />
 		</MapContainer>
 	)

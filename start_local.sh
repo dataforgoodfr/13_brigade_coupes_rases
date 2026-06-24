@@ -3,11 +3,16 @@
 
 echo "Démarrage automatique de Docker..."
 open -a Docker
-echo "Attente de Docker (10s)..."
-sleep 10
+echo "Attente du démon Docker..."
+until docker info >/dev/null 2>&1; do sleep 1; done
 
-echo "1. Démarrage de la base de données..."
-docker compose up -d db pgadmin
+echo "1. Démarrage de la base de données (attente du healthcheck)..."
+docker compose up -d --wait db
+docker compose up -d pgadmin
+
+echo "1b. Migrations + seed des données de dev (via le conteneur backend)..."
+docker compose run --rm backend poetry run alembic upgrade head
+docker compose run --rm backend poetry run python -m seed_dev
 
 echo "2. Démarrage de l'API (Backend)..."
 osascript -e 'tell app "Terminal" to do script "cd \"'$PWD'/backend\" && source .venv/bin/activate && python3 -m poetry run python -m app.main --host=0.0.0.0 --port=8080 --reload --proxy-headers --forwarded-allow-ips=*"'

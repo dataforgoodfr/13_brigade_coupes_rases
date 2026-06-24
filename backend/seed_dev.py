@@ -1,7 +1,9 @@
 import math
 import os
+import shutil
 import traceback
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from geoalchemy2.shape import from_shape
 from shapely.geometry import MultiPolygon, Point
@@ -26,6 +28,20 @@ from common_seed import (
 
 SRID = 4326
 
+# Approximate centroids (longitude, latitude) of the forest communes seeded in
+# common_seed.SEED_CITY_CODES. Used to place realistic clear-cut polygons.
+COMMUNE_COORDS = {
+    "sabres": (-0.728, 44.143),
+    "labouheyre": (-0.918, 44.211),
+    "morcenx": (-0.912, 44.033),
+    "mende": (3.500, 44.518),
+    "pont_de_montvert": (3.758, 44.360),
+    "aubusson": (2.165, 45.957),
+    "royere": (1.943, 45.838),
+    "gerardmer": (6.878, 48.073),
+    "la_bresse": (6.876, 48.001),
+}
+
 # Forest composition profiles expressed as fractions of area_hectare.
 # Sums stay < 1 so the bdf_area_smaller_than_clear_cut_area constraint always passes.
 FOREST_PROFILES = {
@@ -35,6 +51,11 @@ FOREST_PROFILES = {
     "poplar": {"resinous": 0.00, "deciduous": 0.05, "mixed": 0.05, "poplar": 0.85},
     "unknown": None,
 }
+
+# Sample image bundled with the repo, reused so seeded forms display real pictures
+# instead of the broken fake filenames the previous seed referenced.
+UPLOADS_DIR = Path("uploads")
+SAMPLE_IMAGE = UPLOADS_DIR / "67bf9395-0f14-433a-a131-7f46c52a5b19_test.jpg"
 
 
 def _hex_around(lng: float, lat: float, radius: float = 0.003):
@@ -86,6 +107,48 @@ def make_clear_cut(
     )
 
 
+def cut(
+    commune: str,
+    *,
+    area: float,
+    forest: str = "unknown",
+    days_start: int,
+    days_end: int,
+    eco_area: float | None = None,
+    zonings: list | None = None,
+    dx: float = 0.0,
+    dy: float = 0.0,
+) -> ClearCut:
+    """Build a clear cut near a named commune (with optional offset to avoid overlaps)."""
+    lng, lat = COMMUNE_COORDS[commune]
+    return make_clear_cut(
+        lng + dx,
+        lat + dy,
+        area_hectare=area,
+        forest_type=forest,
+        days_ago_start=days_start,
+        days_ago_end=days_end,
+        ecological_zoning_area=eco_area,
+        ecological_zonings=zonings,
+    )
+
+
+def seed_report_image(report_id: int, name: str) -> str | None:
+    """Copy the sample image into the report folder and return its storage key.
+
+    Returns None if the sample image is missing so seeding stays resilient.
+    """
+    if not SAMPLE_IMAGE.exists():
+        return None
+    dest_dir = UPLOADS_DIR / "reports" / str(report_id)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"seed_{name}.jpg"
+    dest = dest_dir / filename
+    if not dest.exists():
+        shutil.copyfile(SAMPLE_IMAGE, dest)
+    return f"local/reports/{report_id}/{filename}"
+
+
 def wipe_database():
     env = os.environ.get("ENVIRONMENT", "development").lower()
     if env != "development" and env != "test":
@@ -107,9 +170,19 @@ def seed_database():
     try:
         wipe_database()
         seed_cities_departments(db)
-        [marseille, paris] = get_cities(db)
-        [natura1, natura2] = seed_ecological_zonings(db)
-        seed_rules(db, [natura1, natura2])
+        cities = get_cities(db)
+        zonings = seed_ecological_zonings(db)
+        seed_rules(db, list(zonings.values()))
+
+        # --- Users -------------------------------------------------------------
+        # One multi-department admin, three volunteers with disjoint departments
+        # (to exercise the department filter and "Actions requises"), and one
+        # inactive volunteer to cover account management.
+        landes = cities["sabres"].department
+        lozere = cities["mende"].department
+        creuse = cities["aubusson"].department
+        vosges = cities["gerardmer"].department
+
         admin = User(
             first_name="Crysta",
             last_name="Faerie",
@@ -119,603 +192,431 @@ def seed_database():
             password=get_password_hash("admin"),
             is_active=True,
         )
-        volunteer = User(
-            first_name="Pips",
-            last_name="Sprite",
-            login="PipsSprite",
+        admin.departments.extend([landes, lozere, creuse, vosges])
+
+        alice = User(
+            first_name="Alice",
+            last_name="Pinède",
+            login="AlicePinede",
             email="volunteer@example.com",
             role="volunteer",
             password=get_password_hash("volunteer"),
             is_active=True,
         )
+        alice.departments.append(landes)
 
-        admin.departments.append(paris.department)
-        volunteer.departments.append(paris.department)
-        users = [admin, volunteer]
+        bruno = User(
+            first_name="Bruno",
+            last_name="Cévennes",
+            login="BrunoCevennes",
+            email="bruno@example.com",
+            role="volunteer",
+            password=get_password_hash("volunteer"),
+            is_active=True,
+        )
+        bruno.departments.append(lozere)
+
+        chloe = User(
+            first_name="Chloé",
+            last_name="Vassivière",
+            login="ChloeVassiviere",
+            email="chloe@example.com",
+            role="volunteer",
+            password=get_password_hash("volunteer"),
+            is_active=True,
+        )
+        chloe.departments.extend([creuse, vosges])
+
+        david = User(
+            first_name="David",
+            last_name="Inactif",
+            login="DavidInactif",
+            email="david@example.com",
+            role="volunteer",
+            password=get_password_hash("volunteer"),
+            is_active=False,
+        )
+        david.departments.append(vosges)
+
+        users = [admin, alice, bruno, chloe, david]
         db.add_all(users)
         db.flush()
 
-        clear_cuts = [
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=15,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=10),
-                        observation_end_date=datetime.now() - timedelta(days=5),
-                        area_hectare=10,
-                        bdf_resinous_area_hectare=0.5,
-                        bdf_deciduous_area_hectare=0.5,
-                        bdf_mixed_area_hectare=0.5,
-                        bdf_poplar_area_hectare=0.5,
-                        ecological_zoning_area_hectare=5,
-                        location=from_shape(Point(2.380192, 48.878899), SRID),
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (2.381136, 48.881707),
-                                            (2.379699, 48.880338),
-                                            (2.378497, 48.878687),
-                                            (2.378561, 48.877615),
-                                            (2.379162, 48.876825),
-                                            (2.381094, 48.876175),
-                                            (2.380879, 48.877573),
-                                            (2.382145, 48.8788),
-                                            (2.384012, 48.879407),
-                                            (2.383454, 48.880127),
-                                            (2.381694, 48.880042),
-                                            (2.381372, 48.880973),
-                                            (2.381136, 48.881707),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                        ecological_zonings=[
-                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
-                            ClearCutEcologicalZoning(ecological_zoning_id=natura2.id),
-                        ],
-                    ),
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=10),
-                        observation_end_date=datetime.now() - timedelta(days=5),
-                        area_hectare=10,
-                        ecological_zoning_area_hectare=0.3,
-                        bdf_resinous_area_hectare=0.5,
-                        bdf_deciduous_area_hectare=0.5,
-                        bdf_mixed_area_hectare=0.5,
-                        bdf_poplar_area_hectare=0.5,
-                        location=from_shape(Point(1.380192, 48.878899), SRID),
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (2.381136, 48.881707),
-                                            (2.379699, 48.880338),
-                                            (2.378497, 48.878687),
-                                            (2.378561, 48.877615),
-                                            (2.379162, 48.876825),
-                                            (2.381094, 48.876175),
-                                            (2.380879, 48.877573),
-                                            (2.382145, 48.8788),
-                                            (2.384012, 48.879407),
-                                            (2.383454, 48.880127),
-                                            (2.381694, 48.880042),
-                                            (2.381372, 48.880973),
-                                            (2.381136, 48.881707),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                        ecological_zonings=[
-                            ClearCutEcologicalZoning(ecological_zoning_id=natura1.id),
-                        ],
-                    ),
-                ],
-                status="to_validate",
-                user=volunteer,
-            ),
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=10,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=5),
-                        observation_end_date=datetime.now() - timedelta(days=2),
-                        area_hectare=10,
-                        location=from_shape(Point(2.371101, 48.839001), SRID),
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (2.375342, 48.832582),
-                                            (2.376072, 48.832286),
-                                            (2.376823, 48.831277),
-                                            (2.376898, 48.830677),
-                                            (2.376308, 48.83012),
-                                            (2.375921, 48.830134),
-                                            (2.375331, 48.830748),
-                                            (2.375514, 48.83175),
-                                            (2.375342, 48.832554),
-                                            (2.375342, 48.832582),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                        ecological_zonings=[],
-                    ),
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=15),
-                        observation_end_date=datetime.now() - timedelta(days=2),
-                        area_hectare=13,
-                        location=from_shape(Point(2.381101, 48.839001), SRID),
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (2.385342, 48.842582),
-                                            (2.386072, 48.842286),
-                                            (2.386823, 48.841277),
-                                            (2.386898, 48.840677),
-                                            (2.386308, 48.84012),
-                                            (2.385921, 48.840134),
-                                            (2.385331, 48.840748),
-                                            (2.385514, 48.84175),
-                                            (2.385342, 48.842554),
-                                            (2.385342, 48.842582),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                        ecological_zonings=[],
-                    ),
-                ],
-                status="validated",
-                user=admin,
-            ),
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=6.8,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=5),
-                        observation_end_date=datetime.now() - timedelta(days=2),
-                        area_hectare=10,
-                        location=from_shape(
-                            Point(5.3698, 43.2965), SRID
-                        ),  # Coordonnées approximatives de Marseille
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (5.3708, 43.3005),
-                                            (5.3688, 43.2995),
-                                            (5.3678, 43.2975),
-                                            (5.3688, 43.2955),
-                                            (5.3708, 43.2945),
-                                            (5.3728, 43.2965),
-                                            (5.3708, 43.3005),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                    )
-                ],
-                status="validated",
-                user=admin,
-            ),
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=4.2,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=15),
-                        observation_end_date=datetime.now() - timedelta(days=9),
-                        area_hectare=10,
-                        location=from_shape(
-                            Point(5.4008, 43.2865), SRID
-                        ),  # Autour de Marseille
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (5.4018, 43.2905),
-                                            (5.3998, 43.2895),
-                                            (5.3988, 43.2875),
-                                            (5.3998, 43.2855),
-                                            (5.4018, 43.2845),
-                                            (5.4038, 43.2865),
-                                            (5.4018, 43.2905),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                    )
-                ],
-                status="validated",
-                user=admin,
-            ),
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=5.7,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=10),
-                        observation_end_date=datetime.now() - timedelta(days=9),
-                        area_hectare=10,
-                        location=from_shape(
-                            Point(5.3508, 43.3165), SRID
-                        ),  # Autour de Marseille
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (5.3518, 43.3205),
-                                            (5.3498, 43.3195),
-                                            (5.3488, 43.3175),
-                                            (5.3498, 43.3155),
-                                            (5.3518, 43.3145),
-                                            (5.3538, 43.3165),
-                                            (5.3518, 43.3205),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                    )
-                ],
-                status="to_validate",
-                user=volunteer,
-            ),
-            ClearCutReport(
-                city=marseille,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=30),
-                        observation_end_date=datetime.now() - timedelta(days=9),
-                        area_hectare=10,
-                        location=from_shape(
-                            Point(5.3808, 43.2765), SRID
-                        ),  # Autour de Marseille
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (5.3818, 43.2805),
-                                            (5.3798, 43.2795),
-                                            (5.3788, 43.2775),
-                                            (5.3798, 43.2755),
-                                            (5.3818, 43.2745),
-                                            (5.3838, 43.2765),
-                                            (5.3818, 43.2805),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                    )
-                ],
-                slope_area_hectare=8.1,
-                status="validated",
-                user=admin,
-            ),
-            ClearCutReport(
-                city=marseille,
-                clear_cuts=[
-                    ClearCut(
-                        observation_start_date=datetime.now() - timedelta(days=2),
-                        observation_end_date=datetime.now() - timedelta(days=1),
-                        area_hectare=10,
-                        location=from_shape(
-                            Point(5.3908, 43.2665), SRID
-                        ),  # Autour de Marseille
-                        boundary=from_shape(
-                            MultiPolygon(
-                                [
-                                    (
-                                        [
-                                            (5.3918, 43.2705),
-                                            (5.3898, 43.2695),
-                                            (5.3888, 43.2675),
-                                            (5.3898, 43.2655),
-                                            (5.3918, 43.2645),
-                                            (5.3938, 43.2665),
-                                            (5.3918, 43.2705),
-                                        ],
-                                    )
-                                ]
-                            ),
-                            srid=SRID,
-                        ),
-                    )
-                ],
-                slope_area_hectare=3.9,
-                status="to_validate",
-                user=volunteer,
-            ),
-        ]
+        # --- Reports -----------------------------------------------------------
+        # The set below covers every status, every forest profile (incl. unknown),
+        # mono- and multi-cut reports, rule edge cases (area/slope/zoning above and
+        # below thresholds), an unassigned report with a pending assignment request,
+        # and a wide spread of cut dates (to exercise the date sort).
 
-        # --- Extra fixtures: cover every status and every forest profile ---
-        # Coordinates are picked away from the originals to avoid overlapping polygons.
-        extra_reports = [
-            # in_progress — admin took the file, large resineux around Marseille
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=12,
-                status="in_progress",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.43,
-                        43.30,
-                        area_hectare=15,
-                        forest_type="resinous",
-                        days_ago_start=20,
-                        days_ago_end=15,
-                    ),
-                ],
-            ),
-            # in_progress — volunteer is filling the form for a feuillus cut
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=3,
-                status="in_progress",
-                user=volunteer,
-                clear_cuts=[
-                    make_clear_cut(
-                        2.42,
-                        48.88,
-                        area_hectare=8,
-                        forest_type="deciduous",
-                        days_ago_start=18,
-                        days_ago_end=12,
-                    ),
-                ],
-            ),
-            # waiting_for_validation — mixed forest submitted by a volunteer
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=7,
-                status="waiting_for_validation",
-                user=volunteer,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.33,
-                        43.30,
-                        area_hectare=12,
-                        forest_type="mixed",
-                        days_ago_start=25,
-                        days_ago_end=20,
-                    ),
-                ],
-            ),
-            # waiting_for_validation — large peupleraie awaiting admin review
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=2,
-                status="waiting_for_validation",
-                user=volunteer,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.45,
-                        43.28,
-                        area_hectare=20,
-                        forest_type="poplar",
-                        days_ago_start=30,
-                        days_ago_end=25,
-                    ),
-                ],
-            ),
-            # legal_validated — coupe in a Natura2000 zone, large resineux
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=15,
-                status="legal_validated",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.31,
-                        43.28,
-                        area_hectare=25,
-                        forest_type="resinous",
-                        days_ago_start=60,
-                        days_ago_end=50,
-                        ecological_zoning_area=8,
-                        ecological_zonings=[natura1],
-                    ),
-                ],
-            ),
-            # legal_validated — mixed forest intersecting two protected zones
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=20,
-                status="legal_validated",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        2.34,
-                        48.85,
-                        area_hectare=18,
-                        forest_type="mixed",
-                        days_ago_start=45,
-                        days_ago_end=40,
-                        ecological_zoning_area=10,
-                        ecological_zonings=[natura1, natura2],
-                    ),
-                ],
-            ),
-            # final_validated — small feuillus, nothing to pursue
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=4,
-                status="final_validated",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.33,
-                        43.32,
-                        area_hectare=6,
-                        forest_type="deciduous",
-                        days_ago_start=90,
-                        days_ago_end=85,
-                    ),
-                ],
-            ),
-            # final_validated — small resineux, low slope, no thresholds hit
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=1,
-                status="final_validated",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        2.42,
-                        48.85,
-                        area_hectare=4,
-                        forest_type="resinous",
-                        days_ago_start=80,
-                        days_ago_end=75,
-                    ),
-                ],
-            ),
-            # rejected — small peupleraie, declared not relevant
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=1,
-                status="rejected",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.45,
-                        43.32,
-                        area_hectare=3,
-                        forest_type="poplar",
-                        days_ago_start=120,
-                        days_ago_end=115,
-                    ),
-                ],
-            ),
-            # rejected — feuillus, false positive from the satellite pipeline
-            ClearCutReport(
-                city=paris,
-                slope_area_hectare=2,
-                status="rejected",
-                user=admin,
-                clear_cuts=[
-                    make_clear_cut(
-                        2.42,
-                        48.84,
-                        area_hectare=5,
-                        forest_type="deciduous",
-                        days_ago_start=100,
-                        days_ago_end=95,
-                    ),
-                ],
-            ),
-            # to_validate — unassigned, the volunteer has requested the assignment
-            ClearCutReport(
-                city=marseille,
-                slope_area_hectare=5,
-                status="to_validate",
-                user=None,
-                assignment_requested_by=volunteer,
-                clear_cuts=[
-                    make_clear_cut(
-                        5.45,
-                        43.26,
-                        area_hectare=7,
-                        forest_type="mixed",
-                        days_ago_start=3,
-                        days_ago_end=1,
-                    ),
-                ],
-            ),
+        # Landes (40) — pinède résineuse, faible pente
+        r_sabres = ClearCutReport(
+            city=cities["sabres"],
+            slope_area_hectare=1.5,  # below slope threshold
+            status="to_validate",
+            user=alice,
+            clear_cuts=[
+                cut("sabres", area=12, forest="resinous", days_start=8, days_end=3),
+            ],
+        )
+        r_labouheyre = ClearCutReport(
+            city=cities["labouheyre"],
+            slope_area_hectare=1.0,
+            status="in_progress",
+            user=alice,
+            clear_cuts=[  # multi-cut, total 13 ha => area rule
+                cut(
+                    "labouheyre", area=7, forest="resinous", days_start=20, days_end=10
+                ),
+                cut(
+                    "labouheyre",
+                    area=6,
+                    forest="resinous",
+                    days_start=20,
+                    days_end=10,
+                    dx=0.012,
+                ),
+            ],
+        )
+        r_morcenx = ClearCutReport(
+            city=cities["morcenx"],
+            slope_area_hectare=0.5,
+            status="waiting_for_validation",
+            user=alice,
+            clear_cuts=[
+                cut("morcenx", area=22, forest="poplar", days_start=30, days_end=25),
+            ],
+        )
+
+        # Lozère (48) — forêt mixte, forte pente, Natura 2000 Mont Lozère
+        r_mende = ClearCutReport(
+            city=cities["mende"],
+            slope_area_hectare=14,  # slope rule
+            status="legal_validated",
+            user=admin,
+            clear_cuts=[
+                cut(
+                    "mende",
+                    area=18,
+                    forest="mixed",
+                    days_start=60,
+                    days_end=50,
+                    eco_area=9,
+                    zonings=[zonings["lozere"]],
+                ),
+            ],
+        )
+        r_montvert = ClearCutReport(
+            city=cities["pont_de_montvert"],
+            slope_area_hectare=8,
+            status="validated",
+            user=bruno,
+            clear_cuts=[  # multi-cut, one inside the protected zone
+                cut(
+                    "pont_de_montvert",
+                    area=9,  # below area threshold on its own
+                    forest="mixed",
+                    days_start=45,
+                    days_end=30,
+                    eco_area=6,
+                    zonings=[zonings["lozere"]],
+                ),
+                cut(
+                    "pont_de_montvert",
+                    area=4,
+                    forest="mixed",
+                    days_start=45,
+                    days_end=30,
+                    dx=0.012,
+                ),
+            ],
+        )
+        r_mende_request = ClearCutReport(
+            city=cities["mende"],
+            slope_area_hectare=3,
+            status="to_validate",
+            user=None,  # unassigned, awaiting admin approval
+            assignment_requested_by=bruno,
+            clear_cuts=[
+                cut(
+                    "mende",
+                    area=8,
+                    forest="mixed",
+                    days_start=5,
+                    days_end=1,
+                    eco_area=2,
+                    zonings=[zonings["lozere"]],
+                    dx=0.02,
+                    dy=0.015,
+                ),
+            ],
+        )
+
+        # Creuse (23) — feuillus
+        r_aubusson = ClearCutReport(
+            city=cities["aubusson"],
+            slope_area_hectare=1.2,  # below threshold
+            status="final_validated",
+            user=chloe,
+            clear_cuts=[  # small, low slope, no zoning => no rule matched (clean case)
+                cut("aubusson", area=6, forest="deciduous", days_start=90, days_end=85),
+            ],
+        )
+        r_aubusson_unknown = ClearCutReport(
+            city=cities["aubusson"],
+            slope_area_hectare=2.5,
+            status="to_validate",
+            user=chloe,
+            clear_cuts=[  # unknown forest type => bdf areas are NULL
+                cut(
+                    "aubusson",
+                    area=11,
+                    forest="unknown",
+                    days_start=7,
+                    days_end=2,
+                    dx=0.02,
+                    dy=0.015,
+                ),
+            ],
+        )
+        r_royere = ClearCutReport(
+            city=cities["royere"],
+            slope_area_hectare=2.0,
+            status="rejected",
+            user=admin,
+            clear_cuts=[  # false positive from the satellite pipeline
+                cut("royere", area=5, forest="deciduous", days_start=100, days_end=95),
+            ],
+        )
+
+        # Vosges (88) — mixte/résineux, forte pente, Natura 2000 massif vosgien
+        r_gerardmer = ClearCutReport(
+            city=cities["gerardmer"],
+            slope_area_hectare=16,
+            status="waiting_for_validation",
+            user=chloe,
+            clear_cuts=[
+                cut(
+                    "gerardmer",
+                    area=25,
+                    forest="resinous",
+                    days_start=25,
+                    days_end=20,
+                    eco_area=10,
+                    zonings=[zonings["vosges"]],
+                ),
+            ],
+        )
+        r_labresse = ClearCutReport(
+            city=cities["la_bresse"],
+            slope_area_hectare=20,
+            status="legal_validated",
+            user=admin,
+            clear_cuts=[  # multi-cut, large, in protected zone
+                cut(
+                    "la_bresse",
+                    area=15,
+                    forest="resinous",
+                    days_start=70,
+                    days_end=60,
+                    eco_area=8,
+                    zonings=[zonings["vosges"]],
+                ),
+                cut(
+                    "la_bresse",
+                    area=10,
+                    forest="mixed",
+                    days_start=70,
+                    days_end=60,
+                    dx=0.014,
+                ),
+            ],
+        )
+        r_gerardmer_progress = ClearCutReport(
+            city=cities["gerardmer"],
+            slope_area_hectare=5,
+            status="in_progress",
+            user=chloe,
+            clear_cuts=[
+                cut(
+                    "gerardmer",
+                    area=12,
+                    forest="mixed",
+                    days_start=18,
+                    days_end=12,
+                    dx=0.02,
+                    dy=0.015,
+                ),
+            ],
+        )
+        r_labresse_small = ClearCutReport(
+            city=cities["la_bresse"],
+            slope_area_hectare=1,
+            status="final_validated",
+            user=admin,
+            clear_cuts=[  # small, below every threshold
+                cut(
+                    "la_bresse",
+                    area=4,
+                    forest="resinous",
+                    days_start=80,
+                    days_end=75,
+                    dx=0.02,
+                    dy=0.015,
+                ),
+            ],
+        )
+        r_royere_rejected = ClearCutReport(
+            city=cities["royere"],
+            slope_area_hectare=1,
+            status="rejected",
+            user=admin,
+            clear_cuts=[
+                cut(
+                    "royere",
+                    area=3,
+                    forest="poplar",
+                    days_start=120,
+                    days_end=115,
+                    dx=0.02,
+                    dy=0.015,
+                ),
+            ],
+        )
+
+        reports = [
+            r_sabres,
+            r_labouheyre,
+            r_morcenx,
+            r_mende,
+            r_montvert,
+            r_mende_request,
+            r_aubusson,
+            r_aubusson_unknown,
+            r_royere,
+            r_gerardmer,
+            r_labresse,
+            r_gerardmer_progress,
+            r_labresse_small,
+            r_royere_rejected,
         ]
-        clear_cuts.extend(extra_reports)
-        db.add_all(clear_cuts)
+        db.add_all(reports)
+
+        # --- Favorites ---------------------------------------------------------
+        alice.favorites.append(r_sabres)
+        bruno.favorites.append(r_montvert)
+        admin.favorites.extend([r_labresse, r_mende])
 
         db.flush()
 
-        reportform = ClearCutForm(
-            report_id=clear_cuts[0].id,
-            editor_id=admin.id,
-            inspection_date=datetime.now(),
-            weather="Sunny",
-            forest="Dense pine forest",
-            has_remaining_trees=True,
-            trees_species="Pinus sylvestris",
-            planting_images=["planting_image_1.jpg", "planting_image_2.jpg"],
-            has_construction_panel=False,
-            construction_panel_images=[
-                "construction_panel_image_1.jpg",
-                "construction_panel_image_2.jpg",
-            ],
-            wetland="Yes",
-            destruction_clues="None",
-            soil_state="Healthy",
-            clear_cut_images=["clear_cut_image_1.jpg", "clear_cut_image_2.jpg"],
-            tree_trunks_images=["tree_trunks_image_1.jpg", "tree_trunks_image_2.jpg"],
-            soil_state_images=["soil_state_image_1.jpg", "soil_state_image_2.jpg"],
-            access_road_images=["access_road_image_1.jpg", "access_road_image_2.jpg"],
-            # Ecological informations
-            has_other_ecological_zone=False,
-            other_ecological_zone_type="N/A",
-            has_nearby_ecological_zone=True,
-            nearby_ecological_zone_type="Wetland",
-            protected_species="None",
-            protected_habitats="None",
-            has_ddt_request=False,
-            ddt_request_owner="N/A",
-            # Stakeholders
-            company="EcoTree",
-            subcontractor="TreeServices",
-            landlord="John Doe",
-            # Reglementation
-            is_pefc_fsc_certified=True,
-            is_over_20_ha=False,
-            is_psg_required_plot=True,
-            # Legal strategy
-            relevant_for_pefc_complaint=False,
-            relevant_for_rediii_complaint=False,
-            relevant_for_ofb_complaint=False,
-            relevant_for_alert_cnpf_ddt_srgs=False,
-            relevant_for_alert_cnpf_ddt_psg_thresholds=False,
-            relevant_for_psg_request=False,
-            request_engaged="None",
-            # Miscellaneous
-            other="No additional information",
+        # --- Forms -------------------------------------------------------------
+        # Two fully-filled forms, one partial draft. Image fields point to real
+        # files copied into each report's upload folder so they actually render.
+        full_forms = [
+            ClearCutForm(
+                report_id=r_mende.id,
+                editor_id=admin.id,
+                inspection_date=datetime.now() - timedelta(days=48),
+                weather="Ensoleillé",
+                forest="Hêtraie-sapinière de montagne",
+                has_remaining_trees=False,
+                trees_species="Fagus sylvatica, Abies alba",
+                planting_images=[seed_report_image(r_mende.id, "planting")],
+                has_construction_panel=True,
+                construction_panel_images=[seed_report_image(r_mende.id, "panel")],
+                wetland="Non",
+                destruction_clues="Sol fortement tassé, ornières profondes",
+                soil_state="Dégradé",
+                clear_cut_images=[seed_report_image(r_mende.id, "clearcut")],
+                tree_trunks_images=[seed_report_image(r_mende.id, "trunks")],
+                soil_state_images=[seed_report_image(r_mende.id, "soil")],
+                access_road_images=[seed_report_image(r_mende.id, "road")],
+                has_other_ecological_zone=True,
+                other_ecological_zone_type="ZNIEFF",
+                has_nearby_ecological_zone=True,
+                nearby_ecological_zone_type="Natura 2000 (Mont Lozère)",
+                protected_species="Grand tétras",
+                protected_habitats="Tourbières de montagne",
+                has_ddt_request=True,
+                ddt_request_owner="DDT 48",
+                company="Scierie du Gévaudan",
+                subcontractor="Travaux Forestiers Lozère",
+                landlord="Groupement Forestier du Mont Lozère",
+                is_pefc_fsc_certified=False,
+                is_over_20_ha=False,
+                is_psg_required_plot=True,
+                relevant_for_pefc_complaint=False,
+                relevant_for_rediii_complaint=True,
+                relevant_for_ofb_complaint=True,
+                relevant_for_alert_cnpf_ddt_srgs=True,
+                relevant_for_alert_cnpf_ddt_psg_thresholds=True,
+                relevant_for_psg_request=True,
+                request_engaged="Signalement OFB en cours",
+                other="Coupe en zone Natura 2000, forte pente, à suivre en priorité",
+            ),
+            ClearCutForm(
+                report_id=r_labresse.id,
+                editor_id=admin.id,
+                inspection_date=datetime.now() - timedelta(days=58),
+                weather="Couvert",
+                forest="Pessière (épicéa)",
+                has_remaining_trees=True,
+                trees_species="Picea abies",
+                planting_images=[seed_report_image(r_labresse.id, "planting")],
+                has_construction_panel=False,
+                construction_panel_images=[],
+                wetland="Non",
+                destruction_clues="Aucun indice particulier",
+                soil_state="Correct",
+                clear_cut_images=[seed_report_image(r_labresse.id, "clearcut")],
+                tree_trunks_images=[seed_report_image(r_labresse.id, "trunks")],
+                soil_state_images=[],
+                access_road_images=[seed_report_image(r_labresse.id, "road")],
+                has_other_ecological_zone=False,
+                other_ecological_zone_type=None,
+                has_nearby_ecological_zone=True,
+                nearby_ecological_zone_type="Massif vosgien",
+                protected_species="Aucune observée",
+                protected_habitats="Aucun",
+                has_ddt_request=False,
+                ddt_request_owner=None,
+                company="Exploitation Forestière des Hautes-Vosges",
+                subcontractor=None,
+                landlord="Commune de La Bresse",
+                is_pefc_fsc_certified=True,
+                is_over_20_ha=True,
+                is_psg_required_plot=True,
+                relevant_for_pefc_complaint=True,
+                relevant_for_rediii_complaint=False,
+                relevant_for_ofb_complaint=False,
+                relevant_for_alert_cnpf_ddt_srgs=False,
+                relevant_for_alert_cnpf_ddt_psg_thresholds=True,
+                relevant_for_psg_request=False,
+                request_engaged="Plainte PEFC déposée",
+                other="Coupe > 20 ha en zone protégée",
+            ),
+        ]
+
+        # Partial draft (volunteer started filling the form while in progress)
+        draft_form = ClearCutForm(
+            report_id=r_labouheyre.id,
+            editor_id=alice.id,
+            inspection_date=datetime.now() - timedelta(days=9),
+            weather="Ensoleillé",
+            forest="Pin maritime",
+            has_remaining_trees=False,
+            trees_species="Pinus pinaster",
+            clear_cut_images=[seed_report_image(r_labouheyre.id, "clearcut")],
         )
 
-        db.add(reportform)
+        db.add_all([*full_forms, draft_form])
 
         sync_clear_cuts_reports(db)
 
         db.commit()
 
         print(f"Added {len(users)} users to the database")
-        print(f"Added {len(clear_cuts)} clear cut reports to the database")
+        print(f"Added {len(reports)} clear cut reports to the database")
+        print(f"Added {len(full_forms) + 1} clear cut forms to the database")
         print("Database finished seeding!")
 
     except Exception as e:

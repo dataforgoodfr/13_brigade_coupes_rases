@@ -155,9 +155,7 @@ export function RegisterForm() {
 					<Button
 						className="w-full"
 						type="submit"
-						disabled={
-							!form.formState.isValid || registerState.status === "loading"
-						}
+						disabled={registerState.status === "loading"}
 					>
 						<LogInIcon />
 						S'inscrire

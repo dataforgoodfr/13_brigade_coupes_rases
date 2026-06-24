@@ -2,14 +2,14 @@ import clsx from "clsx"
 import { type FC, type PropsWithChildren, useEffect } from "react"
 import { FormattedDate } from "react-intl"
 
+import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel"
-import { Button } from "@/components/ui/button"
 import {
 	commitFilters,
-	resetFilters,
 	filtersSlice,
 	getFiltersThunk,
+	resetFilters,
 	selectAreaRange,
 	selectAreas,
 	selectCutMonths,
@@ -33,6 +33,7 @@ import {
 
 interface Props {
 	className?: string
+	onClose?: () => void
 }
 const CUT_YEARS = {
 	label: "Années",
@@ -67,7 +68,7 @@ const FAVORITE = {
 	label: "Favoris"
 }
 
-export function AdvancedFilters({ className }: Props) {
+export function AdvancedFilters({ className, onClose }: Props) {
 	const dispatch = useAppDispatch()
 	const cutYears = useEnhancedItems({
 		items: useAppSelector(selectCutYears),
@@ -122,8 +123,8 @@ export function AdvancedFilters({ className }: Props) {
 			)
 	)
 	return (
-		<div className={clsx("flex flex-col gap-2 py-3", className)}>
-			<div className="flex gap-2">
+		<div className={clsx("flex flex-col gap-3 py-3", className)}>
+			<div className="flex flex-col sm:flex-row gap-2">
 				<FieldWrapper>
 					<label htmlFor={DEPARTMENTS.id}>{DEPARTMENTS.label}</label>
 					<ComboboxFilter
@@ -168,7 +169,7 @@ export function AdvancedFilters({ className }: Props) {
 					</div>
 				</div>
 			</div>
-			<div className="flex gap-2">
+			<div className="flex flex-col sm:flex-row gap-2">
 				<FieldWrapper>
 					<label htmlFor={AREA.id}>
 						{AREA.label} hectares{" "}
@@ -252,12 +253,19 @@ export function AdvancedFilters({ className }: Props) {
 				<Button variant="outline" onClick={() => dispatch(resetFilters())}>
 					Réinitialiser
 				</Button>
-				<Button onClick={() => dispatch(commitFilters())}>OK</Button>
+				<Button
+					onClick={() => {
+						dispatch(commitFilters())
+						onClose?.()
+					}}
+				>
+					OK
+				</Button>
 			</div>
 		</div>
 	)
 }
 
 const FieldWrapper: FC<PropsWithChildren> = ({ children }) => {
-	return <div className="flex w-1/2 flex-col gap-1"> {children}</div>
+	return <div className="flex w-full sm:w-1/2 flex-col gap-1"> {children}</div>
 }

@@ -1,8 +1,13 @@
 import { z } from "zod"
 
 import { clearCutStatusSchema } from "@/features/clear-cut/store/clear-cuts"
+import { sortSchema } from "@/shared/types/list"
 
 import { boundsSchema } from "./types"
+
+export const SORTABLE_FIELDS = ["first_cut_date"] as const
+export const sortableFieldSchema = z.enum(SORTABLE_FIELDS)
+export type SortableField = z.infer<typeof sortableFieldSchema>
 
 const filtersRequestSchema = z.object({
 	cutYears: z.array(z.number()),
@@ -16,7 +21,9 @@ const filtersRequestSchema = z.object({
 	inReportsIds: z.string().array().optional(),
 	outReportsIds: z.string().array().optional(),
 	hasEcologicalZonings: z.boolean().optional(),
-	withPoints: z.boolean().optional()
+	withPoints: z.boolean().optional(),
+	sortBy: sortableFieldSchema.optional(),
+	sortOrder: sortSchema.optional()
 })
 
 export type FiltersRequest = z.infer<typeof filtersRequestSchema>

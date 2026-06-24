@@ -12,11 +12,11 @@ type Props = (ButtonProps | LinkProps) & {
 	Icon: LucideIcon
 }
 const className =
-	"inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
-const inactiveClassName =
-	"border-transparent  text-gray-500 hover:border-gray-300 hover:text-gray-700"
+	"inline-flex items-center justify-center rounded-xl p-2 text-primary-foreground transition-colors"
+const inactiveClassName = "opacity-60 hover:opacity-100 hover:bg-white/10"
+const activeClassName = "opacity-100 bg-white/20"
 export const NavbarItem: React.FC<Props> = ({ Icon, ...props }) => {
-	const StylizedIcon = <Icon className="text-primary-foreground size-11" />
+	const StylizedIcon = <Icon className="size-9" />
 
 	if (props.type === "button") {
 		return (
@@ -32,7 +32,7 @@ export const NavbarItem: React.FC<Props> = ({ Icon, ...props }) => {
 		<Link
 			{...props}
 			activeProps={{
-				className: "border-transparent hover:border-gray-300 text-gray-900"
+				className: activeClassName
 			}}
 			inactiveProps={{
 				className: inactiveClassName

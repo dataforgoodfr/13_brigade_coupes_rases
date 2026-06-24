@@ -3,10 +3,16 @@ import { Loader2, LocateFixed } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useMap } from "react-leaflet"
 
+import { buttonVariants } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
-export function LocationButton() {
+/**
+ * Single geolocation control. One tap locates + recenters the map and starts
+ * live tracking; tapping again stops tracking. Rendered inline inside the map
+ * control row (not absolutely positioned) so it never overlaps other controls.
+ */
+export function LocationButton({ className }: { className?: string }) {
 	const map = useMap()
 	const { toast } = useToast()
 	const buttonRef = useRef<HTMLButtonElement>(null)
@@ -128,17 +134,12 @@ export function LocationButton() {
 			type="button"
 			onClick={handleClick}
 			disabled={isLocating}
-			aria-label={isTracking ? "Désactiver ma position" : "Me géolocaliser"}
+			aria-label={isTracking ? "Désactiver ma position" : "Me localiser"}
+			title={isTracking ? "Désactiver le suivi de position" : "Me localiser"}
 			className={cn(
-				"absolute top-20 right-4 z-[1000]",
-				"flex items-center gap-2 rounded-full px-4 py-3 sm:px-5",
-				"text-sm font-semibold",
-				"shadow-xl ring-2 ring-white",
-				"transition active:scale-95",
-				"disabled:cursor-wait",
-				isTracking
-					? "bg-emerald-600 text-white hover:bg-emerald-700"
-					: "bg-blue-600 text-white hover:bg-blue-700"
+				buttonVariants({ variant: isTracking ? "default" : "white" }),
+				"shrink-0 active:scale-95 disabled:cursor-wait",
+				className
 			)}
 		>
 			{isLocating ? (
@@ -146,7 +147,9 @@ export function LocationButton() {
 			) : (
 				<LocateFixed size={20} />
 			)}
-			<span>{isTracking ? "Position active" : "Me localiser"}</span>
+			<span className="hidden sm:inline">
+				{isTracking ? "Position active" : "Me localiser"}
+			</span>
 		</button>
 	)
 }
