@@ -47,6 +47,10 @@ function inferMimeType(file: File): string {
 	return EXTENSION_TO_MIME[ext] ?? "image/jpeg"
 }
 
+// Doit rester aligné avec MAX_UPLOAD_SIZE_BYTES côté backend (app/config.py).
+const MAX_FILE_SIZE = 25 * 1024 * 1024
+const MAX_FILE_SIZE_LABEL = "25 Mo"
+
 export function useImageUpload(): UseImageUploadResult {
 	const [uploading, setUploading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -61,76 +65,87 @@ export function useImageUpload(): UseImageUploadResult {
 		setProgress(0)
 
 		try {
+			const token = getStoredToken()
+			if (!token) {
+				const message = "Vous devez être connecté pour envoyer des photos."
+				setError(message)
+				throw new Error(message)
+			}
+
+			const authenticatedApi = api.extend({
+				headers: { Authorization: `Bearer ${token.accessToken}` }
+			})
+
 			const uploadedImages: UploadedImage[] = []
+			const failures: string[] = []
 			const totalFiles = files.length
 
 			for (let i = 0; i < totalFiles; i++) {
 				const file = files[i]
-				const contentType = inferMimeType(file)
+				try {
+					const contentType = inferMimeType(file)
 
-				if (!contentType.startsWith("image/")) {
-					throw new Error(`Le fichier "${file.name}" n'est pas une image.`)
-				}
+					if (!contentType.startsWith("image/")) {
+						throw new Error(`"${file.name}" n'est pas une image`)
+					}
 
-				const maxSize = 10 * 1024 * 1024
-				if (file.size > maxSize) {
-					throw new Error(
-						`Le fichier "${file.name}" est trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo). Taille maximale : 10 Mo.`
+					if (file.size > MAX_FILE_SIZE) {
+						throw new Error(
+							`"${file.name}" est trop volumineux (${(file.size / 1024 / 1024).toFixed(1)} Mo, max ${MAX_FILE_SIZE_LABEL})`
+						)
+					}
+
+					const uploadRequest: ImageUploadRequest = {
+						filename: file.name,
+						content_type: contentType,
+						file_size: file.size,
+						report_id: reportId
+					}
+
+					const response = await authenticatedApi
+						.post("api/v1/images/upload-url", { json: uploadRequest })
+						.json<ImageUploadResponse>()
+
+					const formData = new FormData()
+					for (const [key, value] of Object.entries(response.fields)) {
+						formData.append(key, value)
+					}
+					formData.append("file", file)
+
+					const uploadResponse = await fetch(response.uploadUrl, {
+						method: "POST",
+						body: formData
+					})
+
+					if (!uploadResponse.ok) {
+						throw new Error(
+							`échec de l'envoi de "${file.name}" (${uploadResponse.status})`
+						)
+					}
+
+					uploadedImages.push({
+						fileUrl: response.fileUrl,
+						key: response.key,
+						filename: file.name
+					})
+				} catch (fileErr) {
+					// On n'interrompt pas le lot : les autres photos valides doivent
+					// quand même être envoyées. On collecte les fichiers en échec.
+					failures.push(
+						fileErr instanceof Error ? fileErr.message : `"${file.name}"`
 					)
+				} finally {
+					setProgress(((i + 1) / totalFiles) * 100)
 				}
+			}
 
-				const token = getStoredToken()
-				if (!token) {
-					throw new Error("Vous devez être connecté pour envoyer des photos.")
-				}
-
-				const authenticatedApi = api.extend({
-					headers: { Authorization: `Bearer ${token.accessToken}` }
-				})
-
-				const uploadRequest: ImageUploadRequest = {
-					filename: file.name,
-					content_type: contentType,
-					file_size: file.size,
-					report_id: reportId
-				}
-
-				const response = await authenticatedApi
-					.post("api/v1/images/upload-url", { json: uploadRequest })
-					.json<ImageUploadResponse>()
-
-				const formData = new FormData()
-				for (const [key, value] of Object.entries(response.fields)) {
-					formData.append(key, value)
-				}
-				formData.append("file", file)
-
-				const uploadResponse = await fetch(response.uploadUrl, {
-					method: "POST",
-					body: formData
-				})
-
-				if (!uploadResponse.ok) {
-					throw new Error(
-						`Échec de l'envoi de "${file.name}" (${uploadResponse.status} ${uploadResponse.statusText}).`
-					)
-				}
-
-				uploadedImages.push({
-					fileUrl: response.fileUrl,
-					key: response.key,
-					filename: file.name
-				})
-
-				setProgress(((i + 1) / totalFiles) * 100)
+			if (failures.length > 0) {
+				setError(
+					`Certaines photos n'ont pas été ajoutées : ${failures.join(" ; ")}.`
+				)
 			}
 
 			return uploadedImages
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Erreur lors de l'envoi de la photo."
-			setError(errorMessage)
-			throw err
 		} finally {
 			setUploading(false)
 		}

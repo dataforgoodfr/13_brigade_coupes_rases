@@ -68,7 +68,7 @@ def generate_upload_url(
             detail=f"Type de fichier non autorisé. Types acceptés : {ALLOWED_TYPES}",
         )
 
-    max_size = 10 * 1024 * 1024
+    max_size = settings.MAX_UPLOAD_SIZE_BYTES
     if upload_request.file_size and upload_request.file_size > max_size:
         raise AppHTTPException(
             status_code=400,

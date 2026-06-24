@@ -62,6 +62,11 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "S3_ENDPOINT"},
         description="Endpoint URL of the S3 bucket for photos storage",
     )
+    MAX_UPLOAD_SIZE_BYTES: int = Field(
+        default=25 * 1024 * 1024,
+        json_schema_extra={"env": "MAX_UPLOAD_SIZE_BYTES"},
+        description="Maximum allowed size per uploaded photo, in bytes (default 25 MB)",
+    )
 
 
 settings = Settings()  # type: ignore[call-arg]

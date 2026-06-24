@@ -19,7 +19,7 @@ export function Navbar({ className }: Props) {
 		<nav
 			className={clsx(
 				className,
-				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15"
+				"hidden sm:flex flex-col items-center bg-primary shadow z-max min-w-20 max-w-20 justify-between py-15 overflow-y-auto"
 			)}
 		>
 			<div className="flex flex-col items-center ">
