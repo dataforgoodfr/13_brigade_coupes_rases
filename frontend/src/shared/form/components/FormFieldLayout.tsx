@@ -55,7 +55,11 @@ export function FormFieldLayout<
 					) : null}
 				</div>
 			)}
-			<div className="flex flex-grow-1 flex-col">
+			<div
+				className={clsx("flex flex-grow-1 flex-col", {
+					"w-full": orientation === "vertical"
+				})}
+			>
 				{withControl ? <FormControl>{children}</FormControl> : children}
 				<FormMessage />
 			</div>
