@@ -6,6 +6,9 @@
 - [Analytics](./analytics/README.md)
 - [Documentation](./doc/README.md)
 
+> 🚀 **Tu veux juste lancer le projet ?** Saute directement au guide pas à pas :
+> [Lancer le projet en local](#-lancer-le-projet-en-local-guide-pas-à-pas).
+
 # Contexte du Projet
 
 La déforestation et les coupes rases illégales représentent une menace majeure pour les écosystèmes et la biodiversité. Cependant, il existe un manque de transparence et de contrôle efficace sur ces pratiques, rendant difficile leur suivi et leur régulation.
@@ -241,83 +244,150 @@ Considérez la base de données keepass comme étant la golden source de tous le
 Chaque secret utilisés dans le projet doit être référencé dans le keepass.  
 Exemples de secrets à utiliser dans la base : mot de passe du compte gérant l'infrastructure cloud, CI/CD, clés d'API, chaines de connection pour base de données etc ...
 
-# Les commandes pour développer en local
+# 🚀 Lancer le projet en local (guide pas à pas)
 
-Quelques commandes pour démarrer le projet en local.
-Voir les README des sous-répertoires pour plus de détails sur chaque partie du projet.
+Cette section explique comment faire tourner **toute la stack** (base de données + backend + frontend) sur ta machine, de zéro.
 
-## Base de données
+## 0. Prérequis
 
-Prérequis : [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/)
+| Outil | Pour quoi faire | Obligatoire ? |
+| --- | --- | --- |
+| [Docker](https://docs.docker.com/get-docker/) + [Docker Compose](https://docs.docker.com/compose/install/) | Base de données, et toute la stack en Docker | ✅ Toujours |
+| [Python 3.13+](https://www.python.org/downloads/) + [Poetry](https://python-poetry.org/docs/#installation) | Lancer le backend **en local** (Option B) | Option B uniquement |
+| [Node.js 23+](https://nodejs.org/en) + [pnpm](https://pnpm.io/installation) | Lancer le frontend **en local** (Option B) | Option B uniquement |
+
+Il y a **deux façons** de lancer le projet. Choisis-en une :
+
+- **Option A — Tout en Docker** : une seule commande, rien à installer à part Docker. **Recommandé, surtout sur Mac.**
+- **Option B — En local, étape par étape** : DB en Docker, backend et frontend lancés à la main (utile pour développer/debugger).
+
+---
+
+## Option A — Tout en Docker (recommandé) 🐳
+
+Une seule commande construit les images, attend que Postgres soit prêt, applique les migrations, seede les données de dev et démarre tous les services :
 
 ```bash
-# Lancer PostgreSQL et pgAdmin
-docker compose up db pgadmin
+./start_docker.sh
 ```
 
-La base de données est accessible à l'adresse [http://localhost:5432](http://localhost:5432).
-Connectez-vous à pgAdmin sur [http://localhost:8888/](http://localhost:8888/) avec les identifiants suivants :
+Une fois terminé, tout tourne :
 
-- Email : `devuser@devuser.com`
-- Mot de passe : `devuser`
+| Service | URL | Identifiants |
+| --- | --- | --- |
+| Frontend (web) | http://localhost:8081 | voir [comptes de test](#comptes-de-test) |
+| Backend (API + docs Swagger) | http://localhost:8080/docs | — |
+| pgAdmin (gestion DB) | http://localhost:8888 | `devuser@devuser.com` / `devuser` |
+| Mailpit (emails de dev) | http://localhost:8025 | — |
 
-Ensuite, vous pouvez ajouter un nouveau serveur avec les informations suivantes :
-
-- Nom : `Dev Localhost`
-- Hôte : `db`
-- Port : `5432`
-- Maintenance database : `postgres`
-- Username : `devuser`
-- Password : `devuser`
-
-## Backend
-
-Prérequis : [Python 3.13+](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation)
+Commandes utiles :
 
 ```bash
-# Aller dans le répertoire backend
+docker compose logs -f          # suivre les logs de tous les services
+docker compose down             # tout arrêter (les données sont conservées)
+docker compose down -v          # tout arrêter ET supprimer la base de données
+```
+
+> ⚠️ **Mac (puce Apple) :** garde l'entrée de volume `- /app/.venv` dans `docker-compose.yml`. Elle protège l'environnement virtuel du backend dans le conteneur ; le retirer casse le démarrage.
+
+---
+
+## Option B — En local, étape par étape 🔧
+
+### Étape 1 — Base de données (toujours en Docker)
+
+```bash
+# Démarre PostgreSQL/PostGIS + pgAdmin et attend que la DB soit "healthy"
+docker compose up -d --wait db
+docker compose up -d pgadmin
+```
+
+- La base écoute sur le port `5432` (connexion : `postgresql://devuser:devuser@localhost:5432/local`).
+- pgAdmin est dispo sur http://localhost:8888 (`devuser@devuser.com` / `devuser`).
+  Pour y ajouter le serveur : Hôte `db`, Port `5432`, Username/Password `devuser`, Maintenance database `postgres`.
+
+### Étape 2 — Backend (API)
+
+```bash
 cd backend
 
-# Installer les dépendances
+# Installer les dépendances Python
 poetry install
 
-# Activer l'environnement virtuel
-source .venv/bin/activate
-
-# Mettre à jour les tables de la base de données avec Alembic
+# Appliquer les migrations (crée/maj les tables)
 poetry run alembic upgrade head
 
-# Seeder la base de données avec des données de développement
+# Seeder la base avec un jeu de données de dev complet (voir plus bas)
 poetry run python -m seed_dev
 
-# Lancer le serveur de développement
+# Lancer le serveur de dev (rechargement auto)
 poetry run python -m app.main --host='0.0.0.0' --port=8080 --reload --proxy-headers --forwarded-allow-ips='*'
 ```
 
-L'API du backend est accessible à l'adresse [http://localhost:8080](http://localhost:8080/docs)
+L'API et sa documentation Swagger sont sur http://localhost:8080/docs.
 
-## Frontend
+> 💡 Astuce : `make devserver` (dans `backend/`) lance la même commande de serveur.
 
-Prérequis : [Node.js 23+](https://nodejs.org/en) et [pnpm](https://pnpm.io/installation)
+### Étape 3 — Frontend (interface web)
+
+Dans un **deuxième terminal** (laisse le backend tourner) :
 
 ```bash
-# Aller dans le répertoire frontend
 cd frontend
 
 # Installer les dépendances
 pnpm i
 
-# Lancer le serveur de développement
+# Lancer le serveur de dev (tape le vrai backend sur :8080)
 pnpm dev
-
-# Pour construire le projet pour la production et vérifier le typing
-pnpm run build
-
-# Pour lancer les tests
-pnpm test
 ```
 
-Le site web est accessible à l'adresse [http://localhost:5173](http://localhost:5173)
+Le site est sur http://localhost:5173.
+
+Autres commandes frontend utiles :
+
+```bash
+pnpm dev:mock     # lance le front avec des mocks (MSW), sans backend
+pnpm build        # build de prod + vérification du typage
+pnpm test         # tests unitaires (Vitest)
+pnpm cleanup      # formatage + lint (Biome)
+```
+
+### Étape 4 — Vérifier que tout marche
+
+1. Ouvre http://localhost:5173, connecte-toi avec un [compte de test](#comptes-de-test).
+2. La carte doit afficher des coupes rases dans les Landes, la Lozère, la Creuse et les Vosges.
+3. L'API répond sur http://localhost:8080/docs.
+
+> 🍎 **macOS** : le script `./start_local.sh` automatise l'Option B (DB + migrations + seed, puis ouvre le backend et le frontend dans deux fenêtres Terminal).
+
+---
+
+## Comptes de test
+
+Le seed de dev crée ces comptes (tous les bénévoles ont le mot de passe `volunteer`) :
+
+| Email | Mot de passe | Rôle | Départements |
+| --- | --- | --- | --- |
+| `admin@example.com` | `admin` | admin | Landes, Lozère, Creuse, Vosges |
+| `volunteer@example.com` | `volunteer` | bénévole | Landes (40) |
+| `bruno@example.com` | `volunteer` | bénévole | Lozère (48) |
+| `chloe@example.com` | `volunteer` | bénévole | Creuse (23) + Vosges (88) |
+| `david@example.com` | `volunteer` | bénévole **inactif** | Vosges (88) |
+
+## Jeu de données de dev (`seed_dev`)
+
+`poetry run python -m seed_dev` **vide puis recrée** un jeu de données réaliste : 4 départements forestiers, communes et zones Natura 2000 réelles, 14 signalements couvrant tous les statuts et types de forêt, des cas limites pour les règles (surface/pente/zonage), une demande d'assignation en attente, des favoris et des formulaires (dont un avec photos). Détails complets dans [CLAUDE.md](./CLAUDE.md#dev-seed-dataset-backendseed_devpy).
+
+Pour repartir d'une base fraîche à tout moment :
+
+```bash
+# En local
+cd backend && poetry run python -m seed_dev
+
+# En Docker
+docker compose exec backend poetry run python -m seed_dev
+```
 
 ## Data pipeline
 

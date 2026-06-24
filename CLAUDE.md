@@ -39,6 +39,29 @@ docker compose up                   # Full stack
 - pgAdmin (DB Management): http://localhost:8888 (`devuser@devuser.com` / `devuser`)
 - Mailpit: http://localhost:8025
 
+### Dev seed dataset (`backend/seed_dev.py`)
+
+`seed_dev.py` wipes and reseeds a realistic fixture set built around four real
+forested departments — **Landes (40)**, **Lozère (48)**, **Creuse (23)**,
+**Vosges (88)** — with real communes and Natura 2000 zones that actually overlap
+the clear cuts.
+
+- **Users** (all volunteers share the password `volunteer`):
+  - `admin@example.com` / `admin` — admin, all four departments
+  - `volunteer@example.com` — Alice, Landes (40)
+  - `bruno@example.com` — Bruno, Lozère (48)
+  - `chloe@example.com` — Chloé, Creuse (23) + Vosges (88)
+  - `david@example.com` — David, **inactive** account (Vosges)
+- **14 reports** covering every status, every forest profile (résineux /
+  feuillus / mixte / peupleraie / inconnu), mono- and multi-cut reports, rule
+  edge cases (area / slope / ecological zoning above and below thresholds), one
+  unassigned report with a pending assignment request (Bruno), and a wide spread
+  of cut dates for the date sort.
+- **3 forms**: two fully filled (Mende, La Bresse) + one partial draft
+  (Labouheyre). Form images are copied into `backend/uploads/reports/<id>/` so
+  they render instead of pointing at broken filenames.
+- **Favorites** pre-set for Alice, Bruno and the admin.
+
 > **Mac ARM64 note:** The `.venv` inside the backend container is protected by an anonymous Docker volume (`/app/.venv`). Do not remove the `- /app/.venv` volume entry from `docker-compose.yml`.
 
 ### Backend (local, no Docker)
@@ -47,7 +70,7 @@ docker compose up                   # Full stack
 cd backend
 poetry install --with backend
 poetry run alembic upgrade head
-poetry run python -m seed_dev       # dev seed (admin@example.com / password, volunteer@example.com / password)
+poetry run python -m seed_dev       # dev seed (admin@example.com / admin, volunteer@example.com / volunteer)
 make devserver                      # starts on port 8080
 ```
 

@@ -5,16 +5,16 @@ set -e
 
 echo "Démarrage automatique de Docker..."
 open -a Docker
-echo "Attente de Docker (10s)..."
-sleep 10
+echo "Attente du démon Docker..."
+until docker info >/dev/null 2>&1; do sleep 1; done
 
 echo "1. Construction des images et démarrage de la base de données..."
 docker compose build
-docker compose up -d db pgadmin
+# --wait bloque jusqu'à ce que le healthcheck Postgres soit OK (plus de sleep en dur)
+docker compose up -d --wait db
+docker compose up -d pgadmin
 
 echo "2. Initialisation de la base de données (Migrations et seeding)..."
-echo "Attente que Postgres soit prêt..."
-sleep 15
 docker compose run --rm backend poetry run alembic upgrade head
 docker compose run --rm backend poetry run python -m seed_dev
 
