@@ -41,6 +41,7 @@ import {
 	clearCutFormVersionsSchema,
 	clearCutReportResponseSchema,
 	clearCutsResponseSchema,
+	type MultiPolygon,
 	myAssignedReportsResponseSchema
 } from "./clear-cuts"
 
@@ -52,6 +53,8 @@ const mapReport = (
 	report: ClearCutReportResponse
 ): ClearCutReport => ({
 	...report,
+	// "Date de signalement" defaults to the report creation date until corrected.
+	reportedAt: report.reportedAt ?? report.createdAt,
 	rules: selectRulesByIds(state, report.rulesIds),
 	department: selectDepartmentsByIds(state, [report.departmentId])[0],
 	clearCuts: report.clearCuts.map((cut) => ({
@@ -393,6 +396,70 @@ export const rejectValidationThunk = createAppAsyncThunk<void, string>(
 	}
 )
 
+export const updateClearCutGeometryThunk = createAppAsyncThunk<
+	void,
+	{
+		reportId: string
+		clearCutId: string
+		boundary?: MultiPolygon
+		observationStartDate?: string
+		observationEndDate?: string
+	}
+>(
+	"clear-cuts/updateGeometry",
+	async (
+		{
+			reportId,
+			clearCutId,
+			boundary,
+			observationStartDate,
+			observationEndDate
+		},
+		{ extra: { api }, dispatch }
+	) => {
+		const json: Record<string, unknown> = {}
+		if (boundary !== undefined) json.boundary = boundary
+		if (observationStartDate !== undefined)
+			json.observationStartDate = observationStartDate
+		if (observationEndDate !== undefined)
+			json.observationEndDate = observationEndDate
+		await api().patch(`api/v1/clear-cuts/${clearCutId}`, { json }).json()
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
+export const updateReportInfoThunk = createAppAsyncThunk<
+	void,
+	{ reportId: string; reportedAt?: string; cityZipCode?: string }
+>(
+	"clear-cuts/updateReportInfo",
+	async (
+		{ reportId, reportedAt, cityZipCode },
+		{ extra: { api }, dispatch }
+	) => {
+		const json: Record<string, unknown> = {}
+		if (reportedAt !== undefined) json.reportedAt = reportedAt
+		if (cityZipCode !== undefined) json.cityZipCode = cityZipCode
+		await api().put(`api/v1/clear-cuts-reports/${reportId}`, { json })
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
+export const setPipelineOverrideThunk = createAppAsyncThunk<
+	void,
+	{ reportId: string; allow: boolean }
+>(
+	"clear-cuts/setPipelineOverride",
+	async ({ reportId, allow }, { extra: { api }, dispatch }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/pipeline-override`, {
+				json: { allow }
+			})
+			.json()
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
 type State = {
 	clearCuts: RequestedContent<ClearCuts>
 	detail: RequestedContent<ClearCutFormVersions>
@@ -518,6 +585,21 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			rejectValidationThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			updateClearCutGeometryThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			updateReportInfoThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			setPipelineOverrideThunk,
 			(state) => state.assignation
 		)
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
