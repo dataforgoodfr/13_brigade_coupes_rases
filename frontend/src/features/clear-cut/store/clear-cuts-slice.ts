@@ -184,6 +184,12 @@ export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 				searchParams.append("swLng", geoBounds.sw.lng.toString())
 				searchParams.append("neLat", geoBounds.ne.lat.toString())
 				searchParams.append("neLng", geoBounds.ne.lng.toString())
+			} else if (
+				(filter === "sortBy" || filter === "sortOrder") &&
+				typeof value === "string"
+			) {
+				// Plain string params must be sent raw (parseParam would JSON-quote them)
+				searchParams.append(filter, value)
 			} else {
 				parseParam(filter, value, searchParams)
 			}
