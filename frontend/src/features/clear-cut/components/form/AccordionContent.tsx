@@ -7,6 +7,7 @@ import type { FormType } from "@/shared/form/types"
 
 import { actorsKey, actorsValue } from "./sections/ActorsSection"
 import { ecoZoneKey, ecoZoneValue } from "./sections/EcoZoneSection"
+import { GeneralInfoEditControls } from "./sections/GeneralInfoEditControls"
 import { generalInfoKey, generalInfoValue } from "./sections/GeneralInfoSection"
 import { legalKey, legalValue } from "./sections/LegalSection"
 import { onSiteKey, onSiteValue } from "./sections/OnSiteSection"
@@ -48,6 +49,9 @@ export default function AccordionContent({ form, original, latest }: Props) {
 							{sectionContent.map((item) => (
 								<AccordionItem form={form} item={item} key={item.name} />
 							))}
+							{section === generalInfoKey && (
+								<GeneralInfoEditControls form={form} />
+							)}
 						</AccordionFullItem>
 					</ChangeTrackingProvider>
 				)
