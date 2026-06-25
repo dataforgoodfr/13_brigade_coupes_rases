@@ -2,7 +2,7 @@ from datetime import datetime
 
 from geoalchemy2 import Geography
 from geoalchemy2.elements import WKTElement
-from geoalchemy2.functions import ST_AsGeoJSON, ST_Area, ST_Centroid
+from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
 from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
 from shapely.geometry import shape
 from sqlalchemy import cast, update
@@ -107,6 +107,9 @@ def update_clear_cut_geometry(
     clear_cut.is_manually_edited = True
     clear_cut.manually_edited_at = datetime.now()
     clear_cut.manually_edited_by_id = connected_user.id
+    # A fresh manual correction must re-lock the cut against the pipeline, even if
+    # the override had been re-enabled for a previous run.
+    clear_cut.allow_pipeline_override = False
     db.flush()
 
     if boundary_changed:
