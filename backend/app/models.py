@@ -282,9 +282,7 @@ class ClearCut(Base):
     is_manually_edited: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("false"), default=False
     )
-    manually_edited_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True
-    )
+    manually_edited_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     manually_edited_by_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
