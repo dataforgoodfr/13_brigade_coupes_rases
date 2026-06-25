@@ -276,6 +276,20 @@ class ClearCut(Base):
         ),
         nullable=True,
     )
+    # Manual edition tracking: when a clear cut's perimeter or dates are corrected
+    # by hand, we flag it so (a) the UI can signal it and (b) the data pipeline
+    # leaves it untouched on its next run — unless an admin re-enables overriding.
+    is_manually_edited: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), default=False
+    )
+    manually_edited_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    manually_edited_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    # When False (default once edited), the pipeline must not overwrite this cut.
+    allow_pipeline_override: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), default=False
+    )
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), index=True, nullable=False
     )
@@ -316,6 +330,8 @@ class ClearCutReport(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
+    # Editable "date de signalement". Falls back to created_at when null.
+    reported_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     clear_cuts: Mapped[list["ClearCut"]] = relationship(
         back_populates="report", cascade="all, delete"
     )

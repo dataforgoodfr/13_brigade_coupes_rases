@@ -82,6 +82,41 @@ class ClearCutCreateSchema(ClearCutBaseSchema):
     ecological_zonings: list[EcologicalZoningSchema] = Field(default=[])
 
 
+class ClearCutPatchSchema(BaseSchema):
+    """Partial update of a clear cut's perimeter and observation dates.
+
+    Only the provided fields are updated. Setting the perimeter triggers a
+    server-side recomputation of area and centroid.
+    """
+
+    boundary: MultiPolygon | None = Field(
+        default=None,
+        json_schema_extra={
+            "example": {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [2.3522, 48.8566],
+                            [2.3622, 48.8566],
+                            [2.3622, 48.8666],
+                            [2.3522, 48.8566],
+                        ]
+                    ]
+                ],
+            }
+        },
+    )
+    observation_start_date: datetime | None = Field(
+        default=None,
+        json_schema_extra={"example": "2023-01-01T00:00:00Z"},
+    )
+    observation_end_date: datetime | None = Field(
+        default=None,
+        json_schema_extra={"example": "2023-06-01T00:00:00Z"},
+    )
+
+
 class ClearCutResponseSchema(ClearCutBaseSchema):
     id: str = Field(
         json_schema_extra={
@@ -103,6 +138,9 @@ class ClearCutResponseSchema(ClearCutBaseSchema):
             "example": "2023-01-01T00:00:00Z",
         }
     )
+    is_manually_edited: bool = Field(default=False)
+    manually_edited_at: datetime | None = Field(default=None)
+    allow_pipeline_override: bool = Field(default=False)
 
 
 def clear_cut_to_clear_cut_response_schema(
@@ -123,4 +161,7 @@ def clear_cut_to_clear_cut_response_schema(
         bdf_mixed_area_hectare=clear_cut.bdf_mixed_area_hectare,
         bdf_poplar_area_hectare=clear_cut.bdf_poplar_area_hectare,
         ecological_zoning_area_hectare=clear_cut.ecological_zoning_area_hectare,
+        is_manually_edited=clear_cut.is_manually_edited,
+        manually_edited_at=clear_cut.manually_edited_at,
+        allow_pipeline_override=clear_cut.allow_pipeline_override,
     )

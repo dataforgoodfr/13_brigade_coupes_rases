@@ -1,10 +1,11 @@
 from logging import getLogger
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.clear_cut import ClearCutResponseSchema
+from app.models import User
+from app.schemas.clear_cut import ClearCutPatchSchema, ClearCutResponseSchema
 from app.schemas.ecological_zoning import (
     ClearCutEcologicalZoningResponseSchema,
 )
@@ -13,7 +14,9 @@ from app.services.clear_cut import (
     find_clear_cuts,
     find_ecological_zonings_by_clear_cut,
     get_clearcut_by_id,
+    update_clear_cut_geometry,
 )
+from app.services.user_auth import get_current_user
 
 logger = getLogger(__name__)
 
@@ -48,6 +51,22 @@ def get_clear_cut(
 ) -> ClearCutResponseSchema:
     logger.info(db)
     return get_clearcut_by_id(id=clear_cut_id, db=db)
+
+
+@router.patch(
+    "/{clear_cut_id}",
+    response_model=ClearCutResponseSchema,
+    response_model_exclude_none=True,
+)
+def patch_clear_cut(
+    clear_cut_id: int,
+    item: ClearCutPatchSchema,
+    db: Session = db_session,
+    user: User = Depends(get_current_user),
+) -> ClearCutResponseSchema:
+    """Manually correct a clear cut's perimeter and/or observation dates."""
+    logger.info(db)
+    return update_clear_cut_geometry(db, clear_cut_id, user, item)
 
 
 @router.get(

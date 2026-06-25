@@ -31,7 +31,7 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 			) : undefined
 	},
 	{
-		name: "report.updatedAt",
+		name: "report.reportedAt",
 		transformValue: ({ value }) => <FormattedDate value={value as string} />,
 		label: "Date de signalement",
 		type: "fixed",
@@ -50,13 +50,13 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		renderConditions: []
 	},
 	{
-		name: "report.averageLocation.coordinates.0",
+		name: "report.averageLocation.coordinates.1",
 		label: "Latitude",
 		type: "fixed",
 		renderConditions: []
 	},
 	{
-		name: "report.averageLocation.coordinates.1",
+		name: "report.averageLocation.coordinates.0",
 		label: "Longitude",
 		type: "fixed",
 		renderConditions: []

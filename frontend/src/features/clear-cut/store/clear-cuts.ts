@@ -43,7 +43,10 @@ export const clearCutResponseSchema = z.object({
 	observationStartDate: z.iso.date(),
 	observationEndDate: z.iso.date(),
 	ecologicalZoningIds: z.string().array(),
-	areaHectare: z.number()
+	areaHectare: z.number(),
+	isManuallyEdited: z.boolean().optional(),
+	manuallyEditedAt: z.iso.date().optional().nullable(),
+	allowPipelineOverride: z.boolean().optional()
 })
 export type ClearCutResponse = z.infer<typeof clearCutResponseSchema>
 const clearCutSchema = clearCutResponseSchema
@@ -74,6 +77,10 @@ export const clearCutReportResponseSchema = z.object({
 	departmentId: z.string(),
 	createdAt: z.iso.date(),
 	updatedAt: z.iso.date(),
+	reportedAt: z.iso.date().optional().nullable(),
+	isManuallyEdited: z.boolean().optional(),
+	manuallyEditedAt: z.iso.date().optional().nullable(),
+	allowPipelineOverride: z.boolean().optional(),
 	totalAreaHectare: z.number(),
 	totalBdfResinousAreaHectare: z.number().optional(),
 	totalBdfDeciduousAreaHectare: z.number().optional(),

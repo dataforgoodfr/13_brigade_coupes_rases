@@ -1,9 +1,17 @@
-from geoalchemy2.functions import ST_AsGeoJSON
+from datetime import datetime
+
+from geoalchemy2 import Geography
+from geoalchemy2.elements import WKTElement
+from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
+from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
+from shapely.geometry import shape
+from sqlalchemy import cast, update
 from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
-from app.models import ClearCut, ClearCutEcologicalZoning
+from app.models import SRID, ClearCut, ClearCutEcologicalZoning, User
 from app.schemas.clear_cut import (
+    ClearCutPatchSchema,
     ClearCutResponseSchema,
     clear_cut_to_clear_cut_response_schema,
 )
@@ -41,6 +49,87 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponseSchema:
     return clear_cut_to_clear_cut_response_schema(
         map_geo_clearcut(clearcut, boundary, location)
     )
+
+
+def update_clear_cut_geometry(
+    db: Session,
+    clear_cut_id: int,
+    connected_user: User,
+    request: ClearCutPatchSchema,
+) -> ClearCutResponseSchema:
+    """Manually correct a clear cut's perimeter and/or observation dates.
+
+    Allowed for admins and the volunteer assigned to the parent report. Editing
+    the perimeter recomputes the area (hectares) and centroid server-side from
+    PostGIS, flags the cut as manually edited, and re-aggregates the report.
+    """
+    clear_cut = db.get(ClearCut, clear_cut_id)
+    if clear_cut is None:
+        raise AppHTTPException(
+            status_code=404, type="CLEAR_CUT_NOT_FOUND", detail="ClearCut not found"
+        )
+
+    report = clear_cut.report
+    if connected_user.role != "admin" and (
+        report is None or report.user_id != connected_user.id
+    ):
+        raise AppHTTPException(
+            status_code=403,
+            type="INVALID_REQUESTER_RIGHTS",
+            detail="Only admins or the assigned volunteer can edit a clear cut",
+        )
+
+    boundary_changed = request.boundary is not None
+    changed = boundary_changed
+
+    if boundary_changed:
+        geom = shape(request.boundary.model_dump())
+        if geom.geom_type == "Polygon":
+            geom = ShapelyMultiPolygon([geom])
+        elif geom.geom_type != "MultiPolygon":
+            raise AppHTTPException(
+                status_code=400,
+                type="INVALID_GEOMETRY",
+                detail="Perimeter must be a Polygon or MultiPolygon",
+            )
+        clear_cut.boundary = WKTElement(geom.wkt, srid=SRID)
+
+    if request.observation_start_date is not None:
+        clear_cut.observation_start_date = request.observation_start_date
+        changed = True
+    if request.observation_end_date is not None:
+        clear_cut.observation_end_date = request.observation_end_date
+        changed = True
+
+    if not changed:
+        return get_clearcut_by_id(clear_cut_id, db)
+
+    clear_cut.is_manually_edited = True
+    clear_cut.manually_edited_at = datetime.now()
+    clear_cut.manually_edited_by_id = connected_user.id
+    # A fresh manual correction must re-lock the cut against the pipeline, even if
+    # the override had been re-enabled for a previous run.
+    clear_cut.allow_pipeline_override = False
+    db.flush()
+
+    if boundary_changed:
+        # Derive area + centroid from the new perimeter (geography = metric area).
+        db.execute(
+            update(ClearCut)
+            .where(ClearCut.id == clear_cut_id)
+            .values(
+                area_hectare=ST_Area(cast(ClearCut.boundary, Geography)) / 10000.0,
+                location=ST_Centroid(ClearCut.boundary),
+            )
+        )
+
+    db.commit()
+
+    # Recompute report totals, first/last cut date, average location and rules.
+    from app.services.clear_cut_report import sync_clear_cuts_reports
+
+    sync_clear_cuts_reports(db)
+    return get_clearcut_by_id(clear_cut_id, db)
 
 
 def paginated_clear_cuts_query(db: Session, page: int = 0, size: int = 10):

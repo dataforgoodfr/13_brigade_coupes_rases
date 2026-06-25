@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import getLogger
 
 from pydantic import EmailStr, Field, field_validator
@@ -32,6 +33,8 @@ class CreateClearCutsReportCreateRequestSchema(BaseSchema):
 class ClearCutReportPutRequestSchema(BaseSchema):
     status: str | None = None
     user_id: int | None = None
+    reported_at: datetime | None = None
+    city_zip_code: str | None = None
 
     @field_validator("status")
     def validate_status(cls, value):

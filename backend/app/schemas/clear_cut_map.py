@@ -82,6 +82,16 @@ class ClearCutReportPreviewSchema(BaseSchema):
         json_schema_extra={"example": "1"},
         default=None,
     )
+    reported_at: datetime.date | None = Field(
+        json_schema_extra={"example": "2023-10-01"},
+        default=None,
+    )
+    is_manually_edited: bool = Field(default=False)
+    manually_edited_at: datetime.date | None = Field(
+        json_schema_extra={"example": "2023-10-01"},
+        default=None,
+    )
+    allow_pipeline_override: bool = Field(default=False)
 
 
 def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
@@ -143,6 +153,25 @@ def report_to_report_preview_schema(
         first_cut_date=min(
             clear_cut.observation_start_date for clear_cut in report.clear_cuts
         ).date(),
+        reported_at=report.reported_at.date() if report.reported_at else None,
+        is_manually_edited=any(
+            clear_cut.is_manually_edited for clear_cut in report.clear_cuts
+        ),
+        manually_edited_at=(
+            max(
+                clear_cut.manually_edited_at
+                for clear_cut in report.clear_cuts
+                if clear_cut.manually_edited_at is not None
+            ).date()
+            if any(
+                clear_cut.manually_edited_at is not None
+                for clear_cut in report.clear_cuts
+            )
+            else None
+        ),
+        allow_pipeline_override=any(
+            clear_cut.allow_pipeline_override for clear_cut in report.clear_cuts
+        ),
     )
 
 
