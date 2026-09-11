@@ -63,5 +63,31 @@ class Settings(BaseSettings):
         description="Endpoint URL of the S3 bucket for photos storage",
     )
 
+    FRONTEND_URL: str = Field(
+        default="http://localhost:5173",
+        json_schema_extra={"env": "FRONTEND_URL"},
+        description="Public URL of the frontend, used in links sent by email",
+    )
+    SMTP_HOST: str = Field(
+        default="",
+        json_schema_extra={"env": "SMTP_HOST"},
+        description="SMTP relay host (e.g. smtp-relay.brevo.com). Empty: emails are only logged",
+    )
+    SMTP_PORT: int = Field(default=587, json_schema_extra={"env": "SMTP_PORT"})
+    SMTP_USE_TLS: bool = Field(
+        default=True,
+        json_schema_extra={"env": "SMTP_USE_TLS"},
+        description="Upgrade the connection with STARTTLS (port 587). Off for local Mailpit",
+    )
+    SMTP_USER: str = Field(default="", json_schema_extra={"env": "SMTP_USER"})
+    SMTP_PASSWORD: str = Field(
+        default="", json_schema_extra={"env": "SMTP_PASSWORD", "secret": True}
+    )
+    SMTP_FROM: str = Field(
+        default="Brigade des coupes rases <no-reply@canopee.ong>",
+        json_schema_extra={"env": "SMTP_FROM"},
+        description="Sender address; the domain must be verified at the email provider",
+    )
+
 
 settings = Settings()
