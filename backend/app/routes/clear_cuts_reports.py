@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.common.errors import AppHTTPException
 from app.config import settings
 from app.deps import db_session
-from app.models import ClearCutReport, User
+from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.clear_cut import ClearCutResponseSchema
 from app.schemas.clear_cut_form import ClearCutFormCreate, ClearCutFormResponse
@@ -24,20 +24,15 @@ from app.services.clear_cut_form import (
     get_clear_cut_form_by_id,
 )
 from app.services.clear_cut_report import (
-    assign_report,
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
     set_report_pipeline_override,
     sync_clear_cuts_reports,
-    unassign_report,
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
 )
-from app.services.email import (
-    send_assignment_email,
-    send_validation_rejected_email,
-)
+from app.services.report_workflow import WorkflowAction, transition
 from app.services.user_auth import get_current_user, get_optional_current_user
 
 logger = getLogger(__name__)
@@ -190,250 +185,6 @@ def get_by_id(
     return get_report_response_by_id(report_id, db, current_user)
 
 
-@router.post(
-    "/{report_id}/request-assignment",
-    status_code=status.HTTP_200_OK,
-)
-def request_assignment(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Volunteer requests to be assigned to this report. Requires admin validation."""
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.user_id is not None:
-        raise AppHTTPException(
-            status_code=400,
-            type="ALREADY_ASSIGNED",
-            detail="Report is already assigned",
-        )
-    if report.assignment_requested_by_id is not None:
-        raise AppHTTPException(
-            status_code=400,
-            type="REQUEST_PENDING",
-            detail="An assignment request is already pending",
-        )
-    report.assignment_requested_by_id = user.id
-    db.commit()
-    return {"message": "Assignment request submitted, waiting for admin validation"}
-
-
-@router.post(
-    "/{report_id}/cancel-request",
-    status_code=status.HTTP_200_OK,
-)
-def cancel_assignment_request(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Volunteer cancels their pending assignment request."""
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.assignment_requested_by_id != user.id:
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="You have no pending request for this report",
-        )
-    report.assignment_requested_by_id = None
-    db.commit()
-    return {"message": "Assignment request cancelled"}
-
-
-@router.post(
-    "/{report_id}/approve-assignment",
-    status_code=status.HTTP_200_OK,
-)
-def approve_assignment(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Admin approves the pending assignment request."""
-    if user.role != "admin":
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="Only admins can approve assignments",
-        )
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.assignment_requested_by_id is None:
-        raise AppHTTPException(
-            status_code=400, type="NO_REQUEST", detail="No pending assignment request"
-        )
-    assign_report(report, report.assignment_requested_by_id)
-    db.commit()
-    if report.user is not None:
-        send_assignment_email(report.user.email, report_id)
-    return {"message": "Assignment approved"}
-
-
-@router.post(
-    "/{report_id}/reject-assignment",
-    status_code=status.HTTP_200_OK,
-)
-def reject_assignment(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Admin rejects the pending assignment request."""
-    if user.role != "admin":
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="Only admins can reject assignments",
-        )
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.assignment_requested_by_id is None:
-        raise AppHTTPException(
-            status_code=400, type="NO_REQUEST", detail="No pending assignment request"
-        )
-    report.assignment_requested_by_id = None
-    db.commit()
-    return {"message": "Assignment request rejected"}
-
-
-@router.post(
-    "/{report_id}/unassign",
-    status_code=status.HTTP_200_OK,
-)
-def unassign_report_from_me(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Admin or assigned volunteer unassigns the report."""
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if user.role != "admin" and report.user_id != user.id:
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="You are not assigned to this report",
-        )
-    unassign_report(report)
-    db.commit()
-    return {"message": "Unassigned successfully"}
-
-
-@router.post(
-    "/{report_id}/volunteer-validate",
-    status_code=status.HTTP_200_OK,
-)
-def volunteer_validate(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Volunteer marks the form as complete and requests admin validation."""
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if user.role == "volunteer" and report.user_id != user.id:
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="You are not assigned to this report",
-        )
-    if report.status != "in_progress":
-        raise AppHTTPException(
-            status_code=400,
-            type="INVALID_STATUS",
-            detail="Report must be in_progress to be submitted for validation",
-        )
-    report.status = "waiting_for_validation"
-    db.commit()
-    return {"message": "Validation request submitted"}
-
-
-@router.post(
-    "/{report_id}/approve-validation",
-    status_code=status.HTTP_200_OK,
-)
-def approve_validation(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Admin approves the volunteer's validation request."""
-    if user.role != "admin":
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="Only admins can approve validations",
-        )
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.status != "waiting_for_validation":
-        raise AppHTTPException(
-            status_code=400,
-            type="INVALID_STATUS",
-            detail="Report must be waiting_for_validation to be approved",
-        )
-    report.status = "validated"
-    db.commit()
-    return {"message": "Validation approved"}
-
-
-@router.post(
-    "/{report_id}/reject-validation",
-    status_code=status.HTTP_200_OK,
-)
-def reject_validation(
-    report_id: int,
-    user: User = Depends(get_current_user),
-    db: Session = db_session,
-) -> dict[str, str]:
-    """Admin rejects the volunteer's validation request and notifies the volunteer."""
-    if user.role != "admin":
-        raise AppHTTPException(
-            status_code=403,
-            type="FORBIDDEN",
-            detail="Only admins can reject validations",
-        )
-    report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
-    if not report:
-        raise AppHTTPException(
-            status_code=404, type="NOT_FOUND", detail="Report not found"
-        )
-    if report.status != "waiting_for_validation":
-        raise AppHTTPException(
-            status_code=400,
-            type="INVALID_STATUS",
-            detail="Report must be waiting_for_validation to be rejected",
-        )
-    report.status = "in_progress"
-    db.commit()
-    if report.user and report.user.email:
-        send_validation_rejected_email(report.user.email, report_id)
-    return {"message": "Validation rejected"}
-
-
 @router.get(
     "/{report_id}/clear-cuts",
     response_model=PaginationResponseSchema[ClearCutResponseSchema],
@@ -503,3 +254,21 @@ def add_clearcut_form_version(
     response.headers["location"] = (
         f"/api/v1/clear-cuts-reports/{report_id}/forms/{form.id}"
     )
+
+
+# Declared last: `{action}` would otherwise capture /forms and /pipeline-override
+@router.post("/{report_id}/{action}", status_code=status.HTTP_200_OK)
+def report_workflow_action(
+    report_id: int,
+    action: WorkflowAction,
+    user: User = Depends(get_current_user),
+    db: Session = db_session,
+) -> dict[str, str]:
+    """Assignment and validation workflow, see `services/report_workflow.py`.
+
+    Actions: request-assignment, cancel-request (volunteer);
+    approve-assignment, reject-assignment, approve-validation,
+    reject-validation (admin); unassign, volunteer-validate (assigned
+    volunteer or admin).
+    """
+    return transition(db, report_id, action, user)
