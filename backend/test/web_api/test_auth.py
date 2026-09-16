@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from test.common.user import create_user
+from test.common.user import create_user, new_user
 
 
 def test_forgot_password_sends_email_to_existing_user(
@@ -51,3 +51,19 @@ def test_reset_password_round_trip(client: TestClient, db: Session) -> None:
         "/api/v1/token", data={"username": user.email, "password": "new-password"}
     )
     assert login.status_code == status.HTTP_200_OK
+
+
+def test_login_with_password_longer_than_72_bytes(
+    client: TestClient, db: Session
+) -> None:
+    long_password = "x" * 100
+    user = new_user(email="long-password@example.com", password=long_password)
+    db.add(user)
+    db.commit()
+
+    response = client.post(
+        "/api/v1/token",
+        data={"username": user.email, "password": long_password},
+    )
+
+    assert response.status_code == 200

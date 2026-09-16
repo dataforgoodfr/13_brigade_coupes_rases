@@ -15,6 +15,7 @@ from app.config import settings
 from app.deps import db_session
 from app.models import User
 from app.schemas.base import BaseSchema
+from app.services.get_password_hash import password_to_bytes
 from app.services.user import get_user_by_email
 
 
@@ -68,9 +69,8 @@ optional_oauth2_schema = OAuth2PasswordBearer(
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    password_byte_enc = plain_password.encode("utf-8")
     return bcrypt.checkpw(
-        password=password_byte_enc,
+        password=password_to_bytes(plain_password),
         hashed_password=hashed_password.encode("utf-8"),
     )
 
