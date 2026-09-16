@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=UserResponseSchema, status_code=201)
-def register(user_data: RegisterSchema, db: Session = db_session):
+def register(user_data: RegisterSchema, db: Session = db_session) -> UserResponseSchema:
     existing_user = (
         db.query(User)
         .filter((User.email == user_data.email) | (User.login == user_data.login))
@@ -52,7 +52,9 @@ def register(user_data: RegisterSchema, db: Session = db_session):
 
 
 @router.post("/forgot-password", status_code=200)
-def forgot_password(data: ForgotPasswordSchema, db: Session = db_session):
+def forgot_password(
+    data: ForgotPasswordSchema, db: Session = db_session
+) -> dict[str, str]:
     user = (
         db.query(User)
         .filter(User.email == data.email, User.deleted_at.is_(None))
@@ -79,7 +81,9 @@ def forgot_password(data: ForgotPasswordSchema, db: Session = db_session):
 
 
 @router.post("/reset-password", status_code=200)
-def reset_password(data: ResetPasswordSchema, db: Session = db_session):
+def reset_password(
+    data: ResetPasswordSchema, db: Session = db_session
+) -> dict[str, str]:
     try:
         payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
         if payload.get("type") != "reset":

@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
-from app.schemas.department import DepartmentResponseSchema
+from app.schemas.department import DepartmentBaseSchema, DepartmentResponseSchema
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.departement import find_departments
 
@@ -18,6 +18,8 @@ router = APIRouter(prefix="/api/v1/departments", tags=["Department"])
     response_model=PaginationResponseSchema[DepartmentResponseSchema],
     response_model_exclude_none=True,
 )
-def list_departments(db: Session = db_session, page: int = 0, size: int = 10):
+def list_departments(
+    db: Session = db_session, page: int = 0, size: int = 10
+) -> PaginationResponseSchema[DepartmentBaseSchema]:
     logger.info(db)
     return find_departments(db, page=page, size=size, url="/api/v1/departments")

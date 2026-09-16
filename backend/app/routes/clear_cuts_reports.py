@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Response, status
 from sqlalchemy.orm import Session
@@ -41,11 +41,11 @@ router = APIRouter(prefix="/api/v1/clear-cuts-reports", tags=["ClearcutsReports"
 
 # TODO: (unsecure) Workaround to sync the clear cuts after seeding
 @router.post("/sync-reports", status_code=204)
-def sync_clear_cut_reports(db: Session = db_session):
+def sync_clear_cut_reports(db: Session = db_session) -> None:
     sync_clear_cuts_reports(db)
 
 
-def authenticate(x_imports_token: str = Header(default="")):
+def authenticate(x_imports_token: str = Header(default="")) -> None:
     if x_imports_token != settings.IMPORTS_TOKEN or x_imports_token == "":
         raise AppHTTPException(
             status_code=401, type="INVALID_TOKEN", detail="Invalid token"
@@ -59,7 +59,7 @@ def post_report(
     response: Response,
     params: CreateClearCutsReportCreateRequestSchema,
     db: Session = db_session,
-):
+) -> None:
     try:
         clearcut = create_clear_cut_report(db, params)
         response.headers["location"] = f"/api/v1/clear-cuts-reports/{clearcut.id}"
@@ -70,7 +70,7 @@ def post_report(
 
 
 class VolunteerCreateRequestSchema(BaseSchema):
-    polygon: dict
+    polygon: dict[str, Any]
     city_zip_code: str
 
 
@@ -83,7 +83,7 @@ def volunteer_create(
     params: VolunteerCreateRequestSchema,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Authenticated volunteers can create a new clear-cut report from a drawn polygon.
     The report is created with status 'to_validate' and must be validated by an admin.
     """
@@ -168,7 +168,7 @@ def request_assignment(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Volunteer requests to be assigned to this report. Requires admin validation."""
     report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if not report:
@@ -200,7 +200,7 @@ def cancel_assignment_request(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Volunteer cancels their pending assignment request."""
     report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if not report:
@@ -226,7 +226,7 @@ def approve_assignment(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Admin approves the pending assignment request."""
     if user.role != "admin":
         raise AppHTTPException(
@@ -259,7 +259,7 @@ def reject_assignment(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Admin rejects the pending assignment request."""
     if user.role != "admin":
         raise AppHTTPException(
@@ -289,7 +289,7 @@ def unassign_report_from_me(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Admin or assigned volunteer unassigns the report."""
     report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if not report:
@@ -317,7 +317,7 @@ def volunteer_validate(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Volunteer marks the form as complete and requests admin validation."""
     report = db.query(ClearCutReport).filter(ClearCutReport.id == report_id).first()
     if not report:
@@ -349,7 +349,7 @@ def approve_validation(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Admin approves the volunteer's validation request."""
     if user.role != "admin":
         raise AppHTTPException(
@@ -381,7 +381,7 @@ def reject_validation(
     report_id: int,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> dict[str, str]:
     """Admin rejects the volunteer's validation request and notifies the volunteer."""
     if user.role != "admin":
         raise AppHTTPException(
@@ -466,7 +466,7 @@ def add_clearcut_form_version(
     db: Session = db_session,
     editor: User = Depends(get_current_user),
     etag: Annotated[str | None, Header()] = None,
-):
+) -> None:
     logger.info(db)
     form = add_clear_cut_form_entry(db, editor, report_id, new_version, etag)
     response.headers["location"] = (

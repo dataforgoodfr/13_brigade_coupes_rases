@@ -45,5 +45,14 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry install --no-interaction --no-root
 
+      - name: Tests (pytest)
+        run: poetry run pytest
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo "## Couverture pipeline" >> "$GITHUB_STEP_SUMMARY"
+          poetry run coverage report --format=markdown --skip-covered >> "$GITHUB_STEP_SUMMARY"
+
       - name: Type check (mypy)
         run: poetry run mypy

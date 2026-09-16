@@ -5,6 +5,7 @@ from geoalchemy2.shape import from_shape
 from geojson_pydantic import MultiPolygon, Point
 from shapely.geometry import MultiPolygon as DbMultiPolygon
 from shapely.geometry import Point as DbPoint
+from sqlalchemy.orm import Session
 
 from app.models import ClearCut
 from app.schemas.clear_cut import ClearCutCreateSchema
@@ -14,7 +15,7 @@ from app.services.clear_cut_report import create_clear_cut_report
 from test.common.clear_cut import new_clear_cut_report
 
 
-def test_create_report_with_intersection(db):
+def test_create_report_with_intersection(db: Session) -> None:
     report = new_clear_cut_report()
     report.clear_cuts.append(
         ClearCut(
@@ -31,15 +32,15 @@ def test_create_report_with_intersection(db):
             boundary=from_shape(
                 DbMultiPolygon(
                     [
-                        [
+                        (
                             [
-                                [0.0, 48.0],
-                                [0.0, 50.0],
-                                [2.0, 50.0],
-                                [2.0, 48.0],
-                                [0.0, 48.0],
-                            ]
-                        ]
+                                (0.0, 48.0),
+                                (0.0, 50.0),
+                                (2.0, 50.0),
+                                (2.0, 48.0),
+                                (0.0, 48.0),
+                            ],
+                        )
                     ]
                 ),
                 srid=4326,
@@ -90,7 +91,7 @@ def test_create_report_with_intersection(db):
         create_clear_cut_report(db, intersecting_report)
 
 
-def test_create_report_success(db):
+def test_create_report_success(db: Session) -> None:
     report = CreateClearCutsReportCreateRequestSchema(
         city_zip_code="75056",
         slope_area_hectare=7.2,

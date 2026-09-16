@@ -15,7 +15,6 @@ data_pipeline/
 │   ├── main.py
 │   ├── transform.py
 ├── tests/
-│   ├── test_s3.py
 ├── .env
 ├── Makefile
 ├── .gitignore
@@ -118,18 +117,18 @@ make run-task-docker task=verify_file_in_s3
 
 ### 5. Running Tests
 
-Use the Makefile to run tests.
-
 ```bash
-make test
+poetry run pytest    # tests/, no database or S3 needed, coverage of pipeline/
 ```
 
-### 6. Running Tests
+The tests target the pure functions of the pipeline (clustering, overlay,
+matching of new clusters against the reference); `tests/conftest.py` stubs
+`osgeo` (GDAL), which is only available in the conda Docker image.
 
-Use the Makefile to run pre-commit hooks.
+### 6. Pre-commit
 
 ```bash
-make pre-commit
+pre-commit run --all-files    # from the repository root
 ```
 
 ### 7. Type check

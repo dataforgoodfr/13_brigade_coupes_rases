@@ -32,11 +32,14 @@ seed-prd-db: ## Seed the database
 seed-dev-db: ## Seed the database
 	poetry run python -m seed_dev
 
-test: ## Run the tests
-	poetry run pytest test/
+test: ## Run all the tests with coverage (needs the test database, see upgrade-test-db)
+	poetry run pytest test/ --cov
+
+test-unit: ## Run the unit tests only (no database needed)
+	poetry run pytest test/unit/ -m unit
 
 typecheck: ## Run mypy (scope in pyproject.toml, [tool.mypy])
 	poetry run mypy
 
 
-.PHONY: test typecheck help
+.PHONY: test test-unit typecheck help

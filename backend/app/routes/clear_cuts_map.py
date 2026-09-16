@@ -4,7 +4,6 @@ from time import time
 from fastapi import APIRouter, Query
 from sqlalchemy.orm import Session
 
-from app.common.errors import AppHTTPException
 from app.deps import db_session
 from app.models import CLEARCUT_STATUSES
 from app.schemas.clear_cut_map import (
@@ -31,10 +30,7 @@ router = APIRouter(prefix="/api/v1/clear-cuts-map", tags=["Clearcut map"])
 def get_clearcuts_report_by_id(
     report_id: int, db: Session = db_session
 ) -> ClearCutReportPreviewSchema:
-    try:
-        return get_report_preview_by_id(db, report_id=report_id)
-    except Exception as e:
-        raise AppHTTPException(status_code=500, detail=str(e)) from e
+    return get_report_preview_by_id(db, report_id=report_id)
 
 
 @router.get(
@@ -135,39 +131,35 @@ def get_clearcuts_map(
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     t = time()
-    try:
-        bounds = None
-        if (
-            sw_lat is not None
-            and sw_lng is not None
-            and ne_lat is not None
-            and ne_lng is not None
-        ):
-            bounds = GeoBounds(
-                north_east_latitude=ne_lat,
-                north_east_longitude=ne_lng,
-                south_west_latitude=sw_lat,
-                south_west_longitude=sw_lng,
-            )
-        clearcuts = build_clearcuts_map(
-            db,
-            with_points if with_points is not None else False,
-            Filters(
-                bounds=bounds,
-                min_area_hectare=min_area_hectare,
-                max_area_hectare=max_area_hectare,
-                cut_years=cut_years,
-                cut_months=cut_months,
-                statuses=statuses,
-                departments_ids=departments_ids,
-                has_ecological_zonings=has_ecological_zonings,
-                excessive_slope=excessive_slope,
-                in_reports_ids=in_reports_ids,
-                out_reports_ids=out_reports_ids,
-            ),
+    bounds = None
+    if (
+        sw_lat is not None
+        and sw_lng is not None
+        and ne_lat is not None
+        and ne_lng is not None
+    ):
+        bounds = GeoBounds(
+            north_east_latitude=ne_lat,
+            north_east_longitude=ne_lng,
+            south_west_latitude=sw_lat,
+            south_west_longitude=sw_lng,
         )
-
-    except Exception as e:
-        raise AppHTTPException(status_code=500, detail=str(e)) from e
-    logger.error(f"=================== Finished in {round(time() - t, 2)} seconds")
+    clearcuts = build_clearcuts_map(
+        db,
+        with_points if with_points is not None else False,
+        Filters(
+            bounds=bounds,
+            min_area_hectare=min_area_hectare,
+            max_area_hectare=max_area_hectare,
+            cut_years=cut_years,
+            cut_months=cut_months,
+            statuses=statuses,
+            departments_ids=departments_ids,
+            has_ecological_zonings=has_ecological_zonings,
+            excessive_slope=excessive_slope,
+            in_reports_ids=in_reports_ids,
+            out_reports_ids=out_reports_ids,
+        ),
+    )
+    logger.info(f"Clear cuts map built in {round(time() - t, 2)} seconds")
     return clearcuts

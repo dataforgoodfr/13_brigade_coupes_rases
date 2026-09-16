@@ -6,6 +6,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Column,
+    Connection,
     DateTime,
     Float,
     ForeignKey,
@@ -18,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import (
     Mapped,
+    Mapper,
     column_property,
     mapped_column,
     relationship,
@@ -152,7 +154,7 @@ class User(Base):
     forms = relationship("ClearCutForm", back_populates="editor", cascade="all, delete")
 
     @validates("role")
-    def validate_role(self, key, value):
+    def validate_role(self, key: str, value: str) -> str:
         if value not in User.ROLES:
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
@@ -160,7 +162,9 @@ class User(Base):
 
 @listens_for(User, "before_insert")
 @listens_for(User, "before_update")
-def update_search_vector(mapper, connection, target):
+def update_search_vector(
+    mapper: Mapper["User"], connection: Connection, target: "User"
+) -> None:
     connection.execute(
         text("""
             UPDATE users
@@ -188,7 +192,7 @@ class Department(Base):
     )
 
     @validates("name")
-    def validate_name(self, key, value):
+    def validate_name(self, key: str, value: str) -> str:
         if key == "name" and value is None:
             raise ValueError("Name cannot be None")
         return value
@@ -366,7 +370,7 @@ class ClearCutReport(Base):
     )
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
-    statellite_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    statellite_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     rules = relationship(
         "Rules",
         secondary=rules_clear_cut_reports,
@@ -382,7 +386,7 @@ class ClearCutReport(Base):
     )
 
     @validates("status")
-    def validate_status(self, key, value):
+    def validate_status(self, key: str, value: str) -> str:
         if value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value
@@ -410,16 +414,18 @@ class ClearCutForm(Base):
     forest: Mapped[str | None] = mapped_column(String, index=True)
     has_remaining_trees: Mapped[bool | None] = mapped_column(Boolean)
     trees_species: Mapped[str | None] = mapped_column(String, index=True)
-    planting_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    planting_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     has_construction_panel: Mapped[bool | None] = mapped_column(Boolean)
-    construction_panel_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    construction_panel_images: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
     wetland: Mapped[str | None] = mapped_column(String)
     destruction_clues: Mapped[str | None] = mapped_column(String)
     soil_state: Mapped[str | None] = mapped_column(String)
-    clear_cut_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    tree_trunks_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    soil_state_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    access_road_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    clear_cut_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    tree_trunks_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    soil_state_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    access_road_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Ecological informations
     has_other_ecological_zone: Mapped[bool | None] = mapped_column(Boolean)

@@ -2,6 +2,7 @@ import logging
 from typing import cast
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
@@ -247,8 +248,11 @@ def cluster_clear_cuts(
     )
     clear_cut_groups = regroup_clear_cut_pairs(clear_cut_pairs)
 
-    # Assign a clear cut group id to each clear cut polygon
+    # Assign a clear cut group id to each clear cut polygon. The column is
+    # created first: with no pair at all (isolated pixels only, which an
+    # incremental run can produce) the loop below would never create it.
     logging.info("Assigning cluster IDs to clear-cuts")
+    gdf["clear_cut_group"] = np.nan
     for i, subset in tqdm(
         enumerate(clear_cut_groups),
         total=len(clear_cut_groups),
@@ -258,8 +262,11 @@ def cluster_clear_cuts(
 
     # Assign a cluster ID to the pixels that weren't grouped,
     # auto-incrementing from the last cluster ID
+    next_group_id = gdf["clear_cut_group"].max()
+    if pd.isna(next_group_id):
+        next_group_id = -1
     gdf["clear_cut_group"] = gdf["clear_cut_group"].fillna(
-        gdf["clear_cut_group"].max() + gdf["clear_cut_group"].isna().cumsum()
+        next_group_id + gdf["clear_cut_group"].isna().cumsum()
     )
     gdf["clear_cut_group"] = gdf["clear_cut_group"].astype(int)
 

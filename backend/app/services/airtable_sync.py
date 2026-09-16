@@ -12,7 +12,7 @@ AIRTABLE_USERS_TABLE = os.getenv("AIRTABLE_USERS_TABLE", "Utilisateurs")
 AIRTABLE_COUPES_TABLE = os.getenv("AIRTABLE_COUPES_TABLE", "Coupes")
 
 
-def sync_data_with_airtable(db: Session):
+def sync_data_with_airtable(db: Session) -> None:
     if not AIRTABLE_API_KEY or not AIRTABLE_BASE_ID:
         logger.warning("Airtable API Key or Base ID not set. Skipping sync.")
         return

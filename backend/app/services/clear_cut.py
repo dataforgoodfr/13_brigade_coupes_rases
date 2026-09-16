@@ -1,5 +1,9 @@
+from collections.abc import Sequence
+
 from geoalchemy2.functions import ST_AsGeoJSON
+from sqlalchemy import Row
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.query import RowReturningQuery
 
 from app.common.errors import AppHTTPException
 from app.models import ClearCut, ClearCutEcologicalZoning
@@ -43,7 +47,9 @@ def get_clearcut_by_id(id: int, db: Session) -> ClearCutResponseSchema:
     )
 
 
-def paginated_clear_cuts_query(db: Session, page: int = 0, size: int = 10):
+def paginated_clear_cuts_query(
+    db: Session, page: int = 0, size: int = 10
+) -> RowReturningQuery[tuple[ClearCut, str, str]]:
     return (
         db.query(
             ClearCut,
@@ -56,12 +62,12 @@ def paginated_clear_cuts_query(db: Session, page: int = 0, size: int = 10):
 
 
 def clear_cuts_to_paginated_response(
-    clear_cuts: list[ClearCut],
+    clear_cuts: Sequence[Row[tuple[ClearCut, str, str]]],
     clear_cuts_count: int,
     url: str,
     page: int,
     size: int,
-):
+) -> PaginationResponseSchema[ClearCutResponseSchema]:
     clear_cuts_response = map(
         lambda row: clear_cut_to_clear_cut_response_schema(
             map_geo_clearcut(row[0], row[1], row[2])

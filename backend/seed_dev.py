@@ -13,6 +13,7 @@ from app.models import (
     ClearCutEcologicalZoning,
     ClearCutForm,
     ClearCutReport,
+    EcologicalZoning,
     User,
 )
 from app.services.clear_cut_report import sync_clear_cuts_reports
@@ -37,7 +38,9 @@ FOREST_PROFILES = {
 }
 
 
-def _hex_around(lng: float, lat: float, radius: float = 0.003):
+def _hex_around(
+    lng: float, lat: float, radius: float = 0.003
+) -> list[tuple[float, float]]:
     coords = [
         (
             lng + radius * math.cos(math.radians(60 * i)),
@@ -58,7 +61,7 @@ def make_clear_cut(
     days_ago_start: int = 10,
     days_ago_end: int = 5,
     ecological_zoning_area: float | None = None,
-    ecological_zonings: list | None = None,
+    ecological_zonings: list[EcologicalZoning] | None = None,
 ) -> ClearCut:
     profile = FOREST_PROFILES[forest_type]
     bdf: dict[str, float | None]
@@ -87,7 +90,7 @@ def make_clear_cut(
     )
 
 
-def wipe_database():
+def wipe_database() -> None:
     env = os.environ.get("ENVIRONMENT", "development").lower()
     if env != "development" and env != "test":
         raise RuntimeError("This script should only run in development environment!")
@@ -103,7 +106,7 @@ def wipe_database():
     db.commit()
 
 
-def seed_database():
+def seed_database() -> None:
     db = SessionLocal()
     try:
         wipe_database()

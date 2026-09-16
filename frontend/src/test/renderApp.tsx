@@ -3,9 +3,9 @@ import {
 	createRouter,
 	RouterProvider
 } from "@tanstack/react-router"
-import { page, userEvent } from "@vitest/browser/context"
 import { IntlProvider } from "react-intl"
 import { Provider } from "react-redux"
+import { page, userEvent } from "vitest/browser"
 import { type ComponentRenderOptions, render } from "vitest-browser-react"
 
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context"
@@ -44,7 +44,7 @@ interface Options<R extends Route = Route>
 	user?: Me
 }
 
-export function renderApp<R extends Route = Route>(options: Options<R>) {
+export async function renderApp<R extends Route = Route>(options: Options<R>) {
 	const {
 		preloadedState = {},
 		// Automatically create a store instance if no store was passed in
@@ -99,9 +99,12 @@ export function renderApp<R extends Route = Route>(options: Options<R>) {
 			</Provider>
 		</IntlProvider>
 	)
-	const renderResult = render(<Wrapper />, renderOptions)
+	// render() est asynchrone depuis vitest-browser-react 2 et ses méthodes
+	// sont sur le prototype : on les expose explicitement.
+	const renderResult = await render(<Wrapper />, renderOptions)
 	return {
 		...renderResult,
+		unmount: () => renderResult.unmount(),
 		rerender: () => renderResult.rerender(<Wrapper />),
 		store,
 		page,

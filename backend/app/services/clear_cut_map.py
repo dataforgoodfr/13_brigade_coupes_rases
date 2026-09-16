@@ -1,5 +1,6 @@
 from logging import getLogger
 from math import sqrt
+from typing import Any
 
 from fastapi import status
 from geoalchemy2.functions import (
@@ -13,7 +14,7 @@ from geoalchemy2.functions import (
 )
 from geojson_pydantic import Point
 from sqlalchemy import and_, case, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
 
 from app.common.errors import AppHTTPException
 from app.models import (
@@ -60,7 +61,7 @@ class Filters(BaseSchema):
     out_reports_ids: list[str] | None = []
 
 
-def query_clearcuts_filtered(db: Session, filters: Filters | None):
+def query_clearcuts_filtered(db: Session, filters: Filters | None) -> Query[Any]:
     rules = list_rules(db)
 
     reports_with_rules = (
@@ -266,15 +267,17 @@ def build_clearcuts_map(
             # If area doesnt exists clusters are useless
             clusterized_points = process_points_from_reports(reports_with_filters)
 
-    reports_with_filters = reports_with_filters.limit(30).all()
+    previews = reports_with_filters.limit(30).all()
     map_response = ClearCutMapResponseSchema(
         points=clusterized_points,
-        previews=list(map(report_to_report_preview_schema, reports_with_filters)),
+        previews=list(map(report_to_report_preview_schema, previews)),
     )
     return map_response
 
 
-def process_points_from_reports(reports_with_filters):
+def process_points_from_reports(
+    reports_with_filters: Query[Any],
+) -> ClusterizedPointsResponseSchema:
     all_reports = reports_with_filters.all()
     clusterized_points = ClusterizedPointsResponseSchema(
         total=len(all_reports),

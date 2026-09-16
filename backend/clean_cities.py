@@ -4,7 +4,7 @@ from app.database import SessionLocal
 from app.models import City, Department
 
 
-def clean_cities():
+def clean_cities() -> None:
     db = SessionLocal()
 
     # if db.query(Department).first() is not None and db.query(City).first() is not None:

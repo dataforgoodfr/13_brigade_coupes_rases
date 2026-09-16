@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.deps import db_session
+from app.models import User
 from app.schemas.hateoas import PaginationResponseSchema
 from app.schemas.user import (
     UserResponseSchema,
@@ -31,9 +32,9 @@ router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 def create_new_user(
     response: Response,
     item: UserUpdateSchema,
-    db=db_session,
-    _=Depends(get_admin_user),
-):
+    db: Session = db_session,
+    _: User = Depends(get_admin_user),
+) -> None:
     logger.info(db)
     created_user = user_to_user_response_schema(create_user(db, item))
     response.headers["location"] = f"/api/v1/users/{created_user.id}"
@@ -57,7 +58,7 @@ def list_users(
     departments_ids: list[str] | None = Query(default=None, alias="departmentsIds"),
     asc_sort: list[str] = Query(default=[], alias="ascSort"),
     desc_sort: list[str] = Query(default=[], alias="descSort"),
-    _=Depends(get_admin_user),
+    _: User = Depends(get_admin_user),
 ) -> PaginationResponseSchema[UserResponseSchema]:
     logger.info(db)
     return get_users(
@@ -80,7 +81,9 @@ def list_users(
 @router.get(
     "/{id}", response_model=UserResponseSchema, response_model_exclude_none=True
 )
-def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
+def get_user(
+    id: int, db: Session = db_session, _: User = Depends(get_admin_user)
+) -> UserResponseSchema:
     logger.info(db)
     return get_user_by_id(id, db)
 
@@ -89,7 +92,9 @@ def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
     "/{id}",
     status_code=204,
 )
-def delete_user(id: int, db: Session = db_session):
+def delete_user(
+    id: int, db: Session = db_session, _: User = Depends(get_admin_user)
+) -> None:
     logger.info(db)
     return delete_user_by_id(id, db)
 
@@ -98,6 +103,11 @@ def delete_user(id: int, db: Session = db_session):
     "/{id}",
     status_code=204,
 )
-def update_existing_user(id: int, item: UserUpdateSchema, db: Session = db_session):
+def update_existing_user(
+    id: int,
+    item: UserUpdateSchema,
+    db: Session = db_session,
+    _: User = Depends(get_admin_user),
+) -> None:
     logger.info(db)
     update_user(id, item, db)

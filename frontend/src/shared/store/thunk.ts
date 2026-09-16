@@ -4,9 +4,8 @@ import {
 	type Draft
 } from "@reduxjs/toolkit"
 import { isUndefined } from "es-toolkit"
-import type { KyInstance } from "ky"
+import type { KyInstance, Options as KyOptions } from "ky"
 import { HTTPError } from "ky"
-import type { KyOptions } from "node_modules/ky/distribution/types/options"
 import type z from "zod"
 
 import { setError, setLoading, setSuccess } from "@/shared/api/api"

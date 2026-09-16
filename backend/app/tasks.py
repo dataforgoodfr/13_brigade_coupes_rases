@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
 
 
-def scheduled_airtable_sync():
+def scheduled_airtable_sync() -> None:
     logger.info("Executing scheduled Airtable sync job...")
     db = SessionLocal()
     try:
@@ -19,7 +19,7 @@ def scheduled_airtable_sync():
         db.close()
 
 
-def start_scheduler():
+def start_scheduler() -> None:
     if not scheduler.running:
         # Schedule at 8:00 and 12:00 every day
         scheduler.add_job(
@@ -34,7 +34,7 @@ def start_scheduler():
         )
 
 
-def stop_scheduler():
+def stop_scheduler() -> None:
     if scheduler.running:
         scheduler.shutdown()
         logger.info("Background scheduler stopped.")

@@ -1,6 +1,7 @@
 import logging
 import re
 import uuid
+from typing import Any
 
 import boto3
 from botocore.exceptions import ClientError
@@ -22,7 +23,7 @@ def sanitize_filename(filename: str) -> str:
 class S3Service:
     """Service for handling S3 operations and pre-signed URLs"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not settings.S3_ACCESS_KEY_ID:
             logging.error("S3_ACCESS_KEY_ID is not set, image uploads will fail!")
         if not settings.S3_SECRET_ACCESS_KEY:
@@ -44,7 +45,7 @@ class S3Service:
         report_id: str | None = None,
         expires_in: int = 3600,
         max_file_size: int = 10 * 1024 * 1024,  # 10MB default
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Generate a pre-signed URL for uploading a file to S3
 
@@ -140,7 +141,7 @@ class S3Service:
                 },
                 ExpiresIn=expires_in,
             )
-            return url
+            return str(url)
         except ClientError as e:
             raise Exception(f"Failed to generate pre-signed GET URL: {str(e)}") from e
 

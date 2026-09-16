@@ -16,7 +16,7 @@ from app.services.rules import get_rules
 logger = getLogger(__name__)
 
 
-def get_referential(db: Session):
+def get_referential(db: Session) -> ReferentialResponseSchema:
     departments = db.query(Department).all()
     ecological_zonings = db.query(EcologicalZoning).all()
 

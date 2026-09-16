@@ -22,7 +22,7 @@ describe("From tracking", () => {
 		worker.use(reportMock.handler, formMock.handler)
 	})
 	it("Should  display rollback button when current form is different from original", async () => {
-		const { user } = renderApp({
+		const { user } = await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: reportMock.response.id },
 			user: volunteerMock
@@ -48,7 +48,7 @@ describe("From tracking", () => {
 		expect(await field.findValue()).toBe(formMock.response.weather)
 	})
 	it("Should  display apply latest button when current form is different from latest", async () => {
-		const { unmount } = renderApp({
+		const { unmount } = await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: reportMock.response.id },
 			user: volunteerMock
@@ -63,7 +63,7 @@ describe("From tracking", () => {
 		})
 		worker.use(latestFormMock.handler)
 		unmount()
-		const { user } = renderApp({
+		const { user } = await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: reportMock.response.id },
 			user: volunteerMock

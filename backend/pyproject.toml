@@ -15,30 +15,31 @@ python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.6.2"
-pytest = "^7.2.0"
+pytest = "^9.1.1"
+pytest-cov = "^7.0.0"
 httpx = "^0.28.1"
-ipykernel = "^6.29.5"
-mypy = "^1.16.1"
+ipykernel = "^7.3.0"
+mypy = "^2.3.1"
 boto3-stubs = "^1.35.0"
 types-shapely = "^2.0"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.13"
-fastapi = "^0.115.8"
+fastapi = "^0.141.1"
 sqlalchemy = "^2.0.38"
 psycopg2-binary = "^2.9.10"
 pydantic-settings = "^2.7.1"
-uvicorn = "^0.34.0"
-geoalchemy2 = "^0.17.1"
+uvicorn = "^0.53.0"
+geoalchemy2 = "^0.20.0"
 alembic = "^1.14.1"
 pydantic = { extras = ["email"], version = "^2.7.1" }
 shapely = "^2.0.7"
 pyjwt = "^2.10.1"
-bcrypt = "^4.3.0"
-python-multipart = "^0.0.20"
-geojson-pydantic = "^1.2.0"
+bcrypt = "^5.0.0"
+python-multipart = "^0.0.32"
+geojson-pydantic = "^2.1.2"
 boto3 = "^1.35.0"
-pygeofilter = "^0.3.1"
+pygeofilter = "^0.4.0"
 apscheduler = "^3.11.2"
 pyairtable = "^3.3.0"
 
@@ -46,12 +47,31 @@ pyairtable = "^3.3.0"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
+# Tests : `make test-unit` (sans base de données) ou `make test` (tout, avec
+# couverture). Les marqueurs unit / integration sont posés automatiquement
+# par test/conftest.py d'après le dossier du test.
 [tool.pytest.ini_options]
-markers = ["focus: run only these tests"]
+addopts = "--strict-markers"
+markers = [
+    "unit: tests sans base de données ni réseau (test/unit/)",
+    "integration: tests sur une base PostGIS migrée et peuplée",
+    "focus: run only these tests",
+]
 
-# Vérification de types : `make typecheck` (mode par défaut, non strict).
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+# Seuil volontairement en dessous de la couverture actuelle (75 %) : il bloque
+# les régressions, il n'impose pas de tests inutiles.
+fail_under = 70
+
+# Vérification de types : `make typecheck`.
 [tool.mypy]
+strict = true
 python_version = "3.13"
+plugins = ["pydantic.mypy"]
 files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py"]
 
 [[tool.mypy.overrides]]

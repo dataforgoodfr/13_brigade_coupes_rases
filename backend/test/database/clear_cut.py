@@ -1,9 +1,10 @@
 import pytest
+from sqlalchemy.orm import Session
 
 from test.common.clear_cut import new_clear_cut_report
 
 
-def test_clear_cut_creation(db):
+def test_clear_cut_creation(db: Session) -> None:
     clear_cut = new_clear_cut_report()
     db.add(clear_cut)
     db.commit()

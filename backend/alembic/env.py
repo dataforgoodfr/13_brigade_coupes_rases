@@ -1,12 +1,16 @@
 from logging.config import fileConfig
-from typing import cast
+from typing import Literal, cast
 
 from alembic import context
+from alembic.autogenerate.api import AutogenContext
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import Index, engine_from_config, pool
+from sqlalchemy.sql.schema import SchemaItem
 
+# Charge les modèles pour remplir Base.metadata
+import app.models  # noqa: E402, F401
 from app.config import settings
-from app.models import Base
+from app.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -26,7 +30,9 @@ configuration["sqlalchemy.url"] = settings.DATABASE_URL
 IGNORE_TABLES = ["spatial_ref_sys"]
 
 
-def render_item(obj_type, obj, autogen_context):
+def render_item(
+    obj_type: str, obj: object, autogen_context: AutogenContext
+) -> str | Literal[False]:
     """Apply custom rendering for selected items."""
     if obj_type == "type" and isinstance(obj, Geometry | Geography | Raster):
         import_name = obj.__class__.__name__
@@ -37,21 +43,28 @@ def render_item(obj_type, obj, autogen_context):
     return False
 
 
-def include_object(object, name, type_, reflected, compare_to):
+def include_object(
+    object: SchemaItem,
+    name: str | None,
+    type_: str,
+    reflected: bool,
+    compare_to: SchemaItem | None,
+) -> bool:
     """Do not include spatial indexes if they are automatically created by GeoAlchemy2."""
-    if type_ == "index":
+    if type_ == "index" and isinstance(object, Index):
         if len(object.expressions) == 1:
-            try:
-                col = object.expressions[0]
-                if (
-                    alembic_helpers._check_spatial_type(
-                        col.type, (Geometry, Geography, Raster)
-                    )
-                    and col.type.spatial_index
-                ):
-                    return False
-            except AttributeError:
-                pass
+            # Une expression d'index peut être une chaîne ou une colonne
+            col_type = getattr(object.expressions[0], "type", None)
+            if (
+                col_type is not None
+                # Fonction privée mais recommandée par la documentation de
+                # GeoAlchemy2 pour ce filtre.
+                and alembic_helpers._check_spatial_type(  # type: ignore[attr-defined, no-untyped-call]
+                    col_type, (Geometry, Geography, Raster)
+                )
+                and getattr(col_type, "spatial_index", False)
+            ):
+                return False
 
     if type_ == "table" and (
         name in IGNORE_TABLES or object.info.get("skip_autogenerate", False)
