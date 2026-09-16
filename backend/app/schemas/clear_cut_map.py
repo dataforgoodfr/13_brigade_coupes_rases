@@ -2,6 +2,7 @@ import datetime
 from logging import getLogger
 
 from geojson_pydantic import MultiPolygon, Point
+from geojson_pydantic.types import Position2D
 from pydantic import Field
 
 from app.models import ClearCut, ClearCutReport
@@ -118,7 +119,8 @@ def report_to_report_preview_schema(
                 Point.model_validate_json(report.clear_cuts[0].location_json)
                 if report.clear_cuts
                 else Point(
-                    type="Point", coordinates=[2.440236, 46.695554]
+                    type="Point",
+                    coordinates=Position2D(longitude=2.440236, latitude=46.695554),
                 )  # Center of France as ultimate fallback
             )
         ),

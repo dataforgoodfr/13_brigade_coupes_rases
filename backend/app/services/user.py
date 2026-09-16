@@ -4,7 +4,7 @@ from logging import getLogger
 
 from fastapi import status
 from pydantic.alias_generators import to_snake
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.models import ClearCutReport, Department, User, user_department
@@ -65,13 +65,13 @@ def get_users(
     url: str,
     page: int,
     size: int,
-    full_text_search: str,
-    email: str,
-    login: str,
-    first_name: str,
-    last_name: str,
-    roles: list[str],
-    departments_ids: list[str],
+    full_text_search: str | None,
+    email: str | None,
+    login: str | None,
+    first_name: str | None,
+    last_name: str | None,
+    roles: list[str] | None,
+    departments_ids: list[str] | None,
     asc_sort: list[str],
     desc_sort: list[str],
 ) -> PaginationResponseSchema[UserResponseSchema]:
@@ -100,7 +100,6 @@ def get_users(
             .filter(user_department.c.department_id.in_(departments_ids))
             .subquery()
         )
-        aliased(user_department, matching_departments, name="matching_departments")
         query = query.join(matching_departments)
     users = query.offset(page * size).limit(size).all()
     users_count = query.count()

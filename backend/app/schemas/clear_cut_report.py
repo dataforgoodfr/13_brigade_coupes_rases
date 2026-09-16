@@ -66,25 +66,33 @@ def report_to_response_schema(
     # Build the base preview dict and reuse it to avoid duplication
     preview = report_to_report_preview_schema(report)
 
+    affected_user = (
+        report.user if show_user_info and report.user_id is not None else None
+    )
+    assignment_requested_by = (
+        report.assignment_requested_by
+        if show_user_info and report.assignment_requested_by_id is not None
+        else None
+    )
     return ClearCutReportResponseSchema(
         **preview.model_dump(),
         statellite_images=report.statellite_images,
         affected_user=(
             None
-            if report.user_id is None or not show_user_info
+            if affected_user is None
             else PublicUserResponseSchema(
-                id=str(report.user.id),
-                email=report.user.email,
-                login=report.user.login,
+                id=str(affected_user.id),
+                email=affected_user.email,
+                login=affected_user.login,
             )
         ),
         assignment_requested_by=(
             None
-            if report.assignment_requested_by_id is None or not show_user_info
+            if assignment_requested_by is None
             else PublicUserResponseSchema(
-                id=str(report.assignment_requested_by.id),
-                email=report.assignment_requested_by.email,
-                login=report.assignment_requested_by.login,
+                id=str(assignment_requested_by.id),
+                email=assignment_requested_by.email,
+                login=assignment_requested_by.login,
             )
         ),
     )
