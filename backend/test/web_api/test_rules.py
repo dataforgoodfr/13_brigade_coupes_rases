@@ -21,9 +21,7 @@ def test_update_rules(client: TestClient, db: Session) -> None:
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
-def test_update_rules_batch_recomputes_reports(
-    client: TestClient, db: Session
-) -> None:
+def test_update_rules_batch_recomputes_reports(client: TestClient, db: Session) -> None:
     # Abaisser le seuil de surface via l'endpoint groupé doit être répercuté
     # sur les signalements existants.
     token = get_admin_user_token(client, db)[1]
@@ -31,9 +29,7 @@ def test_update_rules_batch_recomputes_reports(
     area_rule = next(rule for rule in rules if rule["type"] == "area")
     before = {
         report["id"]: set(report["rulesIds"])
-        for report in client.get("api/v1/clear-cuts-reports?size=100").json()[
-            "content"
-        ]
+        for report in client.get("api/v1/clear-cuts-reports?size=100").json()["content"]
     }
 
     response = client.put(
@@ -53,9 +49,7 @@ def test_update_rules_batch_recomputes_reports(
 
     after = {
         report["id"]: set(report["rulesIds"])
-        for report in client.get("api/v1/clear-cuts-reports?size=100").json()[
-            "content"
-        ]
+        for report in client.get("api/v1/clear-cuts-reports?size=100").json()["content"]
     }
     newly_matched = [
         report_id
