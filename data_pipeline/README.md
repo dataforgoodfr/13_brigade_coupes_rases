@@ -36,19 +36,21 @@ mkdir data_temp logs
 
 Create a .env file in the root directory (data_pipeline/.env) to store environment variables.
 
-Template for .env:
+Copy the template and fill in the values:
 
-```python
-# General Configuration
-S3_BUCKET_NAME = "s3-bucket-name"
-S3_REGION = "S3_REGION"
-S3_ENDPOINT = "S3_ENDPOINT"
-S3_BUCKET_NAME = "S3_BUCKET_NAME"
-
-KEEPASS_PASSWORD = "KEEPASS_PASSWORD"
+```bash
+cp .env.example .env
 ```
-KeePass Configuration:
-You can find the password in the Vaultwarden of the project, and you will find the S3 credentials to work with the project locally.
+
+```
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+S3_ENDPOINT=https://s3.fr-par.scw.cloud
+S3_BUCKET_NAME=brigade-coupe-rase-s3
+SCW_ACCESS_KEY=...
+SCW_SECRET_KEY=...
+```
+
+The Scaleway Object Storage credentials (`SCW_ACCESS_KEY` / `SCW_SECRET_KEY`) are in the project's Vaultwarden. Never commit `.env` (it is git-ignored).
 
 ### 3. Install Dependencies
 Ensure you have Python 3.11 installed.
