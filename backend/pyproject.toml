@@ -49,8 +49,9 @@ docker-stop = "docker compose down"
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
 
-# Vérification de types : `make typecheck` (mode par défaut, non strict).
+# Vérification de types : `make typecheck`.
 [tool.mypy]
+strict = true
 python_version = "3.13"
 plugins = ["pydantic.mypy"]
 files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py"]

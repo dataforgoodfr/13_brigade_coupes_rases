@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -23,7 +24,7 @@ from app.routes import (
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from app.tasks import start_scheduler, stop_scheduler
 
     start_scheduler()
@@ -65,7 +66,7 @@ app.include_router(rules.router)
 
 def start_server(
     host: str, port: int, reload: bool, proxy_headers: bool, forwarded_allow_ips: str
-):
+) -> None:
     import uvicorn
 
     uvicorn.run(

@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 import bcrypt
 import jwt
@@ -13,11 +13,14 @@ from sqlalchemy.orm import Session
 from app.common.errors import AppHTTPException
 from app.config import settings
 from app.deps import db_session
+from app.models import User
 from app.schemas.base import BaseSchema
 from app.services.user import get_user_by_email
 
 
-def authenticate_user(db: Session, email: str, password: str):
+def authenticate_user(
+    db: Session, email: str, password: str
+) -> User | Literal["inactive"] | None:
     user = get_user_by_email(db, email)
     if not user:
         return None
@@ -64,7 +67,7 @@ optional_oauth2_schema = OAuth2PasswordBearer(
 )
 
 
-def verify_password(plain_password: str, hashed_password: str):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     password_byte_enc = plain_password.encode("utf-8")
     return bcrypt.checkpw(
         password=password_byte_enc,
@@ -72,7 +75,9 @@ def verify_password(plain_password: str, hashed_password: str):
     )
 
 
-def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None):
+def create_access_token(
+    data: dict[str, Any], expires_delta: timedelta | None = None
+) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
@@ -84,14 +89,16 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
 
 
 def get_optional_current_user(
-    db: Session = db_session, token=Depends(optional_oauth2_schema)
-):
+    db: Session = db_session, token: str | None = Depends(optional_oauth2_schema)
+) -> User | None:
     if token is None:
         return None
     return get_current_user(db, token)
 
 
-def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
+def get_current_user(
+    db: Session = db_session, token: str = Depends(oauth2_scheme)
+) -> User:
     invalid_token = AppHTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         type="INVALID_TOKEN",
@@ -118,8 +125,8 @@ def get_current_user(db: Session = db_session, token=Depends(oauth2_scheme)):
 
 
 def get_admin_user(
-    current_user=Depends(get_current_user),
-):
+    current_user: User = Depends(get_current_user),
+) -> User:
     if current_user.role != "admin":
         raise AppHTTPException(
             status_code=403,
@@ -129,7 +136,7 @@ def get_admin_user(
     return current_user
 
 
-def create_token(db: Session, email: str, password: str):
+def create_token(db: Session, email: str, password: str) -> Token:
     user = authenticate_user(db, email, password)
     if user == "inactive":
         raise AppHTTPException(
@@ -156,7 +163,9 @@ def create_token(db: Session, email: str, password: str):
     )
 
 
-def create_refresh_token(data: dict[str, Any], expires_delta: timedelta | None = None):
+def create_refresh_token(
+    data: dict[str, Any], expires_delta: timedelta | None = None
+) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

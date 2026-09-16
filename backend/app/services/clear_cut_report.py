@@ -5,7 +5,8 @@ from fastapi import status
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
 from sqlalchemy import case, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
+from sqlalchemy.sql.selectable import Subquery
 
 from app.common.errors import AppHTTPException
 from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
@@ -24,7 +25,9 @@ from app.services.rules import list_rules
 logger = getLogger(__name__)
 
 
-def query_aggregated_clear_cuts_grouped_by_report_id(db: Session, rules: AllRules):
+def query_aggregated_clear_cuts_grouped_by_report_id(
+    db: Session, rules: AllRules
+) -> Query[Any]:
     return (
         db.query(
             ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
@@ -71,9 +74,9 @@ def query_aggregated_clear_cuts_grouped_by_report_id(db: Session, rules: AllRule
 
 def query_reports_with_additional_data(
     db: Session,
-    aggregated_cuts,
+    aggregated_cuts: Subquery,
     rules: AllRules,
-):
+) -> Query[Any]:
     return db.query(
         ClearCutReport,
         aggregated_cuts,
@@ -102,7 +105,7 @@ def query_reports_with_additional_data(
     ).join(aggregated_cuts, ClearCutReport.id == aggregated_cuts.c.report_id)
 
 
-def sync_clear_cuts_reports(db: Session):
+def sync_clear_cuts_reports(db: Session) -> None:
     rules = list_rules(db)
     aggregated_cuts = query_aggregated_clear_cuts_grouped_by_report_id(db, rules)
     rows = query_reports_with_additional_data(
@@ -286,7 +289,7 @@ def volunteer_create_clear_cut_report(
 
 def update_clear_cut_report(
     id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
-):
+) -> ClearCutReport:
     report = db.get(ClearCutReport, id)
     if not report:
         raise AppHTTPException(

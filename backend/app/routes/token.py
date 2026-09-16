@@ -26,9 +26,9 @@ router = APIRouter(prefix="/api/v1/token", tags=["Token"])
 )
 def generate_token(
     user: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db=db_session,
+    db: Session = db_session,
     referer: Annotated[str | None, Header()] = None,
-):
+) -> Token | TokenSnakeCase:
     if referer is not None and referer.endswith("docs"):
         token = create_token(db, user.username, user.password)
         return TokenSnakeCase(
@@ -47,7 +47,7 @@ class RefreshTokenRequestSchema(BaseSchema):
 @router.post("/refresh")
 def refresh_token(
     refresh_token: RefreshTokenRequestSchema, db: Session = Depends(get_db)
-):
+) -> Token:
     decoded_token = decode_token(refresh_token.refresh_token, "email", type="refresh")
     if not decoded_token:
         raise AppHTTPException(

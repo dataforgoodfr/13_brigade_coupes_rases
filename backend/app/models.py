@@ -6,6 +6,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Column,
+    Connection,
     DateTime,
     Float,
     ForeignKey,
@@ -18,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import (
     Mapped,
+    Mapper,
     column_property,
     mapped_column,
     relationship,
@@ -152,7 +154,7 @@ class User(Base):
     forms = relationship("ClearCutForm", back_populates="editor", cascade="all, delete")
 
     @validates("role")
-    def validate_role(self, key, value):
+    def validate_role(self, key: str, value: str) -> str:
         if value not in User.ROLES:
             raise ValueError(f"Role must be one of: {', '.join(User.ROLES)}")
         return value
@@ -160,7 +162,9 @@ class User(Base):
 
 @listens_for(User, "before_insert")
 @listens_for(User, "before_update")
-def update_search_vector(mapper, connection, target):
+def update_search_vector(
+    mapper: Mapper["User"], connection: Connection, target: "User"
+) -> None:
     connection.execute(
         text("""
             UPDATE users
@@ -188,7 +192,7 @@ class Department(Base):
     )
 
     @validates("name")
-    def validate_name(self, key, value):
+    def validate_name(self, key: str, value: str) -> str:
         if key == "name" and value is None:
             raise ValueError("Name cannot be None")
         return value
@@ -382,7 +386,7 @@ class ClearCutReport(Base):
     )
 
     @validates("status")
-    def validate_status(self, key, value):
+    def validate_status(self, key: str, value: str) -> str:
         if value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value

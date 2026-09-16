@@ -122,7 +122,7 @@ def get_user_by_id(id: int, db: Session) -> UserResponseSchema:
     return user_to_user_response_schema(user)
 
 
-def delete_user_by_id(id: int, db: Session):
+def delete_user_by_id(id: int, db: Session) -> None:
     user = db.get(User, id)
     if user is None or user.deleted_at is not None:
         raise AppHTTPException(
