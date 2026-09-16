@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { isUndefined } from "es-toolkit"
-import { Accordion } from "@/components/ui/accordion"
 import { useEffect, useMemo } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
+import { Accordion } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -55,14 +55,24 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 	const isDisabled = useMemo(() => {
 		if (!user) return true
 		if (user.role === "volunteer") {
-			const lockedStatuses = ["waiting_for_validation", "validated", "legal_validated", "final_validated"]
+			const lockedStatuses = [
+				"waiting_for_validation",
+				"validated",
+				"legal_validated",
+				"final_validated"
+			]
 			if (lockedStatuses.includes(current.report.status)) return true
 			const isAssignmentRequester =
 				current.report.assignmentRequestedById === user.id
 			return !isAssignedVolunteer && !isAssignmentRequester
 		}
 		return false
-	}, [user, isAssignedVolunteer, current.report.assignmentRequestedById, current.report.status])
+	}, [
+		user,
+		isAssignedVolunteer,
+		current.report.assignmentRequestedById,
+		current.report.status
+	])
 
 	const canValidate =
 		isAssignedVolunteer && current.report.status === "in_progress"
@@ -124,7 +134,10 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 
 	useEffect(() => {
 		if (assignation.status === "success") {
-			toast({ id: "assignation-action", title: "Demande envoyée à l'administrateur" })
+			toast({
+				id: "assignation-action",
+				title: "Demande envoyée à l'administrateur"
+			})
 		} else if (assignation.status === "error") {
 			toast({
 				id: "validation-error",

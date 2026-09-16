@@ -128,7 +128,9 @@ export function useImageUpload(): UseImageUploadResult {
 			return uploadedImages
 		} catch (err) {
 			const errorMessage =
-				err instanceof Error ? err.message : "Erreur lors de l'envoi de la photo."
+				err instanceof Error
+					? err.message
+					: "Erreur lors de l'envoi de la photo."
 			setError(errorMessage)
 			throw err
 		} finally {

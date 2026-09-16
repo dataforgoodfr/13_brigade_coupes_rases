@@ -38,7 +38,10 @@ function RouteComponent() {
 					<TabsTrigger value="rules">Paramètres</TabsTrigger>
 				</TabsList>
 				<Outlet />
-				<TabsContent value="action-required" className="flex flex-col gap-8 grow p-4">
+				<TabsContent
+					value="action-required"
+					className="flex flex-col gap-8 grow p-4"
+				>
 					<ActionRequiredTab />
 				</TabsContent>
 				<TabsContent value="reports" className="flex flex-col gap-8 grow p-4">

@@ -8,7 +8,6 @@ import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
 import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 
-
 export function ClearCutItem({
 	id,
 	firstCutDate,

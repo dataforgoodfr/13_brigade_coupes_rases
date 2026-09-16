@@ -43,7 +43,10 @@ export function MobileControl({ clearCutId, children }: Props) {
 			</div>
 
 			<CollapsibleContent>
-				<AdvancedFilters key={resetVersion} className="mt-6 px-3 bg-background" />
+				<AdvancedFilters
+					key={resetVersion}
+					className="mt-6 px-3 bg-background"
+				/>
 			</CollapsibleContent>
 		</Collapsible>
 	)

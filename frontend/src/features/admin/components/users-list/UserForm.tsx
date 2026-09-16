@@ -134,7 +134,11 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 						form={form}
 						name={"isActive"}
 						render={(props) => (
-							<FormSwitch {...props} label="Compte actif" disableChangeTracking />
+							<FormSwitch
+								{...props}
+								label="Compte actif"
+								disableChangeTracking
+							/>
 						)}
 					/>
 				</div>

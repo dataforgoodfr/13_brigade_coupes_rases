@@ -80,54 +80,56 @@ export function MyCuts() {
 							report.assignmentRequestedById === me.id &&
 							report.userId !== me.id
 						return (
-						<div
-							key={report.id}
-							className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group"
-							onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
-						>
-							<div className="flex justify-between items-start mb-3 gap-2">
-								<h3
-									className="font-semibold text-lg text-neutral-800 truncate"
-									title={report.city}
-								>
-									{report.city}
-								</h3>
-								<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
-									{report.department.code}
+							<div
+								key={report.id}
+								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group"
+								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
+							>
+								<div className="flex justify-between items-start mb-3 gap-2">
+									<h3
+										className="font-semibold text-lg text-neutral-800 truncate"
+										title={report.city}
+									>
+										{report.city}
+									</h3>
+									<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
+										{report.department.code}
+									</div>
+								</div>
+
+								{isPendingAssignment && (
+									<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
+										<Clock className="h-3.5 w-3.5" />
+										En attente de validation de l'assignation
+									</div>
+								)}
+
+								<div className="space-y-1 mb-6 flex-grow">
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Surface :
+										</span>{" "}
+										{report.totalAreaHectare.toFixed(1)} ha
+									</p>
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Date approx. :
+										</span>{" "}
+										{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
+									</p>
+									<p className="text-sm text-neutral-600">
+										<span className="font-medium text-neutral-900">
+											Statut :
+										</span>{" "}
+										{report.status === "to_validate" ? "À valider" : "En cours"}
+									</p>
+								</div>
+
+								<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
+									<span>Consulter le détail</span>
+									<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
 								</div>
 							</div>
-
-							{isPendingAssignment && (
-								<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
-									<Clock className="h-3.5 w-3.5" />
-									En attente de validation de l'assignation
-								</div>
-							)}
-
-							<div className="space-y-1 mb-6 flex-grow">
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">
-										Surface :
-									</span>{" "}
-									{report.totalAreaHectare.toFixed(1)} ha
-								</p>
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">
-										Date approx. :
-									</span>{" "}
-									{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
-								</p>
-								<p className="text-sm text-neutral-600">
-									<span className="font-medium text-neutral-900">Statut :</span>{" "}
-									{report.status === "to_validate" ? "À valider" : "En cours"}
-								</p>
-							</div>
-
-							<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
-								<span>Consulter le détail</span>
-								<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-							</div>
-						</div>
 						)
 					})}
 				</div>
