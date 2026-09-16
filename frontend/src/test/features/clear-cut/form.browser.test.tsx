@@ -240,11 +240,37 @@ describe.each(defaultSetup.sections)(
 		if (section.name === "Stratégie juridique") {
 			isShouldNotDisplayAdminSection(section)
 		} else {
-			itShouldHaveValue(items, section)
+			// The field form is only served to connected accounts: a visitor sees
+			// the report data, never the volunteer's notes
+			itShouldHaveValue(
+				items.filter((item) => item.name.startsWith("report.")),
+				section
+			)
 			itShouldHaveDisabledState(items, section, true)
 		}
 	}
 )
+
+describe("field form when there isn't a connected user", () => {
+	defaultSetupServerBeforeEach(defaultSetup)
+	it("is not displayed even though the server would return one", async () => {
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" }
+		})
+		await openAccordion(onSiteKey, user)
+		const weather = defaultSetup.sections
+			.find(({ section }) => section === onSiteKey)
+			?.items.find(
+				(item) => item.name === "weather"
+			) as TestFormItem<ClearCutFormInput>
+		const field = formField<ClearCutFormInput, unknown>({
+			user,
+			item: weather
+		}) as FieldInput
+		expect(await field.findValue()).toBe("")
+	})
+})
 function isShouldNotDisplayAdminSection(
 	section: SectionForm,
 	connectedUser?: Me

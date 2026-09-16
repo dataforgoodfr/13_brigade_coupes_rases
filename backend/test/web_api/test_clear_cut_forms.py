@@ -2,7 +2,8 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from test.common.user import get_admin_user_token
+from app.models import ClearCutForm, ClearCutReport
+from test.common.user import get_admin_user_token, get_volunteer_user_token
 
 
 def test_create_version_success(client: TestClient, db: Session) -> None:
@@ -48,6 +49,7 @@ def test_create_version_success(client: TestClient, db: Session) -> None:
     }
     response = client.get(
         "/api/v1/clear-cuts-reports/1/forms",
+        headers={"Authorization": f"Bearer {token}"},
     ).json()
 
     response = client.post(
@@ -62,7 +64,7 @@ def test_create_version_success(client: TestClient, db: Session) -> None:
     assert response.status_code == status.HTTP_201_CREATED
 
     location = response.headers["location"]
-    data = client.get(location).json()
+    data = client.get(location, headers={"Authorization": f"Bearer {token}"}).json()
 
     assert data["id"] == location.split("/")[-1]
     assert data["company"] == report_data["company"]
@@ -150,6 +152,7 @@ def test_form_submission_does_not_auto_update_report_status(
     }
     response = client.get(
         "/api/v1/clear-cuts-reports/1/forms",
+        headers={"Authorization": f"Bearer {token}"},
     ).json()
     response = client.post(
         "/api/v1/clear-cuts-reports/1/forms",
@@ -166,3 +169,35 @@ def test_form_submission_does_not_auto_update_report_status(
     assert updated_report_response.status_code == status.HTTP_200_OK
     updated_report_data = updated_report_response.json()
     assert updated_report_data["status"] == "to_validate"
+
+
+def test_forms_require_a_token(client: TestClient, db: Session) -> None:
+    forms_url = "/api/v1/clear-cuts-reports/1/forms"
+    assert client.get(forms_url).status_code == status.HTTP_401_UNAUTHORIZED
+    assert client.get(f"{forms_url}/1").status_code == status.HTTP_401_UNAUTHORIZED
+
+    token = get_volunteer_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+    assert client.get(forms_url, headers=headers).status_code == status.HTTP_200_OK
+
+
+def test_form_is_only_served_under_its_report(client: TestClient, db: Session) -> None:
+    volunteer, token = get_volunteer_user_token(client, db)
+    headers = {"Authorization": f"Bearer {token}"}
+    form = ClearCutForm(report_id=1, editor_id=volunteer.id)
+    db.add(form)
+    db.commit()
+    form_id = form.id
+    other_report = db.query(ClearCutReport).filter(ClearCutReport.id != 1).first()
+    assert other_report is not None
+
+    response = client.get(
+        f"/api/v1/clear-cuts-reports/1/forms/{form_id}", headers=headers
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    response = client.get(
+        f"/api/v1/clear-cuts-reports/{other_report.id}/forms/{form_id}",
+        headers=headers,
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND

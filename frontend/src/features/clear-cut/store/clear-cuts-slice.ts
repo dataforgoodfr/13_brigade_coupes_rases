@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react"
 import type { FiltersRequest } from "@/features/clear-cut/store/filters"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import type { Bounds } from "@/features/clear-cut/store/types"
-import { getMeThunk } from "@/features/user/store/me.slice"
+import { getMeThunk, selectConnectedMe } from "@/features/user/store/me.slice"
 import { isNetworkError, parseParam } from "@/shared/api/api"
 import {
 	type EtagMismatchError,
@@ -94,13 +94,17 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 			const state = getState()
 			const baseReport = mapReport(state, report)
 
-			const formsResult = clearCutFormsResponseSchema.parse(
-				await api()
-					.get(`api/v1/clear-cuts-reports/${id}/forms/`, {
-						searchParams: { page: "0", size: "1" }
-					})
-					.json()
-			)
+			// Field forms are only served to connected accounts: a visitor sees the
+			// report data, not the volunteer's notes
+			const formsResult = selectConnectedMe(state)
+				? clearCutFormsResponseSchema.parse(
+						await api()
+							.get(`api/v1/clear-cuts-reports/${id}/forms/`, {
+								searchParams: { page: "0", size: "1" }
+							})
+							.json()
+					)
+				: { content: [] }
 			const ecologicalZonings = uniqBy(
 				baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
 				(e) => e.id
