@@ -38,7 +38,9 @@ FOREST_PROFILES = {
 }
 
 
-def _hex_around(lng: float, lat: float, radius: float = 0.003):
+def _hex_around(
+    lng: float, lat: float, radius: float = 0.003
+) -> list[tuple[float, float]]:
     coords = [
         (
             lng + radius * math.cos(math.radians(60 * i)),
@@ -88,7 +90,7 @@ def make_clear_cut(
     )
 
 
-def wipe_database():
+def wipe_database() -> None:
     env = os.environ.get("ENVIRONMENT", "development").lower()
     if env != "development" and env != "test":
         raise RuntimeError("This script should only run in development environment!")
@@ -104,7 +106,7 @@ def wipe_database():
     db.commit()
 
 
-def seed_database():
+def seed_database() -> None:
     db = SessionLocal()
     try:
         wipe_database()

@@ -7,7 +7,9 @@ from sqlalchemy.orm import Session
 from test.common.user import create_user
 
 
-def test_forgot_password_sends_email_to_existing_user(client: TestClient, db: Session):
+def test_forgot_password_sends_email_to_existing_user(
+    client: TestClient, db: Session
+) -> None:
     user = create_user(db, email="forgot@volunteer.com")
 
     with patch("app.routes.auth.send_reset_password_email") as send_mail:
@@ -20,7 +22,9 @@ def test_forgot_password_sends_email_to_existing_user(client: TestClient, db: Se
     assert send_mail.call_args.args[0] == user.email
 
 
-def test_forgot_password_unknown_email_is_silent(client: TestClient, db: Session):
+def test_forgot_password_unknown_email_is_silent(
+    client: TestClient, db: Session
+) -> None:
     with patch("app.routes.auth.send_reset_password_email") as send_mail:
         response = client.post(
             "/api/v1/auth/forgot-password", json={"email": "nobody@nowhere.org"}
@@ -30,7 +34,7 @@ def test_forgot_password_unknown_email_is_silent(client: TestClient, db: Session
     send_mail.assert_not_called()
 
 
-def test_reset_password_round_trip(client: TestClient, db: Session):
+def test_reset_password_round_trip(client: TestClient, db: Session) -> None:
     user = create_user(db, email="reset@volunteer.com")
 
     with patch("app.routes.auth.send_reset_password_email") as send_mail:

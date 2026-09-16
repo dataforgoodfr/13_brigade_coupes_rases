@@ -19,7 +19,7 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
-def upgrade():
+def upgrade() -> None:
     op.add_column("users", sa.Column("search_vector", postgresql.TEXT(), nullable=True))
     op.execute("""
         UPDATE users
@@ -32,6 +32,6 @@ def upgrade():
     )
 
 
-def downgrade():
+def downgrade() -> None:
     op.drop_index("ix_users_search_vector", table_name="users")
     op.drop_column("users", "search_vector")

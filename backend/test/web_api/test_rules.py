@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from test.common.user import get_admin_user_token
 
 
-def test_get_rules(client: TestClient):
+def test_get_rules(client: TestClient) -> None:
     response = client.get("api/v1/rules/")
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_update_rules(client: TestClient, db: Session):
+def test_update_rules(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
 
     response = client.put(

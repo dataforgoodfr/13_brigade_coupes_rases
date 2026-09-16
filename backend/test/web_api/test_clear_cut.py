@@ -8,7 +8,7 @@ from app.models import ClearCutEcologicalZoning
 from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
-def ensure_authentication(client: TestClient, verb: str, path: str):
+def ensure_authentication(client: TestClient, verb: str, path: str) -> None:
     response = client.request(verb, path, headers={})
     assert response.status_code == 401
 
@@ -16,11 +16,11 @@ def ensure_authentication(client: TestClient, verb: str, path: str):
     assert response.status_code != 401 and response.status_code != 500
 
 
-def test_endpoint_authentication(client: TestClient):
+def test_endpoint_authentication(client: TestClient) -> None:
     ensure_authentication(client, "post", "/api/v1/clear-cuts-reports")
 
 
-def test_post_report_success(client: TestClient):
+def test_post_report_success(client: TestClient) -> None:
     report_data = {
         "slopeAreaHectare": 6.5,
         "cityZipCode": "75056",
@@ -95,7 +95,7 @@ def test_post_report_success(client: TestClient):
     ]
 
 
-def test_post_report_invalid_data(client: TestClient):
+def test_post_report_invalid_data(client: TestClient) -> None:
     invalid_data: dict[str, Any] = {}
 
     response = client.post(
@@ -107,7 +107,7 @@ def test_post_report_invalid_data(client: TestClient):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_reports(client: TestClient):
+def test_get_reports(client: TestClient) -> None:
     response = client.get(
         "/api/v1/clear-cuts-reports",
     )
@@ -116,7 +116,7 @@ def test_get_reports(client: TestClient):
     assert len(data["content"]) == 10
 
 
-def test_get_report(client: TestClient):
+def test_get_report(client: TestClient) -> None:
     response = client.get(
         "/api/v1/clear-cuts-reports/1",
     )
@@ -127,7 +127,7 @@ def test_get_report(client: TestClient):
 
 def test_affect_me_using_connected_volunteer_should_work(
     db: Session, client: TestClient
-):
+) -> None:
     [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
     updates = {"user_id": str(me.id)}
 
@@ -149,7 +149,7 @@ def test_affect_me_using_connected_volunteer_should_work(
 
 def test_affect_other_using_connected_volunteer_should_return_forbidden(
     db: Session, client: TestClient
-):
+) -> None:
     [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
     new_user = create_user(db, login="foo-login")
 
@@ -163,7 +163,9 @@ def test_affect_other_using_connected_volunteer_should_return_forbidden(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_affect_me_using_connected_admin_should_work(db: Session, client: TestClient):
+def test_affect_me_using_connected_admin_should_work(
+    db: Session, client: TestClient
+) -> None:
     [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
     updates = {"userId": str(me.id)}
 
@@ -185,7 +187,7 @@ def test_affect_me_using_connected_admin_should_work(db: Session, client: TestCl
 
 def test_affect_other_using_connected_admin_should_work(
     db: Session, client: TestClient
-):
+) -> None:
     [me, token] = get_admin_user_token(client, db, "assigned-test@admin.com")
     new_user = create_user(db, login="foo")
     expected_email = new_user.email
@@ -207,7 +209,7 @@ def test_affect_other_using_connected_admin_should_work(
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_list_ecological_zonings(client: TestClient, db: Session):
+def test_list_ecological_zonings(client: TestClient, db: Session) -> None:
     clear_cut_ecological_zoning = db.query(ClearCutEcologicalZoning).first()
     assert clear_cut_ecological_zoning is not None
     clear_cut_id = clear_cut_ecological_zoning.clear_cut_id
