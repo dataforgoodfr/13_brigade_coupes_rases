@@ -1,5 +1,3 @@
-from functools import reduce
-
 from sqlalchemy.orm import Query, Session
 
 from app.common.errors import AppHTTPException
@@ -43,11 +41,8 @@ def update_rules(db: Session, rules: RulesUpdateSchema) -> bool:
         updated_rules.append(update_rule(db, rule.id, rule))
 
     db.flush()
-    return reduce(
-        lambda has_changed, current_changed: has_changed and current_changed,
-        updated_rules,
-        False,
-    )
+    # One changed rule is enough to require recomputing the reports
+    return any(updated_rules)
 
 
 def find_rule_by_id(db: Session, id: int) -> Rules:
