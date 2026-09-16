@@ -6,7 +6,7 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import S3Manager
 
 
-def get_enrichment_data():
+def get_enrichment_data() -> None:
     logging.info("Getting enrichment data...")
     s3_manager = S3Manager()
     # TODO: mettre cette liste dans un fichier de config

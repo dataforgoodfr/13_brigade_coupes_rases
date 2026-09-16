@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 class S3Manager:
     load_dotenv()
 
-    def __init__(self, region="eu-west-3"):
+    def __init__(self, region: str = "eu-west-3") -> None:
         self.bucket_name = os.getenv("S3_BUCKET_NAME")
         self.s3 = boto3.client(
             service_name="s3",
@@ -18,10 +18,10 @@ class S3Manager:
             aws_secret_access_key=os.getenv("SCW_SECRET_KEY"),
         )
 
-    def list_bucket_contents(self):
+    def list_bucket_contents(self) -> list[str] | None:
         try:
             result = self.s3.list_objects_v2(Bucket=self.bucket_name)
-            content_list = list()
+            content_list: list[str] = []
             if "Contents" in result:
                 # Récupère les données dans le bucket
                 for obj in result["Contents"]:
@@ -31,8 +31,9 @@ class S3Manager:
             return content_list
         except Exception as e:
             logging.warning(f"Error reading bucket: {e}")
+            return None
 
-    def download_from_s3(self, s3_key, download_path):
+    def download_from_s3(self, s3_key: str, download_path: str) -> None:
         try:
             with open(download_path, "wb") as f:
                 self.s3.download_fileobj(self.bucket_name, s3_key, f)
@@ -40,14 +41,14 @@ class S3Manager:
         except Exception as e:
             logging.warning(f"Error downloading file from S3: {e}")
 
-    def delete_from_s3(self, s3_key):
+    def delete_from_s3(self, s3_key: str) -> None:
         try:
             self.s3.delete_object(Bucket=self.bucket_name, Key=s3_key)
             logging.info(f"File successfully deleted from S3: {s3_key}")
         except Exception as e:
             logging.warning(f"Error deleting file from S3: {e}")
 
-    def upload_to_s3(self, file_path, s3_key):
+    def upload_to_s3(self, file_path: str, s3_key: str) -> None:
         try:
             with open(file_path, "rb") as f:
                 self.s3.upload_fileobj(f, self.bucket_name, s3_key)

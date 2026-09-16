@@ -67,13 +67,13 @@ def run_pipeline() -> None:
             DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
         )
         export_database(
-            database_url=os.getenv("DATABASE_URL"),
+            database_url=os.environ["DATABASE_URL"],
             output_file=db_reference_path,
         )
 
         split_new_and_updated_clusters(
-            gdf_new=str(DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"),
-            gdf_ref=db_reference_path,
+            new_path=str(DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"),
+            ref_path=db_reference_path,
         )
         update_geometries()
 

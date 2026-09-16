@@ -46,7 +46,4 @@ jobs:
           poetry install --no-interaction --no-root
 
       - name: Type check (mypy)
-        # Non bloquant tant que les erreurs existantes ne sont pas corrigées ;
-        # retirer continue-on-error une fois `poetry run mypy` au vert.
-        continue-on-error: true
         run: poetry run mypy

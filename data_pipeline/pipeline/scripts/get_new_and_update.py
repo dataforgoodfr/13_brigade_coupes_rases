@@ -5,7 +5,9 @@ from shapely.ops import unary_union
 from pipeline.scripts import DATA_DIR
 
 
-def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
+def split_new_and_updated_clusters(
+    new_path: str, ref_path: str, distance_threshold: float = 50
+) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Sépare les nouveaux clusters en deux catégories :
     - Clusters qui matchent avec la référence (updated)
@@ -13,9 +15,9 @@ def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
 
     Parameters:
     -----------
-    gdf_new : str
+    new_path : str
         Chemin vers les nouvelles données à classifier
-    gdf_ref : str
+    ref_path : str
         Chemin vers les données de référence
     distance_threshold : float
         Distance en mètres pour considérer deux clusters comme identiques (défaut: 50m)
@@ -28,8 +30,8 @@ def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     """
 
     # Ouverture
-    gdf_new = gpd.read_file(gdf_new)
-    gdf_ref = gpd.read_file(gdf_ref)
+    gdf_new = gpd.read_file(new_path)
+    gdf_ref = gpd.read_file(ref_path)
 
     # Vérifier que les deux GeoDataFrames ont le même CRS
     if gdf_new.crs != gdf_ref.crs:
@@ -90,7 +92,9 @@ def split_new_and_updated_clusters(gdf_new, gdf_ref, distance_threshold=50):
     return gdf_updated, gdf_truly_new
 
 
-def update_geometries(distance_threshold=50):
+def update_geometries(
+    distance_threshold: float = 50,
+) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """
     Met à jour les géométries de référence en les fusionnant avec les clusters updated.
     Utilise les fichiers générés par split_new_and_updated_clusters().
