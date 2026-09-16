@@ -431,7 +431,11 @@ def list_clear_cuts(
     response_model_exclude_none=True,
 )
 def list_clear_cut_forms(
-    report_id: int, db: Session = db_session, page: int = 0, size: int = 10
+    report_id: int,
+    db: Session = db_session,
+    page: int = 0,
+    size: int = 10,
+    _: User = Depends(get_current_user),
 ) -> PaginationResponseSchema[ClearCutFormResponse]:
     logger.info(db)
     return find_clear_cut_form_by_report_id(
@@ -452,10 +456,10 @@ def get_form_by_id(
     report_id: int,
     form_id: int,
     db: Session = db_session,
+    _: User = Depends(get_current_user),
 ) -> ClearCutFormResponse:
     logger.info(db)
-    form = get_clear_cut_form_by_id(db, form_id)
-    return form
+    return get_clear_cut_form_by_id(db, form_id, report_id)
 
 
 @router.post("/{report_id}/forms", status_code=status.HTTP_201_CREATED)

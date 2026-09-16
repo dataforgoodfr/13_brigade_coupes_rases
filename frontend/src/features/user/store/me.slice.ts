@@ -230,7 +230,7 @@ const selectMe = createTypedDraftSafeSelector(
 	selectState,
 	(user) => user.me.value
 )
-const selectConnectedMe = createTypedDraftSafeSelector(
+export const selectConnectedMe = createTypedDraftSafeSelector(
 	selectState,
 	(state) => connectedMeSchema.safeParse(state.me.value).data
 )
