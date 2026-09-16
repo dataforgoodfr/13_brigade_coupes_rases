@@ -19,7 +19,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Bump version and push tag
@@ -35,7 +35,7 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
       - name: Deploy to clever cloud
-        uses: 47ng/actions-clever-cloud@v2.0.0
+        uses: 47ng/actions-clever-cloud@v2.2.0
         with:
           appID: ${{ inputs.app-id }}
           force: true
