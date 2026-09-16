@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -5,6 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models import ClearCutForm
 from app.routes import images as images_routes
 from app.services import images
 from test.common.user import get_volunteer_user_token
@@ -235,3 +237,41 @@ def test_upload_url_sanitizes_the_filename(
     assert response.status_code == status.HTTP_204_NO_CONTENT
     [written] = local_storage.rglob("*.jpg")
     assert written.is_relative_to(local_storage / "reports" / "1")
+
+
+def test_view_url_is_limited_to_report_photos(client: TestClient, db: Session) -> None:
+    _, token = get_volunteer_user_token(client, db)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    allowed = client.get(
+        f"{IMAGES}/view/test/reports/1/" + "b" * 36 + "_photo.jpg", headers=headers
+    )
+    assert allowed.status_code == status.HTTP_200_OK
+    assert "viewUrl" in allowed.json()
+
+    for key in ("bronze/sufosat/clusters.fgb", "reports/../secrets.env", "x.jpg"):
+        refused = client.get(f"{IMAGES}/view/{key}", headers=headers)
+        assert refused.status_code == status.HTTP_403_FORBIDDEN, key
+        assert refused.json()["detail"]["type"] == "NOT_A_REPORT_PHOTO"
+
+
+def test_view_url_accepts_legacy_keys_stored_in_a_form(
+    client: TestClient, db: Session
+) -> None:
+    me, token = get_volunteer_user_token(client, db)
+    db.add(
+        ClearCutForm(
+            report_id=1,
+            editor_id=me.id,
+            clear_cut_images=["ancien/format/photo.jpg"],
+            created_at=datetime.now(),
+        )
+    )
+    db.commit()
+
+    response = client.get(
+        f"{IMAGES}/view/ancien/format/photo.jpg",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK

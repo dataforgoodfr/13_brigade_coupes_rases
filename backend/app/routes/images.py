@@ -3,15 +3,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.config import settings
 from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
+from app.deps import db_session
 from app.services.images import (
     LOCAL_UPLOAD_KEY,
     MAX_UPLOAD_SIZE_BYTES,
+    is_report_photo,
     local_upload_path,
     sign_local_upload,
     verify_local_upload,
@@ -180,8 +183,16 @@ async def get_local_file(
 def generate_view_url(
     request: Request,
     s3_key: str,
+    db: Session = db_session,
     _: User = Depends(get_current_user),
 ) -> ImageViewResponse:
+    if not is_report_photo(db, s3_key):
+        raise AppHTTPException(
+            status_code=403,
+            type="NOT_A_REPORT_PHOTO",
+            detail="Seules les photographies de signalement sont consultables.",
+        )
+
     if s3_key.startswith("local/"):
         base_url = str(request.base_url).rstrip("/")
         # strip the "local/" prefix so the URL path is /local/{relative_path}
