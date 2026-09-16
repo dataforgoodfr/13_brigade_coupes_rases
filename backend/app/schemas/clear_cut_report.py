@@ -34,7 +34,7 @@ class ClearCutReportPutRequestSchema(BaseSchema):
     user_id: int | None = None
 
     @field_validator("status")
-    def validate_status(cls, value):
+    def validate_status(cls, value: str) -> str:
         if value is not None and value not in CLEARCUT_STATUSES:
             raise ValueError(f"Status must be one of: {', '.join(CLEARCUT_STATUSES)}")
         return value

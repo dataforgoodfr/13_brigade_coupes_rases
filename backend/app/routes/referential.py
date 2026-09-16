@@ -18,6 +18,6 @@ router = APIRouter(prefix="/api/v1/referential", tags=["Referential"])
     summary="Returns referential data",
     response_model_exclude_none=True,
 )
-def get_referential(db: Session = db_session):
+def get_referential(db: Session = db_session) -> ReferentialResponseSchema:
     logger.info(db)
     return get_referential_response(db)

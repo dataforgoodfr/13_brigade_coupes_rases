@@ -23,7 +23,7 @@ def sanitize_filename(filename: str) -> str:
 class S3Service:
     """Service for handling S3 operations and pre-signed URLs"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not settings.S3_ACCESS_KEY_ID:
             logging.error("S3_ACCESS_KEY_ID is not set, image uploads will fail!")
         if not settings.S3_SECRET_ACCESS_KEY:

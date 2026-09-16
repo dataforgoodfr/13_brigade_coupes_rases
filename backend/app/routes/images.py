@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 
 from app.common.errors import AppHTTPException
 from app.config import settings
+from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
 from app.services.s3 import s3_service
@@ -55,8 +56,8 @@ class ImageViewResponse(BaseSchema):
 def generate_upload_url(
     request: Request,
     upload_request: ImageUploadRequest,
-    _=Depends(get_current_user),
-):
+    _: User = Depends(get_current_user),
+) -> ImageUploadResponse:
     content_type = infer_content_type(
         upload_request.filename, upload_request.content_type
     )
@@ -120,7 +121,7 @@ def generate_upload_url(
 async def local_upload(
     key: Annotated[str, Form()],
     file: Annotated[UploadFile, File()],
-):
+) -> None:
     """Fallback local file storage — utilisé uniquement en développement quand S3 n'est pas configuré."""
     relative_key = key.removeprefix("local/")
     file_path = LOCAL_UPLOADS_PATH / relative_key
@@ -132,8 +133,8 @@ async def local_upload(
 @router.get("/local/{key:path}")
 async def get_local_file(
     key: str,
-    _=Depends(get_optional_current_user),
-):
+    _: User | None = Depends(get_optional_current_user),
+) -> FileResponse:
     """Sert les fichiers uploadés localement en développement."""
     file_path = LOCAL_UPLOADS_PATH / key.removeprefix("local/")
     if not file_path.exists():
@@ -149,8 +150,8 @@ async def get_local_file(
 def generate_view_url(
     request: Request,
     s3_key: str,
-    _=Depends(get_current_user),
-):
+    _: User = Depends(get_current_user),
+) -> ImageViewResponse:
     if s3_key.startswith("local/"):
         base_url = str(request.base_url).rstrip("/")
         # strip the "local/" prefix so the URL path is /local/{relative_path}
