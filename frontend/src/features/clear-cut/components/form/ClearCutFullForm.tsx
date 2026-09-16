@@ -45,7 +45,7 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 	const user = useConnectedMe()
 
 	const isAssignedVolunteer = useMemo(() => {
-		if (!user || user.role !== "volunteer") return false
+		if (user?.role !== "volunteer") return false
 		return (
 			current.report.userId === user.id ||
 			current.report.affectedUser?.login === user.login

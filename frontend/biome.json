@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -18,12 +18,18 @@
 			"!storybook-static",
 			"!dist",
 			"!public/mockServiceWorker.js",
+			"!src/assets/*.svg",
 			"!test/features/clear-cutting/form"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
 	},
 	"assist": {
 		"actions": {
@@ -46,15 +52,14 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"suspicious": {
 				"noConsole": {
 					"level": "error",
 					"options": {
 						"allow": ["warn", "error"]
 					}
-				},
-				"noUnknownAtRules": "off"
+				}
 			},
 			"correctness": {
 				"noUnusedImports": "error"
