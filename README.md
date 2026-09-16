@@ -262,7 +262,7 @@ L'API du backend est accessible à l'adresse [http://localhost:8080](http://loca
 
 ## Frontend
 
-Prérequis : [Node.js 23+](https://nodejs.org/en) et [pnpm](https://pnpm.io/installation)
+Prérequis : [Node.js 22](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation)
 
 ```bash
 # Aller dans le répertoire frontend
