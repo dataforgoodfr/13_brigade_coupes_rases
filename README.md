@@ -23,39 +23,9 @@ L’objectif est de développer une solution complète pour :
   Optionellement :
 - Repliquer l'identification de coupe rases (algorithme existant fourni par GlobEO) poour reduire le temps de mise a jour du processus existant.
 
-# Contributing
+# Contribuer
 
-## Pour commencer
-
-1. [Rejoindre](https://dataforgood.fr/join) la communauté Data For Good
-2. Sur le slack Data For Good, rejoindre le canal \_#13_brigade_coupes_rases et se présenter
-3. Remplir le [formulaire](https://noco.services.dataforgood.fr/dashboard/#/nc/form/da3564a9-5422-4810-a56f-26122c06dddc)
-4. Explorer la documentation du projet. Familiarisez vous avec le projet, ses objectifs via [Outline](https://outline.services.dataforgood.fr/doc/presentation-du-projet-p8g6j1J3ZT). Notamment, vous trouverez les CR des premières réunions avec Canopée qui spécifient les avancées du projet.
-
-## Pour contribuer
-
-Pour contribuer, vous pouvez demander un accès au projet sur github. Pour cela, contactez les responsables sur le slack Data For Good `#13_brigade_coupes_rases`.
-
-Essayez de respecter les conventions de code et le style d'écriture du projet:
-
-- feature/nom_de_la_feature pour une nouvelle fonctionnalité
-- chore/nom_du_chore pour une modification de code qui ne change pas l'interface utilisateur ou les fonctionnalités existantes
-- hotfix/nom_du_hotfix pour une correction rapide
-
-Chaque commit doit suivre la convention de style suivante :
-
-- Convention complète de style, cheatsheet [HERE](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
-- Structure:
-  - [Type] (optional scope): [Description]
-  - [Optional Body]
-  - [Optional Footer]
-- Exemple : chore(readme): ajouter détails pour contribuer au repo
-
-Créez une pull request.
-
-- Pour faciliter la revue de la pull request :
-  - Liez la pull request à un ticket NocoDB en ajoutant le lien du ticket dans la description.
-  - Rédigez une description détaillée de la pull request afin de fournir un maximum d’informations sur les modifications apportées.
+Voir [CONTRIBUTING.md](./CONTRIBUTING.md) : rejoindre l'équipe, conventions de branches et de commits, vérifications à lancer avant une pull request.
 
 # Architecture du Projet (sujet à améliorer et definir selon les expertises des volonteurs)
 
@@ -222,12 +192,6 @@ se référer à la [documentation officielle](https://python-poetry.org/docs/#in
     python3 -m venv .venv
 
     source .venv/bin/activate
-
-### Lancer les precommit-hook localement
-
-[Installer les precommit](https://pre-commit.com/)
-
-    poetry run pre-commit run --all-files
 
 ## Gestion des secrets
 
