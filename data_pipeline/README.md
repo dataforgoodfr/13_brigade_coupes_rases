@@ -46,7 +46,7 @@ S3_REGION = "S3_REGION"
 S3_ENDPOINT = "S3_ENDPOINT"
 S3_BUCKET_NAME = "S3_BUCKET_NAME"
 
-KEEPASS_PASSWORD= "KEEPASS_PASSWORD"
+KEEPASS_PASSWORD = "KEEPASS_PASSWORD"
 ```
 KeePass Configuration:
 You can find the password in the Vaultwarden of the project, and you will find the S3 credentials to work with the project locally.

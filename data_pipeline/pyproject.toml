@@ -32,7 +32,7 @@ sqlalchemy = "^2.0.40"
 tqdm = "^4.67.1"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
+pre-commit = "^4.6.2"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 moto = "^5.1.1"

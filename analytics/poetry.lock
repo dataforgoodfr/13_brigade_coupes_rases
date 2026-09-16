@@ -230,6 +230,7 @@ optional = false
 python-versions = ">=3.6"
 files = [
     {file = "bqplot-0.12.44-py2.py3-none-any.whl", hash = "sha256:cad65bf5c4ce7ea7b03e1c674340f9274c0975941e63057831b29f7c2c37f144"},
+    {file = "bqplot-0.12.44.tar.gz", hash = "sha256:39f33232ae4b102ec8ef1c116e05601059519ed316c4e9899c0310e3ed23f29e"},
 ]
 
 [package.dependencies]
@@ -2919,13 +2920,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "pre-commit"
-version = "2.21.0"
+version = "4.6.2"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.10"
 files = [
-    {file = "pre_commit-2.21.0-py2.py3-none-any.whl", hash = "sha256:e2f91727039fc39a92f58a588a25b87f936de6567eed4f0e673e0507edc75bad"},
-    {file = "pre_commit-2.21.0.tar.gz", hash = "sha256:31ef31af7e474a8d8995027fefdfcf509b5c913ff31f2015b4ec4beb26a6f658"},
+    {file = "pre_commit-4.6.2-py2.py3-none-any.whl", hash = "sha256:e2dde9a75d3bce11bd3831c26d134df00a2803c1d818be6a0383c3dcda25dc4e"},
+    {file = "pre_commit-4.6.2.tar.gz", hash = "sha256:8f5d7bfb021ecdbcd9d49d89847082dd24172ccde534390081a679ad046e2441"},
 ]
 
 [package.dependencies]
@@ -4583,4 +4584,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "736df519bf6a9705cbe9c228d422c15ec555d92927f0db409595ace0ae5de5df"
+content-hash = "9e6edb76899884aff741c71f992632cd4ac88d78aa5b3bb11f1be96186bee407"

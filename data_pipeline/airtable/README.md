@@ -71,6 +71,7 @@ Connexion via `psycopg2` directement (pas besoin de SQLAlchemy ici) :
 import psycopg2
 import psycopg2.extras
 
+
 def fetch_from_db() -> list[dict]:
     conn = psycopg2.connect(DATABASE_URL)
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -85,6 +86,7 @@ Push vers Airtable via `pyairtable`. La lib gère la pagination et le rate-limit
 ```python
 from pyairtable import Api
 
+
 def sync_to_airtable(records: list[dict]) -> None:
     api = Api(AIRTABLE_TOKEN)
     table = api.table(AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID)
@@ -92,7 +94,7 @@ def sync_to_airtable(records: list[dict]) -> None:
     # Stratégie à choisir : upsert (recommandé) ou recréation complète
     table.batch_upsert(
         records,
-        key_fields=["id"],   # champ qui sert de clé de déduplication
+        key_fields=["id"],  # champ qui sert de clé de déduplication
         replace=True,
     )
 ```
