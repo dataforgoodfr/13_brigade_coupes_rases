@@ -59,6 +59,8 @@ jobs:
         run: pnpm test:browser
 
   deploy:
+    # Only after a merge on main; the job is skipped on pull requests
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit
