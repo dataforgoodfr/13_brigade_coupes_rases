@@ -2,14 +2,14 @@ import clsx from "clsx"
 import { type FC, type PropsWithChildren, useEffect } from "react"
 import { FormattedDate } from "react-intl"
 
+import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { StatusWithLabel } from "@/features/clear-cut/components/StatusWithLabel"
-import { Button } from "@/components/ui/button"
 import {
 	commitFilters,
-	resetFilters,
 	filtersSlice,
 	getFiltersThunk,
+	resetFilters,
 	selectAreaRange,
 	selectAreas,
 	selectCutMonths,

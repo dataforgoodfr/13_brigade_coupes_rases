@@ -26,8 +26,8 @@ import {
 	usersFiltersSlice
 } from "@/features/admin/store/users-filters.slice"
 import { Badge } from "@/shared/components/Badge"
-import { Dot } from "@/shared/components/Dot"
 import { SortingButton } from "@/shared/components/button/SortingButton"
+import { Dot } from "@/shared/components/Dot"
 import { Input } from "@/shared/components/input/Input"
 import { ComboboxFilter } from "@/shared/components/select/ComboboxFilter"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"

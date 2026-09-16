@@ -12,7 +12,8 @@ import type { ClearCutReport } from "@/features/clear-cut/store/clear-cuts"
 import {
 	getClearCutsThunk,
 	requestAssignReportThunk,
-	unassignReportThunk
+	unassignReportThunk,
+	type WorkflowThunkAction
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
@@ -102,7 +103,10 @@ export function ClearCutMapPopUp({
 		return Array.from(uniqNames).join(",")
 	}, [clearCuts])
 
-	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
+	const dispatchAndRefresh = async <Arg,>(
+		thunk: WorkflowThunkAction<Arg>,
+		errorMessage: string
+	) => {
 		const action = await dispatch(thunk)
 		if (action.type.endsWith("/rejected")) {
 			toast({ id: "popup-error", title: "Erreur", description: errorMessage })

@@ -61,6 +61,7 @@ def make_clear_cut(
     ecological_zonings: list | None = None,
 ) -> ClearCut:
     profile = FOREST_PROFILES[forest_type]
+    bdf: dict[str, float | None]
     if profile is None:
         bdf = {k: None for k in ("resinous", "deciduous", "mixed", "poplar")}
     else:

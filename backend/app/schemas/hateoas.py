@@ -1,13 +1,9 @@
 import math
-from typing import Generic, TypeVar
 
 from app.schemas.base import BaseSchema
 
-M = TypeVar("M")
-C = TypeVar("C")
 
-
-class HateaosResponse(BaseSchema, Generic[M, C]):
+class HateaosResponse[M, C](BaseSchema):
     metadata: M
     content: C
 
@@ -43,7 +39,5 @@ class PaginationMetadataSchema(Metadata):
         )
 
 
-class PaginationResponseSchema(
-    HateaosResponse[PaginationMetadataSchema, list[C]], Generic[C]
-):
+class PaginationResponseSchema[C](HateaosResponse[PaginationMetadataSchema, list[C]]):
     pass

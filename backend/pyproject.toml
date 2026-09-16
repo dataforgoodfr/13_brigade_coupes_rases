@@ -14,11 +14,13 @@ package-mode = false
 python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
+pre-commit = "^4.6.2"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 mypy = "^1.16.1"
+boto3-stubs = "^1.35.0"
+types-shapely = "^2.0"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.13"
@@ -44,16 +46,15 @@ pyairtable = "^3.3.0"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
-# See https://docs.astral.sh/ruff/settings
-[tool.ruff]
-target-version = "py313"
-
-[tool.ruff.lint]
-# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
-extend-select = ["I", "B", "UP"]
-
-[tool.ruff.lint.flake8-bugbear]
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
-
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
+
+# Vérification de types : `make typecheck` (mode par défaut, non strict).
+[tool.mypy]
+python_version = "3.13"
+files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py"]
+
+[[tool.mypy.overrides]]
+# apscheduler ne publie ni stubs ni marqueur py.typed
+module = ["apscheduler.*"]
+ignore_missing_imports = true

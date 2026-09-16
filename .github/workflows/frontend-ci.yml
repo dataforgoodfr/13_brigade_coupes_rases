@@ -10,7 +10,7 @@ on:
     paths:
       - "frontend/**"
   pull_request:
-    branches: ["main"]
+    branches: ["main", "develop"]
     paths:
       - "frontend/**"
 
@@ -24,32 +24,43 @@ jobs:
         working-directory: frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 10
           run_install: false
 
-      - name: Install Node.js v22.11.0
-        uses: actions/setup-node@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v7
         with:
-          node-version: 22.11.0
+          node-version-file: frontend/.nvmrc
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Install playwright
         run: pnpm install:playwright
-        
+
+      - name: Lint and format check (Biome)
+        run: pnpm lint
+
+      - name: Unit tests (no browser)
+        run: pnpm test:unit
+
       - name: Build project
         run: pnpm run build
 
-      - name: Run tests
-        run: pnpm test
+      # Browser tests load the built stylesheets, so they run after the build
+      - name: Browser tests (Playwright)
+        run: pnpm test:browser
 
   deploy:
+    # Only after a merge on main; the job is skipped on pull requests
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit

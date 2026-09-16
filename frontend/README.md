@@ -26,6 +26,7 @@ To run in development mode on a mobile device (same Wi-Fi network)
  - On your phone, navigate to the `Network URL`  
 
 To format and lint : `pnpm cleanup`  
+To check format and lint without modifying files (same as CI) : `pnpm lint`  
 To start storybook: `pnpm storybook`
 
 ## VS Code configuration

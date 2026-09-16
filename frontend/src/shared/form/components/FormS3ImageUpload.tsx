@@ -1,4 +1,12 @@
-import { AlertCircle, Camera, ChevronLeft, ChevronRight, ImagePlus, X, ZoomIn } from "lucide-react"
+import {
+	AlertCircle,
+	Camera,
+	ChevronLeft,
+	ChevronRight,
+	ImagePlus,
+	X,
+	ZoomIn
+} from "lucide-react"
 import { type ChangeEvent, useEffect, useRef, useState } from "react"
 import type { FieldValues } from "react-hook-form"
 
@@ -59,7 +67,9 @@ function FormS3ImageField<T extends FieldValues>({
 		handleFiles(e.target.files)
 
 	const removeImageWithField = (indexToRemove: number) => {
-		const newUploadedImages = uploadedImages.filter((_, i) => i !== indexToRemove)
+		const newUploadedImages = uploadedImages.filter(
+			(_, i) => i !== indexToRemove
+		)
 		const newPreviewUrls = previewUrls.filter((_, i) => i !== indexToRemove)
 		setUploadedImages(newUploadedImages)
 		onPreviewUrlsChanged(newPreviewUrls)
@@ -146,8 +156,19 @@ function FormS3ImageField<T extends FieldValues>({
 						fill="none"
 						aria-hidden="true"
 					>
-						<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-						<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+						<circle
+							className="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							strokeWidth="4"
+						/>
+						<path
+							className="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+						/>
 					</svg>
 					{uploading ? "Envoi en cours…" : "Chargement des photos…"}
 				</div>
@@ -179,7 +200,7 @@ function FormS3ImageField<T extends FieldValues>({
 								>
 									<img
 										src={imageUrl}
-										alt={`Photo ${index + 1}`}
+										alt={`Prise de vue ${index + 1}`}
 										className="w-full h-24 object-cover rounded border hover:opacity-75 transition-opacity"
 										onError={(e) => {
 											e.currentTarget.src =
@@ -221,7 +242,9 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 	...props
 }: Forms3ImageUploadProps<T>) {
 	const [previewUrls, setPreviewUrls] = useState<string[]>([])
-	const [selectedImageIndex, setSelectedImageIndex] = useState<number | undefined>()
+	const [selectedImageIndex, setSelectedImageIndex] = useState<
+		number | undefined
+	>()
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -230,13 +253,17 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 				case "ArrowLeft":
 					event.preventDefault()
 					setSelectedImageIndex(
-						selectedImageIndex > 0 ? selectedImageIndex - 1 : previewUrls.length - 1
+						selectedImageIndex > 0
+							? selectedImageIndex - 1
+							: previewUrls.length - 1
 					)
 					break
 				case "ArrowRight":
 					event.preventDefault()
 					setSelectedImageIndex(
-						selectedImageIndex < previewUrls.length - 1 ? selectedImageIndex + 1 : 0
+						selectedImageIndex < previewUrls.length - 1
+							? selectedImageIndex + 1
+							: 0
 					)
 					break
 				case "Escape":
@@ -274,7 +301,7 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 					<div className="relative w-full max-w-4xl max-h-screen p-4">
 						<img
 							src={previewUrls[selectedImageIndex]}
-							alt={`Photo ${selectedImageIndex + 1}`}
+							alt={`Prise de vue ${selectedImageIndex + 1}`}
 							className="max-w-full max-h-[80vh] object-contain rounded shadow-lg mx-auto block"
 							onClick={(e) => e.stopPropagation()}
 							onKeyDown={(e) => e.stopPropagation()}
@@ -290,7 +317,9 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 									onClick={(e) => {
 										e.stopPropagation()
 										setSelectedImageIndex(
-											selectedImageIndex > 0 ? selectedImageIndex - 1 : previewUrls.length - 1
+											selectedImageIndex > 0
+												? selectedImageIndex - 1
+												: previewUrls.length - 1
 										)
 									}}
 								>
@@ -304,7 +333,9 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 									onClick={(e) => {
 										e.stopPropagation()
 										setSelectedImageIndex(
-											selectedImageIndex < previewUrls.length - 1 ? selectedImageIndex + 1 : 0
+											selectedImageIndex < previewUrls.length - 1
+												? selectedImageIndex + 1
+												: 0
 										)
 									}}
 								>

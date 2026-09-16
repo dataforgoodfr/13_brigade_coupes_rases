@@ -26,6 +26,7 @@ import { createTypedDraftSafeSelector } from "@/shared/store/selector"
 import type { RootState } from "@/shared/store/store"
 import { createAppAsyncThunk } from "@/shared/store/thunk"
 import type { Range } from "@/shared/types/range"
+
 interface PendingFilters {
 	cutYears: SelectableItem<number>[]
 	cutMonths: SelectableItem<number>[]
@@ -173,7 +174,10 @@ export const filtersSlice = createSlice({
 			const cleared = {
 				cutYears: state.cutYears.map((y) => ({ ...y, isSelected: false })),
 				cutMonths: state.cutMonths.map((m) => ({ ...m, isSelected: false })),
-				departments: state.departments.map((d) => ({ ...d, isSelected: false })),
+				departments: state.departments.map((d) => ({
+					...d,
+					isSelected: false
+				})),
 				statuses: state.statuses.map((s) => ({ ...s, isSelected: false })),
 				areas: [state.area_range.min, state.area_range.max] as [number, number],
 				excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN.map((x) => ({

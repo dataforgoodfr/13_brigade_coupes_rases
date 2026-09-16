@@ -1,4 +1,5 @@
 import logging
+from typing import NotRequired, TypedDict
 
 import requests
 
@@ -8,7 +9,14 @@ from pipeline.scripts.utils import S3Manager, download_file
 LOCAL_PREFIX = "data_pipeline/bronze/sufosat/"
 
 
-def get_sufosat_version(data_id: str = 15000970) -> dict:
+class SufosatVersion(TypedDict):
+    version: int
+    filename_key: str
+    # Absent for a version read from S3 bronze
+    file_url: NotRequired[str]
+
+
+def get_sufosat_version(data_id: int = 15000970) -> SufosatVersion:
     url = f"https://zenodo.org/api/records?q=conceptrecid:{data_id}&sort=mostrecent&size=1"
     data = requests.get(url).json()["hits"]["hits"][0]
     fichier = data["files"][1]
@@ -25,7 +33,7 @@ def get_sufosat_version(data_id: str = 15000970) -> dict:
     }
 
 
-def local_sufosat_version() -> dict | None:
+def local_sufosat_version() -> SufosatVersion | None:
     s3_manager = S3Manager()
     all_files = s3_manager.list_bucket_contents() or []
     bronze_files = [e for e in all_files if e.startswith(LOCAL_PREFIX)]

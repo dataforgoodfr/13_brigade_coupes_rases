@@ -54,7 +54,9 @@ def register(user_data: RegisterSchema, db: Session = db_session):
 @router.post("/forgot-password", status_code=200)
 def forgot_password(data: ForgotPasswordSchema, db: Session = db_session):
     user = (
-        db.query(User).filter(User.email == data.email, User.deleted_at is None).first()
+        db.query(User)
+        .filter(User.email == data.email, User.deleted_at.is_(None))
+        .first()
     )
     if not user:
         # Don't reveal that user does not exist
@@ -88,7 +90,7 @@ def reset_password(data: ResetPasswordSchema, db: Session = db_session):
     except jwt.InvalidTokenError as err:
         raise HTTPException(status_code=400, detail="Invalid token") from err
 
-    user = db.query(User).filter(User.email == email, User.deleted_at is None).first()
+    user = db.query(User).filter(User.email == email, User.deleted_at.is_(None)).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 

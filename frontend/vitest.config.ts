@@ -7,8 +7,15 @@ export default defineConfig((env) =>
 		test: {
 			projects: [
 				{
+					// Pure logic (schemas, storage, URL building): no Chromium, runs in
+					// well under a second. Anything that renders or needs canvas /
+					// IndexedDB belongs to the browser project below.
 					test: {
 						name: "unit",
+						environment: "happy-dom",
+						alias: {
+							"@/": new URL("./src/", import.meta.url).pathname
+						},
 						exclude: ["src/**/*.browser.test.tsx"],
 						include: ["src/**/*.test.ts"]
 					}

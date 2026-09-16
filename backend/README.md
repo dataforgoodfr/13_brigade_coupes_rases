@@ -35,6 +35,12 @@ poetry install --with dev
 make test
 ```
 
+### Type check
+
+```bash
+make typecheck    # mypy, scope defined in pyproject.toml ([tool.mypy])
+```
+
 ### Add a new backend package
 
 ```bash

@@ -1,6 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
-from pytest import Session
+from sqlalchemy.orm import Session
 
 from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 

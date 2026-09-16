@@ -176,3 +176,11 @@ env311
 
 # Documentation et Notes d'Agent Local
 LOCAL_DEV_*.md
+
+# Fichiers de l'OS et artefacts locaux
+.DS_Store
+Thumbs.db
+coverage/
+_tmp_*
+
+node_modules/

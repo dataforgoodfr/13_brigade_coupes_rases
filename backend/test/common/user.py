@@ -6,11 +6,11 @@ from app.services.get_password_hash import get_password_hash
 
 
 def new_user(
-    email: str = None,
-    role: str = None,
-    password: str = None,
-    login=None,
-):
+    email: str | None = None,
+    role: str | None = None,
+    password: str | None = None,
+    login: str | None = None,
+) -> User:
     return User(
         first_name="Houba",
         last_name="Houba",
@@ -24,10 +24,10 @@ def new_user(
 
 def create_user(
     db: Session,
-    email: str = None,
-    role: str = None,
-    password: str = None,
-    login=None,
+    email: str | None = None,
+    role: str | None = None,
+    password: str | None = None,
+    login: str | None = None,
 ) -> User:
     user = new_user(role=role, email=email, password=password, login=login)
     db.add(user)
@@ -37,7 +37,7 @@ def create_user(
 
 
 def get_user_token(
-    client: TestClient, db: Session, role: str, email: str
+    client: TestClient, db: Session, role: str, email: str | None
 ) -> tuple[User, str]:
     email = email if email is not None else "houba.houba@marsupilami.com"
     user = create_user(db, role=role, email=email)
@@ -50,16 +50,16 @@ def get_user_token(
         },
     )
     data = response.json()
-    return [user, data["accessToken"]]
+    return user, data["accessToken"]
 
 
 def get_admin_user_token(
-    client: TestClient, db: Session, email: str = None
+    client: TestClient, db: Session, email: str | None = None
 ) -> tuple[User, str]:
     return get_user_token(client, db, "admin", email=email)
 
 
 def get_volunteer_user_token(
-    client: TestClient, db: Session, email: str = None
+    client: TestClient, db: Session, email: str | None = None
 ) -> tuple[User, str]:
     return get_user_token(client, db, "volunteer", email=email)

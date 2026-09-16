@@ -46,7 +46,7 @@ S3_REGION = "S3_REGION"
 S3_ENDPOINT = "S3_ENDPOINT"
 S3_BUCKET_NAME = "S3_BUCKET_NAME"
 
-KEEPASS_PASSWORD= "KEEPASS_PASSWORD"
+KEEPASS_PASSWORD = "KEEPASS_PASSWORD"
 ```
 KeePass Configuration:
 You can find the password in the Vaultwarden of the project, and you will find the S3 credentials to work with the project locally.
@@ -132,6 +132,12 @@ Use the Makefile to run pre-commit hooks.
 make pre-commit
 ```
 
-### 6. Recommendations
+### 7. Type check
+
+```bash
+poetry run mypy    # strict, scope defined in pyproject.toml ([tool.mypy])
+```
+
+### 8. Recommendations
 
 Before any pull request, make sure you run pre-commit and the tests.

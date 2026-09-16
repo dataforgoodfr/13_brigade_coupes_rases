@@ -327,15 +327,15 @@ class ClearCutReport(Base):
     city: Mapped["City"] = relationship(
         back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
     )
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-    user: Mapped["User"] = relationship(
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user: Mapped["User | None"] = relationship(
         back_populates="reports", foreign_keys="ClearCutReport.user_id"
     )
 
-    assignment_requested_by_id: Mapped[int] = mapped_column(
+    assignment_requested_by_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
-    assignment_requested_by: Mapped["User"] = relationship(
+    assignment_requested_by: Mapped["User | None"] = relationship(
         foreign_keys="ClearCutReport.assignment_requested_by_id"
     )
 

@@ -205,19 +205,22 @@ export const mockClearCutReportResponse = (
 ) => {
 	const baseMock = createClearCutReportResponseBaseMock(override, options)
 	return {
-		handler: http.get("*/api/v1/clear-cuts-reports/:id", ({ params, request }) => {
-			const { id } = params as { id: string }
-			const authHeader = request.headers.get("Authorization")
-			let affectedUser: PublicUser | undefined
-			if (authHeader?.includes(volunteerAssignedToken)) {
-				affectedUser = volunteerAssignedMock
+		handler: http.get(
+			"*/api/v1/clear-cuts-reports/:id",
+			({ params, request }) => {
+				const { id } = params as { id: string }
+				const authHeader = request.headers.get("Authorization")
+				let affectedUser: PublicUser | undefined
+				if (authHeader?.includes(volunteerAssignedToken)) {
+					affectedUser = volunteerAssignedMock
+				}
+				return HttpResponse.json({
+					...baseMock,
+					id,
+					affectedUser: affectedUser ?? baseMock.affectedUser
+				} satisfies ClearCutReportResponse)
 			}
-			return HttpResponse.json({
-				...baseMock,
-				id,
-				affectedUser: affectedUser ?? baseMock.affectedUser
-			} satisfies ClearCutReportResponse)
-		}),
+		),
 		response: baseMock
 	}
 }

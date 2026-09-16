@@ -8,7 +8,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.13"
 cartopy = "^0.24.1"
 geopandas = "^1.0.1"
 matplotlib = "^3.10.0"
@@ -25,7 +25,7 @@ jupyterlab = "^4.3.5"
 requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
+pre-commit = "^4.6.2"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
@@ -33,11 +33,3 @@ ipykernel = "^6.29.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# See https://docs.astral.sh/ruff/settings
-[tool.ruff]
-target-version = "py313"
-
-[tool.ruff.lint]
-# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
-extend-select = ["I", "B", "UP"]

@@ -18,47 +18,52 @@ export function useImageViewer(): UseImageViewerResult {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	const getViewableUrls = useCallback(async (s3Keys: string[]): Promise<string[]> => {
-		if (!s3Keys || s3Keys.length === 0) return []
+	const getViewableUrls = useCallback(
+		async (s3Keys: string[]): Promise<string[]> => {
+			if (!s3Keys || s3Keys.length === 0) return []
 
-		setLoading(true)
-		setError(null)
+			setLoading(true)
+			setError(null)
 
-		try {
-			const token = getStoredToken()
-			if (!token) {
-				throw new Error("Authentication required for image viewing")
-			}
-
-			const authenticatedApi = api.extend({
-				headers: {
-					Authorization: `Bearer ${token.accessToken}`
+			try {
+				const token = getStoredToken()
+				if (!token) {
+					throw new Error("Authentication required for image viewing")
 				}
-			})
 
-			const viewableUrls = await Promise.all(
-				s3Keys.map(async (s3Key) => {
-					try {
-						const response = await authenticatedApi
-							.get(`api/v1/images/view/${s3Key.split("/").map(encodeURIComponent).join("/")}`)
-							.json<ImageViewResponse>()
-						return response.viewUrl
-					} catch (_e) {
-						return ""
+				const authenticatedApi = api.extend({
+					headers: {
+						Authorization: `Bearer ${token.accessToken}`
 					}
 				})
-			)
 
-			return viewableUrls.filter((url) => url !== "")
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Failed to get viewable URLs"
-			setError(errorMessage)
-			return []
-		} finally {
-			setLoading(false)
-		}
-	}, [])
+				const viewableUrls = await Promise.all(
+					s3Keys.map(async (s3Key) => {
+						try {
+							const response = await authenticatedApi
+								.get(
+									`api/v1/images/view/${s3Key.split("/").map(encodeURIComponent).join("/")}`
+								)
+								.json<ImageViewResponse>()
+							return response.viewUrl
+						} catch (_e) {
+							return ""
+						}
+					})
+				)
+
+				return viewableUrls.filter((url) => url !== "")
+			} catch (err) {
+				const errorMessage =
+					err instanceof Error ? err.message : "Failed to get viewable URLs"
+				setError(errorMessage)
+				return []
+			} finally {
+				setLoading(false)
+			}
+		},
+		[]
+	)
 
 	return {
 		getViewableUrls,

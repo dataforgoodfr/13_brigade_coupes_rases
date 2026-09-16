@@ -1,10 +1,10 @@
 from logging.config import fileConfig
 from typing import cast
 
+from alembic import context
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context
 from app.config import settings
 from app.models import Base
 
