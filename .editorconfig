@@ -1,0 +1,31 @@
+# Conventions d'édition communes ; Biome (frontend) et Ruff (Python) font foi
+# pour le formatage détaillé. https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+# Frontend : Biome formate en tabulations
+[frontend/**.{ts,tsx,js,jsx,css,json,html}]
+indent_style = tab
+
+[frontend/package.json]
+indent_style = space
+
+[{.vscode/*.json,backend/.devcontainer/*.json}]
+indent_style = tab
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+# Deux espaces en fin de ligne = saut de ligne en Markdown
+trim_trailing_whitespace = false
