@@ -10,9 +10,10 @@ from fastapi.testclient import TestClient
 # Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import app.models as models  # noqa: F401 Import must exist to load models for db truncate
 from alembic import command  # noqa: E402
 from alembic.config import Config  # noqa: E402
+
+import app.models as models  # noqa: F401 Import must exist to load models for db truncate
 from app.config import settings
 from app.database import create_engine, get_db, sessionmaker  # noqa: E402
 from app.main import app  # noqa: E402

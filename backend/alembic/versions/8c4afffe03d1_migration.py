@@ -9,7 +9,6 @@ Create Date: 2025-04-18 20:50:12.329605
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-
 from alembic import op
 
 # revision identifiers, used by Alembic.
