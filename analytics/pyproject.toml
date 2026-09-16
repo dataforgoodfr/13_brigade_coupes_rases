@@ -8,7 +8,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.13"
 cartopy = "^0.24.1"
 geopandas = "^1.0.1"
 matplotlib = "^3.10.0"
