@@ -182,3 +182,5 @@ LOCAL_DEV_*.md
 Thumbs.db
 coverage/
 _tmp_*
+
+node_modules/
