@@ -11,7 +11,7 @@ on:
     paths:
       - "backend/**"
   pull_request:
-    branches: ["main"]
+    branches: ["main", "develop"]
     paths:
       - "backend/**"
       - "pyproject.toml"
