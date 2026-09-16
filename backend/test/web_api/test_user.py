@@ -1,8 +1,14 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import Department
-from test.common.user import get_admin_user_token, get_volunteer_user_token, new_user
+from app.models import Department, User
+from test.common.user import (
+    create_user,
+    get_admin_user_token,
+    get_volunteer_user_token,
+    new_user,
+)
 
 
 def test_create_user(client: TestClient, db: Session) -> None:
@@ -20,7 +26,9 @@ def test_create_user(client: TestClient, db: Session) -> None:
     )
 
     assert response.status_code == 201
-    data = client.get(response.headers["location"]).json()
+    data = client.get(
+        response.headers["location"], headers={"Authorization": f"Bearer {token}"}
+    ).json()
 
     assert data["id"] is not None
     assert data["createdAt"] is not None
@@ -47,12 +55,15 @@ def test_create_user_without_admin_right_should_return_forbidden(
 
 
 def test_get_user(client: TestClient, db: Session) -> None:
-    user = new_user(email="houba.houba@marsupilami.com")
+    token = get_admin_user_token(client, db)[1]
+    user = new_user(email="target@volunteer.com")
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    response = client.get(f"/api/v1/users/{user.id}")
+    response = client.get(
+        f"/api/v1/users/{user.id}", headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -62,18 +73,58 @@ def test_get_user(client: TestClient, db: Session) -> None:
     assert data["updatedAt"] is not None
 
 
-# def test_create_invalid_user(client: TestClient) -> None:
-#     # TODO : Add test covering wrong email format and wrong role
-#     assert True is True
+@pytest.mark.parametrize("method", ["get", "put", "delete"])
+def test_user_routes_require_a_token(
+    client: TestClient, db: Session, method: str
+) -> None:
+    user = create_user(db, email="target@volunteer.com")
 
-# def test_delete_user(client: TestClient) -> None:
-#     # TODO : Add test covering user deletion
-#     # Should not remove it but anonymise and at deleted_at
-#     assert True is True
+    response = client.request(
+        method, f"/api/v1/users/{user.id}", json={"role": "admin"}
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize("method", ["get", "put", "delete"])
+def test_user_routes_are_forbidden_to_volunteers(
+    client: TestClient, db: Session, method: str
+) -> None:
+    token = get_volunteer_user_token(client, db)[1]
+    target_id = create_user(db, email="target@volunteer.com").id
+
+    response = client.request(
+        method,
+        f"/api/v1/users/{target_id}",
+        json={"role": "admin"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+    target = db.get(User, target_id)
+    assert target is not None
+    assert target.role == "volunteer"
+    assert target.deleted_at is None
+
+
+def test_admin_can_delete_a_user(client: TestClient, db: Session) -> None:
+    token = get_admin_user_token(client, db)[1]
+    target_id = create_user(db, email="target@volunteer.com").id
+
+    response = client.delete(
+        f"/api/v1/users/{target_id}", headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == 204
+    target = db.get(User, target_id)
+    assert target is not None
+    assert target.deleted_at is not None
 
 
 def test_update_user(client: TestClient, db: Session) -> None:
-    user = new_user(email="houba.houba@marsupilami.com")
+    token = get_admin_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+    user = new_user(email="target@volunteer.com")
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -84,11 +135,12 @@ def test_update_user(client: TestClient, db: Session) -> None:
         json={
             "firstName": "Sorenza",
         },
+        headers=headers,
     )
     assert update_response.status_code == 204
 
     # Check updated datas
-    get_response = client.get(f"/api/v1/users/{user.id}")
+    get_response = client.get(f"/api/v1/users/{user.id}", headers=headers)
     assert get_response.status_code == 200
     data = get_response.json()
 
