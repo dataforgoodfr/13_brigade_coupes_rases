@@ -11,7 +11,7 @@ on:
     paths:
       - "backend/**"
   pull_request:
-    branches: ["main"]
+    branches: ["main", "develop"]
     paths:
       - "backend/**"
       - "pyproject.toml"
@@ -38,10 +38,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    strategy:
-      matrix:
-        python-version: ["3.13"]
-
     steps:
       - uses: actions/checkout@v7
 
@@ -50,10 +46,10 @@ jobs:
         run: |
           echo "127.0.0.1 db" | sudo tee -a /etc/hosts
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: 3.13
+          python-version: "3.13"
           cache: "pip"
 
       - name: Install Poetry
@@ -69,10 +65,8 @@ jobs:
       - name: Cache Poetry virtualenv # Caches the Poetry virtualenv for faster subsequent runs
         uses: actions/cache@v6
         with:
-          path: ./.venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
+          path: backend/.venv
+          key: ${{ runner.os }}-poetry-backend-${{ hashFiles('backend/poetry.lock') }}
 
       - name: Install dependencies
         working-directory: ./backend
@@ -91,6 +85,8 @@ jobs:
         working-directory: ./backend
         run: make typecheck
   deploy:
+    # Only after a merge on main; the job is skipped on pull requests
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: build-test
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit

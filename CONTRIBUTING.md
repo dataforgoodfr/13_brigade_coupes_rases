@@ -12,6 +12,11 @@ Pour obtenir un accès en écriture au dépôt, contactez les responsables sur l
 
 ## Branches
 
+- `develop` reçoit les pull requests ; c'est la branche par défaut.
+- `main` est la branche déployée (Clever Cloud, Storybook) : un mainteneur y fusionne `develop` par pull request.
+
+Nommage des branches de travail :
+
 - `feature/nom_de_la_feature` pour une nouvelle fonctionnalité
 - `chore/nom_du_chore` pour une modification qui ne change ni l'interface ni les fonctionnalités
 - `hotfix/nom_du_hotfix` pour une correction rapide
