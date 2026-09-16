@@ -30,7 +30,6 @@ def ecological_zoning_to_ecological_zoning_schema(
 
 class ClearCutEcologicalZoningResponseSchema(EcologicalZoningSchema):
     id: str = Field(json_schema_extra={"example": "1"})
-    area_hectare: float = Field(json_schema_extra={"example": 15})
     clear_cut_id: str = Field(json_schema_extra={"example": "1"})
 
 
@@ -40,7 +39,6 @@ def clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema(
     return ClearCutEcologicalZoningResponseSchema(
         id=str(ecological_zoning.ecological_zoning_id),
         clear_cut_id=str(ecological_zoning.clear_cut_id),
-        area_hectare=ecological_zoning.area_hectare,
         code=ecological_zoning.ecological_zoning.code,
         type=ecological_zoning.ecological_zoning.type,
         sub_type=ecological_zoning.ecological_zoning.sub_type,
