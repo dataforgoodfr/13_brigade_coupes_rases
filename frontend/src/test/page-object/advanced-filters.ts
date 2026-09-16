@@ -1,5 +1,5 @@
 import { screen, within } from "@testing-library/react"
-import type { UserEvent } from "@vitest/browser/context"
+import type { UserEvent } from "vitest/browser"
 
 type Options = { user: UserEvent }
 type SwitchLabel = "Favoris" | "Zone protégée" | "Pente excessive"

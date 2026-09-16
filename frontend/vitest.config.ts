@@ -1,3 +1,4 @@
+import { playwright } from "@vitest/browser-playwright"
 import { defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config"
 
 import { baseConfigFn } from "./vite.config"
@@ -30,8 +31,8 @@ export default defineConfig((env) =>
 						name: "browser",
 						browser: {
 							enabled: true,
-							provider: "playwright",
 							// https://vitest.dev/guide/browser/playwright
+							provider: playwright(),
 							instances: [{ browser: "chromium" }]
 						}
 					}

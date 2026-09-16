@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react"
-import type { UserEvent } from "@vitest/browser/context"
 import { beforeEach, describe, expect, it } from "vitest"
+import type { UserEvent } from "vitest/browser"
 
 import {
 	actorsKey,
@@ -250,7 +250,7 @@ function isShouldNotDisplayAdminSection(
 	connectedUser?: Me
 ) {
 	it("should not display the accordion", async () => {
-		renderApp({
+		await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: "ABC" },
 			user: connectedUser
@@ -272,7 +272,7 @@ function itShouldHaveValue(
 			it(`${item.label ?? item.name} should have value ${
 				item.expected
 			}`, async () => {
-				const { user } = renderApp({
+				const { user } = await renderApp({
 					route: "/clear-cuts/$clearCutId",
 					params: { $clearCutId: "ABC" },
 					user: connectedUser
@@ -303,7 +303,7 @@ function itShouldHaveDisabledState(
 			}", its label, and it should be ${
 				state ? "disabled" : "enabled"
 			}`, async () => {
-				const { user } = renderApp({
+				const { user } = await renderApp({
 					route: "/clear-cuts/$clearCutId",
 					params: { $clearCutId: "ABC" },
 					user: connectedUser

@@ -89,7 +89,9 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 			react(),
 			tailwindcss(),
 			tsconfigPaths(),
-			reactClickToComponent()
+			// Le script qu'il injecte dans la page casse le mode navigateur de
+			// Vitest ; inutile hors du serveur de développement de toute façon.
+			mode !== "test" && reactClickToComponent()
 		] as PluginOption[]
 	}
 }

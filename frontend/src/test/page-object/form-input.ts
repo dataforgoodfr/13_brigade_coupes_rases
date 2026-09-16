@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react"
-import type { UserEvent } from "@vitest/browser/context"
 import type { FieldValues } from "react-hook-form"
 import { expect } from "vitest"
+import type { UserEvent } from "vitest/browser"
 
 import type {
 	DatePickerItem,
