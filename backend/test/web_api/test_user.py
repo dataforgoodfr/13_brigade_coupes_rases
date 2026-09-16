@@ -150,3 +150,62 @@ def test_get_me(client: TestClient, db: Session) -> None:
 
     data = response.json()
     assert data["email"] == "houba.houba@marsupilami.com"
+
+
+def test_put_me_replaces_favorites(client: TestClient, db: Session) -> None:
+    token = get_volunteer_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = client.put("/api/v1/me", json={"favorites": ["1", "2"]}, headers=headers)
+    assert response.status_code == 204
+    assert client.get("/api/v1/me", headers=headers).json()["favorites"] == ["1", "2"]
+
+    response = client.put("/api/v1/me", json={"favorites": ["3"]}, headers=headers)
+    assert response.status_code == 204
+    assert client.get("/api/v1/me", headers=headers).json()["favorites"] == ["3"]
+
+
+def test_me_requires_authentication(client: TestClient) -> None:
+    assert client.get("/api/v1/me").status_code == 401
+    assert client.put("/api/v1/me", json={"favorites": []}).status_code == 401
+
+
+def test_get_users_filters_and_sorts(client: TestClient, db: Session) -> None:
+    token = get_admin_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+    department = Department(code="48", name="Lozère")
+    zoe = new_user(login="zoe", email="zoe@example.com")
+    zoe.first_name = "Zoé"
+    zoe.departments.append(department)
+    yann = new_user(login="yann", email="yann@example.com", role="admin")
+    yann.last_name = "Yannick"
+    db.add_all([department, zoe, yann])
+    db.commit()
+
+    def emails(**params: str | list[str]) -> list[str]:
+        response = client.get("/api/v1/users", params=params, headers=headers)
+        assert response.status_code == 200
+        return [user["email"] for user in response.json()["content"]]
+
+    assert emails(email="zoe") == ["zoe@example.com"]
+    assert emails(login="YANN") == ["yann@example.com"]
+    assert emails(firstName="zo") == ["zoe@example.com"]
+    assert emails(lastName="yannick") == ["yann@example.com"]
+    assert set(emails(roles=["admin"])) >= {"yann@example.com"}
+    assert "zoe@example.com" not in emails(roles=["admin"])
+    assert emails(departmentsIds=[str(department.id)]) == ["zoe@example.com"]
+    assert emails(descSort=["email"])[0] == "zoe@example.com"
+    assert emails(ascSort=["email"])[-1] == "zoe@example.com"
+
+
+def test_get_users_paginates(client: TestClient, db: Session) -> None:
+    token = get_admin_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = client.get("/api/v1/users", params={"size": 2}, headers=headers)
+
+    data = response.json()
+    assert len(data["content"]) == 2
+    assert data["metadata"]["size"] == 2
+    assert data["metadata"]["totalCount"] >= 3
+    assert "next" in data["metadata"]["links"]
