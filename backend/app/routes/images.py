@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.config import settings
+from app.deps import db_session
 from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
-from app.deps import db_session
 from app.services.images import (
     LOCAL_UPLOAD_KEY,
     MAX_UPLOAD_SIZE_BYTES,
