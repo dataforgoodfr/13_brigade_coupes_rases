@@ -32,8 +32,14 @@ make devserver
 
 ```bash
 poetry install --with dev
-make test
+make test-unit    # unit tests only (test/unit/), no database needed
+make test         # all tests with coverage, needs the migrated test database
 ```
+
+`test/unit/` holds tests that run without a database (pure functions, schemas,
+tokens). Everything else uses the `db` fixture, which migrates and seeds the
+test database (`make upgrade-test-db` first). Coverage settings are in
+`pyproject.toml` (`[tool.coverage.*]`).
 
 ### Type check
 
