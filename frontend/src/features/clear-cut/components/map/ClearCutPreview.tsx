@@ -11,6 +11,10 @@ import type {
 } from "@/features/clear-cut/store/clear-cuts"
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status"
 
+/** Leaflet garde la carte parente dans un champ privé ; l'API publique n'expose pas de getter. */
+const isOnMap = (layer: L.Layer) =>
+	(layer as L.Layer & { _map?: L.Map })._map !== undefined
+
 type Props = { report: ClearCutReport; clearCut: ClearCut }
 
 export function ClearCutPreview({ report, clearCut }: Props) {
@@ -19,14 +23,13 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const location = useLocation()
 	const navigateToDetail = useNavigateToClearCut(report.id)
 	useEffect(() => {
+		const group = ref.current
+		// Un groupe pas encore sur la carte ne peut pas ouvrir de popup (Leaflet lève une erreur)
+		if (!group || !isOnMap(group)) return
 		if (focusedClearCutId === report.id) {
-			if (ref.current && (ref.current as any)._map) {
-				ref.current.openPopup()
-			}
+			group.openPopup()
 		} else {
-			if (ref.current && (ref.current as any)._map) {
-				ref.current.closePopup()
-			}
+			group.closePopup()
 		}
 	}, [focusedClearCutId, report.id])
 

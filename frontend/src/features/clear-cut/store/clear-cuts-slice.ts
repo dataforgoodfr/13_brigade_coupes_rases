@@ -24,6 +24,7 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector"
 import type { RootState } from "@/shared/store/store"
 import {
+	type AppThunk,
 	addRequestedContentCases,
 	createAppAsyncThunk,
 	withEntityStorageActionCreator
@@ -307,6 +308,9 @@ export const getAdminAllReportsThunk = createAppAsyncThunk<
 		}
 	}
 )
+
+/** Action produite par un thunk de workflow une fois dispatché, quel que soit son argument. */
+export type WorkflowThunkAction<Arg = unknown> = ReturnType<AppThunk<void, Arg>>
 
 export const requestAssignReportThunk = createAppAsyncThunk<void, string>(
 	"requestAssignReport",

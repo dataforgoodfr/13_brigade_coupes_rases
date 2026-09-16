@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import { Check, ChevronRight, FileWarning, UserIcon, X } from "lucide-react"
 import { useEffect } from "react"
 
@@ -207,10 +207,11 @@ export function ActionRequiredTab() {
 					</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{otherActions.map((report) => (
-							<div
+							<Link
 								key={report.id}
-								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group relative overflow-hidden"
-								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
+								to="/clear-cuts/$clearCutId"
+								params={{ clearCutId: report.id }}
+								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group relative overflow-hidden text-left"
 							>
 								{report.status === "to_validate" &&
 									!report.assignmentRequestedById && (
@@ -255,7 +256,7 @@ export function ActionRequiredTab() {
 									<span>Traiter la demande</span>
 									<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
 								</div>
-							</div>
+							</Link>
 						))}
 					</div>
 				</div>

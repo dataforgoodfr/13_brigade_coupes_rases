@@ -21,7 +21,7 @@ const createAppThunk = createAsyncThunk.withTypes<{
 	state: RootState
 	extra: { api: (options?: KyOptions) => KyInstance }
 }>()
-type AppThunk<Returned, ThunkArg> = ReturnType<
+export type AppThunk<Returned, ThunkArg> = ReturnType<
 	typeof createAppThunk<Returned, ThunkArg>
 >
 type PayloadCreator<Returned, ThunkArg> = Parameters<

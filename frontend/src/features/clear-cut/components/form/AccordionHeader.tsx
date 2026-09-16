@@ -12,7 +12,8 @@ import {
 	rejectAssignmentThunk,
 	requestAssignReportThunk,
 	unassignReportThunk,
-	updateReportStatusThunk
+	updateReportStatusThunk,
+	type WorkflowThunkAction
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
@@ -42,19 +43,10 @@ export function AccordionHeader({
 	const ecologicalZonings = form.getValues("ecologicalZonings")
 	const reportId = form.getValues("report.id")
 	const reportUserId = form.getValues("report.userId")
-	const report = form.getValues("report") as any
-	const assignmentRequestedById = report?.assignmentRequestedById as
-		| string
-		| null
-		| undefined
-	const affectedUserLogin = report?.affectedUser?.login as
-		| string
-		| null
-		| undefined
-	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login as
-		| string
-		| null
-		| undefined
+	const report = form.getValues("report")
+	const assignmentRequestedById = report?.assignmentRequestedById
+	const affectedUserLogin = report?.affectedUser?.login
+	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login
 
 	const isAdmin = user?.role === "admin"
 	const myId = user?.id
@@ -64,8 +56,10 @@ export function AccordionHeader({
 		window.location.reload()
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
+	const dispatchAndRefresh = async <Arg,>(
+		thunk: WorkflowThunkAction<Arg>,
+		errorMessage: string
+	) => {
 		const action = await dispatch(thunk)
 		if (action.type.endsWith("/rejected")) {
 			toast({

@@ -200,7 +200,7 @@ function FormS3ImageField<T extends FieldValues>({
 								>
 									<img
 										src={imageUrl}
-										alt={`Photo ${index + 1}`}
+										alt={`Prise de vue ${index + 1}`}
 										className="w-full h-24 object-cover rounded border hover:opacity-75 transition-opacity"
 										onError={(e) => {
 											e.currentTarget.src =
@@ -301,7 +301,7 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 					<div className="relative w-full max-w-4xl max-h-screen p-4">
 						<img
 							src={previewUrls[selectedImageIndex]}
-							alt={`Photo ${selectedImageIndex + 1}`}
+							alt={`Prise de vue ${selectedImageIndex + 1}`}
 							className="max-w-full max-h-[80vh] object-contain rounded shadow-lg mx-auto block"
 							onClick={(e) => e.stopPropagation()}
 							onKeyDown={(e) => e.stopPropagation()}

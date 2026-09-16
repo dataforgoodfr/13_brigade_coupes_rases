@@ -42,7 +42,7 @@ const EXTENSION_TO_MIME: Record<string, string> = {
 }
 
 function inferMimeType(file: File): string {
-	if (file.type && file.type.startsWith("image/")) return file.type
+	if (file.type?.startsWith("image/")) return file.type
 	const ext = file.name.split(".").pop()?.toLowerCase() ?? ""
 	return EXTENSION_TO_MIME[ext] ?? "image/jpeg"
 }

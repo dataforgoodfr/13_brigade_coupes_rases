@@ -1,3 +1,4 @@
+import type * as L from "leaflet"
 import type { LatLngExpression, Map as LeafletMap } from "leaflet"
 import { useEffect, useRef } from "react"
 import { MapContainer, TileLayer } from "react-leaflet"
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils"
 import "@geoman-io/leaflet-geoman-free"
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"
 import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useId, useState } from "react"
 import { useMap } from "react-leaflet"
 
 import { Button } from "@/components/ui/button"
@@ -32,27 +33,27 @@ import { ClearCuts } from "./ClearCuts"
 import { LocationButton } from "./LocationButton"
 
 function authedApi() {
-	const token = getStoredToken() as any
+	const token = getStoredToken()
 	return token?.accessToken
 		? api.extend({ headers: { Authorization: `Bearer ${token.accessToken}` } })
 		: api
 }
 
+type CityResult = { insee_code: string; name: string; department_code: string }
+
 function GeomanControls() {
 	const map = useMap()
+	const citySearchId = useId()
 	const { toast } = useToast()
 	const user = useConnectedMe()
 	const [isOpen, setIsOpen] = useState(false)
-	const [_geometry, setGeometry] = useState<any>(null)
+	// GeoJSON du polygone tracé avec Geoman, en attendant son envoi
+	const [geometry, setGeometry] = useState<ReturnType<
+		L.Polygon["toGeoJSON"]
+	> | null>(null)
 	const [citySearch, setCitySearch] = useState("")
-	const [cityResults, setCityResults] = useState<
-		{ insee_code: string; name: string; department_code: string }[]
-	>([])
-	const [selectedCity, setSelectedCity] = useState<{
-		insee_code: string
-		name: string
-		department_code: string
-	} | null>(null)
+	const [cityResults, setCityResults] = useState<CityResult[]>([])
+	const [selectedCity, setSelectedCity] = useState<CityResult | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const dispatch = useAppDispatch()
@@ -90,9 +91,9 @@ function GeomanControls() {
 	useEffect(() => {
 		if (!map || !user) return
 
-		const handleCreate = (e: any) => {
-			const layer = e.layer
-			const geojson = layer.toGeoJSON()
+		const handleCreate: L.PM.CreateEventHandler = ({ layer }) => {
+			// Tout calque de dessin Geoman (polygone, rectangle…) expose toGeoJSON
+			const geojson = (layer as L.Polygon).toGeoJSON()
 			setGeometry(geojson)
 			setIsOpen(true)
 			map.removeLayer(layer)
@@ -136,7 +137,7 @@ function GeomanControls() {
 	}
 
 	const handleSubmit = async () => {
-		if (!selectedCity) {
+		if (!selectedCity || !geometry) {
 			toast({
 				title: "Erreur",
 				description: "Veuillez sélectionner une commune.",
@@ -149,7 +150,7 @@ function GeomanControls() {
 			const response = await authedApi()
 				.post("api/v1/clear-cuts-reports/volunteer-create", {
 					json: {
-						polygon: _geometry.geometry,
+						polygon: geometry.geometry,
 						city_zip_code: selectedCity.insee_code
 					}
 				})
@@ -189,17 +190,17 @@ function GeomanControls() {
 				</DialogHeader>
 				<div className="flex flex-col gap-4 py-4">
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="citySearch">Commune</Label>
+						<Label htmlFor={citySearchId}>Commune</Label>
 						<div className="relative">
 							<input
-								id="citySearch"
+								id={citySearchId}
 								placeholder="Ex: Limoges, Saint-Étienne..."
 								value={
 									selectedCity
 										? `${selectedCity.name} (${selectedCity.department_code})`
 										: citySearch
 								}
-								onChange={(e: any) => {
+								onChange={(e) => {
 									setSelectedCity(null)
 									setCitySearch(e.target.value)
 								}}
@@ -208,11 +209,11 @@ function GeomanControls() {
 							/>
 							{cityResults.length > 0 && !selectedCity && (
 								<ul className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-md max-h-48 overflow-y-auto">
-									{cityResults.map((city: any) => (
+									{cityResults.map((city) => (
 										<li
 											key={city.insee_code}
 											className="cursor-pointer px-3 py-2 text-sm hover:bg-neutral-100"
-											onMouseDown={(e: any) => {
+											onMouseDown={(e) => {
 												e.preventDefault()
 												setSelectedCity(city)
 												setCitySearch("")
