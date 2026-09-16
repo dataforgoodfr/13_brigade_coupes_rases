@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { toStringApiErrorSchema } from "@/shared/api/api"
+import { toStringApiErrorSchema } from "@/shared/api/errors"
 import { departmentSchema } from "@/shared/store/referential/referential"
 
 export const loginRequestSchema = z.object({

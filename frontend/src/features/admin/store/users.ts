@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import { roleSchema } from "@/features/user/store/me"
-import { toStringApiErrorSchema } from "@/shared/api/api"
+import { toStringApiErrorSchema } from "@/shared/api/errors"
 import { paginationResponseSchema } from "@/shared/api/types"
 import { toSelectableItemSchema } from "@/shared/items"
 import { departmentSchema } from "@/shared/store/referential/referential"
