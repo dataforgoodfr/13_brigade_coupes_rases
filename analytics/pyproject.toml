@@ -33,11 +33,3 @@ ipykernel = "^6.29.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# See https://docs.astral.sh/ruff/settings
-[tool.ruff]
-target-version = "py313"
-
-[tool.ruff.lint]
-# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
-extend-select = ["I", "B", "UP"]
