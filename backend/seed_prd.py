@@ -8,7 +8,7 @@ from common_seed import seed_cities_departments
 SRID = 4326
 
 
-def seed_database():
+def seed_database() -> None:
     db = SessionLocal()
     try:
         seed_cities_departments(db)

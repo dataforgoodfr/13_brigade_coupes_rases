@@ -5,7 +5,7 @@ from app.models import Department
 from test.common.user import get_admin_user_token, get_volunteer_user_token, new_user
 
 
-def test_create_user(client: TestClient, db: Session):
+def test_create_user(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
     userJson = {
         "first_name": "John",
@@ -29,7 +29,7 @@ def test_create_user(client: TestClient, db: Session):
 
 def test_create_user_without_admin_right_should_return_forbidden(
     client: TestClient, db: Session
-):
+) -> None:
     token = get_volunteer_user_token(client, db)[1]
     userJson = {
         "first_name": "John",
@@ -46,7 +46,7 @@ def test_create_user_without_admin_right_should_return_forbidden(
     assert response.status_code == 403
 
 
-def test_get_user(client, db):
+def test_get_user(client: TestClient, db: Session) -> None:
     user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
@@ -62,17 +62,17 @@ def test_get_user(client, db):
     assert data["updatedAt"] is not None
 
 
-# def test_create_invalid_user(client):
+# def test_create_invalid_user(client: TestClient) -> None:
 #     # TODO : Add test covering wrong email format and wrong role
 #     assert True is True
 
-# def test_delete_user(client):
+# def test_delete_user(client: TestClient) -> None:
 #     # TODO : Add test covering user deletion
 #     # Should not remove it but anonymise and at deleted_at
 #     assert True is True
 
 
-def test_update_user(client, db):
+def test_update_user(client: TestClient, db: Session) -> None:
     user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
@@ -95,7 +95,7 @@ def test_update_user(client, db):
     assert data["firstName"] == "Sorenza"
 
 
-def test_get_users(client, db):
+def test_get_users(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
     user = new_user(login="ABC", email="ABC@ABC.com")
 
@@ -113,7 +113,7 @@ def test_get_users(client, db):
     assert data["content"][3]["id"] == str(user.id)
 
 
-def test_login_user(client, db):
+def test_login_user(client: TestClient, db: Session) -> None:
     user = new_user(email="houba.houba@marsupilami.com")
     db.add(user)
     db.commit()
@@ -132,7 +132,7 @@ def test_login_user(client, db):
     assert data["tokenType"] == "bearer"
 
 
-def test_login_user_not_found_should_return_unauthorized(client):
+def test_login_user_not_found_should_return_unauthorized(client: TestClient) -> None:
     response = client.post(
         "/api/v1/token",
         data={
@@ -143,7 +143,7 @@ def test_login_user_not_found_should_return_unauthorized(client):
     assert response.status_code == 401
 
 
-def test_get_me(client, db):
+def test_get_me(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
     response = client.get("/api/v1/me", headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200

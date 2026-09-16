@@ -12,8 +12,8 @@ from app.models import (
 
 
 def new_clear_cut_report(
-    status: str = "to_validate", city_id: int = 31482, ecological_zoning_id=1
-):
+    status: str = "to_validate", city_id: int = 31482, ecological_zoning_id: int = 1
+) -> ClearCutReport:
     return ClearCutReport(
         slope_area_hectare=6.8,
         city_id=city_id,

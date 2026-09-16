@@ -1,11 +1,12 @@
 import pytest
+from sqlalchemy.orm import Session
 
 from app.models import City, Department, EcologicalZoning
 from test.common.clear_cut import new_clear_cut_report
 from test.common.user import new_user
 
 
-def test_user_creation(db):
+def test_user_creation(db: Session) -> None:
     user = new_user(role="volunteer")
     db.add(user)
     db.commit()
@@ -21,7 +22,7 @@ def test_user_creation(db):
     assert user.deleted_at is None
 
 
-def test_department_creation(db):
+def test_department_creation(db: Session) -> None:
     department = Department(code="13", name="Bouches du Rhône")
     db.add(department)
     db.commit()
@@ -33,10 +34,12 @@ def test_department_creation(db):
     assert str(exc_info.value) == "Name cannot be None"
 
 
-def test_associations(db):
+def test_associations(db: Session) -> None:
     user = new_user()
     ecological_zoning = db.query(EcologicalZoning).first()
     city = db.query(City).first()
+    assert ecological_zoning is not None
+    assert city is not None
     report = new_clear_cut_report(
         status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
     )
@@ -53,9 +56,11 @@ def test_associations(db):
     assert report.clear_cuts[0].ecological_zonings[0] in ecological_zoning.clear_cuts
 
 
-def test_report_creation(db):
+def test_report_creation(db: Session) -> None:
     ecological_zoning = db.query(EcologicalZoning).first()
     city = db.query(City).first()
+    assert ecological_zoning is not None
+    assert city is not None
     report = new_clear_cut_report(
         status="validated", city_id=city.id, ecological_zoning_id=ecological_zoning.id
     )
@@ -77,12 +82,13 @@ def test_report_creation(db):
     assert report.created_at is not None
 
 
-def test_ecological_zoning_create_without_duplicate(db):
+def test_ecological_zoning_create_without_duplicate(db: Session) -> None:
     db.add(EcologicalZoning(code="ABC", type="Natura2000", name="ABC"))
     db.commit()
     created_ecological_zoning = (
         db.query(EcologicalZoning).filter(EcologicalZoning.code == "ABC").first()
     )
+    assert created_ecological_zoning is not None
     assert created_ecological_zoning.code == "ABC"
     assert created_ecological_zoning.type == "Natura2000"
     assert created_ecological_zoning.name == "ABC"

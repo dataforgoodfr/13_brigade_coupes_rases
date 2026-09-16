@@ -1,7 +1,10 @@
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
 from test.common.clear_cut import new_clear_cut_report
 
 
-def test_get_clearcuts_map(client, db):
+def test_get_clearcuts_map(client: TestClient, db: Session) -> None:
     clear_cut = new_clear_cut_report()
     db.add(clear_cut)
     db.commit()

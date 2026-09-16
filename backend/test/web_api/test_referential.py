@@ -1,4 +1,7 @@
-def test_get_referential(client):
+from fastapi.testclient import TestClient
+
+
+def test_get_referential(client: TestClient) -> None:
     response = client.get("/api/v1/referential/")
 
     assert response.status_code == 200

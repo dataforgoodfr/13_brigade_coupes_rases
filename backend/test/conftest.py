@@ -3,11 +3,12 @@ import os
 os.environ["ENVIRONMENT"] = "test"
 
 import sys
+from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 # Add parent path to get access to app imports.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,7 +32,9 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def pytest_collection_modifyitems(session, config, items):
+def pytest_collection_modifyitems(
+    session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
+) -> None:
     focused_items = [item for item in items if item.get_closest_marker("focus")]
 
     # If there are focused tests, skip all others
@@ -42,13 +45,13 @@ def pytest_collection_modifyitems(session, config, items):
 
 
 @pytest.fixture(scope="session")
-def migration():
+def migration() -> None:
     print("Running migrations")
     command.upgrade(alembic_cfg, "head")
 
 
 @pytest.fixture(scope="function")
-def db():
+def db() -> Iterator[Session]:
     db = SessionLocal()
     seed_database()
     try:
@@ -59,8 +62,8 @@ def db():
 
 
 @pytest.fixture(scope="function")
-def client(db):
-    def override_get_db():
+def client(db: Session) -> Iterator[TestClient]:
+    def override_get_db() -> Iterator[Session]:
         try:
             yield db
         finally:
@@ -73,8 +76,8 @@ def client(db):
 
 
 @pytest.fixture(scope="function")
-def imports_client(db):
-    def override_get_db():
+def imports_client(db: Session) -> Iterator[TestClient]:
+    def override_get_db() -> Iterator[Session]:
         try:
             yield db
         finally:

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from test.common.user import get_admin_user_token
 
 
-def test_create_version_success(client: TestClient, db: Session):
+def test_create_version_success(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
 
     report_data = {
@@ -106,7 +106,7 @@ def test_create_version_success(client: TestClient, db: Session):
 
 def test_form_submission_does_not_auto_update_report_status(
     client: TestClient, db: Session
-):
+) -> None:
     """La soumission du formulaire ne change plus le statut : il faut passer par volunteer-validate puis approve-validation."""
     token = get_admin_user_token(client, db)[1]
 
