@@ -19,10 +19,20 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
+# Configuration Ruff unique pour tous les sous-projets Python (backend,
+# data_pipeline, analytics) : ruff remonte l'arborescence jusqu'à ce fichier.
 # See https://docs.astral.sh/ruff/settings
 [tool.ruff]
 target-version = "py313"
+# Racines des sous-projets : leurs modules (app, pipeline, …) sont des imports
+# de première partie pour le tri isort, comme lorsque chaque sous-projet
+# portait sa propre configuration.
+src = [".", "backend", "data_pipeline", "analytics"]
 
 [tool.ruff.lint]
-# Enable isort,  flake8-bugbear, and pyupgrade on top of the defaults
+# Enable isort, flake8-bugbear, and pyupgrade on top of the defaults
 extend-select = ["I", "B", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's Depends()/Query() in defaults are the documented idiom, not B008
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
