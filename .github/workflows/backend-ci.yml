@@ -43,7 +43,7 @@ jobs:
         python-version: ["3.13"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Configure hosts b/c testing uses db but ci will run on localhost
       - name: Configure hosts
@@ -51,7 +51,7 @@ jobs:
           echo "127.0.0.1 db" | sudo tee -a /etc/hosts
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: 3.13
           cache: "pip"
@@ -67,7 +67,7 @@ jobs:
           poetry config virtualenvs.in-project true
 
       - name: Cache Poetry virtualenv # Caches the Poetry virtualenv for faster subsequent runs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ./.venv
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
@@ -86,6 +86,13 @@ jobs:
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
+
+      - name: Type check (mypy)
+        working-directory: ./backend
+        # Non bloquant tant que les erreurs existantes ne sont pas corrigées ;
+        # retirer continue-on-error une fois `make typecheck` au vert.
+        continue-on-error: true
+        run: make typecheck
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"

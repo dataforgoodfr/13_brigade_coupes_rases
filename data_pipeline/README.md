@@ -132,6 +132,12 @@ Use the Makefile to run pre-commit hooks.
 make pre-commit
 ```
 
-### 6. Recommendations
+### 7. Type check
+
+```bash
+poetry run mypy    # strict, scope defined in pyproject.toml ([tool.mypy])
+```
+
+### 8. Recommendations
 
 Before any pull request, make sure you run pre-commit and the tests.

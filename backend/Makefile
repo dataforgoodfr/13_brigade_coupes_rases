@@ -35,4 +35,8 @@ seed-dev-db: ## Seed the database
 test: ## Run the tests
 	poetry run pytest test/
 
-.PHONY: test help
+typecheck: ## Run mypy (scope in pyproject.toml, [tool.mypy])
+	poetry run mypy
+
+
+.PHONY: test typecheck help

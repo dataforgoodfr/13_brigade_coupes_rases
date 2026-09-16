@@ -19,6 +19,8 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 mypy = "^1.16.1"
+boto3-stubs = "^1.35.0"
+types-shapely = "^2.0"
 
 [tool.poetry.group.backend.dependencies]
 python = "^3.13"
@@ -46,3 +48,13 @@ docker-stop = "docker compose down"
 
 [tool.pytest.ini_options]
 markers = ["focus: run only these tests"]
+
+# Vérification de types : `make typecheck` (mode par défaut, non strict).
+[tool.mypy]
+python_version = "3.13"
+files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py"]
+
+[[tool.mypy.overrides]]
+# apscheduler ne publie ni stubs ni marqueur py.typed
+module = ["apscheduler.*"]
+ignore_missing_imports = true
