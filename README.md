@@ -135,7 +135,7 @@ Prérequis :
 
 - [Docker](https://docs.docker.com/get-docker/) et Docker Compose ;
 - [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/`, `data_pipeline/` et `analytics/`, chacun avec son propre `pyproject.toml` ;
-- [Node.js 22](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
+- [Node.js 24](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
 
