@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react-swc"
 import { defineConfig, type PluginOption, type UserConfigFnObject } from "vite"
 import { VitePWA, type VitePWAOptions } from "vite-plugin-pwa"
 import { reactClickToComponent } from "vite-plugin-react-click-to-component"
-import tsconfigPaths from "vite-tsconfig-paths"
 
 type RuntimeCaching = NonNullable<
 	VitePWAOptions["workbox"]["runtimeCaching"]
@@ -26,6 +25,7 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 			}
 		},
 		build: { sourcemap: true },
+		resolve: { tsconfigPaths: true },
 		plugins: [
 			VitePWA({
 				registerType: "prompt",
@@ -88,7 +88,6 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 			tanstackRouter({ autoCodeSplitting: true }),
 			react(),
 			tailwindcss(),
-			tsconfigPaths(),
 			// Le script qu'il injecte dans la page casse le mode navigateur de
 			// Vitest ; inutile hors du serveur de développement de toute façon.
 			mode !== "test" && reactClickToComponent()
