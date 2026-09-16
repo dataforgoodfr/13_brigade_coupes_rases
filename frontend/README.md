@@ -27,6 +27,8 @@ To run in development mode on a mobile device (same Wi-Fi network)
 
 To format and lint : `pnpm cleanup`  
 To check format and lint without modifying files (same as CI) : `pnpm lint`  
+To run the tests : `pnpm test:unit` (pure logic, no browser) and `pnpm test:browser` (components and flows, Playwright/Chromium)  
+To measure coverage on both : `pnpm coverage` (report in the terminal and in `coverage/`)  
 To start storybook: `pnpm storybook`
 
 ## VS Code configuration

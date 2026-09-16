@@ -54,9 +54,20 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      # Browser tests load the built stylesheets, so they run after the build
-      - name: Browser tests (Playwright)
-        run: pnpm test:browser
+      # Browser tests load the built stylesheets, so they run after the build.
+      # Coverage covers both projects (unit + browser).
+      - name: Browser tests (Playwright) and coverage
+        run: pnpm coverage
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          {
+            echo "## Couverture frontend"
+            echo '```'
+            cat coverage/coverage-summary.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
     # Only after a merge on main; the job is skipped on pull requests
