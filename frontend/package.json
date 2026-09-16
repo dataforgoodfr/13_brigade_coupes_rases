@@ -10,6 +10,7 @@
     "dev:mock": "vite --mode mock",
     "dev:mock:win": "set VITE_MOCK=true && vite",
     "cleanup": "biome check --write --unsafe",
+    "lint": "biome ci",
     "cleanup:tsc": "biome check --write && tsc",
     "build:ci": "vite build",
     "build": "tsc -b && vite build",
