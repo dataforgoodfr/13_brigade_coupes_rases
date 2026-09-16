@@ -11,20 +11,14 @@ package-mode = false
 python = "^3.13"
 boto3 = "^1.37.12"
 dask-geopandas = "^0.5.0"
-fiona = "^1.10.1"
 geoalchemy2 = "^0.20.0"
 geopandas = "^1.0.1"
-jinja2 = "^3.1.6"
 numpy = "^2.2.3"
 pandas = "^2.2.3"
-prefect = { version = "3.2.12", extras = ["base"] }
-psutil = "^7.0.0"
 psycopg2 = "^2.9.10"
 py7zr = "^0.22.0"
 pyarrow = "^25.0.1"
-pykeepass = "^4.1.1.post1"
 python-dotenv = "^1.1.0"
-pyyaml = "^6.0.2"
 rasterio = "^1.4.3"
 requests = "^2.32.3"
 shapely = "^2.1.0"
@@ -37,7 +31,6 @@ pytest = "^7.2.0"
 httpx = "^0.28.1"
 moto = "^5.1.1"
 mypy = "^1.15.0"
-types-psutil = "^7.0.0.20250218"
 types-requests = "^2.32.0.20250328"
 pandas-stubs = "^2.2.3.250308"
 types-tqdm = "^4.67.0.20250319"
@@ -63,7 +56,6 @@ module = [
     "geopandas.*",
     "rasterio.*",
     "osgeo.*",
-    "pykeepass.*",
     "dask_geopandas.*",
 ]
 ignore_missing_imports = true
