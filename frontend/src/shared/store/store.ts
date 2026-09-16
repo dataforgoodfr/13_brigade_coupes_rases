@@ -4,7 +4,7 @@ import {
 	createListenerMiddleware,
 	isRejected
 } from "@reduxjs/toolkit"
-import type { KyOptions } from "node_modules/ky/distribution/types/options"
+import type { Options as KyOptions } from "ky"
 
 import { rulesSlice } from "@/features/admin/store/rules.slice"
 import { usersSlice } from "@/features/admin/store/users.slice"
