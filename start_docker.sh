@@ -1,29 +1,32 @@
 #!/bin/bash
-# Lancer le projet ENTIÈREMENT via Docker (Solution la plus fiable sur Mac)
+# Lancer toute la pile (base, API, frontend) via Docker, base migrée et peuplée.
+# Première fois ou après un changement de schéma : docker compose down -v && ./start_docker.sh
 
 set -e
 
-echo "Démarrage automatique de Docker..."
-open -a Docker
-echo "Attente de Docker (10s)..."
-sleep 10
+if ! docker info > /dev/null 2>&1; then
+    echo "Docker ne répond pas : démarrer Docker Desktop (ou le démon docker) puis relancer." >&2
+    exit 1
+fi
 
 echo "1. Construction des images et démarrage de la base de données..."
 docker compose build
 docker compose up -d db pgadmin
 
-echo "2. Initialisation de la base de données (Migrations et seeding)..."
-echo "Attente que Postgres soit prêt..."
-sleep 15
+echo "2. Attente de PostgreSQL..."
+until docker compose exec -T db pg_isready -U devuser -d local > /dev/null 2>&1; do
+    sleep 1
+done
+
+echo "3. Migrations et jeu de données de développement..."
 docker compose run --rm backend poetry run alembic upgrade head
 docker compose run --rm backend poetry run python -m seed_dev
 
-echo "3. Démarrage de tous les services (API & Frontend)..."
+echo "4. Démarrage de tous les services (API et frontend)..."
 docker compose up -d
 
-echo "Tout est prêt et lancé ! 🎉"
-echo "👉 Backend API : http://localhost:8080/docs"
-echo "👉 Frontend Web : http://localhost:8081"
-echo "👉 Base de Données (PgAdmin) : http://localhost:8888"
-echo "Pour voir les logs : docker compose logs -f"
-echo "Pour tout arrêter : docker compose down"
+echo "Tout est lancé."
+echo "  API      : http://localhost:8080/docs"
+echo "  Frontend : http://localhost:8081"
+echo "  pgAdmin  : http://localhost:8888"
+echo "Logs : docker compose logs -f — arrêt : docker compose down"

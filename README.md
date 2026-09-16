@@ -42,7 +42,7 @@ Le tout est hébergé sur [Clever Cloud](https://www.clever-cloud.com/).
 ├── 📁 data_pipeline/  collecte et traitement des données
 ├── 📁 analytics/      notebooks d'analyse
 ├── 📁 doc/            documentation
-├── 📁 docker/         images Docker de déploiement
+├── 📁 docker/         image PostgreSQL/PostGIS de développement
 └── 📁 keepass/        secrets partagés (chiffrés)
 ```
 
@@ -138,6 +138,8 @@ Prérequis :
 - [Node.js 22](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
+
+Pour tout lancer dans Docker (base migrée et peuplée, API sur le port 8080, frontend sur le port 8081) : `./start_docker.sh`. Sinon, service par service :
 
 ### Base de données
 
