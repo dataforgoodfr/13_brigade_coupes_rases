@@ -6,6 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models import User
 from app.services.user_auth import ALGORITHM, SECRET_KEY, create_access_token
 from test.common.user import create_user, new_user
 
@@ -177,3 +178,74 @@ def test_refresh_token_rejects_invalid_or_access_tokens(
     for token in ("garbage", login["accessToken"]):
         response = client.post("/api/v1/token/refresh", json={"refreshToken": token})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED, token
+
+
+def login(client: TestClient, email: str) -> dict[str, str]:
+    response = client.post(
+        "/api/v1/token", data={"username": email, "password": "password"}
+    )
+    assert response.status_code == status.HTTP_200_OK
+    return dict(response.json())
+
+
+def test_deactivated_account_loses_access_immediately(
+    client: TestClient, db: Session
+) -> None:
+    user_id = create_user(db, email="off@volunteer.com").id
+    tokens = login(client, "off@volunteer.com")
+    user = db.get(User, user_id)
+    assert user is not None
+    user.is_active = False
+    db.commit()
+
+    me = client.get(
+        "/api/v1/me", headers={"Authorization": f"Bearer {tokens['accessToken']}"}
+    )
+    assert me.status_code == status.HTTP_401_UNAUTHORIZED
+    assert me.json()["detail"]["type"] == "USER_INACTIVE"
+
+    refresh = client.post(
+        "/api/v1/token/refresh", json={"refreshToken": tokens["refreshToken"]}
+    )
+    assert refresh.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_deleted_account_loses_access_and_cannot_log_in(
+    client: TestClient, db: Session
+) -> None:
+    user_id = create_user(db, email="gone@volunteer.com").id
+    tokens = login(client, "gone@volunteer.com")
+    user = db.get(User, user_id)
+    assert user is not None
+    user.deleted_at = datetime.now()
+    db.commit()
+
+    me = client.get(
+        "/api/v1/me", headers={"Authorization": f"Bearer {tokens['accessToken']}"}
+    )
+    assert me.status_code == status.HTTP_401_UNAUTHORIZED
+
+    refresh = client.post(
+        "/api/v1/token/refresh", json={"refreshToken": tokens["refreshToken"]}
+    )
+    assert refresh.status_code == status.HTTP_401_UNAUTHORIZED
+
+    relogin = client.post(
+        "/api/v1/token",
+        data={"username": "gone@volunteer.com", "password": "password"},
+    )
+    assert relogin.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_reset_password_token_is_not_an_access_token(
+    client: TestClient, db: Session
+) -> None:
+    user = create_user(db, email="reset@volunteer.com")
+    with patch("app.routes.auth.send_reset_password_email") as send_mail:
+        client.post("/api/v1/auth/forgot-password", json={"email": user.email})
+    reset_token = send_mail.call_args.args[1]
+
+    me = client.get("/api/v1/me", headers={"Authorization": f"Bearer {reset_token}"})
+
+    assert me.status_code == status.HTTP_401_UNAUTHORIZED
+    assert me.json()["detail"]["type"] == "INVALID_TOKEN"
