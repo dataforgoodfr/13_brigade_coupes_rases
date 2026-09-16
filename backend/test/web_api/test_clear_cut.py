@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -94,7 +96,7 @@ def test_post_report_success(client: TestClient):
 
 
 def test_post_report_invalid_data(client: TestClient):
-    invalid_data: dict = {}
+    invalid_data: dict[str, Any] = {}
 
     response = client.post(
         "/api/v1/clear-cuts-reports",

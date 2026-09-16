@@ -171,7 +171,7 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter_by(email=email).first()
 
 
-def update_me(db: Session, user: User, request: MeUpdateSchema):
+def update_me(db: Session, user: User, request: MeUpdateSchema) -> None:
     user.favorites = (
         db.query(ClearCutReport).filter(ClearCutReport.id.in_(request.favorites)).all()
     )

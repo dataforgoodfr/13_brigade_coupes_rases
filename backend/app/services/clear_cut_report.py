@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Any
 
 from fastapi import status
 from geoalchemy2.elements import WKTElement
@@ -137,9 +138,6 @@ def sync_clear_cuts_reports(db: Session):
         report.total_bdf_mixed_area_hectare = total_bdf_mixed_area_hectare
         report.total_bdf_poplar_area_hectare = total_bdf_poplar_area_hectare
         report.total_bdf_resinous_area_hectare = total_bdf_resinous_area_hectare
-        report.total_ecological_zoning_rule_matches = (
-            total_ecological_zoning_rule_matches
-        )
         report.rules = list(
             filter(
                 lambda rule: rule is not None,
@@ -216,7 +214,7 @@ def create_clear_cut_report(
 
 
 def volunteer_create_clear_cut_report(
-    db: Session, polygon_geojson: dict, city_zip_code: str, volunteer: User
+    db: Session, polygon_geojson: dict[str, Any], city_zip_code: str, volunteer: User
 ) -> ClearCutReport:
     """Create a new report from a volunteer-drawn polygon.
 

@@ -130,7 +130,7 @@ def report_to_report_preview_schema(
         created_at=report.created_at.date(),
         updated_at=report.updated_at.date(),
         city=report.city.name if report.city else "Inconnue",
-        total_area_hectare=report.total_area_hectare,  # type: ignore
+        total_area_hectare=report.total_area_hectare,
         total_bdf_resinous_area_hectare=report.total_bdf_resinous_area_hectare,
         total_bdf_deciduous_area_hectare=report.total_bdf_deciduous_area_hectare,
         total_bdf_mixed_area_hectare=report.total_bdf_mixed_area_hectare,

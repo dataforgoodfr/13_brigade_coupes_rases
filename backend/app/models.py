@@ -366,7 +366,7 @@ class ClearCutReport(Base):
     )
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
-    statellite_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    statellite_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     rules = relationship(
         "Rules",
         secondary=rules_clear_cut_reports,
@@ -410,16 +410,18 @@ class ClearCutForm(Base):
     forest: Mapped[str | None] = mapped_column(String, index=True)
     has_remaining_trees: Mapped[bool | None] = mapped_column(Boolean)
     trees_species: Mapped[str | None] = mapped_column(String, index=True)
-    planting_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    planting_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     has_construction_panel: Mapped[bool | None] = mapped_column(Boolean)
-    construction_panel_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    construction_panel_images: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
     wetland: Mapped[str | None] = mapped_column(String)
     destruction_clues: Mapped[str | None] = mapped_column(String)
     soil_state: Mapped[str | None] = mapped_column(String)
-    clear_cut_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    tree_trunks_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    soil_state_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
-    access_road_images: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    clear_cut_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    tree_trunks_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    soil_state_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    access_road_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Ecological informations
     has_other_ecological_zone: Mapped[bool | None] = mapped_column(Boolean)
