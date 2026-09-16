@@ -2,6 +2,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models import ClearCutEcologicalZoning
 from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
@@ -202,3 +203,23 @@ def test_affect_other_using_connected_admin_should_work(
     data = response.json()
     assert data["affectedUser"]["email"] == expected_email
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_list_ecological_zonings(client: TestClient, db: Session):
+    clear_cut_ecological_zoning = db.query(ClearCutEcologicalZoning).first()
+    assert clear_cut_ecological_zoning is not None
+    clear_cut_id = clear_cut_ecological_zoning.clear_cut_id
+    [_, token] = get_volunteer_user_token(client, db)
+
+    response = client.get(
+        f"/api/v1/clear-cuts/{clear_cut_id}/ecological-zonings",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["metadata"]["totalCount"] >= 1
+    zoning = data["content"][0]
+    assert zoning["clearCutId"] == str(clear_cut_id)
+    assert zoning["code"]
+    assert zoning["name"]
