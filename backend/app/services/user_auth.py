@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
 import jwt
@@ -71,7 +72,7 @@ def verify_password(plain_password: str, hashed_password: str):
     )
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
@@ -155,7 +156,7 @@ def create_token(db: Session, email: str, password: str):
     )
 
 
-def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
+def create_refresh_token(data: dict[str, Any], expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -176,9 +177,8 @@ def decode_token(
             )
         else:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        if key:
-            return payload.get(key)
-        return payload.get("sub")
+        value = payload.get(key or "sub")
+        return None if value is None else str(value)
     except jwt.PyJWTError as e:
         print(e)
         return None

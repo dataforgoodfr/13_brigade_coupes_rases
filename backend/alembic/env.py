@@ -5,8 +5,10 @@ from alembic import context
 from geoalchemy2 import Geography, Geometry, Raster, alembic_helpers
 from sqlalchemy import engine_from_config, pool
 
+# Charge les modèles pour remplir Base.metadata
+import app.models  # noqa: E402, F401
 from app.config import settings
-from app.models import Base
+from app.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +46,9 @@ def include_object(object, name, type_, reflected, compare_to):
             try:
                 col = object.expressions[0]
                 if (
-                    alembic_helpers._check_spatial_type(
+                    # Fonction privée mais recommandée par la documentation de
+                    # GeoAlchemy2 pour ce filtre.
+                    alembic_helpers._check_spatial_type(  # type: ignore[attr-defined]
                         col.type, (Geometry, Geography, Raster)
                     )
                     and col.type.spatial_index

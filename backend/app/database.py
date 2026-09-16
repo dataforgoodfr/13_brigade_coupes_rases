@@ -1,7 +1,8 @@
 import logging
+from collections.abc import Iterator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import settings
 
@@ -12,11 +13,14 @@ DATABASE_URL = settings.DATABASE_URL
 
 engine = create_engine(DATABASE_URL, plugins=["geoalchemy2"])
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 # Dependency for FastAPI routes
-def get_db():
+def get_db() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db

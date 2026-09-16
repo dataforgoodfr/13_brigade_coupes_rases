@@ -13,6 +13,7 @@ from app.models import (
     ClearCutEcologicalZoning,
     ClearCutForm,
     ClearCutReport,
+    EcologicalZoning,
     User,
 )
 from app.services.clear_cut_report import sync_clear_cuts_reports
@@ -58,7 +59,7 @@ def make_clear_cut(
     days_ago_start: int = 10,
     days_ago_end: int = 5,
     ecological_zoning_area: float | None = None,
-    ecological_zonings: list | None = None,
+    ecological_zonings: list[EcologicalZoning] | None = None,
 ) -> ClearCut:
     profile = FOREST_PROFILES[forest_type]
     bdf: dict[str, float | None]

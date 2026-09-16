@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, Response, status
 from sqlalchemy.orm import Session
@@ -70,7 +70,7 @@ def post_report(
 
 
 class VolunteerCreateRequestSchema(BaseSchema):
-    polygon: dict
+    polygon: dict[str, Any]
     city_zip_code: str
 
 

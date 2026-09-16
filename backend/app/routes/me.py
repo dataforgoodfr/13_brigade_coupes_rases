@@ -33,4 +33,4 @@ def put_me(
     db: Session = db_session,
     user: User = Depends(get_current_user),
 ) -> None:
-    return update_me(db, user, request)
+    update_me(db, user, request)
