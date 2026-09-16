@@ -11,11 +11,14 @@ def new_user(
     password: str | None = None,
     login: str | None = None,
 ) -> User:
+    email = "houba.houba@marsupilami.com" if email is None else email
     return User(
         first_name="Houba",
         last_name="Houba",
-        login="HoubaHouba" if login is None else login,
-        email="houba.houba@marsupilami.com" if email is None else email,
+        # Le login est unique : le dériver de l'email permet de créer
+        # plusieurs utilisateurs dans un même test.
+        login=email if login is None else login,
+        email=email,
         role="volunteer" if role is None else role,
         is_active=True,
         password=get_password_hash("password" if password is None else password),
