@@ -108,17 +108,30 @@ def get_current_user(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
-        if email is None:
+        # Reset-password tokens share the key: they must not open a session
+        if email is None or payload.get("type") not in (None, "access"):
             raise invalid_token
         token_data = TokenData(email=email)
     except InvalidTokenError:
         raise invalid_token from InvalidTokenError
-    user = get_user_by_email(db, email=token_data.email)
+    return get_active_user_by_email(db, token_data.email)
+
+
+def get_active_user_by_email(db: Session, email: str) -> User:
+    """Rejects deleted or deactivated accounts, whatever token is presented."""
+    user = get_user_by_email(db, email=email)
     if user is None:
         raise AppHTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             type="INVALID_CREDENTIALS",
             detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise AppHTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            type="USER_INACTIVE",
+            detail="Votre compte est désactivé.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user

@@ -8,7 +8,6 @@ from app.common.errors import AppHTTPException
 from app.database import get_db
 from app.deps import db_session
 from app.schemas.base import BaseSchema
-from app.services.user import get_user_by_email
 from app.services.user_auth import (
     Token,
     TokenSnakeCase,
@@ -16,6 +15,7 @@ from app.services.user_auth import (
     create_refresh_token,
     create_token,
     decode_token,
+    get_active_user_by_email,
 )
 
 router = APIRouter(prefix="/api/v1/token", tags=["Token"])
@@ -55,13 +55,7 @@ def refresh_token(
             detail="Invalid refresh token",
             type="INVALID_REFRESH_TOKEN",
         )
-    user = get_user_by_email(db, decoded_token)
-    if not user:
-        raise AppHTTPException(
-            status_code=401,
-            type="USER_NOT_FOUND",
-            detail=f"User {decoded_token} not found",
-        )
+    user = get_active_user_by_email(db, decoded_token)
     access_token = create_access_token(data={"sub": user.email})
     return Token(
         access_token=access_token,
