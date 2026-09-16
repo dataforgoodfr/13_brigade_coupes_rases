@@ -24,6 +24,7 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector"
 import type { RootState } from "@/shared/store/store"
 import {
+	type AppThunk,
 	addRequestedContentCases,
 	createAppAsyncThunk,
 	withEntityStorageActionCreator
@@ -308,6 +309,9 @@ export const getAdminAllReportsThunk = createAppAsyncThunk<
 	}
 )
 
+/** Action produite par un thunk de workflow une fois dispatché, quel que soit son argument. */
+export type WorkflowThunkAction<Arg = unknown> = ReturnType<AppThunk<void, Arg>>
+
 export const requestAssignReportThunk = createAppAsyncThunk<void, string>(
 	"requestAssignReport",
 	async (reportId, { extra: { api } }) => {
@@ -346,20 +350,23 @@ export const rejectAssignmentThunk = createAppAsyncThunk<void, string>(
 
 export const unassignReportThunk = createAppAsyncThunk<void, string>(
 	"clear-cuts/unassign",
-	async (id, { extra: { api } }) => await api().post(`api/v1/clear-cuts-reports/${id}/unassign`).json()
+	async (id, { extra: { api } }) =>
+		await api().post(`api/v1/clear-cuts-reports/${id}/unassign`).json()
 )
 
-export const updateReportStatusThunk = createAppAsyncThunk<void, { id: string, status: string }>(
-	"clear-cuts/updateStatus",
-	async ({ id, status }, { extra: { api } }) => {
-		await api().put(`api/v1/clear-cuts-reports/${id}`, { json: { status } })
-	}
-)
+export const updateReportStatusThunk = createAppAsyncThunk<
+	void,
+	{ id: string; status: string }
+>("clear-cuts/updateStatus", async ({ id, status }, { extra: { api } }) => {
+	await api().put(`api/v1/clear-cuts-reports/${id}`, { json: { status } })
+})
 
 export const volunteerValidateThunk = createAppAsyncThunk<void, string>(
 	"clear-cuts/volunteerValidate",
 	async (reportId, { extra: { api }, dispatch }) => {
-		await api().post(`api/v1/clear-cuts-reports/${reportId}/volunteer-validate`).json()
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/volunteer-validate`)
+			.json()
 		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
 	}
 )
@@ -367,7 +374,9 @@ export const volunteerValidateThunk = createAppAsyncThunk<void, string>(
 export const approveValidationThunk = createAppAsyncThunk<void, string>(
 	"clear-cuts/approveValidation",
 	async (reportId, { extra: { api }, dispatch }) => {
-		await api().post(`api/v1/clear-cuts-reports/${reportId}/approve-validation`).json()
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/approve-validation`)
+			.json()
 		dispatch(getClearCutFormThunk({ id: reportId }))
 	}
 )
@@ -375,7 +384,9 @@ export const approveValidationThunk = createAppAsyncThunk<void, string>(
 export const rejectValidationThunk = createAppAsyncThunk<void, string>(
 	"clear-cuts/rejectValidation",
 	async (reportId, { extra: { api }, dispatch }) => {
-		await api().post(`api/v1/clear-cuts-reports/${reportId}/reject-validation`).json()
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/reject-validation`)
+			.json()
 		dispatch(getClearCutFormThunk({ id: reportId }))
 	}
 )

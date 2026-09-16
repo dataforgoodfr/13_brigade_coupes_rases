@@ -1,8 +1,13 @@
-import { useNavigate } from "@tanstack/react-router"
-import { Check, ChevronRight, FileWarning, X } from "lucide-react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { Check, ChevronRight, FileWarning, UserIcon, X } from "lucide-react"
 import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
+import { UpdateUserDialog } from "@/features/admin/components/users-list/UpdateUserDialog"
+import {
+	selectPendingUsers,
+	useGetUsers
+} from "@/features/admin/store/users.slice"
 import {
 	approveValidationThunk,
 	getAdminActionRequiredReportsThunk,
@@ -10,11 +15,8 @@ import {
 	selectAdminActionRequiredReports,
 	selectAssignation
 } from "@/features/clear-cut/store/clear-cuts-slice"
-import { UpdateUserDialog } from "@/features/admin/components/users-list/UpdateUserDialog"
-import { selectPendingUsers, useGetUsers } from "@/features/admin/store/users.slice"
 import { TimeProgress } from "@/shared/components/TimeProgress"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
-import { UserIcon } from "lucide-react"
 
 export function ActionRequiredTab() {
 	const dispatch = useAppDispatch()
@@ -67,8 +69,12 @@ export function ActionRequiredTab() {
 	}
 
 	const reports = reportsState.value?.content ?? []
-	const validationRequests = reports.filter((r) => r.status === "waiting_for_validation")
-	const otherActions = reports.filter((r) => r.status !== "waiting_for_validation")
+	const validationRequests = reports.filter(
+		(r) => r.status === "waiting_for_validation"
+	)
+	const otherActions = reports.filter(
+		(r) => r.status !== "waiting_for_validation"
+	)
 
 	return (
 		<div className="flex flex-col w-full h-full p-2 overflow-y-auto bg-white">
@@ -76,7 +82,8 @@ export function ActionRequiredTab() {
 				Coupes nécessitant une action
 			</h2>
 			<p className="text-neutral-600 mb-6 font-light">
-				Signalements de nouvelles coupes à valider ou demandes d'attribution en attente.
+				Signalements de nouvelles coupes à valider ou demandes d'attribution en
+				attente.
 			</p>
 
 			{/* Validation requests from volunteers */}
@@ -98,7 +105,8 @@ export function ActionRequiredTab() {
 											{report.city || "Ville Inconnue"}
 										</h3>
 										<p className="text-xs text-neutral-500">
-											Dép. {report.department.code} · {report.totalAreaHectare?.toFixed(1) || 0} ha
+											Dép. {report.department.code} ·{" "}
+											{report.totalAreaHectare?.toFixed(1) || 0} ha
 										</p>
 									</div>
 									<div className="bg-orange-400 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase ml-2 shrink-0">
@@ -107,11 +115,15 @@ export function ActionRequiredTab() {
 								</div>
 								{report.affectedUser && (
 									<p className="text-xs text-neutral-600">
-										Bénévole : <span className="font-medium">{report.affectedUser.login}</span>
+										Bénévole :{" "}
+										<span className="font-medium">
+											{report.affectedUser.login}
+										</span>
 									</p>
 								)}
 								<p className="text-xs text-neutral-500">
-									Mis à jour le {new Date(report.updatedAt).toLocaleDateString("fr-FR")}
+									Mis à jour le{" "}
+									{new Date(report.updatedAt).toLocaleDateString("fr-FR")}
 								</p>
 								<div className="flex gap-2 mt-1">
 									<Button
@@ -176,7 +188,8 @@ export function ActionRequiredTab() {
 								</div>
 								<div className="flex items-center justify-between pt-2 border-t border-amber-100/50">
 									<span className="text-xs text-neutral-600 italic">
-										Inscrit le {new Date(user.createdAt).toLocaleDateString("fr-FR")}
+										Inscrit le{" "}
+										{new Date(user.createdAt).toLocaleDateString("fr-FR")}
 									</span>
 									<UpdateUserDialog {...user} />
 								</div>
@@ -194,16 +207,18 @@ export function ActionRequiredTab() {
 					</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						{otherActions.map((report) => (
-							<div
+							<Link
 								key={report.id}
-								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group relative overflow-hidden"
-								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
+								to="/clear-cuts/$clearCutId"
+								params={{ clearCutId: report.id }}
+								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-200 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group relative overflow-hidden text-left"
 							>
-								{report.status === "to_validate" && !report.assignmentRequestedById && (
-									<div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold uppercase tracking-wider">
-										Nouvelle Zone
-									</div>
-								)}
+								{report.status === "to_validate" &&
+									!report.assignmentRequestedById && (
+										<div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold uppercase tracking-wider">
+											Nouvelle Zone
+										</div>
+									)}
 								{report.assignmentRequestedById && (
 									<div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold uppercase tracking-wider">
 										Demande Attribution
@@ -241,7 +256,7 @@ export function ActionRequiredTab() {
 									<span>Traiter la demande</span>
 									<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
 								</div>
-							</div>
+							</Link>
 						))}
 					</div>
 				</div>

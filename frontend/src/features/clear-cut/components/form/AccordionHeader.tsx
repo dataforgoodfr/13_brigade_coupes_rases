@@ -1,15 +1,10 @@
 import { FormattedNumber } from "react-intl"
 
+import { Button } from "@/components/ui/button"
 import type {
 	ClearCutFormInput,
 	ClearCutStatus
 } from "@/features/clear-cut/store/clear-cuts"
-import type { FormType } from "@/shared/form/types"
-import type { Rule } from "@/shared/store/referential/referential"
-
-import { RuleBadge } from "../RuleBadge"
-import { StatusWithLabel } from "../StatusWithLabel"
-
 import {
 	approveAssignmentThunk,
 	cancelAssignRequestThunk,
@@ -17,13 +12,18 @@ import {
 	rejectAssignmentThunk,
 	requestAssignReportThunk,
 	unassignReportThunk,
-	updateReportStatusThunk
+	updateReportStatusThunk,
+	type WorkflowThunkAction
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
-import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
-import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
+import type { FormType } from "@/shared/form/types"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import type { Rule } from "@/shared/store/referential/referential"
+
+import { RuleBadge } from "../RuleBadge"
+import { StatusWithLabel } from "../StatusWithLabel"
 
 export function AccordionHeader({
 	form,
@@ -43,10 +43,10 @@ export function AccordionHeader({
 	const ecologicalZonings = form.getValues("ecologicalZonings")
 	const reportId = form.getValues("report.id")
 	const reportUserId = form.getValues("report.userId")
-	const report = form.getValues("report") as any
-	const assignmentRequestedById = report?.assignmentRequestedById as string | null | undefined
-	const affectedUserLogin = report?.affectedUser?.login as string | null | undefined
-	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login as string | null | undefined
+	const report = form.getValues("report")
+	const assignmentRequestedById = report?.assignmentRequestedById
+	const affectedUserLogin = report?.affectedUser?.login
+	const assignmentRequestedByLogin = report?.assignmentRequestedBy?.login
 
 	const isAdmin = user?.role === "admin"
 	const myId = user?.id
@@ -56,11 +56,17 @@ export function AccordionHeader({
 		window.location.reload()
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const dispatchAndRefresh = async (thunk: any, errorMessage: string) => {
+	const dispatchAndRefresh = async <Arg,>(
+		thunk: WorkflowThunkAction<Arg>,
+		errorMessage: string
+	) => {
 		const action = await dispatch(thunk)
 		if (action.type.endsWith("/rejected")) {
-			toast({ id: "assignment-error", title: "Erreur", description: errorMessage })
+			toast({
+				id: "assignment-error",
+				title: "Erreur",
+				description: errorMessage
+			})
 		} else {
 			refresh()
 		}
@@ -77,7 +83,8 @@ export function AccordionHeader({
 						<p className="text-xs text-green-700 font-semibold">
 							✓ Attribuée à{" "}
 							<span className="font-bold">
-								{affectedUserLogin ?? (reportUserId === myId ? "vous" : "un bénévole")}
+								{affectedUserLogin ??
+									(reportUserId === myId ? "vous" : "un bénévole")}
 							</span>
 						</p>
 						<Button
@@ -197,7 +204,11 @@ export function AccordionHeader({
 	}
 
 	const renderAdminValidationSection = () => {
-		if (!isAdmin || (status !== "to_validate" && status !== "waiting_for_validation")) return null
+		if (
+			!isAdmin ||
+			(status !== "to_validate" && status !== "waiting_for_validation")
+		)
+			return null
 
 		return (
 			<div className="flex flex-col gap-1 mb-2 mt-2 p-2 bg-amber-50 rounded-md border border-amber-200">

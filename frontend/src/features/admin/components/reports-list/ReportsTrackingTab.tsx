@@ -1,7 +1,14 @@
 import { useNavigate } from "@tanstack/react-router"
-import { ChevronRight, RotateCcw, Users, UserMinus, UserCheck } from "lucide-react"
+import {
+	ChevronRight,
+	RotateCcw,
+	UserCheck,
+	UserMinus,
+	Users
+} from "lucide-react"
 import { useEffect, useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	getAdminAllReportsThunk,
@@ -11,7 +18,6 @@ import {
 import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
 import { TimeProgress } from "@/shared/components/TimeProgress"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
-import { Badge } from "@/components/ui/badge"
 
 export function ReportsTrackingTab() {
 	const dispatch = useAppDispatch()
@@ -25,7 +31,9 @@ export function ReportsTrackingTab() {
 
 	const handleResetToInProgress = (e: React.MouseEvent, reportId: string) => {
 		e.stopPropagation()
-		dispatch(updateReportStatusThunk({ id: reportId, status: "in_progress" })).then(() => {
+		dispatch(
+			updateReportStatusThunk({ id: reportId, status: "in_progress" })
+		).then(() => {
 			dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
 		})
 	}
@@ -39,8 +47,8 @@ export function ReportsTrackingTab() {
 	}
 
 	const allReports = reportsState.value?.content ?? []
-	
-	const filteredReports = allReports.filter(report => {
+
+	const filteredReports = allReports.filter((report) => {
 		if (filter === "assigned") return !!report.userId
 		if (filter === "unassigned") return !report.userId
 		return true
@@ -54,29 +62,30 @@ export function ReportsTrackingTab() {
 						Suivi des Zones de Coupe
 					</h2>
 					<p className="text-neutral-600 font-light">
-						Visualisez l'état d'avancement et les attributions de toutes les zones.
+						Visualisez l'état d'avancement et les attributions de toutes les
+						zones.
 					</p>
 				</div>
 				<div className="flex gap-2 bg-neutral-100 p-1 rounded-lg">
-					<Button 
-						variant={filter === "all" ? "default" : "ghost"} 
-						size="sm" 
+					<Button
+						variant={filter === "all" ? "default" : "ghost"}
+						size="sm"
 						onClick={() => setFilter("all")}
 						className="text-xs"
 					>
 						Tout
 					</Button>
-					<Button 
-						variant={filter === "assigned" ? "default" : "ghost"} 
-						size="sm" 
+					<Button
+						variant={filter === "assigned" ? "default" : "ghost"}
+						size="sm"
 						onClick={() => setFilter("assigned")}
 						className="text-xs"
 					>
 						Attribuées
 					</Button>
-					<Button 
-						variant={filter === "unassigned" ? "default" : "ghost"} 
-						size="sm" 
+					<Button
+						variant={filter === "unassigned" ? "default" : "ghost"}
+						size="sm"
 						onClick={() => setFilter("unassigned")}
 						className="text-xs"
 					>
@@ -89,24 +98,38 @@ export function ReportsTrackingTab() {
 				<table className="w-full min-w-[600px] text-left border-collapse">
 					<thead>
 						<tr className="bg-neutral-50 border-b border-neutral-200">
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Zone / Ville</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Statut</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Attribution</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">Surface</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500 text-right">Actions</th>
+							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+								Zone / Ville
+							</th>
+							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+								Statut
+							</th>
+							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+								Attribution
+							</th>
+							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+								Surface
+							</th>
+							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500 text-right">
+								Actions
+							</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-neutral-100">
 						{filteredReports.map((report) => (
-							<tr 
-								key={report.id} 
+							<tr
+								key={report.id}
 								className="hover:bg-neutral-50 transition-colors cursor-pointer group"
 								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
 							>
 								<td className="px-6 py-4">
 									<div className="flex flex-col">
-										<span className="font-semibold text-neutral-800">{report.city}</span>
-										<span className="text-xs text-neutral-500">Dept: {report.department.code}</span>
+										<span className="font-semibold text-neutral-800">
+											{report.city}
+										</span>
+										<span className="text-xs text-neutral-500">
+											Dept: {report.department.code}
+										</span>
 									</div>
 								</td>
 								<td className="px-6 py-4">
@@ -119,16 +142,24 @@ export function ReportsTrackingTab() {
 										<div className="flex items-center gap-2 text-green-700">
 											<UserCheck size={16} />
 											<div className="flex flex-col">
-												<span className="text-sm font-medium">{report.affectedUser.login}</span>
-												<span className="text-[10px] opacity-70">{report.affectedUser.email}</span>
+												<span className="text-sm font-medium">
+													{report.affectedUser.login}
+												</span>
+												<span className="text-[10px] opacity-70">
+													{report.affectedUser.email}
+												</span>
 											</div>
 										</div>
 									) : report.assignmentRequestedBy ? (
 										<div className="flex items-center gap-2 text-amber-600">
 											<Users size={16} />
 											<div className="flex flex-col">
-												<span className="text-sm font-medium italic">{report.assignmentRequestedBy.login}</span>
-												<span className="text-[10px] font-bold uppercase tracking-tighter">En attente</span>
+												<span className="text-sm font-medium italic">
+													{report.assignmentRequestedBy.login}
+												</span>
+												<span className="text-[10px] font-bold uppercase tracking-tighter">
+													En attente
+												</span>
 											</div>
 										</div>
 									) : (
@@ -143,7 +174,9 @@ export function ReportsTrackingTab() {
 								</td>
 								<td className="px-6 py-4 text-right">
 									<div className="flex items-center justify-end gap-1">
-										{(report.status === "validated" || report.status === "legal_validated" || report.status === "final_validated") && (
+										{(report.status === "validated" ||
+											report.status === "legal_validated" ||
+											report.status === "final_validated") && (
 											<Button
 												variant="outline"
 												size="sm"
@@ -155,7 +188,11 @@ export function ReportsTrackingTab() {
 												<span className="hidden sm:inline">En traitement</span>
 											</Button>
 										)}
-										<Button variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
+										<Button
+											variant="ghost"
+											size="icon"
+											className="group-hover:text-primary transition-colors"
+										>
 											<ChevronRight size={20} />
 										</Button>
 									</div>
@@ -164,7 +201,10 @@ export function ReportsTrackingTab() {
 						))}
 						{filteredReports.length === 0 && (
 							<tr>
-								<td colSpan={5} className="px-6 py-12 text-center text-neutral-500 italic">
+								<td
+									colSpan={5}
+									className="px-6 py-12 text-center text-neutral-500 italic"
+								>
 									Aucune zone trouvée pour ce filtre.
 								</td>
 							</tr>
