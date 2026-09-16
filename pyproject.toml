@@ -14,7 +14,7 @@ package-mode = false
 python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
+pre-commit = "^4.6.2"
 pytest = "^7.2.0"
 httpx = "^0.28.1"
 ipykernel = "^6.29.5"
@@ -30,8 +30,15 @@ target-version = "py313"
 src = [".", "backend", "data_pipeline", "analytics"]
 
 [tool.ruff.lint]
-# Enable isort, flake8-bugbear, and pyupgrade on top of the defaults
-extend-select = ["I", "B", "UP"]
+# pycodestyle (E4/E7/E9) and pyflakes (F) — the historical Ruff defaults — plus
+# isort, flake8-bugbear and pyupgrade. Listed explicitly because Ruff 0.16
+# widened its default rule set; adopting those extra rules is a separate step.
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+# backend/alembic/ (migrations) shadows the alembic package for the
+# first-party detection since Ruff 0.16
+known-third-party = ["alembic"]
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI's Depends()/Query() in defaults are the documented idiom, not B008
