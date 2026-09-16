@@ -1,5 +1,4 @@
 from logging import getLogger
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -10,14 +9,19 @@ from app.config import settings
 from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.image_upload import ImageUploadRequest, ImageUploadResponse
-from app.services.s3 import s3_service
+from app.services.images import (
+    LOCAL_UPLOAD_KEY,
+    MAX_UPLOAD_SIZE_BYTES,
+    local_upload_path,
+    sign_local_upload,
+    verify_local_upload,
+)
+from app.services.s3 import s3_service, sanitize_filename
 from app.services.user_auth import get_current_user, get_optional_current_user
 
 logger = getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/images", tags=["Images"])
-
-LOCAL_UPLOADS_PATH = Path("/app/uploads")
 
 ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
 
@@ -69,7 +73,7 @@ def generate_upload_url(
             detail=f"Type de fichier non autorisé. Types acceptés : {ALLOWED_TYPES}",
         )
 
-    max_size = 10 * 1024 * 1024
+    max_size = MAX_UPLOAD_SIZE_BYTES
     if upload_request.file_size and upload_request.file_size > max_size:
         raise AppHTTPException(
             status_code=400,
@@ -77,11 +81,16 @@ def generate_upload_url(
             detail=f"Fichier trop volumineux ({upload_request.file_size} octets). Taille maximale : {max_size} octets.",
         )
 
+    if upload_request.report_id and not upload_request.report_id.isdigit():
+        raise AppHTTPException(
+            status_code=400, type="INVALID_REPORT_ID", detail="Identifiant invalide."
+        )
+
     if not is_s3_configured():
         import uuid as uuid_module
 
         file_id = str(uuid_module.uuid4())
-        filename = upload_request.filename or "photo.jpg"
+        filename = sanitize_filename(upload_request.filename) or "photo.jpg"
         if upload_request.report_id:
             key = f"local/reports/{upload_request.report_id}/{file_id}_{filename}"
         else:
@@ -90,7 +99,11 @@ def generate_upload_url(
         base_url = str(request.base_url).rstrip("/")
         return ImageUploadResponse(
             upload_url=f"{base_url}/api/v1/images/local-upload",
-            fields={"key": key, "Content-Type": content_type},
+            fields={
+                "key": key,
+                "Content-Type": content_type,
+                **sign_local_upload(key),
+            },
             file_url=f"{base_url}/api/v1/images/local/{key}",
             expires_in=3600,
             key=key,
@@ -117,27 +130,44 @@ def generate_upload_url(
         ) from e
 
 
-@router.post("/local-upload", status_code=204)
+def local_storage_only() -> None:
+    """Le repli local n'existe pas quand S3 est configuré (production)."""
+    if is_s3_configured():
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
+@router.post(
+    "/local-upload", status_code=204, dependencies=[Depends(local_storage_only)]
+)
 async def local_upload(
     key: Annotated[str, Form()],
+    expires: Annotated[str, Form()],
+    signature: Annotated[str, Form()],
     file: Annotated[UploadFile, File()],
 ) -> None:
-    """Fallback local file storage — utilisé uniquement en développement quand S3 n'est pas configuré."""
-    relative_key = key.removeprefix("local/")
-    file_path = LOCAL_UPLOADS_PATH / relative_key
-    file_path.parent.mkdir(parents=True, exist_ok=True)
+    """Repli local sans S3 : la clé, signée par `upload-url`, ne peut être ni forgée ni détournée."""
+    file_path = local_upload_path(key)
+    if (
+        file_path is None
+        or not LOCAL_UPLOAD_KEY.match(key)
+        or not verify_local_upload(key, expires, signature)
+    ):
+        raise HTTPException(status_code=403, detail="Clé d'envoi invalide")
     content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux")
+    file_path.parent.mkdir(parents=True, exist_ok=True)
     file_path.write_bytes(content)
 
 
-@router.get("/local/{key:path}")
+@router.get("/local/{key:path}", dependencies=[Depends(local_storage_only)])
 async def get_local_file(
     key: str,
     _: User | None = Depends(get_optional_current_user),
 ) -> FileResponse:
-    """Sert les fichiers uploadés localement en développement."""
-    file_path = LOCAL_UPLOADS_PATH / key.removeprefix("local/")
-    if not file_path.exists():
+    """Sert les fichiers du repli local ; le chemin ne peut pas sortir du dossier d'envoi."""
+    file_path = local_upload_path(key)
+    if file_path is None or not file_path.is_file():
         raise HTTPException(status_code=404, detail="Fichier non trouvé")
     return FileResponse(file_path)
 
