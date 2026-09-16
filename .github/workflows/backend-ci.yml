@@ -86,6 +86,13 @@ jobs:
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
+
+      - name: Type check (mypy)
+        working-directory: ./backend
+        # Non bloquant tant que les erreurs existantes ne sont pas corrigées ;
+        # retirer continue-on-error une fois `make typecheck` au vert.
+        continue-on-error: true
+        run: make typecheck
   deploy:
     needs: build-test
     uses: "./.github/workflows/deploy.yml"

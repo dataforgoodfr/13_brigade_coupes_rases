@@ -35,7 +35,8 @@ Exemple : `chore(readme): ajouter détails pour contribuer au repo`.
 Les mêmes vérifications tournent en CI ; les lancer en local évite un aller-retour.
 
 - Python (backend, data pipeline, analytics) : `pre-commit run --all-files` à la racine (ruff, formatage, [installation de pre-commit](https://pre-commit.com/)).
-- Backend : `make test` dans `backend/`.
+- Backend : `make test` et `make typecheck` (mypy) dans `backend/`.
+- Data pipeline : `poetry run mypy` dans `data_pipeline/`.
 - Frontend : `pnpm lint`, `pnpm build` et `pnpm test` dans `frontend/`.
 
 ## Pull requests

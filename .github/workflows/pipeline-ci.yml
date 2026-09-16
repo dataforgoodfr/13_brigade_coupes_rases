@@ -1,0 +1,52 @@
+name: Pipeline CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "data_pipeline/**"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "data_pipeline/**"
+      - "pyproject.toml"
+
+concurrency:
+  group: pipeline-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: data_pipeline
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: data_pipeline/.venv
+          key: ${{ runner.os }}-pipeline-poetry-${{ hashFiles('data_pipeline/poetry.lock') }}
+
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install --no-interaction --no-root
+
+      - name: Type check (mypy)
+        # Non bloquant tant que les erreurs existantes ne sont pas corrigées ;
+        # retirer continue-on-error une fois `poetry run mypy` au vert.
+        continue-on-error: true
+        run: poetry run mypy
