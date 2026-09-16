@@ -4,12 +4,14 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import S3Manager
 
 
-def upload_gold_to_s3():
+def upload_gold_to_s3() -> None:
     s3_manager = S3Manager()
     current_key = "data_pipeline/gold/sufosat/current/sufosat_clusters_enriched.fgb"
     previous_key = "data_pipeline/gold/sufosat/previous/sufosat_clusters_enriched.fgb"
 
     bucket_contents = s3_manager.list_bucket_contents()
+    if bucket_contents is None:
+        raise RuntimeError("Unable to list the S3 bucket, gold rotation aborted")
 
     if current_key in bucket_contents:
         logging.info("Rotating current gold to previous...")
