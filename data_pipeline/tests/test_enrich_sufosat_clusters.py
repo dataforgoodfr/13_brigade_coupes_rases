@@ -7,7 +7,9 @@ from pipeline.scripts.enrich_sufosat_clusters import overlay
 
 def clusters(*geoms: Polygon) -> dask_geopandas.GeoDataFrame:
     gdf = gpd.GeoDataFrame(
-        {"clear_cut_group": list(range(len(geoms)))}, geometry=list(geoms), crs="EPSG:2154"
+        {"clear_cut_group": list(range(len(geoms)))},
+        geometry=list(geoms),
+        crs="EPSG:2154",
     )
     return dask_geopandas.from_geopandas(gdf, npartitions=1)
 

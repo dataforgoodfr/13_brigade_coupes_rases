@@ -23,14 +23,12 @@ def squares(
     )
 
 
-
 def test_close_polygons_share_a_group_and_the_rest_continue_numbering() -> None:
     gdf = cluster_clear_cuts(squares((0, 0), (150, 0), (5000, 0)), 100, 365)
 
     groups = gdf["clear_cut_group"].tolist()
     assert groups[0] == groups[1] == 0
     assert groups[2] == 1
-
 
 
 def test_grouping_is_transitive() -> None:
@@ -41,7 +39,9 @@ def test_grouping_is_transitive() -> None:
 
 
 def test_union_aggregates_dates_and_sizes() -> None:
-    gdf = squares((0, 0), (150, 0), (5000, 0), dates=["2026-01-01", "2026-01-31", "2026-06-01"])
+    gdf = squares(
+        (0, 0), (150, 0), (5000, 0), dates=["2026-01-01", "2026-01-31", "2026-06-01"]
+    )
     gdf["clear_cut_group"] = [0, 0, 1]
 
     clusters = union_clear_cut_clusters(gdf)
@@ -68,7 +68,9 @@ def test_concave_hull_score_is_one_for_a_convex_shape() -> None:
 def test_concave_hull_score_is_below_one_for_a_hollow_shape() -> None:
     # Un anneau : sa surface est bien plus petite que celle de son enveloppe.
     ring = box(0, 0, 100, 100).difference(box(10, 10, 90, 90))
-    gdf = gpd.GeoDataFrame({"date": [pd.Timestamp("2026-09-15")]}, geometry=[ring], crs="EPSG:2154")
+    gdf = gpd.GeoDataFrame(
+        {"date": [pd.Timestamp("2026-09-15")]}, geometry=[ring], crs="EPSG:2154"
+    )
 
     scored = add_concave_hull_score(gdf, concave_hull_ratio=1.0)
 
