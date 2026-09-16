@@ -83,11 +83,13 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 					]
 				}
 			}),
+			// Doit précéder react() : le plugin du routeur transforme les routes
+			// avant la compilation JSX.
+			tanstackRouter({ autoCodeSplitting: true }),
 			react(),
 			tailwindcss(),
 			tsconfigPaths(),
-			reactClickToComponent(),
-			tanstackRouter({ autoCodeSplitting: true })
+			reactClickToComponent()
 		] as PluginOption[]
 	}
 }

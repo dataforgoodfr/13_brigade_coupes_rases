@@ -11,14 +11,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as MyCutsRouteImport } from './routes/my-cuts'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as AdministrationRouteImport } from './routes/administration'
 import { Route as ClearCutsRouteImport } from './routes/_clear-cuts'
-import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as AdministrationRouteImport } from './routes/administration'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MyCutsRouteImport } from './routes/my-cuts'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 
 const IndexLazyRouteImport = createFileRoute('/')()
 const ClearCutsClearCutsIndexLazyRouteImport = createFileRoute(
@@ -28,29 +27,13 @@ const ClearCutsClearCutsClearCutIdLazyRouteImport = createFileRoute(
   '/_clear-cuts/clear-cuts/$clearCutId',
 )()
 
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const IndexLazyRoute = IndexLazyRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyCutsRoute = MyCutsRouteImport.update({
-  id: '/my-cuts',
-  path: '/my-cuts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const ClearCutsRoute = ClearCutsRouteImport.update({
+  id: '/_clear-cuts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdministrationRoute = AdministrationRouteImport.update({
@@ -58,19 +41,31 @@ const AdministrationRoute = AdministrationRouteImport.update({
   path: '/administration',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClearCutsRoute = ClearCutsRouteImport.update({
-  id: '/_clear-cuts',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexLazyRoute = IndexLazyRouteImport.update({
-  id: '/',
-  path: '/',
+const MyCutsRoute = MyCutsRouteImport.update({
+  id: '/my-cuts',
+  path: '/my-cuts',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClearCutsClearCutsIndexLazyRoute =
   ClearCutsClearCutsIndexLazyRouteImport.update({
     id: '/clear-cuts/',
@@ -99,7 +94,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/clear-cuts/$clearCutId': typeof ClearCutsClearCutsClearCutIdLazyRoute
-  '/clear-cuts': typeof ClearCutsClearCutsIndexLazyRoute
+  '/clear-cuts/': typeof ClearCutsClearCutsIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
@@ -115,7 +110,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
-  '/_auth': typeof AuthRoute
   '/_clear-cuts': typeof ClearCutsRouteWithChildren
   '/administration': typeof AdministrationRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -137,7 +131,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/clear-cuts/$clearCutId'
-    | '/clear-cuts'
+    | '/clear-cuts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,7 +146,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_auth'
     | '/_clear-cuts'
     | '/administration'
     | '/forgot-password'
@@ -166,7 +159,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  AuthRoute: typeof AuthRoute
   ClearCutsRoute: typeof ClearCutsRouteWithChildren
   AdministrationRoute: typeof AdministrationRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -178,39 +170,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-cuts': {
-      id: '/my-cuts'
-      path: '/my-cuts'
-      fullPath: '/my-cuts'
-      preLoaderRoute: typeof MyCutsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
+    '/_clear-cuts': {
+      id: '/_clear-cuts'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ClearCutsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/administration': {
@@ -220,31 +191,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdministrationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_clear-cuts': {
-      id: '/_clear-cuts'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof ClearCutsRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexLazyRouteImport
+    '/my-cuts': {
+      id: '/my-cuts'
+      path: '/my-cuts'
+      fullPath: '/my-cuts'
+      preLoaderRoute: typeof MyCutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_clear-cuts/clear-cuts/': {
       id: '/_clear-cuts/clear-cuts/'
       path: '/clear-cuts'
-      fullPath: '/clear-cuts'
+      fullPath: '/clear-cuts/'
       preLoaderRoute: typeof ClearCutsClearCutsIndexLazyRouteImport
       parentRoute: typeof ClearCutsRoute
     }
@@ -274,7 +259,6 @@ const ClearCutsRouteWithChildren = ClearCutsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  AuthRoute: AuthRoute,
   ClearCutsRoute: ClearCutsRouteWithChildren,
   AdministrationRoute: AdministrationRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
