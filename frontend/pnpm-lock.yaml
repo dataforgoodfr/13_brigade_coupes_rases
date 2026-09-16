@@ -93,8 +93,8 @@ importers:
         specifier: ^1.7.4
         version: 1.7.4
       ky:
-        specifier: ^1.14.3
-        version: 1.14.3
+        specifier: ^2.1.0
+        version: 2.1.0
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -4100,9 +4100,9 @@ packages:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
 
-  ky@1.14.3:
-    resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
-    engines: {node: '>=18'}
+  ky@2.1.0:
+    resolution: {integrity: sha512-nIKwelw+7qVqKOlX4Eht6GXfEXlDHcdIjyLWV3s119kYt5s+70ayTnYS+0fRNmtgGRRAfqdeWQbh8YizqkS0ng==}
+    engines: {node: '>=22'}
 
   leaflet@1.9.4:
     resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
@@ -9281,7 +9281,7 @@ snapshots:
 
   jsonpointer@5.0.1: {}
 
-  ky@1.14.3: {}
+  ky@2.1.0: {}
 
   leaflet@1.9.4: {}
 

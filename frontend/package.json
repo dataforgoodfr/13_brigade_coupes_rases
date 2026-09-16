@@ -57,7 +57,7 @@
     "date-fns": "^4.4.0",
     "es-toolkit": "^1.52.0",
     "geo-coordinates-parser": "^1.7.4",
-    "ky": "^1.14.3",
+    "ky": "^2.1.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
     "nanoid": "^5.1.16",

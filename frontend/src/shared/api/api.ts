@@ -1,5 +1,5 @@
 import { isUndefined } from "es-toolkit"
-import ky from "ky"
+import ky, { HTTPError } from "ky"
 
 import { type TokenResponse, tokenSchema } from "@/features/user/store/me"
 import type { RequestedContent } from "@/shared/api/types"
@@ -9,17 +9,17 @@ const tokenStorage = localStorageRepository<TokenResponse>("token")
 const meStorage = localStorageRepository<TokenResponse>("me")
 
 export const api = ky.extend({
-	prefixUrl: import.meta.env.VITE_API,
+	prefix: import.meta.env.VITE_API,
 	retry: {
 		statusCodes: [408, 413, 429, 500, 502, 503, 504, 401],
 		methods: ["get", "post", "put", "head", "delete", "options", "trace"]
 	},
 	hooks: {
 		beforeError: [
-			async (error) => {
-				const { response } = error
-				if (response.status === 401) {
-					error.name = UNAUTHORIZED_ERROR_NAME
+			async ({ error }) => {
+				if (error instanceof HTTPError && error.response.status === 401) {
+					// ky 2 type `name` comme le littéral "HTTPError"
+					;(error as Error).name = UNAUTHORIZED_ERROR_NAME
 				}
 				return error
 			}
@@ -37,7 +37,7 @@ export const api = ky.extend({
 				try {
 					const tokenResponse = await ky
 						.post(`api/v1/token/refresh/`, {
-							prefixUrl: import.meta.env.VITE_API,
+							prefix: import.meta.env.VITE_API,
 							json: {
 								refreshToken
 							}
