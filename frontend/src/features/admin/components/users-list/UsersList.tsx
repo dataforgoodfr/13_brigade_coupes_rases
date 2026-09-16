@@ -1,11 +1,10 @@
 import {
 	createColumnHelper,
 	flexRender,
-	getCoreRowModel,
-	useReactTable
+	tableFeatures,
+	useTable
 } from "@tanstack/react-table"
 import { upperFirst } from "es-toolkit"
-import { useMemo } from "react"
 
 import {
 	Table,
@@ -37,7 +36,10 @@ import {
 	useEnhancedItems
 } from "@/shared/items"
 
-const columnHelper = createColumnHelper<User>()
+// Only the core row model is used: no sorting, filtering or pagination feature
+// (they are handled server-side through the users filters store)
+const features = tableFeatures({})
+const columnHelper = createColumnHelper<typeof features, User>()
 
 type Props = {
 	label: string
@@ -105,7 +107,7 @@ export const UsersList: React.FC = () => {
 		getItemLabel: namedIdTranslator,
 		getItemValue: namedIdTranslator
 	})
-	const columns = [
+	const columns = columnHelper.columns([
 		columnHelper.accessor("firstName", {
 			id: "firstName",
 			header: () => <TextHeader field="firstName" label="Prénom" />
@@ -166,18 +168,13 @@ export const UsersList: React.FC = () => {
 			)
 		}),
 		columnHelper.display({ id: "action" })
-	]
-	const table = useReactTable({
-		data: users,
-		columns,
-		getCoreRowModel: getCoreRowModel()
-	})
-	const headerGroups = useMemo(() => table.getHeaderGroups(), [table])
+	])
+	const table = useTable({ features, columns, data: users })
 
 	return (
 		<Table className="sm:table-fixed">
 			<TableHeader>
-				{headerGroups.map((headerGroup) => (
+				{table.getHeaderGroups().map((headerGroup) => (
 					<TableRow key={headerGroup.id}>
 						{headerGroup.headers.map((header) => {
 							return (
@@ -196,7 +193,7 @@ export const UsersList: React.FC = () => {
 				{table.getRowModel().rows.map((row) => {
 					return (
 						<TableRow key={row.id}>
-							{row.getVisibleCells().map((cell) => {
+							{row.getAllCells().map((cell) => {
 								return (
 									<TableCell key={cell.id}>
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}
