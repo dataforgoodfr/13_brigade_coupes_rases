@@ -227,7 +227,7 @@ def volunteer_create_clear_cut_report(
     import math
     from datetime import datetime as dt
 
-    from shapely.geometry import shape
+    from shapely.geometry import Polygon, shape
 
     geom_type = polygon_geojson.get("type")
 
@@ -250,7 +250,7 @@ def volunteer_create_clear_cut_report(
     centroid_wkt = f"POINT({centroid.x} {centroid.y})"
 
     # Build MultiPolygon WKT — Geoman always gives Polygon, wrap it
-    if geom_type == "Polygon":
+    if isinstance(shapely_geom, Polygon):
         exterior = shapely_geom.exterior.coords
         coords_str = ", ".join(f"{x} {y}" for x, y in exterior)
         boundary_wkt = f"MULTIPOLYGON((({coords_str})))"
