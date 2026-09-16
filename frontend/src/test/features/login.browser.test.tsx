@@ -6,7 +6,7 @@ import { renderApp } from "@/test/renderApp"
 
 describe("Login", () => {
 	it("should log user", async () => {
-		const { user } = renderApp({ route: "/login", user: undefined })
+		const { user } = await renderApp({ route: "/login", user: undefined })
 		await loginForm({ user }).logVolunteer()
 		await screen.findByText("COUPES RASES")
 	})

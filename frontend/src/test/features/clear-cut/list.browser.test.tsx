@@ -22,7 +22,7 @@ describe("Clear cuts list", () => {
 				previews: [report]
 			})
 		)
-		const { user } = renderApp({
+		const { user } = await renderApp({
 			preloadedState: {
 				filters: filtersState
 			},
