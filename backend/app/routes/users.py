@@ -81,7 +81,9 @@ def list_users(
 @router.get(
     "/{id}", response_model=UserResponseSchema, response_model_exclude_none=True
 )
-def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
+def get_user(
+    id: int, db: Session = db_session, _: User = Depends(get_admin_user)
+) -> UserResponseSchema:
     logger.info(db)
     return get_user_by_id(id, db)
 
@@ -90,7 +92,9 @@ def get_user(id: int, db: Session = db_session) -> UserResponseSchema:
     "/{id}",
     status_code=204,
 )
-def delete_user(id: int, db: Session = db_session) -> None:
+def delete_user(
+    id: int, db: Session = db_session, _: User = Depends(get_admin_user)
+) -> None:
     logger.info(db)
     return delete_user_by_id(id, db)
 
@@ -100,7 +104,10 @@ def delete_user(id: int, db: Session = db_session) -> None:
     status_code=204,
 )
 def update_existing_user(
-    id: int, item: UserUpdateSchema, db: Session = db_session
+    id: int,
+    item: UserUpdateSchema,
+    db: Session = db_session,
+    _: User = Depends(get_admin_user),
 ) -> None:
     logger.info(db)
     update_user(id, item, db)
