@@ -37,7 +37,7 @@ Les mêmes vérifications tournent en CI ; les lancer en local évite un aller-r
 - Python (backend, data pipeline, analytics) : `pre-commit run --all-files` à la racine (ruff, formatage, [installation de pre-commit](https://pre-commit.com/)).
 - Backend : `make test` et `make typecheck` (mypy) dans `backend/`.
 - Data pipeline : `poetry run mypy` dans `data_pipeline/`.
-- Frontend : `pnpm lint`, `pnpm build` et `pnpm test` dans `frontend/`.
+- Frontend : `pnpm lint`, `pnpm test:unit`, `pnpm build` et `pnpm test:browser` dans `frontend/` (`pnpm test` lance les deux projets Vitest en mode watch).
 
 ## Pull requests
 

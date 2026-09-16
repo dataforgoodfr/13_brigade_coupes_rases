@@ -1,6 +1,5 @@
 import { isUndefined } from "es-toolkit"
 import ky from "ky"
-import z from "zod"
 
 import { type TokenResponse, tokenSchema } from "@/features/user/store/me"
 import type { RequestedContent } from "@/shared/api/types"
@@ -126,16 +125,6 @@ export const parseParam = (
 		searchParams.append(key, JSON.stringify(value))
 	}
 }
-
-export const toApiErrorSchema = <
-	Type extends z.ZodLiteral,
-	Content extends z.ZodType = z.ZodString
->(
-	type: Type,
-	content: Content
-) => z.object({ detail: z.object({ type, content: content }) })
-export const toStringApiErrorSchema = <Type extends z.ZodLiteral>(type: Type) =>
-	toApiErrorSchema(type, z.string())
 
 export const setSuccess = <TValue, TError>(
 	requestedContent: RequestedContent<TValue, TError>,

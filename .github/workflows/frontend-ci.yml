@@ -46,11 +46,15 @@ jobs:
       - name: Lint and format check (Biome)
         run: pnpm lint
 
+      - name: Unit tests (no browser)
+        run: pnpm test:unit
+
       - name: Build project
         run: pnpm run build
 
-      - name: Run tests
-        run: pnpm test
+      # Browser tests load the built stylesheets, so they run after the build
+      - name: Browser tests (Playwright)
+        run: pnpm test:browser
 
   deploy:
     needs: build-test
