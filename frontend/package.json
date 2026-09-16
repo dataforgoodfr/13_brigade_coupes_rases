@@ -75,7 +75,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.4",
+    "@biomejs/biome": "^2.5.14",
     "@chromatic-com/storybook": "4.1.1",
     "@faker-js/faker": "^10.6.0",
     "@storybook/addon-docs": "9.1.5",
