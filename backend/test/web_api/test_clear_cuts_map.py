@@ -146,3 +146,16 @@ def test_get_report_preview_by_id(client: TestClient, db: Session) -> None:
     assert response.status_code == 200
     assert response.json()["id"] == preview["id"]
     assert response.json()["city"] == preview["city"]
+
+
+def test_unknown_report_preview_returns_not_found(client: TestClient) -> None:
+    response = client.get(f"{MAP}/999999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["type"] == "REPORT_NOT_FOUND"
+
+
+def test_invalid_filters_return_a_validation_error(client: TestClient) -> None:
+    response = client.get(MAP, params={"swLat": "north"})
+
+    assert response.status_code == 422
