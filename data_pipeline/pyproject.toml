@@ -28,6 +28,7 @@ tqdm = "^4.67.1"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.6.2"
 pytest = "^9.1.1"
+pytest-cov = "^7.0.0"
 httpx = "^0.28.1"
 moto = "^5.1.1"
 mypy = "^2.3.1"
@@ -41,12 +42,23 @@ types-shapely = "^2.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+# Tests : `poetry run pytest` (tests/, sans base ni S3, couverture de pipeline/).
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov"
+
+[tool.coverage.run]
+source = ["pipeline"]
+
+[tool.coverage.report]
+show_missing = true
+
 # Vérification de types : `poetry run mypy` (strict). Le sous-projet airtable/
 # a son propre environnement (requirements.txt, uv) et n'est pas couvert ici.
 [tool.mypy]
 strict = true
 python_version = "3.13"
-files = ["pipeline", "bootstrap"]
+files = ["pipeline", "bootstrap", "tests"]
 # pipeline/scripts et bootstrap/scripts sont deux paquets distincts sans
 # __init__.py parent : les identifier par leur chemin depuis ce dossier.
 explicit_package_bases = true
