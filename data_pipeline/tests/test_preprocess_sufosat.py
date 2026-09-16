@@ -75,3 +75,18 @@ def test_concave_hull_score_is_below_one_for_a_hollow_shape() -> None:
     scored = add_concave_hull_score(gdf, concave_hull_ratio=1.0)
 
     assert 0 < scored["concave_hull_score"].iloc[0] < 0.5
+
+
+def test_isolated_polygons_each_get_their_own_group() -> None:
+    # Cas d'un passage incrémental : aucun pixel voisin, donc aucune paire.
+    gdf = cluster_clear_cuts(squares((0, 0), (5000, 0), (0, 5000)), 100, 365)
+
+    assert sorted(gdf["clear_cut_group"].tolist()) == [0, 1, 2]
+
+
+def test_polygons_too_far_apart_in_time_are_not_grouped() -> None:
+    gdf = cluster_clear_cuts(
+        squares((0, 0), (150, 0), dates=["2025-01-01", "2026-09-15"]), 100, 365
+    )
+
+    assert gdf["clear_cut_group"].nunique() == 2
