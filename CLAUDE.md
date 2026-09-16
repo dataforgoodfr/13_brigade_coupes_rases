@@ -76,7 +76,8 @@ cd frontend
 pnpm i
 pnpm dev              # port 5173, hits real backend
 pnpm dev:mock         # uses MSW mocks, no backend needed
-pnpm cleanup          # Biome format + lint
+pnpm cleanup          # Biome format + lint (writes)
+pnpm lint             # Biome check only, what the CI runs
 pnpm build            # type-check + production build
 pnpm test             # Vitest unit tests
 pnpm storybook        # component explorer

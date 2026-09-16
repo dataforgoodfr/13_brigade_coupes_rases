@@ -42,7 +42,10 @@ jobs:
 
       - name: Install playwright
         run: pnpm install:playwright
-        
+
+      - name: Lint and format check (Biome)
+        run: pnpm lint
+
       - name: Build project
         run: pnpm run build
 
