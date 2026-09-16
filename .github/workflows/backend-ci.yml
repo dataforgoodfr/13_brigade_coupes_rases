@@ -73,6 +73,12 @@ jobs:
         run: |
           poetry install --with backend,dev --no-interaction
 
+      - name: Unit tests (no database)
+        working-directory: ./backend
+        run: make test-unit
+        env:
+          ENVIRONMENT: test
+
       - name: Run tests
         working-directory: ./backend
         run: |
@@ -80,6 +86,13 @@ jobs:
         env:
           ENVIRONMENT: test
           DATABASE_URL: postgresql://devuser:devuser@db:5432/test
+
+      - name: Coverage summary
+        if: always()
+        working-directory: ./backend
+        run: |
+          echo "## Couverture backend" >> "$GITHUB_STEP_SUMMARY"
+          poetry run coverage report --format=markdown --skip-covered >> "$GITHUB_STEP_SUMMARY"
 
       - name: Type check (mypy)
         working-directory: ./backend

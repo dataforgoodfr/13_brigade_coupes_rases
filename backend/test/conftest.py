@@ -2,6 +2,7 @@ import os
 
 os.environ["ENVIRONMENT"] = "test"
 
+import pathlib
 import sys
 from collections.abc import Iterator
 
@@ -32,9 +33,20 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+UNIT_TESTS_DIR = pathlib.Path(__file__).parent / "unit"
+
+
 def pytest_collection_modifyitems(
     session: pytest.Session, config: pytest.Config, items: list[pytest.Item]
 ) -> None:
+    # Niveau de test d'après le dossier : test/unit/ ne touche pas la base,
+    # tout le reste passe par la fixture `db` (base migrée et peuplée).
+    for item in items:
+        if UNIT_TESTS_DIR in item.path.parents:
+            item.add_marker(pytest.mark.unit)
+        else:
+            item.add_marker(pytest.mark.integration)
+
     focused_items = [item for item in items if item.get_closest_marker("focus")]
 
     # If there are focused tests, skip all others
@@ -51,7 +63,9 @@ def migration() -> None:
 
 
 @pytest.fixture(scope="function")
-def db() -> Iterator[Session]:
+def db(request: pytest.FixtureRequest) -> Iterator[Session]:
+    if request.node.get_closest_marker("unit"):
+        pytest.fail("Un test de test/unit/ ne doit pas utiliser la base de données")
     db = SessionLocal()
     seed_database()
     try:

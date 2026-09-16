@@ -16,6 +16,7 @@ python = "^3.13"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.6.2"
 pytest = "^9.1.1"
+pytest-cov = "^7.0.0"
 httpx = "^0.28.1"
 ipykernel = "^7.3.0"
 mypy = "^2.3.1"
@@ -46,8 +47,25 @@ pyairtable = "^3.3.0"
 docker-start = "docker compose up -d --build"
 docker-stop = "docker compose down"
 
+# Tests : `make test-unit` (sans base de données) ou `make test` (tout, avec
+# couverture). Les marqueurs unit / integration sont posés automatiquement
+# par test/conftest.py d'après le dossier du test.
 [tool.pytest.ini_options]
-markers = ["focus: run only these tests"]
+addopts = "--strict-markers"
+markers = [
+    "unit: tests sans base de données ni réseau (test/unit/)",
+    "integration: tests sur une base PostGIS migrée et peuplée",
+    "focus: run only these tests",
+]
+
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
+# Seuil volontairement en dessous de la couverture actuelle (75 %) : il bloque
+# les régressions, il n'impose pas de tests inutiles.
+fail_under = 70
 
 # Vérification de types : `make typecheck`.
 [tool.mypy]
