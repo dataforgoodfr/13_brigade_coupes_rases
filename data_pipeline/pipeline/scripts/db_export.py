@@ -5,6 +5,8 @@ Simple functional script to export database to FlatGeobuf file.
 from pathlib import Path
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 from sqlalchemy import Engine, create_engine
 
 
@@ -98,19 +100,27 @@ def extract_data(engine: Engine) -> gpd.GeoDataFrame:
     return gdf
 
 
+def array_to_string(value: object) -> str | None:
+    """Render a PostgreSQL array as text, or None when it is missing or empty.
+
+    A report without a city comes out as ``ARRAY[NULL]`` and a value read back
+    from a file may be NaN instead of a list.
+    """
+    if isinstance(value, np.ndarray):
+        value = value.tolist()
+    if not isinstance(value, list | tuple):
+        return None
+    items = [item for item in value if item is not None and not pd.isna(item)]
+    return str(items) if items else None
+
+
 def convert_arrays_to_strings(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """Convert array columns to strings for FlatGeobuf compatibility."""
     print("🔄 Converting arrays to strings...")
 
-    if "natura2000_codes" in gdf.columns:
-        gdf["natura2000_codes"] = gdf["natura2000_codes"].apply(
-            lambda x: str(list(x)) if x is not None and len(x) > 0 else None
-        )
-
-    if "cities" in gdf.columns:
-        gdf["cities"] = gdf["cities"].apply(
-            lambda x: str(list(x)) if x is not None and len(x) > 0 else None
-        )
+    for column in ("natura2000_codes", "cities"):
+        if column in gdf.columns:
+            gdf[column] = gdf[column].apply(array_to_string)
 
     return gdf
 
