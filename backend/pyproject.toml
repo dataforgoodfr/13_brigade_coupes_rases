@@ -39,7 +39,6 @@ bcrypt = "^5.0.0"
 python-multipart = "^0.0.32"
 geojson-pydantic = "^2.1.2"
 boto3 = "^1.35.0"
-pygeofilter = "^0.4.0"
 apscheduler = "^3.11.2"
 pyairtable = "^3.3.0"
 
