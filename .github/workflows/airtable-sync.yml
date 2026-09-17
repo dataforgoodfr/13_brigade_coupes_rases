@@ -13,6 +13,10 @@ on:
     - cron: "0 6 * * *"
     - cron: "0 10 * * *"
 
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
+
 concurrency:
   group: airtable-sync
   cancel-in-progress: false

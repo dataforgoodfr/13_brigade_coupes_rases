@@ -11,6 +11,10 @@ on:
         type: string
 
 # One deployment at a time, never cancelled
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
+
 concurrency:
   group: release
   cancel-in-progress: false

@@ -16,6 +16,10 @@ on:
       - "backend/**"
       - "pyproject.toml"
 
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

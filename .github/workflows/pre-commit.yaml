@@ -9,6 +9,10 @@ on:
   push:
     branches: [main]
 
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
