@@ -1,26 +1,6 @@
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-name = "bcr-root"
-version = "0.1.0"
-authors = ["DataForGood"]
-license = "MIT"
-readme = "README.md"
-package-mode = false
-
-[tool.poetry.dependencies]
-python = "^3.13"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^4.6.2"
-pytest = "^7.2.0"
-httpx = "^0.28.1"
-ipykernel = "^6.29.5"
-
-# Configuration Ruff unique pour tous les sous-projets Python (backend,
-# data_pipeline) : ruff remonte l'arborescence jusqu'à ce fichier.
+# Ce fichier ne porte que la configuration Ruff, commune aux sous-projets Python
+# (backend, data_pipeline) : ruff remonte l'arborescence jusqu'à ce fichier.
+# Aucun projet Poetry à la racine, chaque sous-projet gère ses dépendances.
 # See https://docs.astral.sh/ruff/settings
 [tool.ruff]
 target-version = "py313"
