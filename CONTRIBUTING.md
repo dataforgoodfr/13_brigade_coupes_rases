@@ -12,8 +12,8 @@ Pour obtenir un accès en écriture au dépôt, contactez les responsables sur l
 
 ## Branches
 
-- `develop` reçoit les pull requests ; c'est la branche par défaut.
-- `main` est la branche déployée (Clever Cloud, Storybook) : un mainteneur y fusionne `develop` par pull request.
+- `main` est la branche par défaut et reçoit les pull requests.
+- La mise en production se fait en publiant une release (voir le [README](./README.md#branches-et-déploiement)).
 
 Nommage des branches de travail :
 

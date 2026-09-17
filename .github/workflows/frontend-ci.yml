@@ -10,7 +10,7 @@ on:
     paths:
       - "frontend/**"
   pull_request:
-    branches: ["main", "develop"]
+    branches: ["main"]
     paths:
       - "frontend/**"
 
@@ -69,12 +69,3 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  deploy:
-    # Only after a merge on main; the job is skipped on pull requests
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    needs: build-test
-    uses: "./.github/workflows/deploy.yml"
-    secrets: inherit
-    with:
-      app-id: app_ab2f14d8-10a9-454d-9a7d-92ab22a54110
-      app-name: "frontend"
