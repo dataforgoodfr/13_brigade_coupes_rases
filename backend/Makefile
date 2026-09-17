@@ -38,6 +38,9 @@ test: ## Run all the tests with coverage (needs the test database, see upgrade-t
 test-unit: ## Run the unit tests only (no database needed)
 	poetry run pytest test/unit/ -m unit
 
+erd: ## Print the data model as a Mermaid erDiagram (see doc/architecture.md)
+	poetry run python -m erd
+
 typecheck: ## Run mypy (scope in pyproject.toml, [tool.mypy])
 	poetry run mypy
 
