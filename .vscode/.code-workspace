@@ -8,9 +8,6 @@
 		},
 		{
 			"path": "data_pipeline",
-		},
-		{
-			"path": "analytics",
 		}
 	]
 }

@@ -7,7 +7,6 @@ Projet [Data For Good](https://dataforgood.fr/), saison 13.
 - [Backend](./backend/README.md) — API FastAPI
 - [Frontend](./frontend/README.md) — application React
 - [Data pipeline](./data_pipeline/README.md) — ingestion des alertes et des couches de référence
-- [Analytics](./analytics/README.md) — notebooks d'exploration
 - [Documentation](./doc/README.md)
 - [Contribuer](./CONTRIBUTING.md) — branches, commits, vérifications avant une pull request
 
@@ -40,7 +39,6 @@ Le tout est hébergé sur [Clever Cloud](https://www.clever-cloud.com/).
 ├── 📁 backend/        API et gestion de la base de données
 ├── 📁 frontend/       application web (carte, formulaires)
 ├── 📁 data_pipeline/  collecte et traitement des données
-├── 📁 analytics/      notebooks d'analyse
 ├── 📁 doc/            documentation
 ├── 📁 docker/         image PostgreSQL/PostGIS de développement
 └── 📁 keepass/        secrets partagés (chiffrés)
@@ -134,7 +132,7 @@ flowchart LR
 Prérequis :
 
 - [Docker](https://docs.docker.com/get-docker/) et Docker Compose ;
-- [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/`, `data_pipeline/` et `analytics/`, chacun avec son propre `pyproject.toml` ;
+- [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
 - [Node.js 24](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
@@ -193,19 +191,21 @@ Cette base est la source de vérité : tout secret utilisé par le projet (compt
 
 ### Branches et déploiement
 
-Les pull requests visent `develop`. La fusion de `develop` dans `main` déclenche, via GitHub Actions, la création d'un tag et d'une release puis le déploiement sur Clever Cloud du backend et du frontend, et la publication du Storybook sur GitHub Pages.
+Les pull requests visent `main`. Fusionner n'entraîne aucun déploiement : la mise en production se fait en publiant une [release GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/releases/new) avec un tag `vX.Y.Z` (bouton « Generate release notes » pour lister les pull requests fusionnées). Le workflow **Release** déploie alors le backend et le frontend sur Clever Cloud. Une release marquée « pre-release » n'est pas déployée.
+
+Pour revenir à une version antérieure, lancer le workflow Release à la main (onglet Actions, « Run workflow ») en indiquant le tag à redéployer.
+
+Le Storybook est publié sur GitHub Pages à chaque modification du frontend sur `main`.
 
 Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bouton « Run workflow »).
 
-**Backend CI** : tests du backend (pytest, mypy) puis déploiement.
+**Backend CI** : tests du backend (pytest, mypy).
 
 ![](doc/images/backend_ci.png)
 
-**Frontend CI** : lint, tests unitaires et navigateur (Playwright) puis déploiement.
+**Frontend CI** : lint, tests unitaires et navigateur (Playwright).
 
 ![](doc/images/frontend_ci.png)
-
-> Si le déploiement échoue avec « The clever-cloud application is up-to-date », aucun nouveau commit n'a été créé depuis le dernier déploiement (c'est le cas sur la capture ci-dessus).
 
 **Database Actions** : actions manuelles sur la base (upgrade, setup, reset).
 

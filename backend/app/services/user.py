@@ -167,8 +167,9 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
+    """Deleted accounts are ignored."""
     email = email.strip()
-    return db.query(User).filter_by(email=email).first()
+    return db.query(User).filter(User.email == email, User.deleted_at.is_(None)).first()
 
 
 def update_me(db: Session, user: User, request: MeUpdateSchema) -> None:

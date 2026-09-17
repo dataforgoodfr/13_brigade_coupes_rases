@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag à déployer (ex. v1.2.0) ; par défaut la référence courante"
+        required: false
+        type: string
+
+# One deployment at a time, never cancelled
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    # Pre-releases are not deployed
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    uses: "./.github/workflows/deploy.yml"
+    secrets: inherit
+    with:
+      app-id: app_5292f305-0563-4fd7-b50a-56f6caf806db
+      ref: ${{ inputs.tag || github.ref }}
+
+  frontend:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    uses: "./.github/workflows/deploy.yml"
+    secrets: inherit
+    with:
+      app-id: app_ab2f14d8-10a9-454d-9a7d-92ab22a54110
+      ref: ${{ inputs.tag || github.ref }}

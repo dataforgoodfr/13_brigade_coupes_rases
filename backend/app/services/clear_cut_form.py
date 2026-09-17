@@ -16,9 +16,13 @@ from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSche
 logger = getLogger(__name__)
 
 
-def get_clear_cut_form_by_id(db: Session, form_id: int) -> ClearCutFormResponse:
+def get_clear_cut_form_by_id(
+    db: Session, form_id: int, report_id: int | None = None
+) -> ClearCutFormResponse:
     report_form = db.get(ClearCutForm, form_id)
-    if report_form is None:
+    if report_form is None or (
+        report_id is not None and report_form.report_id != report_id
+    ):
         raise AppHTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             type="REPORT_NOT_FOUND",
