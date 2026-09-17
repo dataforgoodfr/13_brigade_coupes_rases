@@ -251,7 +251,6 @@ class DatabaseSeeder:
         # TODO: There is an issue with the BDFORET joins
         # Some clear-cuts overlap with several BDFORET polygons of the same or different wood types
         # This can lead to a BDFORET coverage > 100%, which doesn't make sense.
-        # See `analytics/notebooks/stats_bdforet.ipynb` for details.
         # For now, as a quick workaround, we simply normalize the areas to avoid a coverage > 100%
         # Eventually, this should be handled in:
         # - `data_pipeline/bootstrap/scripts/preprocess_bdforet.py` (for deduplicating polygons of the same wood type)
