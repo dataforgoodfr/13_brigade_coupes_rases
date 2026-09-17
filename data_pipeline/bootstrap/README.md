@@ -1,47 +1,49 @@
-# Database Bootstrapping for SUFOSAT Historical Detections (2018-2025)
+# Chargement initial des détections SUFOSAT (2018-2025)
 
-This guide explains how to load historical SUFOSAT clear-cut detections into the database, including their enrichment with Natura 2000 zone information.
+Ce guide explique comment charger en base l'historique des détections de coupes
+rases SUFOSAT, enrichies des zonages Natura 2000.
 
-## Option 1: Process the Raw Data (2-3 hours)
+## Option 1 : traiter les données brutes (2 à 3 heures)
 
-Run the complete pipeline to process raw data files into the enriched format required for database seeding:
+Lancer la chaîne complète, qui transforme les fichiers bruts au format attendu
+par le chargement :
 
 ```bash
 python -m bootstrap.scripts.run_pipeline
 ```
 
-This creates:
+Elle produit :
 
-- `bootstrap/data/sufosat/sufosat_clusters_enriched.fgb`: Enriched clear-cut detections
-- `bootstrap/data/natura2000/natura2000_concat.fgb`: Natura 2000 zone information
+- `bootstrap/data/sufosat/sufosat_clusters_enriched.fgb` : détections enrichies ;
+- `bootstrap/data/natura2000/natura2000_concat.fgb` : zonages Natura 2000.
 
-## Option 2: Use Pre-processed Files
+## Option 2 : utiliser les fichiers déjà traités
 
-Download the already processed files from S3 (much faster).
-Check available files:
+Télécharger les fichiers depuis S3 (beaucoup plus rapide). Vérifier les fichiers
+disponibles :
 
 ```bash
 aws s3 ls s3://brigade-coupe-rase-s3/dataeng/bootstrap/ --recursive --profile d4g-s13-brigade-coupes-rases
 ```
 
-You should see something like this:
+Résultat attendu :
 
 ```
 2025-04-14 13:20:05   87660704 dataeng/bootstrap/natura2000/natura2000_concat.fgb
 2025-04-14 13:19:30 2172985856 dataeng/bootstrap/sufosat/sufosat_clusters_enriched.fgb
 ```
 
-Download the files:
+Télécharger les fichiers :
 
 ```bash
 aws s3 sync s3://brigade-coupe-rase-s3/dataeng/bootstrap/ bootstrap/data/ --exact-timestamps --profile d4g-s13-brigade-coupes-rases
 ```
 
-## Database Seeding
+## Chargement en base
 
-Once you have the required files (either from Option 1 or Option 2), seed the database:
+Une fois les fichiers obtenus (option 1 ou 2), charger la base :
 
-⚠️ **WARNING: This command will erase existing database contents** ⚠️
+⚠️ **Attention : cette commande efface le contenu de la base.** ⚠️
 
 ```bash
 python -m bootstrap.scripts.seed_database \
@@ -51,6 +53,11 @@ python -m bootstrap.scripts.seed_database \
     --sample 1000
 ```
 
-This will populate the database with a sample of 1000 historical clear-cut detections from 2018 to 2025.
-The `--sample` parameter is optional.
-If you want to seed the database with all the clear-cuts, you'll need a machine with 32GB of RAM. (_The insertion process could likely be optimized to use less memory_)
+La base reçoit un échantillon de 1 000 détections historiques de 2018 à 2025.
+Le paramètre `--sample` est facultatif : sans lui, toutes les coupes sont
+chargées, ce qui demande une machine avec 32 Go de RAM (_l'insertion pourrait
+sans doute être optimisée pour consommer moins de mémoire_).
+
+Les scripts importent GDAL (`osgeo`) : les lancer depuis l'image Docker de
+`data_pipeline/` ou un environnement conda, voir le
+[README de data_pipeline](../README.md).
