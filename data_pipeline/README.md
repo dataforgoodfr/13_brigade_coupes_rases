@@ -1,42 +1,33 @@
-# ETL Cron
+# Data pipeline
 
-## Project Structure
+Three independent sub-projects live in this folder:
 
-```bash
+| Folder | Purpose | Runs |
+|---|---|---|
+| [`pipeline/`](./pipeline/README.md) | Monthly update: detects the new SUFOSAT clusters since the last date in the database, enriches them and publishes a "gold" file to S3. | Docker image (`Dockerfile`, conda + GDAL) |
+| [`bootstrap/`](./bootstrap/README.md) | One-off load of the 2018-2025 historical detections. **Erases the database.** | Poetry, locally |
+| [`airtable/`](./airtable/README.md) | Export of users and reports from PostgreSQL to Airtable. | `uv`, twice a day via GitHub Actions |
+
+`pipeline/` and `bootstrap/` share this `pyproject.toml`; `airtable/` has its
+own `requirements.txt`.
+
+## Project structure
+
+```
 data_pipeline/
-├── config/
-│   ├── config.yaml
-├── data_temp/
-├── logs/
-│   ├── main.log
-├── scripts/
-│   ├── utils/
-│   ├── extract.py
-│   ├── main.py
-│   ├── transform.py
-├── tests/
-├── .env
-├── Makefile
-├── .gitignore
-├── Dockerfile
+├── pipeline/          # monthly pipeline (scripts/, data/ for local files)
+├── bootstrap/         # historical load (scripts/, data/ for downloaded files)
+├── airtable/          # Airtable export (scripts/, sql/)
+├── tests/             # pytest, pure functions of pipeline/
+├── .env.example       # variables for pipeline/ and bootstrap/
+├── Dockerfile         # image used to run pipeline/ (build context: repository root)
+├── pyproject.toml     # Poetry, pytest, coverage and mypy configuration
 └── README.md
 ```
 
 ## Setup
 
-### 1. Create Directories
-
-Create the necessary directories `data_temp` and `logs`.
-
-```bash
-mkdir data_temp logs
-```
-
-### 2. Environment Variables (.env file)
-
-Create a .env file in the root directory (data_pipeline/.env) to store environment variables.
-
-Copy the template and fill in the values:
+### 1. Environment variables
 
 ```bash
 cp .env.example .env
@@ -50,95 +41,44 @@ SCW_ACCESS_KEY=...
 SCW_SECRET_KEY=...
 ```
 
-The Scaleway Object Storage credentials (`SCW_ACCESS_KEY` / `SCW_SECRET_KEY`) are in the project's Vaultwarden. Never commit `.env` (it is git-ignored).
+The Scaleway Object Storage credentials are in the project's KeePass database.
+Never commit `.env` (it is git-ignored). Running the pipeline or downloading the
+bootstrap files requires them; the tests do not.
 
-### 3. Install Dependencies
-Ensure you have Python 3.11 installed.
+### 2. Install the dependencies
+
+Python 3.13 and [Poetry](https://python-poetry.org/docs/#installation):
 
 ```bash
-# Install Poetry
-# Follow the instructions in the main README.md to install Poetry.
-
-# Navigate to the project directory
 cd data_pipeline
-
-# Install dependencies using Poetry
-make install-dev-deps
+poetry install
 ```
 
-### 4. Set Up Docker (Optional)
-If you prefer using Docker for running the pipeline, follow these steps:
+GDAL (`osgeo`) is not installable with pip and both `pipeline/scripts` and
+`bootstrap/scripts` import it: running them requires the Docker image, which
+ships GDAL from conda-forge, or a conda environment with `gdal`. The tests and
+the type check work in the Poetry environment.
+
+### 3. Docker (to run the pipeline)
+
+The Dockerfile expects the **repository root** as build context, as on Clever
+Cloud:
 
 ```bash
-# Build Docker Image
-docker build -t data_pipeline .
-``` 
-
-# Running the ETL Pipeline
-## Using Poetry
-
-### Run the full ETL pipeline.
-
-```bash
-make run-pipeline
+docker build -f data_pipeline/Dockerfile -t data-pipeline:latest .
+docker run --rm --env-file data_pipeline/.env -e PYTHONUNBUFFERED=1 data-pipeline:latest
 ```
 
-### Run Individual Tasks
+See [pipeline/README.md](./pipeline/README.md) for the steps and the S3 layout.
 
-To run specific tasks, use the run-task-poetry target and specify the task name.
-
-Example:
+## Checks
 
 ```bash
-make run-task-poetry task=verify_file_in_s3
-```
-
-## Using Docker
-In order to use the Makefile commands, you need to have Docker installed on your machine. You also need to export USER_PROJECT_PATH before running, for the script to identify your path correctly. You can do this by running:
-```bash
-export USER_PROJECT_PATH=~/path/to/the/project/13_brigade_coupes_rases/data_pipeline
-``` 
-### Run the full ETL pipeline inside a Docker container.
-
-
-
-Then, you can run the following command:
-
-```bash
-make run-pipeline-docker
-```
-
-### Run Individual Tasks Inside a Docker Container
-To run specific tasks, use the run-task-docker target and specify the task name.
-
-Example:
-
-```bash
-make run-task-docker task=verify_file_in_s3
-```
-
-### 5. Running Tests
-
-```bash
-poetry run pytest    # tests/, no database or S3 needed, coverage of pipeline/
+poetry run pytest             # tests/, no database or S3 needed, coverage of pipeline/
+poetry run mypy               # strict, scope in pyproject.toml ([tool.mypy])
+pre-commit run --all-files    # from the repository root (ruff)
 ```
 
 The tests target the pure functions of the pipeline (clustering, overlay,
 matching of new clusters against the reference); `tests/conftest.py` stubs
-`osgeo` (GDAL), which is only available in the conda Docker image.
-
-### 6. Pre-commit
-
-```bash
-pre-commit run --all-files    # from the repository root
-```
-
-### 7. Type check
-
-```bash
-poetry run mypy    # strict, scope defined in pyproject.toml ([tool.mypy])
-```
-
-### 8. Recommendations
-
-Before any pull request, make sure you run pre-commit and the tests.
+`osgeo`. The same checks run in CI (`.github/workflows/pipeline-ci.yml`).
