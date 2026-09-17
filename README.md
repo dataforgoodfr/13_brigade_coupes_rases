@@ -7,7 +7,6 @@ Projet [Data For Good](https://dataforgood.fr/), saison 13.
 - [Backend](./backend/README.md) — API FastAPI
 - [Frontend](./frontend/README.md) — application React
 - [Data pipeline](./data_pipeline/README.md) — ingestion des alertes et des couches de référence
-- [Analytics](./analytics/README.md) — notebooks d'exploration
 - [Documentation](./doc/README.md)
 - [Contribuer](./CONTRIBUTING.md) — branches, commits, vérifications avant une pull request
 
@@ -40,7 +39,6 @@ Le tout est hébergé sur [Clever Cloud](https://www.clever-cloud.com/).
 ├── 📁 backend/        API et gestion de la base de données
 ├── 📁 frontend/       application web (carte, formulaires)
 ├── 📁 data_pipeline/  collecte et traitement des données
-├── 📁 analytics/      notebooks d'analyse
 ├── 📁 doc/            documentation
 ├── 📁 docker/         image PostgreSQL/PostGIS de développement
 └── 📁 keepass/        secrets partagés (chiffrés)
@@ -134,7 +132,7 @@ flowchart LR
 Prérequis :
 
 - [Docker](https://docs.docker.com/get-docker/) et Docker Compose ;
-- [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/`, `data_pipeline/` et `analytics/`, chacun avec son propre `pyproject.toml` ;
+- [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
 - [Node.js 24](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.

@@ -20,14 +20,14 @@ httpx = "^0.28.1"
 ipykernel = "^6.29.5"
 
 # Configuration Ruff unique pour tous les sous-projets Python (backend,
-# data_pipeline, analytics) : ruff remonte l'arborescence jusqu'à ce fichier.
+# data_pipeline) : ruff remonte l'arborescence jusqu'à ce fichier.
 # See https://docs.astral.sh/ruff/settings
 [tool.ruff]
 target-version = "py313"
 # Racines des sous-projets : leurs modules (app, pipeline, …) sont des imports
 # de première partie pour le tri isort, comme lorsque chaque sous-projet
 # portait sa propre configuration.
-src = [".", "backend", "data_pipeline", "analytics"]
+src = [".", "backend", "data_pipeline"]
 
 [tool.ruff.lint]
 # pycodestyle (E4/E7/E9) and pyflakes (F) — the historical Ruff defaults — plus
