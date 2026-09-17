@@ -62,19 +62,20 @@ https://s3.fr-par.scw.cloud/brigade-coupe-rase-s3/data_pipeline/gold/sufosat/cur
 
 ### En local avec Docker
 
-Depuis le dossier `data_pipeline/` :
+Depuis la **racine du dépôt** (le Dockerfile attend ce contexte de build, comme
+sur Clever Cloud) :
 
 ```bash
 # Build
-docker build -t data-pipeline:latest .
+docker build -f data_pipeline/Dockerfile -t data-pipeline:latest .
 
 # Run
-docker run --rm --env-file .env -e PYTHONUNBUFFERED=1 data-pipeline:latest
+docker run --rm --env-file data_pipeline/.env -e PYTHONUNBUFFERED=1 data-pipeline:latest
 ```
 
 En mode interactif pour débugger :
 ```bash
-docker run -it --rm --env-file .env data-pipeline:latest bash
+docker run -it --rm --env-file data_pipeline/.env data-pipeline:latest bash
 # puis dans le conteneur :
 conda activate py3_13
 python -m pipeline.scripts.run_pipeline
@@ -109,6 +110,3 @@ pipeline/scripts/
     ├── s3_utils.py            # S3Manager (Scaleway)
     └── ...
 ```
-
-
-  docker build -t data-pipeline:latest . && docker run --rm --env-file .env -e PYTHONUNBUFFERED=1 data-pipeline:latest
