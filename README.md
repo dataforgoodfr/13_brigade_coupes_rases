@@ -2,13 +2,22 @@
 
 Application de [Canopée](https://www.canopee.ong/) pour détecter, suivre et vérifier les coupes rases abusives en France : les alertes issues de l'imagerie satellite sont chargées dans une base PostGIS, puis des bénévoles les contrôlent sur le terrain via une carte interactive et un formulaire.
 
-Projet [Data For Good](https://dataforgood.fr/), saison 13.
+Projet [Data For Good](https://dataforgood.fr/), saison 13. Licence MIT.
 
 - [Backend](./backend/README.md) — API FastAPI
 - [Frontend](./frontend/README.md) — application React
 - [Data pipeline](./data_pipeline/README.md) — ingestion des alertes et des couches de référence
-- [Documentation](./doc/README.md)
+- [Documentation](./doc/README.md) — fiche coupe rase, pipeline, PostGIS
 - [Contribuer](./CONTRIBUTING.md) — branches, commits, vérifications avant une pull request
+
+| | |
+|---|---|
+| Application | <https://app-ab2f14d8-10a9-454d-9a7d-92ab22a54110.cleverapps.io> |
+| API | <https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs> |
+| Storybook des composants | <https://dataforgoodfr.github.io/13_brigade_coupes_rases/> |
+| Suivi des tâches | [issues GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) |
+| Échanges | Slack Data For Good, canal `#13_brigade_coupes_rases` |
+| Présentation, comptes rendus | [Outline](https://outline.services.dataforgood.fr/doc/presentation-du-projet-p8g6j1J3ZT) (compte Data For Good) |
 
 ## Contexte
 
@@ -26,7 +35,7 @@ Canopée, association engagée pour la protection des forêts, cherche à automa
 
 ## Architecture
 
-1. **Data pipeline** (`data_pipeline/`) : récupère les alertes satellite (GlobEO / SUFOSAT), les regroupe en polygones, les enrichit avec les couches de référence (Natura 2000, BD Forêt, cadastre, pente) et les charge dans la base. Tourne en tâche planifiée dans un conteneur Docker.
+1. **Data pipeline** (`data_pipeline/`) : récupère les alertes satellite (GlobEO / SUFOSAT), les regroupe en polygones, les enrichit avec les couches de référence (Natura 2000, BD Forêt, cadastre, pente) et publie le résultat (fichier « gold ») dans le bucket S3. Tourne dans un conteneur Docker.
 2. **Base de données** : PostgreSQL avec PostGIS pour les coupes rases et leurs métadonnées spatiales.
 3. **Backend** (`backend/`) : API REST FastAPI + SQLAlchemy, avec authentification et rôles (administrateur, bénévole).
 4. **Frontend** (`frontend/`) : application React / Vite, carte Leaflet, formulaires de contrôle utilisables hors connexion (PWA).
@@ -34,13 +43,15 @@ Canopée, association engagée pour la protection des forêts, cherche à automa
 
 Le tout est hébergé sur [Clever Cloud](https://www.clever-cloud.com/).
 
+Parcours d'une coupe : la pipeline regroupe les détections satellite en **clear cuts**, rattachés à un **signalement** (clear cut report) qui suit un workflow de validation (`to_validate` → `in_progress` → `waiting_for_validation` → `validated` / `legal_validated` / `final_validated`, ou `rejected`). Un administrateur assigne le signalement à un bénévole du département, qui le documente sur place dans un **formulaire** (photos, constat). Les champs de la fiche sont décrits dans [doc/clear-cut-description.md](./doc/clear-cut-description.md), les regroupements dans [doc/pipeline_dataeng.md](./doc/pipeline_dataeng.md).
+
 ```
 📁 13_brigade_coupes_rases
 ├── 📁 backend/        API et gestion de la base de données
 ├── 📁 frontend/       application web (carte, formulaires)
 ├── 📁 data_pipeline/  collecte et traitement des données
 ├── 📁 doc/            documentation
-├── 📁 docker/         image PostgreSQL/PostGIS de développement
+├── 📁 docker/         image PostgreSQL/PostGIS de développement (docker-compose.yml à la racine)
 └── 📁 keepass/        secrets partagés (chiffrés)
 ```
 
@@ -127,6 +138,20 @@ flowchart LR
 
 </details>
 
+## Par où commencer ?
+
+Tout ce qui suit fonctionne sans aucun secret, avec un jeu de données de développement. Choisir selon ce que l'on veut modifier :
+
+| Je veux travailler sur… | Prérequis | Commande |
+|---|---|---|
+| le frontend seul | Node.js 24, pnpm | `pnpm dev:mock` (API simulée par MSW, aucun backend) |
+| le frontend avec la vraie API | Docker, Python 3.13, Poetry, Node.js, pnpm | base + backend + `pnpm dev` (ci-dessous) |
+| le backend | Docker, Python 3.13, Poetry | base + `make devserver` ; tests avec `make test-unit` puis `make test` |
+| la data pipeline | Python 3.13, Poetry | `poetry run pytest` pour les tests ; l'exécution complète demande Docker et les identifiants S3 (voir [Secrets](#secrets)) |
+| toute la pile dans Docker | Docker | `./start_docker.sh` : base migrée et peuplée, API sur 8080, frontend sur 8081 |
+
+Comptes du jeu de données de développement : `admin@example.com` / `admin` (administrateur) et `volunteer@example.com` / `volunteer` (bénévole) ; les autres profils sont décrits dans `backend/seed_dev.py`.
+
 ## Démarrer en local
 
 Prérequis :
@@ -137,15 +162,13 @@ Prérequis :
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
 
-Pour tout lancer dans Docker (base migrée et peuplée, API sur le port 8080, frontend sur le port 8081) : `./start_docker.sh`. Sinon, service par service :
-
 ### Base de données
 
 ```bash
 docker compose up db pgadmin
 ```
 
-PostgreSQL écoute sur `localhost:5432`. pgAdmin est sur [http://localhost:8888](http://localhost:8888/) (`devuser@devuser.com` / `devuser`) ; pour y ajouter le serveur : hôte `db`, port `5432`, base `postgres`, utilisateur et mot de passe `devuser`.
+PostgreSQL écoute sur `localhost:5432` (utilisateur et mot de passe `devuser`, bases `local` et `test`), pgAdmin sur [http://localhost:8888](http://localhost:8888/). Détails et connexion en ligne de commande dans [docker/README.md](./docker/README.md).
 
 ### Backend
 
@@ -153,7 +176,7 @@ PostgreSQL écoute sur `localhost:5432`. pgAdmin est sur [http://localhost:8888]
 cd backend
 poetry install
 poetry run alembic upgrade head        # créer / mettre à jour les tables
-poetry run python -m seed_dev          # jeu de données de développement
+make seed-dev-db                       # jeu de données de développement
 make devserver                         # http://localhost:8080/docs
 ```
 
@@ -162,7 +185,8 @@ make devserver                         # http://localhost:8080/docs
 ```bash
 cd frontend
 pnpm install
-pnpm dev                               # http://localhost:5173
+pnpm dev                               # http://localhost:5173, API sur le port 8080
+pnpm dev:mock                          # idem sans backend
 pnpm build                             # vérification des types + build de production
 pnpm test:unit && pnpm test:browser    # tests
 ```
@@ -172,20 +196,20 @@ pnpm test:unit && pnpm test:browser    # tests
 ```bash
 cd data_pipeline
 poetry install
-# Charger un échantillon de données réalistes
-poetry run python -m bootstrap.scripts.seed_database \
-  --natura2000-concat-filepath bootstrap/data/natura2000/natura2000_concat.fgb \
-  --enriched-clear-cuts-filepath bootstrap/data/sufosat/sufosat_clusters_enriched.fgb \
-  --database-url postgresql://devuser:devuser@localhost:5432/local --sample 1000
-# Puis synchroniser les signalements côté backend
-curl -X POST "http://localhost:8080/api/v1/clear-cuts-reports/sync-reports"
+poetry run pytest                      # tests, sans base ni S3
 ```
+
+L'exécution de la pipeline et le chargement des données historiques (`bootstrap/`) passent par l'image Docker (GDAL) et demandent les identifiants S3 : voir [data_pipeline/README.md](./data_pipeline/README.md).
 
 ## Secrets
 
-Les secrets partagés sont dans la [base KeePass](./keepass/secrets.kdbx) du dépôt ([installer KeePass](https://keepass.info/index.html)). Le mot de passe s'obtient auprès des responsables de sous-équipes.
+Rien n'est nécessaire pour développer le frontend ou le backend en local. Les secrets servent à :
 
-Cette base est la source de vérité : tout secret utilisé par le projet (comptes cloud, CI/CD, clés d'API, chaînes de connexion…) doit y être référencé.
+- la data pipeline (bucket S3 Scaleway : données brutes, couches de référence, fichiers gold) ;
+- l'envoi des photos des formulaires vers S3 (sans S3, le backend les stocke localement) ;
+- le déploiement (Clever Cloud), la synchronisation Airtable et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
+
+Ils sont dans la [base KeePass](./keepass/secrets.kdbx) du dépôt ([installer KeePass](https://keepass.info/index.html)) ; le mot de passe s'obtient auprès des responsables sur le canal Slack. Cette base est la source de vérité : tout secret utilisé par le projet (comptes cloud, CI/CD, clés d'API, chaînes de connexion…) doit y être référencé.
 
 ## Déploiement et opérations
 
@@ -196,6 +220,8 @@ Les pull requests visent `main`. Fusionner n'entraîne aucun déploiement : la m
 Pour revenir à une version antérieure, lancer le workflow Release à la main (onglet Actions, « Run workflow ») en indiquant le tag à redéployer.
 
 Le Storybook est publié sur GitHub Pages à chaque modification du frontend sur `main`.
+
+La data pipeline est une application Docker distincte sur Clever Cloud (`CC_DOCKERFILE=data_pipeline/Dockerfile`, contexte de build à la racine du dépôt) ; aucun workflow ne la déploie, elle se met à jour depuis la console Clever Cloud. La synchronisation Airtable tourne dans GitHub Actions (`airtable-sync.yml`, deux fois par jour).
 
 Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bouton « Run workflow »).
 
