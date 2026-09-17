@@ -1,87 +1,78 @@
-# Frontend project
+# Frontend
 
-## Purposes
+## Rôle
 
-### Critical features
+Consulter les coupes rases sur une carte ou en liste, et permettre aux
+bénévoles de remplir le formulaire de constat d'une coupe.
 
-Review clear cuts on a map or a list view  
-Allow users to edit clear cutting form to add extra information
+## CI
 
-## CI/CD
+Le workflow [Frontend CI](../.github/workflows/frontend-ci.yml) lance le lint,
+les tests et le build sur les pull requests vers `main` et à chaque fusion.
 
-### Build and test 
-A github action run on all branches to build and test code : [Front CI](../.github/workflows/frontend-ci.yml)  
+## Commandes de développement
 
-## Development commands
+Installer [Node.js](https://nodejs.org/fr) (version dans `.nvmrc`) et
+[pnpm](https://pnpm.io/fr/installation).
 
-Install [node](https://nodejs.org/fr)  
-Install package manager [pnpm](https://pnpm.io/fr/installation)  
-Install dependencies : `pnpm i`  
-To run in development mode : `pnpm dev`  
-To run in development mode with mock service worker: `pnpm dev:mock`  
-To run in development mode on a mobile device (same Wi-Fi network)  
- - Run `pnpm dev:host`
- - Copy the `Network URL` displayed in the terminal
- - In `.env.development` file, set `VITE_API` to this Network URL with port `8080`.
- - On your phone, navigate to the `Network URL`  
+| Commande | Effet |
+|---|---|
+| `pnpm i` | Installer les dépendances |
+| `pnpm dev` | Serveur de développement sur <http://localhost:5173>, API sur le port 8080 |
+| `pnpm dev:mock` | Idem avec l'API simulée par Mock Service Worker, sans backend |
+| `pnpm dev:host` | Serveur accessible depuis un téléphone sur le même réseau Wi-Fi (voir ci-dessous) |
+| `pnpm cleanup` | Formater et corriger le lint (Biome) |
+| `pnpm lint` | Vérifier le format et le lint sans modifier les fichiers (comme la CI) |
+| `pnpm test:unit` | Tests de logique pure, sans navigateur |
+| `pnpm test:browser` | Tests de composants et de parcours (Playwright/Chromium) |
+| `pnpm coverage` | Couverture des deux projets de tests (terminal et `coverage/`) |
+| `pnpm build` | Vérification des types et build de production |
+| `pnpm storybook` | Explorateur de composants |
 
-To format and lint : `pnpm cleanup`  
-To check format and lint without modifying files (same as CI) : `pnpm lint`  
-To run the tests : `pnpm test:unit` (pure logic, no browser) and `pnpm test:browser` (components and flows, Playwright/Chromium)  
-To measure coverage on both : `pnpm coverage` (report in the terminal and in `coverage/`)  
-To start storybook: `pnpm storybook`
+Pour tester sur un téléphone :
 
-## VS Code configuration
+1. lancer `pnpm dev:host` et copier l'URL `Network` affichée dans le terminal ;
+2. dans `.env.development`, donner à `VITE_API` cette URL avec le port `8080` ;
+3. ouvrir l'URL `Network` sur le téléphone.
 
-Please install the recommended extensions listed [recommended extensions file](../.vscode/extensions.json)
+## Configuration VS Code
 
-Then use [workspace folder settings](./.vscode/settings.json)
+Installer les extensions listées dans
+[.vscode/extensions.json](../.vscode/extensions.json), puis utiliser les
+[réglages du dossier](./.vscode/settings.json).
 
-## Technical choices
+## Choix techniques
 
-- Package manager : [PNPM](https://pnpm.io/fr/) centralized package manager for javascript packages, reduce amount of downloaded across multiple projects
-- SPA : [React](https://fr.react.dev/) library, many usages among professional frontend developers
-- Map : [Leaflet](https://leafletjs.com/) and [React Leaflet](https://react-leaflet.js.org/) library, free map, allow to draw lines, polygons, circles on a map
-- CSS Framework : [Tailwind](https://tailwindcss.com/), flexible css design
-- State management : [RTK](https://redux-toolkit.js.org/), well suited state management with a good documentation
-- Build tool : [Vite](https://vite.dev/), fast and simple tool
-- Test framework : [Vitest](https://vitest.dev/), works well with Vite
-- Integration test : [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/), interacts with a computed dom to test UI
-- Mock server : [MSW](https://mswjs.io/) intercept http requests and returns mocks
-- Format / Linter : [Biome](https://biomejs.dev/) formatter and linter, easier to configure than eslint and faster
-- Routing : [Tanstack router](https://tanstack.com/router/latest) files based routing, type safe router
-- Progressive WebApp : [Vite PWA](https://vite-pwa-org.netlify.app/guide/pwa-minimal-requirements.html) Add pwa integration with vite tool
+- Gestionnaire de paquets : [pnpm](https://pnpm.io/fr/), stockage centralisé des paquets, moins de téléchargements entre projets.
+- SPA : [React](https://fr.react.dev/), bibliothèque la plus répandue chez les développeurs frontend.
+- Carte : [Leaflet](https://leafletjs.com/) et [React Leaflet](https://react-leaflet.js.org/), fond de carte libre, tracé de lignes, polygones et cercles.
+- CSS : [Tailwind](https://tailwindcss.com/).
+- État : [Redux Toolkit](https://redux-toolkit.js.org/), bien documenté.
+- Build : [Vite](https://vite.dev/), rapide et simple.
+- Tests : [Vitest](https://vitest.dev/), intégré à Vite ; [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) pour interagir avec le DOM rendu.
+- Serveur simulé : [MSW](https://mswjs.io/), intercepte les requêtes HTTP et renvoie des données de test.
+- Format et lint : [Biome](https://biomejs.dev/), plus simple à configurer et plus rapide qu'ESLint.
+- Routage : [TanStack Router](https://tanstack.com/router/latest), routes par fichier, typées.
+- PWA : [Vite PWA](https://vite-pwa-org.netlify.app/guide/pwa-minimal-requirements.html).
 
-## Mocks
+## Données simulées
 
-To mocks api requests we use [MSW](https://mswjs.io/)
-You can add mocks in the folder /src/mocks
+Les requêtes vers l'API sont simulées avec [MSW](https://mswjs.io/) ; les
+handlers sont dans `src/mocks/`.
 
 ## PWA
 
-PWA configuration is done vite.config.ts.  
-We use register type "prompt" to allow user prompting before updating installed version. We have to proceed like this because if user is editing a form we don't want a refresh of the application without its consent.
+La configuration PWA est dans `vite.config.ts`, avec `registerType: "prompt"` :
+l'utilisateur est prévenu avant qu'une nouvelle version s'installe, pour ne pas
+recharger l'application pendant qu'il édite un formulaire.
 
-## Folders architecture
+## Organisation des dossiers
 
-### /features
+Détaillée dans [doc/architecture.md](../doc/architecture.md#frontend).
 
-On subfolder by feature e.g : clear-cutting handle all features relative to clear cuts, visualization, edition etc...
-
-### /routes
-
-File based routing please see [Tanstack router](https://tanstack.com/router/latest) documentation
-
-### /shared
-
-Available files in the whole project as components, hooks, store etc ...
-
-### /test
-
-Test files
-
-### /mocks
-
-List of mocks and http handlers
-
-
+- `src/features/` : un sous-dossier par fonctionnalité (`clear-cut` pour tout ce qui concerne les coupes : carte, liste, formulaire ; `admin`, `user`, `offline`).
+- `src/routes/` : routes par fichier, voir la documentation de [TanStack Router](https://tanstack.com/router/latest).
+- `src/shared/` : composants, hooks, store et client API partagés par tout le projet.
+- `src/components/ui/` : primitives shadcn/ui.
+- `src/test/` : utilitaires de test (rendu de l'application, page objects, store) et tests unitaires.
+- `src/mocks/` : données simulées et handlers HTTP.

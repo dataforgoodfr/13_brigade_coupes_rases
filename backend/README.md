@@ -1,99 +1,100 @@
-# Brigade Coupes Rases backend
+# Backend Brigade des Coupes Rases
 
-FastAPI + SQLAlchemy API on top of PostgreSQL/PostGIS. Listens on port **8080**.
+API FastAPI + SQLAlchemy sur PostgreSQL/PostGIS. Écoute sur le port **8080**.
 
-## Data
+## Données
 
-All coordinates returned from the API follow this format: latitude/longitude.
+Toutes les coordonnées renvoyées par l'API sont au format latitude/longitude.
 
-## Development
+## Développement
 
-### Prerequisites
+### Prérequis
 
-- Python 3.13 and [Poetry](https://python-poetry.org/docs/#installation)
-- A running PostgreSQL/PostGIS database: `docker compose up db pgadmin` from the
-  repository root (creates the `local` and `test` databases, see
+- Python 3.13 et [Poetry](https://python-poetry.org/docs/#installation)
+- Une base PostgreSQL/PostGIS en marche : `docker compose up db pgadmin` depuis
+  la racine du dépôt (crée les bases `local` et `test`, voir
   [docker/README.md](../docker/README.md)).
 
 ### Installation
 
 ```bash
 cd backend
-poetry install                 # runtime (group "backend") and dev dependencies
+poetry install                 # dépendances d'exécution (groupe "backend") et de développement
 poetry run alembic upgrade head
 make seed-dev-db               # admin@example.com / admin, volunteer@example.com / volunteer
 make devserver                 # http://localhost:8080/docs
 ```
 
-`make help` lists the other targets (`generate-migration`, `reset-db`,
+`make help` liste les autres cibles (`generate-migration`, `reset-db`,
 `seed-prd-db`, …).
 
-### Alternative: Docker
+### Alternative : Docker
 
-From the repository root, `docker compose up` (or `./start_docker.sh`, which
-also migrates and seeds the database) starts the database, the backend on port
-8080 and the frontend on port 8081.
+Depuis la racine du dépôt, `docker compose up` (ou `./start_docker.sh`, qui
+migre et peuple aussi la base) démarre la base, le backend sur le port 8080 et
+le frontend sur le port 8081.
 
-VS Code users can open `backend/` in the devcontainer (`.devcontainer/`,
-extension `ms-vscode-remote.remote-containers`); it reuses the `backend` service
-of `docker-compose.yml`.
+Sous VS Code, `backend/` peut s'ouvrir dans le devcontainer (`.devcontainer/`,
+extension `ms-vscode-remote.remote-containers`) ; il réutilise le service
+`backend` de `docker-compose.yml`.
 
-### Run the tests
-
-```bash
-make test-unit    # unit tests only (test/unit/), no database needed
-make upgrade-test-db && make test    # all tests with coverage, needs the migrated test database
-```
-
-`test/unit/` holds tests that run without a database (pure functions, schemas,
-tokens). Everything else uses the `db` fixture, which migrates and seeds the
-test database. Coverage settings are in `pyproject.toml` (`[tool.coverage.*]`).
-
-### Type check
+### Lancer les tests
 
 ```bash
-make typecheck    # mypy, scope defined in pyproject.toml ([tool.mypy])
+make test-unit    # tests unitaires seuls (test/unit/), sans base de données
+make upgrade-test-db && make test    # tous les tests avec couverture, base de test migrée
 ```
 
-### Add a new backend package
+`test/unit/` contient les tests qui tournent sans base (fonctions pures,
+schémas, jetons). Tout le reste utilise la fixture `db`, qui migre et peuple la
+base de test. La configuration de la couverture est dans `pyproject.toml`
+(`[tool.coverage.*]`).
+
+### Vérification des types
 
 ```bash
-poetry add package-name --group backend
+make typecheck    # mypy, périmètre défini dans pyproject.toml ([tool.mypy])
 ```
 
-### Use the API
+### Ajouter une dépendance du backend
 
-Once the server is running, the API is at `http://localhost:8080` and the
-OpenAPI docs, generated from the code, at `http://localhost:8080/docs`.
+```bash
+poetry add nom-du-paquet --group backend
+```
 
-### Environment variables
+### Utiliser l'API
 
-Settings are read by `app/config.py` from `.env` if it exists, otherwise from
-`.env.test` when `ENVIRONMENT=test`, otherwise from `.env.development`.
+Une fois le serveur lancé, l'API répond sur `http://localhost:8080` et la
+documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/docs`.
 
-| Variable | Required | Description |
+### Variables d'environnement
+
+`app/config.py` lit les variables depuis `.env` s'il existe, sinon depuis
+`.env.test` quand `ENVIRONMENT=test`, sinon depuis `.env.development`.
+
+| Variable | Obligatoire | Description |
 |---|---|---|
-| `DATABASE_URL` | yes | PostgreSQL connection string |
-| `ENVIRONMENT` | yes | `development`, `test` or `production` |
-| `PORT` | yes | HTTP port |
-| `JWT_SECRET_KEY` | yes | Key used to sign the access, refresh and password-reset tokens |
-| `ALLOWED_ORIGINS` | no | Comma-separated origins allowed for CORS |
-| `IMPORTS_TOKEN` | no | Token expected in the `x-imports-token` header by the report import endpoint |
-| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | no | Object storage for the form photos; without them uploads are stored locally |
+| `DATABASE_URL` | oui | Chaîne de connexion PostgreSQL |
+| `ENVIRONMENT` | oui | `development`, `test` ou `production` |
+| `PORT` | oui | Port HTTP |
+| `JWT_SECRET_KEY` | oui | Clé de signature des jetons d'accès, de rafraîchissement et de réinitialisation du mot de passe |
+| `ALLOWED_ORIGINS` | non | Origines autorisées pour CORS, séparées par des virgules |
+| `IMPORTS_TOKEN` | non | Jeton attendu dans l'en-tête `x-imports-token` par la route d'import des signalements |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | non | Stockage objet des photos des formulaires ; sans ces variables, les envois sont stockés localement |
 
-`.env.development` and `.env.test` are committed with values for a local
-database only. Production values are set on Clever Cloud and referenced in the
-shared KeePass database.
+`.env.development` et `.env.test` sont versionnés avec des valeurs pour une base
+locale uniquement. Les valeurs de production sont définies sur Clever Cloud et
+référencées dans la base KeePass partagée.
 
 ### Clever Cloud
 
-- Application: [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)
-- Swagger UI: [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs)
-- Database: PostgreSQL add-on, connection string in the KeePass database.
+- Application : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)
+- Swagger UI : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs)
+- Base de données : add-on PostgreSQL, chaîne de connexion dans la base KeePass.
 
-Deployment is triggered by publishing a GitHub release, see the
-[main README](../README.md#branches-et-déploiement).
+Le déploiement se déclenche en publiant une release GitHub, voir le
+[README principal](../README.md#branches-et-déploiement).
 
-## Database schema
+## Schéma de la base
 
-The entity-relationship diagram is in [doc/architecture.md](../doc/architecture.md#modèle-de-données); regenerate it from the models with `make erd` after a migration.
+Le diagramme entité-association est dans [doc/architecture.md](../doc/architecture.md#modèle-de-données) ; le régénérer depuis les modèles avec `make erd` après une migration.

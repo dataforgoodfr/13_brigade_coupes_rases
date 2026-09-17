@@ -1,34 +1,34 @@
-# Development database image
+# Image de la base de développement
 
-`postgres/Dockerfile` builds the PostgreSQL/PostGIS image used by the `db`
-service of the root `docker-compose.yml`; `create-databases.sh` creates one
-database per name listed in `DATABASES` (`local` for development, `test` for
-the backend tests).
+`postgres/Dockerfile` construit l'image PostgreSQL/PostGIS utilisée par le
+service `db` du `docker-compose.yml` de la racine ; `create-databases.sh` crée
+une base par nom listé dans `DATABASES` (`local` pour le développement, `test`
+pour les tests du backend).
 
-## Start the database
+## Démarrer la base
 
-From the repository root:
+Depuis la racine du dépôt :
 
 ```bash
-docker compose up db pgadmin        # add -d to run in the background
+docker compose up db pgadmin        # ajouter -d pour la lancer en arrière-plan
 ```
 
-PostgreSQL listens on `localhost:5432`, user and password `devuser`, container
-`coupes-rases-database`. Data is kept in the `coupes-rases-data` volume;
-`docker compose down -v` deletes it.
+PostgreSQL écoute sur `localhost:5432`, utilisateur et mot de passe `devuser`,
+conteneur `coupes-rases-database`. Les données sont conservées dans le volume
+`coupes-rases-data` ; `docker compose down -v` le supprime.
 
-## Connect to the database
+## Se connecter à la base
 
-pgAdmin runs on [http://localhost:8888](http://localhost:8888)
-(`devuser@devuser.com` / `devuser`); register the server with host `db`, port
-`5432`, database `postgres`, user and password `devuser`.
+pgAdmin est sur [http://localhost:8888](http://localhost:8888)
+(`devuser@devuser.com` / `devuser`) ; enregistrer le serveur avec l'hôte `db`,
+le port `5432`, la base `postgres`, utilisateur et mot de passe `devuser`.
 
-With the [psql client](https://www.postgresql.org/download/):
+Avec le [client psql](https://www.postgresql.org/download/) :
 
 ```bash
 docker exec -it coupes-rases-database psql -U devuser -d local
-# or, without docker exec
+# ou, sans docker exec
 PGPASSWORD=devuser psql -h localhost -U devuser -d local
 ```
 
-Any other client works, for instance [DBeaver](https://dbeaver.io/).
+Tout autre client convient, par exemple [DBeaver](https://dbeaver.io/).
