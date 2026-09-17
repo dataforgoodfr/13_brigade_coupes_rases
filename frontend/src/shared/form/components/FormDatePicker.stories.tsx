@@ -6,6 +6,7 @@ import {
 	FormDatePicker,
 	type FormDatePickerProps
 } from "@/shared/form/components/FormDatePicker"
+import { ChangeTrackingProvider } from "@/shared/form/context/ChangeTrackingForm"
 import type { FormRenderProps } from "@/shared/form/types"
 
 type Props = { date?: string }
@@ -19,20 +20,28 @@ const FormDatePickerStory = ({
 		"form" | "name" | keyof FormRenderProps
 	>) => {
 	const form = useForm<Props>({ values: { date } })
+	// Le suivi des modifications de FormFieldLayout lit ce contexte, comme dans
+	// le formulaire de l'application (AccordionContent).
 	return (
 		<FormProvider {...form}>
-			<FormField<Props, "date">
-				name="date"
+			<ChangeTrackingProvider
 				form={form}
-				render={(renderProps) => (
-					<FormDatePicker<Props>
-						label="Date"
-						{...renderProps}
-						{...props}
-						form={form}
-					/>
-				)}
-			/>
+				others={{ original: { date }, latest: { date } }}
+				trackedFields={["date"]}
+			>
+				<FormField<Props, "date">
+					name="date"
+					form={form}
+					render={(renderProps) => (
+						<FormDatePicker<Props>
+							label="Date"
+							{...renderProps}
+							{...props}
+							form={form}
+						/>
+					)}
+				/>
+			</ChangeTrackingProvider>
 		</FormProvider>
 	)
 }
