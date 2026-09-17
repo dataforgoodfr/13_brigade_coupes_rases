@@ -6,39 +6,27 @@ on:
         required: true
         description: "Clever cloud application ID"
         type: string
-      app-name:
-        required: false
-        description: "Application name used in tag generation"
+      ref:
+        required: true
+        description: "Git ref to deploy (tag or commit)"
         type: string
-        default: "clear-cut"
 jobs:
-  release:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+  deploy:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.ref }}
+          # clever deploy refuses a shallow clone
           fetch-depth: 0
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          tag_prefix: ${{inputs.app-name}}.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
       - name: Deploy to clever cloud
         uses: 47ng/actions-clever-cloud@v2.2.0
         with:
           appID: ${{ inputs.app-id }}
           force: true
+          # Allows redeploying the commit already in production (rollback, env change)
+          sameCommitPolicy: rebuild
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

@@ -191,19 +191,21 @@ Cette base est la source de vérité : tout secret utilisé par le projet (compt
 
 ### Branches et déploiement
 
-Les pull requests visent `develop`. La fusion de `develop` dans `main` déclenche, via GitHub Actions, la création d'un tag et d'une release puis le déploiement sur Clever Cloud du backend et du frontend, et la publication du Storybook sur GitHub Pages.
+Les pull requests visent `main`. Fusionner n'entraîne aucun déploiement : la mise en production se fait en publiant une [release GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/releases/new) avec un tag `vX.Y.Z` (bouton « Generate release notes » pour lister les pull requests fusionnées). Le workflow **Release** déploie alors le backend et le frontend sur Clever Cloud. Une release marquée « pre-release » n'est pas déployée.
+
+Pour revenir à une version antérieure, lancer le workflow Release à la main (onglet Actions, « Run workflow ») en indiquant le tag à redéployer.
+
+Le Storybook est publié sur GitHub Pages à chaque modification du frontend sur `main`.
 
 Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bouton « Run workflow »).
 
-**Backend CI** : tests du backend (pytest, mypy) puis déploiement.
+**Backend CI** : tests du backend (pytest, mypy).
 
 ![](doc/images/backend_ci.png)
 
-**Frontend CI** : lint, tests unitaires et navigateur (Playwright) puis déploiement.
+**Frontend CI** : lint, tests unitaires et navigateur (Playwright).
 
 ![](doc/images/frontend_ci.png)
-
-> Si le déploiement échoue avec « The clever-cloud application is up-to-date », aucun nouveau commit n'a été créé depuis le dernier déploiement (c'est le cas sur la capture ci-dessus).
 
 **Database Actions** : actions manuelles sur la base (upgrade, setup, reset).
 
