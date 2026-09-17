@@ -96,4 +96,4 @@ Deployment is triggered by publishing a GitHub release, see the
 
 ## Database schema
 
-![](./database_schema.png)
+The entity-relationship diagram is in [doc/architecture.md](../doc/architecture.md#modèle-de-données); regenerate it from the models with `make erd` after a migration.

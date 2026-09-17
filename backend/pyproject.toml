@@ -71,7 +71,7 @@ fail_under = 70
 strict = true
 python_version = "3.13"
 plugins = ["pydantic.mypy"]
-files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py"]
+files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py", "erd.py"]
 
 [[tool.mypy.overrides]]
 # apscheduler ne publie ni stubs ni marqueur py.typed
