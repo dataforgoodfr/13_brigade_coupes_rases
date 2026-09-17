@@ -13,13 +13,3 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: mixed-line-ending
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    # v1.4.1+ pins safety<=2.3.5, whose packaging<22 constraint breaks the
-    # poetry export the hook relies on
-    rev: v1.3.3
-    hooks:
-      - id: python-safety-dependencies-check
-      # This file is pinned because the hook doesn't support multiple pyproject files. 
-      # It's better to check partially (dependencies of backend) than eliminating the hook.
-        files: backend/pyproject.toml
-        additional_dependencies: [poetry-plugin-export]

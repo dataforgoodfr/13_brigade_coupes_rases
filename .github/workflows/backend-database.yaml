@@ -1,5 +1,5 @@
 name: Backend Database actions
-description: Enable database actions based on Makefile commands
+# Enable database actions based on Makefile commands
 
 on:
   workflow_dispatch:
@@ -20,6 +20,10 @@ on:
           - stamp-and-upgrade
         type: choice
         description: "Seed the database with test data"
+
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
