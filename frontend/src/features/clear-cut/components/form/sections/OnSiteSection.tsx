@@ -1,6 +1,6 @@
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
 
-import type { FixedItem, SectionForm, SectionFormItem } from "../types"
+import type { CustomizedItem, SectionForm, SectionFormItem } from "../types"
 
 export const onSiteKey: SectionForm = {
 	name: "Terrain",
@@ -11,15 +11,30 @@ export const onSiteValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
 		name: "report.affectedUser",
 		label: "Bénévole en charge du terrain :",
-		type: "fixed",
-		renderConditions: ["report.affectedUser"],
-		fallBack: (key: string | number) => (
-			<div key={key} className="sm:flex gap-2 my-2">
-				<p className="font-bold">Bénévole en charge du terrain : </p>
-				<p>Aucun bénévole n'est assigné</p>
-			</div>
-		)
-	} satisfies FixedItem<ClearCutFormInput, "report.affectedUser">,
+		type: "customized",
+		// Always true so customizeRender always runs while staying out of the
+		// generic value/disabled test loops (which target renderConditions.length === 0).
+		renderConditions: ["report.id"],
+		customizeRender: (form, key) => {
+			const affectedUser = form.getValues("report.affectedUser")
+			const userId = form.getValues("report.userId")
+			// `affectedUser` is hidden by the backend for users who can't see the
+			// assignment (privacy gating), but `userId` is still exposed. Distinguish
+			// "assigned to someone else (name hidden)" from "truly unassigned" to stay
+			// consistent with the header badge.
+			const display = affectedUser?.login
+				? affectedUser.login
+				: userId
+					? "Attribuée à un autre bénévole"
+					: "Aucun bénévole n'est assigné"
+			return (
+				<div key={key} className="sm:flex gap-2 my-2">
+					<p className="font-bold">Bénévole en charge du terrain : </p>
+					<p>{display}</p>
+				</div>
+			)
+		}
+	} satisfies CustomizedItem<ClearCutFormInput, "report.affectedUser">,
 	{
 		name: "inspectionDate",
 		label: "Date du terrain",
