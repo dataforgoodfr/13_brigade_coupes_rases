@@ -40,17 +40,30 @@ def add_clear_cut_form_entry(
     etag: str | None,
 ) -> ClearCutForm:
     report = db.get(ClearCutReport, report_id)
+    if report is None:
+        raise AppHTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            type="REPORT_NOT_FOUND",
+            detail="Clear cut report not found",
+        )
+    # The volunteer in charge fills the form; while their assignment request is
+    # pending they may already draft it, as the frontend lets them do.
+    is_in_charge = report.user_id == editor.id or (
+        report.user_id is None and report.assignment_requested_by_id == editor.id
+    )
+    if editor.role == "volunteer" and not is_in_charge:
+        raise AppHTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            type="NOT_ASSIGNED",
+            detail="Seul le bénévole en charge de la coupe peut remplir son formulaire.",
+        )
     locked_statuses = (
         "waiting_for_validation",
         "validated",
         "legal_validated",
         "final_validated",
     )
-    if (
-        report is not None
-        and editor.role == "volunteer"
-        and report.status in locked_statuses
-    ):
+    if editor.role == "volunteer" and report.status in locked_statuses:
         raise AppHTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             type="FORM_LOCKED",

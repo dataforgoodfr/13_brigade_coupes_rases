@@ -3,7 +3,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models import ClearCutForm, ClearCutReport
-from test.common.user import get_admin_user_token, get_volunteer_user_token
+from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
+
+MINIMAL_FORM = {"inspectionDate": "2025-07-31T20:16:13.358000"}
 
 
 def test_create_version_success(client: TestClient, db: Session) -> None:
@@ -201,3 +203,83 @@ def test_form_is_only_served_under_its_report(client: TestClient, db: Session) -
         headers=headers,
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_volunteer_cannot_submit_form_on_report_not_assigned_to_them(
+    client: TestClient, db: Session
+) -> None:
+    token = get_volunteer_user_token(client, db, "not-owner@volunteer.com")[1]
+    other = create_user(db, email="owner@volunteer.com", login="owner-login")
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    report.user_id = other.id
+    db.commit()
+
+    response = client.post(
+        "/api/v1/clear-cuts-reports/1/forms",
+        json=MINIMAL_FORM,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["detail"]["type"] == "NOT_ASSIGNED"
+
+
+def test_assigned_volunteer_can_submit_form(client: TestClient, db: Session) -> None:
+    [me, token] = get_volunteer_user_token(client, db, "owner@volunteer.com")
+    # An unlocked report without any form yet, so that no ETag is expected
+    report = (
+        db.query(ClearCutReport)
+        .filter(
+            ~ClearCutReport.clear_cut_forms.any(),
+            ClearCutReport.status == "to_validate",
+        )
+        .first()
+    )
+    assert report is not None
+    report.user_id = me.id
+    db.commit()
+    report_id = report.id
+
+    response = client.post(
+        f"/api/v1/clear-cuts-reports/{report_id}/forms",
+        json=MINIMAL_FORM,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_assignment_requester_can_draft_form(client: TestClient, db: Session) -> None:
+    [me, token] = get_volunteer_user_token(client, db, "requester@volunteer.com")
+    report = (
+        db.query(ClearCutReport)
+        .filter(
+            ~ClearCutReport.clear_cut_forms.any(),
+            ClearCutReport.status == "to_validate",
+        )
+        .first()
+    )
+    assert report is not None
+    report.user_id = None
+    report.assignment_requested_by_id = me.id
+    db.commit()
+    report_id = report.id
+
+    response = client.post(
+        f"/api/v1/clear-cuts-reports/{report_id}/forms",
+        json=MINIMAL_FORM,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_form_on_unknown_report_returns_not_found(
+    client: TestClient, db: Session
+) -> None:
+    token = get_admin_user_token(client, db)[1]
+    response = client.post(
+        "/api/v1/clear-cuts-reports/999999/forms",
+        json=MINIMAL_FORM,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["detail"]["type"] == "REPORT_NOT_FOUND"
