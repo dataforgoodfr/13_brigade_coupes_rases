@@ -44,6 +44,11 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "DB_POOL_RECYCLE_SECONDS"},
         description="Recycle connections older than this, to survive server-side idle timeouts",
     )
+    MAP_MAX_POINTS: int = Field(
+        default=2000,
+        json_schema_extra={"env": "MAP_MAX_POINTS"},
+        description="Maximum number of individual points returned by the map endpoint; `total` still counts them all",
+    )
     API_DOCS_ENABLED: bool = Field(
         default=False,
         json_schema_extra={"env": "API_DOCS_ENABLED"},

@@ -1,8 +1,10 @@
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from test.common.clear_cut import new_clear_cut_report
 
 MAP = "/api/v1/clear-cuts-map"
@@ -63,6 +65,19 @@ def test_narrow_bounds_keep_individual_points(client: TestClient, db: Session) -
     for preview in data["previews"]:
         preview_lng, preview_lat = preview["averageLocation"]["coordinates"]
         assert abs(preview_lat - lat) <= 0.2 and abs(preview_lng - lng) <= 0.2
+
+
+def test_individual_points_are_capped(
+    client: TestClient, db: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    everything = get_map(client, withPoints=True)
+    assert everything["points"]["total"] > 1
+
+    monkeypatch.setattr(settings, "MAP_MAX_POINTS", 1)
+    capped = get_map(client, withPoints=True)
+
+    assert capped["points"]["total"] == everything["points"]["total"]
+    assert len(capped["points"]["content"]) == 1
 
 
 def test_filter_by_status(client: TestClient, db: Session) -> None:
