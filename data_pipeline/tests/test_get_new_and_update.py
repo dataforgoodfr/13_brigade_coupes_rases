@@ -52,3 +52,25 @@ def test_clusters_near_the_reference_are_updated_others_are_new(
     assert "_temp_idx" not in updated.columns
     assert (data_dir / "sufosat" / "clusters_updated.fgb").exists()
     assert (data_dir / "sufosat" / "clusters_new.fgb").exists()
+
+
+def test_locked_clusters_are_never_matched(data_dir: Path) -> None:
+    ref = cluster_frame([box(0, 0, 100, 100), box(500, 500, 600, 600)])
+    # La première coupe a été corrigée à la main sans réautoriser le pipeline,
+    # la seconde a été corrigée puis réouverte par un administrateur.
+    ref["is_manually_edited"] = [True, True]
+    ref["allow_pipeline_override"] = [False, True]
+    new = cluster_frame([box(20, 20, 120, 120), box(520, 520, 620, 620)])
+    ref_path, new_path = data_dir / "ref.fgb", data_dir / "new.fgb"
+    ref.to_file(ref_path, driver="FlatGeobuf")
+    new.to_file(new_path, driver="FlatGeobuf")
+
+    updated, truly_new = split_new_and_updated_clusters(str(new_path), str(ref_path))
+
+    assert truly_new["clear_cut_group"].tolist() == [1]
+    assert updated["clear_cut_group"].tolist() == [2]
+
+
+def test_reference_without_edition_flags_is_fully_matchable() -> None:
+    ref = cluster_frame([box(0, 0, 100, 100)])
+    assert not get_new_and_update.locked_clusters_mask(ref).any()

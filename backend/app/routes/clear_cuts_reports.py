@@ -27,6 +27,7 @@ from app.services.clear_cut_report import (
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
+    set_report_pipeline_override,
     sync_clear_cuts_reports,
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
@@ -147,6 +148,30 @@ def update_existing_clear_cut_report(
 ) -> None:
     logger.info(db)
     update_clear_cut_report(report_id, db, user, item)
+
+
+class PipelineOverrideRequestSchema(BaseSchema):
+    allow: bool
+
+
+class PipelineOverrideResponseSchema(BaseSchema):
+    allow_pipeline_override: bool
+
+
+@router.post(
+    "/{report_id}/pipeline-override",
+    status_code=status.HTTP_200_OK,
+    response_model=PipelineOverrideResponseSchema,
+)
+def set_pipeline_override(
+    report_id: int,
+    params: PipelineOverrideRequestSchema,
+    user: User = Depends(get_current_user),
+    db: Session = db_session,
+) -> PipelineOverrideResponseSchema:
+    """Toggle whether the pipeline may overwrite this report's manually edited cuts."""
+    set_report_pipeline_override(report_id, db, user, params.allow)
+    return PipelineOverrideResponseSchema(allow_pipeline_override=params.allow)
 
 
 @router.get(
