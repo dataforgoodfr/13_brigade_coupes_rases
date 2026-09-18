@@ -6,7 +6,7 @@ Ce document décrit ce qu'il faut connaître avant de modifier le code, quel que
 
 ```mermaid
 flowchart LR
-    SUFOSAT[Détections satellite<br>SUFOSAT, Zenodo] --> P[Data pipeline<br>regroupement, enrichissement]
+    RADD[Alertes satellite<br>RADD Europe, Earth Engine] --> P[Data pipeline<br>regroupement, enrichissement]
     REF[Couches de référence<br>Natura 2000, BD Forêt, cadastre, pente] --> P
     P --> S3[(S3 « gold »)]
     S3 -. chargement .-> DB[(PostgreSQL / PostGIS)]

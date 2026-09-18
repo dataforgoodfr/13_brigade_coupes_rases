@@ -9,6 +9,20 @@ from pipeline.scripts import DATA_DIR
 from pipeline.scripts.utils import display_df, load_gdf, log_execution, save_gdf
 
 ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriched.fgb"
+# Les couches de référence (cadastre, Natura 2000, BD Forêt, pente) sont en
+# Lambert 93 alors que le raster RADD est exporté en EPSG:3035 : un sjoin
+# geopandas entre deux CRS différents ne renvoie silencieusement rien, d'où la
+# reprojection des clusters.
+REFERENCE_CRS = "EPSG:2154"
+
+
+def to_reference_crs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    if gdf.crs is None:
+        raise ValueError("Clusters have no CRS, cannot align with the reference layers")
+    if gdf.crs.to_epsg() == 2154:
+        return gdf
+    logging.info(f"Reprojecting clusters from {gdf.crs} to {REFERENCE_CRS}")
+    return gdf.to_crs(REFERENCE_CRS)
 
 
 def overlay(
@@ -229,8 +243,8 @@ def enrich_sufosat_clusters() -> None:
     ProgressBar().register()  # type: ignore
 
     # Load SUFOSAT clusters
-    sufosat = load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index(
-        "clear_cut_group"
+    sufosat = to_reference_crs(
+        load_gdf(DATA_DIR / "sufosat/sufosat_clusters.fgb").set_index("clear_cut_group")
     )
 
     # Convert to dask_geopandas for parallel processing
