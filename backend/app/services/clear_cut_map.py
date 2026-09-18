@@ -17,6 +17,7 @@ from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Query, Session
 
 from app.common.errors import AppHTTPException
+from app.config import settings
 from app.models import (
     SRID,
     City,
@@ -278,9 +279,12 @@ def build_clearcuts_map(
 def process_points_from_reports(
     reports_with_filters: Query[Any],
 ) -> ClusterizedPointsResponseSchema:
-    all_reports = reports_with_filters.all()
+    # Individual points are only served for small areas, but nothing bounds
+    # their number when the request carries no bounds at all: cap them
+    total = reports_with_filters.count()
+    all_reports = reports_with_filters.limit(settings.MAP_MAX_POINTS).all()
     clusterized_points = ClusterizedPointsResponseSchema(
-        total=len(all_reports),
+        total=total,
         content=[
             CountedPoint(
                 count=1,
