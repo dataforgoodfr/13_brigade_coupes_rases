@@ -40,6 +40,9 @@ Les alertes RADD ont remplacé les millésimes SUFOSAT (Zenodo) : même format d
    → Export DB → FGB local (référentiel de comparaison)
    → Split : clusters nouveaux vs clusters mis à jour (buffer 50m)
    → Fusion des géométries mises à jour avec l'historique
+   → Les coupes corrigées à la main dans l'application (is_manually_edited,
+     sans allow_pipeline_override) sont exclues du matching : jamais fusionnées,
+     les détections voisines deviennent de nouveaux clusters
 
    Premier run (base vide) : le fichier enrichi devient directement le gold final.
 

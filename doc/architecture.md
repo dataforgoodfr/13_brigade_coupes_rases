@@ -86,6 +86,7 @@ erDiagram
         datetime first_cut_date
         datetime last_cut_date
         json statellite_images
+        datetime reported_at
         datetime created_at
         datetime updated_at
     }
@@ -102,6 +103,10 @@ erDiagram
         float bdf_mixed_area_hectare
         float bdf_poplar_area_hectare
         float ecological_zoning_area_hectare
+        bool is_manually_edited
+        datetime manually_edited_at
+        int manually_edited_by_id FK
+        bool allow_pipeline_override
         datetime created_at
         datetime updated_at
     }
@@ -154,6 +159,7 @@ erDiagram
     users |o--o{ clear_cuts_reports : assignment_requested_by_id
     cities ||--o{ clear_cuts_reports : city_id
     clear_cuts_reports ||--o{ clear_cuts : report_id
+    users |o--o{ clear_cuts : manually_edited_by_id
     clear_cuts_reports ||--o{ clear_cut_report_forms : report_id
     users ||--o{ clear_cut_report_forms : editor_id
     clear_cuts ||--o{ clear_cut_ecological_zoning : clear_cut_id

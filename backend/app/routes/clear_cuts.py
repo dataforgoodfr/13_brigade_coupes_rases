@@ -65,7 +65,6 @@ def patch_clear_cut(
     user: User = Depends(get_current_user),
 ) -> ClearCutResponseSchema:
     """Manually correct a clear cut's perimeter and/or observation dates."""
-    logger.info(db)
     return update_clear_cut_geometry(db, clear_cut_id, user, item)
 
 

@@ -2,11 +2,9 @@ from collections.abc import Sequence
 from datetime import datetime
 
 from geoalchemy2 import Geography
-from geoalchemy2.elements import WKTElement
 from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
-from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
 from shapely.geometry import shape
-from sqlalchemy import Row, cast, update
+from sqlalchemy import Row, cast, func, update
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import RowReturningQuery
 
@@ -22,6 +20,7 @@ from app.schemas.ecological_zoning import (
     clear_cut_ecological_zoning_to_clear_cut_ecological_zoning_response_schema,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.services.clear_cut_report import sync_clear_cuts_reports
 
 
 def map_geo_clearcut(clearcut: ClearCut, boundary: str, location: str) -> ClearCut:
@@ -81,26 +80,29 @@ def update_clear_cut_geometry(
             detail="Only admins or the assigned volunteer can edit a clear cut",
         )
 
-    boundary_changed = request.boundary is not None
-    changed = boundary_changed
-
-    if boundary_changed:
-        geom = shape(request.boundary.model_dump())
-        if geom.geom_type == "Polygon":
-            geom = ShapelyMultiPolygon([geom])
-        elif geom.geom_type != "MultiPolygon":
-            raise AppHTTPException(
-                status_code=400,
-                type="INVALID_GEOMETRY",
-                detail="Perimeter must be a Polygon or MultiPolygon",
-            )
-        clear_cut.boundary = WKTElement(geom.wkt, srid=SRID)
-
+    changed = False
     if request.observation_start_date is not None:
         clear_cut.observation_start_date = request.observation_start_date
         changed = True
     if request.observation_end_date is not None:
         clear_cut.observation_end_date = request.observation_end_date
+        changed = True
+
+    if request.boundary is not None:
+        # Area (hectares, metric via geography) and centroid are derived from the
+        # new perimeter by PostGIS, in the same statement.
+        boundary = func.ST_Multi(
+            func.ST_GeomFromText(shape(request.boundary.model_dump()).wkt, SRID)
+        )
+        db.execute(
+            update(ClearCut)
+            .where(ClearCut.id == clear_cut_id)
+            .values(
+                boundary=boundary,
+                area_hectare=ST_Area(cast(boundary, Geography)) / 10000.0,
+                location=ST_Centroid(boundary),
+            )
+        )
         changed = True
 
     if not changed:
@@ -112,24 +114,9 @@ def update_clear_cut_geometry(
     # A fresh manual correction must re-lock the cut against the pipeline, even if
     # the override had been re-enabled for a previous run.
     clear_cut.allow_pipeline_override = False
-    db.flush()
-
-    if boundary_changed:
-        # Derive area + centroid from the new perimeter (geography = metric area).
-        db.execute(
-            update(ClearCut)
-            .where(ClearCut.id == clear_cut_id)
-            .values(
-                area_hectare=ST_Area(cast(ClearCut.boundary, Geography)) / 10000.0,
-                location=ST_Centroid(ClearCut.boundary),
-            )
-        )
-
     db.commit()
 
     # Recompute report totals, first/last cut date, average location and rules.
-    from app.services.clear_cut_report import sync_clear_cuts_reports
-
     sync_clear_cuts_reports(db)
     return get_clearcut_by_id(clear_cut_id, db)
 

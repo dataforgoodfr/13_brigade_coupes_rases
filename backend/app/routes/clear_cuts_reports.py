@@ -154,19 +154,24 @@ class PipelineOverrideRequestSchema(BaseSchema):
     allow: bool
 
 
+class PipelineOverrideResponseSchema(BaseSchema):
+    allow_pipeline_override: bool
+
+
 @router.post(
     "/{report_id}/pipeline-override",
     status_code=status.HTTP_200_OK,
+    response_model=PipelineOverrideResponseSchema,
 )
 def set_pipeline_override(
     report_id: int,
     params: PipelineOverrideRequestSchema,
     user: User = Depends(get_current_user),
     db: Session = db_session,
-):
+) -> PipelineOverrideResponseSchema:
     """Toggle whether the pipeline may overwrite this report's manually edited cuts."""
     set_report_pipeline_override(report_id, db, user, params.allow)
-    return {"allow_pipeline_override": params.allow}
+    return PipelineOverrideResponseSchema(allow_pipeline_override=params.allow)
 
 
 @router.get(
