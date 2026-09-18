@@ -79,6 +79,7 @@ documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/doc
 | `PORT` | oui | Port HTTP |
 | `JWT_SECRET_KEY` | oui | Clé de signature des jetons d'accès, de rafraîchissement et de réinitialisation du mot de passe ; au moins 32 caractères en production (`openssl rand -hex 32`) |
 | `ALLOWED_ORIGINS` | non | Origines autorisées pour CORS, séparées par des virgules |
+| `DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_RECYCLE_SECONDS` | non | Pool de connexions SQLAlchemy (défauts 3, 2 et 1800 s) ; garder `DB_POOL_SIZE + DB_MAX_OVERFLOW` sous la limite de connexions du plan PostgreSQL |
 | `API_DOCS_ENABLED` | non | Expose `/docs`, `/redoc` et `/openapi.json` en production (toujours exposés hors production) |
 | `IMPORTS_TOKEN` | non | Jeton attendu dans l'en-tête `x-imports-token` par la route d'import des signalements |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | non | Stockage objet des photos des formulaires ; sans ces variables, les envois sont stockés localement |
