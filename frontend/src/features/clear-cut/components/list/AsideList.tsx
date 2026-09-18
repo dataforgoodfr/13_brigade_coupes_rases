@@ -9,16 +9,23 @@ import { AdvancedFilters } from "@/features/clear-cut/components/filters/Advance
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { ClearCutItem } from "@/features/clear-cut/components/list/ClearCutItem"
 import { selectClearCuts } from "@/features/clear-cut/store/clear-cuts-slice"
-import { selectResetVersion } from "@/features/clear-cut/store/filters.slice"
+import {
+	filtersSlice,
+	selectResetVersion,
+	selectSortOrder
+} from "@/features/clear-cut/store/filters.slice"
 import { cn } from "@/lib/utils"
 import { IconButton } from "@/shared/components/button/Button"
+import { SortingButton } from "@/shared/components/button/SortingButton"
 import { Title } from "@/shared/components/typo/Title"
-import { useAppSelector } from "@/shared/hooks/store"
+import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function AsideList({ mobile = false }: { mobile?: boolean }) {
 	const { value } = useAppSelector(selectClearCuts)
 	const { layout, setLayout } = useLayout()
+	const dispatch = useAppDispatch()
 	const resetVersion = useAppSelector(selectResetVersion)
+	const sortOrder = useAppSelector(selectSortOrder)
 	const isShown = layout === "list"
 
 	return (
@@ -33,6 +40,12 @@ export function AsideList({ mobile = false }: { mobile?: boolean }) {
 				<div className="flex justify-between items-center mt-1 sm:mt-2 border-b-1 border-zinc-200 px-3 py-2">
 					<Title className="text-primary">COUPES RASES</Title>
 					<div className="flex gap-2">
+						<SortingButton
+							sort={sortOrder}
+							onClick={() => dispatch(filtersSlice.actions.toggleSortOrder())}
+						>
+							Date de coupe
+						</SortingButton>
 						<CollapsibleTrigger asChild>
 							<IconButton
 								variant="outline"

@@ -13,6 +13,8 @@ from app.schemas.clear_cut_map import (
 from app.services.clear_cut_map import (
     Filters,
     GeoBounds,
+    SortBy,
+    SortOrder,
     build_clearcuts_map,
     get_report_preview_by_id,
 )
@@ -128,6 +130,16 @@ def get_clearcuts_map(
         description="List of report ids to exclude",
         openapi_examples={"default": {"value": ["1"]}},
     ),
+    sort_by: SortBy = Query(
+        "first_cut_date",
+        alias="sortBy",
+        description="Field to sort the report previews by",
+    ),
+    sort_order: SortOrder = Query(
+        "desc",
+        alias="sortOrder",
+        description="Sort direction",
+    ),
     db: Session = db_session,
 ) -> ClearCutMapResponseSchema:
     t = time()
@@ -159,6 +171,8 @@ def get_clearcuts_map(
             excessive_slope=excessive_slope,
             in_reports_ids=in_reports_ids,
             out_reports_ids=out_reports_ids,
+            sort_by=sort_by,
+            sort_order=sort_order,
         ),
     )
     logger.info(f"Clear cuts map built in {round(time() - t, 2)} seconds")

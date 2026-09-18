@@ -4,7 +4,8 @@ import type { ClearCutStatus } from "@/features/clear-cut/store/clear-cuts"
 import {
 	type FiltersRequest,
 	type FiltersResponse,
-	filtersResponseSchema
+	filtersResponseSchema,
+	type SortableField
 } from "@/features/clear-cut/store/filters"
 import type { Bounds } from "@/features/clear-cut/store/types"
 import { selectFavorites } from "@/features/user/store/me.slice"
@@ -25,6 +26,7 @@ import {
 import { createTypedDraftSafeSelector } from "@/shared/store/selector"
 import type { RootState } from "@/shared/store/store"
 import { createAppAsyncThunk } from "@/shared/store/thunk"
+import type { Sort } from "@/shared/types/list"
 import type { Range } from "@/shared/types/range"
 
 interface PendingFilters {
@@ -52,6 +54,8 @@ export interface FiltersState {
 	ecological_zoning: EventuallyBooleanSelectableItems
 	favorite: EventuallyBooleanSelectableItems
 	with_points?: boolean
+	sortBy: SortableField
+	sortOrder: Sort
 	// pending (UI editing state, not yet applied)
 	isInitialized: boolean
 	resetVersion: number
@@ -78,6 +82,8 @@ export const initialState: FiltersState = {
 	excessive_slope: DEFAULT_EVENTUALLY_BOOLEAN,
 	ecological_zoning: DEFAULT_EVENTUALLY_BOOLEAN,
 	favorite: DEFAULT_EVENTUALLY_BOOLEAN,
+	sortBy: "first_cut_date",
+	sortOrder: "desc",
 	isInitialized: false,
 	resetVersion: 0,
 	pendingFilters: emptyPending
@@ -242,6 +248,9 @@ export const filtersSlice = createSlice({
 		},
 		setWithPoints: (state, { payload }: PayloadAction<boolean>) => {
 			state.with_points = payload
+		},
+		toggleSortOrder: (state) => {
+			state.sortOrder = state.sortOrder === "desc" ? "asc" : "desc"
 		}
 	},
 	extraReducers: (builder) => {
@@ -297,6 +306,7 @@ export const {
 		updateCutYear: toggleCutYear,
 		setGeoBounds,
 		setWithPoints,
+		toggleSortOrder,
 		commitFilters,
 		resetFilters
 	}
@@ -316,7 +326,9 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 			departments,
 			excessive_slope,
 			favorite,
-			with_points
+			with_points,
+			sortBy,
+			sortOrder
 		},
 		favorites
 	): FiltersRequest | undefined => {
@@ -338,7 +350,9 @@ export const selectFiltersRequest = createTypedDraftSafeSelector(
 			excessiveSlope: excessive_slope.find((item) => item.isSelected)?.item,
 			inReportsIds: selectedFavoriteOption === true ? favorites : undefined,
 			outReportsIds: selectedFavoriteOption === false ? favorites : undefined,
-			withPoints: with_points
+			withPoints: with_points,
+			sortBy,
+			sortOrder
 		}
 	}
 )
@@ -401,4 +415,9 @@ export const selectWithPoints = createTypedDraftSafeSelector(
 export const selectResetVersion = createTypedDraftSafeSelector(
 	selectState,
 	(state) => state.resetVersion
+)
+
+export const selectSortOrder = createTypedDraftSafeSelector(
+	selectState,
+	(state) => state.sortOrder
 )

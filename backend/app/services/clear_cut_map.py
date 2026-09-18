@@ -1,6 +1,6 @@
 from logging import getLogger
 from math import sqrt
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import status
 from geoalchemy2.functions import (
@@ -47,6 +47,14 @@ class GeoBounds(BaseSchema):
     north_east_longitude: float
 
 
+SortBy = Literal["first_cut_date", "last_cut_date"]
+SortOrder = Literal["asc", "desc"]
+SORTABLE_COLUMNS = {
+    "first_cut_date": ClearCutReport.first_cut_date,
+    "last_cut_date": ClearCutReport.last_cut_date,
+}
+
+
 class Filters(BaseSchema):
     bounds: GeoBounds | None = None
     report_id: int | None = None
@@ -60,6 +68,8 @@ class Filters(BaseSchema):
     excessive_slope: bool | None = None
     in_reports_ids: list[str] | None = []
     out_reports_ids: list[str] | None = []
+    sort_by: SortBy = "first_cut_date"
+    sort_order: SortOrder = "desc"
 
 
 def query_clearcuts_filtered(db: Session, filters: Filters | None) -> Query[Any]:
@@ -268,7 +278,11 @@ def build_clearcuts_map(
             # If area doesnt exists clusters are useless
             clusterized_points = process_points_from_reports(reports_with_filters)
 
-    previews = reports_with_filters.limit(30).all()
+    sort_column = SORTABLE_COLUMNS[filters.sort_by]
+    sort_direction = (
+        sort_column.asc() if filters.sort_order == "asc" else sort_column.desc()
+    )
+    previews = reports_with_filters.order_by(sort_direction).limit(30).all()
     map_response = ClearCutMapResponseSchema(
         points=clusterized_points,
         previews=list(map(report_to_report_preview_schema, previews)),
