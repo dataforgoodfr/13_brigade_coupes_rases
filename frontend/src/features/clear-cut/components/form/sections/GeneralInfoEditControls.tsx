@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
 import {
 	setPipelineOverrideThunk,
@@ -57,6 +58,9 @@ export function GeneralInfoEditControls({
 	const user = useConnectedMe()
 	const dispatch = useAppDispatch()
 	const { toast } = useToast()
+	const { editingPerimeterReportId, setEditingPerimeterReportId } =
+		useMapInstance()
+	const isEditingPerimeter = editingPerimeterReportId === report.id
 
 	const canEdit = useMemo(() => {
 		if (!user) return false
@@ -307,6 +311,22 @@ export function GeneralInfoEditControls({
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>
+			)}
+
+			{canEdit && singleCut && (
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					className="w-fit"
+					disabled={isEditingPerimeter}
+					onClick={() => setEditingPerimeterReportId(report.id)}
+				>
+					<Pencil size={14} className="mr-1" />
+					{isEditingPerimeter
+						? "Édition du périmètre en cours…"
+						: "Modifier le périmètre"}
+				</Button>
 			)}
 
 			{canEdit && report.isManuallyEdited && (

@@ -63,7 +63,8 @@ type SectionData<
 
 const setupTest = (
 	report: Partial<ClearCutReportResponse> = {},
-	form: Partial<ClearCutFormResponse> = {}
+	form: Partial<ClearCutFormResponse> = {},
+	options = { ecologicalZoningsCount: 1, clearCutsCount: 1 }
 ) => {
 	const reportMock = mockClearCutReportResponse(
 		{
@@ -78,7 +79,7 @@ const setupTest = (
 			averageLocation: { coordinates: [1, 2], type: "Point" },
 			...report
 		},
-		{ ecologicalZoningsCount: 1, clearCutsCount: 1 }
+		options
 	)
 	const formMock = mockClearCutFormsResponse({
 		reportId: reportMock.response.id,
@@ -297,6 +298,25 @@ describe("general info edition controls", () => {
 		it("shows the edit button", async () => {
 			await openGeneralInfo(adminMock)
 			expect(editButton()).toBeInTheDocument()
+		})
+		it("shows the perimeter edit button for a single-cut report", async () => {
+			await openGeneralInfo(adminMock)
+			expect(
+				screen.getByRole("button", { name: /Modifier le périmètre/ })
+			).toBeInTheDocument()
+		})
+	})
+
+	describe("when the report has several cuts", () => {
+		defaultSetupServerBeforeEach(
+			setupTest({}, {}, { ecologicalZoningsCount: 1, clearCutsCount: 2 })
+		)
+		it("hides the perimeter edit button", async () => {
+			await openGeneralInfo(adminMock)
+			expect(editButton()).toBeInTheDocument()
+			expect(
+				screen.queryByRole("button", { name: /Modifier le périmètre/ })
+			).not.toBeInTheDocument()
 		})
 	})
 
