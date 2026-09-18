@@ -1,4 +1,5 @@
 import { useLocation } from "@tanstack/react-router"
+import L from "leaflet"
 import { type RefObject, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { GeoJSON } from "react-leaflet"
@@ -49,6 +50,7 @@ function toMultiPolygon(geojson: any): MultiPolygon {
 
 export function ClearCutPreview({ report, clearCut }: Props) {
 	const {
+		map,
 		setFocusedClearCutId,
 		focusedClearCutId,
 		editingPerimeterReportId,
@@ -78,6 +80,14 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 			else child.pm?.disable()
 		})
 	}, [isEditingPerimeter])
+
+	// The action bar lives inside the map container (centered on the map, not on
+	// the window); keep its clicks and scrolls away from the map handlers.
+	const actionBarRef = (el: HTMLDivElement | null) => {
+		if (!el) return
+		L.DomEvent.disableClickPropagation(el)
+		L.DomEvent.disableScrollPropagation(el)
+	}
 
 	const handleSavePerimeter = async () => {
 		const layer = ref.current
@@ -174,9 +184,13 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				<ClearCutMapPopUp report={report} />
 			</GeoJSON>
 			{isEditingPerimeter &&
+				map &&
 				createPortal(
-					<div className="fixed bottom-24 left-1/2 z-[1000] flex -translate-x-1/2 items-center gap-2 rounded-md border bg-white p-2 shadow-lg">
-						<span className="px-2 text-sm">
+					<div
+						ref={actionBarRef}
+						className="absolute bottom-24 left-1/2 z-[1000] flex -translate-x-1/2 items-center gap-2 rounded-md border bg-white p-2 shadow-lg"
+					>
+						<span className="whitespace-nowrap px-2 text-sm">
 							Déplacez les sommets pour ajuster le périmètre
 						</span>
 						<Button
@@ -191,7 +205,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 							{isSaving ? "Enregistrement…" : "Enregistrer le périmètre"}
 						</Button>
 					</div>,
-					document.body
+					map.getContainer()
 				)}
 		</>
 	)

@@ -479,6 +479,9 @@ type State = {
 		totalCount: number
 	}>
 	assignation: RequestedContent<void, string>
+	// Manual corrections of a report (info, perimeter, pipeline lock); kept apart
+	// from `assignation` so the assignment toasts do not fire on an edition.
+	edition: RequestedContent<void, string>
 }
 
 const initialState: State = {
@@ -488,7 +491,8 @@ const initialState: State = {
 	myAssignedReports: { status: "idle" },
 	adminActionRequiredReports: { status: "idle" },
 	adminAllReports: { status: "idle" },
-	assignation: { status: "idle" }
+	assignation: { status: "idle" },
+	edition: { status: "idle" }
 }
 
 export const clearCutsSlice = createSlice({
@@ -592,17 +596,17 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			updateClearCutGeometryThunk,
-			(state) => state.assignation
+			(state) => state.edition
 		)
 		addRequestedContentCases(
 			builder,
 			updateReportInfoThunk,
-			(state) => state.assignation
+			(state) => state.edition
 		)
 		addRequestedContentCases(
 			builder,
 			setPipelineOverrideThunk,
-			(state) => state.assignation
+			(state) => state.edition
 		)
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
 			formStorage.syncStorage(favorites, clearCutFormVersionsSchema)
