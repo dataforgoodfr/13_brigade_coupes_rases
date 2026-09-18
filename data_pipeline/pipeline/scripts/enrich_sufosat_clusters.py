@@ -15,6 +15,20 @@ ENRICHED_CLUSTERS_RESULT_FILEPATH = DATA_DIR / "sufosat/sufosat_clusters_enriche
 # reprojection des clusters.
 REFERENCE_CRS = "EPSG:2154"
 
+# Filtres métier : seuls les clusters qui peuvent intéresser la brigade sont
+# publiés. Le backend réévalue ensuite ses propres règles (surface, pente,
+# zonage écologique, seuils modifiables par les administrateurs) : ces bornes
+# restent donc en deçà des siennes.
+MIN_AREA_HA = 2.0
+# Sous cette surface, seule une coupe en zone Natura 2000 ou en pente est gardée.
+ALERT_AREA_HA = 10.0
+BDF_AREA_COLUMNS = [
+    "bdf_deciduous_area_ha",
+    "bdf_mixed_area_ha",
+    "bdf_poplar_area_ha",
+    "bdf_resinous_area_ha",
+]
+
 
 def to_reference_crs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     if gdf.crs is None:
@@ -229,6 +243,35 @@ def enrich_with_bdforet(
     return sufosat
 
 
+def apply_business_filters(sufosat: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Ne garde que les clusters d'au moins MIN_AREA_HA, situés en forêt selon la
+    BD Forêt, et soit d'au moins ALERT_AREA_HA, soit touchant une zone
+    Natura 2000 ou une pente.
+    """
+    logging.info("Applying business filters (area, Natura 2000 / slope, BD Forêt)")
+
+    # La pivot_table de enrich_with_bdforet ne crée une colonne que pour les
+    # types de forêt rencontrés.
+    for col in BDF_AREA_COLUMNS:
+        if col not in sufosat.columns:
+            sufosat[col] = 0.0
+    in_forest = sufosat[BDF_AREA_COLUMNS].fillna(0).sum(axis=1) > 0
+
+    large_enough = sufosat["area_ha"] >= MIN_AREA_HA
+    worth_an_alert = (
+        (sufosat["area_ha"] >= ALERT_AREA_HA)
+        | (sufosat["natura2000_area_ha"].fillna(0) > 0)
+        | (sufosat["slope_area_ha"].fillna(0) > 0)
+    )
+
+    before_count = len(sufosat)
+    sufosat = sufosat[large_enough & worth_an_alert & in_forest]
+    logging.info("Business filtering kept %s / %s clusters", len(sufosat), before_count)
+
+    return sufosat
+
+
 @log_execution(ENRICHED_CLUSTERS_RESULT_FILEPATH)
 def enrich_sufosat_clusters() -> None:
     """
@@ -256,6 +299,7 @@ def enrich_sufosat_clusters() -> None:
     sufosat = enrich_with_natura2000_codes(sufosat, sufosat_dask)
     sufosat = enrich_with_bdforet(sufosat, sufosat_dask)
     sufosat = enrich_with_slope_information(sufosat, sufosat_dask)
+    sufosat = apply_business_filters(sufosat)
 
     # Save the enriched SUFOSAT clusters
     sufosat = sufosat.sort_values("area_ha")

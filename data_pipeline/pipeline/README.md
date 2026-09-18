@@ -32,6 +32,10 @@ Les alertes RADD ont remplacé les millésimes SUFOSAT (Zenodo) : même format d
 5. Enrichissement
    Reprojection en Lambert 93, intersection avec bdforet, natura2000, pente, communes
 
+   Filtres métier : au moins 2 ha, en forêt (BD Forêt), et soit au moins 10 ha,
+   soit en zone Natura 2000 ou en pente. Le backend applique ensuite ses propres
+   règles (seuils modifiables par les administrateurs).
+
 6. Comparaison avec la base de données courante
    → Export DB → FGB local (référentiel de comparaison)
    → Split : clusters nouveaux vs clusters mis à jour (buffer 50m)
