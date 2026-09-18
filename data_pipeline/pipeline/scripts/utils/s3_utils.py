@@ -8,14 +8,15 @@ from dotenv import load_dotenv
 class S3Manager:
     load_dotenv()
 
-    def __init__(self, region: str = "eu-west-3") -> None:
+    def __init__(self) -> None:
+        # Mêmes noms de variables que le backend (backend/app/config.py)
         self.bucket_name = os.getenv("S3_BUCKET_NAME")
         self.s3 = boto3.client(
             service_name="s3",
-            region_name="PAR",
+            region_name=os.getenv("S3_REGION", "fr-par"),
             endpoint_url=os.getenv("S3_ENDPOINT"),
-            aws_access_key_id=os.getenv("SCW_ACCESS_KEY"),
-            aws_secret_access_key=os.getenv("SCW_SECRET_KEY"),
+            aws_access_key_id=os.getenv("S3_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("S3_SECRET_ACCESS_KEY"),
         )
 
     def list_bucket_contents(self) -> list[str] | None:
