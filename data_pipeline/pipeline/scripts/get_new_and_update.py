@@ -21,7 +21,8 @@ def locked_clusters_mask(gdf: gpd.GeoDataFrame) -> pd.Series:
         override = gdf["allow_pipeline_override"].fillna(False).astype(bool)
     else:
         override = pd.Series(False, index=gdf.index)
-    return edited & ~override
+    locked: pd.Series = edited & ~override
+    return locked
 
 
 def split_new_and_updated_clusters(
