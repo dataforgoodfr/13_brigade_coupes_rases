@@ -31,7 +31,10 @@ from app.services.clear_cut_report import (
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
 )
-from app.services.email import send_validation_rejected_email
+from app.services.email import (
+    send_assignment_email,
+    send_validation_rejected_email,
+)
 from app.services.user_auth import get_current_user, get_optional_current_user
 
 logger = getLogger(__name__)
@@ -248,6 +251,8 @@ def approve_assignment(
     if report.status == "to_validate":
         report.status = "in_progress"
     db.commit()
+    if report.user is not None:
+        send_assignment_email(report.user.email, report_id)
     return {"message": "Assignment approved"}
 
 

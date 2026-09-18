@@ -48,8 +48,19 @@ services:
     environment:
       DATABASE_URL: postgresql://devuser:devuser@db:5432/local
       ALLOWED_ORIGINS: http://localhost:5173,http://localhost:8081
+      FRONTEND_URL: http://localhost:5173
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_USE_TLS: "false"
     depends_on:
       - db
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: coupes-rases-mailpit
+    ports:
+      - "8025:8025"
 
   frontend:
       build:

@@ -32,3 +32,9 @@ PGPASSWORD=devuser psql -h localhost -U devuser -d local
 ```
 
 Tout autre client convient, par exemple [DBeaver](https://dbeaver.io/).
+
+## Lire les e-mails envoyés en local
+
+Avec la pile complète (`docker compose up`), le backend envoie ses e-mails à
+[Mailpit](https://mailpit.axllent.org/), qui les affiche sur
+[http://localhost:8025](http://localhost:8025) sans rien expédier.

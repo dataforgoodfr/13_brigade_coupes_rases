@@ -81,6 +81,8 @@ documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/doc
 | `ALLOWED_ORIGINS` | non | Origines autorisées pour CORS, séparées par des virgules |
 | `IMPORTS_TOKEN` | non | Jeton attendu dans l'en-tête `x-imports-token` par la route d'import des signalements |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | non | Stockage objet des photos des formulaires ; sans ces variables, les envois sont stockés localement |
+| `FRONTEND_URL` | non | Adresse publique du frontend, utilisée dans les liens des e-mails (défaut `http://localhost:5173`) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USE_TLS`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | non | Relais SMTP pour les e-mails (attribution, validation refusée, mot de passe oublié) ; sans `SMTP_HOST`, les e-mails sont seulement journalisés. En local, `docker compose up` fournit [Mailpit](http://localhost:8025) |
 
 `.env.development` et `.env.test` sont versionnés avec des valeurs pour une base
 locale uniquement. Les valeurs de production sont définies sur Clever Cloud et
