@@ -41,6 +41,12 @@ ENV PATH="/opt/conda/envs/py3_13/bin:${PATH}"
 
 # Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
 ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
+# Ce que `conda activate` aurait exporté : sans PROJ_DATA, le GDAL de conda ne
+# trouve pas proj.db et toutes les reprojections échouent (« Open of share/proj failed »).
+ENV PROJ_DATA=/opt/conda/envs/py3_13/share/proj \
+    GDAL_DATA=/opt/conda/envs/py3_13/share/gdal \
+    GDAL_DRIVER_PATH=/opt/conda/envs/py3_13/lib/gdalplugins \
+    PROJ_NETWORK=OFF
 
 # Lance un serveur HTTP minimaliste sur 8080 (exigé par Clever Cloud)
 # en parallèle de la pipeline ; le container s'arrête quand la pipeline finit.

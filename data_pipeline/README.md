@@ -4,7 +4,7 @@ Trois sous-projets indépendants cohabitent dans ce dossier :
 
 | Dossier | Rôle | Exécution |
 |---|---|---|
-| [`pipeline/`](./pipeline/README.md) | Mise à jour mensuelle : détecte les nouveaux clusters SUFOSAT depuis la dernière date en base, les enrichit et publie un fichier « gold » dans S3. | Image Docker (`Dockerfile`, conda + GDAL) |
+| [`pipeline/`](./pipeline/README.md) | Mise à jour mensuelle : récupère les alertes RADD depuis Earth Engine, détecte les nouveaux clusters depuis la dernière date en base, les enrichit et publie un fichier « gold » dans S3. | Image Docker (`Dockerfile`, conda + GDAL) |
 | [`bootstrap/`](./bootstrap/README.md) | Chargement unique des détections historiques 2018-2025. **Efface la base.** | Poetry, en local |
 | [`airtable/`](./airtable/README.md) | Export des utilisateurs et des signalements de PostgreSQL vers Airtable. | `uv`, deux fois par jour via GitHub Actions |
 
@@ -40,11 +40,19 @@ S3_BUCKET_NAME=brigade-coupe-rase-s3
 S3_REGION=fr-par
 S3_ACCESS_KEY_ID=...
 S3_SECRET_ACCESS_KEY=...
+EARTH_ENGINE_PROJECT=...
+GOOGLE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 ```
 
-Les identifiants Scaleway Object Storage sont dans la base KeePass du projet.
-Ne jamais versionner `.env` (il est ignoré par git). Exécuter la pipeline ou
-télécharger les fichiers du bootstrap les demande ; pas les tests.
+Les identifiants Scaleway Object Storage et la clé du compte de service Google
+sont dans la base KeePass du projet. Ne jamais versionner `.env` (il est ignoré
+par git). Exécuter la pipeline ou télécharger les fichiers du bootstrap les
+demande ; pas les tests.
+
+Pour un usage interactif, la clé de compte de service peut être remplacée par
+une connexion Google une fois pour toutes : `poetry run earthengine authenticate`
+(la commande `earthengine` vient du paquet `earthengine-api`, installé dans
+l'environnement Poetry). `EARTH_ENGINE_PROJECT` reste nécessaire.
 
 ### 2. Installer les dépendances
 

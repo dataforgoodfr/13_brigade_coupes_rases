@@ -11,8 +11,10 @@ package-mode = false
 python = "^3.13"
 boto3 = "^1.37.12"
 dask-geopandas = "^0.5.0"
+earthengine-api = "^1.7.43"
 geoalchemy2 = "^0.20.0"
 geopandas = "^1.0.1"
+google-cloud-storage = "^3"
 numpy = "^2.2.3"
 pandas = "^3.0.5"
 psycopg2 = "^2.9.10"
@@ -69,5 +71,6 @@ module = [
     "rasterio.*",
     "osgeo.*",
     "dask_geopandas.*",
+    "google.cloud.*",
 ]
 ignore_missing_imports = true

@@ -4,6 +4,7 @@ from typing import cast
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import rasterio
 from tqdm import tqdm
 
 from pipeline.scripts import DATA_DIR
@@ -18,15 +19,9 @@ from pipeline.scripts.utils.df_utils import save_gdf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
 RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
-
-
-# Cette fonction doit-être sortie de process_sufosat --> ici on process les données brutes
-# def download_sufosat_raster_dates(input_raster_dates: str) -> None:
-#     logging.info("Downloading the sufosat raster dates file")
-#     download_file(
-#         url="https://zenodo.org/records/15004634/files/forest-clearcuts_mainland-france_sufosat_dates_v3.tif",
-#         output_filepath=input_raster_dates,
-#     )
+# Les alertes antérieures ne sont pas suivies par la brigade : le premier
+# passage (base vide) part de cette date.
+MIN_CLEARCUT_DATE = pd.Timestamp("2026-01-01")
 
 
 def polygonize_sufosat(
@@ -44,6 +39,39 @@ def polygonize_sufosat(
     gdf: gpd.GeoDataFrame = load_gdf(polygonized_raster_output_layer)
 
     return gdf
+
+
+def mask_radd_alerts_to_date_band(
+    input_raster_dates: str, masked_raster_dates: str
+) -> str:
+    """
+    Ne garde que les alertes RADD confirmées (Alert >= 2) et écrit la bande
+    Date seule dans un raster mono-bande.
+
+    Convention d'entrée :
+    - bande 1 : Alert
+    - bande 2 : Date (YYDDD)
+
+    Un raster mono-bande (export Earth Engine déjà masqué) est retourné tel quel.
+    """
+    with rasterio.open(input_raster_dates) as src:
+        if src.count < 2:
+            return input_raster_dates
+
+        logging.info("Applying Alert >= 2 mask before polygonization")
+        alert_band = src.read(1)
+        date_band = src.read(2)
+        masked_date_band = np.where(alert_band >= 2, date_band, 0).astype(
+            date_band.dtype
+        )
+
+        profile = src.profile.copy()
+        profile.update(count=1, dtype=masked_date_band.dtype, nodata=0, compress="lzw")
+
+        with rasterio.open(masked_raster_dates, "w", **profile) as dst:
+            dst.write(masked_date_band, 1)
+
+    return masked_raster_dates
 
 
 def parse_sufosat_date(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -394,10 +422,11 @@ def preprocess_sufosat(
     polygonized_raster_output_layer: str = str(
         SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.fgb"
     ),
+    masked_raster_dates: str = str(SUFOSAT_DIR / "radd_date_alert_gte_2.tif"),
     max_meters_between_clear_cuts: int = 100,
     max_days_between_clear_cuts: int = 365,
     concave_hull_ratio: float = 0.42,
-    update_start_date: str = "2024-09-01",
+    update_start_date: str | None = None,
 ) -> None:
     """
     Process forest clear-cut raster data into a vector layer of clear-cut clusters.
@@ -413,9 +442,14 @@ def preprocess_sufosat(
     Parameters
     ----------
     input_raster_dates : str
-        Path to the input raster file containing clear-cut dates in SUFOSAT format.
+        Path to the input raster file containing clear-cut dates in SUFOSAT format
+        (YYDDD): either the single Date band exported from Earth Engine, or a raw
+        two-band RADD raster (Alert, Date).
     polygonized_raster_output_layer : str
         Path for the temporary vector file created during polygonization.
+    masked_raster_dates : str
+        Path for the temporary single-band raster written when the input has an
+        Alert band.
     max_meters_between_clear_cuts : int
         Maximum distance in meters between clear-cuts to consider them spatially related.
     max_days_between_clear_cuts : int
@@ -423,19 +457,30 @@ def preprocess_sufosat(
     concave_hull_ratio : float
         Ratio parameter for the concave hull calculation (1.0 = convex hull).
         Lower values create tighter hulls that follow the shape more closely.
+    update_start_date : str | None
+        Lower bound (inclusive) on the clear-cut date; None on a first run.
+        Never earlier than MIN_CLEARCUT_DATE.
 
     Returns
     -------
     None
         The function saves the results to the specified output_layer path.
     """
-    # download_sufosat_raster_dates(input_raster_dates)
-    gdf = polygonize_sufosat(input_raster_dates, polygonized_raster_output_layer)
+    masked_input_raster_dates = mask_radd_alerts_to_date_band(
+        input_raster_dates, masked_raster_dates
+    )
+
+    gdf = polygonize_sufosat(masked_input_raster_dates, polygonized_raster_output_layer)
+    gdf = gdf[gdf["sufosat_date"] > 0]
     gdf = parse_sufosat_date(gdf)
 
-    # Update start
-    update_timestamp = pd.Timestamp(update_start_date)
-    logging.info(f"Filtering data strictly after {update_start_date} for optimization.")
+    if update_start_date:
+        update_timestamp = max(pd.Timestamp(update_start_date), MIN_CLEARCUT_DATE)
+    else:
+        update_timestamp = MIN_CLEARCUT_DATE
+    logging.info(
+        f"Filtering data on or after {update_timestamp.date()} for optimization."
+    )
 
     gdf = gdf[gdf["date"] >= update_timestamp]
 

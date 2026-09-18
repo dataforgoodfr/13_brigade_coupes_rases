@@ -1,10 +1,16 @@
+from pathlib import Path
+
 import geopandas as gpd
+import numpy as np
 import pandas as pd
+import rasterio
+from rasterio.transform import from_origin
 from shapely.geometry import box
 
 from pipeline.scripts.preprocess_sufosat import (
     add_concave_hull_score,
     cluster_clear_cuts,
+    mask_radd_alerts_to_date_band,
     union_clear_cut_clusters,
 )
 
@@ -90,3 +96,53 @@ def test_polygons_too_far_apart_in_time_are_not_grouped() -> None:
     )
 
     assert gdf["clear_cut_group"].nunique() == 2
+
+
+def test_mask_radd_alerts_keeps_confirmed_dates_only(tmp_path: Path) -> None:
+    # Bande 1 : Alert (2 = confirmée), bande 2 : Date (YYDDD).
+    alert = np.array([[1, 2], [3, 0]], dtype="int16")
+    date = np.array([[26010, 26020], [26030, 26040]], dtype="int16")
+    source = tmp_path / "radd.tif"
+    with rasterio.open(
+        source,
+        "w",
+        driver="GTiff",
+        height=2,
+        width=2,
+        count=2,
+        dtype="int16",
+        crs="EPSG:3035",
+        transform=from_origin(0, 20, 10, 10),
+    ) as dst:
+        dst.write(alert, 1)
+        dst.write(date, 2)
+    masked = tmp_path / "masked.tif"
+
+    result = mask_radd_alerts_to_date_band(str(source), str(masked))
+
+    assert result == str(masked)
+    with rasterio.open(masked) as src:
+        assert src.count == 1
+        assert src.nodata == 0
+        assert src.read(1).tolist() == [[0, 26020], [26030, 0]]
+
+
+def test_mask_radd_alerts_passes_a_single_band_raster_through(tmp_path: Path) -> None:
+    source = tmp_path / "dates.tif"
+    with rasterio.open(
+        source,
+        "w",
+        driver="GTiff",
+        height=1,
+        width=1,
+        count=1,
+        dtype="int16",
+        crs="EPSG:3035",
+        transform=from_origin(0, 10, 10, 10),
+    ) as dst:
+        dst.write(np.array([[26010]], dtype="int16"), 1)
+
+    assert mask_radd_alerts_to_date_band(str(source), str(tmp_path / "x.tif")) == str(
+        source
+    )
+    assert not (tmp_path / "x.tif").exists()
