@@ -77,8 +77,9 @@ documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/doc
 | `DATABASE_URL` | oui | Chaîne de connexion PostgreSQL |
 | `ENVIRONMENT` | oui | `development`, `test` ou `production` |
 | `PORT` | oui | Port HTTP |
-| `JWT_SECRET_KEY` | oui | Clé de signature des jetons d'accès, de rafraîchissement et de réinitialisation du mot de passe |
+| `JWT_SECRET_KEY` | oui | Clé de signature des jetons d'accès, de rafraîchissement et de réinitialisation du mot de passe ; au moins 32 caractères en production (`openssl rand -hex 32`) |
 | `ALLOWED_ORIGINS` | non | Origines autorisées pour CORS, séparées par des virgules |
+| `API_DOCS_ENABLED` | non | Expose `/docs`, `/redoc` et `/openapi.json` en production (toujours exposés hors production) |
 | `IMPORTS_TOKEN` | non | Jeton attendu dans l'en-tête `x-imports-token` par la route d'import des signalements |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | non | Stockage objet des photos des formulaires ; sans ces variables, les envois sont stockés localement |
 | `FRONTEND_URL` | non | Adresse publique du frontend, utilisée dans les liens des e-mails (défaut `http://localhost:5173`) |
@@ -91,7 +92,7 @@ référencées dans la base KeePass partagée.
 ### Clever Cloud
 
 - Application : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)
-- Swagger UI : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/docs)
+- Swagger UI : `/docs`, `/redoc` et `/openapi.json` sont fermés en production sauf si `API_DOCS_ENABLED=true` (en local : [http://localhost:8080/docs](http://localhost:8080/docs))
 - Base de données : add-on PostgreSQL, chaîne de connexion dans la base KeePass.
 
 Le déploiement se déclenche en publiant une release GitHub, voir le

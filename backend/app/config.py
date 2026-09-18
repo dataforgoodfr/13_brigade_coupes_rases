@@ -29,6 +29,11 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "ALLOWED_ORIGINS"},
         description="List of allowed origins for CORS, each origin should be separated with a comma. E.g : origin1,origin2",
     )
+    API_DOCS_ENABLED: bool = Field(
+        default=False,
+        json_schema_extra={"env": "API_DOCS_ENABLED"},
+        description="Expose /docs, /redoc and /openapi.json in production (always exposed elsewhere)",
+    )
     IMPORTS_TOKEN: str = Field(
         default="", json_schema_extra={"env": "IMPORTS_TOKEN", "secret": True}
     )
@@ -89,5 +94,37 @@ class Settings(BaseSettings):
         description="Sender address; the domain must be verified at the email provider",
     )
 
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT == "production"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        return [
+            origin.strip()
+            for origin in self.ALLOWED_ORIGINS.split(",")
+            if origin.strip()
+        ]
+
+    @property
+    def api_docs_enabled(self) -> bool:
+        return self.API_DOCS_ENABLED or not self.is_production
+
+
+MIN_JWT_SECRET_KEY_LENGTH = 32
+
+
+def check_production_settings(settings: Settings) -> None:
+    """Refuse to start in production with a weak JWT_SECRET_KEY."""
+    if (
+        settings.is_production
+        and len(settings.JWT_SECRET_KEY) < MIN_JWT_SECRET_KEY_LENGTH
+    ):
+        raise RuntimeError(
+            f"JWT_SECRET_KEY must be at least {MIN_JWT_SECRET_KEY_LENGTH} characters "
+            "in production (generate one with: openssl rand -hex 32)"
+        )
+
 
 settings = Settings()
+check_production_settings(settings)
