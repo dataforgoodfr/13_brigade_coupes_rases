@@ -280,6 +280,58 @@ describe("field form when there isn't a connected user", () => {
 		expect(await field.findValue()).toBe("")
 	})
 })
+describe("general info edition controls", () => {
+	const editButton = () =>
+		screen.queryByRole("button", { name: /Modifier les informations/ })
+	const openGeneralInfo = async (connectedUser?: Me) => {
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: connectedUser
+		})
+		await openAccordion(generalInfoKey, user)
+	}
+
+	describe("when an admin is connected", () => {
+		defaultSetupServerBeforeEach(defaultSetup)
+		it("shows the edit button", async () => {
+			await openGeneralInfo(adminMock)
+			expect(editButton()).toBeInTheDocument()
+		})
+	})
+
+	describe("when the assigned volunteer is connected", () => {
+		defaultSetupServerBeforeEach(setupTest({ userId: volunteerMock.id }))
+		it("shows the edit button", async () => {
+			await openGeneralInfo(volunteerMock)
+			expect(editButton()).toBeInTheDocument()
+		})
+	})
+
+	describe("when a volunteer not assigned is connected", () => {
+		defaultSetupServerBeforeEach(defaultSetup)
+		it("hides the edit button", async () => {
+			await openGeneralInfo(volunteerMock)
+			expect(editButton()).not.toBeInTheDocument()
+		})
+	})
+
+	describe("when the report was manually edited", () => {
+		defaultSetupServerBeforeEach(
+			setupTest({ isManuallyEdited: true, manuallyEditedAt: "2026-04-02" })
+		)
+		it("shows the badge to everyone and the pipeline switch to admins", async () => {
+			await openGeneralInfo(volunteerMock)
+			expect(await screen.findByText(/Édité manuellement/)).toBeInTheDocument()
+			expect(screen.queryByRole("switch")).not.toBeInTheDocument()
+		})
+		it("lets an admin re-enable the pipeline", async () => {
+			await openGeneralInfo(adminMock)
+			expect(await screen.findByRole("switch")).toBeInTheDocument()
+		})
+	})
+})
+
 function isShouldNotDisplayAdminSection(
 	section: SectionForm,
 	connectedUser?: Me

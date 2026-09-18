@@ -34,7 +34,7 @@ type CitySearchResult = {
 }
 
 function authedApi() {
-	const token = getStoredToken() as { accessToken?: string } | null
+	const token = getStoredToken()
 	return token?.accessToken
 		? api.extend({ headers: { Authorization: `Bearer ${token.accessToken}` } })
 		: api
