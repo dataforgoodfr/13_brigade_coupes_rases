@@ -29,6 +29,21 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "ALLOWED_ORIGINS"},
         description="List of allowed origins for CORS, each origin should be separated with a comma. E.g : origin1,origin2",
     )
+    DB_POOL_SIZE: int = Field(
+        default=3,
+        json_schema_extra={"env": "DB_POOL_SIZE"},
+        description="Persistent connections kept in the SQLAlchemy pool. Keep pool + overflow below the database plan's connection limit",
+    )
+    DB_MAX_OVERFLOW: int = Field(
+        default=2,
+        json_schema_extra={"env": "DB_MAX_OVERFLOW"},
+        description="Extra connections opened under load, closed when idle",
+    )
+    DB_POOL_RECYCLE_SECONDS: int = Field(
+        default=1800,
+        json_schema_extra={"env": "DB_POOL_RECYCLE_SECONDS"},
+        description="Recycle connections older than this, to survive server-side idle timeouts",
+    )
     API_DOCS_ENABLED: bool = Field(
         default=False,
         json_schema_extra={"env": "API_DOCS_ENABLED"},

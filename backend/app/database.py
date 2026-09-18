@@ -11,7 +11,16 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 DATABASE_URL = settings.DATABASE_URL
 
-engine = create_engine(DATABASE_URL, plugins=["geoalchemy2"])
+engine = create_engine(
+    DATABASE_URL,
+    plugins=["geoalchemy2"],
+    # Connections dropped by the server (idle timeout, restart) are detected
+    # before use instead of failing the first request after them
+    pool_pre_ping=True,
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_recycle=settings.DB_POOL_RECYCLE_SECONDS,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
