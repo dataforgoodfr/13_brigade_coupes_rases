@@ -49,22 +49,22 @@ export function AsideForm({
 		}
 	}, [status, navigate, toast])
 
+	// Re-center only when the displayed report changes, not on every `value`
+	// update (e.g. the background refresh that follows a save), otherwise the
+	// map would jump back each time the form is auto-refreshed.
+	const averageCoordinates = value?.current.report.averageLocation.coordinates
+	const averageLat = averageCoordinates?.[1]
+	const averageLng = averageCoordinates?.[0]
 	useEffect(() => {
 		if (
 			map &&
 			breakpoint === "all" &&
-			value?.current.report.averageLocation.coordinates
+			averageLat !== undefined &&
+			averageLng !== undefined
 		) {
-			map.flyTo(
-				[
-					value.current.report.averageLocation.coordinates[1],
-					value.current.report.averageLocation.coordinates[0]
-				],
-				15,
-				{ duration: 1 }
-			)
+			map.flyTo([averageLat, averageLng], 15, { duration: 1 })
 		}
-	}, [breakpoint, map, value])
+	}, [breakpoint, map, averageLat, averageLng])
 
 	useEffect(() => {
 		if (value?.versionMismatchDisclaimerShown === false) {
@@ -95,10 +95,10 @@ export function AsideForm({
 			<div
 				className={cn(
 					"pt-4 px-4 pb-1 border-b-1 flex align-middle justify-between",
-					status === "loading" && "justify-end"
+					status === "loading" && !value && "justify-end"
 				)}
 			>
-				{status !== "loading" && value ? (
+				{value ? (
 					<div className="flex flex-col">
 						<Title>{`${value.current.report.city.toLocaleUpperCase()}`}</Title>
 						<span className="font-[Roboto]">
@@ -113,12 +113,12 @@ export function AsideForm({
 					<X size={30} />
 				</Link>
 			</div>
-			{status === "loading" && (
+			{status === "loading" && !value && (
 				<div className="flex h-full justify-center items-center">
 					<Loading className="w-1/2" />
 				</div>
 			)}
-			{status !== "loading" && value && <ClearCutFullForm {...value} />}
+			{value && <ClearCutFullForm {...value} />}
 		</div>
 	)
 }

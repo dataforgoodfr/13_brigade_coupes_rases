@@ -1,8 +1,8 @@
 import { useLocation } from "@tanstack/react-router"
 import L from "leaflet"
-import { type RefObject, useEffect, useRef, useState } from "react"
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { GeoJSON } from "react-leaflet"
+import { GeoJSON, Marker } from "react-leaflet"
 
 import "@geoman-io/leaflet-geoman-free"
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"
@@ -152,6 +152,23 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const weight = isFocused ? 2 : 0
 	const fillOpacity = isFocused ? 0.25 : 0.5
 
+	// "i" badge displayed on the zone to hint that clicking reveals its details.
+	// (The popup no longer opens on hover, so this invites the click instead.)
+	const infoIcon = useMemo(
+		() =>
+			L.divIcon({
+				className: "clear-cut-info-icon",
+				html: '<span aria-hidden="true">i</span>',
+				iconSize: [22, 22],
+				iconAnchor: [11, 11]
+			}),
+		[]
+	)
+	const iconPosition = useMemo<[number, number]>(
+		() => [clearCut.location.coordinates[1], clearCut.location.coordinates[0]],
+		[clearCut.location.coordinates]
+	)
+
 	return (
 		<>
 			<GeoJSON
@@ -164,10 +181,6 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 					fillOpacity
 				}}
 				eventHandlers={{
-					mouseover: (event) => {
-						if (isEditingRef.current) return
-						event.target.openPopup()
-					},
 					dblclick: () => {
 						if (isEditingRef.current) return
 						navigateToDetail()
@@ -181,8 +194,22 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 					}
 				}}
 			>
-				<ClearCutMapPopUp report={report} />
+				<ClearCutMapPopUp
+					report={report}
+					isReportPanelOpen={reportIsOpenInSideList}
+				/>
 			</GeoJSON>
+			{!isEditingPerimeter && (
+				<Marker
+					position={iconPosition}
+					icon={infoIcon}
+					interactive
+					keyboard={false}
+					eventHandlers={{
+						click: () => navigateToDetail()
+					}}
+				/>
+			)}
 			{isEditingPerimeter &&
 				map &&
 				createPortal(
