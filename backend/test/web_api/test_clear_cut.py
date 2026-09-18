@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import ClearCutEcologicalZoning
+from app.models import ClearCutEcologicalZoning, ClearCutReport
 from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
@@ -129,6 +129,11 @@ def test_affect_me_using_connected_volunteer_should_work(
     db: Session, client: TestClient
 ) -> None:
     [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
+    # Seeded report 1 is already assigned: free it first, a volunteer can only take a free report
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    report.user_id = None
+    db.commit()
     updates = {"user_id": str(me.id)}
 
     response = client.put(
@@ -207,6 +212,48 @@ def test_affect_other_using_connected_admin_should_work(
     data = response.json()
     assert data["affectedUser"]["email"] == expected_email
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_volunteer_cannot_take_report_assigned_to_another(
+    db: Session, client: TestClient
+) -> None:
+    [me, token] = get_volunteer_user_token(client, db, "thief@volunteer.com")
+    other_id = create_user(db, email="owner@volunteer.com", login="owner-login").id
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    report.user_id = other_id
+    db.commit()
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json={"user_id": str(me.id)},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.json()["detail"]["type"] == "ALREADY_ASSIGNED"
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    assert report.user_id == other_id
+
+
+def test_volunteer_can_release_their_own_report(
+    db: Session, client: TestClient
+) -> None:
+    [me, token] = get_volunteer_user_token(client, db, "releaser@volunteer.com")
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    report.user_id = me.id
+    db.commit()
+
+    response = client.put(
+        "/api/v1/clear-cuts-reports/1",
+        json={"user_id": None},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    assert report.user_id is None
 
 
 def test_list_ecological_zonings(client: TestClient, db: Session) -> None:

@@ -307,7 +307,14 @@ def update_clear_cut_report(
                     type="INVALID_REQUESTER_RIGHTS",
                     detail="Volunteer could not assign an other user",
                 )
-            report.user_id = connected_user.id
+            # A volunteer can only take a free report or release their own
+            if report.user_id is not None and report.user_id != connected_user.id:
+                raise AppHTTPException(
+                    status_code=409,
+                    type="ALREADY_ASSIGNED",
+                    detail="Report is already assigned to another volunteer",
+                )
+            report.user_id = request.user_id
         if connected_user.role == "admin":
             report.user_id = request.user_id
         if report.user_id is not None:
