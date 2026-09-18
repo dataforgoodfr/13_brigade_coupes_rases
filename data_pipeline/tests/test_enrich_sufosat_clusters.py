@@ -3,7 +3,11 @@ import geopandas as gpd
 import pytest
 from shapely.geometry import Polygon, box
 
-from pipeline.scripts.enrich_sufosat_clusters import overlay, to_reference_crs
+from pipeline.scripts.enrich_sufosat_clusters import (
+    apply_business_filters,
+    overlay,
+    to_reference_crs,
+)
 
 
 def clusters(*geoms: Polygon) -> dask_geopandas.GeoDataFrame:
@@ -83,3 +87,54 @@ def test_overlay_finds_the_reference_only_once_aligned() -> None:
 
     assert len(mismatched.compute()) == 0
     assert aligned.compute()["code_insee"].tolist() == ["40134"]
+
+
+def enriched(**columns: list[float | None]) -> gpd.GeoDataFrame:
+    """Clusters enrichis minimaux ; les colonnes absentes valent NaN."""
+    n = len(next(iter(columns.values())))
+    return gpd.GeoDataFrame(
+        {
+            "natura2000_area_ha": [None] * n,
+            "slope_area_ha": [None] * n,
+            "bdf_resinous_area_ha": [None] * n,
+        }
+        | columns,
+        geometry=[box(0, 0, 10, 10)] * n,
+        crs="EPSG:2154",
+    )
+
+
+def test_business_filters_keep_large_forest_cuts() -> None:
+    gdf = enriched(area_ha=[12.0, 9.9], bdf_resinous_area_ha=[12.0, 9.9])
+
+    assert apply_business_filters(gdf).index.tolist() == [0]
+
+
+def test_business_filters_keep_small_cuts_in_natura2000_or_on_slopes() -> None:
+    gdf = enriched(
+        area_ha=[3.0, 3.0, 3.0],
+        bdf_resinous_area_ha=[3.0, 3.0, 3.0],
+        natura2000_area_ha=[0.1, None, None],
+        slope_area_ha=[None, 0.2, None],
+    )
+
+    assert apply_business_filters(gdf).index.tolist() == [0, 1]
+
+
+def test_business_filters_drop_cuts_under_two_hectares_and_outside_forests() -> None:
+    gdf = enriched(
+        area_ha=[1.9, 12.0],
+        bdf_resinous_area_ha=[1.9, None],
+        natura2000_area_ha=[1.0, 1.0],
+    )
+
+    assert len(apply_business_filters(gdf)) == 0
+
+
+def test_business_filters_tolerate_missing_forest_type_columns() -> None:
+    # La pivot_table ne crée que les colonnes des types rencontrés.
+    gdf = enriched(area_ha=[12.0], bdf_resinous_area_ha=[None]).assign(
+        bdf_mixed_area_ha=[12.0]
+    )
+
+    assert apply_business_filters(gdf).index.tolist() == [0]
