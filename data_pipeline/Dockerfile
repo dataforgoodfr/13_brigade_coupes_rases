@@ -15,37 +15,37 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Crée l'environnement conda avec Python 3.13 + GDAL en une seule passe
+# Crée l'environnement conda avec Python 3.14 + GDAL en une seule passe
 # (deux appels conda séparés doublent le pic mémoire du solveur)
 ENV CONDA_ALWAYS_YES=true
-RUN mamba create -y -n py3_13 python=3.13 gdal -c conda-forge && \
+RUN mamba create -y -n py3_14 python=3.14 gdal -c conda-forge && \
     mamba clean -afy
 
-# Installe Poetry dans py3_13 pour que les packages atterrissent dans le bon env
-RUN /opt/conda/envs/py3_13/bin/pip install poetry
-RUN /opt/conda/envs/py3_13/bin/poetry config virtualenvs.create false
+# Installe Poetry dans py3_14 pour que les packages atterrissent dans le bon env
+RUN /opt/conda/envs/py3_14/bin/pip install poetry
+RUN /opt/conda/envs/py3_14/bin/poetry config virtualenvs.create false
 
 # Copie les fichiers de configuration Poetry (context = repo root)
 COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
 
-# Installe les dépendances du projet dans py3_13
-RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --no-root
+# Installe les dépendances du projet dans py3_14
+RUN /opt/conda/envs/py3_14/bin/poetry install --no-interaction --no-ansi --no-root
 
 # Copie le code du sous-projet pipeline
 COPY data_pipeline/ ./
 
-# Installe le projet lui-même dans py3_13
-RUN /opt/conda/envs/py3_13/bin/poetry install --no-interaction --no-ansi --only-root
+# Installe le projet lui-même dans py3_14
+RUN /opt/conda/envs/py3_14/bin/poetry install --no-interaction --no-ansi --only-root
 
-ENV PATH="/opt/conda/envs/py3_13/bin:${PATH}"
+ENV PATH="/opt/conda/envs/py3_14/bin:${PATH}"
 
 # Force l'utilisation des bibliothèques conda (dont libstdc++ récent)
-ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_13/lib
+ENV LD_LIBRARY_PATH=/opt/conda/envs/py3_14/lib
 # Ce que `conda activate` aurait exporté : sans PROJ_DATA, le GDAL de conda ne
 # trouve pas proj.db et toutes les reprojections échouent (« Open of share/proj failed »).
-ENV PROJ_DATA=/opt/conda/envs/py3_13/share/proj \
-    GDAL_DATA=/opt/conda/envs/py3_13/share/gdal \
-    GDAL_DRIVER_PATH=/opt/conda/envs/py3_13/lib/gdalplugins \
+ENV PROJ_DATA=/opt/conda/envs/py3_14/share/proj \
+    GDAL_DATA=/opt/conda/envs/py3_14/share/gdal \
+    GDAL_DRIVER_PATH=/opt/conda/envs/py3_14/lib/gdalplugins \
     PROJ_NETWORK=OFF
 
 # Lance un serveur HTTP minimaliste sur 8080 (exigé par Clever Cloud)

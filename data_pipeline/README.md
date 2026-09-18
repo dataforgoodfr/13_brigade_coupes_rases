@@ -56,7 +56,7 @@ l'environnement Poetry). `EARTH_ENGINE_PROJECT` reste nécessaire.
 
 ### 2. Installer les dépendances
 
-Python 3.13 et [Poetry](https://python-poetry.org/docs/#installation) :
+Python 3.14 et [Poetry](https://python-poetry.org/docs/#installation) :
 
 ```bash
 cd data_pipeline

@@ -86,7 +86,7 @@ En mode interactif pour débugger :
 ```bash
 docker run -it --rm --env-file data_pipeline/.env data-pipeline:latest bash
 # puis dans le conteneur :
-conda activate py3_13
+conda activate py3_14
 python -m pipeline.scripts.run_pipeline
 ```
 

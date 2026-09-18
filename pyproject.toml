@@ -3,7 +3,7 @@
 # Aucun projet Poetry à la racine, chaque sous-projet gère ses dépendances.
 # See https://docs.astral.sh/ruff/settings
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 # Racines des sous-projets : leurs modules (app, pipeline, …) sont des imports
 # de première partie pour le tri isort, comme lorsque chaque sous-projet
 # portait sa propre configuration.

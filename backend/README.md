@@ -10,7 +10,7 @@ Toutes les coordonnées renvoyées par l'API sont au format latitude/longitude.
 
 ### Prérequis
 
-- Python 3.13 et [Poetry](https://python-poetry.org/docs/#installation)
+- Python 3.14 et [Poetry](https://python-poetry.org/docs/#installation)
 - Une base PostgreSQL/PostGIS en marche : `docker compose up db pgadmin` depuis
   la racine du dépôt (crée les bases `local` et `test`, voir
   [docker/README.md](../docker/README.md)).

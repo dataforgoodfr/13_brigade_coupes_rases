@@ -21,7 +21,7 @@ class PaginationMetadataSchema(Metadata):
     @classmethod
     def create(
         cls, page: int, size: int, total_count: int, url: str
-    ) -> "PaginationMetadataSchema":
+    ) -> PaginationMetadataSchema:
         links = {
             "self": f"{url}?page={page}&size={size}",
         }

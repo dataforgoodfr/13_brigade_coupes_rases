@@ -1,4 +1,4 @@
-FROM python:3.13 as builder
+FROM python:3.14 as builder
 ARG SRC_DIR="."
 RUN pip install poetry
 
@@ -24,7 +24,7 @@ USER devuser
 
 RUN  poetry install --with backend
 
-FROM python:3.13-slim as runtime
+FROM python:3.14-slim as runtime
 
 ARG SRC_DIR="."
 ENV VIRTUAL_ENV=/app/.venv \
