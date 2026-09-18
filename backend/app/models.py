@@ -52,10 +52,10 @@ class ClearCutEcologicalZoning(Base):
     ecological_zoning_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("ecological_zonings.id"), primary_key=True
     )
-    clear_cut: Mapped["ClearCut"] = relationship(
+    clear_cut: Mapped[ClearCut] = relationship(
         back_populates="ecological_zonings", cascade="all, delete"
     )
-    ecological_zoning: Mapped["EcologicalZoning"] = relationship(
+    ecological_zoning: Mapped[EcologicalZoning] = relationship(
         back_populates="clear_cuts", cascade="all, delete"
     )
 
@@ -163,7 +163,7 @@ class User(Base):
 @listens_for(User, "before_insert")
 @listens_for(User, "before_update")
 def update_search_vector(
-    mapper: Mapper["User"], connection: Connection, target: "User"
+    mapper: Mapper[User], connection: Connection, target: User
 ) -> None:
     connection.execute(
         text("""
@@ -187,7 +187,7 @@ class Department(Base):
         back_populates="departments",
         cascade="all, delete",
     )
-    cities: Mapped[list["City"]] = relationship(
+    cities: Mapped[list[City]] = relationship(
         back_populates="department", cascade="all, delete"
     )
 
@@ -206,10 +206,10 @@ class City(Base):
     department_id: Mapped[int] = mapped_column(
         ForeignKey("departments.id"), nullable=False
     )
-    department: Mapped["Department"] = relationship(
+    department: Mapped[Department] = relationship(
         back_populates="cities", cascade="all, delete"
     )
-    clear_cuts_reports: Mapped[list["ClearCutReport"]] = relationship(
+    clear_cuts_reports: Mapped[list[ClearCutReport]] = relationship(
         back_populates="city", cascade="all, delete"
     )
 
@@ -224,7 +224,7 @@ class EcologicalZoning(Base):
     sub_type: Mapped[str | None] = mapped_column(String, nullable=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     code: Mapped[str] = mapped_column(String, nullable=False)
-    clear_cuts: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
+    clear_cuts: Mapped[list[ClearCutEcologicalZoning]] = relationship(
         back_populates="ecological_zoning", cascade="all, delete"
     )
     rules = relationship(
@@ -283,11 +283,11 @@ class ClearCut(Base):
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), index=True, nullable=False
     )
-    report: Mapped["ClearCutReport"] = relationship(
+    report: Mapped[ClearCutReport] = relationship(
         back_populates="clear_cuts", cascade="all, delete"
     )
 
-    ecological_zonings: Mapped[list["ClearCutEcologicalZoning"]] = relationship(
+    ecological_zonings: Mapped[list[ClearCutEcologicalZoning]] = relationship(
         back_populates="clear_cut", lazy="joined", cascade="all, delete"
     )
     location_json = column_property(functions.ST_AsGeoJSON(location))
@@ -320,26 +320,26 @@ class ClearCutReport(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
     )
-    clear_cuts: Mapped[list["ClearCut"]] = relationship(
+    clear_cuts: Mapped[list[ClearCut]] = relationship(
         back_populates="report", cascade="all, delete"
     )
-    clear_cut_forms: Mapped[list["ClearCutForm"]] = relationship(
+    clear_cut_forms: Mapped[list[ClearCutForm]] = relationship(
         back_populates="report", cascade="all, delete"
     )
     status: Mapped[str] = mapped_column(String, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
-    city: Mapped["City"] = relationship(
+    city: Mapped[City] = relationship(
         back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
     )
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    user: Mapped["User | None"] = relationship(
+    user: Mapped[User | None] = relationship(
         back_populates="reports", foreign_keys="ClearCutReport.user_id"
     )
 
     assignment_requested_by_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
-    assignment_requested_by: Mapped["User | None"] = relationship(
+    assignment_requested_by: Mapped[User | None] = relationship(
         foreign_keys="ClearCutReport.assignment_requested_by_id"
     )
 
@@ -399,11 +399,11 @@ class ClearCutForm(Base):
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), nullable=False
     )
-    report: Mapped["ClearCutReport"] = relationship(back_populates="clear_cut_forms")
+    report: Mapped[ClearCutReport] = relationship(back_populates="clear_cut_forms")
     editor_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=False
     )
-    editor: Mapped["User"] = relationship(back_populates="forms", cascade="all, delete")
+    editor: Mapped[User] = relationship(back_populates="forms", cascade="all, delete")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now
     )

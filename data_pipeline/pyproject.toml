@@ -8,7 +8,7 @@ readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.14"
 boto3 = "^1.37.12"
 dask-geopandas = "^0.5.0"
 earthengine-api = "^1.7.43"
@@ -59,7 +59,7 @@ show_missing = true
 # a son propre environnement (requirements.txt, uv) et n'est pas couvert ici.
 [tool.mypy]
 strict = true
-python_version = "3.13"
+python_version = "3.14"
 files = ["pipeline", "bootstrap", "tests"]
 # pipeline/scripts et bootstrap/scripts sont deux paquets distincts sans
 # __init__.py parent : les identifier par leur chemin depuis ce dossier.

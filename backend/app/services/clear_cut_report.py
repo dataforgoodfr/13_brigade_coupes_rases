@@ -333,7 +333,7 @@ def find_clearcuts_reports(
     url: str,
     page: int = 0,
     size: int = 10,
-    current_user: "User | None" = None,
+    current_user: User | None = None,
     assigned_to_me: bool = False,
     admin_action_required: bool = False,
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
@@ -385,6 +385,6 @@ def get_report_by_id(db: Session, report_id: int) -> ClearCutReport:
 
 
 def get_report_response_by_id(
-    id: int, db: Session, current_user: "User | None" = None
+    id: int, db: Session, current_user: User | None = None
 ) -> ClearCutReportResponseSchema:
     return report_to_response_schema(get_report_by_id(db, id), current_user)

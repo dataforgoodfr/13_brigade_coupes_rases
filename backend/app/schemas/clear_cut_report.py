@@ -50,7 +50,7 @@ class ClearCutReportResponseSchema(ClearCutReportPreviewSchema):
 
 
 def report_to_response_schema(
-    report: ClearCutReport, current_user: "User | None" = None
+    report: ClearCutReport, current_user: User | None = None
 ) -> ClearCutReportResponseSchema:
     """Build a full ClearCutReportResponseSchema from a ORM report instance.
 

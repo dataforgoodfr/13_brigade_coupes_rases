@@ -145,9 +145,9 @@ Tout ce qui suit fonctionne sans aucun secret, avec un jeu de données de dével
 | Je veux travailler sur… | Prérequis | Commande |
 |---|---|---|
 | le frontend seul | Node.js 24, pnpm | `pnpm dev:mock` (API simulée par MSW, aucun backend) |
-| le frontend avec la vraie API | Docker, Python 3.13, Poetry, Node.js, pnpm | base + backend + `pnpm dev` (ci-dessous) |
-| le backend | Docker, Python 3.13, Poetry | base + `make devserver` ; tests avec `make test-unit` puis `make test` |
-| la data pipeline | Python 3.13, Poetry | `poetry run pytest` pour les tests ; l'exécution complète demande Docker et les identifiants S3 (voir [Secrets](#secrets)) |
+| le frontend avec la vraie API | Docker, Python 3.14, Poetry, Node.js, pnpm | base + backend + `pnpm dev` (ci-dessous) |
+| le backend | Docker, Python 3.14, Poetry | base + `make devserver` ; tests avec `make test-unit` puis `make test` |
+| la data pipeline | Python 3.14, Poetry | `poetry run pytest` pour les tests ; l'exécution complète demande Docker et les identifiants S3 (voir [Secrets](#secrets)) |
 | toute la pile dans Docker | Docker | `./start_docker.sh` : base migrée et peuplée, API sur 8080, frontend sur 8081 |
 
 Comptes du jeu de données de développement : `admin@example.com` / `admin` (administrateur) et `volunteer@example.com` / `volunteer` (bénévole) ; les autres profils sont décrits dans `backend/seed_dev.py`.
@@ -157,7 +157,7 @@ Comptes du jeu de données de développement : `admin@example.com` / `admin` (ad
 Prérequis :
 
 - [Docker](https://docs.docker.com/get-docker/) et Docker Compose ;
-- [Python 3.13](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
+- [Python 3.14](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
 - [Node.js 24](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
