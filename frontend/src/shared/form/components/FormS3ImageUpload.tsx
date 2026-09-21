@@ -7,11 +7,12 @@ import {
 	X,
 	ZoomIn
 } from "lucide-react"
-import { type ChangeEvent, useEffect, useRef, useState } from "react"
+import { type ChangeEvent, useEffect, useId, useRef, useState } from "react"
 import type { FieldValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useUploadingTracker } from "@/shared/form/UploadingContext"
 import { useImageUpload } from "@/shared/hooks/useImageUpload"
 import { useImageViewer } from "@/shared/hooks/useImageViewer"
 
@@ -43,28 +44,47 @@ function FormS3ImageField<T extends FieldValues>({
 	onSelectedImageIndexChanged,
 	field
 }: FormS3ImageFieldProps<T>) {
-	const { uploadImages, uploading, error, progress } = useImageUpload()
+	const { uploadImages, uploading, error, progress, current, total } =
+		useImageUpload()
 	const { getViewableUrls, loading: viewerLoading } = useImageViewer()
 	const [uploadedImages, setUploadedImages] = useState<string[]>([])
 
 	const galleryInputRef = useRef<HTMLInputElement>(null)
 	const cameraInputRef = useRef<HTMLInputElement>(null)
 
+	// Let ancestors (e.g. the "Sauvegarder" button) know an upload is running so
+	// the form is not saved with an incomplete set of photos.
+	const fieldId = useId()
+	const { setFieldUploading } = useUploadingTracker()
+	useEffect(() => {
+		setFieldUploading(fieldId, uploading)
+		return () => setFieldUploading(fieldId, false)
+	}, [uploading, fieldId, setFieldUploading])
+
 	const handleFiles = async (files: FileList | null) => {
 		if (!files || files.length === 0) return
-		try {
-			const uploaded = await uploadImages(files, reportId)
+		// `uploadImages` never throws: it returns whatever succeeded plus per-file
+		// errors. We always commit the successful uploads so photos already sent
+		// to S3 are recorded in the form (and persisted to localStorage) even if
+		// some files failed — no more "4 out of 8 photos disappeared".
+		const { uploaded } = await uploadImages(files, reportId)
+		if (uploaded.length > 0) {
 			const s3Keys = uploaded.map((img) => img.key)
 			const newUploadedImages = [...uploadedImages, ...s3Keys]
 			setUploadedImages(newUploadedImages)
 			field.onChange(newUploadedImages)
-		} catch (_e) {}
+		}
 	}
 
-	const handleGalleryChange = (e: ChangeEvent<HTMLInputElement>) =>
+	const handleGalleryChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleFiles(e.target.files)
-	const handleCameraChange = (e: ChangeEvent<HTMLInputElement>) =>
+		// Reset so re-selecting the same files fires `change` again (e.g. retry).
+		e.target.value = ""
+	}
+	const handleCameraChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleFiles(e.target.files)
+		e.target.value = ""
+	}
 
 	const removeImageWithField = (indexToRemove: number) => {
 		const newUploadedImages = uploadedImages.filter(
@@ -170,11 +190,22 @@ function FormS3ImageField<T extends FieldValues>({
 							d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
 						/>
 					</svg>
-					{uploading ? "Envoi en cours…" : "Chargement des photos…"}
+					{uploading
+						? total > 0
+							? `Envoi de la photo ${current}/${total}…`
+							: "Envoi en cours…"
+						: "Chargement des photos…"}
 				</div>
 			)}
 
-			{uploading && <Progress value={progress} className="w-full" />}
+			{uploading && (
+				<div className="flex items-center gap-2">
+					<Progress value={progress} className="w-full" />
+					<span className="text-xs text-gray-500 shrink-0 tabular-nums">
+						{Math.round(progress)}%
+					</span>
+				</div>
+			)}
 
 			{error && (
 				<div className="flex items-start gap-2 text-sm text-red-600 mt-1">
