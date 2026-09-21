@@ -52,6 +52,11 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "API_DOCS_ENABLED"},
         description="Expose /docs, /redoc and /openapi.json in production (always exposed elsewhere)",
     )
+    SQL_ECHO: bool = Field(
+        default=False,
+        json_schema_extra={"env": "SQL_ECHO"},
+        description="Log every SQL statement and its parameters (development only: parameters include personal data)",
+    )
     IMPORTS_TOKEN: str = Field(
         default="", json_schema_extra={"env": "IMPORTS_TOKEN", "secret": True}
     )

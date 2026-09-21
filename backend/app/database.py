@@ -7,7 +7,10 @@ from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from app.config import settings
 
 logging.basicConfig()
-logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+# Statement logging carries bound parameters (e-mails, password hashes): opt-in only
+logging.getLogger("sqlalchemy.engine").setLevel(
+    logging.INFO if settings.SQL_ECHO else logging.WARNING
+)
 
 DATABASE_URL = settings.DATABASE_URL
 
