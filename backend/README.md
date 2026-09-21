@@ -82,6 +82,7 @@ documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/doc
 | `DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_RECYCLE_SECONDS` | non | Pool de connexions SQLAlchemy (défauts 3, 2 et 1800 s) ; garder `DB_POOL_SIZE + DB_MAX_OVERFLOW` sous la limite de connexions du plan PostgreSQL |
 | `MAP_MAX_POINTS` | non | Nombre maximal de points individuels renvoyés par la carte (défaut 2000) ; `total` compte toujours tous les signalements |
 | `API_DOCS_ENABLED` | non | Expose `/docs`, `/redoc` et `/openapi.json` en production (toujours exposés hors production) |
+| `SQL_ECHO` | non | Journalise chaque requête SQL avec ses paramètres (données personnelles incluses) ; réservé au développement |
 | `IMPORTS_TOKEN` | non | Jeton attendu dans l'en-tête `x-imports-token` par la route d'import des signalements |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PREFIX`, `S3_REGION`, `S3_ENDPOINT` | non | Stockage objet des photos des formulaires ; sans ces variables, les envois sont stockés localement |
 | `FRONTEND_URL` | non | Adresse publique du frontend, utilisée dans les liens des e-mails (défaut `http://localhost:5173`) |
