@@ -6,14 +6,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
+        # En test, on ignore toujours le .env local du développeur : les tests
+        # doivent lire la configuration de .env.test (jeton d'import, base).
         env_file=(
-            ".env"
-            if os.path.exists(".env")
-            else (
-                ".env.test"
-                if os.environ.get("ENVIRONMENT") == "test"
-                else ".env.development"
-            )
+            ".env.test"
+            if os.environ.get("ENVIRONMENT") == "test"
+            else (".env" if os.path.exists(".env") else ".env.development")
         )
     )
     DATABASE_URL: str = Field(
