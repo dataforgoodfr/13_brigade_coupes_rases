@@ -18,6 +18,11 @@ services:
       POSTGRES_USER: devuser
       POSTGRES_PASSWORD: devuser
       DATABASES: local,test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devuser -d local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin4_container
@@ -53,8 +58,10 @@ services:
       SMTP_PORT: 1025
       SMTP_USE_TLS: "false"
     depends_on:
-      - db
-      - mailpit
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
 
   mailpit:
     image: axllent/mailpit
