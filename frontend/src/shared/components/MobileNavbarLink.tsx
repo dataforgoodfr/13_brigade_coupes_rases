@@ -35,10 +35,10 @@ export const MobileNavbarLink: React.FC<Props> = ({
 		<Link
 			activeProps={activeProps}
 			inactiveProps={inactiveProps}
-			className="flex flex-col items-center h-full px-1 pt-1 text-xs font-medium "
+			className="flex flex-col items-center justify-center gap-0.5 h-full px-1 text-[11px] font-medium leading-none whitespace-nowrap"
 			{...props}
 		>
-			<Icon className="size-7 " />
+			<Icon className="size-6" />
 			{label}
 		</Link>
 	)

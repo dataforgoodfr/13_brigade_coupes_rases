@@ -132,7 +132,8 @@ export function AccordionHeader({
 										"Impossible d'approuver la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+								className="flex-1 text-xs h-8 border-green-600 text-green-700 hover:bg-green-50 cursor-pointer"
+								variant="outline"
 								size="sm"
 							>
 								Approuver
@@ -145,8 +146,8 @@ export function AccordionHeader({
 										"Impossible de refuser la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 cursor-pointer"
-								variant="destructive"
+								className="flex-1 text-xs h-8 border-destructive text-destructive hover:bg-destructive/10 cursor-pointer"
+								variant="outline"
 								size="sm"
 							>
 								Refuser
@@ -195,7 +196,8 @@ export function AccordionHeader({
 						"Impossible de demander l'attribution."
 					)
 				}}
-				className="w-full text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+				className="w-full text-xs h-8 cursor-pointer"
+				variant="default"
 				size="sm"
 			>
 				Demander l'attribution
@@ -224,7 +226,8 @@ export function AccordionHeader({
 								"Impossible de valider le signalement."
 							)
 						}}
-						className="flex-1 text-xs h-8 bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+						className="flex-1 text-xs h-8 cursor-pointer"
+						variant="default"
 						size="sm"
 					>
 						Valider

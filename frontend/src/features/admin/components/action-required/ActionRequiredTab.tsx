@@ -138,7 +138,7 @@ export function ActionRequiredTab() {
 								<div className="flex gap-2">
 									<Button
 										size="sm"
-										className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold min-h-[44px]"
+										className="flex-1 font-semibold min-h-[44px]"
 										disabled={assignation.status === "loading"}
 										onClick={(e) => handleApproveValidation(e, report.id)}
 									>

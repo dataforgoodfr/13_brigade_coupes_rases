@@ -4,7 +4,7 @@ import { Navbar } from "./Navbar"
 
 export function AppLayout() {
 	return (
-		<div className="sm:flex hidden h-screen ">
+		<div className="sm:flex hidden h-full overflow-hidden">
 			<Navbar />
 			<Outlet />
 		</div>
