@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react"
+import { screen, within } from "@testing-library/dom"
 import type { FieldValues } from "react-hook-form"
 import { expect } from "vitest"
 import type { UserEvent } from "vitest/browser"

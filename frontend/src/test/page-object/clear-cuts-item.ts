@@ -1,4 +1,4 @@
-import { type waitForOptions, within } from "@testing-library/react"
+import { type waitForOptions, within } from "@testing-library/dom"
 import type { UserEvent } from "vitest/browser"
 
 type Options = {

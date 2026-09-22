@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/dom"
 import { describe, expect, it } from "vitest"
 
 import { renderApp } from "@/test/renderApp"
