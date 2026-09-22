@@ -16,7 +16,9 @@ vi.mock("@/features/offline/hooks/useReloadPwa", () => ({
 configure({
 	asyncUtilTimeout: 5_000
 })
-beforeAll(() => worker.start())
+// quiet : MSW ne journalise plus chaque requête interceptée (requête, handler,
+// réponse), que Vitest recopie dans le terminal par milliers de lignes.
+beforeAll(() => worker.start({ quiet: true }))
 afterEach(() => {
 	localStorage.clear()
 	worker.resetHandlers()
