@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context"
+import { OfflineBanner } from "@/features/offline/components/OfflineBanner"
 import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa"
 import type { AuthContext } from "@/features/user/components/Auth.context"
 import { AppLayout } from "@/shared/components/AppLayout"
@@ -51,11 +52,16 @@ function RootComponent() {
 
 	return referentialStatus === "success" ? (
 		<>
-			<MapProvider>
-				<LayoutProvider>
-					{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
-				</LayoutProvider>
-			</MapProvider>
+			<div className="flex flex-col h-[100dvh]">
+				<OfflineBanner />
+				<div className="flex-1 min-h-0">
+					<MapProvider>
+						<LayoutProvider>
+							{breakpoint === "all" ? <AppLayout /> : <AppMobileLayout />}
+						</LayoutProvider>
+					</MapProvider>
+				</div>
+			</div>
 			<Toaster />
 		</>
 	) : (

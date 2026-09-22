@@ -4,7 +4,7 @@ import { MobileNavbar } from "@/shared/components/MobileNavbar"
 
 export function AppMobileLayout() {
 	return (
-		<div className="sm:hidden h-[100dvh] flex flex-col justify-content-between">
+		<div className="sm:hidden h-full flex flex-col justify-content-between">
 			<div
 				className="flex grow overflow-auto"
 				style={{
