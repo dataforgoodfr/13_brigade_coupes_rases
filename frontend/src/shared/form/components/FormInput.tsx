@@ -13,6 +13,7 @@ export function FormInput<Form extends FieldValues = FieldValues>({
 	form,
 	name,
 	type,
+	placeholder,
 	field,
 	...props
 }: FormProps<Form> & {
@@ -20,7 +21,7 @@ export function FormInput<Form extends FieldValues = FieldValues>({
 } & FormFieldLayoutProps<Form>) {
 	return (
 		<FormFieldLayout {...props} name={name}>
-			<Input type={type} {...field} {...props} />
+			<Input type={type} placeholder={placeholder} {...field} />
 		</FormFieldLayout>
 	)
 }
