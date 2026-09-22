@@ -102,10 +102,10 @@ export function AsideForm({
 				{value ? (
 					<div className="flex flex-col">
 						<Title>{`${value.current.report.city.toLocaleUpperCase()}`}</Title>
-						<span className="font-[Roboto]">
+						<span className="font-roboto">
 							<FormattedDate value={value.current.report.firstCutDate} />
 						</span>
-						<span className="font-[Roboto] italic font-light text-xs">
+						<span className="font-roboto italic font-light text-xs">
 							v{value.current.id ?? 0}
 						</span>
 					</div>

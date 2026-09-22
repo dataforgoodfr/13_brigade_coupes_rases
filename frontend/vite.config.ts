@@ -35,7 +35,12 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 						process.env.STORYBOOK === "true"
 							? Number.MAX_SAFE_INTEGER
 							: undefined,
-					globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+					globPatterns: [
+						"**/*.{js,css,html,svg,png,ico}",
+						// Polices : sous-ensemble latin uniquement (≈ 225 Kio), les autres
+						// sous-ensembles ne sont téléchargés qu'en cas de besoin
+						"**/*-latin-{wght,300,400,500,600,700}-*.woff2"
+					],
 					cleanupOutdatedCaches: true,
 					clientsClaim: true,
 					runtimeCaching: [
