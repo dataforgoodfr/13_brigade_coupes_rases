@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen } from "@testing-library/dom"
 import { describe, it } from "vitest"
 
 import { loginForm } from "@/test/page-object/login"

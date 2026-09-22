@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen } from "@testing-library/dom"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
@@ -62,7 +62,7 @@ describe("From tracking", () => {
 			weather: "other"
 		})
 		worker.use(latestFormMock.handler)
-		unmount()
+		await unmount()
 		const { user } = await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: reportMock.response.id },

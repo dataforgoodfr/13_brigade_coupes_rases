@@ -68,12 +68,15 @@ export function ToggleGroup<TItem>({
 		)
 	}
 	const value = items.find(({ isSelected }) => isSelected)?.value
+	// allowEmptyValue ne doit pas finir sur le DOM ; "" (aucun élément) garde le
+	// groupe contrôlé tant que rien n'est sélectionné.
+	const { allowEmptyValue: _allowEmptyValue, ...radixProps } = props
 	return (
 		<RadixToggleGroup
-			{...props}
+			{...radixProps}
 			type="single"
 			defaultValue={value}
-			value={props.allowEmptyValue ? undefined : value}
+			value={props.allowEmptyValue ? undefined : (value ?? "")}
 			onValueChange={(v) => {
 				if (!v && !props.allowEmptyValue) {
 					return

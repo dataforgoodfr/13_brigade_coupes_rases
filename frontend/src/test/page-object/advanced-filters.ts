@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react"
+import { screen, within } from "@testing-library/dom"
 import type { UserEvent } from "vitest/browser"
 
 type Options = { user: UserEvent }

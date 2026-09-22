@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen } from "@testing-library/dom"
 import { beforeEach, describe, expect, it } from "vitest"
 import type { UserEvent } from "vitest/browser"
 
