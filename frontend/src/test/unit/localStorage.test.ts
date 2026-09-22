@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import z from "zod"
 
 import { localStorageRepository } from "@/shared/localStorage"
@@ -17,10 +17,15 @@ describe("localStorageRepository", () => {
 	})
 
 	it("drops a corrupted or outdated entry instead of throwing", () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined)
 		localStorage.setItem("unit-test", "{not json")
 		expect(repo.getFromLocalStorage(schema)).toBeUndefined()
 		localStorage.setItem("unit-test", JSON.stringify({ wrong: 1 }))
 		expect(repo.getFromLocalStorage(schema)).toBeUndefined()
+		expect(consoleError).toHaveBeenCalledTimes(2)
+		consoleError.mockRestore()
 	})
 
 	it("keeps a record of entries by id", () => {

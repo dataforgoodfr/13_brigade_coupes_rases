@@ -1,7 +1,7 @@
 import { playwright } from "@vitest/browser-playwright"
 import { defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config"
 
-import { baseConfigFn } from "./vite.config"
+import { baseConfigFn } from "./vite.config.ts"
 
 export default defineConfig((env) =>
 	mergeConfig(baseConfigFn(env), {
