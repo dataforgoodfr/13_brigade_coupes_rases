@@ -57,14 +57,14 @@ export function AccordionFullItem({
 					</DownloadOutdatedButton>
 				)}
 				<AccordionTrigger
-					className="cursor-pointer ms-1 text-lg font-bold font-[Roboto] sticky top-0 py-3 border-b-1"
+					className="cursor-pointer ms-1 text-lg font-bold font-roboto sticky top-0 py-3 border-b-1"
 					headerClassName="grow"
 				>
 					{title}
 				</AccordionTrigger>
 			</div>
 
-			<AccordionContent className={cn("font-[Roboto] pt-4", className)}>
+			<AccordionContent className={cn("font-roboto pt-4", className)}>
 				{children}
 			</AccordionContent>
 		</AccordionItem>
