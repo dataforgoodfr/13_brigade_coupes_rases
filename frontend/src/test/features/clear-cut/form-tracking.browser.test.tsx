@@ -62,7 +62,7 @@ describe("From tracking", () => {
 			weather: "other"
 		})
 		worker.use(latestFormMock.handler)
-		unmount()
+		await unmount()
 		const { user } = await renderApp({
 			route: "/clear-cuts/$clearCutId",
 			params: { $clearCutId: reportMock.response.id },
