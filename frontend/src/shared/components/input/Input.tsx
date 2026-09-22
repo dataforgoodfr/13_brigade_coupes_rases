@@ -24,7 +24,7 @@ const InputAside = ({ children, className }: InputAsideProps) => {
 	)
 }
 export const Input = forwardRef<HTMLInputElement, Props>(
-	({ className, type, suffix, prefix, id, ...props }, ref) => {
+	({ className, type, suffix, prefix, suffixClassName, id, ...props }, ref) => {
 		return (
 			<div className="flex grow relative items-center">
 				{prefix && <InputAside className="left-0">{prefix}</InputAside>}
@@ -39,7 +39,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(
 					{...props}
 				/>
 				{suffix && (
-					<InputAside className={cn("right-0", props.suffixClassName)}>
+					<InputAside className={cn("right-0", suffixClassName)}>
 						{suffix}
 					</InputAside>
 				)}
