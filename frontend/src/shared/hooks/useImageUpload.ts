@@ -35,7 +35,7 @@ export interface UploadResult {
 }
 
 export interface UseImageUploadResult {
-	uploadImages: (files: FileList, reportId?: string) => Promise<UploadResult>
+	uploadImages: (files: File[], reportId?: string) => Promise<UploadResult>
 	uploading: boolean
 	error: string | null
 	/** Overall progress of the current batch, 0-100. */
@@ -156,7 +156,7 @@ export function useImageUpload(): UseImageUploadResult {
 	const [total, setTotal] = useState(0)
 
 	const uploadImages = async (
-		files: FileList,
+		files: File[],
 		reportId?: string
 	): Promise<UploadResult> => {
 		setUploading(true)

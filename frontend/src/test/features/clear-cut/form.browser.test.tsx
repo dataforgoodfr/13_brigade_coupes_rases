@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/dom"
+import { HttpResponse, http } from "msw"
 import { beforeEach, describe, expect, it } from "vitest"
 import type { UserEvent } from "vitest/browser"
 
@@ -41,6 +42,7 @@ import type {
 	ClearCutReportResponse
 } from "@/features/clear-cut/store/clear-cuts"
 import type { Me } from "@/features/user/store/me"
+import { setStoredToken } from "@/features/user/store/me.slice"
 import { worker } from "@/mocks/browser"
 import { mockClearCutReportResponse } from "@/mocks/clear-cuts"
 import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms"
@@ -424,6 +426,53 @@ function itShouldHaveDisabledState(
 			})
 		})
 }
+
+const FAKE_JWT = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl"
+
+describe("photo upload", () => {
+	defaultSetupServerBeforeEach(setupVolunteerAssigned)
+	beforeEach(() => {
+		worker.use(
+			http.post("*/api/v1/images/upload-url", async ({ request }) => {
+				const { filename } = (await request.json()) as { filename: string }
+				const key = `local/reports/ABC/${filename}`
+				return HttpResponse.json({
+					uploadUrl: "http://localhost:8080/api/v1/images/local-upload",
+					fields: {},
+					fileUrl: `http://localhost:8080/api/v1/images/${key}`,
+					expiresIn: 3600,
+					key
+				})
+			}),
+			http.post(
+				"*/api/v1/images/local-upload",
+				() => new HttpResponse(null, { status: 204 })
+			),
+			http.get("*/api/v1/images/view/*", ({ request }) =>
+				HttpResponse.json({ viewUrl: `${request.url}.jpg`, expiresIn: 3600 })
+			)
+		)
+	})
+
+	it("keeps every photo of a multiple selection", async () => {
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		// L'envoi exige un jeton stocké, que renderApp ne pose pas
+		setStoredToken({ accessToken: FAKE_JWT, refreshToken: FAKE_JWT })
+		await openAccordion(onSiteKey, user)
+		const input = await screen.findByLabelText(
+			"Sélectionner des photos — Photos de la coupe"
+		)
+		await user.upload(input, [
+			new File(["a"], "coupe-1.jpg", { type: "image/jpeg" }),
+			new File(["b"], "coupe-2.jpg", { type: "image/jpeg" })
+		])
+		expect(await screen.findByText("2 photos")).toBeInTheDocument()
+	})
+})
 
 async function openAccordion(section: SectionForm, user: UserEvent) {
 	const accordionButton = await screen.findByText(section.name, {
