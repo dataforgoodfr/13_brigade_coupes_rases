@@ -61,8 +61,8 @@ function FormS3ImageField<T extends FieldValues>({
 		return () => setFieldUploading(fieldId, false)
 	}, [uploading, fieldId, setFieldUploading])
 
-	const handleFiles = async (files: FileList | null) => {
-		if (!files || files.length === 0) return
+	const handleFiles = async (files: File[]) => {
+		if (files.length === 0) return
 		// `uploadImages` never throws: it returns whatever succeeded plus per-file
 		// errors. We always commit the successful uploads so photos already sent
 		// to S3 are recorded in the form (and persisted to localStorage) even if
@@ -77,12 +77,14 @@ function FormS3ImageField<T extends FieldValues>({
 	}
 
 	const handleGalleryChange = (e: ChangeEvent<HTMLInputElement>) => {
-		handleFiles(e.target.files)
+		// Copie indispensable : `e.target.files` est vidée par la remise à zéro
+		// ci-dessous, alors que l'envoi des photos suivantes est encore à venir.
+		handleFiles(Array.from(e.target.files ?? []))
 		// Reset so re-selecting the same files fires `change` again (e.g. retry).
 		e.target.value = ""
 	}
 	const handleCameraChange = (e: ChangeEvent<HTMLInputElement>) => {
-		handleFiles(e.target.files)
+		handleFiles(Array.from(e.target.files ?? []))
 		e.target.value = ""
 	}
 
