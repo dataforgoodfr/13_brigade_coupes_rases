@@ -13,8 +13,9 @@ export function MobileNavbar() {
 	// Boolean to know if route matcher **clear-cuts**
 	const isOnClearCutsRoute = location.pathname.startsWith("/clear-cuts")
 
+	// z-40 : sous le fond des fenêtres modales (z-50), qui doit la recouvrir.
 	return (
-		<nav className="flex sm:hidden items-center shadow justify-around fixed bottom-0 left-0 right-0 bg-white z-[150] border-t h-16 pb-[env(safe-area-inset-bottom)]">
+		<nav className="flex sm:hidden items-center shadow justify-around fixed bottom-0 left-0 right-0 bg-white z-40 border-t h-16 pb-[env(safe-area-inset-bottom)]">
 			<div className="flex items-center justify-around w-full h-full">
 				<MobileNavbarLink
 					to="/clear-cuts"

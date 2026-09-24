@@ -26,7 +26,15 @@ export function AsideForm({
 	mobile?: boolean
 }) {
 	const { value, status } = useGetClearCut(clearCutId)
-	const { map, setFocusedClearCutId } = useMapInstance()
+	const {
+		map,
+		setFocusedClearCutId,
+		editingPerimeterReportId,
+		setEditingPerimeterReportId
+	} = useMapInstance()
+	// Sur mobile, la fiche recouvre la carte : on la masque (sans la démonter,
+	// pour garder les saisies en cours) le temps d'éditer le périmètre.
+	const isEditingPerimeter = editingPerimeterReportId === clearCutId
 	const { toast } = useToast()
 	const navigate = useNavigate()
 	const { breakpoint } = useBreakpoint()
@@ -36,6 +44,13 @@ export function AsideForm({
 		setFocusedClearCutId(clearCutId)
 		return () => setFocusedClearCutId(undefined)
 	}, [clearCutId, setFocusedClearCutId])
+
+	// Quitter la fiche abandonne l'édition du périmètre en cours.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: nettoyage aussi au changement de fiche
+	useEffect(
+		() => () => setEditingPerimeterReportId(undefined),
+		[clearCutId, setEditingPerimeterReportId]
+	)
 
 	useEffect(() => {
 		if (status === "error") {
@@ -56,16 +71,18 @@ export function AsideForm({
 	const averageCoordinates = value?.current.report.averageLocation.coordinates
 	const averageLat = averageCoordinates?.[1]
 	const averageLng = averageCoordinates?.[0]
+	// Sur mobile, la carte n'est visible que pendant l'édition du périmètre.
+	const mapIsVisible = breakpoint === "all" || isEditingPerimeter
 	useEffect(() => {
 		if (
 			map &&
-			breakpoint === "all" &&
+			mapIsVisible &&
 			averageLat !== undefined &&
 			averageLng !== undefined
 		) {
 			map.flyTo([averageLat, averageLng], 15, { duration: 1 })
 		}
-	}, [breakpoint, map, averageLat, averageLng])
+	}, [mapIsVisible, map, averageLat, averageLng])
 
 	useEffect(() => {
 		if (value?.versionMismatchDisclaimerShown === false) {
@@ -90,7 +107,8 @@ export function AsideForm({
 	return (
 		<div
 			className={cn("flex flex-col w-full bg-background", {
-				"absolute top-0 left-0 right-0 bottom-12 z-10": mobile
+				"absolute top-0 left-0 right-0 bottom-12 z-10": mobile,
+				hidden: mobile && isEditingPerimeter
 			})}
 		>
 			<div

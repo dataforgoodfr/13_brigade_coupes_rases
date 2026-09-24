@@ -68,17 +68,33 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const isEditingRef = useRef(isEditingPerimeter)
 	isEditingRef.current = isEditingPerimeter
 
+	// Geometry to restore when edit mode ends without a save (Annuler, or the
+	// report panel being closed), kept in a ref so the effect below reads the
+	// latest value without re-running on every refresh.
+	const boundaryRef = useRef(clearCut.boundary)
+	boundaryRef.current = clearCut.boundary
+	const savedRef = useRef(false)
+
 	// Enable/disable Geoman vertex editing on this layer when entering/leaving
 	// perimeter edit mode for this report.
 	useEffect(() => {
 		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
 		const layer = ref.current as any
-		if (!layer?.eachLayer) return
+		if (!layer?.eachLayer || !isEditingPerimeter) return
+		savedRef.current = false
 		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
-		layer.eachLayer((child: any) => {
-			if (isEditingPerimeter) child.pm?.enable({ allowSelfIntersection: false })
-			else child.pm?.disable()
-		})
+		layer.eachLayer((child: any) =>
+			child.pm?.enable({ allowSelfIntersection: false })
+		)
+		return () => {
+			// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
+			layer.eachLayer?.((child: any) => child.pm?.disable())
+			if (!savedRef.current) {
+				// Revert the on-screen edits by reloading the original geometry.
+				layer.clearLayers?.()
+				layer.addData?.(boundaryRef.current)
+			}
+		}
 	}, [isEditingPerimeter])
 
 	// The action bar lives inside the map container (centered on the map, not on
@@ -105,6 +121,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				})
 			).unwrap()
 			toast({ id: "perimeter-saved", title: "Périmètre mis à jour" })
+			savedRef.current = true
 			setEditingPerimeterReportId(undefined)
 		} catch {
 			toast({
@@ -116,29 +133,19 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 		}
 	}
 
-	const handleCancelPerimeter = () => {
-		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
-		const layer = ref.current as any
-		if (layer) {
-			// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
-			layer.eachLayer?.((child: any) => child.pm?.disable())
-			// Revert the on-screen edits by reloading the original geometry.
-			layer.clearLayers?.()
-			layer.addData?.(clearCut.boundary)
-		}
-		setEditingPerimeterReportId(undefined)
-	}
+	const handleCancelPerimeter = () => setEditingPerimeterReportId(undefined)
 
 	useEffect(() => {
 		const group = ref.current
 		// Un groupe pas encore sur la carte ne peut pas ouvrir de popup (Leaflet lève une erreur)
 		if (!group || !isOnMap(group)) return
-		if (focusedClearCutId === report.id) {
+		// Pendant l'édition du périmètre, la popup masquerait les sommets
+		if (focusedClearCutId === report.id && !isEditingPerimeter) {
 			group.openPopup()
 		} else {
 			group.closePopup()
 		}
-	}, [focusedClearCutId, report.id])
+	}, [focusedClearCutId, report.id, isEditingPerimeter])
 
 	// Extract the clear-cut ID from the URL path using a regular expression
 	const urlMatch = location.pathname.match(/\/clear-cuts\/([^/]+)/)
@@ -215,9 +222,9 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				createPortal(
 					<div
 						ref={actionBarRef}
-						className="absolute bottom-24 left-1/2 z-[1000] flex -translate-x-1/2 items-center gap-2 rounded-md border bg-white p-2 shadow-lg"
+						className="absolute bottom-24 left-1/2 z-[1000] flex w-[calc(100%-1rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded-md border bg-white p-2 shadow-lg sm:w-auto sm:flex-nowrap"
 					>
-						<span className="whitespace-nowrap px-2 text-sm">
+						<span className="w-full px-2 text-center text-sm sm:w-auto sm:whitespace-nowrap">
 							Déplacez les sommets pour ajuster le périmètre
 						</span>
 						<Button
