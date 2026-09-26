@@ -318,13 +318,14 @@ def update_clear_cut_report(
     # Only update user_id when explicitly included in the request body
     if "user_id" in request.model_fields_set:
         if connected_user.role == "volunteer":
-            if request.user_id is not None and request.user_id != connected_user.id:
+            # Taking a report goes through request-assignment and an admin's
+            # approval; a volunteer can only release their own report here.
+            if request.user_id is not None:
                 raise AppHTTPException(
                     status_code=403,
                     type="INVALID_REQUESTER_RIGHTS",
-                    detail="Volunteer could not assign an other user",
+                    detail="Volunteers must request an assignment",
                 )
-            # A volunteer can only take a free report or release their own
             if report.user_id is not None and report.user_id != connected_user.id:
                 raise AppHTTPException(
                     status_code=409,
