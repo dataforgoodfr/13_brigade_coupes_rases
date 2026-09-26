@@ -289,7 +289,7 @@ def test_workflow_requires_authentication(client: TestClient, action: str) -> No
     assert client.post(f"{REPORTS}/1/{action}").status_code == 401
 
 
-# H1 — l'attribution directe (PUT) a les mêmes effets que l'approbation.
+# L'attribution directe (PUT) a les mêmes effets que l'approbation.
 
 
 def test_direct_assignment_starts_the_report_and_allows_validation(
@@ -340,7 +340,7 @@ def test_admin_direct_assignment_clears_pending_request(
     assert report.status == "in_progress"
 
 
-# H4 — pas de signalement en cours ou en attente de validation sans titulaire.
+# Pas de signalement en cours ou en attente de validation sans titulaire.
 
 
 @pytest.mark.parametrize("path", ["unassign", "put"])
