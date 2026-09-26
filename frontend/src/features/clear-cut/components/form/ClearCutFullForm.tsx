@@ -63,7 +63,8 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 				"waiting_for_validation",
 				"validated",
 				"legal_validated",
-				"final_validated"
+				"final_validated",
+				"rejected"
 			]
 			if (lockedStatuses.includes(current.report.status)) return true
 			const isAssignmentRequester =

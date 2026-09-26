@@ -287,3 +287,129 @@ def test_workflow_on_unknown_report_returns_not_found(
 @pytest.mark.parametrize("action", ["request-assignment", "approve-validation"])
 def test_workflow_requires_authentication(client: TestClient, action: str) -> None:
     assert client.post(f"{REPORTS}/1/{action}").status_code == 401
+
+
+# H1 — l'attribution directe (PUT) a les mêmes effets que l'approbation.
+
+
+def test_direct_assignment_starts_the_report_and_allows_validation(
+    client: TestClient, db: Session
+) -> None:
+    volunteer, volunteer_token = get_volunteer_user_token(client, db)
+    report_id = free_report(db)
+
+    response = client.put(
+        f"{REPORTS}/{report_id}",
+        json={"userId": str(volunteer.id)},
+        headers=auth(volunteer_token),
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    report = reload(db, report_id)
+    assert report.user_id == volunteer.id
+    assert report.status == "in_progress"
+
+    response = client.post(
+        f"{REPORTS}/{report_id}/volunteer-validate", headers=auth(volunteer_token)
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert reload(db, report_id).status == "waiting_for_validation"
+
+
+def test_admin_direct_assignment_clears_pending_request(
+    client: TestClient, db: Session
+) -> None:
+    requester, requester_token = get_volunteer_user_token(
+        client, db, "first@workflow.test"
+    )
+    other, _ = get_volunteer_user_token(client, db, "second@workflow.test")
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db)
+    client.post(
+        f"{REPORTS}/{report_id}/request-assignment", headers=auth(requester_token)
+    )
+
+    response = client.put(
+        f"{REPORTS}/{report_id}",
+        json={"userId": str(other.id)},
+        headers=auth(admin_token),
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    report = reload(db, report_id)
+    assert report.user_id == other.id
+    assert report.assignment_requested_by_id is None
+    assert report.status == "in_progress"
+
+
+# H4 — pas de signalement en cours ou en attente de validation sans titulaire.
+
+
+@pytest.mark.parametrize("path", ["unassign", "put"])
+def test_unassigning_a_report_awaiting_validation_returns_it_to_the_pool(
+    client: TestClient, db: Session, path: str
+) -> None:
+    volunteer, _ = get_volunteer_user_token(client, db)
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db)
+    assign(db, report_id, volunteer.id)
+    report = reload(db, report_id)
+    report.status = "waiting_for_validation"
+    db.commit()
+
+    if path == "unassign":
+        response = client.post(
+            f"{REPORTS}/{report_id}/unassign", headers=auth(admin_token)
+        )
+    else:
+        response = client.put(
+            f"{REPORTS}/{report_id}", json={"userId": None}, headers=auth(admin_token)
+        )
+    assert response.status_code in (status.HTTP_200_OK, status.HTTP_204_NO_CONTENT)
+    report = reload(db, report_id)
+    assert report.user_id is None
+    assert report.status == "to_validate"
+
+
+def test_unassigning_keeps_a_decided_status(client: TestClient, db: Session) -> None:
+    volunteer, _ = get_volunteer_user_token(client, db)
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db)
+    assign(db, report_id, volunteer.id)
+    report = reload(db, report_id)
+    report.status = "validated"
+    db.commit()
+
+    client.post(f"{REPORTS}/{report_id}/unassign", headers=auth(admin_token))
+
+    report = reload(db, report_id)
+    assert report.user_id is None
+    assert report.status == "validated"
+
+
+@pytest.mark.parametrize(
+    "locked_status",
+    [
+        "waiting_for_validation",
+        "validated",
+        "legal_validated",
+        "final_validated",
+        "rejected",
+    ],
+)
+def test_assigned_volunteer_cannot_edit_a_locked_form(
+    client: TestClient, db: Session, locked_status: str
+) -> None:
+    volunteer, volunteer_token = get_volunteer_user_token(client, db)
+    report_id = free_report(db)
+    assign(db, report_id, volunteer.id)
+    report = reload(db, report_id)
+    report.status = locked_status
+    db.commit()
+
+    response = client.post(
+        f"{REPORTS}/{report_id}/forms",
+        json={"inspectionDate": "2026-10-17T10:00:00"},
+        headers=auth(volunteer_token),
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert error_type(response.json()) == "FORM_LOCKED"

@@ -287,6 +287,23 @@ def volunteer_create_clear_cut_report(
     return report
 
 
+def assign_report(report: ClearCutReport, user_id: int) -> None:
+    """Every assignment path (approval, direct PUT) has the same effect: the
+    report gets a holder and a free report moves on to in_progress."""
+    report.user_id = user_id
+    report.assignment_requested_by_id = None
+    if report.status == "to_validate":
+        report.status = "in_progress"
+
+
+def unassign_report(report: ClearCutReport) -> None:
+    """A report without a holder can be neither in progress nor awaiting
+    validation: it goes back to the pool."""
+    report.user_id = None
+    if report.status in ("in_progress", "waiting_for_validation"):
+        report.status = "to_validate"
+
+
 def update_clear_cut_report(
     id: int, db: Session, connected_user: User, request: ClearCutReportPutRequestSchema
 ) -> ClearCutReport:
@@ -314,11 +331,10 @@ def update_clear_cut_report(
                     type="ALREADY_ASSIGNED",
                     detail="Report is already assigned to another volunteer",
                 )
-            report.user_id = request.user_id
-        if connected_user.role == "admin":
-            report.user_id = request.user_id
-        if report.user_id is not None:
-            report.assignment_requested_by_id = None
+        if request.user_id is None:
+            unassign_report(report)
+        else:
+            assign_report(report, request.user_id)
 
     if request.status is not None:
         if connected_user.role == "admin":
