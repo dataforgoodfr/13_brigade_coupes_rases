@@ -20,6 +20,10 @@ on:
           - stamp-and-upgrade
         type: choice
         description: "Seed the database with test data"
+      confirmation:
+        required: false
+        type: string
+        description: "Pour reset-database ou setup-database, taper exactement : RESET suivi de l'environnement (ex. RESET prd)"
 
 # Le GITHUB_TOKEN n'a besoin que de lire le dépôt
 permissions:
@@ -40,6 +44,13 @@ jobs:
       matrix:
         python-version: ["3.14"]
     steps:
+      # DATABASE_URL est le même secret pour dev et prd (la base de production) :
+      # la garde vaut pour les deux
+      - name: Garde-fou contre la purge ou le peuplement de la base
+        if: ${{ (inputs.database-action == 'reset-database' || inputs.database-action == 'setup-database') && inputs.confirmation != format('RESET {0}', inputs.env) }}
+        run: |
+          echo "::error::${{ inputs.database-action }} vide ou peuple la base : relancer avec la confirmation « RESET ${{ inputs.env }} »."
+          exit 1
       - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v7
