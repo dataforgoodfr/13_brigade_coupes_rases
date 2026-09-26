@@ -296,12 +296,13 @@ def test_direct_assignment_starts_the_report_and_allows_validation(
     client: TestClient, db: Session
 ) -> None:
     volunteer, volunteer_token = get_volunteer_user_token(client, db)
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
     report_id = free_report(db)
 
     response = client.put(
         f"{REPORTS}/{report_id}",
         json={"userId": str(volunteer.id)},
-        headers=auth(volunteer_token),
+        headers=auth(admin_token),
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
     report = reload(db, report_id)

@@ -125,31 +125,28 @@ def test_get_report(client: TestClient) -> None:
     assert data["id"] == "1"
 
 
-def test_affect_me_using_connected_volunteer_should_work(
+def test_volunteer_cannot_take_a_free_report_without_approval(
     db: Session, client: TestClient
 ) -> None:
     [me, token] = get_volunteer_user_token(client, db, "assigned-test@volunteer.com")
-    # Seeded report 1 is already assigned: free it first, a volunteer can only take a free report
     report = db.get(ClearCutReport, 1)
     assert report is not None
     report.user_id = None
+    report.status = "to_validate"
     db.commit()
-    updates = {"user_id": str(me.id)}
 
     response = client.put(
         "/api/v1/clear-cuts-reports/1",
-        json=updates,
+        json={"user_id": str(me.id)},
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = client.get(
-        "/api/v1/clear-cuts-reports/1",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    data = response.json()
-    assert data["affectedUser"]["email"] == "assigned-test@volunteer.com"
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json()["detail"]["type"] == "INVALID_REQUESTER_RIGHTS"
+    report = db.get(ClearCutReport, 1)
+    assert report is not None
+    assert report.user_id is None
+    assert report.status == "to_validate"
 
 
 def test_affect_other_using_connected_volunteer_should_return_forbidden(
@@ -214,10 +211,10 @@ def test_affect_other_using_connected_admin_should_work(
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_volunteer_cannot_take_report_assigned_to_another(
+def test_volunteer_cannot_release_a_report_assigned_to_another(
     db: Session, client: TestClient
 ) -> None:
-    [me, token] = get_volunteer_user_token(client, db, "thief@volunteer.com")
+    [_, token] = get_volunteer_user_token(client, db, "thief@volunteer.com")
     other_id = create_user(db, email="owner@volunteer.com", login="owner-login").id
     report = db.get(ClearCutReport, 1)
     assert report is not None
@@ -226,7 +223,7 @@ def test_volunteer_cannot_take_report_assigned_to_another(
 
     response = client.put(
         "/api/v1/clear-cuts-reports/1",
-        json={"user_id": str(me.id)},
+        json={"user_id": None},
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == status.HTTP_409_CONFLICT
