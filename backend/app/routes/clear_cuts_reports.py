@@ -24,11 +24,13 @@ from app.services.clear_cut_form import (
     get_clear_cut_form_by_id,
 )
 from app.services.clear_cut_report import (
+    assign_report,
     create_clear_cut_report,
     find_clearcuts_reports,
     get_report_response_by_id,
     set_report_pipeline_override,
     sync_clear_cuts_reports,
+    unassign_report,
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
 )
@@ -271,10 +273,7 @@ def approve_assignment(
         raise AppHTTPException(
             status_code=400, type="NO_REQUEST", detail="No pending assignment request"
         )
-    report.user_id = report.assignment_requested_by_id
-    report.assignment_requested_by_id = None
-    if report.status == "to_validate":
-        report.status = "in_progress"
+    assign_report(report, report.assignment_requested_by_id)
     db.commit()
     if report.user is not None:
         send_assignment_email(report.user.email, report_id)
@@ -332,9 +331,7 @@ def unassign_report_from_me(
             type="FORBIDDEN",
             detail="You are not assigned to this report",
         )
-    report.user_id = None
-    if report.status == "in_progress":
-        report.status = "to_validate"
+    unassign_report(report)
     db.commit()
     return {"message": "Unassigned successfully"}
 

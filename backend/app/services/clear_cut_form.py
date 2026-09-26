@@ -62,12 +62,13 @@ def add_clear_cut_form_entry(
         "validated",
         "legal_validated",
         "final_validated",
+        "rejected",
     )
     if editor.role == "volunteer" and report.status in locked_statuses:
         raise AppHTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             type="FORM_LOCKED",
-            detail="Le formulaire est verrouillé après validation. Seul un administrateur peut le modifier.",
+            detail="Le formulaire est verrouillé après validation ou rejet. Seul un administrateur peut le modifier.",
         )
 
     last_form = find_last_clear_cut_form_by_report_id(db, report_id)
