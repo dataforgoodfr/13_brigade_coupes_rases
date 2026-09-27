@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from logging import getLogger
 from typing import Any, Literal
 
 import bcrypt
@@ -31,6 +32,8 @@ def authenticate_user(
         return "inactive"
     return user
 
+
+logger = getLogger(__name__)
 
 SECRET_KEY = settings.JWT_SECRET_KEY
 ALGORITHM = "HS256"
@@ -202,5 +205,5 @@ def decode_token(
         value = payload.get(key or "sub")
         return None if value is None else str(value)
     except jwt.PyJWTError as e:
-        print(e)
+        logger.debug(f"Invalid token: {e}")
         return None

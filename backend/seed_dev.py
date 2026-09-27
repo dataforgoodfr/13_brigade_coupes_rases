@@ -156,20 +156,21 @@ def cut(
     )
 
 
-def seed_report_image(report_id: int, name: str) -> str | None:
+def seed_report_images(report_id: int, name: str) -> list[str]:
     """Copy the sample image into the report folder and return its storage key.
 
-    Returns None if the sample image is missing so seeding stays resilient.
+    The sample image is not versioned: without it the list stays empty, rather
+    than holding a null key that breaks the form API.
     """
     if not SAMPLE_IMAGE.exists():
-        return None
+        return []
     dest_dir = UPLOADS_DIR / "reports" / str(report_id)
     dest_dir.mkdir(parents=True, exist_ok=True)
     filename = f"seed_{name}.jpg"
     dest = dest_dir / filename
     if not dest.exists():
         shutil.copyfile(SAMPLE_IMAGE, dest)
-    return f"local/reports/{report_id}/{filename}"
+    return [f"local/reports/{report_id}/{filename}"]
 
 
 def wipe_database() -> None:
@@ -543,16 +544,16 @@ def seed_database() -> None:
                 forest="Hêtraie-sapinière de montagne",
                 has_remaining_trees=False,
                 trees_species="Fagus sylvatica, Abies alba",
-                planting_images=[seed_report_image(r_mende.id, "planting")],
+                planting_images=seed_report_images(r_mende.id, "planting"),
                 has_construction_panel=True,
-                construction_panel_images=[seed_report_image(r_mende.id, "panel")],
+                construction_panel_images=seed_report_images(r_mende.id, "panel"),
                 wetland="Non",
                 destruction_clues="Sol fortement tassé, ornières profondes",
                 soil_state="Dégradé",
-                clear_cut_images=[seed_report_image(r_mende.id, "clearcut")],
-                tree_trunks_images=[seed_report_image(r_mende.id, "trunks")],
-                soil_state_images=[seed_report_image(r_mende.id, "soil")],
-                access_road_images=[seed_report_image(r_mende.id, "road")],
+                clear_cut_images=seed_report_images(r_mende.id, "clearcut"),
+                tree_trunks_images=seed_report_images(r_mende.id, "trunks"),
+                soil_state_images=seed_report_images(r_mende.id, "soil"),
+                access_road_images=seed_report_images(r_mende.id, "road"),
                 has_other_ecological_zone=True,
                 other_ecological_zone_type="ZNIEFF",
                 has_nearby_ecological_zone=True,
@@ -584,16 +585,16 @@ def seed_database() -> None:
                 forest="Pessière (épicéa)",
                 has_remaining_trees=True,
                 trees_species="Picea abies",
-                planting_images=[seed_report_image(r_labresse.id, "planting")],
+                planting_images=seed_report_images(r_labresse.id, "planting"),
                 has_construction_panel=False,
                 construction_panel_images=[],
                 wetland="Non",
                 destruction_clues="Aucun indice particulier",
                 soil_state="Correct",
-                clear_cut_images=[seed_report_image(r_labresse.id, "clearcut")],
-                tree_trunks_images=[seed_report_image(r_labresse.id, "trunks")],
+                clear_cut_images=seed_report_images(r_labresse.id, "clearcut"),
+                tree_trunks_images=seed_report_images(r_labresse.id, "trunks"),
                 soil_state_images=[],
-                access_road_images=[seed_report_image(r_labresse.id, "road")],
+                access_road_images=seed_report_images(r_labresse.id, "road"),
                 has_other_ecological_zone=False,
                 other_ecological_zone_type=None,
                 has_nearby_ecological_zone=True,
@@ -628,7 +629,7 @@ def seed_database() -> None:
             forest="Pin maritime",
             has_remaining_trees=False,
             trees_species="Pinus pinaster",
-            clear_cut_images=[seed_report_image(r_labouheyre.id, "clearcut")],
+            clear_cut_images=seed_report_images(r_labouheyre.id, "clearcut"),
         )
 
         db.add_all([*full_forms, draft_form])
