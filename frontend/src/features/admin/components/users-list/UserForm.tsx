@@ -42,7 +42,7 @@ export function UserForm({ user, footer, header, onSubmit }: Props) {
 					firstName: "",
 					lastName: "",
 					login: "",
-					isActive: false,
+					isActive: true,
 					departments: departments
 				}
 	})

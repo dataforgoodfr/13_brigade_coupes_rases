@@ -11,6 +11,7 @@ from app.schemas.user import (
     UserUpdateSchema,
     user_to_user_response_schema,
 )
+from app.services.email import send_activation_email
 from app.services.user import (
     create_user,
     delete_user_by_id,
@@ -18,7 +19,7 @@ from app.services.user import (
     get_users,
     update_user,
 )
-from app.services.user_auth import get_admin_user
+from app.services.user_auth import create_password_token, get_admin_user
 
 logger = getLogger(__name__)
 
@@ -35,8 +36,11 @@ def create_new_user(
     db: Session = db_session,
     _: User = Depends(get_admin_user),
 ) -> None:
-    logger.info(db)
-    created_user = user_to_user_response_schema(create_user(db, item))
+    user = create_user(db, item)
+    send_activation_email(
+        user.email, user.login, create_password_token(user.email, "activation")
+    )
+    created_user = user_to_user_response_schema(user)
     response.headers["location"] = f"/api/v1/users/{created_user.id}"
 
 

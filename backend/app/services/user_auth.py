@@ -78,6 +78,24 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     )
 
 
+# Emailed links to choose a password: after "forgot password" (one hour), or
+# when an admin creates the account (a week, time to read the email).
+PASSWORD_TOKEN_LIFETIMES = {
+    "reset": timedelta(hours=1),
+    "activation": timedelta(days=7),
+}
+PasswordTokenType = Literal["reset", "activation"]
+
+
+def create_password_token(email: str, token_type: PasswordTokenType) -> str:
+    expire = datetime.now(UTC) + PASSWORD_TOKEN_LIFETIMES[token_type]
+    return jwt.encode(
+        {"sub": email, "exp": expire, "type": token_type},
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
+
 def create_access_token(
     data: dict[str, Any], expires_delta: timedelta | None = None
 ) -> str:
