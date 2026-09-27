@@ -95,7 +95,9 @@ def get_users(
     if roles is not None:
         query = query.filter(User.role.in_(roles))
     if full_text_search is not None:
-        query = query.filter(User.search_vector.ilike(f"%{full_text_search}%"))
+        # Every word must appear: "camille hêtre" finds Camille Hêtre
+        for word in full_text_search.split():
+            query = query.filter(User.search_vector.ilike(f"%{word}%"))
 
     if departments_ids is not None and len(departments_ids) > 0:
         matching_departments = (
