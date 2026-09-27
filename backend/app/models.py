@@ -167,13 +167,12 @@ class User(Base):
 def update_search_vector(
     mapper: Mapper[User], connection: Connection, target: User
 ) -> None:
-    connection.execute(
-        text("""
-            UPDATE users
-            SET search_vector = concat(first_name,last_name,login,email)
-            WHERE id = :id
-        """),
-        {"id": target.id},
+    # Set on the object so the INSERT/UPDATE being flushed carries it, with
+    # separators so that "first last" matches word by word.
+    target.search_vector = " ".join(
+        part
+        for part in (target.first_name, target.last_name, target.login, target.email)
+        if part
     )
 
 
