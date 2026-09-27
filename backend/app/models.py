@@ -80,6 +80,8 @@ rules_clear_cut_reports = Table(
         Integer,
         ForeignKey("clear_cuts_reports.id"),
         primary_key=True,
+        # The primary key starts with rule_id: lookups by report need their own
+        index=True,
     ),
 )
 
@@ -332,7 +334,11 @@ class ClearCutReport(Base):
         DateTime, default=datetime.now, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now, onupdate=datetime.now, nullable=False
+        DateTime,
+        default=datetime.now,
+        onupdate=datetime.now,
+        nullable=False,
+        index=True,
     )
     # Editable "date de signalement". Falls back to created_at when null.
     reported_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -342,18 +348,22 @@ class ClearCutReport(Base):
     clear_cut_forms: Mapped[list[ClearCutForm]] = relationship(
         back_populates="report", cascade="all, delete"
     )
-    status: Mapped[str] = mapped_column(String, nullable=False)
-    city_id: Mapped[int] = mapped_column(ForeignKey("cities.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    city_id: Mapped[int] = mapped_column(
+        ForeignKey("cities.id"), nullable=False, index=True
+    )
     city: Mapped[City] = relationship(
         back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
     )
-    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     user: Mapped[User | None] = relationship(
         back_populates="reports", foreign_keys="ClearCutReport.user_id"
     )
 
     assignment_requested_by_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
+        ForeignKey("users.id"), nullable=True, index=True
     )
     assignment_requested_by: Mapped[User | None] = relationship(
         foreign_keys="ClearCutReport.assignment_requested_by_id"
@@ -410,6 +420,12 @@ class ClearCutReport(Base):
 
 class ClearCutForm(Base):
     __tablename__ = "clear_cut_report_forms"
+    # Serves "latest version of a report's form" (report_id, then created_at)
+    __table_args__ = (
+        Index(
+            "ix_clear_cut_report_forms_report_id_created_at", "report_id", "created_at"
+        ),
+    )
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
 
     report_id: Mapped[int] = mapped_column(
