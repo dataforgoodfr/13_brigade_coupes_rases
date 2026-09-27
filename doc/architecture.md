@@ -188,33 +188,65 @@ Les règles déclenchées sont stockées dans `rules_clear_cuts_reports` par `sy
 
 ## Cycle de vie d'un signalement
 
+Un signalement porte deux informations distinctes : son **statut** (`status`) et son **titulaire** (`user_id`, le bénévole qui remplit le formulaire). Une demande d'assignation en attente est stockée à part (`assignment_requested_by_id`) et ne change pas le statut.
+
 ```mermaid
 stateDiagram-v2
     [*] --> to_validate : import ou création par un bénévole
-    to_validate --> in_progress : assignation approuvée
+    to_validate --> in_progress : assignation (approbation d'une demande, ou PUT admin)
     in_progress --> to_validate : désassignation
-    in_progress --> waiting_for_validation : le bénévole soumet le formulaire
-    waiting_for_validation --> in_progress : validation refusée
-    waiting_for_validation --> validated : validation approuvée
-    validated --> legal_validated : admin
-    legal_validated --> final_validated : admin
-    to_validate --> rejected : admin
-    in_progress --> rejected : admin
+    in_progress --> waiting_for_validation : volunteer-validate
+    waiting_for_validation --> to_validate : désassignation
+    waiting_for_validation --> in_progress : reject-validation
+    waiting_for_validation --> validated : approve-validation
+    validated --> legal_validated : PUT admin
+    legal_validated --> final_validated : PUT admin
+    to_validate --> rejected : PUT admin
+    in_progress --> rejected : PUT admin
 ```
 
 | Statut | Libellé | Sens |
 |---|---|---|
-| `to_validate` | À valider | Nouveau, personne d'assigné. |
-| `in_progress` | En traitement | Un bénévole est assigné et remplit le formulaire. |
+| `to_validate` | À valider | Nouveau, sans titulaire. |
+| `in_progress` | En traitement | Un bénévole est titulaire et remplit le formulaire. |
 | `waiting_for_validation` | En attente de validation | Le bénévole a terminé ; un administrateur doit relire. |
 | `validated`, `legal_validated`, `final_validated` | Validé, validé juridiquement, validé définitivement | Étapes de validation par les administrateurs. |
 | `rejected` | Rejeté | Faux positif ou sans suite. |
 
-Les transitions « bénévole » passent par des routes dédiées (`request-assignment`, `validate`, …) ; un administrateur peut aussi fixer n'importe quel statut via `PUT /api/v1/clear-cuts-reports/{id}`. Le formulaire est **verrouillé pour les bénévoles** à partir de `waiting_for_validation` ; un administrateur peut toujours l'éditer.
+Un signalement sans titulaire n'est jamais `in_progress` ni `waiting_for_validation` : l'assignation et la désassignation passent toutes par `assign_report` / `unassign_report` (`services/clear_cut_report.py`), quel que soit le chemin.
 
-### Assignation
+- **Assigner** : pose le titulaire, efface la demande en attente et fait passer un signalement `to_validate` en `in_progress`. Un autre statut est conservé (réassigner un signalement validé ne le rouvre pas).
+- **Désassigner** : retire le titulaire et remet un signalement `in_progress` ou `waiting_for_validation` en `to_validate`. Un statut décidé par un administrateur (`validated` et suivants, `rejected`) est conservé.
 
-Un bénévole ne s'assigne pas lui-même : il **demande** l'assignation (`assignment_requested_by_id`), qu'un administrateur approuve ou refuse depuis l'onglet « Actions requises ». En attendant, il peut déjà remplir le formulaire. Un bénévole peut aussi **créer** un signalement depuis la carte (polygone dessiné) : il naît en `to_validate` avec la demande d'assignation déjà posée.
+### Actions du workflow
+
+Toutes les transitions « métier » passent par une route unique, `POST /api/v1/clear-cuts-reports/{id}/{action}`. Chaque action est déclarée une fois dans `backend/app/services/report_workflow.py` (`TRANSITIONS`) : qui peut la déclencher, ce qui doit être vrai du signalement, ce qu'elle modifie, l'e-mail envoyé ensuite.
+
+| Action | Qui | Condition | Effet | E-mail |
+|---|---|---|---|---|
+| `request-assignment` | tout utilisateur connecté | pas de titulaire, pas de demande en attente | la demande est posée à son nom | — |
+| `cancel-request` | l'auteur de la demande | — | la demande est effacée | — |
+| `approve-assignment` | admin | une demande en attente | assignation au demandeur | au nouveau titulaire |
+| `reject-assignment` | admin | une demande en attente | la demande est effacée | — |
+| `unassign` | le titulaire ou un admin | — | désassignation | — |
+| `volunteer-validate` | le titulaire ou un admin | statut `in_progress` | → `waiting_for_validation` | — |
+| `approve-validation` | admin | statut `waiting_for_validation` | → `validated` | — |
+| `reject-validation` | admin | statut `waiting_for_validation` | → `in_progress`, le titulaire reste | au titulaire |
+
+Refus : `403 FORBIDDEN` pour un droit manquant, `400` (`ALREADY_ASSIGNED`, `REQUEST_PENDING`, `NO_REQUEST`, `INVALID_STATUS`) quand le signalement n'est pas dans le bon état, `404` s'il n'existe pas.
+
+### Modification directe (`PUT /api/v1/clear-cuts-reports/{id}`)
+
+- **Administrateur** : peut assigner (`userId`) ou désassigner (`userId: null`) avec les mêmes effets que ci-dessus, et fixer n'importe quel statut (`status`) sans contrôle de transition. C'est le seul chemin vers `legal_validated`, `final_validated` et `rejected`.
+- **Bénévole** : ne peut que libérer son propre signalement (`userId: null`). S'attribuer un signalement (`403 INVALID_REQUESTER_RIGHTS`) ou changer un statut (`403`) lui est refusé ; libérer celui d'un autre renvoie `409 ALREADY_ASSIGNED`.
+
+### Formulaire
+
+Un bénévole peut remplir le formulaire s'il est titulaire, ou s'il a une demande d'assignation en attente sur un signalement sans titulaire (il peut commencer avant l'approbation). Sinon : `403 NOT_ASSIGNED`.
+
+Le formulaire est **verrouillé pour les bénévoles** (`403 FORM_LOCKED`) dans les statuts `waiting_for_validation`, `validated`, `legal_validated`, `final_validated` et `rejected`. Un administrateur peut toujours l'éditer. Après un `reject-validation`, le signalement revient en `in_progress` et le titulaire peut de nouveau modifier son formulaire.
+
+Un bénévole peut aussi **créer** un signalement depuis la carte (polygone dessiné) : il naît en `to_validate` avec la demande d'assignation déjà posée à son nom.
 
 ### Versions du formulaire et conflits
 
@@ -226,13 +258,14 @@ Chaque enregistrement (`POST /{id}/forms`) crée une nouvelle version. Le client
 |---|---|---|
 | Voir la carte et les signalements | oui | oui |
 | Demander une assignation, se désassigner | ses signalements | tous |
-| Remplir le formulaire | si assigné et statut non verrouillé | toujours |
+| Remplir le formulaire | s'il est titulaire (ou demandeur en attente) et que le statut n'est pas verrouillé | toujours |
+| Soumettre à validation | ses signalements `in_progress` | tous |
 | Approuver / refuser assignation et validation, changer un statut | non | oui |
 | Gérer les utilisateurs, les départements, les règles | non | oui |
 
 Un compte désactivé (`is_active = false`) ou supprimé (`deleted_at`) ne peut plus se connecter ni rafraîchir de jeton.
 
-Authentification : JWT HS256 signés avec `JWT_SECRET_KEY` — jeton d'accès 60 minutes, jeton de rafraîchissement 7 jours, jeton de réinitialisation de mot de passe 1 heure. L'envoi d'e-mail est un simulacre (`services/email.py`) : les liens sont écrits dans les logs.
+Authentification : JWT HS256 signés avec `JWT_SECRET_KEY` — jeton d'accès 60 minutes, jeton de rafraîchissement 7 jours, jeton de réinitialisation de mot de passe 1 heure. Les e-mails partent par SMTP (`services/email.py`, variables `SMTP_*`) ; sans `SMTP_HOST`, ils sont seulement écrits dans les logs.
 
 ## Backend
 
@@ -245,7 +278,7 @@ Authentification : JWT HS256 signés avec `JWT_SECRET_KEY` — jeton d'accès 60
 | `database.py`, `deps.py` | Session SQLAlchemy et dépendances FastAPI (`db_session`, `get_current_user`). |
 | `models.py` | Tous les modèles ORM, dans un seul fichier. |
 | `routes/` | Un fichier par ressource sous `/api/v1/` ; handlers minces qui vérifient les droits et appellent les services. |
-| `services/` | Logique métier et requêtes : `clear_cut_report.py` (sync, règles, assignation), `clear_cut_form.py` (versions, verrouillage, ETag), `clear_cut_map.py` (carte et filtres), `user_auth.py` (jetons), `images.py` / `s3.py` (photos, S3 ou repli local signé). |
+| `services/` | Logique métier et requêtes : `clear_cut_report.py` (sync, règles, assignation), `report_workflow.py` (actions du workflow), `clear_cut_form.py` (versions, verrouillage, ETag), `clear_cut_map.py` (carte et filtres), `user_auth.py` (jetons), `images.py` / `s3.py` (photos, S3 ou repli local signé). |
 | `schemas/` | Modèles Pydantic d'entrée et de sortie. |
 
 `seed_dev.py` construit le jeu de données de développement (quatre départements réels, comptes, signalements couvrant chaque statut) ; `seed_prd.py` ne crée que le référentiel et les règles. Après un changement de `models.py` : `make generate-migration` puis relire la migration.
