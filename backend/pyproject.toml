@@ -39,8 +39,6 @@ bcrypt = "^5.0.0"
 python-multipart = "^0.0.32"
 geojson-pydantic = "^2.1.2"
 boto3 = "^1.35.0"
-apscheduler = "^3.11.2"
-pyairtable = "^3.3.0"
 
 [tool.poetry.scripts]
 docker-start = "docker compose up -d --build"
@@ -73,7 +71,3 @@ python_version = "3.14"
 plugins = ["pydantic.mypy"]
 files = ["app", "test", "alembic", "seed_dev.py", "seed_prd.py", "common_seed.py", "clean_cities.py", "erd.py"]
 
-[[tool.mypy.overrides]]
-# apscheduler ne publie ni stubs ni marqueur py.typed
-module = ["apscheduler.*"]
-ignore_missing_imports = true

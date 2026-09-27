@@ -1,6 +1,3 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,20 +19,9 @@ from app.routes import (
     users,
 )
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    from app.tasks import start_scheduler, stop_scheduler
-
-    start_scheduler()
-    yield
-    stop_scheduler()
-
-
 app = FastAPI(
     title="Brigades Coupes Rases",
     swagger_ui_parameters={"operationsSorter": "method"},
-    lifespan=lifespan,
     docs_url="/docs" if settings.api_docs_enabled else None,
     redoc_url="/redoc" if settings.api_docs_enabled else None,
     openapi_url="/openapi.json" if settings.api_docs_enabled else None,
