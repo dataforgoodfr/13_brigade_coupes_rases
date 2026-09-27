@@ -50,6 +50,21 @@ schémas, jetons). Tout le reste utilise la fixture `db`, qui migre et peuple la
 base de test. La configuration de la couverture est dans `pyproject.toml`
 (`[tool.coverage.*]`).
 
+### Test de charge
+
+`load_test.py` simule des bénévoles qui chargent la carte (emprise de la France
+métropolitaine) puis ouvrent une fiche (signalement et dernier formulaire),
+toutes les 5 secondes :
+
+```bash
+poetry run python load_test.py --url https://<api> \
+    --email <compte bénévole> --password '<mot de passe>' --users 20 --duration 600
+```
+
+Il affiche la médiane, le 95ᵉ centile et le maximum de chaque requête, et se
+termine en erreur si une requête a échoué ou si la médiane de la carte dépasse
+2 s (`--max-median-map`). À lancer en dehors des heures d'utilisation.
+
 ### Vérification des types
 
 ```bash
