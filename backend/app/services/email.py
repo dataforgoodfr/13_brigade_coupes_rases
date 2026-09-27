@@ -64,3 +64,25 @@ def send_reset_password_email(user_email: str, reset_token: str) -> None:
         f"{reset_link}\n\n"
         "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.",
     )
+
+
+def send_activation_email(user_email: str, login: str, activation_token: str) -> None:
+    link = f"{settings.FRONTEND_URL}/reset-password?token={activation_token}"
+    _send(
+        user_email,
+        "Coupe rase : votre compte a été créé",
+        f"Un compte a été créé pour vous (identifiant : {login}).\n\n"
+        "Pour choisir votre mot de passe, ouvrez ce lien (valable 7 jours) :\n\n"
+        f"{link}\n\n"
+        "S'il a expiré, utilisez « Mot de passe oublié » sur la page de connexion :\n"
+        f"{settings.FRONTEND_URL}/login",
+    )
+
+
+def send_account_activated_email(user_email: str) -> None:
+    _send(
+        user_email,
+        "Coupe rase : votre compte est activé",
+        "Un administrateur a activé votre compte : vous pouvez vous connecter.\n\n"
+        f"{settings.FRONTEND_URL}/login",
+    )

@@ -4,6 +4,7 @@ from logging import getLogger
 
 from fastapi import status
 from pydantic.alias_generators import to_snake
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
@@ -15,6 +16,7 @@ from app.schemas.user import (
     UserUpdateSchema,
     user_to_user_response_schema,
 )
+from app.services.email import send_account_activated_email
 from app.services.get_password_hash import get_password_hash
 
 logger = getLogger(__name__)
@@ -23,7 +25,7 @@ logger = getLogger(__name__)
 def create_user(db: Session, user: UserUpdateSchema) -> User:
     existing_user = (
         db.query(User)
-        .filter(User.email == user.email or User.login == user.login)
+        .filter(or_(User.email == user.email, User.login == user.login))
         .first()
     )
     password = secrets.token_urlsafe(10)
@@ -41,6 +43,8 @@ def create_user(db: Session, user: UserUpdateSchema) -> User:
     new_user.login = user.login
     new_user.email = user.email
     new_user.role = user.role
+    new_user.is_active = user.is_active
+    # Nobody knows this password: the route emails a link to choose one
     new_user.password = get_password_hash(password)
 
     for department_id in user.departments:
@@ -142,6 +146,7 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
             detail=f"User {id} not found",
         )
     user_db.updated_at = datetime.now()
+    was_active = user_db.is_active
     update_data = user_in.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
@@ -162,6 +167,8 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
             setattr(user_db, key, value)
     db.commit()
     db.refresh(user_db)
+    if user_db.is_active and not was_active:
+        send_account_activated_email(user_db.email)
     return user_db
 
 

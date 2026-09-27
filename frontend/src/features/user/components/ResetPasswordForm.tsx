@@ -41,9 +41,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
 		if (resetPasswordState.status === "success") {
 			toast({
 				id: "reset-success",
-				title: "Mot de passe modifié",
+				title: "Mot de passe enregistré",
 				variant: "success",
-				description: "Votre mot de passe a été réinitialisé avec succès."
+				description: "Vous pouvez maintenant vous connecter."
 			})
 			navigate({ to: "/login" })
 		} else if (resetPasswordState.status === "error") {
@@ -62,9 +62,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
 	return (
 		<>
 			<img alt="Canopée forêts vivantes" src={largeLogo} />
-			<Title className="text-primary mt-4">Nouveau mot de passe</Title>
+			<Title className="text-primary mt-4">Choisir un mot de passe</Title>
 			<h3 className="text-neutral-600 font-light">
-				Définissez votre nouveau mot de passe
+				Définissez le mot de passe de votre compte
 			</h3>
 
 			<FormProvider {...form}>

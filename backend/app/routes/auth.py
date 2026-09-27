@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import jwt
 from fastapi import APIRouter, HTTPException
@@ -13,7 +13,9 @@ from app.services.email import send_reset_password_email
 from app.services.get_password_hash import get_password_hash
 from app.services.user_auth import (
     ALGORITHM,
+    PASSWORD_TOKEN_LIFETIMES,
     SECRET_KEY,
+    create_password_token,
 )
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
@@ -66,15 +68,7 @@ def forgot_password(
             "message": "If this email is registered, a password reset link has been sent."
         }
 
-    # Generate token valid for 1 hour
-    expire = datetime.utcnow() + timedelta(hours=1)
-    reset_token = jwt.encode(
-        {"sub": user.email, "exp": expire, "type": "reset"},
-        SECRET_KEY,
-        algorithm=ALGORITHM,
-    )
-
-    send_reset_password_email(user.email, reset_token)
+    send_reset_password_email(user.email, create_password_token(user.email, "reset"))
     return {
         "message": "If this email is registered, a password reset link has been sent."
     }
@@ -86,7 +80,8 @@ def reset_password(
 ) -> dict[str, str]:
     try:
         payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
-        if payload.get("type") != "reset":
+        # Also sets the first password of an account created by an admin
+        if payload.get("type") not in PASSWORD_TOKEN_LIFETIMES:
             raise HTTPException(status_code=400, detail="Invalid token type")
         email = payload.get("sub")
     except jwt.ExpiredSignatureError as err:

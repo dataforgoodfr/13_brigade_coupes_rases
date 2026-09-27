@@ -72,6 +72,8 @@ export function UpdateUserDialog(user: User) {
 		[user.departments, otherDepartments]
 	)
 	useEffect(() => {
+		// One dialog per row shares the edited user state: only the open one reacts
+		if (!isOpen) return
 		if (updatedUser.status === "success") {
 			toast({
 				id: "user-updated",
@@ -87,7 +89,7 @@ export function UpdateUserDialog(user: User) {
 				variant: "destructive"
 			})
 		}
-	}, [updatedUser, toast, dispatch])
+	}, [isOpen, updatedUser, toast, dispatch])
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>

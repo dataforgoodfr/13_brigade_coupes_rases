@@ -24,8 +24,8 @@ const Header = () => (
 	<DialogHeader>
 		<DialogTitle>Ajouter un utilisateur</DialogTitle>
 		<DialogDescription>
-			Ajoutez un nouveau bénévole ou administrateur en remplissant les
-			informations ci-dessous.
+			Ajoutez un nouveau bénévole ou administrateur. Il reçoit un e-mail pour
+			choisir son mot de passe.
 		</DialogDescription>
 	</DialogHeader>
 )
@@ -45,10 +45,13 @@ export function CreateUserDialog() {
 	const createdUser = useAppSelector(selectEditedUser)
 	const [isOpen, setIsOpen] = useState(false)
 	useEffect(() => {
+		// The edited user state is shared with the update dialogs
+		if (!isOpen) return
 		if (createdUser.status === "success") {
 			toast({
 				id: "user-created",
-				title: `Utilisateur ${createdUser.value?.login} créé`
+				title: `Utilisateur ${createdUser.value?.login} créé`,
+				description: "Un e-mail lui a été envoyé pour choisir son mot de passe."
 			})
 			setIsOpen(false)
 			dispatch(usersSlice.actions.resetEditedUser())
@@ -60,7 +63,7 @@ export function CreateUserDialog() {
 				variant: "destructive"
 			})
 		}
-	}, [createdUser, toast, dispatch])
+	}, [isOpen, createdUser, toast, dispatch])
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogTrigger asChild>
