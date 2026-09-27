@@ -186,6 +186,9 @@ export function AccordionHeader({
 			)
 		}
 
+		// A decided report (validated, rejected…) cannot be taken on
+		if (status !== "to_validate") return null
+
 		// No assignment and no pending request → volunteer can request
 		return (
 			<Button

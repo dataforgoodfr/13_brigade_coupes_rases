@@ -232,6 +232,24 @@ def test_validation_round_trip_with_rejection(client: TestClient, db: Session) -
     assert report.status == "validated"
 
 
+@pytest.mark.parametrize(
+    "decided", ["validated", "legal_validated", "final_validated", "rejected"]
+)
+def test_request_is_refused_on_a_decided_report(
+    client: TestClient, db: Session, decided: str
+) -> None:
+    _, volunteer_token = get_volunteer_user_token(client, db)
+    report_id = free_report(db, decided)
+
+    response = client.post(
+        f"{REPORTS}/{report_id}/request-assignment", headers=auth(volunteer_token)
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_type(response.json()) == "INVALID_STATUS"
+    assert reload(db, report_id).assignment_requested_by_id is None
+
+
 def test_validation_decisions_require_waiting_status(
     client: TestClient, db: Session
 ) -> None:

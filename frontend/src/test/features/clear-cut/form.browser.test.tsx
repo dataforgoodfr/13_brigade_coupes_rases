@@ -354,6 +354,39 @@ describe("general info edition controls", () => {
 	})
 })
 
+describe("assignment request", () => {
+	const requestButtons = () =>
+		screen.queryAllByRole("button", { name: "Demander l'attribution" })
+	const openAsVolunteer = () =>
+		renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+	const free = { userId: undefined, assignmentRequestedById: undefined }
+
+	describe("when the report is still to validate", () => {
+		defaultSetupServerBeforeEach(setupTest({ ...free, status: "to_validate" }))
+		it("lets a volunteer request it", async () => {
+			await openAsVolunteer()
+			expect(
+				await screen.findAllByRole("button", {
+					name: "Demander l'attribution"
+				})
+			).not.toHaveLength(0)
+		})
+	})
+
+	describe("when the report has been decided", () => {
+		defaultSetupServerBeforeEach(setupTest({ ...free, status: "rejected" }))
+		it("offers no request", async () => {
+			await openAsVolunteer()
+			await screen.findAllByText("Rejeté")
+			expect(requestButtons()).toHaveLength(0)
+		})
+	})
+})
+
 function isShouldNotDisplayAdminSection(
 	section: SectionForm,
 	connectedUser?: Me

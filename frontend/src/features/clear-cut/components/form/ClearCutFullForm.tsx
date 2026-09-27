@@ -85,7 +85,8 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 	const canRequestAssignment =
 		user?.role === "volunteer" &&
 		!current.report.userId &&
-		!current.report.assignmentRequestedById
+		!current.report.assignmentRequestedById &&
+		current.report.status === "to_validate"
 
 	const hasPendingRequest =
 		user?.role === "volunteer" &&
