@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
-from app.deps import db_session
+from app.deps import PageParam, PageSizeParam, db_session
 from app.schemas.ecological_zoning import EcologicalZoningResponseSchema
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.ecological_zoning import find_paginated_ecological_zonings
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/v1/ecological-zonings", tags=["EcologicalZoning"
     response_model_exclude_none=True,
 )
 def list_ecological_zonings(
-    db: Session = db_session, page: int = 0, size: int = 10
+    db: Session = db_session, page: PageParam = 0, size: PageSizeParam = 10
 ) -> PaginationResponseSchema[EcologicalZoningResponseSchema]:
     logger.info(db)
     return find_paginated_ecological_zonings(

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.config import settings
-from app.deps import db_session
+from app.deps import PageParam, PageSizeParam, db_session
 from app.models import User
 from app.schemas.base import BaseSchema
 from app.schemas.clear_cut import ClearCutResponseSchema
@@ -113,8 +113,8 @@ def volunteer_create(
 )
 def list_clear_cuts_reports(
     db: Session = db_session,
-    page: int = 0,
-    size: int = 10,
+    page: PageParam = 0,
+    size: PageSizeParam = 10,
     current_user: User | None = Depends(get_optional_current_user),
     assigned_to_me: bool = False,
     admin_action_required: bool = False,
@@ -191,7 +191,10 @@ def get_by_id(
     response_model_exclude_none=True,
 )
 def list_clear_cuts(
-    report_id: int, db: Session = db_session, page: int = 0, size: int = 10
+    report_id: int,
+    db: Session = db_session,
+    page: PageParam = 0,
+    size: PageSizeParam = 10,
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     logger.info(db)
     return find_clearcuts_by_report(
@@ -211,8 +214,8 @@ def list_clear_cuts(
 def list_clear_cut_forms(
     report_id: int,
     db: Session = db_session,
-    page: int = 0,
-    size: int = 10,
+    page: PageParam = 0,
+    size: PageSizeParam = 10,
     _: User = Depends(get_current_user),
 ) -> PaginationResponseSchema[ClearCutFormResponse]:
     logger.info(db)
