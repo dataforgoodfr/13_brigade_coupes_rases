@@ -199,7 +199,6 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None) -> Query[Any]
         reports = reports.filter(ClearCutReport.status.in_(filters.statuses))
 
     if filters.min_area_hectare is not None:
-        print(f"Filtering by min area: {filters.min_area_hectare}")
         reports = reports.filter(
             ClearCutReport.total_area_hectare >= filters.min_area_hectare
         )

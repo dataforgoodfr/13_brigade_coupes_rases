@@ -91,7 +91,6 @@ def get_users(
     if roles is not None:
         query = query.filter(User.role.in_(roles))
     if full_text_search is not None:
-        print(full_text_search)
         query = query.filter(User.search_vector.ilike(f"%{full_text_search}%"))
 
     if departments_ids is not None and len(departments_ids) > 0:

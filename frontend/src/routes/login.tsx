@@ -14,7 +14,7 @@ export const Route = createFileRoute("/login")({
 	// If already authenticated, redirect to the intended page or home
 	beforeLoad: ({ context, search }) => {
 		if (context.auth?.isAuthenticated) {
-			throw redirect({ to: search.redirect || "" })
+			throw redirect({ to: search.redirect || "/" })
 		}
 	},
 	component: RouteComponent
