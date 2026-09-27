@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 
-from app.deps import db_session
+from app.deps import PageParam, PageSizeParam, db_session
 from app.schemas.department import DepartmentBaseSchema, DepartmentResponseSchema
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.departement import find_departments
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/v1/departments", tags=["Department"])
     response_model_exclude_none=True,
 )
 def list_departments(
-    db: Session = db_session, page: int = 0, size: int = 10
+    db: Session = db_session, page: PageParam = 0, size: PageSizeParam = 10
 ) -> PaginationResponseSchema[DepartmentBaseSchema]:
     logger.info(db)
     return find_departments(db, page=page, size=size, url="/api/v1/departments")

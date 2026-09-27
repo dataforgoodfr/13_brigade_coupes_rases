@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
-from app.deps import db_session
+from app.deps import PageParam, PageSizeParam, db_session
 from app.models import User
 from app.schemas.hateoas import PaginationResponseSchema
 from app.schemas.user import (
@@ -47,8 +47,8 @@ def create_new_user(
 )
 def list_users(
     db: Session = db_session,
-    page: int = 0,
-    size: int = 10,
+    page: PageParam = 0,
+    size: PageSizeParam = 10,
     full_text_search: str | None = Query(default=None, alias="fullTextSearch"),
     email: str | None = None,
     login: str | None = None,

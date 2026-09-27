@@ -3,7 +3,7 @@ from logging import getLogger
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.deps import db_session
+from app.deps import PageParam, PageSizeParam, db_session
 from app.models import User
 from app.schemas.clear_cut import ClearCutPatchSchema, ClearCutResponseSchema
 from app.schemas.ecological_zoning import (
@@ -29,7 +29,10 @@ router = APIRouter(prefix="/api/v1/clear-cuts", tags=["Clearcuts"])
     response_model_exclude_none=True,
 )
 def list_ecological_zonings(
-    clear_cut_id: int, db: Session = db_session, page: int = 0, size: int = 10
+    clear_cut_id: int,
+    db: Session = db_session,
+    page: PageParam = 0,
+    size: PageSizeParam = 10,
 ) -> PaginationResponseSchema[ClearCutEcologicalZoningResponseSchema]:
     logger.info(db)
     return find_ecological_zonings_by_clear_cut(
@@ -74,7 +77,7 @@ def patch_clear_cut(
     response_model_exclude_none=True,
 )
 def list_clear_cuts(
-    db: Session = db_session, page: int = 0, size: int = 10
+    db: Session = db_session, page: PageParam = 0, size: PageSizeParam = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
     logger.info(db)
     return find_clear_cuts(
