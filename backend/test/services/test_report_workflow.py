@@ -50,6 +50,20 @@ def test_every_action_has_a_transition() -> None:
             ALICE,
             "REQUEST_PENDING",
         ),
+        *(
+            (
+                WorkflowAction.REQUEST_ASSIGNMENT,
+                report(status=decided),
+                ALICE,
+                "INVALID_STATUS",
+            )
+            for decided in (
+                "validated",
+                "legal_validated",
+                "final_validated",
+                "rejected",
+            )
+        ),
         (
             WorkflowAction.CANCEL_REQUEST,
             report(assignment_requested_by_id=BOB.id),

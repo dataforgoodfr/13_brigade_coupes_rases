@@ -224,7 +224,7 @@ Toutes les transitions « métier » passent par une route unique, `POST /api/v1
 
 | Action | Qui | Condition | Effet | E-mail |
 |---|---|---|---|---|
-| `request-assignment` | tout utilisateur connecté | pas de titulaire, pas de demande en attente | la demande est posée à son nom | — |
+| `request-assignment` | tout utilisateur connecté | statut `to_validate`, pas de titulaire, pas de demande en attente | la demande est posée à son nom | — |
 | `cancel-request` | l'auteur de la demande | — | la demande est effacée | — |
 | `approve-assignment` | admin | une demande en attente | assignation au demandeur | au nouveau titulaire |
 | `reject-assignment` | admin | une demande en attente | la demande est effacée | — |

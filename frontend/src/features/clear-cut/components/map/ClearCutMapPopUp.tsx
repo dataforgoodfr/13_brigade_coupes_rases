@@ -174,8 +174,8 @@ export function ClearCutMapPopUp({
 			)
 		}
 
-		// Free — volunteer can request, admin cannot
-		if (!isAdmin) {
+		// Free and still to validate — volunteer can request, admin cannot
+		if (!isAdmin && status === "to_validate") {
 			return (
 				<Button
 					type="button"

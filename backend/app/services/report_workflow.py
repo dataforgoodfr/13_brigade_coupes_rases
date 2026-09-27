@@ -131,6 +131,9 @@ TRANSITIONS: dict[WorkflowAction, Transition] = {
                 "REQUEST_PENDING",
                 "An assignment request is already pending",
             ),
+            # Only a report still in the pool can be taken on: a decided one
+            # would lock its form to the new holder.
+            invalid_status("to_validate", "requested"),
         ),
         apply=_request_for_self,
         message="Assignment request submitted, waiting for admin validation",
