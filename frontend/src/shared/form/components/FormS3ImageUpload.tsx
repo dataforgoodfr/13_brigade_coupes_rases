@@ -13,6 +13,8 @@ import type { FieldValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
+import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
 import { useImageUpload } from "@/shared/hooks/useImageUpload"
 import { useImageViewer } from "@/shared/hooks/useImageViewer"
@@ -35,6 +37,10 @@ import type { FormProps } from "../types"
 /** Shown for a photo that cannot be displayed (offline, missing file). */
 const PHOTO_PLACEHOLDER =
 	"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='12' fill='%23666' text-anchor='middle' dy='0.3em'>Photo</text></svg>"
+
+/** A small round button over a thumbnail, with a 44 px touch area. */
+const DELETE_PHOTO_BUTTON =
+	"absolute -top-2 -right-2 h-8 w-8 rounded-full p-0 after:absolute after:-inset-1.5 after:content-['']"
 
 const withPreview = (photo: PendingPhoto) => ({
 	photo,
@@ -294,17 +300,19 @@ function FormS3ImageField<T extends FieldValues>({
 									alt={`En attente d'envoi ${index + 1}`}
 									className="h-20 w-full rounded border object-cover opacity-80"
 								/>
-								<Button
-									type="button"
+								<ConfirmButton
+									title="Retirer cette photo ?"
+									description="Elle n'a pas encore été envoyée : elle sera effacée de cet appareil."
+									confirmLabel="Retirer"
+									onConfirm={() => dropPending(photo.id)}
 									variant="destructive"
 									size="sm"
-									className="absolute -top-2 -right-2 h-7 w-7 rounded-full p-0"
-									onClick={() => dropPending(photo.id)}
+									className={DELETE_PHOTO_BUTTON}
 									disabled={uploading}
 									aria-label={`Retirer la photo en attente ${index + 1}`}
 								>
-									<X className="h-3 w-3" />
-								</Button>
+									<X className="h-4 w-4" />
+								</ConfirmButton>
 							</div>
 						))}
 					</div>
@@ -417,20 +425,23 @@ function FormS3ImageField<T extends FieldValues>({
 										<ZoomIn className="h-6 w-6 text-white drop-shadow" />
 									</div>
 								</button>
-								<Button
-									type="button"
+								<ConfirmButton
+									title="Supprimer cette photo ?"
+									description="Elle sera retirée du formulaire à son prochain enregistrement."
+									confirmLabel="Supprimer"
+									onConfirm={() => removeImageWithField(index)}
 									variant="destructive"
 									size="sm"
-									className="absolute -top-2 -right-2 h-7 w-7 rounded-full p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-									onClick={(e) => {
-										e.stopPropagation()
-										removeImageWithField(index)
-									}}
+									className={cn(
+										DELETE_PHOTO_BUTTON,
+										"opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+									)}
+									onClick={(e) => e.stopPropagation()}
 									disabled={uploading}
 									aria-label={`Supprimer la photo ${index + 1}`}
 								>
-									<X className="h-3 w-3" />
-								</Button>
+									<X className="h-4 w-4" />
+								</ConfirmButton>
 							</div>
 						))}
 					</div>

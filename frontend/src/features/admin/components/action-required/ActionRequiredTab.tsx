@@ -15,6 +15,7 @@ import {
 	selectAdminActionRequiredReports,
 	selectAssignation
 } from "@/features/clear-cut/store/clear-cuts-slice"
+import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import { TimeProgress } from "@/shared/components/TimeProgress"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
@@ -38,8 +39,7 @@ export function ActionRequiredTab() {
 		})
 	}
 
-	const handleRejectValidation = (e: React.MouseEvent, reportId: string) => {
-		e.stopPropagation()
+	const handleRejectValidation = (reportId: string) => {
 		dispatch(rejectValidationThunk(reportId)).then(() => {
 			dispatch(getAdminActionRequiredReportsThunk({ page: 0, size: 50 }))
 		})
@@ -129,7 +129,7 @@ export function ActionRequiredTab() {
 									<Button
 										size="sm"
 										variant="outline"
-										className="flex-1 text-neutral-600 border-neutral-300 min-h-[40px]"
+										className="flex-1 text-neutral-600 border-neutral-300 min-h-[44px]"
 										onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
 									>
 										Voir le formulaire
@@ -145,16 +145,20 @@ export function ActionRequiredTab() {
 										<Check className="h-4 w-4 mr-1" />
 										Approuver
 									</Button>
-									<Button
+									<ConfirmButton
+										title="Rejeter la validation ?"
+										description="Le signalement repassera « en cours » et le bénévole en sera averti par e-mail."
+										confirmLabel="Rejeter"
+										onConfirm={() => handleRejectValidation(report.id)}
 										size="sm"
 										variant="outline"
 										className="flex-1 border-red-300 text-red-600 hover:bg-red-50 font-semibold min-h-[44px]"
 										disabled={assignation.status === "loading"}
-										onClick={(e) => handleRejectValidation(e, report.id)}
+										onClick={(e) => e.stopPropagation()}
 									>
 										<X className="h-4 w-4 mr-1" />
 										Rejeter
-									</Button>
+									</ConfirmButton>
 								</div>
 							</div>
 						))}

@@ -18,6 +18,7 @@ import {
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
+import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type Props = {
@@ -132,11 +133,19 @@ export function ClearCutMapPopUp({
 						<p className="text-xs text-green-700 font-semibold text-center">
 							✓ Coupe attribuée à un bénévole
 						</p>
-						<Button
-							type="button"
+						<ConfirmButton
+							title="Annuler l'attribution ?"
+							description={
+								userId === myId
+									? "Le signalement ne vous sera plus attribué : vous ne pourrez plus modifier son formulaire."
+									: "Le signalement ne sera plus attribué à ce bénévole, qui ne pourra plus modifier son formulaire."
+							}
+							confirmLabel="Annuler l'attribution"
 							onClick={(e) => {
 								e.stopPropagation()
 								e.nativeEvent.stopImmediatePropagation()
+							}}
+							onConfirm={() => {
 								dispatchAndRefresh(
 									unassignReportThunk(id),
 									"Impossible d'annuler l'attribution."
@@ -147,7 +156,7 @@ export function ClearCutMapPopUp({
 							size="sm"
 						>
 							Annuler l'attribution
-						</Button>
+						</ConfirmButton>
 					</>
 				)
 			}

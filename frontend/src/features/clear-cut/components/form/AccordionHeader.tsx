@@ -18,6 +18,7 @@ import {
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
+import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import type { FormType } from "@/shared/form/types"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import type { Rule } from "@/shared/store/referential/referential"
@@ -87,20 +88,26 @@ export function AccordionHeader({
 									(reportUserId === myId ? "vous" : "un bénévole")}
 							</span>
 						</p>
-						<Button
-							type="button"
-							onClick={() => {
+						<ConfirmButton
+							title="Annuler l'attribution ?"
+							description={
+								reportUserId === myId
+									? "Le signalement ne vous sera plus attribué : vous ne pourrez plus modifier son formulaire."
+									: `Le signalement ne sera plus attribué à ${affectedUserLogin ?? "ce bénévole"}, qui ne pourra plus modifier son formulaire.`
+							}
+							confirmLabel="Annuler l'attribution"
+							onConfirm={() => {
 								dispatchAndRefresh(
 									unassignReportThunk(reportId),
 									"Impossible d'annuler l'attribution."
 								)
 							}}
-							className="w-full text-xs h-8 cursor-pointer"
+							className="w-full text-xs min-h-[44px] cursor-pointer"
 							variant="destructive"
 							size="sm"
 						>
 							Annuler l'attribution
-						</Button>
+						</ConfirmButton>
 					</div>
 				)
 			}
@@ -132,26 +139,28 @@ export function AccordionHeader({
 										"Impossible d'approuver la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 border-green-600 text-green-700 hover:bg-green-50 cursor-pointer"
+								className="flex-1 text-xs min-h-[44px] border-green-600 text-green-700 hover:bg-green-50 cursor-pointer"
 								variant="outline"
 								size="sm"
 							>
 								Approuver
 							</Button>
-							<Button
-								type="button"
-								onClick={() => {
+							<ConfirmButton
+								title="Refuser la demande ?"
+								description={`${assignmentRequestedByLogin ?? "Le bénévole"} ne pourra pas travailler sur ce signalement.`}
+								confirmLabel="Refuser"
+								onConfirm={() => {
 									dispatchAndRefresh(
 										rejectAssignmentThunk(reportId),
 										"Impossible de refuser la demande."
 									)
 								}}
-								className="flex-1 text-xs h-8 border-destructive text-destructive hover:bg-destructive/10 cursor-pointer"
+								className="flex-1 text-xs min-h-[44px] border-destructive text-destructive hover:bg-destructive/10 cursor-pointer"
 								variant="outline"
 								size="sm"
 							>
 								Refuser
-							</Button>
+							</ConfirmButton>
 						</div>
 					</div>
 				)
@@ -170,7 +179,7 @@ export function AccordionHeader({
 									"Impossible d'annuler la demande."
 								)
 							}}
-							className="w-full text-xs h-8 cursor-pointer"
+							className="w-full text-xs min-h-[44px] cursor-pointer"
 							variant="outline"
 							size="sm"
 						>
@@ -199,7 +208,7 @@ export function AccordionHeader({
 						"Impossible de demander l'attribution."
 					)
 				}}
-				className="w-full text-xs h-8 cursor-pointer"
+				className="w-full text-xs min-h-[44px] cursor-pointer"
 				variant="default"
 				size="sm"
 			>
@@ -229,26 +238,28 @@ export function AccordionHeader({
 								"Impossible de valider le signalement."
 							)
 						}}
-						className="flex-1 text-xs h-8 cursor-pointer"
+						className="flex-1 text-xs min-h-[44px] cursor-pointer"
 						variant="default"
 						size="sm"
 					>
 						Valider
 					</Button>
-					<Button
-						type="button"
-						onClick={() => {
+					<ConfirmButton
+						title="Rejeter le signalement ?"
+						description="Le signalement sera classé comme rejeté et son formulaire ne pourra plus être modifié."
+						confirmLabel="Rejeter"
+						onConfirm={() => {
 							dispatchAndRefresh(
 								updateReportStatusThunk({ id: reportId, status: "rejected" }),
 								"Impossible de rejeter le signalement."
 							)
 						}}
-						className="flex-1 text-xs h-8 cursor-pointer"
+						className="flex-1 text-xs min-h-[44px] cursor-pointer"
 						variant="destructive"
 						size="sm"
 					>
 						Rejeter
-					</Button>
+					</ConfirmButton>
 				</div>
 			</div>
 		)
