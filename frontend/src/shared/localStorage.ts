@@ -18,8 +18,10 @@ export const localStorageRepository = <Value>(key: string) => ({
 		schema: z.ZodType<Value>,
 		defaultValue: Value
 	) => getFromLocalStorageOrDefaultById(key, id, schema, defaultValue),
-	syncStorage: (ids: string[], schema: z.ZodType<Value>) =>
-		syncStorage(key, ids, schema),
+	pruneStorage: (
+		keep: (id: string, value: Value) => boolean,
+		schema: z.ZodType<Value>
+	) => pruneStorage(key, keep, schema),
 	getRecordFromStorage: (schema: z.ZodType<Value>) =>
 		getRecordFromStorage(key, schema),
 	getValuesFromStorage: (schema: z.ZodType<Value>) =>
@@ -83,11 +85,25 @@ function getFromLocalStorageOrDefaultById<Value>(
 	return getFromLocalStorageById(key, id, schema) ?? defaultValue
 }
 
+/**
+ * Entries are validated one by one: an entry written by an older version of
+ * the application is skipped, without discarding the others.
+ */
 function getRecordFromStorage<Value>(
 	key: string,
 	schema: z.ZodType<Value>
 ): Record<string, Value> {
-	return getFromLocalStorage(key, z.record(z.string(), schema)) ?? {}
+	const raw = getFromLocalStorage(key, z.record(z.string(), z.unknown())) ?? {}
+	const record: Record<string, Value> = {}
+	for (const [id, value] of Object.entries(raw)) {
+		const parsed = schema.safeParse(value)
+		if (parsed.success) {
+			record[id] = parsed.data
+		} else {
+			console.warn("Ignoring invalid localStorage entry", key, id)
+		}
+	}
+	return record
 }
 function getValuesFromStorage<Value>(
 	key: string,
@@ -95,16 +111,24 @@ function getValuesFromStorage<Value>(
 ): Value[] {
 	return Object.values(getRecordFromStorage(key, schema))
 }
-function syncStorage<Value>(
+/**
+ * Removes the valid entries for which `keep` returns false. Entries that do
+ * not match the schema are left untouched: they may hold unsent work.
+ */
+function pruneStorage<Value>(
 	key: string,
-	ids: string[],
+	keep: (id: string, value: Value) => boolean,
 	schema: z.ZodType<Value>
 ) {
-	const record = getRecordFromStorage(key, schema)
-	const withIds = Object.fromEntries(
-		Object.entries(record).filter(([id]) => ids.includes(id))
+	const raw = getFromLocalStorage(key, z.record(z.string(), z.unknown()))
+	if (isUndefined(raw)) return
+	const kept = Object.fromEntries(
+		Object.entries(raw).filter(([id, value]) => {
+			const parsed = schema.safeParse(value)
+			return !parsed.success || keep(id, parsed.data)
+		})
 	)
-	setToLocalStorage(key, withIds)
+	setToLocalStorage(key, kept)
 }
 
 export type LocalStorageRepository<Value> = ReturnType<

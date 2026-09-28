@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import { isUndefined, uniqBy } from "es-toolkit"
+import { isEqual, isUndefined, uniqBy } from "es-toolkit"
 import { HTTPError } from "ky"
 import { useEffect, useRef } from "react"
 
@@ -48,6 +48,20 @@ import {
 
 const formStorage =
 	localStorageRepository<ClearCutFormVersions>("clear-cut-form")
+
+/**
+ * Stored forms are both drafts and the offline copy of the reports opened.
+ * Keep unsent edits and the reports the user is assigned to (needed offline
+ * in the field); the other reports opened in passing can go.
+ */
+export const keepStoredForm = (
+	me: { id: string; favorites: string[] },
+	id: string,
+	versions: Pick<ClearCutFormVersions, "current" | "original">
+) =>
+	!isEqual(versions.current, versions.original) ||
+	versions.current.report.userId === me.id ||
+	me.favorites.includes(id)
 
 const mapReport = (
 	state: RootState,
@@ -614,8 +628,13 @@ export const clearCutsSlice = createSlice({
 			setPipelineOverrideThunk,
 			(state) => state.edition
 		)
-		builder.addCase(getMeThunk.fulfilled, (_, { payload: { favorites } }) => {
-			formStorage.syncStorage(favorites, clearCutFormVersionsSchema)
+		builder.addCase(getMeThunk.fulfilled, (_, { payload: me }) => {
+			// Offline, the stored profile carries no id: keep everything
+			if (!("id" in me)) return
+			formStorage.pruneStorage(
+				(id, versions) => keepStoredForm(me, id, versions),
+				clearCutFormVersionsSchema
+			)
 		})
 	}
 })

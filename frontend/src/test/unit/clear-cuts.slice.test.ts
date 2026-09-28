@@ -4,6 +4,7 @@ import type { ClearCutFormVersions } from "@/features/clear-cut/store/clear-cuts
 import {
 	clearCutsSlice,
 	getClearCutFormThunk,
+	keepStoredForm,
 	selectDetail
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { setupStore } from "@/shared/store/store"
@@ -47,5 +48,35 @@ describe("replaceCurrentVersionByLatest", () => {
 		const store = setupStore()
 		store.dispatch(replaceCurrentVersionByLatest())
 		expect(selectDetail(store.getState())).toEqual({ status: "idle" })
+	})
+})
+
+describe("keepStoredForm", () => {
+	const me = { id: "me", favorites: ["fav"] }
+	const stored = (userId: string | undefined, edited: boolean) => {
+		const report = { userId } as ClearCutFormVersions["current"]["report"]
+		const original = { etag: "1", report } as ClearCutFormVersions["current"]
+		return {
+			original,
+			current: edited ? { ...original, etag: "1-edited" } : original
+		}
+	}
+
+	it("keeps a form with unsent edits, whoever the report belongs to", () => {
+		expect(keepStoredForm(me, "r", stored("other", true))).toBe(true)
+		expect(keepStoredForm(me, "r", stored(undefined, true))).toBe(true)
+	})
+
+	it("keeps the reports assigned to the user", () => {
+		expect(keepStoredForm(me, "r", stored("me", false))).toBe(true)
+	})
+
+	it("keeps favorites", () => {
+		expect(keepStoredForm(me, "fav", stored("other", false))).toBe(true)
+	})
+
+	it("drops an unedited report of someone else", () => {
+		expect(keepStoredForm(me, "r", stored("other", false))).toBe(false)
+		expect(keepStoredForm(me, "r", stored(undefined, false))).toBe(false)
 	})
 })
