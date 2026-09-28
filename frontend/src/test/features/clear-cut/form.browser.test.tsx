@@ -505,6 +505,51 @@ describe("photo upload", () => {
 		])
 		expect(await screen.findByText("2 photos")).toBeInTheDocument()
 	})
+
+	it("deletes the photo shown, even when another one cannot be displayed", async () => {
+		worker.use(
+			http.get("*/api/v1/images/view/*", ({ request }) =>
+				request.url.includes("coupe-2")
+					? new HttpResponse(null, { status: 404 })
+					: HttpResponse.json({
+							// A displayable image carrying the photo's name
+							viewUrl: `data:image/svg+xml,${encodeURIComponent(
+								`<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><title>${request.url.split("/").pop()}</title><rect width="10" height="10"/></svg>`
+							)}`,
+							expiresIn: 3600
+						})
+			)
+		)
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		setStoredToken({ accessToken: FAKE_JWT, refreshToken: FAKE_JWT })
+		await openAccordion(onSiteKey, user)
+		const input = await screen.findByLabelText(
+			"Sélectionner des photos — Photos de la coupe"
+		)
+		await user.upload(
+			input,
+			["coupe-1.jpg", "coupe-2.jpg", "coupe-3.jpg"].map(
+				(name) => new File([name], name, { type: "image/jpeg" })
+			)
+		)
+		// The photo that cannot be displayed still counts
+		expect(await screen.findByText("3 photos")).toBeInTheDocument()
+		const shown = await screen.findAllByAltText(/^Prise de vue \d+$/)
+		const third = shown.findIndex((img) =>
+			img.getAttribute("src")?.includes("coupe-3")
+		)
+		await user.click(screen.getByLabelText(`Supprimer la photo ${third + 1}`))
+		expect(await screen.findByText("2 photos")).toBeInTheDocument()
+		const remaining = screen
+			.getAllByAltText(/^Prise de vue \d+$/)
+			.map((img) => img.getAttribute("src") ?? "")
+		expect(remaining.some((src) => src.includes("coupe-3"))).toBe(false)
+		expect(remaining.some((src) => src.includes("coupe-1"))).toBe(true)
+	})
 })
 
 async function openAccordion(section: SectionForm, user: UserEvent) {

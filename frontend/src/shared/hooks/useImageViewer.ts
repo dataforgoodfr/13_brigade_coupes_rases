@@ -9,6 +9,10 @@ export interface ImageViewResponse {
 }
 
 export interface UseImageViewerResult {
+	/**
+	 * One URL per key, in the same order; an empty string for a photo that
+	 * cannot be displayed (network, missing file), so positions stay aligned.
+	 */
 	getViewableUrls: (s3Keys: string[]) => Promise<string[]>
 	loading: boolean
 	error: string | null
@@ -52,12 +56,12 @@ export function useImageViewer(): UseImageViewerResult {
 					})
 				)
 
-				return viewableUrls.filter((url) => url !== "")
+				return viewableUrls
 			} catch (err) {
 				const errorMessage =
 					err instanceof Error ? err.message : "Failed to get viewable URLs"
 				setError(errorMessage)
-				return []
+				return s3Keys.map(() => "")
 			} finally {
 				setLoading(false)
 			}

@@ -25,6 +25,10 @@ import {
 } from "./Form"
 import type { FormProps } from "../types"
 
+/** Shown for a photo that cannot be displayed (offline, missing file). */
+const PHOTO_PLACEHOLDER =
+	"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='12' fill='%23666' text-anchor='middle' dy='0.3em'>Photo</text></svg>"
+
 type Forms3ImageUploadProps<T extends FieldValues> = FormProps<T> & {
 	reportId: string
 }
@@ -224,7 +228,10 @@ function FormS3ImageField<T extends FieldValues>({
 					</p>
 					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 						{previewUrls.map((imageUrl, index) => (
-							<div key={imageUrl} className="relative group">
+							<div
+								key={uploadedImages[index] ?? index}
+								className="relative group"
+							>
 								<button
 									type="button"
 									className="relative cursor-pointer w-full bg-transparent border-none p-0"
@@ -232,12 +239,11 @@ function FormS3ImageField<T extends FieldValues>({
 									aria-label={`Voir la photo ${index + 1}`}
 								>
 									<img
-										src={imageUrl}
+										src={imageUrl || PHOTO_PLACEHOLDER}
 										alt={`Prise de vue ${index + 1}`}
 										className="w-full h-24 object-cover rounded border hover:opacity-75 transition-opacity"
 										onError={(e) => {
-											e.currentTarget.src =
-												"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='12' fill='%23666' text-anchor='middle' dy='0.3em'>Photo</text></svg>"
+											e.currentTarget.src = PHOTO_PLACEHOLDER
 										}}
 									/>
 									<div className="absolute inset-0 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-opacity-30 rounded">
@@ -333,7 +339,7 @@ export function FormS3ImageUpload<T extends FieldValues = FieldValues>({
 				>
 					<div className="relative w-full max-w-4xl max-h-screen p-4">
 						<img
-							src={previewUrls[selectedImageIndex]}
+							src={previewUrls[selectedImageIndex] || PHOTO_PLACEHOLDER}
 							alt={`Prise de vue ${selectedImageIndex + 1}`}
 							className="max-w-full max-h-[80vh] object-contain rounded shadow-lg mx-auto block"
 							onClick={(e) => e.stopPropagation()}
