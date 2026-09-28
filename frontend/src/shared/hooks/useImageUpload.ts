@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { getStoredToken } from "@/features/user/store/me.slice"
 import { api, isNetworkError } from "@/shared/api/api"
@@ -35,6 +35,8 @@ export interface UploadResult {
 	errors: UploadError[]
 	/** Photos (already resized) that could not reach the server: no network. */
 	pending: File[]
+	/** The user stopped the batch. */
+	cancelled: boolean
 }
 
 export interface UseImageUploadResult {
@@ -47,6 +49,8 @@ export interface UseImageUploadResult {
 	current: number
 	/** Total number of photos in the current batch. */
 	total: number
+	/** Stops the current batch: the photo being sent and the next ones are dropped. */
+	cancel: () => void
 }
 
 const EXTENSION_TO_MIME: Record<string, string> = {
@@ -64,8 +68,11 @@ const MAX_FILE_SIZE = 25 * 1024 * 1024
 const MAX_FILE_SIZE_LABEL = "25 Mo"
 /** Per-file upload attempts (1 initial + retries) to survive flaky networks. */
 const MAX_ATTEMPTS = 3
-/** Abort a single attempt after this delay to avoid hanging on dead networks. */
-const ATTEMPT_TIMEOUT_MS = 30_000
+/**
+ * Give up an attempt when nothing has been sent for this long: a slow but
+ * steady upload is not interrupted, a dead network is.
+ */
+const IDLE_TIMEOUT_MS = 30_000
 
 function inferMimeType(file: File): string {
 	if (file.type?.startsWith("image/")) return file.type
@@ -83,6 +90,61 @@ export function isConnectivityError(error: unknown) {
 	)
 }
 
+/**
+ * Sends the form with XMLHttpRequest, which, unlike fetch, reports the upload
+ * progress. Rejects like fetch on a network failure (TypeError), with a
+ * TimeoutError when idle for too long and an AbortError when cancelled.
+ */
+function postWithProgress(
+	url: string,
+	body: FormData,
+	signal: AbortSignal,
+	onProgress: (fraction: number) => void
+): Promise<void> {
+	return new Promise((resolve, reject) => {
+		const xhr = new XMLHttpRequest()
+		let idle: ReturnType<typeof setTimeout>
+		const fail = (error: Error) => {
+			clearTimeout(idle)
+			signal.removeEventListener("abort", onAbort)
+			reject(error)
+		}
+		const armIdleTimer = () => {
+			clearTimeout(idle)
+			idle = setTimeout(() => {
+				xhr.abort()
+				const error = new Error("Délai d'envoi dépassé.")
+				error.name = "TimeoutError"
+				fail(error)
+			}, IDLE_TIMEOUT_MS)
+		}
+		const onAbort = () => {
+			xhr.abort()
+			fail(new DOMException("Envoi annulé.", "AbortError"))
+		}
+		xhr.upload.onprogress = (event) => {
+			armIdleTimer()
+			if (event.lengthComputable) onProgress(event.loaded / event.total)
+		}
+		xhr.onload = () => {
+			clearTimeout(idle)
+			signal.removeEventListener("abort", onAbort)
+			if (xhr.status >= 200 && xhr.status < 300) {
+				onProgress(1)
+				resolve()
+			} else {
+				reject(new Error(`Échec de l'envoi (${xhr.status} ${xhr.statusText}).`))
+			}
+		}
+		xhr.onerror = () => fail(new TypeError("Failed to fetch"))
+		if (signal.aborted) return onAbort()
+		signal.addEventListener("abort", onAbort)
+		xhr.open("POST", url)
+		armIdleTimer()
+		xhr.send(body)
+	})
+}
+
 const delay = (ms: number) =>
 	new Promise((resolve) => {
 		setTimeout(resolve, ms)
@@ -97,14 +159,17 @@ async function uploadSingleFile(
 	file: File,
 	contentType: string,
 	reportId: string | undefined,
-	accessToken: string
+	accessToken: string,
+	signal: AbortSignal,
+	onProgress: (fraction: number) => void
 ): Promise<UploadedImage> {
 	// Keep `api`'s default retry config so a 401 still triggers ky's token
 	// refresh (long form sessions can outlive the access token). Our own loop
 	// below adds retries for the raw S3 `fetch`, which ky does not manage.
 	const authenticatedApi = api.extend({
 		headers: { Authorization: `Bearer ${accessToken}` },
-		timeout: ATTEMPT_TIMEOUT_MS
+		timeout: IDLE_TIMEOUT_MS,
+		signal
 	})
 
 	const uploadRequest: ImageUploadRequest = {
@@ -127,22 +192,7 @@ async function uploadSingleFile(
 			}
 			formData.append("file", file)
 
-			const controller = new AbortController()
-			const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS)
-			try {
-				const uploadResponse = await fetch(response.uploadUrl, {
-					method: "POST",
-					body: formData,
-					signal: controller.signal
-				})
-				if (!uploadResponse.ok) {
-					throw new Error(
-						`Échec de l'envoi (${uploadResponse.status} ${uploadResponse.statusText}).`
-					)
-				}
-			} finally {
-				clearTimeout(timer)
-			}
+			await postWithProgress(response.uploadUrl, formData, signal, onProgress)
 
 			return {
 				fileUrl: response.fileUrl,
@@ -151,8 +201,8 @@ async function uploadSingleFile(
 			}
 		} catch (err) {
 			lastError = err
-			// Offline, retrying only delays keeping the photo for later
-			if (!navigator.onLine) break
+			// Cancelled, or offline: retrying only delays keeping the photo for later
+			if (signal.aborted || !navigator.onLine) break
 			if (attempt < MAX_ATTEMPTS) {
 				await delay(1000 * attempt)
 			}
@@ -169,6 +219,8 @@ export function useImageUpload(): UseImageUploadResult {
 	const [progress, setProgress] = useState(0)
 	const [current, setCurrent] = useState(0)
 	const [total, setTotal] = useState(0)
+	const controllerRef = useRef<AbortController | null>(null)
+	const cancel = () => controllerRef.current?.abort()
 
 	const uploadImages = async (
 		files: File[],
@@ -183,12 +235,15 @@ export function useImageUpload(): UseImageUploadResult {
 		const uploaded: UploadedImage[] = []
 		const errors: UploadError[] = []
 		const pending: File[] = []
+		const controller = new AbortController()
+		controllerRef.current = controller
 
 		try {
 			const token = getStoredToken()
 			const totalFiles = files.length
 
 			for (let i = 0; i < totalFiles; i++) {
+				if (controller.signal.aborted) break
 				const file = files[i]
 				setCurrent(i + 1)
 
@@ -216,10 +271,14 @@ export function useImageUpload(): UseImageUploadResult {
 						photo,
 						contentType,
 						reportId,
-						token.accessToken
+						token.accessToken,
+						controller.signal,
+						(fraction) => setProgress(((i + fraction) / totalFiles) * 100)
 					)
 					uploaded.push(image)
 				} catch (err) {
+					// Cancelled by the user: neither an error nor a photo to keep
+					if (controller.signal.aborted) continue
 					if (photo && sending && isConnectivityError(err)) {
 						pending.push(photo)
 						continue
@@ -243,11 +302,17 @@ export function useImageUpload(): UseImageUploadResult {
 				)
 			}
 
-			return { uploaded, errors, pending }
+			return {
+				uploaded,
+				errors,
+				pending,
+				cancelled: controller.signal.aborted
+			}
 		} finally {
+			if (controllerRef.current === controller) controllerRef.current = null
 			setUploading(false)
 		}
 	}
 
-	return { uploadImages, uploading, error, progress, current, total }
+	return { uploadImages, uploading, error, progress, current, total, cancel }
 }

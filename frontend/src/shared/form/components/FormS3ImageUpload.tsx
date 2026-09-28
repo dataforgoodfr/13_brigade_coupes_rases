@@ -60,7 +60,7 @@ function FormS3ImageField<T extends FieldValues>({
 	onSelectedImageIndexChanged,
 	field
 }: FormS3ImageFieldProps<T>) {
-	const { uploadImages, uploading, error, progress, current, total } =
+	const { uploadImages, uploading, error, progress, current, total, cancel } =
 		useImageUpload()
 	const { getViewableUrls, loading: viewerLoading } = useImageViewer()
 	const [uploadedImages, setUploadedImages] = useState<string[]>([])
@@ -115,11 +115,12 @@ function FormS3ImageField<T extends FieldValues>({
 		flushingRef.current = true
 		try {
 			for (const photo of photos) {
-				const { uploaded, pending: stillOffline } = await uploadImages(
-					[photo.file],
-					reportId
-				)
-				if (stillOffline.length > 0) break
+				const {
+					uploaded,
+					pending: stillOffline,
+					cancelled
+				} = await uploadImages([photo.file], reportId)
+				if (stillOffline.length > 0 || cancelled) break
 				if (uploaded.length > 0) {
 					addUploaded(uploaded.map((image) => image.key))
 					await dropPending(photo.id)
@@ -367,6 +368,15 @@ function FormS3ImageField<T extends FieldValues>({
 					<span className="text-xs text-gray-500 shrink-0 tabular-nums">
 						{Math.round(progress)}%
 					</span>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="min-h-[44px] shrink-0"
+						onClick={cancel}
+					>
+						Annuler
+					</Button>
 				</div>
 			)}
 

@@ -511,6 +511,44 @@ describe("photo upload", () => {
 		expect(await screen.findByText("2 photos")).toBeInTheDocument()
 	})
 
+	it("stops sending when the user cancels", async () => {
+		worker.use(
+			http.post("*/api/v1/images/upload-url", async () => {
+				await new Promise((resolve) => setTimeout(resolve, 2000))
+				return HttpResponse.json({
+					uploadUrl: "http://localhost:8080/api/v1/images/local-upload",
+					fields: {},
+					fileUrl: "http://localhost:8080/api/v1/images/local/x.jpg",
+					expiresIn: 3600,
+					key: "local/reports/ABC/x.jpg"
+				})
+			})
+		)
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		setStoredToken({ accessToken: FAKE_JWT, refreshToken: FAKE_JWT })
+		await openAccordion(onSiteKey, user)
+		const input = await screen.findByLabelText(
+			"Sélectionner des photos — Photos de la coupe"
+		)
+		await user.upload(input, [
+			new File(["a"], "coupe-1.jpg", { type: "image/jpeg" }),
+			new File(["b"], "coupe-2.jpg", { type: "image/jpeg" })
+		])
+		await user.click(await screen.findByRole("button", { name: "Annuler" }))
+
+		await expect
+			.poll(() => screen.queryByRole("button", { name: "Annuler" }))
+			.toBeNull()
+		await new Promise((resolve) => setTimeout(resolve, 2500))
+		expect(screen.queryByText(/^\d+ photos?$/)).not.toBeInTheDocument()
+		expect(screen.queryByText(/pas pu être envoyée/)).not.toBeInTheDocument()
+		expect(screen.queryByText(/en attente d'envoi/)).not.toBeInTheDocument()
+	})
+
 	it("deletes the photo shown, even when another one cannot be displayed", async () => {
 		worker.use(
 			http.get("*/api/v1/images/view/*", ({ request }) =>
