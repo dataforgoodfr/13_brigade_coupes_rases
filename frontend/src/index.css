@@ -3,6 +3,9 @@
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
+/* Same condition as useBreakpoint (shared/hooks/breakpoint.ts): a phone turned
+   sideways is wide but short, and keeps the mobile layout */
+@custom-variant sm (@media (width >= 40rem) and ((height >= 40rem) or (pointer: fine)));
 
 :root {
 	--background: hsl(0 0% 100%);

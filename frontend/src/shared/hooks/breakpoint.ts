@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from "react"
 
-// Same threshold as Tailwind's `sm` breakpoint
-const DESKTOP_QUERY = "(min-width: 640px)"
+// Same condition as the `sm` variant redefined in index.css: a phone turned
+// sideways is wide but short, and keeps the mobile layout
+const DESKTOP_QUERY =
+	"(min-width: 640px) and ((min-height: 640px) or (pointer: fine))"
 
 export type Breakpoint = "mobile" | "all"
 
