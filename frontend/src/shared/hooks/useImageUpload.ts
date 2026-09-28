@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { getStoredToken } from "@/features/user/store/me.slice"
 import { api } from "@/shared/api/api"
+import { compressPhoto } from "@/shared/image"
 
 export interface ImageUploadRequest {
 	filename: string
@@ -181,18 +182,20 @@ export function useImageUpload(): UseImageUploadResult {
 						throw new Error("Vous devez être connecté pour envoyer des photos.")
 					}
 
-					const contentType = inferMimeType(file)
-					if (!contentType.startsWith("image/")) {
+					if (!inferMimeType(file).startsWith("image/")) {
 						throw new Error("Ce fichier n'est pas une image.")
 					}
-					if (file.size > MAX_FILE_SIZE) {
+					// A phone photo weighs 3 to 8 MB: resize it before sending
+					const photo = await compressPhoto(file)
+					const contentType = inferMimeType(photo)
+					if (photo.size > MAX_FILE_SIZE) {
 						throw new Error(
-							`Photo trop volumineuse (${(file.size / 1024 / 1024).toFixed(1)} Mo, max ${MAX_FILE_SIZE_LABEL}).`
+							`Photo trop volumineuse (${(photo.size / 1024 / 1024).toFixed(1)} Mo, max ${MAX_FILE_SIZE_LABEL}).`
 						)
 					}
 
 					const image = await uploadSingleFile(
-						file,
+						photo,
 						contentType,
 						reportId,
 						token.accessToken
