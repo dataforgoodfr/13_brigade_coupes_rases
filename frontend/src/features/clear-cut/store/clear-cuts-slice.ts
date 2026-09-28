@@ -102,7 +102,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 			const formsResult = selectConnectedMe(state)
 				? clearCutFormsResponseSchema.parse(
 						await api()
-							.get(`api/v1/clear-cuts-reports/${id}/forms/`, {
+							.get(`api/v1/clear-cuts-reports/${id}/forms`, {
 								searchParams: { page: "0", size: "1" }
 							})
 							.json()
