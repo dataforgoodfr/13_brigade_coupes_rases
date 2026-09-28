@@ -8,10 +8,26 @@ import { reactClickToComponent } from "vite-plugin-react-click-to-component"
 type RuntimeCaching = NonNullable<
 	VitePWAOptions["workbox"]["runtimeCaching"]
 >[number]
-function cacheNetworkFirst(
+/** Map tiles barely change: serve them from the cache, without waiting for a
+ * slow network. Tiles are opaque responses (no CORS), hence status 0. */
+function cacheTiles(
+	cacheName: string,
 	urlPattern: RuntimeCaching["urlPattern"]
 ): RuntimeCaching {
-	return { urlPattern, handler: "NetworkFirst", method: "GET" }
+	return {
+		urlPattern,
+		handler: "CacheFirst",
+		method: "GET",
+		options: {
+			cacheName,
+			cacheableResponse: { statuses: [0, 200] },
+			expiration: {
+				maxEntries: 1000,
+				maxAgeSeconds: 60 * 60 * 24 * 30,
+				purgeOnQuotaError: true
+			}
+		}
+	}
 }
 export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 	return {
@@ -44,16 +60,29 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 					cleanupOutdatedCaches: true,
 					clientsClaim: true,
 					runtimeCaching: [
-						cacheNetworkFirst(
+						cacheTiles(
+							"tiles-openstreetmap",
 							/^https:\/\/[abc]\.tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png$/i
 						),
-						cacheNetworkFirst(
+						cacheTiles(
+							"tiles-opentopomap",
 							/^https:\/\/[abc]\.tile\.opentopomap\.org\/\d+\/\d+\/\d+\.png$/i
 						),
-						cacheNetworkFirst(
+						cacheTiles(
+							"tiles-arcgis",
 							/^https:\/\/server.arcgisonline.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/\d+\/\d+\/\d+$/i
 						),
-						cacheNetworkFirst(/^https?:\/\/.*\/api\/v1\/referential$/i)
+						// Needed to start the application: fall back to the cached copy
+						// when the network is missing or too slow
+						{
+							urlPattern: /^https?:\/\/.*\/api\/v1\/referential\/?$/i,
+							handler: "NetworkFirst",
+							method: "GET",
+							options: {
+								cacheName: "referential",
+								networkTimeoutSeconds: 5
+							}
+						}
 					],
 					disableDevLogs: true
 				},
