@@ -43,9 +43,10 @@ describe("From tracking", () => {
 			}
 		}) as FieldInput<string | null, HTMLButtonElement | HTMLTextAreaElement>
 		await field.setValue("Test")
-		expect(await field.findValue()).toBe("Test")
+		await expect.poll(() => field.findValue()).toBe("Test")
 		await field.resetToOriginal()
-		expect(await field.findValue()).toBe(formMock.response.weather)
+		// The form updates after the click: wait for the value, do not read it once
+		await expect.poll(() => field.findValue()).toBe(formMock.response.weather)
 	})
 	it("Should  display apply latest button when current form is different from latest", async () => {
 		const { unmount } = await renderApp({
@@ -85,8 +86,10 @@ describe("From tracking", () => {
 			}
 		}) as FieldInput<string | null, HTMLButtonElement | HTMLTextAreaElement>
 		await field.setValue("Test")
-		expect(await field.findValue()).toBe("Test")
+		await expect.poll(() => field.findValue()).toBe("Test")
 		await field.applyLatest()
-		expect(await field.findValue()).toBe(latestFormMock.response.weather)
+		await expect
+			.poll(() => field.findValue())
+			.toBe(latestFormMock.response.weather)
 	})
 })
