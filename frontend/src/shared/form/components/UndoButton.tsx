@@ -5,6 +5,7 @@ import {
 	IconButton,
 	type IconButtonProps
 } from "@/shared/components/button/Button"
+import { TOUCH_TARGET } from "@/shared/form/components/touchTarget"
 
 type Props = Omit<IconButtonProps, "icon">
 
@@ -21,7 +22,7 @@ export function UndoButton({
 			type={type}
 			variant={variant}
 			size={size}
-			className={cn("text-primary", className)}
+			className={cn("text-primary", TOUCH_TARGET, className)}
 			title={title}
 			icon={<Undo2 />}
 			{...rest}
