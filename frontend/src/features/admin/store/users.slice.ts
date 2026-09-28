@@ -43,7 +43,7 @@ type State = {
 export const deleteUserThunk = createAppAsyncThunk<void, string>(
 	"deleteUser",
 	async (request, { extra: { api }, dispatch }) => {
-		await api().delete(`api/v1/users/${request}/`)
+		await api().delete(`api/v1/users/${request}`)
 		dispatch(getUsersThunk())
 	}
 )
@@ -72,7 +72,7 @@ export const updateUserThunk = createAppAsyncThunk<
 	UserResponse,
 	UserForm & { id: string }
 >("updateUser", async (request, { extra: { api }, dispatch }) => {
-	const url = `api/v1/users/${request.id}/`
+	const url = `api/v1/users/${request.id}`
 	await api().put<PaginatedUsersResponse>(url, {
 		json: {
 			...request,

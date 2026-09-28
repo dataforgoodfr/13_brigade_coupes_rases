@@ -36,7 +36,7 @@ export const api = ky.extend({
 				}
 				try {
 					const tokenResponse = await ky
-						.post(`api/v1/token/refresh/`, {
+						.post(`api/v1/token/refresh`, {
 							prefix: import.meta.env.VITE_API,
 							json: {
 								refreshToken
