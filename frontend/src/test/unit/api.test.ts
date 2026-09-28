@@ -1,3 +1,4 @@
+import { NetworkError } from "ky"
 import { describe, expect, it } from "vitest"
 
 import { isNetworkError, requestToParams } from "@/shared/api/api"
@@ -8,6 +9,15 @@ describe("isNetworkError", () => {
 		expect(
 			isNetworkError(
 				new TypeError("NetworkError when attempting to fetch resource.")
+			)
+		).toBe(true)
+	})
+
+	it("recognises ky's wrapped network error", () => {
+		const request = new Request("http://api.test/api/v1/me")
+		expect(
+			isNetworkError(
+				new NetworkError(request, { cause: new TypeError("Failed to fetch") })
 			)
 		).toBe(true)
 	})

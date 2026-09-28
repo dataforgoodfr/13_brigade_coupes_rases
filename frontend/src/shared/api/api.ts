@@ -1,5 +1,5 @@
 import { isUndefined } from "es-toolkit"
-import ky, { HTTPError } from "ky"
+import ky, { HTTPError, NetworkError } from "ky"
 
 import { type TokenResponse, tokenSchema } from "@/features/user/store/me"
 import type { RequestedContent } from "@/shared/api/types"
@@ -25,7 +25,15 @@ export const api = ky.extend({
 			}
 		],
 		beforeRetry: [
-			async ({ request }) => {
+			async ({ request, error }) => {
+				// Offline, retrying only delays the network error the caller handles
+				if (isNetworkError(error) && !navigator.onLine) {
+					throw error
+				}
+				// Only an expired access token calls for a refresh
+				if (!(error instanceof HTTPError && error.response.status === 401)) {
+					return
+				}
 				const refreshToken =
 					tokenStorage.getFromLocalStorage(tokenSchema)?.refreshToken
 				if (
@@ -34,8 +42,9 @@ export const api = ky.extend({
 				) {
 					return
 				}
+				let tokenResponse: unknown
 				try {
-					const tokenResponse = await ky
+					tokenResponse = await ky
 						.post(`api/v1/token/refresh`, {
 							prefix: import.meta.env.VITE_API,
 							json: {
@@ -43,16 +52,21 @@ export const api = ky.extend({
 							}
 						})
 						.json()
-					const token = tokenSchema.parse(tokenResponse)
-					tokenStorage.setToLocalStorage(token)
-					request.headers.set("Authorization", `Bearer ${token.accessToken}`)
-				} catch (_err) {
-					// Logout user if refresh fails
+				} catch (refreshError) {
+					// The refresh did not reach the server: the session may still be
+					// valid, keep it and report the network error.
+					if (!(refreshError instanceof HTTPError)) {
+						throw refreshError
+					}
+					// The server refused the refresh token: the session is over
 					tokenStorage.setToLocalStorage(undefined)
 					meStorage.setToLocalStorage(undefined)
-					// Go to login page
 					window.location.href = "/login"
+					return
 				}
+				const token = tokenSchema.parse(tokenResponse)
+				tokenStorage.setToLocalStorage(token)
+				request.headers.set("Authorization", `Bearer ${token.accessToken}`)
 			}
 		]
 	}
@@ -76,6 +90,10 @@ const errorMessages = new Set([
 ])
 
 export function isNetworkError(error: unknown) {
+	// ky 2 wraps the fetch failure, available as `cause`
+	if (error instanceof NetworkError) {
+		return true
+	}
 	const isValid =
 		error &&
 		isError(error) &&
