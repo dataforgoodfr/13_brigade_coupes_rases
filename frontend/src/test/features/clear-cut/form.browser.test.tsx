@@ -47,6 +47,11 @@ import { worker } from "@/mocks/browser"
 import { mockClearCutReportResponse } from "@/mocks/clear-cuts"
 import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms"
 import { fakeDepartments } from "@/mocks/referential"
+import {
+	addPendingPhoto,
+	listPendingPhotos,
+	removePendingPhoto
+} from "@/shared/pendingPhotos"
 import { adminMock, volunteerMock } from "@/test/mocks/user"
 import {
 	type FieldInput,
@@ -549,6 +554,88 @@ describe("photo upload", () => {
 			.map((img) => img.getAttribute("src") ?? "")
 		expect(remaining.some((src) => src.includes("coupe-3"))).toBe(false)
 		expect(remaining.some((src) => src.includes("coupe-1"))).toBe(true)
+	})
+})
+
+describe("photos taken without network", () => {
+	defaultSetupServerBeforeEach(setupVolunteerAssigned)
+	let network = false
+	beforeEach(async () => {
+		network = false
+		for (const p of await listPendingPhotos("ABC", "clearCutImages")) {
+			await removePendingPhoto(p.id)
+		}
+		worker.use(
+			http.post("*/api/v1/images/upload-url", async ({ request }) => {
+				if (!network) return HttpResponse.error()
+				const { filename } = (await request.json()) as { filename: string }
+				const key = `local/reports/ABC/${filename}`
+				return HttpResponse.json({
+					uploadUrl: "http://localhost:8080/api/v1/images/local-upload",
+					fields: {},
+					fileUrl: `http://localhost:8080/api/v1/images/${key}`,
+					expiresIn: 3600,
+					key
+				})
+			}),
+			http.post(
+				"*/api/v1/images/local-upload",
+				() => new HttpResponse(null, { status: 204 })
+			),
+			http.get("*/api/v1/images/view/*", ({ request }) =>
+				HttpResponse.json({ viewUrl: `${request.url}.jpg`, expiresIn: 3600 })
+			)
+		)
+	})
+
+	it("keeps the photo on the device and sends it when the network is back", async () => {
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		setStoredToken({ accessToken: FAKE_JWT, refreshToken: FAKE_JWT })
+		await openAccordion(onSiteKey, user)
+		const input = await screen.findByLabelText(
+			"Sélectionner des photos — Photos de la coupe"
+		)
+		await user.upload(
+			input,
+			new File(["a"], "coupe.jpg", { type: "image/jpeg" })
+		)
+
+		expect(
+			await screen.findByText(/1 photo en attente d'envoi/, undefined, {
+				timeout: 10000
+			})
+		).toBeInTheDocument()
+		expect(await listPendingPhotos("ABC", "clearCutImages")).toHaveLength(1)
+
+		network = true
+		window.dispatchEvent(new Event("online"))
+
+		expect(await screen.findByText("1 photo")).toBeInTheDocument()
+		expect(screen.queryByText(/en attente d'envoi/)).not.toBeInTheDocument()
+		expect(await listPendingPhotos("ABC", "clearCutImages")).toHaveLength(0)
+	})
+
+	it("sends a photo kept from an earlier visit when the form opens", async () => {
+		network = true
+		await addPendingPhoto({
+			reportId: "ABC",
+			field: "clearCutImages",
+			file: new File(["a"], "gardee.jpg", { type: "image/jpeg" })
+		})
+		const { user } = await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		setStoredToken({ accessToken: FAKE_JWT, refreshToken: FAKE_JWT })
+		await openAccordion(onSiteKey, user)
+
+		expect(await screen.findByText("1 photo")).toBeInTheDocument()
+		expect(await listPendingPhotos("ABC", "clearCutImages")).toHaveLength(0)
 	})
 })
 

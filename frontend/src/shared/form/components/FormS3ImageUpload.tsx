@@ -3,6 +3,7 @@ import {
 	Camera,
 	ChevronLeft,
 	ChevronRight,
+	CloudOff,
 	ImagePlus,
 	X,
 	ZoomIn
@@ -15,6 +16,12 @@ import { Progress } from "@/components/ui/progress"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
 import { useImageUpload } from "@/shared/hooks/useImageUpload"
 import { useImageViewer } from "@/shared/hooks/useImageViewer"
+import {
+	addPendingPhoto,
+	listPendingPhotos,
+	type PendingPhoto,
+	removePendingPhoto
+} from "@/shared/pendingPhotos"
 
 import {
 	FormControl,
@@ -28,6 +35,11 @@ import type { FormProps } from "../types"
 /** Shown for a photo that cannot be displayed (offline, missing file). */
 const PHOTO_PLACEHOLDER =
 	"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f0f0f0'/><text x='50' y='50' font-family='Arial' font-size='12' fill='%23666' text-anchor='middle' dy='0.3em'>Photo</text></svg>"
+
+const withPreview = (photo: PendingPhoto) => ({
+	photo,
+	url: URL.createObjectURL(photo.file)
+})
 
 type Forms3ImageUploadProps<T extends FieldValues> = FormProps<T> & {
 	reportId: string
@@ -65,18 +77,105 @@ function FormS3ImageField<T extends FieldValues>({
 		return () => setFieldUploading(fieldId, false)
 	}, [uploading, fieldId, setFieldUploading])
 
+	// Keys of the photos in the field, read after `await`s: a ref avoids
+	// appending to a stale list when several uploads finish in turn.
+	const keysRef = useRef<string[]>(uploadedImages)
+	keysRef.current = uploadedImages
+	const addUploaded = (keys: string[]) => {
+		if (keys.length === 0) return
+		const newUploadedImages = [...keysRef.current, ...keys]
+		keysRef.current = newUploadedImages
+		setUploadedImages(newUploadedImages)
+		field.onChange(newUploadedImages)
+	}
+
+	// Photos taken without network, kept on the device until they can be sent
+	const [pending, setPending] = useState<
+		{ photo: PendingPhoto; url: string }[]
+	>([])
+	const pendingRef = useRef(pending)
+	pendingRef.current = pending
+	const dropPending = async (id: string) => {
+		await removePendingPhoto(id)
+		setPending((previous) => {
+			for (const item of previous) {
+				if (item.photo.id === id) URL.revokeObjectURL(item.url)
+			}
+			return previous.filter((item) => item.photo.id !== id)
+		})
+	}
+
+	const [storageError, setStorageError] = useState(false)
+
+	const flushingRef = useRef(false)
+	const sendPending = async (
+		photos = pendingRef.current.map((p) => p.photo)
+	) => {
+		if (flushingRef.current || !navigator.onLine) return
+		flushingRef.current = true
+		try {
+			for (const photo of photos) {
+				const { uploaded, pending: stillOffline } = await uploadImages(
+					[photo.file],
+					reportId
+				)
+				if (stillOffline.length > 0) break
+				if (uploaded.length > 0) {
+					addUploaded(uploaded.map((image) => image.key))
+					await dropPending(photo.id)
+				}
+			}
+		} finally {
+			flushingRef.current = false
+		}
+	}
+	const sendPendingRef = useRef(sendPending)
+	sendPendingRef.current = sendPending
+
+	useEffect(() => {
+		let cancelled = false
+		listPendingPhotos(reportId, field.name)
+			.then((photos) => {
+				if (cancelled) return
+				setPending(photos.map(withPreview))
+				// The state is not updated yet: hand over the list read from storage
+				if (photos.length > 0) sendPendingRef.current(photos)
+			})
+			.catch(() => undefined)
+		const onOnline = () => sendPendingRef.current()
+		window.addEventListener("online", onOnline)
+		return () => {
+			cancelled = true
+			window.removeEventListener("online", onOnline)
+		}
+	}, [reportId, field.name])
+	useEffect(
+		() => () => {
+			for (const item of pendingRef.current) URL.revokeObjectURL(item.url)
+		},
+		[]
+	)
+
 	const handleFiles = async (files: File[]) => {
 		if (files.length === 0) return
 		// `uploadImages` never throws: it returns whatever succeeded plus per-file
 		// errors. We always commit the successful uploads so photos already sent
 		// to S3 are recorded in the form (and persisted to localStorage) even if
 		// some files failed — no more "4 out of 8 photos disappeared".
-		const { uploaded } = await uploadImages(files, reportId)
-		if (uploaded.length > 0) {
-			const s3Keys = uploaded.map((img) => img.key)
-			const newUploadedImages = [...uploadedImages, ...s3Keys]
-			setUploadedImages(newUploadedImages)
-			field.onChange(newUploadedImages)
+		const { uploaded, pending: offline } = await uploadImages(files, reportId)
+		addUploaded(uploaded.map((image) => image.key))
+		for (const file of offline) {
+			try {
+				const photo = await addPendingPhoto({
+					reportId,
+					field: field.name,
+					file
+				})
+				setPending((previous) => [...previous, withPreview(photo)])
+			} catch {
+				// Storage refused (quota, private mode): say the photo is not kept
+				setStorageError(true)
+			}
 		}
 	}
 
@@ -172,6 +271,64 @@ function FormS3ImageField<T extends FieldValues>({
 					</div>
 				</div>
 			</FormControl>
+
+			{pending.length > 0 && (
+				<div
+					role="status"
+					className="mt-1 flex flex-col gap-2 rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900"
+				>
+					<p className="flex items-start gap-2">
+						<CloudOff className="mt-0.5 h-4 w-4 shrink-0" />
+						<span>
+							{pending.length > 1
+								? `${pending.length} photos en attente d'envoi, gardées sur cet appareil. Elles partiront au retour du réseau ; enregistrez ensuite le formulaire.`
+								: "1 photo en attente d'envoi, gardée sur cet appareil. Elle partira au retour du réseau ; enregistrez ensuite le formulaire."}
+						</span>
+					</p>
+					<div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+						{pending.map(({ photo, url }, index) => (
+							<div key={photo.id} className="relative">
+								<img
+									src={url}
+									alt={`En attente d'envoi ${index + 1}`}
+									className="h-20 w-full rounded border object-cover opacity-80"
+								/>
+								<Button
+									type="button"
+									variant="destructive"
+									size="sm"
+									className="absolute -top-2 -right-2 h-7 w-7 rounded-full p-0"
+									onClick={() => dropPending(photo.id)}
+									disabled={uploading}
+									aria-label={`Retirer la photo en attente ${index + 1}`}
+								>
+									<X className="h-3 w-3" />
+								</Button>
+							</div>
+						))}
+					</div>
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="min-h-[44px] self-start"
+						disabled={uploading}
+						onClick={() => sendPending()}
+					>
+						Réessayer l'envoi
+					</Button>
+				</div>
+			)}
+
+			{storageError && (
+				<div className="flex items-start gap-2 text-sm text-red-600 mt-1">
+					<AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+					<span>
+						Sans réseau, la photo n'a pas pu être gardée sur cet appareil.
+						Reprenez-la une fois le réseau revenu.
+					</span>
+				</div>
+			)}
 
 			{/* Progress and status */}
 			{(uploading || viewerLoading) && (

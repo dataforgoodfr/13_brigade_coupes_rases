@@ -1,7 +1,7 @@
 import { useState } from "react"
 
 import { getStoredToken } from "@/features/user/store/me.slice"
-import { api } from "@/shared/api/api"
+import { api, isNetworkError } from "@/shared/api/api"
 import { compressPhoto } from "@/shared/image"
 
 export interface ImageUploadRequest {
@@ -33,6 +33,8 @@ export interface UploadError {
 export interface UploadResult {
 	uploaded: UploadedImage[]
 	errors: UploadError[]
+	/** Photos (already resized) that could not reach the server: no network. */
+	pending: File[]
 }
 
 export interface UseImageUploadResult {
@@ -69,6 +71,16 @@ function inferMimeType(file: File): string {
 	if (file.type?.startsWith("image/")) return file.type
 	const ext = file.name.split(".").pop()?.toLowerCase() ?? ""
 	return EXTENSION_TO_MIME[ext] ?? "image/jpeg"
+}
+
+/** The photo did not reach the server: worth keeping it and sending it later. */
+export function isConnectivityError(error: unknown) {
+	return (
+		!navigator.onLine ||
+		isNetworkError(error) ||
+		(error instanceof Error &&
+			(error.name === "TimeoutError" || error.name === "AbortError"))
+	)
 }
 
 const delay = (ms: number) =>
@@ -139,6 +151,8 @@ async function uploadSingleFile(
 			}
 		} catch (err) {
 			lastError = err
+			// Offline, retrying only delays keeping the photo for later
+			if (!navigator.onLine) break
 			if (attempt < MAX_ATTEMPTS) {
 				await delay(1000 * attempt)
 			}
@@ -168,6 +182,7 @@ export function useImageUpload(): UseImageUploadResult {
 
 		const uploaded: UploadedImage[] = []
 		const errors: UploadError[] = []
+		const pending: File[] = []
 
 		try {
 			const token = getStoredToken()
@@ -177,6 +192,8 @@ export function useImageUpload(): UseImageUploadResult {
 				const file = files[i]
 				setCurrent(i + 1)
 
+				let photo: File | undefined
+				let sending = false
 				try {
 					if (!token) {
 						throw new Error("Vous devez être connecté pour envoyer des photos.")
@@ -186,7 +203,7 @@ export function useImageUpload(): UseImageUploadResult {
 						throw new Error("Ce fichier n'est pas une image.")
 					}
 					// A phone photo weighs 3 to 8 MB: resize it before sending
-					const photo = await compressPhoto(file)
+					photo = await compressPhoto(file)
 					const contentType = inferMimeType(photo)
 					if (photo.size > MAX_FILE_SIZE) {
 						throw new Error(
@@ -194,6 +211,7 @@ export function useImageUpload(): UseImageUploadResult {
 						)
 					}
 
+					sending = true
 					const image = await uploadSingleFile(
 						photo,
 						contentType,
@@ -202,6 +220,10 @@ export function useImageUpload(): UseImageUploadResult {
 					)
 					uploaded.push(image)
 				} catch (err) {
+					if (photo && sending && isConnectivityError(err)) {
+						pending.push(photo)
+						continue
+					}
 					errors.push({
 						filename: file.name,
 						message:
@@ -221,7 +243,7 @@ export function useImageUpload(): UseImageUploadResult {
 				)
 			}
 
-			return { uploaded, errors }
+			return { uploaded, errors, pending }
 		} finally {
 			setUploading(false)
 		}
