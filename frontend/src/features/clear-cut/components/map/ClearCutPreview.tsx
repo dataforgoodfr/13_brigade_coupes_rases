@@ -19,7 +19,15 @@ import type {
 import { updateClearCutGeometryThunk } from "@/features/clear-cut/store/clear-cuts-slice"
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status"
 import { useToast } from "@/hooks/use-toast"
+import { simplifyMultiPolygon } from "@/shared/geometry"
 import { useAppDispatch } from "@/shared/hooks/store"
+
+/**
+ * Detected boundaries follow the 10 m pixels of the alert rasters and repeat
+ * most of their points: without simplification a cut shows thousands of
+ * handles. 1 m stays well below the pixel size.
+ */
+const PERIMETER_EDIT_TOLERANCE_METERS = 1
 
 /** Leaflet garde la carte parente dans un champ privé ; l'API publique n'expose pas de getter. */
 const isOnMap = (layer: L.Layer) =>
@@ -82,6 +90,10 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 		const layer = ref.current as any
 		if (!layer?.eachLayer || !isEditingPerimeter) return
 		savedRef.current = false
+		layer.clearLayers?.()
+		layer.addData?.(
+			simplifyMultiPolygon(boundaryRef.current, PERIMETER_EDIT_TOLERANCE_METERS)
+		)
 		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
 		layer.eachLayer((child: any) =>
 			child.pm?.enable({ allowSelfIntersection: false })
@@ -110,8 +122,10 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 		if (!layer) return
 		setIsSaving(true)
 		try {
+			// Full precision: rounding to 6 decimals (the default) makes pixel
+			// corners touch and yields self-intersecting rings.
 			// biome-ignore lint/suspicious/noExplicitAny: Leaflet toGeoJSON is untyped
-			const boundary = toMultiPolygon((layer as any).toGeoJSON())
+			const boundary = toMultiPolygon((layer as any).toGeoJSON(false))
 			if (boundary.coordinates.length === 0) throw new Error("empty geometry")
 			await dispatch(
 				updateClearCutGeometryThunk({
