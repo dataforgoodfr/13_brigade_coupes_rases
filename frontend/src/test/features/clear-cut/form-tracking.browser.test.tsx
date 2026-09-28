@@ -46,9 +46,7 @@ describe("From tracking", () => {
 		await expect.poll(() => field.findValue()).toBe("Test")
 		await field.resetToOriginal()
 		// The form updates after the click: wait for the value, do not read it once
-		await expect
-			.poll(() => field.findValue())
-			.toBe(formMock.response.weather)
+		await expect.poll(() => field.findValue()).toBe(formMock.response.weather)
 	})
 	it("Should  display apply latest button when current form is different from latest", async () => {
 		const { unmount } = await renderApp({
