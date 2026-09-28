@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { X } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { FormattedDate } from "react-intl"
 
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import {
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { ConfirmDialog } from "@/shared/components/ConfirmDialog"
 import { Loading } from "@/shared/components/Loading"
 import { Title } from "@/shared/components/typo/Title"
 import { UploadingProvider } from "@/shared/form/UploadingContext"
@@ -84,6 +85,7 @@ export function AsideForm({
 		}
 	}, [mapIsVisible, map, averageLat, averageLng])
 
+	const [confirmUpdate, setConfirmUpdate] = useState(false)
 	useEffect(() => {
 		if (value?.versionMismatchDisclaimerShown === false) {
 			const { dismiss } = toast({
@@ -92,9 +94,10 @@ export function AsideForm({
 				description: "Mettez à jour votre formulaire",
 				action: (
 					<Button
+						className="min-h-[44px]"
 						onClick={() => {
 							dismiss()
-							dispatch(clearCutsSlice.actions.replaceCurrentVersionByLatest())
+							setConfirmUpdate(true)
 						}}
 					>
 						Mettre à jour
@@ -102,7 +105,7 @@ export function AsideForm({
 				)
 			})
 		}
-	}, [toast, value, dispatch])
+	}, [toast, value])
 
 	return (
 		<div
@@ -111,6 +114,16 @@ export function AsideForm({
 				hidden: mobile && isEditingPerimeter
 			})}
 		>
+			<ConfirmDialog
+				open={confirmUpdate}
+				onOpenChange={setConfirmUpdate}
+				title="Mettre à jour le formulaire ?"
+				description="Une version plus récente a été enregistrée. Vos saisies non enregistrées sur ce formulaire seront remplacées par cette version."
+				confirmLabel="Mettre à jour"
+				onConfirm={() =>
+					dispatch(clearCutsSlice.actions.replaceCurrentVersionByLatest())
+				}
+			/>
 			<div
 				className={cn(
 					"pt-4 px-4 pb-1 border-b-1 flex align-middle justify-between",
@@ -128,7 +141,11 @@ export function AsideForm({
 						</span>
 					</div>
 				) : null}
-				<Link to="/clear-cuts">
+				<Link
+					to="/clear-cuts"
+					className="-m-2 flex h-11 w-11 shrink-0 items-center justify-center"
+					aria-label="Fermer le formulaire"
+				>
 					<X size={30} />
 				</Link>
 			</div>

@@ -586,6 +586,11 @@ describe("photo upload", () => {
 			img.getAttribute("src")?.includes("coupe-3")
 		)
 		await user.click(screen.getByLabelText(`Supprimer la photo ${third + 1}`))
+		// Going back keeps the photo
+		await user.click(await screen.findByRole("button", { name: "Retour" }))
+		expect(screen.getByText("3 photos")).toBeInTheDocument()
+		await user.click(screen.getByLabelText(`Supprimer la photo ${third + 1}`))
+		await user.click(await screen.findByRole("button", { name: "Supprimer" }))
 		expect(await screen.findByText("2 photos")).toBeInTheDocument()
 		const remaining = screen
 			.getAllByAltText(/^Prise de vue \d+$/)
