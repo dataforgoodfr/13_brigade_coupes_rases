@@ -194,3 +194,95 @@ def test_pipeline_override_requires_rights(db: Session, client: TestClient) -> N
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+# The south-west quarter of SQUARE: about 25 ha
+QUARTER = {
+    "type": "MultiPolygon",
+    "coordinates": [
+        [
+            [
+                [2.35, 48.85],
+                [2.3568, 48.85],
+                [2.3568, 48.8545],
+                [2.35, 48.8545],
+                [2.35, 48.85],
+            ]
+        ]
+    ],
+}
+
+
+def clear_cut_with_forest_areas(db: Session, client: TestClient, token: str) -> int:
+    """A clear cut on SQUARE with 60 + 30 ha of BD Forêt and 80 ha of zoning."""
+    clear_cut_id = first_clear_cut(db).id
+    response = client.patch(
+        f"/api/v1/clear-cuts/{clear_cut_id}",
+        json={"boundary": SQUARE},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+    # The request closed the session: reload the clear cut before changing it
+    clear_cut = db.get(ClearCut, clear_cut_id)
+    assert clear_cut is not None
+    clear_cut.bdf_resinous_area_hectare = 60
+    clear_cut.bdf_deciduous_area_hectare = 30
+    clear_cut.bdf_mixed_area_hectare = None
+    clear_cut.bdf_poplar_area_hectare = None
+    clear_cut.ecological_zoning_area_hectare = 80
+    db.commit()
+    return clear_cut_id
+
+
+def test_shrinking_boundary_scales_down_forest_areas(
+    db: Session, client: TestClient
+) -> None:
+    [_, token] = get_admin_user_token(client, db)
+    clear_cut_id = clear_cut_with_forest_areas(db, client, token)
+
+    response = client.patch(
+        f"/api/v1/clear-cuts/{clear_cut_id}",
+        json={"boundary": QUARTER},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    db.expire_all()
+    clear_cut = db.get(ClearCut, clear_cut_id)
+    assert clear_cut is not None
+    area = clear_cut.area_hectare
+    assert 20 < area < 30
+    assert clear_cut.bdf_resinous_area_hectare is not None
+    assert clear_cut.bdf_deciduous_area_hectare is not None
+    # Scaled together, so the resinous / deciduous split is kept
+    assert abs(clear_cut.bdf_resinous_area_hectare - area * 2 / 3) < 0.001
+    assert abs(clear_cut.bdf_deciduous_area_hectare - area / 3) < 0.001
+    assert clear_cut.bdf_mixed_area_hectare is None
+    assert clear_cut.ecological_zoning_area_hectare == area
+
+
+def test_boundary_above_forest_areas_keeps_them(
+    db: Session, client: TestClient
+) -> None:
+    [_, token] = get_admin_user_token(client, db)
+    clear_cut_id = clear_cut_with_forest_areas(db, client, token)
+    clear_cut = db.get(ClearCut, clear_cut_id)
+    assert clear_cut is not None
+    clear_cut.bdf_resinous_area_hectare = 10
+    clear_cut.bdf_deciduous_area_hectare = 5
+    clear_cut.ecological_zoning_area_hectare = 12
+    db.commit()
+
+    response = client.patch(
+        f"/api/v1/clear-cuts/{clear_cut_id}",
+        json={"boundary": QUARTER},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    db.expire_all()
+    clear_cut = db.get(ClearCut, clear_cut_id)
+    assert clear_cut is not None
+    assert clear_cut.bdf_resinous_area_hectare == 10
+    assert clear_cut.bdf_deciduous_area_hectare == 5
+    assert clear_cut.ecological_zoning_area_hectare == 12

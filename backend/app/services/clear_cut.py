@@ -4,7 +4,7 @@ from datetime import datetime
 from geoalchemy2 import Geography
 from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
 from shapely.geometry import shape
-from sqlalchemy import Row, cast, func, update
+from sqlalchemy import Row, case, cast, func, update
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import RowReturningQuery
 
@@ -94,13 +94,32 @@ def update_clear_cut_geometry(
         boundary = func.ST_Multi(
             func.ST_GeomFromText(shape(request.boundary.model_dump()).wkt, SRID)
         )
+        area = ST_Area(cast(boundary, Geography)) / 10000.0
+        # BD Forêt and ecological zoning areas come from the pipeline and cannot
+        # be recomputed here. When the perimeter shrinks below them, they are
+        # scaled down so the table constraints still hold.
+        bdf_columns = [
+            ClearCut.bdf_resinous_area_hectare,
+            ClearCut.bdf_deciduous_area_hectare,
+            ClearCut.bdf_mixed_area_hectare,
+            ClearCut.bdf_poplar_area_hectare,
+        ]
+        bdf_total = sum(func.coalesce(column, 0) for column in bdf_columns)
+        bdf_ratio = case((bdf_total > area, area / bdf_total), else_=1.0)
         db.execute(
             update(ClearCut)
             .where(ClearCut.id == clear_cut_id)
             .values(
-                boundary=boundary,
-                area_hectare=ST_Area(cast(boundary, Geography)) / 10000.0,
-                location=ST_Centroid(boundary),
+                {column: column * bdf_ratio for column in bdf_columns}
+                | {
+                    ClearCut.boundary: boundary,
+                    ClearCut.area_hectare: area,
+                    ClearCut.location: ST_Centroid(boundary),
+                    ClearCut.ecological_zoning_area_hectare: case(
+                        (ClearCut.ecological_zoning_area_hectare > area, area),
+                        else_=ClearCut.ecological_zoning_area_hectare,
+                    ),
+                }
             )
         )
         changed = True
