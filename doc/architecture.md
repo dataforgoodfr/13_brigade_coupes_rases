@@ -281,7 +281,7 @@ Authentification : JWT HS256 signés avec `JWT_SECRET_KEY` — jeton d'accès 60
 | `services/` | Logique métier et requêtes : `clear_cut_report.py` (sync, règles, assignation), `report_workflow.py` (actions du workflow), `clear_cut_form.py` (versions, verrouillage, ETag), `clear_cut_map.py` (carte et filtres), `user_auth.py` (jetons), `images.py` / `s3.py` (photos, S3 ou repli local signé). |
 | `schemas/` | Modèles Pydantic d'entrée et de sortie. |
 
-`seed_dev.py` construit le jeu de données de développement (quatre départements réels, comptes, signalements couvrant chaque statut) ; `seed_prd.py` ne crée que le référentiel et les règles. Après un changement de `models.py` : `make generate-migration` puis relire la migration.
+`seed_dev.py` construit le jeu de données de développement (quatre départements réels, comptes, signalements couvrant chaque statut) ; `seed_prd.py` ne crée que le référentiel, plus un premier administrateur si `SEED_ADMIN_EMAIL` et `SEED_ADMIN_PASSWORD` (12 caractères minimum) sont définis. Après un changement de `models.py` : `make generate-migration` puis relire la migration.
 
 Tests : `test/unit/` sans base, le reste avec la base `test` migrée (fixture `db`, réinitialisée à chaque test). Couverture minimale 70 % (`make test`).
 
