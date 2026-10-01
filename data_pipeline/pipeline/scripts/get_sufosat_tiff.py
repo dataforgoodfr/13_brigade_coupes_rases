@@ -23,6 +23,8 @@ EE_EXPORT_POLL_SECONDS = 20
 # 40 km × 40 km à 10 m en int16 → 32 Mo, sous le plafond (~48 Mo) de getDownloadURL
 DOWNLOAD_TILE_SIZE_METERS = 40_000
 DOWNLOAD_ATTEMPTS = 3
+# une tuile se télécharge d'ordinaire en moins de 15 s
+DOWNLOAD_TILE_TIMEOUT_SECONDS = 300
 
 
 class RaddVersion(TypedDict):
@@ -187,6 +189,40 @@ def merge_tiles(tile_paths: list[Path], output_path: Path) -> None:
             dataset.close()
 
 
+def download_tile(image: ee.Image, tile_region: ee.Geometry, tile_path: Path) -> None:
+    """Télécharge une tuile, en TimeoutError au-delà de DOWNLOAD_TILE_TIMEOUT_SECONDS.
+
+    L'URL est demandée à chaque tentative : celle d'une tentative précédente a
+    pu expirer (401). Le délai de `requests` ne porte que sur l'attente entre
+    deux paquets ; une réponse qui arrive au compte-gouttes est coupée ici.
+    """
+    download_url = (
+        image.toInt16()
+        .unmask(0)
+        .getDownloadURL(
+            {
+                "scale": EXPORT_SCALE_METERS,
+                "crs": EXPORT_CRS,
+                "region": tile_region,
+                "format": "GEO_TIFF",
+            }
+        )
+    )
+    deadline = time.monotonic() + DOWNLOAD_TILE_TIMEOUT_SECONDS
+    partial_path = tile_path.with_suffix(".part")
+    with requests.get(download_url, stream=True, timeout=60) as response:
+        response.raise_for_status()
+        with partial_path.open("wb") as partial:
+            for chunk in response.iter_content(chunk_size=1 << 20):
+                if time.monotonic() > deadline:
+                    raise TimeoutError(
+                        f"tile not downloaded within {DOWNLOAD_TILE_TIMEOUT_SECONDS} s"
+                    )
+                partial.write(chunk)
+    # le fichier final n'existe qu'une fois complet : la reprise s'y fie
+    partial_path.replace(tile_path)
+
+
 def download_ee_image_to_tiff(
     image: ee.Image, region: ee.Geometry, output_path: Path
 ) -> None:
@@ -231,25 +267,11 @@ def download_ee_image_to_tiff(
         if tile_path.exists():
             continue  # reprise d'un téléchargement interrompu
         tile_region = ee.Geometry.Rectangle([minx, miny, maxx, maxy], EXPORT_CRS, False)
-        download_url = (
-            image.toInt16()
-            .unmask(0)
-            .getDownloadURL(
-                {
-                    "scale": EXPORT_SCALE_METERS,
-                    "crs": EXPORT_CRS,
-                    "region": tile_region,
-                    "format": "GEO_TIFF",
-                }
-            )
-        )
         for attempt in range(1, DOWNLOAD_ATTEMPTS + 1):
             try:
-                response = requests.get(download_url, timeout=600)
-                response.raise_for_status()
-                tile_path.write_bytes(response.content)
+                download_tile(image, tile_region, tile_path)
                 break
-            except requests.RequestException as exc:
+            except (requests.RequestException, TimeoutError) as exc:
                 if attempt == DOWNLOAD_ATTEMPTS:
                     raise
                 logging.warning("Tile %s attempt %s failed: %s", index, attempt, exc)
