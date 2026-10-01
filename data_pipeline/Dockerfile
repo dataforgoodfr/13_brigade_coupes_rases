@@ -28,8 +28,9 @@ RUN /opt/conda/envs/py3_14/bin/poetry config virtualenvs.create false
 # Copie les fichiers de configuration Poetry (context = repo root)
 COPY data_pipeline/pyproject.toml data_pipeline/poetry.lock* ./
 
-# Installe les dépendances du projet dans py3_14
-RUN /opt/conda/envs/py3_14/bin/poetry install --no-interaction --no-ansi --no-root
+# Installe les dépendances du projet dans py3_14, sans le groupe dev : Poetry
+# partage cet environnement, et le virtualenv de pre-commit casse le sien
+RUN /opt/conda/envs/py3_14/bin/poetry install --only main --no-interaction --no-ansi --no-root
 
 # Copie le code du sous-projet pipeline
 COPY data_pipeline/ ./
