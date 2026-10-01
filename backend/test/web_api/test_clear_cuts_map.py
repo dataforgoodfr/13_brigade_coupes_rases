@@ -1,11 +1,18 @@
+import math
 from datetime import datetime
 from typing import Any
 
 import pytest
+import shapely
 from fastapi.testclient import TestClient
+from geoalchemy2.shape import from_shape
+from shapely.geometry import MultiPolygon, shape
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.models import SRID
+from app.services.clear_cut_report import sync_clear_cuts_reports
 from test.common.clear_cut import new_clear_cut_report
 
 MAP = "/api/v1/clear-cuts-map"
@@ -204,3 +211,65 @@ def test_get_clearcuts_map_sorted_by_first_cut_date(
 def test_invalid_sort_parameters_return_a_validation_error(client: TestClient) -> None:
     assert client.get(MAP, params={"sortBy": "city"}).status_code == 422
     assert client.get(MAP, params={"sortOrder": "sideways"}).status_code == 422
+
+
+def dense_boundary(vertices: int = 2000) -> MultiPolygon:
+    """Smooth ~100 m radius ring: almost every vertex is redundant at 1 m."""
+    lng, lat = 2.38, 48.879
+    ring = [
+        (
+            lng + 0.00136 * math.cos(2 * math.pi * i / vertices),
+            lat + 0.0009 * math.sin(2 * math.pi * i / vertices),
+        )
+        for i in range(vertices)
+    ]
+    return MultiPolygon([(ring + ring[:1],)])
+
+
+def test_map_previews_carry_simplified_boundaries(
+    client: TestClient, db: Session
+) -> None:
+    report = new_clear_cut_report()
+    original = dense_boundary()
+    report.clear_cuts[0].boundary = from_shape(original, srid=SRID)  # type: ignore[assignment]
+    db.add(report)
+    db.commit()
+    report_id = report.id
+    sync_clear_cuts_reports(db)
+
+    [preview] = get_map(client, inReportsIds=[report_id])["previews"]
+    simplified = shape(preview["clearCuts"][0]["boundary"])
+    detail = client.get(f"{MAP}/{report_id}").json()
+    full = shape(detail["clearCuts"][0]["boundary"])
+
+    assert simplified.geom_type == "MultiPolygon"
+    assert shapely.get_num_coordinates(simplified) < 0.1 * 2000
+    # ~1 m in degrees at this latitude, with margin for the projection
+    assert simplified.hausdorff_distance(original) < 2e-5
+    assert shapely.get_num_coordinates(full) == 2001
+
+
+def test_map_query_count_does_not_grow_with_previews(
+    client: TestClient, db: Session
+) -> None:
+    reports = [new_clear_cut_report() for _ in range(6)]
+    db.add_all(reports)
+    db.commit()
+    ids = [report.id for report in reports]
+    sync_clear_cuts_reports(db)
+
+    def count_queries(report_ids: list[int]) -> int:
+        statements: list[str] = []
+
+        def record(*args: Any) -> None:
+            statements.append(args[2])
+
+        event.listen(db.get_bind(), "before_cursor_execute", record)
+        try:
+            previews = get_map(client, inReportsIds=report_ids)["previews"]
+        finally:
+            event.remove(db.get_bind(), "before_cursor_execute", record)
+        assert len(previews) == len(report_ids)
+        return len(statements)
+
+    assert count_queries(ids) == count_queries(ids[:1])

@@ -9,18 +9,22 @@ from geoalchemy2.functions import (
     ST_ClusterWithin,
     ST_Contains,
     ST_MakeEnvelope,
+    ST_Multi,
     ST_NumGeometries,
     ST_SetSRID,
+    ST_SimplifyPreserveTopology,
+    ST_Transform,
 )
 from geojson_pydantic import Point
 from sqlalchemy import and_, case, func, or_
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query, Session, defer, selectinload
 
 from app.common.errors import AppHTTPException
 from app.config import settings
 from app.models import (
     SRID,
     City,
+    ClearCut,
     ClearCutReport,
     Department,
     Rules,
@@ -38,6 +42,11 @@ from app.services.rules import (
 )
 
 logger = getLogger(__name__)
+
+# Lambert-93, metric over metropolitan France
+METRIC_SRID = 2154
+# Same tolerance as the frontend's simplification when the edition starts
+MAP_BOUNDARY_TOLERANCE_METERS = 1.0
 
 
 class GeoBounds(BaseSchema):
@@ -281,12 +290,56 @@ def build_clearcuts_map(
     sort_direction = (
         sort_column.asc() if filters.sort_order == "asc" else sort_column.desc()
     )
-    previews = reports_with_filters.order_by(sort_direction).limit(30).all()
+    previews = (
+        reports_with_filters.options(
+            # One query per relation instead of one per preview; the full
+            # geometries are not needed, simplified_boundaries replaces them
+            selectinload(ClearCutReport.clear_cuts).options(
+                defer(ClearCut.boundary), defer(ClearCut.boundary_json)
+            ),
+            selectinload(ClearCutReport.rules),
+        )
+        .order_by(sort_direction)
+        .limit(30)
+        .all()
+    )
+    boundaries = simplified_boundaries(
+        db, [cut.id for report in previews for cut in report.clear_cuts]
+    )
     map_response = ClearCutMapResponseSchema(
         points=clusterized_points,
-        previews=list(map(report_to_report_preview_schema, previews)),
+        previews=[
+            report_to_report_preview_schema(report, boundaries) for report in previews
+        ],
     )
     return map_response
+
+
+def simplified_boundaries(db: Session, clear_cut_ids: list[int]) -> dict[int, str]:
+    """GeoJSON boundaries simplified to MAP_BOUNDARY_TOLERANCE_METERS.
+
+    The map draws the previews' boundaries and the perimeter edition starts
+    from them, simplified by the frontend with the same tolerance: sending
+    every vertex (~1 900 per contour) only costs database time and transfer.
+    """
+    if not clear_cut_ids:
+        return {}
+    # ST_Multi: the simplification can return a Polygon from a MultiPolygon
+    simplified = ST_Multi(
+        ST_Transform(
+            ST_SimplifyPreserveTopology(
+                ST_Transform(ClearCut.boundary, METRIC_SRID),
+                MAP_BOUNDARY_TOLERANCE_METERS,
+            ),
+            SRID,
+        )
+    )
+    rows = (
+        db.query(ClearCut.id, ST_AsGeoJSON(simplified))
+        .filter(ClearCut.id.in_(clear_cut_ids))
+        .all()
+    )
+    return {clear_cut_id: geojson for clear_cut_id, geojson in rows}
 
 
 def process_points_from_reports(
