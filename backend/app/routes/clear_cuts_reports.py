@@ -40,17 +40,18 @@ logger = getLogger(__name__)
 router = APIRouter(prefix="/api/v1/clear-cuts-reports", tags=["ClearcutsReports"])
 
 
-# TODO: (unsecure) Workaround to sync the clear cuts after seeding
-@router.post("/sync-reports", status_code=204)
-def sync_clear_cut_reports(db: Session = db_session) -> None:
-    sync_clear_cuts_reports(db)
-
-
 def authenticate(x_imports_token: str = Header(default="")) -> None:
     if x_imports_token != settings.IMPORTS_TOKEN or x_imports_token == "":
         raise AppHTTPException(
             status_code=401, type="INVALID_TOKEN", detail="Invalid token"
         )
+
+
+# Recompute report aggregates and rule matches after a data load (same token
+# as the imports)
+@router.post("/sync-reports", status_code=204, dependencies=[Depends(authenticate)])
+def sync_clear_cut_reports(db: Session = db_session) -> None:
+    sync_clear_cuts_reports(db)
 
 
 @router.post(
