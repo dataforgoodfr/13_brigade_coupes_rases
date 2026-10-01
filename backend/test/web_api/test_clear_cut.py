@@ -20,6 +20,17 @@ def test_endpoint_authentication(client: TestClient) -> None:
     ensure_authentication(client, "post", "/api/v1/clear-cuts-reports")
 
 
+def test_sync_reports_requires_imports_token(client: TestClient, db: Session) -> None:
+    ensure_authentication(client, "post", "/api/v1/clear-cuts-reports/sync-reports")
+
+    token = get_admin_user_token(client, db)[1]
+    response = client.post(
+        "/api/v1/clear-cuts-reports/sync-reports",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 401
+
+
 def test_post_report_success(client: TestClient) -> None:
     report_data = {
         "slopeAreaHectare": 6.5,
