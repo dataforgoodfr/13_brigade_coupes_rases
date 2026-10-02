@@ -1,4 +1,5 @@
 import datetime
+from collections.abc import Mapping
 from logging import getLogger
 
 from geojson_pydantic import MultiPolygon, Point
@@ -101,14 +102,20 @@ def sum_area(clear_cuts: list[ClearCut], area_attr: str) -> float:
 
 def report_to_report_preview_schema(
     report: ClearCutReport,
+    boundaries: Mapping[int, str] | None = None,
 ) -> ClearCutReportPreviewSchema:
+    """`boundaries` replaces a clear cut's GeoJSON boundary, by clear cut id."""
     return ClearCutReportPreviewSchema(
         id=str(report.id),
         clear_cuts=[
             ClearCutPreviewSchema(
                 id=str(clear_cut.id),
                 area_hectare=clear_cut.area_hectare,
-                boundary=MultiPolygon.model_validate_json(clear_cut.boundary_json),
+                boundary=MultiPolygon.model_validate_json(
+                    boundaries[clear_cut.id]
+                    if boundaries is not None
+                    else clear_cut.boundary_json
+                ),
                 observation_start_date=clear_cut.observation_start_date.date(),
                 observation_end_date=clear_cut.observation_end_date.date(),
                 ecological_zoning_ids=[
