@@ -32,7 +32,8 @@ class Results:
 
     def record(self, name: str, started: float, response: httpx.Response) -> None:
         self.durations[name].append(time.perf_counter() - started)
-        if response.status_code >= 400:
+        # a redirect means a wrong path: the request measured nothing useful
+        if response.status_code >= 300:
             self.errors.append(f"{name}: HTTP {response.status_code}")
 
 
@@ -86,7 +87,7 @@ async def virtual_user(
                     client,
                     results,
                     "formulaire",
-                    f"/api/v1/clear-cuts-reports/{report_id}/forms/",
+                    f"/api/v1/clear-cuts-reports/{report_id}/forms",
                     {"page": 0, "size": 1},
                 )
             elapsed = time.perf_counter() - started
