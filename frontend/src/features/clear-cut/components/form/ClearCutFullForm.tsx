@@ -15,6 +15,7 @@ import {
 	DialogTitle,
 	DialogTrigger
 } from "@/components/ui/dialog"
+import { PendingFormNotice } from "@/features/clear-cut/components/PendingFormBadge"
 import {
 	type ClearCutForm,
 	type ClearCutFormVersions,
@@ -141,9 +142,9 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 						}
 					: {
 							id: "form-edition-error",
-							title: "Sauvegarde impossible hors connexion",
+							title: "Saisie gardée sur cet appareil",
 							description:
-								"Vos saisies restent enregistrées sur cet appareil. Réessayez une fois le réseau revenu."
+								"Hors connexion : elle sera envoyée automatiquement au retour du réseau."
 						}
 			)
 		}
@@ -201,9 +202,10 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 							{!isOnline && (
 								<p className="text-sm text-amber-600 font-medium text-center py-1">
 									📡 Hors connexion — vos saisies sont enregistrées sur cet
-									appareil.
+									appareil. « Sauvegarder » les enverra au retour du réseau.
 								</p>
 							)}
+							<PendingFormNotice reportId={current.report.id} />
 							<Button
 								type="submit"
 								variant="outline"

@@ -3,6 +3,7 @@ import { ChevronRight, Clock, FileWarning, LogOut } from "lucide-react"
 import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
+import { PendingFormBadge } from "@/features/clear-cut/components/PendingFormBadge"
 import {
 	getMyAssignedReportsThunk,
 	selectMyAssignedReports
@@ -112,6 +113,8 @@ export function MyCuts() {
 										{report.department.code}
 									</div>
 								</div>
+
+								<PendingFormBadge reportId={report.id} />
 
 								{isPendingAssignment && (
 									<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">

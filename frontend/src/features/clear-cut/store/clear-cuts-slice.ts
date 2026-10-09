@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { isEqual, isUndefined, uniqBy } from "es-toolkit"
-import { HTTPError } from "ky"
+import { HTTPError, type KyInstance } from "ky"
 import { useEffect, useRef } from "react"
 
 import type { FiltersRequest } from "@/features/clear-cut/store/filters"
@@ -16,6 +16,7 @@ import type { RequestedContent } from "@/shared/api/types"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { localStorageRepository } from "@/shared/localStorage"
+import { countPendingPhotos } from "@/shared/pendingPhotos"
 import {
 	selectDepartmentsByIds,
 	selectEcologicalZoningByIds,
@@ -45,6 +46,11 @@ import {
 	type MultiPolygon,
 	myAssignedReportsResponseSchema
 } from "./clear-cuts"
+import {
+	clearFormPending,
+	getPendingForms,
+	setFormPending
+} from "./pendingForms"
 
 const formStorage =
 	localStorageRepository<ClearCutFormVersions>("clear-cut-form")
@@ -96,94 +102,103 @@ export const persistClearCutCurrentForm = createAppAsyncThunk<
 	return form
 })
 
+type FormThunkApi = {
+	getState: () => RootState
+	extra: { api: () => KyInstance }
+}
+
+/**
+ * The report from the server with its latest form, merged with the copy kept
+ * on the device (unless `hasBeenCreated`: the server copy is then the truth).
+ */
+async function loadClearCutFormVersions(
+	{ id, hasBeenCreated }: { id: string; hasBeenCreated?: boolean },
+	{ getState, extra: { api } }: FormThunkApi
+): Promise<ClearCutFormVersions> {
+	// Get the base report data (full endpoint returns affectedUser/assignmentRequestedBy)
+	const reportResult = await api().get(`api/v1/clear-cuts-reports/${id}`).json()
+	const report = clearCutReportResponseSchema.parse(reportResult)
+	const state = getState()
+	const baseReport = mapReport(state, report)
+
+	// Field forms are only served to connected accounts: a visitor sees the
+	// report data, not the volunteer's notes
+	const formsResult = selectConnectedMe(state)
+		? clearCutFormsResponseSchema.parse(
+				await api()
+					.get(`api/v1/clear-cuts-reports/${id}/forms`, {
+						searchParams: { page: "0", size: "1" }
+					})
+					.json()
+			)
+		: { content: [] }
+	const ecologicalZonings = uniqBy(
+		baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
+		(e) => e.id
+	)
+
+	const computedProperties = {
+		hasEcologicalZonings: ecologicalZonings.length > 0
+	}
+	let formReport: ClearCutForm
+	// If forms exist, merge the latest form data with the base report
+	if (formsResult.content && formsResult.content.length > 0) {
+		const form = formsResult.content[0]
+		formReport = {
+			report: baseReport,
+			...form,
+			ecologicalZonings,
+			...computedProperties
+		}
+	} else {
+		formReport = clearCutFormSchema.parse({
+			report: baseReport,
+			reportId: baseReport.id,
+			...computedProperties
+		} as ClearCutForm)
+	}
+
+	const versions = formStorage.getFromLocalStorageById(
+		formReport.report.id,
+		clearCutFormVersionsSchema
+	)
+
+	// Always use the fresh report from the server (assignment status, userId, etc.)
+	// while keeping user's locally-cached form field edits.
+	const withFreshReport = (cached: ClearCutForm) => ({
+		...cached,
+		report: formReport.report
+	})
+
+	const form = (type: "current" | "original") => {
+		if (hasBeenCreated) return formReport
+		const cached = versions?.[type]
+		return cached ? withFreshReport(cached) : formReport
+	}
+	const current = form("current")
+	const differentFromLatest = current.etag !== formReport.etag
+	const latest = differentFromLatest === true ? formReport : undefined
+
+	return {
+		original: form("original"),
+		current,
+		latest,
+		versionMismatchDisclaimerShown:
+			hasBeenCreated ?? (!differentFromLatest || isUndefined(versions))
+	}
+}
+
 export const getClearCutFormThunk = createAppAsyncThunk<
 	ClearCutFormVersions,
 	{ id: string; hasBeenCreated?: boolean }
 >(
 	"getClearCutForm",
-	withEntityStorageActionCreator(
-		async ({ id, hasBeenCreated }, { getState, extra: { api } }) => {
-			// Get the base report data (full endpoint returns affectedUser/assignmentRequestedBy)
-			const reportResult = await api()
-				.get(`api/v1/clear-cuts-reports/${id}`)
-				.json()
-			const report = clearCutReportResponseSchema.parse(reportResult)
-			const state = getState()
-			const baseReport = mapReport(state, report)
-
-			// Field forms are only served to connected accounts: a visitor sees the
-			// report data, not the volunteer's notes
-			const formsResult = selectConnectedMe(state)
-				? clearCutFormsResponseSchema.parse(
-						await api()
-							.get(`api/v1/clear-cuts-reports/${id}/forms`, {
-								searchParams: { page: "0", size: "1" }
-							})
-							.json()
-					)
-				: { content: [] }
-			const ecologicalZonings = uniqBy(
-				baseReport.clearCuts.flatMap((c) => c.ecologicalZonings),
-				(e) => e.id
-			)
-
-			const computedProperties = {
-				hasEcologicalZonings: ecologicalZonings.length > 0
-			}
-			let formReport: ClearCutForm
-			// If forms exist, merge the latest form data with the base report
-			if (formsResult.content && formsResult.content.length > 0) {
-				const form = formsResult.content[0]
-				formReport = {
-					report: baseReport,
-					...form,
-					ecologicalZonings,
-					...computedProperties
-				}
-			} else {
-				formReport = clearCutFormSchema.parse({
-					report: baseReport,
-					reportId: baseReport.id,
-					...computedProperties
-				} as ClearCutForm)
-			}
-
-			const versions = formStorage.getFromLocalStorageById(
-				formReport.report.id,
-				clearCutFormVersionsSchema
-			)
-
-			// Always use the fresh report from the server (assignment status, userId, etc.)
-			// while keeping user's locally-cached form field edits.
-			const withFreshReport = (cached: ClearCutForm) => ({
-				...cached,
-				report: formReport.report
-			})
-
-			const form = (type: "current" | "original") => {
-				if (hasBeenCreated) return formReport
-				const cached = versions?.[type]
-				return cached ? withFreshReport(cached) : formReport
-			}
-			const current = form("current")
-			const differentFromLatest = current.etag !== formReport.etag
-			const latest = differentFromLatest === true ? formReport : undefined
-
-			return {
-				original: form("original"),
-				current,
-				latest,
-				versionMismatchDisclaimerShown:
-					hasBeenCreated ?? (!differentFromLatest || isUndefined(versions))
-			}
-		},
-		{
-			getId: (v) => v.id,
-			storage: formStorage,
-			schema: clearCutFormVersionsSchema,
-			type: "controlled"
-		}
-	)
+	withEntityStorageActionCreator(loadClearCutFormVersions, {
+		getId: (v) => v.id,
+		storage: formStorage,
+		schema: clearCutFormVersionsSchema,
+		type: "controlled"
+	})
 )
 
 export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
@@ -259,6 +274,11 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 				})
 				.json()
 		} catch (e) {
+			if (isNetworkError(e)) {
+				// Kept on the device: sent as soon as the network is back
+				setFormPending(reportId, "offline")
+				throw e
+			}
 			if (
 				e instanceof HTTPError &&
 				e.response.status === 409 &&
@@ -269,7 +289,68 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 			throw e
 		}
 
+		await settlePendingForm(reportId)
 		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
+/** Once a form reached the server, it only waits for its offline photos. */
+async function settlePendingForm(reportId: string) {
+	const photos = await countPendingPhotos(reportId).catch(() => 0)
+	if (photos > 0) setFormPending(reportId, "photos")
+	else clearFormPending(reportId)
+}
+
+/**
+ * Send the forms saved without network. Each one is sent with the version it
+ * was edited from: if someone saved a newer one meanwhile, the server refuses
+ * it and the volunteer chooses when opening the report.
+ */
+export const sendPendingFormsThunk = createAppAsyncThunk<void, void>(
+	"sendPendingForms",
+	async (_, thunkApi) => {
+		const { getState, dispatch, extra } = thunkApi
+		for (const [reportId, reason] of Object.entries(getPendingForms())) {
+			// "photos": already sent, sent again once its photos have left;
+			// "conflict": waits for the volunteer
+			if (reason !== "offline") continue
+			const versions = formStorage.getFromLocalStorageById(
+				reportId,
+				clearCutFormVersionsSchema
+			)
+			if (isUndefined(versions)) {
+				clearFormPending(reportId)
+				continue
+			}
+			try {
+				await extra
+					.api()
+					.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
+						json: clearCutFormCreateSchema.parse(versions.current),
+						headers: { etag: versions.current.etag }
+					})
+					.json()
+			} catch (e) {
+				// Still no network: stop, the next "online" event will retry
+				if (isNetworkError(e)) return
+				if (e instanceof HTTPError && e.response.status === 409) {
+					setFormPending(reportId, "conflict")
+				}
+				// Other refusals (locked form, lost assignment) stay flagged
+				continue
+			}
+			await settlePendingForm(reportId)
+			// Replace the device copy by the version just created
+			if (selectDetail(getState()).value?.current.report.id === reportId) {
+				dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+			} else {
+				const fresh = await loadClearCutFormVersions(
+					{ id: reportId, hasBeenCreated: true },
+					thunkApi
+				).catch(() => undefined)
+				if (fresh) formStorage.setToLocalStorageById(reportId, fresh)
+			}
+		}
 	}
 )
 
@@ -279,11 +360,23 @@ export const getMyAssignedReportsThunk = createAppAsyncThunk<
 >(
 	"getMyAssignedReports",
 	async ({ page, size }, { getState, extra: { api } }) => {
-		const result = await api()
-			.get("api/v1/clear-cuts-reports/", {
-				searchParams: { page, size, assigned_to_me: true }
-			})
-			.json()
+		let result: unknown
+		try {
+			result = await api()
+				.get("api/v1/clear-cuts-reports/", {
+					searchParams: { page, size, assigned_to_me: true }
+				})
+				.json()
+		} catch (e) {
+			if (!isNetworkError(e)) throw e
+			// Offline: the reports kept on the device that are assigned to me
+			const me = selectConnectedMe(getState())
+			const content = formStorage
+				.getValuesFromStorage(clearCutFormVersionsSchema)
+				.map((f) => f.current.report)
+				.filter((report) => !!me && report.userId === me.id)
+			return { content, totalCount: content.length }
+		}
 		const parsed = myAssignedReportsResponseSchema.parse(result)
 		const state = getState()
 		const reports = parsed.content.map((report) => mapReport(state, report))
