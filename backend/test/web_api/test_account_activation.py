@@ -110,3 +110,16 @@ def test_activating_a_registered_account_notifies_the_volunteer(
 
         client.put(url, json={"isActive": True}, headers=headers)
         send_mail.assert_called_once()
+
+
+def test_admin_recreates_a_deleted_account(client: TestClient, db: Session) -> None:
+    headers = admin_headers(client, db)
+    user_id, _ = create_account(client, headers)
+    client.delete(f"{USERS}{user_id}", headers=headers)
+
+    recreated_id, send_mail = create_account(client, headers)
+
+    send_mail.assert_called_once()
+    assert recreated_id == user_id
+    response = client.get(f"{USERS}{user_id}", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
