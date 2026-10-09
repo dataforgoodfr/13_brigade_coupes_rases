@@ -28,7 +28,8 @@ logger = getLogger(__name__)
 def query_aggregated_clear_cuts_grouped_by_report_id(
     db: Session, rules: AllRules
 ) -> Query[Any]:
-    return (
+    # Too many columns for SQLAlchemy's typed overloads: the query is untyped
+    query: Query[Any] = (
         db.query(
             ST_Centroid(ST_Multi(ST_Union(ClearCut.location))).label(
                 "average_location"
@@ -70,6 +71,7 @@ def query_aggregated_clear_cuts_grouped_by_report_id(
         .join(ClearCutEcologicalZoning, ClearCut.ecological_zonings, isouter=True)
         .group_by(ClearCut.report_id)
     )
+    return query
 
 
 def query_reports_with_additional_data(
