@@ -6,7 +6,7 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models import User
+from app.models import Department, User
 from app.services.user_auth import ALGORITHM, SECRET_KEY, create_access_token
 from test.common.user import create_user, new_user
 
@@ -120,6 +120,62 @@ def test_register_refuses_an_existing_login_or_email(
 
     assert same_email.status_code == status.HTTP_409_CONFLICT
     assert same_login.status_code == status.HTTP_409_CONFLICT
+
+
+def deleted_user(db: Session, email: str, login: str) -> User:
+    user = create_user(db, email=email, login=login)
+    user.departments.append(Department(code="48", name="Lozère"))
+    user.deleted_at = datetime.now()
+    db.commit()
+    return user
+
+
+def test_register_again_after_deletion(client: TestClient, db: Session) -> None:
+    former_id = deleted_user(db, "parti@example.com", "parti").id
+
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "first_name": "Paul",
+            "last_name": "Revenu",
+            "email": "parti@example.com",
+            "login": "parti",
+            "password": "nouveau-mdp",
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    db.expire_all()
+    former = db.get(User, former_id)
+    assert former is not None
+    assert former.deleted_at is None
+    assert former.first_name == "Paul"
+    assert former.departments == []
+    login = client.post(
+        "/api/v1/token",
+        data={"username": "parti@example.com", "password": "nouveau-mdp"},
+    )
+    assert login.json()["detail"]["type"] == "USER_INACTIVE"
+
+
+def test_register_refuses_a_login_kept_by_an_active_account(
+    client: TestClient, db: Session
+) -> None:
+    deleted_user(db, "parti@example.com", "parti")
+    create_user(db, email="actif@example.com", login="actif")
+
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "first_name": "Paul",
+            "last_name": "Revenu",
+            "email": "parti@example.com",
+            "login": "actif",
+            "password": "nouveau-mdp",
+        },
+    )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
 
 
 def test_reset_password_rejects_bad_tokens(client: TestClient, db: Session) -> None:

@@ -4,13 +4,13 @@ import jwt
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.orm import Session
 
-from app.common.errors import AppHTTPException
 from app.deps import db_session
 from app.models import User
 from app.schemas.auth import ForgotPasswordSchema, RegisterSchema, ResetPasswordSchema
 from app.schemas.user import UserResponseSchema, user_to_user_response_schema
 from app.services.email import send_reset_password_email
 from app.services.get_password_hash import get_password_hash
+from app.services.user import reusable_account
 from app.services.user_auth import (
     ALGORITHM,
     PASSWORD_TOKEN_LIFETIMES,
@@ -23,29 +23,17 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 @router.post("/register", response_model=UserResponseSchema, status_code=201)
 def register(user_data: RegisterSchema, db: Session = db_session) -> UserResponseSchema:
-    existing_user = (
-        db.query(User)
-        .filter((User.email == user_data.email) | (User.login == user_data.login))
-        .first()
-    )
-    if existing_user and existing_user.deleted_at is None:
-        raise AppHTTPException(
-            status_code=409,
-            type="USER_ALREADY_EXISTS",
-            detail="A user already has the same login or the same email",
-        )
-
-    new_user = User(
-        first_name=user_data.first_name,
-        last_name=user_data.last_name,
-        email=user_data.email,
-        login=user_data.login,
-        password=get_password_hash(user_data.password),
-        role="volunteer",  # default role
-        is_active=False,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-    )
+    new_user = reusable_account(db, user_data.email, user_data.login)
+    new_user.first_name = user_data.first_name
+    new_user.last_name = user_data.last_name
+    new_user.email = user_data.email
+    new_user.login = user_data.login
+    new_user.password = get_password_hash(user_data.password)
+    new_user.role = "volunteer"
+    # An administrator validates the account first
+    new_user.is_active = False
+    new_user.created_at = datetime.now()
+    new_user.updated_at = datetime.now()
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

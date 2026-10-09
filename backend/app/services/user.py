@@ -22,20 +22,31 @@ from app.services.get_password_hash import get_password_hash
 logger = getLogger(__name__)
 
 
-def create_user(db: Session, user: UserUpdateSchema) -> User:
-    existing_user = (
-        db.query(User)
-        .filter(or_(User.email == user.email, User.login == user.login))
-        .first()
-    )
-    password = secrets.token_urlsafe(10)
-    new_user: User = existing_user if existing_user is not None else User()
-    if existing_user is not None and existing_user.deleted_at is None:
+def reusable_account(db: Session, email: str, login: str) -> User:
+    """A blank account for this email and login.
+
+    Email and login stay unique once an account is deleted: the deleted
+    account holding them is taken over, without its former departments.
+    """
+    holders = db.query(User).filter(or_(User.email == email, User.login == login)).all()
+    # Two deleted accounts would each keep one of the two values
+    if any(holder.deleted_at is None for holder in holders) or len(holders) > 1:
         raise AppHTTPException(
             status_code=409,
             type="USER_ALREADY_EXISTS",
             detail="A user already has the same login or the same email",
         )
+    if not holders:
+        return User()
+    account = holders[0]
+    account.deleted_at = None
+    account.departments = []
+    return account
+
+
+def create_user(db: Session, user: UserUpdateSchema) -> User:
+    new_user = reusable_account(db, user.email, user.login)
+    password = secrets.token_urlsafe(10)
     new_user.created_at = datetime.now()
     new_user.updated_at = datetime.now()
     new_user.first_name = user.first_name
