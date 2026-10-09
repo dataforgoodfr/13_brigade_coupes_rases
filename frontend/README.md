@@ -37,8 +37,8 @@ Pour tester sur un téléphone :
 
 ## Configuration VS Code
 
-Installer les extensions listées dans
-[.vscode/extensions.json](../.vscode/extensions.json), puis utiliser les
+Installer les extensions Biome (`biomejs.biome`) et Tailwind CSS IntelliSense
+(`bradlc.vscode-tailwindcss`), puis utiliser les
 [réglages du dossier](./.vscode/settings.json).
 
 ## Choix techniques
