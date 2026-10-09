@@ -269,17 +269,22 @@ def build_clearcuts_map(
                             )
                         ).label("cluster"),
                     ).subquery()
+                    cluster = clusters.c.cluster
                     clusterized_points = ClusterizedPointsResponseSchema(
                         total=reports_cnt,
                         content=[
                             CountedPoint(
-                                count=row[0], point=Point.model_validate_json(row[1])
+                                count=count,
+                                point=Point.model_validate_json(centroid),
+                                bounds=bounds if count > 1 else None,
                             )
-                            for row in db.query(
-                                ST_NumGeometries(clusters.c.cluster).label(
-                                    "points_cnt"
-                                ),
-                                ST_AsGeoJSON(ST_Centroid(clusters.c.cluster)),
+                            for count, centroid, *bounds in db.query(
+                                ST_NumGeometries(cluster),
+                                ST_AsGeoJSON(ST_Centroid(cluster)),
+                                func.ST_XMin(cluster),
+                                func.ST_YMin(cluster),
+                                func.ST_XMax(cluster),
+                                func.ST_YMax(cluster),
                             ).all()
                         ],
                     )

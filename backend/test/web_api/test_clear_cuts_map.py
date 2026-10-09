@@ -55,6 +55,21 @@ def test_wide_bounds_cluster_the_points(client: TestClient, db: Session) -> None
     assert sum(point["count"] for point in data["points"]["content"]) == total
 
 
+def test_clusters_carry_the_bounds_of_their_points(
+    client: TestClient, db: Session
+) -> None:
+    content = get_map(client, withPoints=True, **FRANCE)["points"]["content"]
+
+    clusters = [point for point in content if point["count"] > 1]
+    assert clusters
+    for cluster in clusters:
+        west, south, east, north = cluster["bounds"]
+        lng, lat = cluster["point"]["coordinates"]
+        assert west <= lng <= east and south <= lat <= north
+        assert west < east or south < north
+    assert all(point.get("bounds") is None for point in content if point["count"] == 1)
+
+
 def test_narrow_bounds_keep_individual_points(client: TestClient, db: Session) -> None:
     everything = get_map(client, withPoints=True)
     first = everything["previews"][0]["averageLocation"]["coordinates"]
