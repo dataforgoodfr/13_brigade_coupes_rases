@@ -125,9 +125,13 @@ def query_clearcuts_filtered(db: Session, filters: Filters | None) -> Query[Any]
         return reports
 
     if filters.in_reports_ids:
-        reports = reports.filter(ClearCutReport.id.in_(filters.in_reports_ids))
+        reports = reports.filter(
+            ClearCutReport.id.in_(map(int, filters.in_reports_ids))
+        )
     if filters.out_reports_ids:
-        reports = reports.filter(ClearCutReport.id.notin_(filters.out_reports_ids))
+        reports = reports.filter(
+            ClearCutReport.id.notin_(map(int, filters.out_reports_ids))
+        )
     if filters.bounds is not None:
         envelope = ST_MakeEnvelope(
             filters.bounds.south_west_longitude,

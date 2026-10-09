@@ -102,7 +102,7 @@ def get_users(
     if departments_ids is not None and len(departments_ids) > 0:
         matching_departments = (
             db.query(user_department)
-            .filter(user_department.c.department_id.in_(departments_ids))
+            .filter(user_department.c.department_id.in_(map(int, departments_ids)))
             .subquery()
         )
         query = query.join(matching_departments)
@@ -156,7 +156,9 @@ def update_user(id: int, user_in: UserUpdateSchema, db: Session) -> User:
             user_db.departments = []
             for department_id in value:
                 department_db = (
-                    db.query(Department).filter(Department.id == department_id).first()
+                    db.query(Department)
+                    .filter(Department.id == int(department_id))
+                    .first()
                 )
                 if department_db is None:
                     raise AppHTTPException(
@@ -182,6 +184,8 @@ def get_user_by_email(db: Session, email: str) -> User | None:
 
 def update_me(db: Session, user: User, request: MeUpdateSchema) -> None:
     user.favorites = (
-        db.query(ClearCutReport).filter(ClearCutReport.id.in_(request.favorites)).all()
+        db.query(ClearCutReport)
+        .filter(ClearCutReport.id.in_(map(int, request.favorites)))
+        .all()
     )
     db.commit()

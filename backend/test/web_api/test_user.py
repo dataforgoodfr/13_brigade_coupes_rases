@@ -147,6 +147,26 @@ def test_update_user(client: TestClient, db: Session) -> None:
     assert data["firstName"] == "Sorenza"
 
 
+def test_update_user_departments(client: TestClient, db: Session) -> None:
+    token = get_admin_user_token(client, db)[1]
+    headers = {"Authorization": f"Bearer {token}"}
+    user = new_user(email="moved@volunteer.com")
+    department = Department(code="48", name="Lozère")
+    db.add_all([user, department])
+    db.commit()
+    user_id, department_id = str(user.id), str(department.id)
+
+    response = client.put(
+        f"/api/v1/users/{user_id}",
+        json={"departments": [department_id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 204
+    data = client.get(f"/api/v1/users/{user_id}", headers=headers).json()
+    assert data["departments"] == [department_id]
+
+
 def test_get_users(client: TestClient, db: Session) -> None:
     token = get_admin_user_token(client, db)[1]
     user = new_user(login="ABC", email="ABC@ABC.com")

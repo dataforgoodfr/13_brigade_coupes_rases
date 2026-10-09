@@ -23,10 +23,10 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
 
-import psycopg2
-import psycopg2.extras
+import psycopg
 import requests
 from dotenv import load_dotenv
+from psycopg.rows import dict_row
 from pyairtable import Api
 from schemas import CLEAR_CUT_REPORTS_FIELDS, USERS_FIELDS
 
@@ -66,13 +66,12 @@ def _serialize_record(row: dict) -> dict:
 
 
 def fetch_from_db(sql: str) -> list[dict]:
-    conn = psycopg2.connect(DATABASE_URL)
-    try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(sql)
-            return [_serialize_record(dict(row)) for row in cur.fetchall()]
-    finally:
-        conn.close()
+    with (
+        psycopg.connect(DATABASE_URL) as conn,
+        conn.cursor(row_factory=dict_row) as cur,
+    ):
+        cur.execute(sql)
+        return [_serialize_record(row) for row in cur.fetchall()]
 
 
 def _find_table(api: Api, base_id: str, name_or_id: str):
