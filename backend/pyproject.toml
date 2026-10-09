@@ -29,7 +29,7 @@ fastapi = "^0.143.0"
 sqlalchemy = "^2.1.4"
 psycopg = { extras = ["binary"], version = "^3.3.6" }
 pydantic-settings = "^2.7.1"
-uvicorn = "^0.53.0"
+uvicorn = "^0.54.0"
 geoalchemy2 = "^0.20.0"
 alembic = "^1.14.1"
 pydantic = { extras = ["email"], version = "^2.7.1" }
