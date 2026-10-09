@@ -25,7 +25,9 @@ function stubFetch(replies: Reply[], refresh?: Reply) {
 				authorization: request.headers.get("authorization")
 			})
 			const reply = request.url.includes("token/refresh")
-				? refresh
+				? refresh instanceof Response
+					? refresh.clone()
+					: refresh
 				: replies.shift()
 			if (reply === undefined) throw new Error(`unexpected ${request.url}`)
 			if (reply instanceof Error) throw reply
@@ -92,6 +94,38 @@ describe("api session handling", () => {
 		await expect(client.get("api/v1/me")).rejects.toThrow()
 		expect(storedToken()).toBeNull()
 		expect(localStorage.getItem("me")).toBeNull()
+	})
+
+	it("does not retry refused credentials", async () => {
+		const calls = stubFetch([json(401)])
+
+		await expect(client.post("api/v1/token/")).rejects.toThrow()
+		expect(calls).toHaveLength(1)
+	})
+
+	it("does not retry a 401 without a refresh token", async () => {
+		localStorage.removeItem("token")
+		const calls = stubFetch([json(401)])
+
+		await expect(client.get("api/v1/me")).rejects.toThrow()
+		expect(calls).toHaveLength(1)
+	})
+
+	it("replays a request only once after refreshing the token", async () => {
+		const fresh = {
+			accessToken: jwt("new"),
+			refreshToken: jwt("refresh2"),
+			tokenType: "bearer"
+		}
+		const calls = stubFetch(
+			[json(401), json(401), json(200, { ok: true })],
+			json(200, fresh)
+		)
+
+		await expect(client.get("api/v1/me")).rejects.toThrow()
+		expect(calls.filter((c) => !c.url.includes("token/refresh"))).toHaveLength(
+			2
+		)
 	})
 
 	it("does not refresh the token on a server error", async () => {

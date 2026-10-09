@@ -12,7 +12,21 @@ export const api = ky.extend({
 	prefix: import.meta.env.VITE_API,
 	retry: {
 		statusCodes: [408, 413, 429, 500, 502, 503, 504, 401],
-		methods: ["get", "post", "put", "head", "delete", "options", "trace"]
+		methods: ["get", "post", "put", "head", "delete", "options", "trace"],
+		// A 401 is worth a single retry, once the access token is refreshed:
+		// refused credentials or a refused new token would fail again
+		shouldRetry: ({ error, retryCount }) => {
+			if (!(error instanceof HTTPError && error.response.status === 401)) {
+				return undefined
+			}
+			return (
+				retryCount === 1 &&
+				!error.request.url.includes("api/v1/token") &&
+				!isUndefined(
+					tokenStorage.getFromLocalStorage(tokenSchema)?.refreshToken
+				)
+			)
+		}
 	},
 	hooks: {
 		beforeRetry: [
