@@ -4,6 +4,17 @@ from shapely.ops import unary_union
 
 from pipeline.scripts import DATA_DIR
 
+# Le rayon de rapprochement et les surfaces sont en mètres. La référence
+# exportée de la base est en WGS84 : appliqué tel quel, le rayon de 50 « m »
+# valait 50 degrés, et tout nouveau cluster passait pour une coupe connue.
+METRIC_CRS = "EPSG:2154"
+
+
+def to_metric_crs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    if gdf.crs is not None and gdf.crs.is_projected:
+        return gdf.to_crs(METRIC_CRS) if gdf.crs != METRIC_CRS else gdf
+    return gdf.to_crs(METRIC_CRS)
+
 
 def locked_clusters_mask(gdf: gpd.GeoDataFrame) -> pd.Series:
     """Reference clusters that were manually edited and must NOT be overwritten.
@@ -53,16 +64,8 @@ def split_new_and_updated_clusters(
     gdf_new = gpd.read_file(new_path)
     gdf_ref = gpd.read_file(ref_path)
 
-    # Vérifier que les deux GeoDataFrames ont le même CRS
-    if gdf_new.crs != gdf_ref.crs:
-        print(f"Attention: CRS différents. Reprojection de gdf_new vers {gdf_ref.crs}")
-        gdf_new = gdf_new.to_crs(gdf_ref.crs)
-
-    # S'assurer qu'on travaille en mètres (projection métrique)
-    if not gdf_new.crs.is_projected:
-        print(
-            "Attention: CRS géographique détecté. Reprojection en mètres recommandée."
-        )
+    gdf_new = to_metric_crs(gdf_new)
+    gdf_ref = to_metric_crs(gdf_ref)
 
     # Créer un buffer de 50m autour des géométries de référence.
     # On exclut les clusters verrouillés (édités manuellement) pour que les
@@ -139,6 +142,11 @@ def update_geometries(
     )
     gdf_updated = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_updated.fgb"))
     gdf_new = gpd.read_file(str(DATA_DIR / "sufosat" / "clusters_new.fgb"))
+    # Calculs en mètres ; le résultat garde la projection de la référence
+    output_crs = gdf_ref.crs
+    gdf_ref = to_metric_crs(gdf_ref)
+    gdf_updated = to_metric_crs(gdf_updated)
+    gdf_new = to_metric_crs(gdf_new)
 
     print("Chargement:")
     print(f"   - Référence: {len(gdf_ref)} clusters")
@@ -182,30 +190,37 @@ def update_geometries(
         merged_geom = unary_union(all_geoms)
 
         # === MISE À JOUR DES DATES ===
-        all_dates_min = [gdf_ref_updated.loc[ref_idx, "date_min"]] + gdf_updated.loc[
-            matching_new_indices, "date_min"
-        ].tolist()
-        all_dates_max = [gdf_ref_updated.loc[ref_idx, "date_max"]] + gdf_updated.loc[
-            matching_new_indices, "date_max"
-        ].tolist()
+        # La base peut ne pas renseigner une date, ou le score d'enveloppe
+        # (toujours vide à l'export) : seules les valeurs connues comptent.
+        all_dates_min = pd.Series(
+            [gdf_ref_updated.loc[ref_idx, "date_min"]]
+            + gdf_updated.loc[matching_new_indices, "date_min"].tolist()
+        ).dropna()
+        all_dates_max = pd.Series(
+            [gdf_ref_updated.loc[ref_idx, "date_max"]]
+            + gdf_updated.loc[matching_new_indices, "date_max"].tolist()
+        ).dropna()
 
-        new_date_min = min(all_dates_min)
-        new_date_max = max(all_dates_max)
+        new_date_min = all_dates_min.min()
+        new_date_max = all_dates_max.max()
 
         # === RECALCUL DES ATTRIBUTS ===
         new_days_delta = (new_date_max - new_date_min).days
 
-        all_sizes = [
-            gdf_ref_updated.loc[ref_idx, "clear_cut_group_size"]
-        ] + gdf_updated.loc[matching_new_indices, "clear_cut_group_size"].tolist()
-        new_group_size = sum(all_sizes)
+        all_sizes = pd.Series(
+            [gdf_ref_updated.loc[ref_idx, "clear_cut_group_size"]]
+            + gdf_updated.loc[matching_new_indices, "clear_cut_group_size"].tolist()
+        )
+        new_group_size = int(all_sizes.fillna(1).sum())
 
         new_area_ha = merged_geom.area / 10000  # m² -> ha
 
-        all_scores = [
-            gdf_ref_updated.loc[ref_idx, "concave_hull_score"]
-        ] + gdf_updated.loc[matching_new_indices, "concave_hull_score"].tolist()
-        new_concave_hull_score = sum(all_scores) / len(all_scores)
+        all_scores = pd.Series(
+            [gdf_ref_updated.loc[ref_idx, "concave_hull_score"]]
+            + gdf_updated.loc[matching_new_indices, "concave_hull_score"].tolist(),
+            dtype="float64",
+        )
+        new_concave_hull_score = all_scores.mean()  # NaN si aucun n'est connu
 
         # Stocker les mises à jour
         updates[ref_idx] = {
@@ -230,7 +245,10 @@ def update_geometries(
     print(f"   - Clusters de référence inchangés: {len(gdf_ref) - n_updated}")
 
     # Combiner référence updated + nouveaux clusters
-    gdf_final = pd.concat([gdf_ref_updated, gdf_new], ignore_index=True)
+    gdf_ref_updated = gdf_ref_updated.to_crs(output_crs)
+    gdf_final = pd.concat(
+        [gdf_ref_updated, gdf_new.to_crs(output_crs)], ignore_index=True
+    )
 
     print("\n Dataset final:")
     print(f"   - gdf_ref_updated: {len(gdf_ref_updated)} clusters")

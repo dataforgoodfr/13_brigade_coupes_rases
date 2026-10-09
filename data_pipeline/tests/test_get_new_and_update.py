@@ -6,7 +6,10 @@ import pytest
 from shapely.geometry import Polygon, box
 
 from pipeline.scripts import get_new_and_update
-from pipeline.scripts.get_new_and_update import split_new_and_updated_clusters
+from pipeline.scripts.get_new_and_update import (
+    split_new_and_updated_clusters,
+    update_geometries,
+)
 
 
 def cluster_frame(geoms: list[Polygon]) -> gpd.GeoDataFrame:
@@ -74,3 +77,62 @@ def test_locked_clusters_are_never_matched(data_dir: Path) -> None:
 def test_reference_without_edition_flags_is_fully_matchable() -> None:
     ref = cluster_frame([box(0, 0, 100, 100)])
     assert not get_new_and_update.locked_clusters_mask(ref).any()
+
+
+def test_matching_is_in_meters_when_the_reference_comes_from_the_database(
+    data_dir: Path,
+) -> None:
+    # La base exporte en WGS84 : le rayon de 50 m ne doit pas devenir 50°.
+    ref = cluster_frame([box(370_000, 6_340_000, 370_100, 6_340_100)])
+    new = cluster_frame(
+        [
+            box(370_000, 6_340_140, 370_100, 6_340_240),  # à 40 m → mis à jour
+            box(370_000, 6_340_200, 370_100, 6_340_300),  # à 100 m → nouveau
+            box(400_000, 6_400_000, 400_100, 6_400_100),  # à 60 km → nouveau
+        ]
+    )
+    ref_path, new_path = data_dir / "ref.fgb", data_dir / "new.fgb"
+    ref.to_crs("EPSG:4326").to_file(ref_path, driver="FlatGeobuf")
+    new.to_file(new_path, driver="FlatGeobuf")
+
+    updated, truly_new = split_new_and_updated_clusters(str(new_path), str(ref_path))
+
+    assert updated["clear_cut_group"].tolist() == [1]
+    assert sorted(truly_new["clear_cut_group"]) == [2, 3]
+
+
+def test_update_merges_in_meters_despite_missing_database_values(
+    data_dir: Path,
+) -> None:
+    (data_dir / "sufosat_reference").mkdir()
+    ref = cluster_frame([box(370_000, 6_340_000, 370_100, 6_340_100)]).assign(
+        clear_cut_group_size=[3],
+        days_delta=[31],
+        area_ha=[1.0],
+        concave_hull_score=[None],  # jamais exporté par la base
+    )
+    updated = cluster_frame([box(370_100, 6_340_000, 370_200, 6_340_100)]).assign(
+        date_max=[datetime(2026, 9, 1)],
+        clear_cut_group_size=[2],
+        concave_hull_score=[0.8],
+    )
+    new = cluster_frame([box(400_000, 6_400_000, 400_100, 6_400_100)]).assign(
+        clear_cut_group_size=[1], concave_hull_score=[0.5]
+    )
+    ref.to_crs("EPSG:4326").to_file(
+        data_dir / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
+    )
+    updated.to_file(data_dir / "sufosat" / "clusters_updated.fgb")
+    new.to_file(data_dir / "sufosat" / "clusters_new.fgb")
+
+    merged, final = update_geometries()
+
+    row = merged.iloc[0]
+    assert row["area_ha"] == pytest.approx(2.0, rel=1e-3)
+    assert row["clear_cut_group_size"] == 5
+    assert row["concave_hull_score"] == pytest.approx(0.8)
+    assert row["date_max"] == datetime(2026, 9, 1)
+    assert row["days_delta"] == 243
+    # Le résultat reste dans la projection de la référence
+    assert final.crs.to_epsg() == 4326
+    assert len(final) == 2
