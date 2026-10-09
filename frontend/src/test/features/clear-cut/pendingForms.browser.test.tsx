@@ -80,6 +80,21 @@ describe("forms saved without network", () => {
 		expect(getPendingForms()).toEqual({})
 	})
 
+	it("are sent once when several tabs send at the same time", async () => {
+		const { store } = await storeWithKeptForm()
+		const otherTab = connectedStore()
+		setFormPending(REPORT, "offline")
+		const posts = answerPosts(() => HttpResponse.json({}, { status: 201 }))
+
+		await Promise.all([
+			store.dispatch(sendPendingFormsThunk()),
+			otherTab.dispatch(sendPendingFormsThunk())
+		])
+
+		expect(posts).toHaveLength(1)
+		expect(getPendingForms()).toEqual({})
+	})
+
 	it("stay flagged while the network is still down", async () => {
 		const { store } = await storeWithKeptForm()
 		setFormPending(REPORT, "offline")

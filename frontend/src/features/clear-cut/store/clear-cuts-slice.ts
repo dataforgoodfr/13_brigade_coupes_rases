@@ -49,7 +49,8 @@ import {
 import {
 	clearFormPending,
 	getPendingForms,
-	setFormPending
+	setFormPending,
+	withSendLock
 } from "./pendingForms"
 
 const formStorage =
@@ -308,50 +309,51 @@ async function settlePendingForm(reportId: string) {
  */
 export const sendPendingFormsThunk = createAppAsyncThunk<void, void>(
 	"sendPendingForms",
-	async (_, thunkApi) => {
-		const { getState, dispatch, extra } = thunkApi
-		for (const [reportId, reason] of Object.entries(getPendingForms())) {
-			// "photos": already sent, sent again once its photos have left;
-			// "conflict": waits for the volunteer
-			if (reason !== "offline") continue
-			const versions = formStorage.getFromLocalStorageById(
-				reportId,
-				clearCutFormVersionsSchema
-			)
-			if (isUndefined(versions)) {
-				clearFormPending(reportId)
-				continue
-			}
-			try {
-				await extra
-					.api()
-					.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
-						json: clearCutFormCreateSchema.parse(versions.current),
-						headers: { etag: versions.current.etag }
-					})
-					.json()
-			} catch (e) {
-				// Still no network: stop, the next "online" event will retry
-				if (isNetworkError(e)) return
-				if (e instanceof HTTPError && e.response.status === 409) {
-					setFormPending(reportId, "conflict")
+	(_, thunkApi) =>
+		withSendLock(async () => {
+			const { getState, dispatch, extra } = thunkApi
+			for (const [reportId, reason] of Object.entries(getPendingForms())) {
+				// "photos": already sent, sent again once its photos have left;
+				// "conflict": waits for the volunteer
+				if (reason !== "offline") continue
+				const versions = formStorage.getFromLocalStorageById(
+					reportId,
+					clearCutFormVersionsSchema
+				)
+				if (isUndefined(versions)) {
+					clearFormPending(reportId)
+					continue
 				}
-				// Other refusals (locked form, lost assignment) stay flagged
-				continue
+				try {
+					await extra
+						.api()
+						.post(`api/v1/clear-cuts-reports/${reportId}/forms`, {
+							json: clearCutFormCreateSchema.parse(versions.current),
+							headers: { etag: versions.current.etag }
+						})
+						.json()
+				} catch (e) {
+					// Still no network: stop, the next "online" event will retry
+					if (isNetworkError(e)) return
+					if (e instanceof HTTPError && e.response.status === 409) {
+						setFormPending(reportId, "conflict")
+					}
+					// Other refusals (locked form, lost assignment) stay flagged
+					continue
+				}
+				await settlePendingForm(reportId)
+				// Replace the device copy by the version just created
+				if (selectDetail(getState()).value?.current.report.id === reportId) {
+					dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+				} else {
+					const fresh = await loadClearCutFormVersions(
+						{ id: reportId, hasBeenCreated: true },
+						thunkApi
+					).catch(() => undefined)
+					if (fresh) formStorage.setToLocalStorageById(reportId, fresh)
+				}
 			}
-			await settlePendingForm(reportId)
-			// Replace the device copy by the version just created
-			if (selectDetail(getState()).value?.current.report.id === reportId) {
-				dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
-			} else {
-				const fresh = await loadClearCutFormVersions(
-					{ id: reportId, hasBeenCreated: true },
-					thunkApi
-				).catch(() => undefined)
-				if (fresh) formStorage.setToLocalStorageById(reportId, fresh)
-			}
-		}
-	}
+		})
 )
 
 export const getMyAssignedReportsThunk = createAppAsyncThunk<
