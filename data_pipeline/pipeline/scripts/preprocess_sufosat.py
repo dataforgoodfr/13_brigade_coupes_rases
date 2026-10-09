@@ -1,21 +1,16 @@
 import logging
+from pathlib import Path
 from typing import cast
 
 import geopandas as gpd
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
+import pyogrio
 import rasterio
-from tqdm import tqdm
 
 from pipeline.scripts import DATA_DIR
-from pipeline.scripts.utils import (
-    DisjointSet,
-    display_df,
-    load_gdf,
-    log_execution,
-    polygonize_raster,
-)
-from pipeline.scripts.utils.df_utils import save_gdf
+from pipeline.scripts.utils import log_execution, polygonize_raster, to_flatgeobuf
 
 SUFOSAT_DIR = DATA_DIR / "sufosat"
 RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
@@ -23,339 +18,170 @@ RESULT_FILEPATH = SUFOSAT_DIR / "sufosat_clusters.fgb"
 # passage (base vide) part de cette date.
 MIN_CLEARCUT_DATE = pd.Timestamp("2026-01-01")
 
+# Les polygones de pixels de la France entière ne tiennent pas en mémoire
+# (15 millions en 2026). Ils sont traités par bandes horizontales de cette
+# hauteur, dans la projection du raster.
+BAND_HEIGHT_METERS = 25_000
 
-def polygonize_sufosat(
-    input_raster_dates: str, polygonized_raster_output_layer: str
-) -> gpd.GeoDataFrame:
-    logging.info(f"Polygonize {input_raster_dates}")
-
-    polygonize_raster(
-        input_raster=input_raster_dates,
-        output_layer_file=polygonized_raster_output_layer,
-        fieldname="sufosat_date",
-    )
-
-    # Read the SUFOSAT vectorized data
-    gdf: gpd.GeoDataFrame = load_gdf(polygonized_raster_output_layer)
-
-    return gdf
+Bounds = tuple[float, float, float, float]
+IntArray = npt.NDArray[np.int64]
 
 
-def mask_radd_alerts_to_date_band(
-    input_raster_dates: str, masked_raster_dates: str
+def mask_alerts(
+    input_raster_dates: str, masked_raster_dates: str, min_date: pd.Timestamp
 ) -> str:
     """
-    Ne garde que les alertes RADD confirmées (Alert >= 2) et écrit la bande
-    Date seule dans un raster mono-bande.
+    Ne garde que les alertes datées de `min_date` ou après, dans un raster
+    mono-bande écrit bloc par bloc.
 
-    Convention d'entrée :
-    - bande 1 : Alert
-    - bande 2 : Date (YYDDD)
+    Les alertes plus anciennes seraient écartées après la polygonisation : sur
+    la France, elles représentent 89 % des pixels en 2026, et autant de
+    polygones à écrire puis relire. Un polygone ne regroupe que des pixels de
+    même date : en masquer une ne change pas les polygones des autres.
 
-    Un raster mono-bande (export Earth Engine déjà masqué) est retourné tel quel.
+    Convention d'entrée : soit la seule bande Date (YYDDD) exportée d'Earth
+    Engine, soit un raster RADD brut à deux bandes, Alert puis Date, dont
+    seules les alertes confirmées (Alert >= 2) sont gardées.
     """
     with rasterio.open(input_raster_dates) as src:
-        if src.count < 2:
-            return input_raster_dates
-
-        logging.info("Applying Alert >= 2 mask before polygonization")
-        alert_band = src.read(1)
-        date_band = src.read(2)
-        masked_date_band = np.where(alert_band >= 2, date_band, 0).astype(
-            date_band.dtype
-        )
-
+        date_band_index = 2 if src.count >= 2 else 1
         profile = src.profile.copy()
-        profile.update(count=1, dtype=masked_date_band.dtype, nodata=0, compress="lzw")
+        profile.update(count=1, nodata=0, compress="lzw")
 
         with rasterio.open(masked_raster_dates, "w", **profile) as dst:
-            dst.write(masked_date_band, 1)
+            for _, window in src.block_windows(1):
+                date_band = src.read(date_band_index, window=window)
+                keep = (date_band > 0) & (
+                    decode_dates(date_band) >= np.datetime64(min_date.date())
+                )
+                if date_band_index == 2:
+                    keep &= src.read(1, window=window) >= 2
+                masked = np.where(keep, date_band, 0).astype(date_band.dtype)
+                dst.write(masked, 1, window=window)
 
     return masked_raster_dates
 
 
-def parse_sufosat_date(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def decode_dates(codes: npt.NDArray[np.integer]) -> npt.NDArray[np.datetime64]:
     """
-    Converts SUFOSAT date format to a pandas Timestamp.
+    Dates SUFOSAT (YYDDD) en dates numpy : 19032 donne le 1er février 2019,
+    32e jour de l'année.
 
-    The input format is YYDDD, where YY is the year (e.g., 18-25 = 2018-2025)
-    and DDD is the day of the year (1-366).
-
-    Parameters
-    ----------
-    sufosat_date : float
-        Date in SUFOSAT format (YYDDD).
-
-    Returns
-    -------
-    pd.Timestamp
-        Converted date as a pandas Timestamp.
-
-    Examples
-    --------
-    >>> parse_sufosat_date(19032)
-    Timestamp('2019-02-01 00:00:00')  # February 1, 2019 (32nd day of 2019)
+    Le raster RADD contient quelques jours au-delà de 366 (25423 en 2026) :
+    ils comptent à partir du 1er janvier de l'année, donc 25423 tombe le
+    27 février 2026.
     """
-    logging.info("Parsing the SUFOSAT dates")
-
-    gdf["sufosat_date"] = gdf["sufosat_date"].astype(int)
-
-    # Calculate the year and the day-of-year offset
-    years = 2000 + (gdf["sufosat_date"] // 1000)
-    # Subtract one since day-of-year in pd.Timedelta starts at 0 days offset for Jan 1
-    days_of_year = (gdf["sufosat_date"] % 1000) - 1
-
-    # Build a Series of January 1st for each year
-    jan_first = pd.to_datetime(years.astype(str) + "-01-01")
-
-    # Add the days offset to January 1st
-    gdf["date"] = jan_first + pd.to_timedelta(days_of_year, unit="D")
-    gdf = gdf.drop(columns="sufosat_date")
-
-    display_df(gdf)
-
-    return gdf
+    codes = codes.astype(np.int64)
+    january_first = (codes // 1000 + 2000 - 1970).astype("datetime64[Y]")
+    days: npt.NDArray[np.datetime64] = january_first.astype("datetime64[D]") + (
+        codes % 1000 - 1
+    )
+    return days
 
 
-def pair_clear_cuts_through_space_and_time(
-    gdf: gpd.GeoDataFrame,
+def horizontal_bands(bounds: Bounds) -> list[tuple[float, float]]:
+    """Bandes de BAND_HEIGHT_METERS couvrant `bounds`, du sud au nord."""
+    _, miny, _, maxy = bounds
+    bands = []
+    y = miny
+    while y <= maxy:
+        bands.append((y, y + BAND_HEIGHT_METERS))
+        y += BAND_HEIGHT_METERS
+    return bands
+
+
+def read_pixels(
+    pixels_path: Path, bounds: Bounds, min_date: pd.Timestamp
+) -> tuple[gpd.GeoDataFrame, npt.NDArray[np.float64]]:
+    """Les polygones de pixels datés de `min_date` ou après qui touchent
+    `bounds`, indexés par leur numéro d'entité, et le bas de chacun."""
+    pixels = gpd.read_file(pixels_path, bbox=bounds, fid_as_index=True)
+    pixels["date"] = decode_dates(pixels["sufosat_date"].to_numpy())
+    pixels = pixels[pixels["date"] >= min_date]
+    return pixels, pixels.geometry.bounds["miny"].to_numpy()
+
+
+def find_pairs(
+    pixels_path: Path,
+    bands: list[tuple[float, float]],
+    total_bounds: Bounds,
+    min_date: pd.Timestamp,
     max_meters_between_clear_cuts: int,
     max_days_between_clear_cuts: int,
-) -> pd.DataFrame:
+) -> tuple[IntArray, IntArray, IntArray, IntArray]:
     """
-    Identifies pairs of clear-cuts that are within a specified distance and a
-    specified number of days of each other.
+    Les pixels à au plus `max_meters_between_clear_cuts` et
+    `max_days_between_clear_cuts` l'un de l'autre, en numéros d'entité.
 
-    Parameters
-    ----------
-    gdf : gpd.GeoDataFrame
-        GeoDataFrame containing clear-cut polygons with a 'geometry' column.
-    max_meters_between_clear_cuts : int
-        Maximum distance in meters that can separate two clear-cuts for them
-        to be considered a pair.
-    max_days_between_clear_cuts : int
-        Maximum time difference in days between clear-cuts to consider them related.
+    Chaque pixel appartient à la bande où se trouve son bas. Elle est lue avec
+    une marge de `max_meters_between_clear_cuts` : ses voisins des bandes
+    adjacentes en font partie, et aucune paire ne se perd entre deux bandes.
 
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with columns:
-        - index_left: Index of the first clear-cut in each pair
-        - date_left: Date of the first clear-cut
-        - index_right: Index of the second clear-cut in each pair
-        - date_right: Date of the second clear-cut
-
-    Notes
-    -----
-    This function can consume a significant amount of memory due to the Cartesian product
-    generated by the spatial join.
+    Retourne les pixels, la bande de chacun, puis les deux colonnes de paires.
     """
-    logging.info(
-        f"Pairing clear-cuts within {max_meters_between_clear_cuts} meters "
-        f"and {max_days_between_clear_cuts} days of each other"
-    )
-
-    # Cluster the clear-cuts that are within `max_meters_between_clear_cuts` of each other
-    # Lambert-93 CRS uses meters as its unit of measurement for distance.
-    clear_cut_pairs: pd.DataFrame = (
-        gdf.sjoin(
-            gdf, how="left", predicate="dwithin", distance=max_meters_between_clear_cuts
+    minx, _, maxx, _ = total_bounds
+    margin = max_meters_between_clear_cuts
+    nodes, node_bands, lefts, rights = [], [], [], []
+    for band, (y0, y1) in enumerate(bands):
+        pixels, bottoms = read_pixels(
+            pixels_path, (minx, y0 - margin, maxx, y1 + margin), min_date
         )
-        .reset_index()
-        .rename(columns={"index": "index_left"})
+        home = (bottoms >= y0) & (bottoms < y1)
+        fids = pixels.index.to_numpy(dtype=np.int64)
+        dates = pixels["date"].to_numpy()
+        home_positions = np.flatnonzero(home)
+        nodes.append(fids[home_positions])
+        node_bands.append(np.full(len(home_positions), band, dtype=np.int64))
+
+        left, right = pixels.sindex.query(
+            pixels.geometry.iloc[home_positions],
+            predicate="dwithin",
+            distance=max_meters_between_clear_cuts,
+        )
+        left = home_positions[left]
+        close_in_time = (
+            np.abs(
+                (dates[left] - dates[right]).astype("timedelta64[D]").astype(np.int64)
+            )
+            <= max_days_between_clear_cuts
+        )
+        keep = close_in_time & (left != right)
+        lefts.append(fids[left[keep]])
+        rights.append(fids[right[keep]])
+
+    return (
+        np.concatenate(nodes),
+        np.concatenate(node_bands),
+        np.concatenate(lefts),
+        np.concatenate(rights),
     )
 
-    # Ignore clear-cuts that intersect with themselves
-    clear_cut_pairs = clear_cut_pairs[
-        clear_cut_pairs["index_left"] != clear_cut_pairs["index_right"]
-    ]
 
-    # Remove duplicates (left -> right exists, ignore right -> left)
-    clear_cut_pairs = clear_cut_pairs[
-        clear_cut_pairs["index_left"] < clear_cut_pairs["index_right"]
-    ]
-
-    # Remove pairs if the date difference is too big
-    clear_cut_pairs = clear_cut_pairs[
-        (clear_cut_pairs["date_left"] - clear_cut_pairs["date_right"]).dt.days.abs()
-        <= max_days_between_clear_cuts
-    ]
-
-    logging.info(f"Found {len(clear_cut_pairs)} clear-cut pairs")
-
-    display_df(clear_cut_pairs)
-
-    return clear_cut_pairs
-
-
-def regroup_clear_cut_pairs(clear_cut_pairs: pd.DataFrame) -> list[set[int]]:
+def connected_components(node_count: int, left: IntArray, right: IntArray) -> IntArray:
     """
-    Groups connected clear-cut pairs into distinct sets (clusters).
+    Numéro de groupe de chaque nœud (0 à `node_count` - 1), deux nœuds reliés
+    par une paire (`left`, `right`) étant dans le même groupe.
 
-    Given a set of identified clear-cut pairs, this function groups all
-    interconnected clear cuts into the same set using a disjoint-set
-    data structure (also known as a union-find algorithm).
-
-    Parameters
-    ----------
-    clear_cut_pairs : pd.DataFrame
-        DataFrame containing pairs of clear-cut IDs that are connected,
-        with columns 'index_left' and 'index_right'.
-
-    Returns
-    -------
-    list[set[int]]
-        A list of sets, where each set contains the IDs of clear cuts
-        belonging to the same cluster.
-
-    Examples
-    --------
-    If we have four clear cuts (A, B, C, and D) and the identified pairs
-    are (A, B) and (B, D), the function will group them as:
-    - Group 1: {A, B, D}
-    - Group 2: {C}
+    Accroche chaque racine à la plus petite de ses voisines, puis raccourcit
+    les chemins, jusqu'à ce que chaque paire partage sa racine. Tout se passe
+    dans des tableaux d'entiers : 15 millions de pixels tiennent en 120 Mo.
     """
-    logging.info("Grouping connected clear-cuts into clusters")
-
-    # Get all unique clear-cut indices from both columns
-    all_indices = pd.concat(
-        [clear_cut_pairs["index_left"], clear_cut_pairs["index_right"]]
-    ).unique()
-
-    # Start with each clear cut having its own group
-    clear_cuts_disjoint_set = DisjointSet(all_indices)
-
-    # Group the clear cuts that belong together one pair at a time
-    for index_left, index_right in tqdm(
-        clear_cut_pairs[["index_left", "index_right"]].itertuples(index=False),
-        total=len(clear_cut_pairs),
-        desc="Merging connected clear-cuts",
-    ):
-        clear_cuts_disjoint_set.merge(index_left, index_right)
-
-    # Get the resulting subsets (clusters)
-    subsets = cast(list[set[int]], clear_cuts_disjoint_set.subsets())
-
-    logging.info(f"Created {len(subsets)} clear-cut clusters")
-
-    return subsets
-
-
-def cluster_clear_cuts(
-    gdf: gpd.GeoDataFrame,
-    max_meters_between_clear_cuts: int,
-    max_days_between_clear_cuts: int,
-) -> gpd.GeoDataFrame:
-    """
-    Clusters individual clear-cuts based on spatial and temporal proximity.
-    Parameters
-    ----------
-    gdf : gpd.GeoDataFrame
-        GeoDataFrame containing clear-cut polygons with 'date' and 'geometry' columns.
-    max_meters_between_clear_cuts : int
-        Maximum distance in meters between clear-cuts to consider them related.
-    max_days_between_clear_cuts : int
-        Maximum time difference in days between clear-cuts to consider them related.
-
-    Returns
-    -------
-    gpd.GeoDataFrame
-        The input GeoDataFrame with an additional 'clear_cut_group' column
-        that assigns each polygon to a cluster.
-
-    Notes
-    -----
-    The function modifies the input GeoDataFrame by adding a 'clear_cut_group' column.
-    """
-    logging.info("Clustering clear-cuts by spatial and temporal proximity")
-
-    # Identify the clear cut groups
-    clear_cut_pairs = pair_clear_cuts_through_space_and_time(
-        gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
-    )
-    clear_cut_groups = regroup_clear_cut_pairs(clear_cut_pairs)
-
-    # Assign a clear cut group id to each clear cut polygon. The column is
-    # created first: with no pair at all (isolated pixels only, which an
-    # incremental run can produce) the loop below would never create it.
-    logging.info("Assigning cluster IDs to clear-cuts")
-    gdf["clear_cut_group"] = np.nan
-    for i, subset in tqdm(
-        enumerate(clear_cut_groups),
-        total=len(clear_cut_groups),
-        desc="Assigning cluster IDs",
-    ):
-        gdf.loc[list(subset), "clear_cut_group"] = i
-
-    # Assign a cluster ID to the pixels that weren't grouped,
-    # auto-incrementing from the last cluster ID
-    next_group_id = gdf["clear_cut_group"].max()
-    if pd.isna(next_group_id):
-        next_group_id = -1
-    gdf["clear_cut_group"] = gdf["clear_cut_group"].fillna(
-        next_group_id + gdf["clear_cut_group"].isna().cumsum()
-    )
-    gdf["clear_cut_group"] = gdf["clear_cut_group"].astype(int)
-
-    pixels_per_cluster = gdf.groupby("clear_cut_group").size()
-    logging.info(
-        "Clustering complete:\n"
-        f"- Number of clusters: {gdf['clear_cut_group'].nunique()}\n"
-        f"- Number of clusters with more than one pixel: {(pixels_per_cluster > 1).sum()}\n"
-        f"- Number of clusters with a single pixel: {(pixels_per_cluster == 1).sum()}\n"
-        f"- Min cluster ID: {gdf['clear_cut_group'].min()}\n"
-        f"- Max cluster ID: {gdf['clear_cut_group'].max()}"
-    )
-
-    return gdf
-
-
-def union_clear_cut_clusters(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    """
-    Combines clear-cuts belonging to the same cluster into single geometries.
-
-    This function dissolves the geometries based on the 'clear_cut_group' column,
-    and calculates aggregate statistics for each cluster.
-
-    Parameters
-    ----------
-    gdf : gpd.GeoDataFrame
-        GeoDataFrame with 'clear_cut_group', 'date', and 'geometry' columns.
-
-    Returns
-    -------
-    gpd.GeoDataFrame
-        A new GeoDataFrame with one row per cluster, containing:
-        - Unified geometry
-        - Minimum and maximum dates
-        - Time span of the cluster in days
-        - Number of clear-cuts in each cluster
-    """
-    logging.info("Merging clear-cuts within each cluster")
-
-    # Calculate group sizes before dissolve
-    clear_cut_group_size = gdf.groupby("clear_cut_group").size()
-
-    logging.info("Performing spatial union of geometries within each cluster")
-    gdf = gdf.dissolve(by="clear_cut_group", aggfunc={"date": ["min", "max"]}).rename(
-        columns={
-            ("date", "min"): "date_min",
-            ("date", "max"): "date_max",
-        }
-    )
-    gdf["days_delta"] = (gdf["date_max"] - gdf["date_min"]).dt.days
-    gdf["clear_cut_group_size"] = clear_cut_group_size
-
-    # Fill tiny gaps left after the dissolve/union operation
-    logging.info("Filling tiny gaps in the dissolved geometries")
-    gdf["geometry"] = gdf["geometry"].buffer(0.0001)
-
-    logging.info(f"Successfully created {len(gdf)} merged clear-cut clusters")
-
-    display_df(gdf)
-
-    return gdf
+    parent = np.arange(node_count, dtype=np.int64)
+    while True:
+        root_left, root_right = parent[left], parent[right]
+        differ = root_left != root_right
+        if not differ.any():
+            break
+        lowest = np.minimum(root_left[differ], root_right[differ])
+        np.minimum.at(parent, root_left[differ], lowest)
+        np.minimum.at(parent, root_right[differ], lowest)
+        while True:
+            grandparent = parent[parent]
+            if np.array_equal(grandparent, parent):
+                break
+            parent = grandparent
+    _, groups = np.unique(parent, return_inverse=True)
+    return groups
 
 
 def add_concave_hull_score(
@@ -386,32 +212,135 @@ def add_concave_hull_score(
     of shape complexity. Values close to 0 indicate more complex, irregular shapes,
     while large values indicate simpler shapes. We clip the max score to 1.
     """
-    logging.info('Adding the "concave_hull_score" column')
-
     # concave_hull(ratio=1) would be the same as convex_hull
     gdf["concave_hull_score"] = gdf.area / gdf.concave_hull(concave_hull_ratio).area
 
     # The score can be greater than 1 but we can clip it to [0, 1] for simplicity
     gdf["concave_hull_score"] = gdf["concave_hull_score"].clip(upper=1)
 
-    display_df(gdf)
-
     return gdf
 
 
-def add_area_ha(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    # Add clear cut area, with 1 hectare = 10,000 m²
-    logging.info("Adding clear-cut clusters area")
-    gdf["area_ha"] = gdf.area / 10000
+def finish_clusters(
+    parts: gpd.GeoDataFrame, concave_hull_ratio: float
+) -> gpd.GeoDataFrame:
+    """Attributs des clusters une fois leur géométrie complète."""
+    parts["days_delta"] = (parts["date_max"] - parts["date_min"]).dt.days
+    # Fill tiny gaps left after the dissolve/union operation
+    parts["geometry"] = parts.geometry.buffer(0.0001)
+    parts = add_concave_hull_score(parts, concave_hull_ratio)
+    # 1 hectare = 10,000 m²
+    parts["area_ha"] = parts.area / 10000
+    return parts[
+        [
+            "date_min",
+            "date_max",
+            "days_delta",
+            "clear_cut_group_size",
+            "concave_hull_score",
+            "area_ha",
+            "geometry",
+        ]
+    ]
 
-    # Let's sort the clear-cut clusters by their area
-    gdf = gdf.sort_values("area_ha")
 
-    logging.info(
-        f"We identified {(gdf['area_ha'] >= 10).sum()} clear-cut clusters >= 10 ha"
+def append_clusters(clusters: gpd.GeoDataFrame, output_path: Path) -> None:
+    if clusters.empty:
+        return
+    clusters.to_file(
+        output_path,
+        driver="GPKG",
+        index=True,
+        mode="a" if output_path.exists() else "w",
     )
 
-    return gdf
+
+def cluster_pixels(
+    pixels_path: Path,
+    output_path: Path,
+    min_date: pd.Timestamp,
+    max_meters_between_clear_cuts: int,
+    max_days_between_clear_cuts: int,
+    concave_hull_ratio: float,
+) -> int:
+    """
+    Regroupe les polygones de pixels datés de `min_date` ou après en clusters,
+    écrits dans le GeoPackage `output_path`, et retourne leur nombre.
+
+    Deux pixels sont dans le même cluster s'ils sont reliés par une suite de
+    pixels distants deux à deux d'au plus `max_meters_between_clear_cuts` et
+    `max_days_between_clear_cuts`. Le travail se fait par bandes : les paires
+    d'abord, puis les groupes sur les seuls numéros d'entité, puis l'union des
+    géométries de chaque groupe, bande par bande. Les groupes à cheval sur
+    plusieurs bandes sont réunis à la fin.
+    """
+    info = pyogrio.read_info(pixels_path, force_total_bounds=True)
+    if info["features"] == 0:
+        return 0
+    total_bounds = cast(Bounds, tuple(info["total_bounds"]))
+    bands = horizontal_bands(total_bounds)
+    logging.info(
+        f"Pairing pixels dated {min_date.date()} or later in {len(bands)} bands"
+    )
+    nodes, node_bands, left, right = find_pairs(
+        pixels_path,
+        bands,
+        total_bounds,
+        min_date,
+        max_meters_between_clear_cuts,
+        max_days_between_clear_cuts,
+    )
+    logging.info(f"Found {len(left)} pairs between {len(nodes)} pixels")
+
+    order = np.argsort(nodes)
+    nodes, node_bands = nodes[order], node_bands[order]
+    groups = connected_components(
+        len(nodes), np.searchsorted(nodes, left), np.searchsorted(nodes, right)
+    )
+    group_count = int(groups.max()) + 1 if len(groups) else 0
+    band_count = np.zeros(group_count, dtype=np.int64)
+    np.add.at(band_count, np.unique(groups * len(bands) + node_bands) // len(bands), 1)
+    straddling = np.flatnonzero(band_count > 1)
+    logging.info(
+        f"Created {group_count} clusters, {len(straddling)} of them across bands"
+    )
+
+    if output_path.exists():
+        output_path.unlink()
+    minx, _, maxx, _ = total_bounds
+    pending = []
+    for band, (y0, y1) in enumerate(bands):
+        pixels, bottoms = read_pixels(pixels_path, (minx, y0, maxx, y1), min_date)
+        pixels = pixels[(bottoms >= y0) & (bottoms < y1)]
+        if pixels.empty:
+            continue
+        pixels["clear_cut_group"] = groups[
+            np.searchsorted(nodes, pixels.index.to_numpy())
+        ]
+        parts = pixels.dissolve(
+            by="clear_cut_group", aggfunc={"date": ["min", "max"]}
+        ).rename(columns={("date", "min"): "date_min", ("date", "max"): "date_max"})
+        parts["clear_cut_group_size"] = pixels.groupby("clear_cut_group").size()
+        across = parts.index.isin(straddling)
+        pending.append(parts[across])
+        append_clusters(
+            finish_clusters(parts[~across], concave_hull_ratio), output_path
+        )
+        logging.info(f"Band {band + 1}/{len(bands)}: {len(pixels)} pixels")
+
+    if pending:
+        parts = pd.concat(pending).reset_index()
+        merged = parts.dissolve(
+            by="clear_cut_group",
+            aggfunc={
+                "date_min": "min",
+                "date_max": "max",
+                "clear_cut_group_size": "sum",
+            },
+        )
+        append_clusters(finish_clusters(merged, concave_hull_ratio), output_path)
+
+    return group_count
 
 
 @log_execution([RESULT_FILEPATH])
@@ -431,13 +360,10 @@ def preprocess_sufosat(
     """
     Process forest clear-cut raster data into a vector layer of clear-cut clusters.
 
-    This function orchestrates a complete workflow for processing forest clear-cut data:
     1. Converts raster clear-cut data to vector polygons
-    2. Processes the dates associated with each clear-cut
-    3. Clusters nearby clear-cuts in space and time, and saves the result
-    4. Merges clear-cuts within each cluster
-    5. Add shape complexity and area attributes
-    6. Saves the final vector dataset
+    2. Clusters nearby clear-cuts in space and time, band by band
+    3. Merges clear-cuts within each cluster, with shape complexity and area
+    4. Saves the clusters to RESULT_FILEPATH
 
     Parameters
     ----------
@@ -448,8 +374,7 @@ def preprocess_sufosat(
     polygonized_raster_output_layer : str
         Path for the temporary vector file created during polygonization.
     masked_raster_dates : str
-        Path for the temporary single-band raster written when the input has an
-        Alert band.
+        Path for the temporary single-band raster of the dates kept.
     max_meters_between_clear_cuts : int
         Maximum distance in meters between clear-cuts to consider them spatially related.
     max_days_between_clear_cuts : int
@@ -460,34 +385,34 @@ def preprocess_sufosat(
     update_start_date : str | None
         Lower bound (inclusive) on the clear-cut date; None on a first run.
         Never earlier than MIN_CLEARCUT_DATE.
-
-    Returns
-    -------
-    None
-        The function saves the results to the specified output_layer path.
     """
-    masked_input_raster_dates = mask_radd_alerts_to_date_band(
-        input_raster_dates, masked_raster_dates
-    )
-
-    gdf = polygonize_sufosat(masked_input_raster_dates, polygonized_raster_output_layer)
-    gdf = gdf[gdf["sufosat_date"] > 0]
-    gdf = parse_sufosat_date(gdf)
-
+    min_date = MIN_CLEARCUT_DATE
     if update_start_date:
-        update_timestamp = max(pd.Timestamp(update_start_date), MIN_CLEARCUT_DATE)
-    else:
-        update_timestamp = MIN_CLEARCUT_DATE
-    logging.info(
-        f"Filtering data on or after {update_timestamp.date()} for optimization."
+        min_date = max(pd.Timestamp(update_start_date), MIN_CLEARCUT_DATE)
+
+    logging.info(f"Keeping the alerts dated {min_date.date()} or later")
+    mask_alerts(input_raster_dates, masked_raster_dates, min_date)
+
+    logging.info(f"Polygonize {masked_raster_dates}")
+    polygonize_raster(
+        input_raster=masked_raster_dates,
+        output_layer_file=polygonized_raster_output_layer,
+        fieldname="sufosat_date",
     )
 
-    gdf = gdf[gdf["date"] >= update_timestamp]
-
-    gdf = cluster_clear_cuts(
-        gdf, max_meters_between_clear_cuts, max_days_between_clear_cuts
+    clusters_gpkg = RESULT_FILEPATH.with_suffix(".gpkg")
+    cluster_count = cluster_pixels(
+        Path(polygonized_raster_output_layer),
+        clusters_gpkg,
+        min_date,
+        max_meters_between_clear_cuts,
+        max_days_between_clear_cuts,
+        concave_hull_ratio,
     )
-    gdf = union_clear_cut_clusters(gdf)
-    gdf = add_concave_hull_score(gdf, concave_hull_ratio)
-    gdf = add_area_ha(gdf)
-    save_gdf(gdf, RESULT_FILEPATH, index=True)
+    if RESULT_FILEPATH.exists():
+        RESULT_FILEPATH.unlink()
+    if cluster_count == 0:
+        logging.info("No clear-cut pixel since %s", min_date.date())
+        return
+    to_flatgeobuf(str(clusters_gpkg), str(RESULT_FILEPATH))
+    clusters_gpkg.unlink()

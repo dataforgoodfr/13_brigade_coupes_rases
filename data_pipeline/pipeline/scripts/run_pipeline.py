@@ -3,7 +3,7 @@ import os
 import shutil
 from datetime import timedelta
 
-import geopandas as gpd
+import pyogrio
 
 from pipeline.scripts import DATA_DIR
 from pipeline.scripts.db_export import export_database
@@ -40,13 +40,13 @@ def run_pipeline() -> None:
     preprocess_sufosat(
         input_raster_dates=str(sufosat_tif_path),
         polygonized_raster_output_layer=str(
-            DATA_DIR / "sufosat" / "sufosat_clusters.fgb"
+            DATA_DIR / "sufosat" / "sufosat_pixels.fgb"
         ),
         update_start_date=update_start_date,
     )
 
     clusters_path = DATA_DIR / "sufosat" / "sufosat_clusters.fgb"
-    if not clusters_path.exists() or len(gpd.read_file(str(clusters_path))) == 0:
+    if not clusters_path.exists() or pyogrio.read_info(clusters_path)["features"] == 0:
         logging.info("No new clusters after preprocessing, pipeline is up to date.")
         return
 

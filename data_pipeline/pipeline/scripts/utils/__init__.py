@@ -4,6 +4,7 @@ from pipeline.scripts.utils.download_file import download_file
 from pipeline.scripts.utils.log_execution import log_execution
 from pipeline.scripts.utils.polygonize_raster import polygonize_raster
 from pipeline.scripts.utils.s3_utils import S3Manager
+from pipeline.scripts.utils.vector_translate import to_flatgeobuf
 
 __all__ = [
     "DisjointSet",
@@ -14,4 +15,5 @@ __all__ = [
     "polygonize_raster",
     "save_gdf",
     "S3Manager",
+    "to_flatgeobuf",
 ]
