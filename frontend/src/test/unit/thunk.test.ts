@@ -1,4 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
+import { HTTPError } from "ky"
 import { beforeEach, describe, expect, it } from "vitest"
 import z from "zod"
 
@@ -8,6 +9,7 @@ import type { AppDispatch } from "@/shared/store/store"
 import {
 	addRequestedContentCases,
 	createAppAsyncThunk,
+	isUnauthorizedRejection,
 	withEntityStorageActionCreator,
 	withStorageActionCreator
 } from "@/shared/store/thunk"
@@ -23,6 +25,18 @@ const fetchValue = createAppAsyncThunk<Value>("test/fetch", async () => {
 	if (fail !== undefined) throw fail
 	return { name: "from api" }
 })
+
+// ky 2 reads the body of a refused response into `data` before throwing
+function httpError(status: number, data: unknown) {
+	const request = new Request("http://api.test/")
+	const error = new HTTPError(
+		new Response(null, { status }),
+		request,
+		{} as ConstructorParameters<typeof HTTPError>[2]
+	)
+	error.data = data
+	return error
+}
 
 const storage = localStorageRepository<Value>("thunk-test")
 const fetchWithFallback = createAppAsyncThunk<Value>(
@@ -101,6 +115,24 @@ describe("addRequestedContentCases", () => {
 		await store.dispatch(fetchValue())
 		expect(store.getState().test.content.status).toBe("error")
 		expect(store.getState().test.content.value).toBeUndefined()
+	})
+
+	it("stores the body of an API refusal as the error", async () => {
+		const store = makeStore()
+		fail = httpError(409, { code: "ETAG_MISMATCH" })
+		const action = await store.dispatch(fetchValue())
+		expect(store.getState().test.content.error).toEqual({
+			code: "ETAG_MISMATCH"
+		})
+		expect(isUnauthorizedRejection(action)).toBe(false)
+	})
+
+	it("flags a 401 refusal as unauthorized", async () => {
+		const store = makeStore()
+		fail = httpError(401, { code: "INVALID_TOKEN" })
+		expect(isUnauthorizedRejection(await store.dispatch(fetchValue()))).toBe(
+			true
+		)
 	})
 
 	it("only registers the requested cases", async () => {

@@ -69,6 +69,28 @@ describe("forms saved without network", () => {
 		expect(getPendingForms()).toEqual({ [REPORT]: "offline" })
 	})
 
+	it("reload the server version when the save is refused as outdated", async () => {
+		const { store, current } = await storeWithKeptForm()
+		let reloads = 0
+		worker.use(
+			http.get(FORMS, () => {
+				reloads++
+			})
+		)
+		answerPosts(() =>
+			HttpResponse.json(
+				{ detail: { type: "ETAG_MISMATCH", content: "etag mismatch" } },
+				{ status: 409 }
+			)
+		)
+
+		await store.dispatch(
+			submitClearCutFormThunk({ reportId: REPORT, formData: current })
+		)
+
+		await expect.poll(() => reloads).toBe(1)
+	})
+
 	it("are sent once the network is back, with the version they were edited from", async () => {
 		const { store, current } = await storeWithKeptForm()
 		setFormPending(REPORT, "offline")

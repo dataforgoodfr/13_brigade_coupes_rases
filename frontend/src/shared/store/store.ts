@@ -1,8 +1,7 @@
 import {
 	combineReducers,
 	configureStore,
-	createListenerMiddleware,
-	isRejected
+	createListenerMiddleware
 } from "@reduxjs/toolkit"
 import type { Options as KyOptions } from "ky"
 
@@ -17,16 +16,15 @@ import {
 	meSlice,
 	setStoredToken
 } from "@/features/user/store/me.slice"
-import { api, UNAUTHORIZED_ERROR_NAME } from "@/shared/api/api"
+import { api } from "@/shared/api/api"
 import { referentialSlice } from "@/shared/store/referential/referential.slice"
+import { isUnauthorizedRejection } from "@/shared/store/thunk"
 
 const unauthorizedMiddleware = createListenerMiddleware()
 unauthorizedMiddleware.startListening({
-	predicate: (action) => isRejected(action),
-	effect: (action) => {
-		if (action.error.name === UNAUTHORIZED_ERROR_NAME) {
-			setStoredToken(undefined)
-		}
+	predicate: isUnauthorizedRejection,
+	effect: () => {
+		setStoredToken(undefined)
 	}
 })
 

@@ -283,7 +283,7 @@ export const submitClearCutFormThunk = createAppAsyncThunk<
 			if (
 				e instanceof HTTPError &&
 				e.response.status === 409 &&
-				etagMismatchErrorSchema.safeParse(await e.response.json()).success
+				etagMismatchErrorSchema.safeParse(e.data).success
 			) {
 				dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: false }))
 			}

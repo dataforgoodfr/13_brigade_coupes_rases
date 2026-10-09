@@ -92,7 +92,7 @@ export type Volunteer = MeResponse & { role: "volunteer" }
 export type Administrator = MeResponse & { role: "admin" }
 
 export const credentialErrorSchema = toStringApiErrorSchema(
-	z.literal("INVALID_CREDENTIALS")
+	z.literal(["INVALID_CREDENTIALS", "USER_INACTIVE"])
 )
 
 export type CredentialError = z.infer<typeof credentialErrorSchema>
