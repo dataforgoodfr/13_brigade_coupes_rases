@@ -157,7 +157,7 @@ Comptes du jeu de données de développement : `admin@example.com` / `admin` (ad
 Prérequis :
 
 - [Docker](https://docs.docker.com/get-docker/) et Docker Compose ;
-- [Python 3.14](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
+- [Python 3.14](https://www.python.org/downloads/) et [Poetry](https://python-poetry.org/docs/#installation) 2.5, la version de la CI et des images Docker (installation avec pipx recommandée, hors de tout environnement virtuel du projet) pour `backend/` et `data_pipeline/`, chacun avec son propre `pyproject.toml` ;
 - [Node.js 24](https://nodejs.org/en) (version dans `frontend/.nvmrc`) et [pnpm](https://pnpm.io/installation) pour `frontend/`.
 
 Chaque README de sous-projet détaille sa propre installation ; ce qui suit est le chemin le plus court.
