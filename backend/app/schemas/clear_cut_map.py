@@ -187,6 +187,9 @@ def report_to_report_preview_schema(
 class CountedPoint(BaseSchema):
     count: int
     point: Point
+    # [west, south, east, north] of a cluster's points: the point is their
+    # centroid and some of them lie far from it
+    bounds: tuple[float, float, float, float] | None = None
 
 
 class ClusterizedPointsResponseSchema(BaseSchema):

@@ -1,7 +1,7 @@
 import * as L from "leaflet"
 import { Layers, ListIcon, Map as MapIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { CircleMarker, useMap, useMapEvents } from "react-leaflet"
+import { useMap, useMapEvents } from "react-leaflet"
 
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover"
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { ClearCutPreview } from "@/features/clear-cut/components/map/ClearCutPreview"
+import { CountedPointMarker } from "@/features/clear-cut/components/map/CountedPointMarker"
 import { LocationButton } from "@/features/clear-cut/components/map/LocationButton"
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import { MobileControl } from "@/features/clear-cut/components/map/MobileControl"
@@ -83,13 +84,6 @@ const OVERLAYS: SelectableItemEnhanced<L.TileLayer>[] = [
 		value: "cadastre"
 	}
 ]
-
-function getPointRadius(currentPointCnt: number, mapSize: L.Point) {
-	const size = Math.min(mapSize.x, mapSize.y)
-	const pointRadius = currentPointCnt / size
-	const radius = pointRadius * 10
-	return Math.max(radius, 3)
-}
 
 export function ClearCuts() {
 	const map = useMap()
@@ -219,20 +213,14 @@ export function ClearCuts() {
 
 	const points = useMemo(() => {
 		if (displayPoints) {
-			return value?.points.content.map(({ point, count }) => (
-				<CircleMarker
-					key={`${point.coordinates[0]},${point.coordinates[1]}`}
-					color="#ff6467"
-					center={{
-						lat: point.coordinates[1],
-						lng: point.coordinates[0]
-					}}
-					radius={getPointRadius(count, map.getSize())}
-					fillOpacity={0.7}
+			return value?.points.content.map((countedPoint) => (
+				<CountedPointMarker
+					key={countedPoint.point.coordinates.join(",")}
+					countedPoint={countedPoint}
 				/>
 			))
 		}
-	}, [displayPoints, value?.points, map])
+	}, [displayPoints, value?.points])
 
 	// Desktop: a single persistent segmented control replaces the lone, ambiguous
 	// toggle icon. Mobile switches map/list via the bottom navbar instead.

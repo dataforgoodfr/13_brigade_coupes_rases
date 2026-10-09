@@ -113,8 +113,11 @@ export type ClearCutReport = z.infer<typeof clearCutReportSchema>
 
 const countedPoint = z.object({
 	count: z.number(),
-	point: pointSchema
+	point: pointSchema,
+	/** [west, south, east, north] of a cluster's points */
+	bounds: z.tuple([z.number(), z.number(), z.number(), z.number()]).nullish()
 })
+export type CountedPoint = z.infer<typeof countedPoint>
 const clusterizedPointsSchema = z.object({
 	total: z.number(),
 	content: countedPoint.array()
