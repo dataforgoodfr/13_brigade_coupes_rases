@@ -88,6 +88,21 @@ export function onPendingFormsSendRequested(listener: () => void) {
 	return () => window.removeEventListener(SEND_REQUESTED, listener)
 }
 
+/**
+ * Run a sending pass in one tab at a time: every open tab has its own sender,
+ * and without this they would all send the same forms when the network comes
+ * back (duplicate versions, then a false conflict). The list is read again
+ * inside the lock, as the previous pass may have emptied it in another tab.
+ */
+export async function withSendLock<T>(pass: () => Promise<T>): Promise<T> {
+	const run = () => {
+		cache = undefined
+		return pass()
+	}
+	if (typeof navigator === "undefined" || !navigator.locks) return run()
+	return navigator.locks.request("bcr:pending-forms-send", run)
+}
+
 /** Forget the cached copy (tests clear localStorage between cases). */
 export const resetPendingFormsCache = () => {
 	cache = undefined
