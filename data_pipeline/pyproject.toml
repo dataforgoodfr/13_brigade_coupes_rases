@@ -71,6 +71,7 @@ module = [
     "rasterio.*",
     "osgeo.*",
     "dask_geopandas.*",
+    "pyogrio.*",
     "google.cloud.*",
 ]
 ignore_missing_imports = true
