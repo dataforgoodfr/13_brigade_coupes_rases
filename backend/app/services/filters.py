@@ -23,10 +23,8 @@ def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSc
         func.min(ClearCutReport.total_area_hectare),
         func.max(ClearCutReport.total_area_hectare),
     ).first()
-    if area_range is None:
-        min_area, max_area = 0, 0
-    else:
-        min_area, max_area = area_range
+    # No report yet: MIN/MAX are NULL
+    min_area, max_area = area_range if area_range is not None else (None, None)
     if connected_user is not None and len(connected_user.departments) > 0:
         departments_query.filter(
             Department.id.in_([dep.id for dep in connected_user.departments])
@@ -35,7 +33,7 @@ def build_filters(db: Session, connected_user: User | None) -> FiltersResponseSc
     statuses = db.query(ClearCutReport.status).distinct().all()
     return FiltersResponseSchema(
         area_range=AreaRangeResponseSchema(
-            min=math.floor(min_area), max=math.ceil(max_area)
+            min=math.floor(min_area or 0), max=math.ceil(max_area or 0)
         ),
         cut_years=[row[0] for row in cut_years],
         departments_ids=[str(row[0]) for row in departments],

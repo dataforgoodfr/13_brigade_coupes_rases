@@ -142,7 +142,7 @@ def update_clear_cut_geometry(
 
 def paginated_clear_cuts_query(
     db: Session, page: int = 0, size: int = 10
-) -> RowReturningQuery[tuple[ClearCut, str, str]]:
+) -> RowReturningQuery[ClearCut, str, str]:
     return (
         db.query(
             ClearCut,
@@ -155,7 +155,7 @@ def paginated_clear_cuts_query(
 
 
 def clear_cuts_to_paginated_response(
-    clear_cuts: Sequence[Row[tuple[ClearCut, str, str]]],
+    clear_cuts: Sequence[Row[ClearCut, str, str]],
     clear_cuts_count: int,
     url: str,
     page: int,
