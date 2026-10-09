@@ -15,9 +15,10 @@ from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
 from bootstrap.scripts.utils import display_df, load_gdf
+from pipeline.scripts.database import create_db_engine
 
 
 class DatabaseSeeder:
@@ -42,7 +43,7 @@ class DatabaseSeeder:
             SQLAlchemy connection string
         """
         logging.info("Initializing DatabaseSeeder")
-        self.engine = create_engine(database_url, plugins=["geoalchemy2"])
+        self.engine = create_db_engine(database_url)
         # Test connection
         with self.engine.connect() as conn:
             conn.execute(text("SELECT 1"))

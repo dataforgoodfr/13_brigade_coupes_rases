@@ -1,6 +1,6 @@
 import os
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -116,6 +116,16 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "SMTP_FROM"},
         description="Sender address; the domain must be verified at the email provider",
     )
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def use_psycopg_driver(cls, url: str) -> str:
+        """Hosting providers hand out plain postgresql:// (or postgres://) URLs,
+        which SQLAlchemy 2.0 maps to psycopg2: point them at psycopg 3."""
+        for scheme in ("postgresql://", "postgres://"):
+            if url.startswith(scheme):
+                return "postgresql+psycopg://" + url.removeprefix(scheme)
+        return url
 
     @property
     def is_production(self) -> bool:

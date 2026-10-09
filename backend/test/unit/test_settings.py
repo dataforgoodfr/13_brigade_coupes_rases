@@ -40,3 +40,17 @@ def test_short_jwt_secret_is_refused_in_production_only() -> None:
     check_production_settings(
         make_settings(ENVIRONMENT="production", JWT_SECRET_KEY="x" * 32)
     )
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("postgresql://u:p@h:5432/db", "postgresql+psycopg://u:p@h:5432/db"),
+        ("postgres://u:p@h/db", "postgresql+psycopg://u:p@h/db"),
+        # An explicit driver is left alone
+        ("postgresql+psycopg://u@h/db", "postgresql+psycopg://u@h/db"),
+        ("postgresql+psycopg2://u@h/db", "postgresql+psycopg2://u@h/db"),
+    ],
+)
+def test_database_url_uses_psycopg(url: str, expected: str) -> None:
+    assert make_settings(DATABASE_URL=url).DATABASE_URL == expected

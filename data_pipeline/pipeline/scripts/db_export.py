@@ -7,7 +7,9 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine
+
+from pipeline.scripts.database import create_db_engine
 
 
 def export_database(database_url: str, output_file: str) -> None:
@@ -22,7 +24,7 @@ def export_database(database_url: str, output_file: str) -> None:
 def connect_db(database_url: str) -> Engine:
     """Create database connection."""
     print("📡 Connecting to database...")
-    engine = create_engine(database_url, plugins=["geoalchemy2"])
+    engine = create_db_engine(database_url)
     print("✅ Connected!")
     return engine
 
