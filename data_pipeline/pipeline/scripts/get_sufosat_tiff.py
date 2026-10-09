@@ -25,6 +25,9 @@ DOWNLOAD_TILE_SIZE_METERS = 40_000
 DOWNLOAD_ATTEMPTS = 3
 # une tuile se télécharge d'ordinaire en moins de 15 s
 DOWNLOAD_TILE_TIMEOUT_SECONDS = 300
+# 4 096 px de côté en int16 → 32 Mo par bloc assemblé, multiple des blocs
+# de 256 px du GeoTIFF écrit
+MERGE_BLOCK_PIXELS = 4096
 
 
 class RaddVersion(TypedDict):
@@ -164,17 +167,34 @@ def tile_grid(
 
 
 def merge_tiles(tile_paths: list[Path], output_path: Path) -> None:
-    """Assemble les tuiles téléchargées en un seul GeoTIFF compressé."""
+    """Assemble les tuiles téléchargées en un seul GeoTIFF compressé.
+
+    La France entière à 10 m ne tient pas en mémoire (~27 Go) : la mosaïque
+    est écrite par blocs de MERGE_BLOCK_PIXELS de côté, chacun assemblé à part.
+    Les blocs suivent la grille interne du GeoTIFF, qui n'écrit ainsi jamais
+    deux fois le même bloc compressé.
+    """
     import rasterio
     from rasterio.merge import merge
+    from rasterio.transform import from_origin
+    from rasterio.windows import Window
+    from rasterio.windows import bounds as window_bounds
 
     datasets = [rasterio.open(p) for p in tile_paths]
     try:
-        mosaic, transform = merge(datasets, nodata=0)
+        res_x, res_y = datasets[0].res
+        west = min(d.bounds.left for d in datasets)
+        south = min(d.bounds.bottom for d in datasets)
+        east = max(d.bounds.right for d in datasets)
+        north = max(d.bounds.top for d in datasets)
+        width = round((east - west) / res_x)
+        height = round((north - south) / res_y)
+        transform = from_origin(west, north, res_x, res_y)
+
         profile = datasets[0].profile.copy()
         profile.update(
-            height=mosaic.shape[1],
-            width=mosaic.shape[2],
+            height=height,
+            width=width,
             transform=transform,
             nodata=0,
             compress="deflate",
@@ -183,10 +203,32 @@ def merge_tiles(tile_paths: list[Path], output_path: Path) -> None:
             blockysize=256,
         )
         with rasterio.open(output_path, "w", **profile) as dst:
-            dst.write(mosaic)
+            for row in range(0, height, MERGE_BLOCK_PIXELS):
+                for col in range(0, width, MERGE_BLOCK_PIXELS):
+                    window = Window(
+                        col,
+                        row,
+                        min(MERGE_BLOCK_PIXELS, width - col),
+                        min(MERGE_BLOCK_PIXELS, height - row),
+                    )
+                    block_bounds = window_bounds(window, transform)
+                    sources = [d for d in datasets if _overlaps(d.bounds, block_bounds)]
+                    if not sources:
+                        continue  # hors des tuiles : reste à nodata
+                    block, _ = merge(
+                        sources, bounds=block_bounds, res=(res_x, res_y), nodata=0
+                    )
+                    dst.write(block, window=window)
     finally:
         for dataset in datasets:
             dataset.close()
+
+
+def _overlaps(
+    a: tuple[float, float, float, float], b: tuple[float, float, float, float]
+) -> bool:
+    """Deux emprises (ouest, sud, est, nord) se chevauchent-elles ?"""
+    return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
 
 
 def download_tile(image: ee.Image, tile_region: ee.Geometry, tile_path: Path) -> None:

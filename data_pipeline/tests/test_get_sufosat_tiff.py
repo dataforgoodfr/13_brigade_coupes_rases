@@ -69,6 +69,42 @@ def test_merge_tiles_assembles_a_mosaic_with_nodata(tmp_path: Path) -> None:
         assert src.profile["compress"] == "deflate"
 
 
+def test_merge_tiles_block_by_block_matches_the_tiles(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Blocs de 4 px sur des tuiles de 10 px : chaque bloc chevauche
+    # plusieurs tuiles, et la case sans tuile reste à nodata.
+    monkeypatch.setattr(get_sufosat_tiff, "MERGE_BLOCK_PIXELS", 4)
+    rng = np.random.default_rng(0)
+    expected = np.zeros((20, 30), dtype="int16")
+    paths = []
+    for row, col in [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2)]:
+        data = rng.integers(1, 1000, (10, 10), dtype="int16")
+        expected[row * 10 : row * 10 + 10, col * 10 : col * 10 + 10] = data
+        path = tmp_path / f"{row}_{col}.tif"
+        with rasterio.open(
+            path,
+            "w",
+            driver="GTiff",
+            height=10,
+            width=10,
+            count=1,
+            dtype="int16",
+            crs="EPSG:3035",
+            transform=from_origin(col * 100, 200 - row * 100, 10, 10),
+            nodata=0,
+        ) as dst:
+            dst.write(data, 1)
+        paths.append(path)
+    output = tmp_path / "merged.tif"
+
+    merge_tiles(paths, output)
+
+    with rasterio.open(output) as src:
+        assert src.transform == from_origin(0, 200, 10, 10)
+        np.testing.assert_array_equal(src.read(1), expected)
+
+
 @responses.activate
 def test_download_tile_writes_the_file_only_once_complete(tmp_path: Path) -> None:
     responses.get("https://ee.test/tile/1", body=b"tiff bytes")
