@@ -84,6 +84,13 @@ def test_every_action_has_a_transition() -> None:
             ADMIN,
             "INVALID_STATUS",
         ),
+        (WorkflowAction.REOPEN, report(), ADMIN, "INVALID_STATUS"),
+        (
+            WorkflowAction.REOPEN,
+            report(user_id=BOB.id, status="in_progress"),
+            ADMIN,
+            "INVALID_STATUS",
+        ),
     ],
 )
 def test_guards_reject_invalid_situations(
@@ -108,6 +115,8 @@ def test_guards_reject_invalid_situations(
             report(status="waiting_for_validation"),
             ADMIN,
         ),
+        (WorkflowAction.REOPEN, report(status="validated"), ADMIN),
+        (WorkflowAction.REOPEN, report(status="in_progress"), ADMIN),
     ],
 )
 def test_guards_accept_valid_situations(
@@ -123,6 +132,7 @@ def test_admin_only_actions() -> None:
         WorkflowAction.REJECT_ASSIGNMENT,
         WorkflowAction.APPROVE_VALIDATION,
         WorkflowAction.REJECT_VALIDATION,
+        WorkflowAction.REOPEN,
     }
 
 
@@ -150,3 +160,19 @@ def test_unassign_from_waiting_for_validation_returns_to_the_pool() -> None:
     rep = report(user_id=ALICE.id, status="waiting_for_validation")
     TRANSITIONS[WorkflowAction.UNASSIGN].apply(rep, ADMIN)
     assert (rep.user_id, rep.status) == (None, "to_validate")
+
+
+@pytest.mark.parametrize(
+    ("rep", "expected"),
+    [
+        # Validated by mistake before anyone took it on: back to the pool
+        (report(status="validated"), (None, "to_validate")),
+        # Left in progress without holder: back to the pool
+        (report(status="in_progress"), (None, "to_validate")),
+        # Decided while held: the holder works on it again
+        (report(status="rejected", user_id=ALICE.id), (ALICE.id, "in_progress")),
+    ],
+)
+def test_reopen(rep: ClearCutReport, expected: tuple[int | None, str]) -> None:
+    TRANSITIONS[WorkflowAction.REOPEN].apply(rep, ADMIN)
+    assert (rep.user_id, rep.status) == expected
