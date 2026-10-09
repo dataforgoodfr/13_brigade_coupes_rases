@@ -1,7 +1,8 @@
 import {
 	type ActionReducerMapBuilder,
 	createAsyncThunk,
-	type Draft
+	type Draft,
+	isRejectedWithValue
 } from "@reduxjs/toolkit"
 import { isUndefined } from "es-toolkit"
 import type { KyInstance, Options as KyOptions } from "ky"
@@ -19,6 +20,7 @@ import type { RootState } from "@/shared/store/store"
 const createAppThunk = createAsyncThunk.withTypes<{
 	state: RootState
 	extra: { api: (options?: KyOptions) => KyInstance }
+	rejectedMeta: { status: number }
 }>()
 export type AppThunk<Returned, ThunkArg> = ReturnType<
 	typeof createAppThunk<Returned, ThunkArg>
@@ -36,13 +38,13 @@ export const createAppAsyncThunk = <Returned, ThunkArg = void>(
 ) =>
 	createAppThunk<Returned, ThunkArg>(
 		prefix,
-		async (arg, api): Promise<Returned> => {
+		async (arg, api) => {
 			try {
 				return (await payloadCreator(arg, api)) as Returned
 			} catch (e) {
+				// ky 2 has already read the body into `data`
 				if (e instanceof HTTPError) {
-					const apiError = await e.response.json()
-					api.rejectWithValue(apiError)
+					return api.rejectWithValue(e.data, { status: e.response.status })
 				}
 				throw e
 			}
@@ -134,6 +136,10 @@ export function withEntityStorageActionCreator<
 		}
 	}
 }
+export const isUnauthorizedRejection = (action: unknown) =>
+	isRejectedWithValue(action) &&
+	(action.meta as { status?: number }).status === 401
+
 const CASES = ["pending", "fulfilled", "rejected"] as const
 type Case = (typeof CASES)[number]
 export const addRequestedContentCases = <State, Value, Error, ThunkArg = void>(

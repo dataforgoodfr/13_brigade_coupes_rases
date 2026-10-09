@@ -4,7 +4,7 @@ import ky, { HTTPError, NetworkError } from "ky"
 import { type TokenResponse, tokenSchema } from "@/features/user/store/me"
 import type { RequestedContent } from "@/shared/api/types"
 import { localStorageRepository } from "@/shared/localStorage"
-export const UNAUTHORIZED_ERROR_NAME = "Unauthorized"
+
 const tokenStorage = localStorageRepository<TokenResponse>("token")
 const meStorage = localStorageRepository<TokenResponse>("me")
 
@@ -15,15 +15,6 @@ export const api = ky.extend({
 		methods: ["get", "post", "put", "head", "delete", "options", "trace"]
 	},
 	hooks: {
-		beforeError: [
-			async ({ error }) => {
-				if (error instanceof HTTPError && error.response.status === 401) {
-					// ky 2 type `name` comme le littéral "HTTPError"
-					;(error as Error).name = UNAUTHORIZED_ERROR_NAME
-				}
-				return error
-			}
-		],
 		beforeRetry: [
 			async ({ request, error }) => {
 				// Offline, retrying only delays the network error the caller handles
