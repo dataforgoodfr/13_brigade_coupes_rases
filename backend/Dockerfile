@@ -1,6 +1,6 @@
 FROM python:3.14 as builder
 ARG SRC_DIR="."
-RUN pip install poetry
+RUN pip install poetry==2.5.1
 
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \

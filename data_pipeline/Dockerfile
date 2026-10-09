@@ -22,7 +22,7 @@ RUN mamba create -y -n py3_14 python=3.14 gdal -c conda-forge && \
     mamba clean -afy
 
 # Installe Poetry dans py3_14 pour que les packages atterrissent dans le bon env
-RUN /opt/conda/envs/py3_14/bin/pip install poetry
+RUN /opt/conda/envs/py3_14/bin/pip install poetry==2.5.1
 RUN /opt/conda/envs/py3_14/bin/poetry config virtualenvs.create false
 
 # Copie les fichiers de configuration Poetry (context = repo root)
