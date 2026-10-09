@@ -69,6 +69,12 @@ export async function listPendingPhotos(
 		.sort((a, b) => a.createdAt - b.createdAt)
 }
 
+/** Photos of a report still on the device, all fields together. */
+export async function countPendingPhotos(reportId: string): Promise<number> {
+	const all = await run<PendingPhoto[]>("readonly", (store) => store.getAll())
+	return all.filter((photo) => photo.reportId === reportId).length
+}
+
 export async function removePendingPhoto(id: string): Promise<void> {
 	await run("readwrite", (store) => store.delete(id))
 }

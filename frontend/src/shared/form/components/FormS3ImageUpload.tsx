@@ -13,6 +13,10 @@ import type { FieldValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import {
+	requestPendingFormsSend,
+	setFormPending
+} from "@/features/clear-cut/store/pendingForms"
 import { cn } from "@/lib/utils"
 import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
@@ -119,6 +123,7 @@ function FormS3ImageField<T extends FieldValues>({
 	) => {
 		if (flushingRef.current || !navigator.onLine) return
 		flushingRef.current = true
+		let sent = 0
 		try {
 			for (const photo of photos) {
 				const {
@@ -130,10 +135,17 @@ function FormS3ImageField<T extends FieldValues>({
 				if (uploaded.length > 0) {
 					addUploaded(uploaded.map((image) => image.key))
 					await dropPending(photo.id)
+					sent++
 				}
 			}
 		} finally {
 			flushingRef.current = false
+		}
+		if (sent > 0) {
+			// The form now lists these photos: send it without waiting for
+			// "Sauvegarder". Deferred so the field change reaches the device copy.
+			setFormPending(reportId, "offline")
+			setTimeout(requestPendingFormsSend, 0)
 		}
 	}
 	const sendPendingRef = useRef(sendPending)
@@ -179,6 +191,7 @@ function FormS3ImageField<T extends FieldValues>({
 					file
 				})
 				setPending((previous) => [...previous, withPreview(photo)])
+				setFormPending(reportId, "offline")
 			} catch {
 				// Storage refused (quota, private mode): say the photo is not kept
 				setStorageError(true)
@@ -288,8 +301,8 @@ function FormS3ImageField<T extends FieldValues>({
 						<CloudOff className="mt-0.5 h-4 w-4 shrink-0" />
 						<span>
 							{pending.length > 1
-								? `${pending.length} photos en attente d'envoi, gardées sur cet appareil. Elles partiront au retour du réseau ; enregistrez ensuite le formulaire.`
-								: "1 photo en attente d'envoi, gardée sur cet appareil. Elle partira au retour du réseau ; enregistrez ensuite le formulaire."}
+								? `${pending.length} photos en attente d'envoi, gardées sur cet appareil. Elles partiront au retour du réseau, fiche ouverte, avec le formulaire.`
+								: "1 photo en attente d'envoi, gardée sur cet appareil. Elle partira au retour du réseau, fiche ouverte, avec le formulaire."}
 						</span>
 					</p>
 					<div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

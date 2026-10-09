@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { LayoutProvider } from "@/features/clear-cut/components/Layout.context"
 import { MapProvider } from "@/features/clear-cut/components/map/Map.context"
 import { OfflineBanner } from "@/features/offline/components/OfflineBanner"
+import { usePendingFormsSender } from "@/features/offline/hooks/usePendingFormsSender"
 import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa"
 import type { AuthContext } from "@/features/user/components/Auth.context"
 import { AppLayout } from "@/shared/components/AppLayout"
@@ -28,6 +29,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
 	useReloadPwa()
+	usePendingFormsSender()
 	const dispatch = useAppDispatch()
 	useEffect(() => {
 		dispatch(getReferentialThunk())
