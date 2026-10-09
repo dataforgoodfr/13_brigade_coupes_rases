@@ -7,15 +7,18 @@ import type {
 } from "@/features/clear-cut/store/clear-cuts"
 import {
 	approveAssignmentThunk,
+	approveValidationThunk,
 	cancelAssignRequestThunk,
 	getClearCutsThunk,
 	rejectAssignmentThunk,
+	reopenReportThunk,
 	requestAssignReportThunk,
 	unassignReportThunk,
 	updateReportStatusThunk,
 	type WorkflowThunkAction
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
+import { canBeReopened } from "@/features/clear-cut/store/status"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { ConfirmButton } from "@/shared/components/ConfirmDialog"
@@ -218,10 +221,28 @@ export function AccordionHeader({
 	}
 
 	const renderAdminValidationSection = () => {
-		if (
-			!isAdmin ||
-			(status !== "to_validate" && status !== "waiting_for_validation")
-		)
+		if (!isAdmin) return null
+
+		if (canBeReopened(status, !!reportUserId)) {
+			return (
+				<Button
+					type="button"
+					onClick={() => {
+						dispatchAndRefresh(
+							reopenReportThunk(reportId),
+							"Impossible de rouvrir le signalement."
+						)
+					}}
+					className="w-full text-xs min-h-[44px] mb-2 mt-2 cursor-pointer"
+					variant="outline"
+					size="sm"
+				>
+					{reportUserId ? "Remettre en traitement" : "Remettre à traiter"}
+				</Button>
+			)
+		}
+
+		if (status !== "to_validate" && status !== "waiting_for_validation")
 			return null
 
 		return (
@@ -234,7 +255,12 @@ export function AccordionHeader({
 						type="button"
 						onClick={() => {
 							dispatchAndRefresh(
-								updateReportStatusThunk({ id: reportId, status: "validated" }),
+								status === "waiting_for_validation"
+									? approveValidationThunk(reportId)
+									: updateReportStatusThunk({
+											id: reportId,
+											status: "validated"
+										}),
 								"Impossible de valider le signalement."
 							)
 						}}

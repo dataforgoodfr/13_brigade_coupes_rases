@@ -287,6 +287,11 @@ def volunteer_create_clear_cut_report(
     return report
 
 
+# Statuses that only make sense with a volunteer holding the report
+HOLDER_STATUSES = ("in_progress", "waiting_for_validation")
+DECIDED_STATUSES = ("validated", "legal_validated", "final_validated", "rejected")
+
+
 def assign_report(report: ClearCutReport, user_id: int) -> None:
     """Every assignment path (approval, direct PUT) has the same effect: the
     report gets a holder and a free report moves on to in_progress."""
@@ -300,7 +305,7 @@ def unassign_report(report: ClearCutReport) -> None:
     """A report without a holder can be neither in progress nor awaiting
     validation: it goes back to the pool."""
     report.user_id = None
-    if report.status in ("in_progress", "waiting_for_validation"):
+    if report.status in HOLDER_STATUSES:
         report.status = "to_validate"
 
 
@@ -338,14 +343,21 @@ def update_clear_cut_report(
             assign_report(report, request.user_id)
 
     if request.status is not None:
-        if connected_user.role == "admin":
-            report.status = request.status
-        else:
+        if connected_user.role != "admin":
             raise AppHTTPException(
                 status_code=403,
                 type="INVALID_REQUESTER_RIGHTS",
                 detail="Only admins can update report status directly",
             )
+        # Nothing could get such a report out of this status: it can neither
+        # be requested (not in the pool) nor unassigned (no holder).
+        if request.status in HOLDER_STATUSES and report.user_id is None:
+            raise AppHTTPException(
+                status_code=400,
+                type="INVALID_STATUS",
+                detail=f"A report without holder cannot be {request.status}",
+            )
+        report.status = request.status
 
     # Editing the initial report info (commune, date de signalement) is allowed
     # for admins and for the volunteer assigned to the report.

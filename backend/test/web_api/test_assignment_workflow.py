@@ -290,6 +290,7 @@ def test_admin_can_submit_any_in_progress_report(
         "volunteer-validate",
         "approve-validation",
         "reject-validation",
+        "reopen",
     ],
 )
 def test_workflow_on_unknown_report_returns_not_found(
@@ -432,3 +433,72 @@ def test_assigned_volunteer_cannot_edit_a_locked_form(
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert error_type(response.json()) == "FORM_LOCKED"
+
+
+def test_report_validated_by_mistake_can_be_reopened_and_taken_on(
+    client: TestClient, db: Session
+) -> None:
+    volunteer, volunteer_token = get_volunteer_user_token(client, db)
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db, "validated")
+
+    response = client.post(f"{REPORTS}/{report_id}/reopen", headers=auth(admin_token))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert reload(db, report_id).status == "to_validate"
+    response = client.post(
+        f"{REPORTS}/{report_id}/request-assignment", headers=auth(volunteer_token)
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert reload(db, report_id).assignment_requested_by_id == volunteer.id
+
+
+def test_reopen_is_reserved_to_admins(client: TestClient, db: Session) -> None:
+    _, volunteer_token = get_volunteer_user_token(client, db)
+    report_id = free_report(db, "validated")
+
+    response = client.post(
+        f"{REPORTS}/{report_id}/reopen", headers=auth(volunteer_token)
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert reload(db, report_id).status == "validated"
+
+
+@pytest.mark.parametrize("holder_status", ["in_progress", "waiting_for_validation"])
+def test_admin_cannot_put_a_report_without_holder_in_progress(
+    client: TestClient, db: Session, holder_status: str
+) -> None:
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db, "validated")
+
+    response = client.put(
+        f"{REPORTS}/{report_id}",
+        json={"status": holder_status},
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_type(response.json()) == "INVALID_STATUS"
+    assert reload(db, report_id).status == "validated"
+
+
+def test_admin_can_put_a_held_report_back_in_progress(
+    client: TestClient, db: Session
+) -> None:
+    volunteer, _ = get_volunteer_user_token(client, db)
+    _, admin_token = get_admin_user_token(client, db, "admin@workflow.test")
+    report_id = free_report(db)
+    assign(db, report_id, volunteer.id)
+    report = reload(db, report_id)
+    report.status = "validated"
+    db.commit()
+
+    response = client.put(
+        f"{REPORTS}/{report_id}",
+        json={"status": "in_progress"},
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert reload(db, report_id).status == "in_progress"

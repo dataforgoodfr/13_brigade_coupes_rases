@@ -7,6 +7,10 @@ all the same way. The route layer only maps an URL to a `WorkflowAction`.
     to_validate ──(request → approve)──▶ in_progress ──(volunteer-validate)──▶
     waiting_for_validation ──(approve-validation)──▶ validated
                             └─(reject-validation)──▶ in_progress
+
+An admin can reopen a decided report (or one left in progress without a
+holder): it goes back to in_progress if it still has a holder, to the pool
+otherwise.
 """
 
 from collections.abc import Callable
@@ -17,7 +21,12 @@ from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
 from app.models import ClearCutReport, User
-from app.services.clear_cut_report import assign_report, unassign_report
+from app.services.clear_cut_report import (
+    DECIDED_STATUSES,
+    HOLDER_STATUSES,
+    assign_report,
+    unassign_report,
+)
 from app.services.email import send_assignment_email, send_validation_rejected_email
 
 
@@ -30,6 +39,7 @@ class WorkflowAction(StrEnum):
     VOLUNTEER_VALIDATE = "volunteer-validate"
     APPROVE_VALIDATION = "approve-validation"
     REJECT_VALIDATION = "reject-validation"
+    REOPEN = "reopen"
 
 
 Predicate = Callable[[ClearCutReport, User], bool]
@@ -104,6 +114,18 @@ def _set_status(status: str) -> Callable[[ClearCutReport, User], None]:
         report.status = status
 
     return apply
+
+
+def _reopen(report: ClearCutReport, _: User) -> None:
+    report.assignment_requested_by_id = None
+    report.status = "to_validate" if report.user_id is None else "in_progress"
+
+
+def can_be_reopened(report: ClearCutReport, _: User) -> bool:
+    """Decided reports, and reports whose status needs a holder they lost."""
+    if report.status in DECIDED_STATUSES:
+        return True
+    return report.status in HOLDER_STATUSES and report.user_id is None
 
 
 def _notify_assignment(report: ClearCutReport) -> None:
@@ -208,6 +230,19 @@ TRANSITIONS: dict[WorkflowAction, Transition] = {
         apply=_set_status("in_progress"),
         after_commit=_notify_rejection,
         message="Validation rejected",
+    ),
+    WorkflowAction.REOPEN: Transition(
+        admin_only="Only admins can reopen reports",
+        guards=(
+            Guard(
+                can_be_reopened,
+                400,
+                "INVALID_STATUS",
+                "Only a decided report or one without holder can be reopened",
+            ),
+        ),
+        apply=_reopen,
+        message="Report reopened",
     ),
 }
 

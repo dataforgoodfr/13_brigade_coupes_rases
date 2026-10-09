@@ -12,10 +12,13 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	getAdminAllReportsThunk,
-	selectAdminAllReports,
-	updateReportStatusThunk
+	reopenReportThunk,
+	selectAdminAllReports
 } from "@/features/clear-cut/store/clear-cuts-slice"
-import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
+import {
+	CLEAR_CUTTING_STATUS_TRANSLATIONS,
+	canBeReopened
+} from "@/features/clear-cut/store/status"
 import { TimeProgress } from "@/shared/components/TimeProgress"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
@@ -29,11 +32,9 @@ export function ReportsTrackingTab() {
 		dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
 	}, [dispatch])
 
-	const handleResetToInProgress = (e: React.MouseEvent, reportId: string) => {
+	const handleReopen = (e: React.MouseEvent, reportId: string) => {
 		e.stopPropagation()
-		dispatch(
-			updateReportStatusThunk({ id: reportId, status: "in_progress" })
-		).then(() => {
+		dispatch(reopenReportThunk(reportId)).then(() => {
 			dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
 		})
 	}
@@ -174,18 +175,20 @@ export function ReportsTrackingTab() {
 								</td>
 								<td className="px-6 py-4 text-right">
 									<div className="flex items-center justify-end gap-1">
-										{(report.status === "validated" ||
-											report.status === "legal_validated" ||
-											report.status === "final_validated") && (
+										{canBeReopened(report.status, !!report.affectedUser) && (
 											<Button
 												variant="outline"
 												size="sm"
 												className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50 min-h-[36px] gap-1"
-												title="Remettre en traitement"
-												onClick={(e) => handleResetToInProgress(e, report.id)}
+												title={
+													report.affectedUser
+														? "Remettre en traitement par le bénévole attribué"
+														: "Remettre à traiter"
+												}
+												onClick={(e) => handleReopen(e, report.id)}
 											>
 												<RotateCcw size={13} />
-												<span className="hidden sm:inline">En traitement</span>
+												<span className="hidden sm:inline">Rouvrir</span>
 											</Button>
 										)}
 										<Button

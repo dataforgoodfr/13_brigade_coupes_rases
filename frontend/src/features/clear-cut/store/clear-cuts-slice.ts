@@ -418,6 +418,12 @@ export const rejectValidationThunk = createAppAsyncThunk<void, string>(
 	}
 )
 
+export const reopenReportThunk = createAppAsyncThunk<void, string>(
+	"clear-cuts/reopen",
+	async (reportId, { extra: { api } }) =>
+		await api().post(`api/v1/clear-cuts-reports/${reportId}/reopen`).json()
+)
+
 export const updateClearCutGeometryThunk = createAppAsyncThunk<
 	void,
 	{
@@ -611,6 +617,11 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			rejectValidationThunk,
+			(state) => state.assignation
+		)
+		addRequestedContentCases(
+			builder,
+			reopenReportThunk,
 			(state) => state.assignation
 		)
 		addRequestedContentCases(

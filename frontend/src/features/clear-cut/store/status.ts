@@ -32,3 +32,19 @@ export const CLEAR_CUTTING_STATUS_TRANSLATIONS: Record<ClearCutStatus, string> =
 		final_validated: "Validé sans poursuites",
 		rejected: "Rejeté"
 	}
+
+const DECIDED_STATUSES: ClearCutStatus[] = [
+	"validated",
+	"legal_validated",
+	"final_validated",
+	"rejected"
+]
+const HOLDER_STATUSES: ClearCutStatus[] = [
+	"in_progress",
+	"waiting_for_validation"
+]
+
+/** An admin can reopen a decided report, or one left without its holder. */
+export const canBeReopened = (status: ClearCutStatus, hasHolder: boolean) =>
+	DECIDED_STATUSES.includes(status) ||
+	(HOLDER_STATUSES.includes(status) && !hasHolder)
