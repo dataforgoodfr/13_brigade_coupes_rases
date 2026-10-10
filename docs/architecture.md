@@ -9,7 +9,7 @@ flowchart LR
     RADD[Alertes satellite<br>RADD Europe, Earth Engine] --> P[Data pipeline<br>regroupement, enrichissement]
     REF[Couches de référence<br>Natura 2000, BD Forêt, cadastre, pente] --> P
     P --> S3[(S3 « gold »)]
-    S3 -. chargement .-> DB[(PostgreSQL / PostGIS)]
+    P -- chargement --> DB[(PostgreSQL / PostGIS)]
     DB <--> API[Backend FastAPI]
     API <--> FRONT[Frontend React]
     FRONT --> V[Bénévoles, administrateurs]
@@ -17,7 +17,7 @@ flowchart LR
     DB --> AT[Export Airtable]
 ```
 
-- La **data pipeline** ne connaît que les coupes : elle lit la base pour savoir jusqu'où elle a déjà traité, et publie ses résultats dans S3 ([data_pipeline/pipeline/README.md](../data_pipeline/pipeline/README.md)).
+- La **data pipeline** ne connaît que les coupes : elle lit la base pour savoir jusqu'où elle a déjà traité, publie ses résultats dans S3, puis ajoute les nouvelles coupes (un signalement « à valider » chacune) et complète les coupes existantes, sans toucher au suivi des signalements ([data_pipeline/pipeline/README.md](../data_pipeline/pipeline/README.md)).
 - Le **backend** possède la base : modèles, migrations, règles d'illégalité, workflow, authentification.
 - Le **frontend** est une SPA qui ne parle qu'à l'API ; il fonctionne aussi sur des données simulées (`pnpm dev:mock`).
 

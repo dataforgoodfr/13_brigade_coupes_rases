@@ -10,6 +10,7 @@ on:
     branches: ["main"]
     paths:
       - "data_pipeline/**"
+      - "backend/alembic/**"
       - "pyproject.toml"
 
 # Le GITHUB_TOKEN n'a besoin que de lire le dépôt
@@ -23,6 +24,21 @@ concurrency:
 jobs:
   typecheck:
     runs-on: ubuntu-latest
+    # Base des tests du chargement, au schéma des migrations du backend
+    services:
+      db:
+        image: postgis/postgis:15-3.5
+        env:
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: devuser
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: data_pipeline
@@ -49,8 +65,25 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry install --no-interaction --no-root
 
+      - name: Cache backend virtualenv
+        uses: actions/cache@v6
+        with:
+          path: backend/.venv
+          key: ${{ runner.os }}-poetry-backend-main-${{ hashFiles('backend/poetry.lock') }}
+
+      - name: Database schema (backend migrations)
+        working-directory: backend
+        run: |
+          poetry install --with backend --no-interaction --no-root
+          poetry run alembic upgrade head
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: postgresql://devuser:devuser@localhost:5432/test
+
       - name: Tests (pytest)
         run: poetry run pytest
+        env:
+          TEST_DATABASE_URL: postgresql://devuser:devuser@localhost:5432/test
 
       - name: Coverage summary
         if: always()

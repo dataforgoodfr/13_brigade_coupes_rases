@@ -2,11 +2,16 @@
 
 ## Objectif
 
-Chaque mois, la pipeline récupère la dernière image d'alertes [RADD Europe](https://data.globalforestwatch.org/documents/gfw::deforestation-alerts-radd/about) depuis Google Earth Engine, détecte les nouveaux clusters de coupes depuis la dernière date en base, les enrichit avec les données de référence, et produit un fichier gold dans S3 que le backend consomme pour mettre à jour la base de données.
+Chaque mois, la pipeline récupère la dernière image d'alertes [RADD Europe](https://data.globalforestwatch.org/documents/gfw::deforestation-alerts-radd/about) depuis Google Earth Engine, détecte les nouveaux clusters de coupes depuis la dernière date en base, les enrichit avec les données de référence, produit un fichier gold dans S3, puis charge les nouvelles coupes et les mises à jour dans la base.
 
 Les alertes RADD ont remplacé les millésimes SUFOSAT (Zenodo) : même format de dates (YYDDD), mais une image mise à jour chaque semaine au lieu de deux fois par an. Les scripts et les chemins S3 gardent le nom `sufosat`.
 
-**La pipeline ne fait aucune écriture en base de données.** Elle lit la base (source de vérité) et écrit uniquement dans S3.
+La base reste la source de vérité. Le chargement n'écrit qu'avec `LOAD_DATABASE=on` (`dry-run` : tout est calculé puis annulé ; par défaut `off`) et ne fait qu'ajouter ou compléter :
+
+- chaque nouveau cluster devient un signalement « à valider » avec sa coupe ;
+- une coupe rapprochée d'une nouvelle détection reçoit le contour fusionné, les dates et la surface, sauf si elle a été corrigée à la main ;
+- rien n'est supprimé, et ni le statut, ni le bénévole, ni les formulaires d'un signalement ne changent ;
+- un cluster qui recoupe déjà une coupe en base est ignoré : relancer le chargement n'ajoute rien.
 
 ---
 
@@ -49,6 +54,11 @@ Les alertes RADD ont remplacé les millésimes SUFOSAT (Zenodo) : même format d
 7. Upload S3 gold
    current  →  previous   (rotation)
    clusters_final.fgb  →  current
+
+8. Chargement en base (si LOAD_DATABASE=on)
+   clusters_new.fgb → nouveaux signalements « to_validate »
+   clusters_reference_updated.fgb → coupes existantes mises à jour
+   une seule transaction, puis POST /sync-reports (totaux et règles)
 ```
 
 ---
@@ -126,6 +136,7 @@ pipeline/scripts/
 ├── get_new_and_update.py      # Comparaison new/updated, fusion géométries
 ├── upload_gold.py             # Rotation et upload S3 gold
 ├── db_export.py               # Export DB → FGB local (référentiel de comparaison)
+├── load_database.py           # Chargement incrémental en base, --dry-run pour essayer
 └── utils/
     ├── s3_utils.py            # S3Manager (Scaleway)
     └── ...
