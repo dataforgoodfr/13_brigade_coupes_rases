@@ -11,7 +11,7 @@ Les contributions arrivent par pull request depuis un fork. Les questions et pro
 ## Branches
 
 - `main` est la branche par défaut et reçoit les pull requests.
-- La mise en production se fait en publiant une release (voir le [README](./README.md#branches-et-déploiement)).
+- La mise en production se fait en publiant une release (voir le [guide des opérations](./docs/operations.md#branches-et-déploiement)).
 
 Nommage des branches de travail :
 
