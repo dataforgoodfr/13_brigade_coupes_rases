@@ -114,7 +114,7 @@ référencées dans la base KeePass partagée.
 - Base de données : add-on PostgreSQL, chaîne de connexion dans la base KeePass.
 
 Le déploiement se déclenche en publiant une release GitHub, voir le
-[README principal](../README.md#branches-et-déploiement).
+[guide des opérations](../docs/operations.md#branches-et-déploiement).
 
 ## Schéma de la base
 
