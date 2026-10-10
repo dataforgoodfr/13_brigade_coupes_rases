@@ -1,0 +1,29 @@
+name: Pipeline mensuelle
+
+# La pipeline est une tâche Clever Cloud : la redémarrer l'exécute une fois,
+# puis l'instance s'arrête. Clever Cloud n'a pas de déclencheur planifié pour
+# les tâches, d'où ce workflow.
+on:
+  schedule:
+    # Le 2 de chaque mois à 6 h UTC
+    - cron: "0 6 2 * *"
+  workflow_dispatch:
+
+# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
+permissions:
+  contents: read
+
+concurrency:
+  group: pipeline-mensuelle
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Lancer la tâche Clever Cloud
+        run: npx --yes clever-tools@5.0.2 restart --app app_b5275abd-5f5e-4de3-9382-a3c76db0b8e5 --quiet
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}

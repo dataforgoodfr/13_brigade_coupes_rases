@@ -49,6 +49,6 @@ ENV PROJ_DATA=/opt/conda/envs/py3_14/share/proj \
     GDAL_DRIVER_PATH=/opt/conda/envs/py3_14/lib/gdalplugins \
     PROJ_NETWORK=OFF
 
-# Lance un serveur HTTP minimaliste sur 8080 (exigé par Clever Cloud)
-# en parallèle de la pipeline ; le container s'arrête quand la pipeline finit.
-CMD python -m pipeline.scripts.run_pipeline & python -m http.server 8080
+# Sur Clever Cloud, l'application est une tâche (Clever Tasks) : elle exécute
+# la pipeline puis s'arrête, sans écouter de port.
+CMD ["python", "-m", "pipeline.scripts.run_pipeline"]

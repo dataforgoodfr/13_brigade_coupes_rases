@@ -12,7 +12,9 @@ Le Storybook est publié sur GitHub Pages à chaque modification du frontend sur
 
 ## Data pipeline et synchronisation Airtable
 
-La data pipeline est une application Docker distincte sur Clever Cloud (`CC_DOCKERFILE=data_pipeline/Dockerfile`, contexte de build à la racine du dépôt) ; aucun workflow ne la déploie, elle se met à jour depuis la console Clever Cloud. La synchronisation Airtable tourne dans GitHub Actions (`airtable-sync.yml`, deux fois par jour).
+La data pipeline est une application Docker distincte sur Clever Cloud (`CC_DOCKERFILE=data_pipeline/Dockerfile`, contexte de build à la racine du dépôt), déclarée comme tâche ([Clever Tasks](https://www.clever.cloud/developers/doc/develop/tasks/)) : chaque démarrage exécute la pipeline une fois, puis l'instance s'arrête. Aucun workflow ne la déploie, elle se met à jour depuis la console ou avec `clever deploy`.
+
+Le workflow **Pipeline mensuelle** (`pipeline-mensuelle.yml`) la redémarre le 2 de chaque mois ; il peut aussi être lancé à la main. Le chargement en base dépend de la variable `LOAD_DATABASE` de l'application (`off`, `dry-run` ou `on`, voir [data_pipeline/.env.example](../data_pipeline/.env.example)). Le suivi d'une exécution se fait dans les journaux de l'application Clever. La synchronisation Airtable tourne dans GitHub Actions (`airtable-sync.yml`, deux fois par jour).
 
 ## Workflows GitHub Actions
 
