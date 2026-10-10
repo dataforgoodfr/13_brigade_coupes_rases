@@ -3,14 +3,16 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pyogrio
 import pytest
 import rasterio
 from rasterio.transform import from_origin
-from shapely.geometry import box
+from shapely.geometry import MultiPolygon, box
 
 from pipeline.scripts import preprocess_sufosat
 from pipeline.scripts.preprocess_sufosat import (
     add_concave_hull_score,
+    append_clusters,
     cluster_pixels,
     connected_components,
     decode_dates,
@@ -223,3 +225,20 @@ def test_mask_alerts_filters_a_single_date_band_by_date(tmp_path: Path) -> None:
 
     with rasterio.open(masked) as src:
         assert src.read(1).tolist() == [[26010, 0, 0, 25423]]
+
+
+def test_append_clusters_keeps_one_multipolygon_layer(tmp_path: Path) -> None:
+    # Une première bande sans MultiPolygon ne doit pas figer la couche en
+    # POLYGON : la conversion en FlatGeobuf refuserait les bandes suivantes.
+    output = tmp_path / "clusters.gpkg"
+    polygons = gpd.GeoDataFrame(geometry=[box(0, 0, 100, 100)], crs="EPSG:2154")
+    multipolygons = gpd.GeoDataFrame(
+        geometry=[MultiPolygon([box(0, 0, 100, 100), box(300, 0, 400, 100)])],
+        crs="EPSG:2154",
+    )
+
+    append_clusters(polygons, output)
+    append_clusters(multipolygons, output)
+
+    assert pyogrio.read_info(output)["geometry_type"] == "MultiPolygon"
+    assert set(gpd.read_file(output).geom_type) == {"MultiPolygon"}
