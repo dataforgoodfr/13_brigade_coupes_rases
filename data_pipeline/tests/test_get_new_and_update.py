@@ -136,3 +136,57 @@ def test_update_merges_in_meters_despite_missing_database_values(
     # Le résultat reste dans la projection de la référence
     assert final.crs.to_epsg() == 4326
     assert len(final) == 2
+
+
+def test_only_matched_reference_cuts_are_kept_for_loading(data_dir: Path) -> None:
+    (data_dir / "sufosat_reference").mkdir()
+    ref = cluster_frame(
+        [
+            box(370_000, 6_340_000, 370_100, 6_340_100),
+            box(380_000, 6_340_000, 380_100, 6_340_100),  # sans nouvelle détection
+        ]
+    ).assign(
+        clear_cut_group=[41, 42],
+        clear_cut_group_size=[1, 1],
+        area_ha=[1.0, 1.0],
+        concave_hull_score=[None, None],
+    )
+    updated = cluster_frame([box(370_100, 6_340_000, 370_200, 6_340_100)]).assign(
+        clear_cut_group_size=[1], concave_hull_score=[0.8]
+    )
+    ref.to_crs("EPSG:4326").to_file(
+        data_dir / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
+    )
+    updated.to_file(data_dir / "sufosat" / "clusters_updated.fgb")
+    cluster_frame([box(400_000, 6_400_000, 400_100, 6_400_100)]).to_file(
+        data_dir / "sufosat" / "clusters_new.fgb"
+    )
+
+    update_geometries()
+
+    to_load = gpd.read_file(data_dir / "sufosat" / "clusters_reference_updated.fgb")
+    assert to_load["clear_cut_group"].tolist() == [41]
+
+
+def test_no_reference_update_leaves_no_file_to_load(data_dir: Path) -> None:
+    (data_dir / "sufosat_reference").mkdir()
+    stale = data_dir / "sufosat" / "clusters_reference_updated.fgb"
+    stale.write_text("ancienne exécution")
+    cluster_frame([box(370_000, 6_340_000, 370_100, 6_340_100)]).assign(
+        clear_cut_group_size=[1]
+    ).to_crs("EPSG:4326").to_file(
+        data_dir / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
+    )
+    empty = (
+        cluster_frame([box(370_000, 6_340_000, 370_100, 6_340_100)])
+        .assign(clear_cut_group_size=[1])
+        .iloc[:0]
+    )
+    empty.to_file(data_dir / "sufosat" / "clusters_updated.fgb")
+    cluster_frame([box(400_000, 6_400_000, 400_100, 6_400_100)]).to_file(
+        data_dir / "sufosat" / "clusters_new.fgb"
+    )
+
+    update_geometries()
+
+    assert not stale.exists()

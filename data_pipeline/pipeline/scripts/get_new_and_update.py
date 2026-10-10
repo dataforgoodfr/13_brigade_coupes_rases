@@ -117,6 +117,16 @@ def split_new_and_updated_clusters(
     return gdf_updated, gdf_truly_new
 
 
+def save_reference_updates(gdf: gpd.GeoDataFrame) -> None:
+    """Écrit les coupes de la base rapprochées d'une nouvelle détection ; un
+    fichier vide ne s'écrit pas en FlatGeobuf, il est alors retiré."""
+    path = DATA_DIR / "sufosat" / "clusters_reference_updated.fgb"
+    if gdf.empty:
+        path.unlink(missing_ok=True)
+        return
+    gdf.to_file(path, driver="FlatGeobuf")
+
+
 def update_geometries(
     distance_threshold: float = 50,
 ) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame]:
@@ -260,6 +270,8 @@ def update_geometries(
         driver="FlatGeobuf",
     )
     gdf_final.to_file(DATA_DIR / "sufosat" / "clusters_final.fgb", driver="FlatGeobuf")
+    # Les seules coupes de la base à modifier, pour le chargement en base
+    save_reference_updates(gdf_ref_updated.loc[list(updates)])
 
     print("\n Fichiers sauvegardés:")
     print(

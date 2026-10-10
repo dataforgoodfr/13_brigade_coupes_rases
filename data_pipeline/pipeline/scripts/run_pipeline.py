@@ -15,6 +15,11 @@ from pipeline.scripts.get_new_and_update import (
 )
 from pipeline.scripts.get_reference_data import get_enrichment_data
 from pipeline.scripts.get_sufosat_tiff import get_sufosat_tiff
+from pipeline.scripts.load_database import (
+    NEW_CLUSTERS_PATH,
+    UPDATED_CLUSTERS_PATH,
+    load_database,
+)
 from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 from pipeline.scripts.upload_gold import upload_gold_to_s3
 
@@ -54,10 +59,10 @@ def run_pipeline() -> None:
 
     if last_version_date is None:
         # Premier run : pas de données en base, le fichier enrichi devient directement le gold final
-        shutil.copy(
-            str(DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"),
-            str(DATA_DIR / "sufosat" / "clusters_final.fgb"),
-        )
+        enriched_path = DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"
+        shutil.copy(enriched_path, DATA_DIR / "sufosat" / "clusters_final.fgb")
+        shutil.copy(enriched_path, NEW_CLUSTERS_PATH)
+        UPDATED_CLUSTERS_PATH.unlink(missing_ok=True)
     else:
         db_reference_path = str(
             DATA_DIR / "sufosat_reference" / "sufosat_clusters_enriched.fgb"
@@ -74,6 +79,12 @@ def run_pipeline() -> None:
         update_geometries()
 
     upload_gold_to_s3()
+
+    load_mode = os.environ.get("LOAD_DATABASE", "off")
+    if load_mode in ("on", "dry-run"):
+        load_database(dry_run=load_mode == "dry-run")
+    else:
+        logging.info("LOAD_DATABASE=%s : la base n'est pas modifiée.", load_mode)
 
     logging.info("Pipeline completed successfully.")
 
