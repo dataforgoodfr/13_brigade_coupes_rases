@@ -1,6 +1,6 @@
 """Imprime le modèle de données en Mermaid (erDiagram) depuis les modèles SQLAlchemy.
 
-Usage : `make erd` ; coller le résultat dans doc/architecture.md (la table des
+Usage : `make erd` ; coller le résultat dans docs/architecture.md (la table des
 formulaires y est abrégée à la main).
 """
 

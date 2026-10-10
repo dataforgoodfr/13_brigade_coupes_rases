@@ -7,7 +7,7 @@ Projet [Data For Good](https://dataforgood.fr/), saison 13. Licence MIT.
 - [Backend](./backend/README.md) — API FastAPI
 - [Frontend](./frontend/README.md) — application React
 - [Data pipeline](./data_pipeline/README.md) — ingestion des alertes et des couches de référence
-- [Documentation](./doc/README.md) — fiche coupe rase, pipeline, PostGIS
+- [Documentation](./docs/README.md) — fiche coupe rase, pipeline, PostGIS
 - [Contribuer](./CONTRIBUTING.md) — branches, commits, vérifications avant une pull request
 
 | | |
@@ -43,14 +43,14 @@ Canopée, association engagée pour la protection des forêts, cherche à automa
 
 Le tout est hébergé sur [Clever Cloud](https://www.clever-cloud.com/).
 
-Parcours d'une coupe : la pipeline regroupe les détections satellite en **clear cuts**, rattachés à un **signalement** (clear cut report) qui suit un workflow de validation (`to_validate` → `in_progress` → `waiting_for_validation` → `validated` / `legal_validated` / `final_validated`, ou `rejected`). Un administrateur assigne le signalement à un bénévole du département, qui le documente sur place dans un **formulaire** (photos, constat). Les champs de la fiche sont décrits dans [doc/clear-cut-description.md](./doc/clear-cut-description.md), les regroupements dans [doc/pipeline_dataeng.md](./doc/pipeline_dataeng.md).
+Parcours d'une coupe : la pipeline regroupe les détections satellite en **clear cuts**, rattachés à un **signalement** (clear cut report) qui suit un workflow de validation (`to_validate` → `in_progress` → `waiting_for_validation` → `validated` / `legal_validated` / `final_validated`, ou `rejected`). Un administrateur assigne le signalement à un bénévole du département, qui le documente sur place dans un **formulaire** (photos, constat). Les champs de la fiche sont décrits dans [docs/clear-cut-description.md](./docs/clear-cut-description.md), les regroupements dans [docs/pipeline_dataeng.md](./docs/pipeline_dataeng.md).
 
 ```
 📁 13_brigade_coupes_rases
 ├── 📁 backend/        API et gestion de la base de données
 ├── 📁 frontend/       application web (carte, formulaires)
 ├── 📁 data_pipeline/  collecte et traitement des données
-├── 📁 doc/            documentation
+├── 📁 docs/           documentation
 ├── 📁 docker/         image PostgreSQL/PostGIS de développement (docker-compose.yml à la racine)
 └── 📁 keepass/        secrets partagés (chiffrés)
 ```
@@ -227,15 +227,15 @@ Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bo
 
 **Backend CI** : tests du backend (pytest, mypy).
 
-![](doc/images/backend_ci.png)
+![](docs/images/backend_ci.png)
 
 **Frontend CI** : lint, tests unitaires et navigateur (Playwright).
 
-![](doc/images/frontend_ci.png)
+![](docs/images/frontend_ci.png)
 
 **Database Actions** : actions manuelles sur la base (upgrade, setup, reset).
 
-![](doc/images/database_ci.png)
+![](docs/images/database_ci.png)
 
 ### Bucket S3
 
