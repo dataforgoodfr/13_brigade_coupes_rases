@@ -2,7 +2,7 @@
 
 Application de [Canopée](https://www.canopee.ong/) pour détecter, suivre et vérifier les coupes rases abusives en France : les alertes issues de l'imagerie satellite sont chargées dans une base PostGIS, puis des bénévoles les contrôlent sur le terrain via une carte interactive et un formulaire.
 
-Projet [Data For Good](https://dataforgood.fr/), saison 13. Licence MIT.
+Développé à l'origine par des bénévoles de [Data For Good](https://dataforgood.fr/) (saison 13). Licence MIT.
 
 - [Backend](./backend/README.md) — API FastAPI
 - [Frontend](./frontend/README.md) — application React
@@ -15,9 +15,7 @@ Projet [Data For Good](https://dataforgood.fr/), saison 13. Licence MIT.
 | Application | <https://app-ab2f14d8-10a9-454d-9a7d-92ab22a54110.cleverapps.io> |
 | API | <https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io> (Swagger sur `/docs` en local ; en production seulement si `API_DOCS_ENABLED` est défini) |
 | Storybook des composants | <https://dataforgoodfr.github.io/13_brigade_coupes_rases/> |
-| Suivi des tâches | [issues GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) |
-| Échanges | Slack Data For Good, canal `#13_brigade_coupes_rases` |
-| Présentation, comptes rendus | [Outline](https://outline.services.dataforgood.fr/doc/presentation-du-projet-p8g6j1J3ZT) (compte Data For Good) |
+| Suivi des tâches, échanges | [issues GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) |
 
 ## Contexte
 
@@ -209,7 +207,7 @@ Rien n'est nécessaire pour développer le frontend ou le backend en local. Les 
 - l'envoi des photos des formulaires vers S3 (sans S3, le backend les stocke localement) ;
 - le déploiement (Clever Cloud), la synchronisation Airtable et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
 
-Ils sont dans la [base KeePass](./keepass/secrets.kdbx) du dépôt ([installer KeePass](https://keepass.info/index.html)) ; le mot de passe s'obtient auprès des responsables sur le canal Slack. Cette base est la source de vérité : tout secret utilisé par le projet (comptes cloud, CI/CD, clés d'API, chaînes de connexion…) doit y être référencé.
+Ils sont dans la [base KeePass](./keepass/secrets.kdbx) du dépôt ([installer KeePass](https://keepass.info/index.html)) ; le mot de passe s'obtient auprès des mainteneurs du projet. Cette base est la source de vérité : tout secret utilisé par le projet (comptes cloud, CI/CD, clés d'API, chaînes de connexion…) doit y être référencé.
 
 ## Déploiement et opérations
 
