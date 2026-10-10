@@ -3,13 +3,18 @@ name: Pipeline mensuelle
 # La pipeline est une tâche Clever Cloud : la redémarrer l'exécute une fois,
 # puis l'instance s'arrête. Clever Cloud n'a pas de déclencheur planifié pour
 # les tâches, d'où ce workflow.
+#
+# `clever restart` attend la fin de la tâche. Le résultat est lu dans les
+# journaux Clever : une exécution réussie se termine par SUCCESS_MESSAGE
+# (pipeline/scripts/run_pipeline.py). Sans ce message, le job échoue et une
+# issue « Échec de la pipeline mensuelle » est ouverte (ou commentée), ce qui
+# prévient les personnes qui suivent le dépôt.
 on:
   schedule:
     # Le 2 de chaque mois à 6 h UTC
     - cron: "0 6 2 * *"
   workflow_dispatch:
 
-# Le GITHUB_TOKEN n'a besoin que de lire le dépôt
 permissions:
   contents: read
 
@@ -17,13 +22,64 @@ concurrency:
   group: pipeline-mensuelle
   cancel-in-progress: false
 
+env:
+  APP_ID: app_b5275abd-5f5e-4de3-9382-a3c76db0b8e5
+  SUCCESS_MESSAGE: Pipeline terminée sans erreur.
+
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Téléchargement d'un nouveau raster RADD (~1 h) compris
+    timeout-minutes: 180
+    env:
+      CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+      CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
     steps:
       - name: Lancer la tâche Clever Cloud
-        run: npx --yes clever-tools@5.0.2 restart --app app_b5275abd-5f5e-4de3-9382-a3c76db0b8e5 --quiet
+        id: start
+        run: |
+          echo "since=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          # --quiet : les journaux de la pipeline restent sur Clever, pas dans
+          # ceux du dépôt public
+          npx --yes clever-tools@5.0.2 restart --app "$APP_ID" --quiet
+
+      - name: Vérifier la fin de la pipeline dans les journaux
+        if: ${{ !cancelled() }}
         env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+          SINCE: ${{ steps.start.outputs.since }}
+        run: |
+          # Laisser aux derniers journaux le temps d'arriver
+          sleep 60
+          until=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          logs=$(timeout 600 npx --yes clever-tools@5.0.2 logs --app "$APP_ID" \
+            --since "$SINCE" --until "$until" --search "$SUCCESS_MESSAGE" || true)
+          if grep -qF "$SUCCESS_MESSAGE" <<< "$logs"; then
+            echo "Pipeline terminée sans erreur."
+          else
+            echo "::error::Message de fin absent des journaux Clever entre $SINCE et $until : la pipeline a échoué ou a été interrompue."
+            exit 1
+          fi
+
+  notify:
+    needs: run
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Ouvrir ou compléter l'issue d'échec
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Échec de la pipeline mensuelle"
+          body="L'exécution du $(date -u +%d/%m/%Y) n'a pas abouti : $RUN_URL
+
+          Journaux détaillés : application Clever Cloud \`Data_pipeline\` (\`clever logs --app $APP_ID --since …\`). Voir docs/operations.md."
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

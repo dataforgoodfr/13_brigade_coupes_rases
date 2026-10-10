@@ -23,6 +23,10 @@ from pipeline.scripts.load_database import (
 from pipeline.scripts.preprocess_sufosat import preprocess_sufosat
 from pipeline.scripts.upload_gold import upload_gold_to_s3
 
+# Dernière ligne d'une exécution réussie : le workflow « Pipeline mensuelle »
+# la cherche dans les journaux Clever pour savoir si la tâche a abouti.
+SUCCESS_MESSAGE = "Pipeline terminée sans erreur."
+
 
 def run_pipeline() -> None:
     logging.info("Starting the pipeline...")
@@ -89,5 +93,10 @@ def run_pipeline() -> None:
     logging.info("Pipeline completed successfully.")
 
 
-if __name__ == "__main__":
+def main() -> None:
     run_pipeline()
+    logging.info(SUCCESS_MESSAGE)
+
+
+if __name__ == "__main__":
+    main()
