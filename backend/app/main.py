@@ -18,9 +18,11 @@ from app.routes import (
     token,
     users,
 )
+from app.version import VERSION
 
 app = FastAPI(
     title="Brigades Coupes Rases",
+    version=VERSION,
     swagger_ui_parameters={"operationsSorter": "method"},
     docs_url="/docs" if settings.api_docs_enabled else None,
     redoc_url="/redoc" if settings.api_docs_enabled else None,

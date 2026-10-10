@@ -1,6 +1,6 @@
 [project]
 name = "bcr-data-pipeline"
-version = "0.1.0"
+version = "0.40.0"
 description = "ETL subproject to ingest datasources, process and load clear cuts data model into the main DB"
 authors = [{ name = "DataForGood" }]
 license = "MIT"
