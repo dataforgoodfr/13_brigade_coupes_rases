@@ -176,7 +176,7 @@ Toutes les géométries sont en WGS 84 (SRID 4326) ; l'API expose les coordonné
 
 ### Règles d'illégalité
 
-Trois règles, une ligne chacune dans `rules`, modifiables par un administrateur (page Administration) :
+Trois règles, une ligne chacune dans `rules`, modifiables par un administrateur (page Administration). La migration `c3d4e5f6a7b8` crée celles qui manquent avec le seuil initial ; la règle de zonage part alors sans zonage sélectionné.
 
 | Type | Un signalement est marqué si… | Seuil initial |
 |---|---|---|
