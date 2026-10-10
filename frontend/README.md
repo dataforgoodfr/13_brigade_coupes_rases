@@ -68,7 +68,7 @@ recharger l'application pendant qu'il édite un formulaire.
 
 ## Organisation des dossiers
 
-Détaillée dans [doc/architecture.md](../doc/architecture.md#frontend).
+Détaillée dans [docs/architecture.md](../docs/architecture.md#frontend).
 
 - `src/features/` : un sous-dossier par fonctionnalité (`clear-cut` pour tout ce qui concerne les coupes : carte, liste, formulaire ; `admin`, `user`, `offline`).
 - `src/routes/` : routes par fichier, voir la documentation de [TanStack Router](https://tanstack.com/router/latest).

@@ -118,4 +118,4 @@ Le déploiement se déclenche en publiant une release GitHub, voir le
 
 ## Schéma de la base
 
-Le diagramme entité-association est dans [doc/architecture.md](../doc/architecture.md#modèle-de-données) ; le régénérer depuis les modèles avec `make erd` après une migration.
+Le diagramme entité-association est dans [docs/architecture.md](../docs/architecture.md#modèle-de-données) ; le régénérer depuis les modèles avec `make erd` après une migration.
