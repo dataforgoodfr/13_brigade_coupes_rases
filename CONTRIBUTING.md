@@ -2,16 +2,11 @@
 
 ## Pour commencer
 
-1. [Rejoindre](https://dataforgood.fr/join) la communauté Data For Good.
-2. Sur le Slack Data For Good, rejoindre le canal `#13_brigade_coupes_rases` et se présenter.
-3. Remplir le [formulaire](https://noco.services.dataforgood.fr/dashboard/#/nc/form/da3564a9-5422-4810-a56f-26122c06dddc).
-4. Explorer la documentation du projet sur [Outline](https://outline.services.dataforgood.fr/doc/presentation-du-projet-p8g6j1J3ZT) : présentation, objectifs et comptes rendus des réunions avec Canopée.
-5. Installer le projet en suivant le [README](./README.md), puis le README du sous-projet concerné : [backend](./backend/README.md), [frontend](./frontend/README.md) ou [data pipeline](./data_pipeline/README.md).
-6. Lire [docs/architecture.md](./docs/architecture.md) : vocabulaire, modèle de données, cycle de vie d'un signalement, organisation du code.
+1. Installer le projet en suivant le [README](./README.md), puis le README du sous-projet concerné : [backend](./backend/README.md), [frontend](./frontend/README.md) ou [data pipeline](./data_pipeline/README.md).
+2. Lire [docs/architecture.md](./docs/architecture.md) : vocabulaire, modèle de données, cycle de vie d'un signalement, organisation du code.
+3. Choisir ou ouvrir une [issue GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) pour le sujet traité.
 
-Les étapes 1 à 4 concernent les bénévoles Data For Good ; le dépôt est public et une contribution par pull request depuis un fork est bienvenue sans elles.
-
-Pour obtenir un accès en écriture au dépôt, contactez les responsables sur le canal Slack.
+Les contributions arrivent par pull request depuis un fork. Les questions et propositions passent par les issues.
 
 ## Branches
 
@@ -50,6 +45,6 @@ Les mêmes vérifications tournent en CI ; les lancer en local évite un aller-r
 ## Pull requests
 
 - Une PR par sujet, aussi petite que possible.
-- Liez la PR à l'[issue GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) correspondante dans la description (`Closes #123`), ou au ticket NocoDB pour les bénévoles Data For Good.
+- Liez la PR à l'[issue GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) correspondante dans la description (`Closes #123`).
 - Décrivez ce qui change et comment le tester ; le [modèle de PR](./.github/pull_request_template.md) est pré-rempli à l'ouverture.
-- Demandez une relecture à un autre bénévole du projet.
+- Demandez une relecture à un mainteneur du projet.

@@ -1,5 +1,5 @@
 ### Description
-Nocodb : _insérer le lien vers la tâche Nocodb correspondante_
+Issue : _Closes #…_
 
 _Merci de fournir une description détaillée de la tâche._
 
@@ -10,7 +10,7 @@ _Merci d'indiquer comment tester les modifications apportées._
 - [ ] Les pre-commit passent
 - [ ] Les test unitaires passent
 - [ ] Le code modifié fonctionne en local/dev
-- [ ] J'ai demandé une peer-review à un autre bénévole du projet
+- [ ] J'ai demandé une relecture à un mainteneur du projet
 - [ ] La PR est bien formatée et respecte les conventions de style
 - [ ] J'ai documenté les modifications apportées (dans le README.md, code ou dans un fichier spécifique si nécessaire)
 
