@@ -252,6 +252,11 @@ def append_clusters(clusters: gpd.GeoDataFrame, output_path: Path) -> None:
         driver="GPKG",
         index=True,
         mode="a" if output_path.exists() else "w",
+        # La couche prend le type de la première bande écrite : sans
+        # promotion, une bande de Polygon la fige en POLYGON et les
+        # MultiPolygon des bandes suivantes font échouer la conversion en
+        # FlatGeobuf.
+        promote_to_multi=True,
     )
 
 
