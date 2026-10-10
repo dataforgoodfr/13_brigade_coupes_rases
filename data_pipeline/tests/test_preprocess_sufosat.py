@@ -178,7 +178,7 @@ def test_concave_hull_score_is_below_one_for_a_hollow_shape() -> None:
     assert 0 < scored["concave_hull_score"].iloc[0] < 0.5
 
 
-def write_raster(path: Path, *bands: list[list[int]]) -> Path:
+def write_raster(path: Path, *bands: list[list[int]], crs: str = "EPSG:3035") -> Path:
     arrays = [np.array(band, dtype="int16") for band in bands]
     height, width = arrays[0].shape
     with rasterio.open(
@@ -189,7 +189,7 @@ def write_raster(path: Path, *bands: list[list[int]]) -> Path:
         width=width,
         count=len(arrays),
         dtype="int16",
-        crs="EPSG:3035",
+        crs=crs,
         transform=from_origin(0, height * 10, 10, 10),
     ) as dst:
         for index, array in enumerate(arrays, start=1):
@@ -225,6 +225,15 @@ def test_mask_alerts_filters_a_single_date_band_by_date(tmp_path: Path) -> None:
 
     with rasterio.open(masked) as src:
         assert src.read(1).tolist() == [[26010, 0, 0, 25423]]
+
+
+def test_mask_alerts_refuses_a_raster_in_degrees(tmp_path: Path) -> None:
+    source = write_raster(tmp_path / "dates.tif", [[26010]], crs="EPSG:4326")
+
+    with pytest.raises(ValueError, match="projeté en mètres"):
+        mask_alerts(
+            str(source), str(tmp_path / "masked.tif"), pd.Timestamp("2026-01-01")
+        )
 
 
 def test_append_clusters_keeps_one_multipolygon_layer(tmp_path: Path) -> None:
