@@ -20,9 +20,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Une release vX.Y.Z doit porter la version X.Y.Z dans les trois sous-projets.
+  # Pas de contrôle au redéploiement manuel : les anciens tags ne l'ont pas.
+  version:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+      - name: Versions du tag et des sous-projets
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          expected="${TAG#v}"
+          frontend=$(jq -r .version frontend/package.json)
+          backend=$(python3 -c 'import tomllib; print(tomllib.load(open("backend/pyproject.toml", "rb"))["project"]["version"])')
+          pipeline=$(python3 -c 'import tomllib; print(tomllib.load(open("data_pipeline/pyproject.toml", "rb"))["project"]["version"])')
+          echo "tag $TAG, frontend $frontend, backend $backend, pipeline $pipeline"
+          test "$frontend" = "$expected" && test "$backend" = "$expected" && test "$pipeline" = "$expected"
+
   backend:
+    needs: version
     # Pre-releases are not deployed
-    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    if: >-
+      !cancelled() && (github.event_name == 'workflow_dispatch'
+      || (!github.event.release.prerelease && needs.version.result == 'success'))
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit
     with:
@@ -30,7 +53,10 @@ jobs:
       ref: ${{ inputs.tag || github.ref }}
 
   frontend:
-    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    needs: version
+    if: >-
+      !cancelled() && (github.event_name == 'workflow_dispatch'
+      || (!github.event.release.prerelease && needs.version.result == 'success'))
     uses: "./.github/workflows/deploy.yml"
     secrets: inherit
     with:

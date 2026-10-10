@@ -32,6 +32,8 @@ ENV VIRTUAL_ENV=/app/.venv \
 
 
 COPY "${SRC_DIR}/app" ./app
+# Numéro de version lu par app/version.py
+COPY "${SRC_DIR}/pyproject.toml" ./pyproject.toml
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 ENTRYPOINT ["python", "-m", "app.main", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*"]

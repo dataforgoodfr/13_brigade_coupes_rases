@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "bcr-backend"
-version = "0.1.0"
+version = "0.40.0"
 authors = [{ name = "DataForGood" }]
 license = "MIT"
 readme = "README.md"
