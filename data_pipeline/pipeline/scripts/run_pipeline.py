@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 from datetime import timedelta
+from pathlib import Path
 
 import pyogrio
 
@@ -26,6 +27,10 @@ from pipeline.scripts.upload_gold import upload_gold_to_s3
 # Dernière ligne d'une exécution réussie : le workflow « Pipeline mensuelle »
 # la cherche dans les journaux Clever pour savoir si la tâche a abouti.
 SUCCESS_MESSAGE = "Pipeline terminée sans erreur."
+
+
+def has_features(path: Path) -> bool:
+    return path.exists() and pyogrio.read_info(path)["features"] > 0
 
 
 def run_pipeline() -> None:
@@ -54,16 +59,21 @@ def run_pipeline() -> None:
         update_start_date=update_start_date,
     )
 
-    clusters_path = DATA_DIR / "sufosat" / "sufosat_clusters.fgb"
-    if not clusters_path.exists() or pyogrio.read_info(clusters_path)["features"] == 0:
+    if not has_features(DATA_DIR / "sufosat" / "sufosat_clusters.fgb"):
         logging.info("No new clusters after preprocessing, pipeline is up to date.")
         return
 
     enrich_sufosat_clusters()
 
+    enriched_path = DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"
+    # Les amas trop petits sont écartés à l'enrichissement : un mois calme
+    # peut n'en garder aucun.
+    if not has_features(enriched_path):
+        logging.info("No clear cut left after enrichment, pipeline is up to date.")
+        return
+
     if last_version_date is None:
         # Premier run : pas de données en base, le fichier enrichi devient directement le gold final
-        enriched_path = DATA_DIR / "sufosat" / "sufosat_clusters_enriched.fgb"
         shutil.copy(enriched_path, DATA_DIR / "sufosat" / "clusters_final.fgb")
         shutil.copy(enriched_path, NEW_CLUSTERS_PATH)
         UPDATED_CLUSTERS_PATH.unlink(missing_ok=True)

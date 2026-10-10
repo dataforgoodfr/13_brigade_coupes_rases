@@ -95,11 +95,12 @@ def split_new_and_updated_clusters(
     # Statistiques
     print("Résultats du matching:")
     print(f" - Total nouvelles données: {len(gdf_new)}")
+    total = max(len(gdf_new), 1)
     print(
-        f" - Clusters matchés (updated): {len(gdf_updated)} ({len(gdf_updated) / len(gdf_new) * 100:.1f}%)"
+        f" - Clusters matchés (updated): {len(gdf_updated)} ({len(gdf_updated) / total * 100:.1f}%)"
     )
     print(
-        f" - Clusters nouveaux: {len(gdf_truly_new)} ({len(gdf_truly_new) / len(gdf_new) * 100:.1f}%)"
+        f" - Clusters nouveaux: {len(gdf_truly_new)} ({len(gdf_truly_new) / total * 100:.1f}%)"
     )
 
     # Sauvegarde

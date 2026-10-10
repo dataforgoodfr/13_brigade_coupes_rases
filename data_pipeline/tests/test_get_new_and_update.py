@@ -57,6 +57,19 @@ def test_clusters_near_the_reference_are_updated_others_are_new(
     assert (data_dir / "sufosat" / "clusters_new.fgb").exists()
 
 
+def test_no_new_cluster_gives_empty_outputs(data_dir: Path) -> None:
+    ref_path, new_path = data_dir / "ref.fgb", data_dir / "new.fgb"
+    cluster_frame([box(0, 0, 100, 100)]).to_file(ref_path, driver="FlatGeobuf")
+    cluster_frame([box(0, 0, 100, 100)]).iloc[0:0].to_file(
+        new_path, driver="FlatGeobuf"
+    )
+
+    updated, truly_new = split_new_and_updated_clusters(str(new_path), str(ref_path))
+
+    assert updated.empty
+    assert truly_new.empty
+
+
 def test_locked_clusters_are_never_matched(data_dir: Path) -> None:
     ref = cluster_frame([box(0, 0, 100, 100), box(500, 500, 600, 600)])
     # La première coupe a été corrigée à la main sans réautoriser le pipeline,
