@@ -42,8 +42,21 @@ def mask_alerts(
     Convention d'entrée : soit la seule bande Date (YYDDD) exportée d'Earth
     Engine, soit un raster RADD brut à deux bandes, Alert puis Date, dont
     seules les alertes confirmées (Alert >= 2) sont gardées.
+
+    Le raster doit être projeté en mètres : les distances du regroupement
+    (`max_meters_between_clear_cuts`, bandes de BAND_HEIGHT_METERS) sont
+    lues dans ses unités, et des degrés les fausseraient sans erreur.
     """
     with rasterio.open(input_raster_dates) as src:
+        if (
+            src.crs is None
+            or not src.crs.is_projected
+            or src.crs.linear_units != "metre"
+        ):
+            raise ValueError(
+                f"{input_raster_dates} doit être projeté en mètres "
+                f"(EPSG:3035 par exemple), pas en {src.crs}"
+            )
         date_band_index = 2 if src.count >= 2 else 1
         profile = src.profile.copy()
         profile.update(count=1, nodata=0, compress="lzw")
