@@ -227,6 +227,23 @@ def test_mask_alerts_filters_a_single_date_band_by_date(tmp_path: Path) -> None:
         assert src.read(1).tolist() == [[26010, 0, 0, 25423]]
 
 
+def test_mask_alerts_leaves_out_dates_in_the_future(tmp_path: Path) -> None:
+    # 26285 : 12 octobre 2026 ; 26300 : 27 octobre 2026 ; 25997 : 24 septembre
+    # 2027 (997e jour à partir du 1er janvier 2025)
+    source = write_raster(tmp_path / "dates.tif", [[26010, 26285, 26300, 25997]])
+    masked = tmp_path / "masked.tif"
+
+    mask_alerts(
+        str(source),
+        str(masked),
+        pd.Timestamp("2026-01-01"),
+        max_date=pd.Timestamp("2026-10-12"),
+    )
+
+    with rasterio.open(masked) as src:
+        assert src.read(1).tolist() == [[26010, 26285, 0, 0]]
+
+
 def test_mask_alerts_refuses_a_raster_in_degrees(tmp_path: Path) -> None:
     source = write_raster(tmp_path / "dates.tif", [[26010]], crs="EPSG:4326")
 

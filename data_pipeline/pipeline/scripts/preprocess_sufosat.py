@@ -28,11 +28,14 @@ IntArray = npt.NDArray[np.int64]
 
 
 def mask_alerts(
-    input_raster_dates: str, masked_raster_dates: str, min_date: pd.Timestamp
+    input_raster_dates: str,
+    masked_raster_dates: str,
+    min_date: pd.Timestamp,
+    max_date: pd.Timestamp | None = None,
 ) -> str:
     """
-    Ne garde que les alertes datées de `min_date` ou après, dans un raster
-    mono-bande écrit bloc par bloc.
+    Ne garde que les alertes datées de `min_date` à `max_date` (aujourd'hui
+    par défaut), dans un raster mono-bande écrit bloc par bloc.
 
     Les alertes plus anciennes seraient écartées après la polygonisation : sur
     la France, elles représentent 89 % des pixels en 2026, et autant de
@@ -46,7 +49,14 @@ def mask_alerts(
     Le raster doit être projeté en mètres : les distances du regroupement
     (`max_meters_between_clear_cuts`, bandes de BAND_HEIGHT_METERS) sont
     lues dans ses unités, et des degrés les fausseraient sans erreur.
+
+    Le raster RADD contient quelques dates dans le futur (25997, soit le
+    24 septembre 2027, dans le raster du 28 septembre 2026). Gardée, une seule d'entre elles dans une coupe
+    retenue deviendrait la date de dernière version en base : les exécutions
+    suivantes partiraient de cette date et ne trouveraient plus rien.
     """
+    last_day = np.datetime64((max_date or pd.Timestamp.now("UTC")).date())
+    future_pixels = 0
     with rasterio.open(input_raster_dates) as src:
         if (
             src.crs is None
@@ -64,14 +74,21 @@ def mask_alerts(
         with rasterio.open(masked_raster_dates, "w", **profile) as dst:
             for _, window in src.block_windows(1):
                 date_band = src.read(date_band_index, window=window)
-                keep = (date_band > 0) & (
-                    decode_dates(date_band) >= np.datetime64(min_date.date())
+                dates = decode_dates(date_band)
+                future = (date_band > 0) & (dates > last_day)
+                future_pixels += int(future.sum())
+                keep = (
+                    (date_band > 0)
+                    & (dates >= np.datetime64(min_date.date()))
+                    & ~future
                 )
                 if date_band_index == 2:
                     keep &= src.read(1, window=window) >= 2
                 masked = np.where(keep, date_band, 0).astype(date_band.dtype)
                 dst.write(masked, 1, window=window)
 
+    if future_pixels:
+        logging.warning("%s pixels dated after %s left out", future_pixels, last_day)
     return masked_raster_dates
 
 
