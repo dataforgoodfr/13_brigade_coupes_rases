@@ -14,7 +14,9 @@ def upload_gold_to_s3() -> None:
         raise RuntimeError("Unable to list the S3 bucket, gold rotation aborted")
 
     if current_key in bucket_contents:
-        logging.info("Rotating current gold to previous...")
+        # L'ancien fichier reste en place jusqu'à ce que le nouveau le
+        # remplace : un envoi raté laisse `current` intact.
+        logging.info("Copying current gold to previous...")
         tmp_path = (
             DATA_DIR
             / "sufosat_reference"
@@ -24,8 +26,7 @@ def upload_gold_to_s3() -> None:
 
         s3_manager.download_from_s3(current_key, str(tmp_path))
         s3_manager.upload_to_s3(str(tmp_path), previous_key)
-        s3_manager.delete_from_s3(current_key)
-        logging.info("Rotation current -> previous done.")
+        logging.info("Copy current -> previous done.")
 
     new_gold_path = DATA_DIR / "sufosat" / "clusters_final.fgb"
     logging.info(f"Uploading new gold to S3: {current_key}")

@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import boto3
 from dotenv import load_dotenv
@@ -35,24 +36,24 @@ class S3Manager:
             return None
 
     def download_from_s3(self, s3_key: str, download_path: str) -> None:
+        """Lève une exception en cas d'échec, sans laisser de fichier partiel :
+        les étapes suivantes prendraient sinon un fichier tronqué pour bon."""
         try:
             with open(download_path, "wb") as f:
                 self.s3.download_fileobj(self.bucket_name, s3_key, f)
-            logging.info(f"File downloaded from S3: {download_path}")
-        except Exception as e:
-            logging.warning(f"Error downloading file from S3: {e}")
-
-    def delete_from_s3(self, s3_key: str) -> None:
-        try:
-            self.s3.delete_object(Bucket=self.bucket_name, Key=s3_key)
-            logging.info(f"File successfully deleted from S3: {s3_key}")
-        except Exception as e:
-            logging.warning(f"Error deleting file from S3: {e}")
+        except Exception:
+            Path(download_path).unlink(missing_ok=True)
+            logging.error(f"Error downloading {s3_key} from S3")
+            raise
+        logging.info(f"File downloaded from S3: {download_path}")
 
     def upload_to_s3(self, file_path: str, s3_key: str) -> None:
+        """Lève une exception en cas d'échec : la pipeline doit s'arrêter en
+        erreur plutôt que de continuer sans le fichier sur le stockage."""
         try:
             with open(file_path, "rb") as f:
                 self.s3.upload_fileobj(f, self.bucket_name, s3_key)
-            logging.info(f"File successfully uploaded to S3: {s3_key}")
-        except Exception as e:
-            logging.warning(f"Error uploading file to S3: {e}")
+        except Exception:
+            logging.error(f"Error uploading {file_path} to S3 ({s3_key})")
+            raise
+        logging.info(f"File successfully uploaded to S3: {s3_key}")
