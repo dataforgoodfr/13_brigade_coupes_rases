@@ -4,10 +4,7 @@ import math
 import sys
 import time
 from collections.abc import Callable
-from pathlib import Path
-from typing import Any, TypeVar
-
-T = TypeVar("T")
+from typing import Any
 
 
 def _format_time(timespan: float, precision: int = 3) -> str:
@@ -52,53 +49,30 @@ def _format_time(timespan: float, precision: int = 3) -> str:
     return f"{timespan * scaling[order]:.{precision}g} {units[order]}"
 
 
-def log_execution(
-    result_filepath: str | Path | list[str | Path],
-) -> Callable[[Callable[..., T]], Callable[..., T | None]]:
+def log_execution[T](func: Callable[..., T]) -> Callable[..., T]:
     """
-    Decorator for logging start, end, and duration
+    Journalise le début, la fin et la durée d'une étape de la pipeline.
+
+    L'étape est toujours exécutée, même si son fichier de sortie existe déjà :
+    un fichier laissé par une exécution précédente (autre date de départ,
+    autre raster) serait sinon repris sans être recalculé.
     """
-    if not isinstance(result_filepath, list):
-        result_filepath = [result_filepath]
 
-    def decorator(func: Callable[..., T]) -> Callable[..., T | None]:
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> T | None:
-            # Get the function name
-            decorated_function_name = func.__name__
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> T:
+        decorated_function_name = func.__name__
+        logging.info(
+            f"[============  Start of the {decorated_function_name} script ============]"
+        )
+        start_time = time.perf_counter()
 
-            # Check if we can skip the job
-            if sum([Path(fp).exists() for fp in result_filepath]) == len(
-                result_filepath
-            ):
-                logging.info(
-                    f"The result filepath {' & '.join([str(fp) for fp in result_filepath])} for the {decorated_function_name} "
-                    "script already exist, we're skipping this job."
-                )
-                return None
+        result = func(*args, **kwargs)
 
-            # Log start time and message
-            logging.info(
-                f"[============  Start of the {decorated_function_name} script ============]"
-            )
+        end_time = time.perf_counter()
+        logging.info(
+            f"[============  End of the {decorated_function_name} script. "
+            f"Total duration: {_format_time(end_time - start_time)} ============]"
+        )
+        return result
 
-            # Record start time
-            start_time = time.perf_counter()
-
-            # Execute the function
-            result = func(*args, **kwargs)
-
-            # Record end time
-            end_time = time.perf_counter()
-
-            # Log end time, memory usage, and duration
-            logging.info(
-                f"[============  End of the {decorated_function_name} script. "
-                f"Total duration: {_format_time(end_time - start_time)} ============]"
-            )
-
-            return result
-
-        return wrapper
-
-    return decorator
+    return wrapper
