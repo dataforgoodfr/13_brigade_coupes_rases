@@ -310,7 +310,8 @@ def cluster_pixels(
     plusieurs bandes sont réunis à la fin.
     """
     info = pyogrio.read_info(pixels_path, force_total_bounds=True)
-    if info["features"] == 0:
+    # Une couche FlatGeobuf vide donne -1 entité et aucune emprise.
+    if info["features"] == 0 or info["total_bounds"] is None:
         return 0
     total_bounds = cast(Bounds, tuple(info["total_bounds"]))
     bands = horizontal_bands(total_bounds)
