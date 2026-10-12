@@ -136,6 +136,25 @@ def test_pixels_before_the_start_date_are_left_out(tmp_path: Path) -> None:
     assert clusters["date_min"].tolist() == [pd.Timestamp("2026-03-01")]
 
 
+def test_an_empty_pixel_layer_gives_no_cluster(tmp_path: Path) -> None:
+    # Cas d'un mois sans aucune alerte : la polygonisation écrit une couche vide.
+    pixels_path = tmp_path / "pixels.fgb"
+    gpd.GeoDataFrame({"sufosat_date": []}, geometry=[], crs="EPSG:3035").to_file(
+        pixels_path
+    )
+
+    count = cluster_pixels(
+        pixels_path,
+        tmp_path / "clusters.gpkg",
+        pd.Timestamp("2026-09-29"),
+        100,
+        365,
+        0.42,
+    )
+
+    assert count == 0
+
+
 def test_no_pixel_left_gives_no_cluster(tmp_path: Path) -> None:
     clusters = cluster(tmp_path, squares((0, 0), dates=["2025-12-31"]))
 
