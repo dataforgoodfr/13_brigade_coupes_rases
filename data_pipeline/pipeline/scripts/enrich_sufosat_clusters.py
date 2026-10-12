@@ -254,7 +254,7 @@ def business_filters_mask(sufosat: gpd.GeoDataFrame) -> pd.Series:
     return cast(pd.Series, large_enough & worth_an_alert & in_forest)
 
 
-@log_execution(ENRICHED_CLUSTERS_RESULT_FILEPATH)
+@log_execution
 def enrich_sufosat_clusters() -> None:
     """
     Enrich SUFOSAT clear-cut clusters with additional geographical information.

@@ -379,7 +379,7 @@ def cluster_pixels(
     return group_count
 
 
-@log_execution([RESULT_FILEPATH])
+@log_execution
 def preprocess_sufosat(
     input_raster_dates: str = str(
         SUFOSAT_DIR / "forest-clearcuts_mainland-france_sufosat_dates_v3.tif"
