@@ -52,11 +52,9 @@ class ClearCutEcologicalZoning(Base):
     ecological_zoning_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("ecological_zonings.id"), primary_key=True
     )
-    clear_cut: Mapped[ClearCut] = relationship(
-        back_populates="ecological_zonings", cascade="all, delete"
-    )
+    clear_cut: Mapped[ClearCut] = relationship(back_populates="ecological_zonings")
     ecological_zoning: Mapped[EcologicalZoning] = relationship(
-        back_populates="clear_cuts", cascade="all, delete"
+        back_populates="clear_cuts"
     )
 
 
@@ -95,13 +93,11 @@ class Rules(Base):
         "EcologicalZoning",
         secondary=rules_ecological_zoning,
         back_populates="rules",
-        cascade="all, delete",
     )
     clear_cuts_reports = relationship(
         "ClearCutReport",
         secondary=rules_clear_cut_reports,
         back_populates="rules",
-        cascade="all, delete",
     )
     threshold: Mapped[float | None] = mapped_column(Float, nullable=True)
 
@@ -138,22 +134,19 @@ class User(Base):
         "Department",
         secondary=user_department,
         back_populates="users",
-        cascade="all, delete",
     )
 
     reports = relationship(
         "ClearCutReport",
         back_populates="user",
-        cascade="all, delete",
         foreign_keys="ClearCutReport.user_id",
     )
     favorites = relationship(
         "ClearCutReport",
         secondary=user_clear_cut_report,
         back_populates="favorited_by",
-        cascade="all, delete",
     )
-    forms = relationship("ClearCutForm", back_populates="editor", cascade="all, delete")
+    forms = relationship("ClearCutForm", back_populates="editor")
 
     @validates("role")
     def validate_role(self, key: str, value: str) -> str:
@@ -186,11 +179,8 @@ class Department(Base):
         "User",
         secondary=user_department,
         back_populates="departments",
-        cascade="all, delete",
     )
-    cities: Mapped[list[City]] = relationship(
-        back_populates="department", cascade="all, delete"
-    )
+    cities: Mapped[list[City]] = relationship(back_populates="department")
 
     @validates("name")
     def validate_name(self, key: str, value: str) -> str:
@@ -209,11 +199,9 @@ class City(Base):
     department_id: Mapped[int] = mapped_column(
         ForeignKey("departments.id"), nullable=False
     )
-    department: Mapped[Department] = relationship(
-        back_populates="cities", cascade="all, delete"
-    )
+    department: Mapped[Department] = relationship(back_populates="cities")
     clear_cuts_reports: Mapped[list[ClearCutReport]] = relationship(
-        back_populates="city", cascade="all, delete"
+        back_populates="city"
     )
 
 
@@ -234,7 +222,6 @@ class EcologicalZoning(Base):
         "Rules",
         secondary=rules_ecological_zoning,
         back_populates="ecological_zonings",
-        cascade="all, delete",
     )
 
 
@@ -300,9 +287,7 @@ class ClearCut(Base):
     report_id: Mapped[int] = mapped_column(
         ForeignKey("clear_cuts_reports.id"), index=True, nullable=False
     )
-    report: Mapped[ClearCutReport] = relationship(
-        back_populates="clear_cuts", cascade="all, delete"
-    )
+    report: Mapped[ClearCutReport] = relationship(back_populates="clear_cuts")
 
     ecological_zonings: Mapped[list[ClearCutEcologicalZoning]] = relationship(
         back_populates="clear_cut", lazy="joined", cascade="all, delete"
@@ -354,7 +339,7 @@ class ClearCutReport(Base):
         ForeignKey("cities.id"), nullable=False, index=True
     )
     city: Mapped[City] = relationship(
-        back_populates="clear_cuts_reports", lazy="joined", cascade="all, delete"
+        back_populates="clear_cuts_reports", lazy="joined"
     )
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=True, index=True
@@ -402,14 +387,12 @@ class ClearCutReport(Base):
         "Rules",
         secondary=rules_clear_cut_reports,
         back_populates="clear_cuts_reports",
-        cascade="all, delete",
     )
 
     favorited_by = relationship(
         "User",
         secondary=user_clear_cut_report,
         back_populates="favorites",
-        cascade="all, delete",
     )
 
     @validates("status")
@@ -436,7 +419,7 @@ class ClearCutForm(Base):
     editor_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"), nullable=False
     )
-    editor: Mapped[User] = relationship(back_populates="forms", cascade="all, delete")
+    editor: Mapped[User] = relationship(back_populates="forms")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now
     )
