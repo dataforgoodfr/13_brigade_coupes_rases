@@ -114,17 +114,25 @@ export function GeneralInfoEditControls({
 			setCityResults([])
 			return
 		}
+		const controller = new AbortController()
 		const timeout = setTimeout(async () => {
 			try {
 				const results = await authedApi()
-					.get("api/v1/cities/search", { searchParams: { q: citySearch } })
+					.get("api/v1/cities/search", {
+						searchParams: { q: citySearch },
+						signal: controller.signal
+					})
 					.json<CitySearchResult[]>()
 				setCityResults(results)
 			} catch {
-				setCityResults([])
+				// A newer search replaced this one: its results will come
+				if (!controller.signal.aborted) setCityResults([])
 			}
 		}, 250)
-		return () => clearTimeout(timeout)
+		return () => {
+			clearTimeout(timeout)
+			controller.abort()
+		}
 	}, [citySearch])
 
 	if (!canEdit && !report.isManuallyEdited) {
@@ -277,7 +285,7 @@ export function GeneralInfoEditControls({
 										<ul className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-md max-h-48 overflow-y-auto">
 											{cityResults.map((city) => (
 												<li
-													key={city.insee_code}
+													key={`${city.insee_code}-${city.name}`}
 													className="cursor-pointer px-3 py-2 text-sm hover:bg-neutral-100"
 													onMouseDown={(e) => {
 														e.preventDefault()
