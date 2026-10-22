@@ -11,6 +11,7 @@ from sqlalchemy import Engine, text
 
 from pipeline.scripts import load_database as loader
 from pipeline.scripts.database import create_db_engine
+from pipeline.scripts.get_last_version import last_detection_date
 from pipeline.scripts.load_database import (
     capped_areas,
     load_clusters,
@@ -343,3 +344,38 @@ class TestLoadClusters:
             ).scalar_one()
         assert valid is True
         assert loaded_cuts(engine)[0]["boundary_ha"] == pytest.approx(2.0, rel=0.05)
+
+
+@database
+class TestLastDetectionDate:
+    """La reprise se cale sur la dernière alerte chargée par la pipeline."""
+
+    def add_cut(
+        self, engine: Engine, offset_m: float, end: datetime, edited: bool = False
+    ) -> None:
+        load_clusters(
+            engine,
+            clusters(
+                [{"geometry": square(offset_m), "date_min": end, "date_max": end}]
+            ),
+            empty(),
+        )
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "UPDATE clear_cuts SET observation_end_date = :end, "
+                    "is_manually_edited = :edited "
+                    "WHERE id = (SELECT MAX(id) FROM clear_cuts)"
+                ),
+                {"end": end, "edited": edited},
+            )
+
+    def test_ignores_cuts_drawn_or_edited_by_hand(self, engine: Engine) -> None:
+        # Dates lointaines pour dépasser les autres données de la base de test
+        self.add_cut(engine, 0, datetime(2099, 1, 1))
+        # Tracée par un bénévole : l'heure de création
+        self.add_cut(engine, 1_000, datetime(2099, 6, 1, 14, 46, 6))
+        # Corrigée à la main
+        self.add_cut(engine, 2_000, datetime(2099, 9, 1), edited=True)
+
+        assert last_detection_date(engine) == datetime(2099, 1, 1)
