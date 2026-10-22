@@ -10,7 +10,7 @@ from app.schemas.auth import ForgotPasswordSchema, RegisterSchema, ResetPassword
 from app.schemas.user import UserResponseSchema, user_to_user_response_schema
 from app.services.email import send_reset_password_email
 from app.services.get_password_hash import get_password_hash
-from app.services.user import reusable_account
+from app.services.user import reusable_account, save_new_account
 from app.services.user_auth import (
     ALGORITHM,
     PASSWORD_TOKEN_LIFETIMES,
@@ -34,11 +34,7 @@ def register(user_data: RegisterSchema, db: Session = db_session) -> UserRespons
     new_user.is_active = False
     new_user.created_at = datetime.now()
     new_user.updated_at = datetime.now()
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return user_to_user_response_schema(new_user)
+    return user_to_user_response_schema(save_new_account(db, new_user))
 
 
 @router.post("/forgot-password", status_code=200)

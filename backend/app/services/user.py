@@ -5,6 +5,7 @@ from logging import getLogger
 from fastapi import status
 from pydantic.alias_generators import to_snake
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.common.errors import AppHTTPException
@@ -31,16 +32,39 @@ def reusable_account(db: Session, email: str, login: str) -> User:
     holders = db.query(User).filter(or_(User.email == email, User.login == login)).all()
     # Two deleted accounts would each keep one of the two values
     if any(holder.deleted_at is None for holder in holders) or len(holders) > 1:
-        raise AppHTTPException(
-            status_code=409,
-            type="USER_ALREADY_EXISTS",
-            detail="A user already has the same login or the same email",
-        )
+        raise user_already_exists()
     if not holders:
         return User()
     account = holders[0]
     account.deleted_at = None
     account.departments = []
+    return account
+
+
+def user_already_exists() -> AppHTTPException:
+    return AppHTTPException(
+        status_code=409,
+        type="USER_ALREADY_EXISTS",
+        detail="A user already has the same login or the same email",
+    )
+
+
+def save_new_account(db: Session, account: User) -> User:
+    """Saves an account taken from `reusable_account`.
+
+    Two identical requests can both pass its check: the second insert then
+    breaks the unique email or login, which is reported the same way.
+    """
+    db.add(account)
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        constraint = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
+        if constraint not in ("users_email_key", "users_login_key"):
+            raise
+        raise user_already_exists() from error
+    db.refresh(account)
     return account
 
 
@@ -69,10 +93,7 @@ def create_user(db: Session, user: UserUpdateSchema) -> User:
                 detail=f"Department with id {department_db} not found",
             )
         new_user.departments.append(department_db)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    return save_new_account(db, new_user)
 
 
 def get_users(
