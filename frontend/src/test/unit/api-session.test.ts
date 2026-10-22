@@ -135,6 +135,60 @@ describe("api session handling", () => {
 		expect(calls.some((c) => c.url.includes("token/refresh"))).toBe(false)
 	})
 
+	it("replays a write after refreshing the token", async () => {
+		const fresh = {
+			accessToken: jwt("new"),
+			refreshToken: jwt("refresh2"),
+			tokenType: "bearer"
+		}
+		const calls = stubFetch(
+			[json(401), json(201, { ok: true })],
+			json(200, fresh)
+		)
+
+		await expect(
+			client.post("api/v1/clear-cuts-reports/1/forms").json()
+		).resolves.toEqual({ ok: true })
+		expect(calls.filter((c) => !c.url.includes("token/refresh"))).toHaveLength(
+			2
+		)
+	})
+
+	it.each(["post", "put", "delete"] as const)(
+		"does not replay a %s on a server error",
+		async (method) => {
+			const calls = stubFetch([json(502), json(201, { ok: true })])
+
+			await expect(
+				client[method]("api/v1/clear-cuts-reports/1")
+			).rejects.toThrow()
+			expect(calls).toHaveLength(1)
+		}
+	)
+
+	it("does not replay a write on a network error", async () => {
+		const calls = stubFetch([
+			new TypeError("Failed to fetch"),
+			json(201, { ok: true })
+		])
+
+		const error = await client
+			.post("api/v1/clear-cuts-reports/1/forms")
+			.catch((e: unknown) => e)
+		expect(isNetworkError(error)).toBe(true)
+		expect(calls).toHaveLength(1)
+	})
+
+	it("replays a read on a network error", async () => {
+		const calls = stubFetch([
+			new TypeError("Failed to fetch"),
+			json(200, { ok: true })
+		])
+
+		await expect(client.get("api/v1/me").json()).resolves.toEqual({ ok: true })
+		expect(calls).toHaveLength(2)
+	})
+
 	it("does not retry a request while offline", async () => {
 		vi.spyOn(navigator, "onLine", "get").mockReturnValue(false)
 		const calls = stubFetch([new TypeError("Failed to fetch")])
