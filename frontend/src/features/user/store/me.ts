@@ -96,6 +96,10 @@ export const credentialErrorSchema = toStringApiErrorSchema(
 )
 
 export type CredentialError = z.infer<typeof credentialErrorSchema>
+export const registerErrorSchema = toStringApiErrorSchema(
+	z.literal("USER_ALREADY_EXISTS")
+)
+export type RegisterError = z.infer<typeof registerErrorSchema>
 export const invalidTokenSchema = toStringApiErrorSchema(
 	z.literal("INVALID_TOKEN")
 )

@@ -57,12 +57,27 @@ export function RegisterForm() {
 			})
 			navigate({ to: "/login" })
 		} else if (registerState.status === "error") {
+			const alreadyExists =
+				registerState.error?.detail?.type === "USER_ALREADY_EXISTS"
 			toast({
 				id: "register-failed",
-				title: "Erreur d'inscription",
-				description:
-					"Erreur lors de la création du compte. Vérifiez les informations.",
-				variant: "destructive"
+				title: alreadyExists ? "Compte déjà existant" : "Erreur d'inscription",
+				description: alreadyExists ? (
+					<>
+						Un compte existe déjà avec cet e-mail ou cet identifiant.{" "}
+						<Link to="/login" className="underline">
+							Connectez-vous
+						</Link>
+						, ou{" "}
+						<Link to="/forgot-password" className="underline">
+							choisissez un nouveau mot de passe
+						</Link>{" "}
+						si vous l'avez oublié.
+					</>
+				) : (
+					"Erreur lors de la création du compte. Vérifiez les informations."
+				),
+				variant: alreadyExists ? "default" : "destructive"
 			})
 		}
 	}, [registerState, toast, navigate])
