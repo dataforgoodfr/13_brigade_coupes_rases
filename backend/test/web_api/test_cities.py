@@ -18,19 +18,70 @@ def add_cities(db: Session, prefix: str, *names: str) -> None:
     db.commit()
 
 
-def test_search_matches_case_insensitively_and_sorts_by_name(
-    client: TestClient, db: Session
-) -> None:
-    add_cities(db, "98", "Qqville-sur-Loire", "Aqqville", "Bourg-Qqville")
-
-    response = client.get("/api/v1/cities/search", params={"q": "QQVILLE"})
-
+def search_names(client: TestClient, q: str) -> list[str]:
+    """The names found among the test cities, whose code starts with 98."""
+    response = client.get("/api/v1/cities/search", params={"q": q})
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == [
-        {"insee_code": "98001", "name": "Aqqville", "department_code": "98"},
-        {"insee_code": "98002", "name": "Bourg-Qqville", "department_code": "98"},
-        {"insee_code": "98000", "name": "Qqville-sur-Loire", "department_code": "98"},
+    return [
+        city["name"] for city in response.json() if city["insee_code"].startswith("98")
     ]
+
+
+def test_search_puts_the_best_matches_first(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Aqqville", "Bourg-Qqville", "Qqville-sur-Loire", "Qqville")
+
+    assert search_names(client, "QQVILLE") == [
+        "Qqville",
+        "Qqville-sur-Loire",
+        "Bourg-Qqville",
+        "Aqqville",
+    ]
+
+
+def test_search_ignores_accents(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Qqcivières", "Vendœuvres-Qq")
+
+    assert search_names(client, "qqcivieres") == ["Qqcivières"]
+    assert search_names(client, "QQCIVIÈRES") == ["Qqcivières"]
+    assert search_names(client, "vendoeuvres qq") == ["Vendœuvres-Qq"]
+
+
+def test_search_tolerates_light_typos(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Zalcivières")
+
+    assert search_names(client, "zalicvieres") == ["Zalcivières"]
+    assert search_names(client, "zalvieres") == ["Zalcivières"]
+
+
+def test_search_spells_out_saint(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Saint-Qqdidier", "Sainte-Qqfoy")
+
+    assert search_names(client, "st qqdidier") == ["Saint-Qqdidier"]
+    assert search_names(client, "ste qqfoy") == ["Sainte-Qqfoy"]
+
+
+def test_search_shows_a_city_stored_twice_once(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Qqvault")
+    db.add(
+        City(
+            zip_code="98000",
+            name="Qqvault",
+            department=Department(code="9Z", name="Test"),
+        )
+    )
+    db.commit()
+
+    response = client.get("/api/v1/cities/search", params={"q": "qqvault"})
+
+    assert [city for city in response.json() if city["name"] == "Qqvault"] == [
+        {"insee_code": "98000", "name": "Qqvault", "department_code": "98"}
+    ]
+
+
+def test_search_ignores_like_wildcards(client: TestClient, db: Session) -> None:
+    add_cities(db, "98", "Qqville")
+
+    assert search_names(client, "q%e") == []
 
 
 def test_search_limits_the_results_to_15(client: TestClient, db: Session) -> None:
