@@ -85,7 +85,7 @@ export function UpdateUserDialog(user: User) {
 			toast({
 				id: "user-update-failed",
 				title: "La mise à jour de l'utilisateur a échoué",
-				description: updatedUser.error?.detail.content,
+				description: updatedUser.error?.detail?.content,
 				variant: "destructive"
 			})
 		}

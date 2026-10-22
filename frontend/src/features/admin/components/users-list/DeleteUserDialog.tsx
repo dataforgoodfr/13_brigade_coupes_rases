@@ -40,7 +40,7 @@ export function DeleteUserDialog({ user, onDeleted }: Props) {
 			toast({
 				id: "user-deletion-failed",
 				title: "La suppression de l'utilisateur a échoué",
-				description: deletedUser.error?.detail.content,
+				description: deletedUser.error?.detail?.content,
 				variant: "destructive"
 			})
 		}

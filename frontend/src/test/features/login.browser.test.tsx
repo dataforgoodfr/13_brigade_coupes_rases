@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/dom"
 import { HttpResponse, http } from "msw"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, onTestFinished, vi } from "vitest"
 
 import { worker } from "@/mocks/browser"
 import { volunteerMock } from "@/test/mocks/user"
@@ -49,6 +49,18 @@ describe("Login", () => {
 		await loginForm({ user }).logVolunteer()
 		await screen.findByText("Erreur de connexion")
 		expect(screen.getByText(/lien reçu par e-mail/)).toBeInTheDocument()
+	})
+
+	it("reports a server error without details", async () => {
+		worker.use(
+			http.post("*/api/v1/token", () => HttpResponse.json({}, { status: 500 }))
+		)
+		const errors = vi.spyOn(console, "error")
+		onTestFinished(() => errors.mockRestore())
+		const { user } = await renderApp({ route: "/login", user: undefined })
+		await loginForm({ user }).logVolunteer()
+		await screen.findByText("Erreur de connexion")
+		expect(errors).not.toHaveBeenCalledWith(expect.any(TypeError))
 	})
 })
 
