@@ -122,6 +122,27 @@ def test_register_refuses_an_existing_login_or_email(
     assert same_login.status_code == status.HTTP_409_CONFLICT
 
 
+def test_register_twice_at_the_same_time(client: TestClient, db: Session) -> None:
+    create_user(db, email="pressee@example.com", login="pressee")
+
+    # The second request checked before the first one was saved
+    with patch("app.routes.auth.reusable_account", return_value=User()):
+        response = client.post(
+            "/api/v1/auth/register",
+            json={
+                "first_name": "Nina",
+                "last_name": "Pressée",
+                "email": "pressee@example.com",
+                "login": "pressee",
+                "password": "secret",
+            },
+        )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.json()["detail"]["type"] == "USER_ALREADY_EXISTS"
+    assert db.query(User).filter(User.email == "pressee@example.com").count() == 1
+
+
 def deleted_user(db: Session, email: str, login: str) -> User:
     user = create_user(db, email=email, login=login)
     user.departments.append(Department(code="48", name="Lozère"))

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -33,6 +35,29 @@ def test_create_user(client: TestClient, db: Session) -> None:
     assert data["id"] is not None
     assert data["createdAt"] is not None
     assert data["updatedAt"] is not None
+
+
+def test_create_user_twice_at_the_same_time(client: TestClient, db: Session) -> None:
+    token = get_admin_user_token(client, db)[1]
+    create_user(db, email="john.tree2@yahoo.com", login="JohnTree78")
+    userJson = {
+        "first_name": "John",
+        "last_name": "Tree",
+        "login": "JohnTree78",
+        "email": "john.tree2@yahoo.com",
+        "role": "volunteer",
+    }
+
+    # The second request checked before the first one was saved
+    with patch("app.services.user.reusable_account", return_value=User()):
+        response = client.post(
+            "/api/v1/users/",
+            json=userJson,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["type"] == "USER_ALREADY_EXISTS"
 
 
 def test_create_user_without_admin_right_should_return_forbidden(
