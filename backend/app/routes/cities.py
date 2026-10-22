@@ -18,24 +18,14 @@ SEARCH_CITIES = text(
     WITH search AS (SELECT city_search_key(CAST(:q AS text)) AS key),
     matches AS (
         SELECT c.zip_code, c.name, d.code AS department_code,
-            city_search_key(c.name) AS name_key,
-            left(c.zip_code, length(d.code)) = d.code AS in_its_department
+            city_search_key(c.name) AS name_key
         FROM cities c
         JOIN departments d ON d.id = c.department_id, search
         WHERE city_search_key(c.name) LIKE '%' || search.key || '%'
             OR search.key <% city_search_key(c.name)
-    ),
-    -- Some cities are stored twice, once in a wrong department
-    unique_matches AS (
-        SELECT DISTINCT ON (zip_code, name) *
-        FROM matches
-        ORDER BY zip_code, name, in_its_department DESC
     )
-    SELECT zip_code, name,
-        CASE WHEN in_its_department THEN department_code
-            ELSE left(zip_code, CASE WHEN zip_code LIKE '97%' THEN 3 ELSE 2 END)
-        END AS department_code
-    FROM unique_matches, search
+    SELECT zip_code, name, department_code
+    FROM matches, search
     ORDER BY
         CASE
             WHEN name_key = search.key THEN 0
