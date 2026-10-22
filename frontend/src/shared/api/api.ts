@@ -1,5 +1,5 @@
 import { isUndefined } from "es-toolkit"
-import ky, { HTTPError, NetworkError } from "ky"
+import ky, { HTTPError, NetworkError, TimeoutError } from "ky"
 
 import { type TokenResponse, tokenSchema } from "@/features/user/store/me"
 import type { RequestedContent } from "@/shared/api/types"
@@ -7,6 +7,10 @@ import { localStorageRepository } from "@/shared/localStorage"
 
 const tokenStorage = localStorageRepository<TokenResponse>("token")
 const meStorage = localStorageRepository<TokenResponse>("me")
+
+// A request that changes data may have been processed despite the error
+// (a 502 from the proxy, a dropped connection): replaying it could duplicate it
+const replayableMethods = new Set(["GET", "HEAD", "OPTIONS", "TRACE"])
 
 export const api = ky.extend({
 	prefix: import.meta.env.VITE_API,
@@ -17,6 +21,15 @@ export const api = ky.extend({
 		// refused credentials or a refused new token would fail again
 		shouldRetry: ({ error, retryCount }) => {
 			if (!(error instanceof HTTPError && error.response.status === 401)) {
+				const request =
+					error instanceof HTTPError ||
+					error instanceof NetworkError ||
+					error instanceof TimeoutError
+						? error.request
+						: undefined
+				if (request && !replayableMethods.has(request.method)) {
+					return false
+				}
 				return undefined
 			}
 			return (
