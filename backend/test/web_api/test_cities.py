@@ -60,24 +60,6 @@ def test_search_spells_out_saint(client: TestClient, db: Session) -> None:
     assert search_names(client, "ste qqfoy") == ["Sainte-Qqfoy"]
 
 
-def test_search_shows_a_city_stored_twice_once(client: TestClient, db: Session) -> None:
-    add_cities(db, "98", "Qqvault")
-    db.add(
-        City(
-            zip_code="98000",
-            name="Qqvault",
-            department=Department(code="9Z", name="Test"),
-        )
-    )
-    db.commit()
-
-    response = client.get("/api/v1/cities/search", params={"q": "qqvault"})
-
-    assert [city for city in response.json() if city["name"] == "Qqvault"] == [
-        {"insee_code": "98000", "name": "Qqvault", "department_code": "98"}
-    ]
-
-
 def test_search_ignores_like_wildcards(client: TestClient, db: Session) -> None:
     add_cities(db, "98", "Qqville")
 

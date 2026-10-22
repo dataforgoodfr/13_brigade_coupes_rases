@@ -202,7 +202,9 @@ class Department(Base):
 class City(Base):
     __tablename__ = "cities"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    zip_code: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    zip_code: Mapped[str] = mapped_column(
+        String, index=True, unique=True, nullable=False
+    )
     name: Mapped[str] = mapped_column(String, nullable=False)
     department_id: Mapped[int] = mapped_column(
         ForeignKey("departments.id"), nullable=False
