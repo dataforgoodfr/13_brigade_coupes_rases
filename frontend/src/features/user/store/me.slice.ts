@@ -13,8 +13,10 @@ import {
 	meResponseSchema,
 	meSchema,
 	type OfflineMe,
+	type RegisterError,
 	type RegisterRequest,
 	type ResetPasswordRequest,
+	registerErrorSchema,
 	type TokenResponse,
 	tokenSchema,
 	type UpdateMeRequest
@@ -157,7 +159,7 @@ type State = {
 	me: RequestedContent<Me, MeError>
 	login: RequestedContent<void, CredentialError>
 	updateMe: RequestedContent<void, MeError>
-	register: RequestedContent<void, string>
+	register: RequestedContent<void, RegisterError>
 	forgotPassword: RequestedContent<void, string>
 	resetPassword: RequestedContent<void, string>
 }
@@ -205,7 +207,14 @@ export const meSlice = createSlice({
 		addRequestedContentCases(builder, loginThunk, (state) => state.login, {
 			errorSchema: credentialErrorSchema
 		})
-		addRequestedContentCases(builder, registerThunk, (state) => state.register)
+		addRequestedContentCases(
+			builder,
+			registerThunk,
+			(state) => state.register,
+			{
+				errorSchema: registerErrorSchema
+			}
+		)
 		addRequestedContentCases(
 			builder,
 			forgotPasswordThunk,
