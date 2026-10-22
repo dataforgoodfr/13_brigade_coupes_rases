@@ -20,6 +20,8 @@ La base reste la source de vérité. Le chargement n'écrit qu'avec `LOAD_DATABA
 ```
 1. Lecture de la dernière date en base
    SELECT MAX(observation_end_date) FROM clear_cuts
+   → sans les coupes tracées par un bénévole (dates avec une heure)
+     ni celles corrigées à la main (is_manually_edited)
 
 2. Dernière image RADD dans Earth Engine (couche « alert »)
    → Même version que S3 bronze : réutilisation du raster
