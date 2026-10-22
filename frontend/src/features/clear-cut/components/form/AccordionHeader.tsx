@@ -23,6 +23,7 @@ import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { ConfirmButton } from "@/shared/components/ConfirmDialog"
 import type { FormType } from "@/shared/form/types"
+import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import type { Rule } from "@/shared/store/referential/referential"
 
@@ -42,6 +43,7 @@ export function AccordionHeader({
 	const user = useConnectedMe()
 	const filters = useAppSelector(selectFiltersRequest)
 	const { toast } = useToast()
+	const singleFlight = useSingleFlight()
 
 	const areaHectare = form.getValues("report.totalAreaHectare")
 	const ecologicalZonings = form.getValues("ecologicalZonings")
@@ -63,18 +65,19 @@ export function AccordionHeader({
 	const dispatchAndRefresh = async <Arg,>(
 		thunk: WorkflowThunkAction<Arg>,
 		errorMessage: string
-	) => {
-		const action = await dispatch(thunk)
-		if (action.type.endsWith("/rejected")) {
-			toast({
-				id: "assignment-error",
-				title: "Erreur",
-				description: errorMessage
-			})
-		} else {
-			refresh()
-		}
-	}
+	) =>
+		singleFlight(async () => {
+			const action = await dispatch(thunk)
+			if (action.type.endsWith("/rejected")) {
+				toast({
+					id: "assignment-error",
+					title: "Erreur",
+					description: errorMessage
+				})
+			} else {
+				refresh()
+			}
+		})
 
 	const renderAssignmentSection = () => {
 		if (!user) return null
