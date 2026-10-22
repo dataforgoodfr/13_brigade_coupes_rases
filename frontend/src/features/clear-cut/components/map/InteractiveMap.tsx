@@ -27,6 +27,7 @@ import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { getStoredToken, useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { api } from "@/shared/api/api"
+import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 import { ClearCuts } from "./ClearCuts"
@@ -54,6 +55,7 @@ function GeomanControls() {
 	const [cityResults, setCityResults] = useState<CityResult[]>([])
 	const [selectedCity, setSelectedCity] = useState<CityResult | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
+	const singleFlight = useSingleFlight()
 
 	const dispatch = useAppDispatch()
 	const filters = useAppSelector(selectFiltersRequest)
@@ -239,7 +241,7 @@ function GeomanControls() {
 						Annuler
 					</Button>
 					<Button
-						onClick={handleSubmit}
+						onClick={() => singleFlight(handleSubmit)}
 						disabled={isSubmitting || !selectedCity}
 					>
 						{isSubmitting ? "Envoi..." : "Valider le signalement"}

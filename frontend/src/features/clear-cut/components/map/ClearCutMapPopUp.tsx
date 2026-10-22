@@ -19,6 +19,7 @@ import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { ConfirmButton } from "@/shared/components/ConfirmDialog"
+import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 type Props = {
@@ -95,6 +96,7 @@ export function ClearCutMapPopUp({
 	const user = useConnectedMe()
 	const filters = useAppSelector(selectFiltersRequest)
 	const { toast } = useToast()
+	const singleFlight = useSingleFlight()
 	const map = useMap()
 	const navigate = useNavigate()
 	const popupRef = useRef<L.Popup>(null)
@@ -109,15 +111,16 @@ export function ClearCutMapPopUp({
 	const dispatchAndRefresh = async <Arg,>(
 		thunk: WorkflowThunkAction<Arg>,
 		errorMessage: string
-	) => {
-		const action = await dispatch(thunk)
-		if (action.type.endsWith("/rejected")) {
-			toast({ id: "popup-error", title: "Erreur", description: errorMessage })
-		} else {
-			map.closePopup()
-			if (filters) dispatch(getClearCutsThunk(filters))
-		}
-	}
+	) =>
+		singleFlight(async () => {
+			const action = await dispatch(thunk)
+			if (action.type.endsWith("/rejected")) {
+				toast({ id: "popup-error", title: "Erreur", description: errorMessage })
+			} else {
+				map.closePopup()
+				if (filters) dispatch(getClearCutsThunk(filters))
+			}
+		})
 
 	const isAdmin = user?.role === "admin"
 	const myId = user?.id

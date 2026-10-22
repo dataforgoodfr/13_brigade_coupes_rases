@@ -32,6 +32,7 @@ import {
 import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
+import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus"
 
@@ -42,6 +43,7 @@ type Props = ClearCutFormVersions
 
 export function ClearCutFullForm({ current, original, latest }: Props) {
 	const dispatch = useAppDispatch()
+	const singleFlight = useSingleFlight()
 	const submission = useAppSelector(selectSubmission)
 	const assignation = useAppSelector(selectAssignation)
 	const loggedUser = useMe()
@@ -93,9 +95,8 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		user?.role === "volunteer" &&
 		current.report.assignmentRequestedById === user.id
 
-	const handleRequestAssignment = () => {
-		dispatch(requestAssignReportThunk(current.report.id))
-	}
+	const handleRequestAssignment = () =>
+		singleFlight(() => dispatch(requestAssignReportThunk(current.report.id)))
 
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
@@ -115,18 +116,18 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 
 	const { toast } = useToast()
 
-	const handleSubmit = (formData: ClearCutForm) => {
-		dispatch(
-			submitClearCutFormThunk({
-				reportId: current.report.id,
-				formData
-			})
+	const handleSubmit = (formData: ClearCutForm) =>
+		singleFlight(() =>
+			dispatch(
+				submitClearCutFormThunk({
+					reportId: current.report.id,
+					formData
+				})
+			)
 		)
-	}
 
-	const handleValidate = () => {
-		dispatch(volunteerValidateThunk(current.report.id))
-	}
+	const handleValidate = () =>
+		singleFlight(() => dispatch(volunteerValidateThunk(current.report.id)))
 
 	useEffect(() => {
 		if (submission.status === "success") {

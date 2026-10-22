@@ -26,6 +26,7 @@ import {
 	FormLabel,
 	FormMessage
 } from "@/shared/form/components/Form"
+import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function RegisterForm() {
@@ -43,6 +44,7 @@ export function RegisterForm() {
 	const navigate = useNavigate()
 	const registerState = useAppSelector(selectRegister)
 	const { toast } = useToast()
+	const singleFlight = useSingleFlight()
 
 	useEffect(() => {
 		if (registerState.status === "success") {
@@ -63,10 +65,16 @@ export function RegisterForm() {
 				variant: "destructive"
 			})
 		}
-		return () => {
+	}, [registerState, toast, navigate])
+
+	// Reset on leaving only: reset on each change, the request would be back
+	// to idle while still loading, and the submit button enabled again
+	useEffect(
+		() => () => {
 			dispatch(meSlice.actions.resetRegister())
-		}
-	}, [registerState, toast, dispatch, navigate])
+		},
+		[dispatch]
+	)
 
 	return (
 		<>
@@ -78,7 +86,9 @@ export function RegisterForm() {
 
 			<FormProvider {...form}>
 				<form
-					onSubmit={form.handleSubmit((data) => dispatch(registerThunk(data)))}
+					onSubmit={form.handleSubmit((data) =>
+						singleFlight(() => dispatch(registerThunk(data)))
+					)}
 					className="space-y-4 mt-4"
 				>
 					<div className="flex gap-4">
