@@ -59,7 +59,7 @@ export function CreateUserDialog() {
 			toast({
 				id: "user-creation-failed",
 				title: "La création de l'utilisateur a échoué",
-				description: createdUser.error?.detail.content,
+				description: createdUser.error?.detail?.content,
 				variant: "destructive"
 			})
 		}
