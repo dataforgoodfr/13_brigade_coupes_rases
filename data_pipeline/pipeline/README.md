@@ -72,12 +72,12 @@ La base reste la source de vérité. Le chargement n'écrit qu'avec `LOAD_DATABA
 | `data_pipeline/gold/sufosat/current/sufosat_clusters_enriched.fgb` | Dernière version complète (lue par le backend) |
 | `data_pipeline/gold/sufosat/previous/sufosat_clusters_enriched.fgb` | Millésime précédent |
 
-Endpoint Scaleway : `https://s3.fr-par.scw.cloud`  
-Bucket : `brigade-coupe-rase-s3`
+Endpoint Cellar (Clever Cloud) : `https://cellar-c2.services.clever-cloud.com`  
+Bucket : `bcr-datalake`
 
 URL complète du fichier courant :
 ```
-https://s3.fr-par.scw.cloud/brigade-coupe-rase-s3/data_pipeline/gold/sufosat/current/sufosat_clusters_enriched.fgb
+https://cellar-c2.services.clever-cloud.com/bcr-datalake/data_pipeline/gold/sufosat/current/sufosat_clusters_enriched.fgb
 ```
 
 ---
@@ -109,8 +109,8 @@ python -m pipeline.scripts.run_pipeline
 
 ```
 DATABASE_URL=postgresql://user:password@host:5432/dbname
-S3_ENDPOINT=https://s3.fr-par.scw.cloud
-S3_BUCKET_NAME=brigade-coupe-rase-s3
+S3_ENDPOINT=https://cellar-c2.services.clever-cloud.com
+S3_BUCKET_NAME=bcr-datalake
 S3_REGION=fr-par
 S3_ACCESS_KEY_ID=...
 S3_SECRET_ACCESS_KEY=...
@@ -140,6 +140,6 @@ pipeline/scripts/
 ├── db_export.py               # Export DB → FGB local (référentiel de comparaison)
 ├── load_database.py           # Chargement incrémental en base, --dry-run pour essayer
 └── utils/
-    ├── s3_utils.py            # S3Manager (Scaleway)
+    ├── s3_utils.py            # S3Manager (Cellar Clever Cloud)
     └── ...
 ```

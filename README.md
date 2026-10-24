@@ -104,7 +104,7 @@ L'exécution de la pipeline et le chargement des données historiques (`bootstra
 
 Rien n'est nécessaire pour développer le frontend ou le backend en local. Les secrets servent à :
 
-- la data pipeline (bucket S3 Scaleway : données brutes, couches de référence, fichiers gold) ;
+- la data pipeline (bucket S3 Cellar de Clever Cloud : données brutes, couches de référence, fichiers gold) ;
 - l'envoi des photos des formulaires vers S3 (sans S3, le backend les stocke localement) ;
 - le déploiement (Clever Cloud), la synchronisation Airtable et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
 

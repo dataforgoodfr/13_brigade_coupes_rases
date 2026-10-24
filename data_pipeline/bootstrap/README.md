@@ -23,7 +23,7 @@ Télécharger les fichiers depuis S3 (beaucoup plus rapide). Vérifier les fichi
 disponibles :
 
 ```bash
-aws s3 ls s3://brigade-coupe-rase-s3/dataeng/bootstrap/ --recursive --profile d4g-s13-brigade-coupes-rases
+aws s3 ls s3://bcr-datalake/dataeng/bootstrap/ --recursive --profile d4g-s13-brigade-coupes-rases --endpoint-url https://cellar-c2.services.clever-cloud.com
 ```
 
 Résultat attendu :
@@ -36,7 +36,7 @@ Résultat attendu :
 Télécharger les fichiers :
 
 ```bash
-aws s3 sync s3://brigade-coupe-rase-s3/dataeng/bootstrap/ bootstrap/data/ --exact-timestamps --profile d4g-s13-brigade-coupes-rases
+aws s3 sync s3://bcr-datalake/dataeng/bootstrap/ bootstrap/data/ --exact-timestamps --profile d4g-s13-brigade-coupes-rases --endpoint-url https://cellar-c2.services.clever-cloud.com
 ```
 
 ## Chargement en base
