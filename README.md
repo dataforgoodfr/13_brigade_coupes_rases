@@ -33,8 +33,7 @@ Le vocabulaire (coupe, signalement, formulaire), le modèle de données et le cy
 ├── 📁 frontend/       application web (carte, formulaires)
 ├── 📁 data_pipeline/  collecte et traitement des données
 ├── 📁 docs/           documentation
-├── 📁 docker/         image PostgreSQL/PostGIS de développement (docker-compose.yml à la racine)
-└── 📁 keepass/        secrets partagés (chiffrés)
+└── 📁 docker/         image PostgreSQL/PostGIS de développement (docker-compose.yml à la racine)
 ```
 
 ## Par où commencer ?
@@ -108,7 +107,7 @@ Rien n'est nécessaire pour développer le frontend ou le backend en local. Les 
 - l'envoi des photos des formulaires vers S3 (sans S3, le backend les stocke localement) ;
 - le déploiement (Clever Cloud), la synchronisation Airtable et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
 
-Ils sont dans la [base KeePass](./keepass/secrets.kdbx) du dépôt ([installer KeePass](https://keepass.info/index.html)) ; le mot de passe s'obtient auprès des mainteneurs du projet. Cette base est la source de vérité : tout secret utilisé par le projet (comptes cloud, CI/CD, clés d'API, chaînes de connexion…) doit y être référencé.
+Aucun secret n'est versionné dans le dépôt : les valeurs sont définies dans les variables d'environnement Clever Cloud et les secrets du dépôt GitHub, et s'obtiennent auprès des mainteneurs du projet.
 
 ## Déploiement
 

@@ -45,7 +45,7 @@ GOOGLE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 ```
 
 Les identifiants du Cellar Clever Cloud et la clé du compte de service Google
-sont dans la base KeePass du projet. Ne jamais versionner `.env` (il est ignoré
+s'obtiennent auprès des mainteneurs du projet. Ne jamais versionner `.env` (il est ignoré
 par git). Exécuter la pipeline ou télécharger les fichiers du bootstrap les
 demande ; pas les tests.
 

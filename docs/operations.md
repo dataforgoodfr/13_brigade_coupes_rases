@@ -36,7 +36,7 @@ Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bo
 
 ## Bucket S3
 
-Le stockage est le Cellar de Clever Cloud (bucket `bcr-datalake`). Le profil AWS CLI `d4g-s13-brigade-coupes-rases` doit contenir les clés du Cellar (KeePass) et, comme Cellar refuse les checksums ajoutés par défaut aux envois, la ligne `request_checksum_calculation = when_required` dans `~/.aws/config`.
+Le stockage est le Cellar de Clever Cloud (bucket `bcr-datalake`). Le profil AWS CLI `d4g-s13-brigade-coupes-rases` doit contenir les clés du Cellar (à demander aux mainteneurs) et, comme Cellar refuse les checksums ajoutés par défaut aux envois, la ligne `request_checksum_calculation = when_required` dans `~/.aws/config`.
 
 ```bash
 # Lister les fichiers
