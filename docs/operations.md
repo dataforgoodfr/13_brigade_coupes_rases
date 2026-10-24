@@ -36,13 +36,15 @@ Les workflows peuvent aussi être lancés à la main depuis l'onglet Actions (bo
 
 ## Bucket S3
 
+Le stockage est le Cellar de Clever Cloud (bucket `bcr-datalake`). Le profil AWS CLI `d4g-s13-brigade-coupes-rases` doit contenir les clés du Cellar (KeePass) et, comme Cellar refuse les checksums ajoutés par défaut aux envois, la ligne `request_checksum_calculation = when_required` dans `~/.aws/config`.
+
 ```bash
 # Lister les fichiers
-aws s3 ls s3://brigade-coupe-rase-s3 --recursive --profile d4g-s13-brigade-coupes-rases
+aws s3 ls s3://bcr-datalake --recursive --profile d4g-s13-brigade-coupes-rases --endpoint-url https://cellar-c2.services.clever-cloud.com
 
 # Supprimer les fichiers de développement
-aws s3 rm s3://brigade-coupe-rase-s3/development/reports/ --recursive --profile d4g-s13-brigade-coupes-rases
+aws s3 rm s3://bcr-datalake/development/reports/ --recursive --profile d4g-s13-brigade-coupes-rases --endpoint-url https://cellar-c2.services.clever-cloud.com
 
 # Mettre à jour la configuration CORS (fichier dans frontend/s3cors.json)
-aws s3api put-bucket-cors --bucket brigade-coupe-rase-s3 --cors-configuration file://frontend/s3cors.json --profile d4g-s13-brigade-coupes-rases
+aws s3api put-bucket-cors --bucket bcr-datalake --cors-configuration file://frontend/s3cors.json --profile d4g-s13-brigade-coupes-rases --endpoint-url https://cellar-c2.services.clever-cloud.com
 ```

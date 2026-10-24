@@ -99,7 +99,7 @@ Les objets sont ensuite enrichis avec des données géographiques auxiliaires (z
 
 🧷 Structure des fichiers persistents
 
-Bucket : brigade-coupe-rase-s3
+Bucket : bcr-datalake
 Repertoire Data eng : /dataeng 
 * /sufosat_data/forest-clearcuts_mainland-france_sufosat_dates_v3-metadata.json
      Contient :
