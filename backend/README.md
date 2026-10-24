@@ -104,14 +104,13 @@ documentation OpenAPI, générée depuis le code, sur `http://localhost:8080/doc
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USE_TLS`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | non | Relais SMTP pour les e-mails (attribution, validation refusée, mot de passe oublié) ; sans `SMTP_HOST`, les e-mails sont seulement journalisés. En local, `docker compose up` fournit [Mailpit](http://localhost:8025) |
 
 `.env.development` et `.env.test` sont versionnés avec des valeurs pour une base
-locale uniquement. Les valeurs de production sont définies sur Clever Cloud et
-référencées dans la base KeePass partagée.
+locale uniquement. Les valeurs de production sont définies sur Clever Cloud.
 
 ### Clever Cloud
 
 - Application : [https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/](https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io/)
 - Swagger UI : `/docs`, `/redoc` et `/openapi.json` sont fermés en production sauf si `API_DOCS_ENABLED=true` (en local : [http://localhost:8080/docs](http://localhost:8080/docs))
-- Base de données : add-on PostgreSQL, chaîne de connexion dans la base KeePass.
+- Base de données : add-on PostgreSQL, chaîne de connexion dans les variables d'environnement Clever Cloud.
 
 Le déploiement se déclenche en publiant une release GitHub, voir le
 [guide des opérations](../docs/operations.md#branches-et-déploiement).
