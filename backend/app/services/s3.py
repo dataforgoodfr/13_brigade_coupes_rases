@@ -4,6 +4,7 @@ import uuid
 from typing import Any
 
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from app.config import settings
@@ -34,6 +35,12 @@ class S3Service:
             aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
             region_name=settings.S3_REGION,
             endpoint_url=settings.S3_ENDPOINT,
+            # Cellar (Clever Cloud) refuse les checksums CRC que boto3 ajoute
+            # par défaut aux envois (MissingContentLength) : seulement si requis.
+            config=Config(
+                request_checksum_calculation="when_required",
+                response_checksum_validation="when_required",
+            ),
         )
         self.bucket_name = settings.S3_BUCKET_NAME
         self.prefix = settings.S3_PREFIX

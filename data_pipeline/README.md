@@ -35,8 +35,8 @@ cp .env.example .env
 
 ```
 DATABASE_URL=postgresql://user:password@host:5432/dbname
-S3_ENDPOINT=https://s3.fr-par.scw.cloud
-S3_BUCKET_NAME=brigade-coupe-rase-s3
+S3_ENDPOINT=https://cellar-c2.services.clever-cloud.com
+S3_BUCKET_NAME=bcr-datalake
 S3_REGION=fr-par
 S3_ACCESS_KEY_ID=...
 S3_SECRET_ACCESS_KEY=...
@@ -44,7 +44,7 @@ EARTH_ENGINE_PROJECT=...
 GOOGLE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 ```
 
-Les identifiants Scaleway Object Storage et la clé du compte de service Google
+Les identifiants du Cellar Clever Cloud et la clé du compte de service Google
 sont dans la base KeePass du projet. Ne jamais versionner `.env` (il est ignoré
 par git). Exécuter la pipeline ou télécharger les fichiers du bootstrap les
 demande ; pas les tests.

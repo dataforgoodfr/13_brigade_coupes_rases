@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import boto3
+from botocore.config import Config
 from dotenv import load_dotenv
 
 
@@ -18,6 +19,12 @@ class S3Manager:
             endpoint_url=os.getenv("S3_ENDPOINT"),
             aws_access_key_id=os.getenv("S3_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("S3_SECRET_ACCESS_KEY"),
+            # Cellar (Clever Cloud) refuse les checksums CRC que boto3 ajoute
+            # par défaut aux envois (MissingContentLength) : seulement si requis.
+            config=Config(
+                request_checksum_calculation="when_required",
+                response_checksum_validation="when_required",
+            ),
         )
 
     def list_bucket_contents(self) -> list[str] | None:
