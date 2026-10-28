@@ -19,6 +19,7 @@ import { PendingFormNotice } from "@/features/clear-cut/components/PendingFormBa
 import {
 	type ClearCutForm,
 	type ClearCutFormVersions,
+	type ClearCutStatus,
 	clearCutFormSchema
 } from "@/features/clear-cut/store/clear-cuts"
 import {
@@ -41,6 +42,14 @@ import { AccordionHeader } from "./AccordionHeader"
 
 type Props = ClearCutFormVersions
 
+const VOLUNTEER_LOCKED_STATUSES: ClearCutStatus[] = [
+	"waiting_for_validation",
+	"validated",
+	"legal_validated",
+	"final_validated",
+	"rejected"
+]
+
 export function ClearCutFullForm({ current, original, latest }: Props) {
 	const dispatch = useAppDispatch()
 	const singleFlight = useSingleFlight()
@@ -59,17 +68,15 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		)
 	}, [user, current.report.userId, current.report.affectedUser])
 
+	// Once sent for validation, a report's form is the admins' to correct
+	const isLockedForVolunteer =
+		user?.role === "volunteer" &&
+		VOLUNTEER_LOCKED_STATUSES.includes(current.report.status)
+
 	const isDisabled = useMemo(() => {
 		if (!user) return true
 		if (user.role === "volunteer") {
-			const lockedStatuses = [
-				"waiting_for_validation",
-				"validated",
-				"legal_validated",
-				"final_validated",
-				"rejected"
-			]
-			if (lockedStatuses.includes(current.report.status)) return true
+			if (isLockedForVolunteer) return true
 			const isAssignmentRequester =
 				current.report.assignmentRequestedById === user.id
 			return !isAssignedVolunteer && !isAssignmentRequester
@@ -77,9 +84,9 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		return false
 	}, [
 		user,
+		isLockedForVolunteer,
 		isAssignedVolunteer,
-		current.report.assignmentRequestedById,
-		current.report.status
+		current.report.assignmentRequestedById
 	])
 
 	const canValidate =
@@ -198,6 +205,12 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 							{hasPendingRequest && (
 								<p className="text-sm text-amber-600 font-medium text-center py-2">
 									⏳ Demande d'attribution en attente de validation
+								</p>
+							)}
+							{isLockedForVolunteer && isAssignedVolunteer && (
+								<p className="text-sm text-neutral-600 font-medium text-center py-1">
+									🔒 Fiche envoyée en validation : elle n'est plus modifiable.
+									Un administrateur peut encore la corriger.
 								</p>
 							)}
 							{!isOnline && (
