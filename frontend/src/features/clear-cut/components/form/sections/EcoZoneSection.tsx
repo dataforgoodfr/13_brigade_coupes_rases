@@ -3,14 +3,14 @@ import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
 import type { SectionForm, SectionFormItem } from "../types"
 
 export const ecoZoneKey: SectionForm = {
-	name: "Zonnages écologiques",
+	name: "Zonages écologiques",
 	className: "flex flex-col gap-4"
 }
 
 export const ecoZoneValue: SectionFormItem<ClearCutFormInput>[] = [
 	{
 		name: "hasOtherEcologicalZone",
-		label: "Coupe au sein d'autres zone écologiques ?",
+		label: "Coupe au sein d'autres zones écologiques ?",
 		type: "switch",
 		renderConditions: []
 	},
@@ -28,7 +28,7 @@ export const ecoZoneValue: SectionFormItem<ClearCutFormInput>[] = [
 	},
 	{
 		name: "nearbyEcologicalZoneType",
-		label: "Type de zonages écologiques a proximité",
+		label: "Type de zonages écologiques à proximité",
 		type: "textArea",
 		renderConditions: ["hasNearbyEcologicalZone"]
 	},
