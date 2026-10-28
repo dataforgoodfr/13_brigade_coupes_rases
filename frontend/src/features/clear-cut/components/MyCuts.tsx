@@ -12,7 +12,7 @@ import {
 import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { IconButton } from "@/shared/components/button/Button"
-import { TimeProgress } from "@/shared/components/TimeProgress"
+import { RequestedSection } from "@/shared/components/RequestedSection"
 import { useLogout } from "@/shared/hooks/auth"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
@@ -27,28 +27,8 @@ export function MyCuts() {
 		dispatch(getMyAssignedReportsThunk({ page: 0, size: 50 }))
 	}, [dispatch])
 
-	if (reportsState.status === "idle" || reportsState.status === "loading") {
-		return (
-			<div className="flex h-full w-full justify-center items-center">
-				<TimeProgress className="w-1/4" durationMs={1000} />
-			</div>
-		)
-	}
-
-	if (reportsState.status === "error") {
-		return (
-			<div className="flex flex-col h-full w-full justify-center items-center gap-4">
-				<p>Erreur lors du chargement de vos coupes.</p>
-				<Button
-					onClick={() =>
-						dispatch(getMyAssignedReportsThunk({ page: 0, size: 50 }))
-					}
-				>
-					Réessayer
-				</Button>
-			</div>
-		)
-	}
+	const fetchReports = () =>
+		dispatch(getMyAssignedReportsThunk({ page: 0, size: 50 }))
 
 	const reports = reportsState.value?.content ?? []
 
@@ -74,91 +54,97 @@ export function MyCuts() {
 				vérification.
 			</p>
 
-			{reports.length === 0 ? (
-				<div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow-sm border border-neutral-100 mt-10">
-					<div className="h-16 w-16 bg-neutral-50 rounded-full flex items-center justify-center mb-4">
-						<FileWarning className="h-8 w-8 text-neutral-400" />
+			<RequestedSection
+				requested={reportsState}
+				errorMessage="Erreur lors du chargement de vos coupes."
+				onRetry={fetchReports}
+			>
+				{reports.length === 0 ? (
+					<div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow-sm border border-neutral-100 mt-10">
+						<div className="h-16 w-16 bg-neutral-50 rounded-full flex items-center justify-center mb-4">
+							<FileWarning className="h-8 w-8 text-neutral-400" />
+						</div>
+						<h3 className="text-lg font-medium text-neutral-800 mb-2">
+							Aucune coupe attribuée
+						</h3>
+						<p className="text-neutral-500 text-center max-w-sm mb-6">
+							Vous n'avez pas encore de coupe rase attribuée. Explorez la carte
+							pour vous attribuer des signalements.
+						</p>
+						<Button onClick={() => navigate({ to: "/clear-cuts" })}>
+							Aller sur la carte
+						</Button>
 					</div>
-					<h3 className="text-lg font-medium text-neutral-800 mb-2">
-						Aucune coupe attribuée
-					</h3>
-					<p className="text-neutral-500 text-center max-w-sm mb-6">
-						Vous n'avez pas encore de coupe rase attribuée. Explorez la carte
-						pour vous attribuer des signalements.
-					</p>
-					<Button onClick={() => navigate({ to: "/clear-cuts" })}>
-						Aller sur la carte
-					</Button>
-				</div>
-			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{reports.map((report) => {
-						const isPendingAssignment =
-							!!me &&
-							report.assignmentRequestedById === me.id &&
-							report.userId !== me.id
-						return (
-							<Link
-								key={report.id}
-								to="/clear-cuts/$clearCutId"
-								params={{ clearCutId: report.id }}
-								className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group text-left"
-							>
-								<div className="flex justify-between items-start mb-3 gap-2">
-									<h3
-										className="font-semibold text-lg text-neutral-800 truncate"
-										title={report.city}
-									>
-										{report.city}
-									</h3>
-									<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
-										{report.department.code}
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{reports.map((report) => {
+							const isPendingAssignment =
+								!!me &&
+								report.assignmentRequestedById === me.id &&
+								report.userId !== me.id
+							return (
+								<Link
+									key={report.id}
+									to="/clear-cuts/$clearCutId"
+									params={{ clearCutId: report.id }}
+									className="bg-white p-5 rounded-xl shadow-sm border border-neutral-100 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer flex flex-col group text-left"
+								>
+									<div className="flex justify-between items-start mb-3 gap-2">
+										<h3
+											className="font-semibold text-lg text-neutral-800 truncate"
+											title={report.city}
+										>
+											{report.city}
+										</h3>
+										<div className="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full font-medium shrink-0">
+											{report.department.code}
+										</div>
 									</div>
-								</div>
 
-								<PendingFormBadge reportId={report.id} />
+									<PendingFormBadge reportId={report.id} />
 
-								{isPendingAssignment && (
-									<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
-										<Clock className="h-3.5 w-3.5" />
-										En attente de validation de l'assignation
+									{isPendingAssignment && (
+										<div className="mb-3 inline-flex items-center gap-1.5 self-start bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-200">
+											<Clock className="h-3.5 w-3.5" />
+											En attente de validation de l'assignation
+										</div>
+									)}
+
+									<div className="space-y-1 mb-6 flex-grow">
+										<p className="text-sm text-neutral-600">
+											<span className="font-medium text-neutral-900">
+												Surface :
+											</span>{" "}
+											<FormattedNumber
+												value={report.totalAreaHectare}
+												maximumFractionDigits={1}
+											/>{" "}
+											ha
+										</p>
+										<p className="text-sm text-neutral-600">
+											<span className="font-medium text-neutral-900">
+												Date approx. :
+											</span>{" "}
+											{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
+										</p>
+										<p className="text-sm text-neutral-600">
+											<span className="font-medium text-neutral-900">
+												Statut :
+											</span>{" "}
+											{CLEAR_CUTTING_STATUS_TRANSLATIONS[report.status]}
+										</p>
 									</div>
-								)}
 
-								<div className="space-y-1 mb-6 flex-grow">
-									<p className="text-sm text-neutral-600">
-										<span className="font-medium text-neutral-900">
-											Surface :
-										</span>{" "}
-										<FormattedNumber
-											value={report.totalAreaHectare}
-											maximumFractionDigits={1}
-										/>{" "}
-										ha
-									</p>
-									<p className="text-sm text-neutral-600">
-										<span className="font-medium text-neutral-900">
-											Date approx. :
-										</span>{" "}
-										{new Date(report.lastCutDate).toLocaleDateString("fr-FR")}
-									</p>
-									<p className="text-sm text-neutral-600">
-										<span className="font-medium text-neutral-900">
-											Statut :
-										</span>{" "}
-										{CLEAR_CUTTING_STATUS_TRANSLATIONS[report.status]}
-									</p>
-								</div>
-
-								<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
-									<span>Consulter le détail</span>
-									<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-								</div>
-							</Link>
-						)
-					})}
-				</div>
-			)}
+									<div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary-dark transition-colors">
+										<span>Consulter le détail</span>
+										<ChevronRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+									</div>
+								</Link>
+							)
+						})}
+					</div>
+				)}
+			</RequestedSection>
 			{/* The phone navigation bar has no room left for it */}
 			<Link
 				to="/about"

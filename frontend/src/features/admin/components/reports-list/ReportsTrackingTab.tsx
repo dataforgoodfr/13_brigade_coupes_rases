@@ -20,7 +20,7 @@ import {
 	CLEAR_CUTTING_STATUS_TRANSLATIONS,
 	canBeReopened
 } from "@/features/clear-cut/store/status"
-import { TimeProgress } from "@/shared/components/TimeProgress"
+import { RequestedSection } from "@/shared/components/RequestedSection"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 export function ReportsTrackingTab() {
@@ -40,13 +40,8 @@ export function ReportsTrackingTab() {
 		})
 	}
 
-	if (reportsState.status === "idle" || reportsState.status === "loading") {
-		return (
-			<div className="flex h-full w-full justify-center items-center">
-				<TimeProgress className="w-1/4" durationMs={1000} />
-			</div>
-		)
-	}
+	const fetchReports = () =>
+		dispatch(getAdminAllReportsThunk({ page: 0, size: 100 }))
 
 	const allReports = reportsState.value?.content ?? []
 
@@ -96,130 +91,136 @@ export function ReportsTrackingTab() {
 				</div>
 			</div>
 
-			<div className="border rounded-xl overflow-x-auto shadow-sm">
-				<table className="w-full min-w-[600px] text-left border-collapse">
-					<thead>
-						<tr className="bg-neutral-50 border-b border-neutral-200">
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
-								Zone / Ville
-							</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
-								Statut
-							</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
-								Attribution
-							</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
-								Surface
-							</th>
-							<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500 text-right">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-neutral-100">
-						{filteredReports.map((report) => (
-							<tr
-								key={report.id}
-								className="hover:bg-neutral-50 transition-colors cursor-pointer group"
-								onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
-							>
-								<td className="px-6 py-4">
-									<div className="flex flex-col">
-										<span className="font-semibold text-neutral-800">
-											{report.city}
-										</span>
-										<span className="text-xs text-neutral-500">
-											Dept: {report.department.code}
-										</span>
-									</div>
-								</td>
-								<td className="px-6 py-4">
-									<Badge variant="outline" className="font-medium">
-										{CLEAR_CUTTING_STATUS_TRANSLATIONS[report.status]}
-									</Badge>
-								</td>
-								<td className="px-6 py-4">
-									{report.affectedUser ? (
-										<div className="flex items-center gap-2 text-green-700">
-											<UserCheck size={16} />
-											<div className="flex flex-col">
-												<span className="text-sm font-medium">
-													{report.affectedUser.login}
-												</span>
-												<span className="text-[10px] opacity-70">
-													{report.affectedUser.email}
-												</span>
-											</div>
-										</div>
-									) : report.assignmentRequestedBy ? (
-										<div className="flex items-center gap-2 text-amber-600">
-											<Users size={16} />
-											<div className="flex flex-col">
-												<span className="text-sm font-medium italic">
-													{report.assignmentRequestedBy.login}
-												</span>
-												<span className="text-[10px] font-bold uppercase tracking-tighter">
-													En attente
-												</span>
-											</div>
-										</div>
-									) : (
-										<div className="flex items-center gap-2 text-neutral-400 italic">
-											<UserMinus size={16} />
-											<span className="text-sm">Non attribuée</span>
-										</div>
-									)}
-								</td>
-								<td className="px-6 py-4 text-sm text-neutral-600">
-									<FormattedNumber
-										value={report.totalAreaHectare ?? 0}
-										maximumFractionDigits={1}
-									/>{" "}
-									ha
-								</td>
-								<td className="px-6 py-4 text-right">
-									<div className="flex items-center justify-end gap-1">
-										{canBeReopened(report.status, !!report.affectedUser) && (
-											<Button
-												variant="outline"
-												size="sm"
-												className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50 min-h-[36px] gap-1"
-												title={
-													report.affectedUser
-														? "Remettre en traitement par le bénévole attribué"
-														: "Remettre à traiter"
-												}
-												onClick={(e) => handleReopen(e, report.id)}
-											>
-												<RotateCcw size={13} />
-												<span className="hidden sm:inline">Rouvrir</span>
-											</Button>
-										)}
-										<Button
-											variant="ghost"
-											size="icon"
-											className="group-hover:text-primary transition-colors"
-										>
-											<ChevronRight size={20} />
-										</Button>
-									</div>
-								</td>
+			<RequestedSection
+				requested={reportsState}
+				errorMessage="Erreur lors du chargement des zones."
+				onRetry={fetchReports}
+			>
+				<div className="border rounded-xl overflow-x-auto shadow-sm">
+					<table className="w-full min-w-[600px] text-left border-collapse">
+						<thead>
+							<tr className="bg-neutral-50 border-b border-neutral-200">
+								<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+									Zone / Ville
+								</th>
+								<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+									Statut
+								</th>
+								<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+									Attribution
+								</th>
+								<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500">
+									Surface
+								</th>
+								<th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-neutral-500 text-right">
+									Actions
+								</th>
 							</tr>
-						))}
-						{filteredReports.length === 0 && (
-							<tr>
-								<td
-									colSpan={5}
-									className="px-6 py-12 text-center text-neutral-500 italic"
+						</thead>
+						<tbody className="divide-y divide-neutral-100">
+							{filteredReports.map((report) => (
+								<tr
+									key={report.id}
+									className="hover:bg-neutral-50 transition-colors cursor-pointer group"
+									onClick={() => navigate({ to: `/clear-cuts/${report.id}` })}
 								>
-									Aucune zone trouvée pour ce filtre.
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+									<td className="px-6 py-4">
+										<div className="flex flex-col">
+											<span className="font-semibold text-neutral-800">
+												{report.city}
+											</span>
+											<span className="text-xs text-neutral-500">
+												Dept: {report.department.code}
+											</span>
+										</div>
+									</td>
+									<td className="px-6 py-4">
+										<Badge variant="outline" className="font-medium">
+											{CLEAR_CUTTING_STATUS_TRANSLATIONS[report.status]}
+										</Badge>
+									</td>
+									<td className="px-6 py-4">
+										{report.affectedUser ? (
+											<div className="flex items-center gap-2 text-green-700">
+												<UserCheck size={16} />
+												<div className="flex flex-col">
+													<span className="text-sm font-medium">
+														{report.affectedUser.login}
+													</span>
+													<span className="text-[10px] opacity-70">
+														{report.affectedUser.email}
+													</span>
+												</div>
+											</div>
+										) : report.assignmentRequestedBy ? (
+											<div className="flex items-center gap-2 text-amber-600">
+												<Users size={16} />
+												<div className="flex flex-col">
+													<span className="text-sm font-medium italic">
+														{report.assignmentRequestedBy.login}
+													</span>
+													<span className="text-[10px] font-bold uppercase tracking-tighter">
+														En attente
+													</span>
+												</div>
+											</div>
+										) : (
+											<div className="flex items-center gap-2 text-neutral-400 italic">
+												<UserMinus size={16} />
+												<span className="text-sm">Non attribuée</span>
+											</div>
+										)}
+									</td>
+									<td className="px-6 py-4 text-sm text-neutral-600">
+										<FormattedNumber
+											value={report.totalAreaHectare ?? 0}
+											maximumFractionDigits={1}
+										/>{" "}
+										ha
+									</td>
+									<td className="px-6 py-4 text-right">
+										<div className="flex items-center justify-end gap-1">
+											{canBeReopened(report.status, !!report.affectedUser) && (
+												<Button
+													variant="outline"
+													size="sm"
+													className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50 min-h-[36px] gap-1"
+													title={
+														report.affectedUser
+															? "Remettre en traitement par le bénévole attribué"
+															: "Remettre à traiter"
+													}
+													onClick={(e) => handleReopen(e, report.id)}
+												>
+													<RotateCcw size={13} />
+													<span className="hidden sm:inline">Rouvrir</span>
+												</Button>
+											)}
+											<Button
+												variant="ghost"
+												size="icon"
+												className="group-hover:text-primary transition-colors"
+											>
+												<ChevronRight size={20} />
+											</Button>
+										</div>
+									</td>
+								</tr>
+							))}
+							{filteredReports.length === 0 && (
+								<tr>
+									<td
+										colSpan={5}
+										className="px-6 py-12 text-center text-neutral-500 italic"
+									>
+										Aucune zone trouvée pour ce filtre.
+									</td>
+								</tr>
+							)}
+						</tbody>
+					</table>
+				</div>
+			</RequestedSection>
 		</div>
 	)
 }
