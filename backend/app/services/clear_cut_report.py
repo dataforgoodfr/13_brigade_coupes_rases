@@ -5,11 +5,18 @@ from fastapi import status
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.functions import ST_Centroid, ST_Multi, ST_Union
 from sqlalchemy import case, func, or_
-from sqlalchemy.orm import Query, Session
+from sqlalchemy.orm import Query, Session, joinedload, selectinload
 from sqlalchemy.sql.selectable import Subquery
 
 from app.common.errors import AppHTTPException
-from app.models import SRID, ClearCut, ClearCutEcologicalZoning, ClearCutReport, User
+from app.models import (
+    SRID,
+    City,
+    ClearCut,
+    ClearCutEcologicalZoning,
+    ClearCutReport,
+    User,
+)
 from app.schemas.clear_cut_report import (
     ClearCutReportPutRequestSchema,
     ClearCutReportResponseSchema,
@@ -435,11 +442,14 @@ def find_clearcuts_reports(
     assigned_to_me: bool = False,
     admin_action_required: bool = False,
 ) -> PaginationResponseSchema[ClearCutReportResponseSchema]:
-    from sqlalchemy.orm import joinedload
-
+    # Everything the response reads, loaded for the whole page at once rather
+    # than with a query per report
     query = db.query(ClearCutReport).options(
         joinedload(ClearCutReport.user),
         joinedload(ClearCutReport.assignment_requested_by),
+        joinedload(ClearCutReport.city).joinedload(City.department),
+        selectinload(ClearCutReport.clear_cuts),
+        selectinload(ClearCutReport.rules),
     )
     if assigned_to_me and current_user:
         query = query.filter(

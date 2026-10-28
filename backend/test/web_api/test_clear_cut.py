@@ -2,9 +2,11 @@ from typing import Any
 
 from fastapi import status
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 
 from app.models import ClearCutEcologicalZoning, ClearCutReport
+from test.common.clear_cut import new_clear_cut_report
 from test.common.user import create_user, get_admin_user_token, get_volunteer_user_token
 
 
@@ -125,6 +127,35 @@ def test_get_reports(client: TestClient) -> None:
     data = response.json()
     assert response.status_code == status.HTTP_200_OK
     assert len(data["content"]) == 10
+
+
+def test_report_list_query_count_does_not_grow_with_the_page(
+    client: TestClient, db: Session
+) -> None:
+    db.add_all(new_clear_cut_report() for _ in range(6))
+    db.commit()
+    _, token = get_admin_user_token(client, db)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    def count_queries(size: int) -> int:
+        statements: list[str] = []
+
+        def record(*args: Any) -> None:
+            statements.append(args[2])
+
+        event.listen(db.get_bind(), "before_cursor_execute", record)
+        try:
+            response = client.get(
+                "/api/v1/clear-cuts-reports/",
+                params={"size": size},
+                headers=headers,
+            )
+        finally:
+            event.remove(db.get_bind(), "before_cursor_execute", record)
+        assert len(response.json()["content"]) == size
+        return len(statements)
+
+    assert count_queries(6) == count_queries(1)
 
 
 def test_get_report(client: TestClient) -> None:
