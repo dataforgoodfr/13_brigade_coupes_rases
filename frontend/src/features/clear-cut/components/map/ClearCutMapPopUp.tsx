@@ -274,7 +274,11 @@ export function ClearCutMapPopUp({
 					Taille de la coupe :
 					<strong>
 						{" "}
-						<FormattedNumber value={totalAreaHectare} /> HA
+						<FormattedNumber
+							value={totalAreaHectare}
+							maximumFractionDigits={1}
+						/>{" "}
+						ha
 					</strong>
 				</div>
 				{slopeAreaHectare && (

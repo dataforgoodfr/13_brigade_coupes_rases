@@ -7,6 +7,7 @@ import {
 	Users
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { FormattedNumber } from "react-intl"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -171,7 +172,11 @@ export function ReportsTrackingTab() {
 									)}
 								</td>
 								<td className="px-6 py-4 text-sm text-neutral-600">
-									{report.totalAreaHectare?.toFixed(1) || 0} ha
+									<FormattedNumber
+										value={report.totalAreaHectare ?? 0}
+										maximumFractionDigits={1}
+									/>{" "}
+									ha
 								</td>
 								<td className="px-6 py-4 text-right">
 									<div className="flex items-center justify-end gap-1">
