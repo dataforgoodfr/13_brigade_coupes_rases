@@ -1,13 +1,13 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import { isEqual, isUndefined, uniqBy } from "es-toolkit"
-import { HTTPError, type KyInstance } from "ky"
+import { HTTPError, type KyInstance, TimeoutError } from "ky"
 import { useEffect, useRef } from "react"
 
 import type { FiltersRequest } from "@/features/clear-cut/store/filters"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import type { Bounds } from "@/features/clear-cut/store/types"
 import { getMeThunk, selectConnectedMe } from "@/features/user/store/me.slice"
-import { isNetworkError, parseParam } from "@/shared/api/api"
+import { isNetworkError, parseParam, setError } from "@/shared/api/api"
 import {
 	type EtagMismatchError,
 	etagMismatchErrorSchema
@@ -207,7 +207,7 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 
 export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
-	async (filters, { getState, extra: { api } }) => {
+	async (filters, { getState, signal, extra: { api } }) => {
 		const searchParams = new URLSearchParams()
 		for (const filter in filters) {
 			const value = filters[filter as keyof FiltersRequest]
@@ -230,7 +230,8 @@ export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 		try {
 			const result = await api()
 				.get("api/v1/clear-cuts-map/", {
-					searchParams
+					searchParams,
+					signal
 				})
 				.json()
 			const clearCuts = clearCutsResponseSchema.parse(result)
@@ -240,14 +241,20 @@ export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 			) satisfies ClearCutReport[]
 			return { ...clearCuts, previews }
 		} catch (e) {
-			if (isNetworkError(e)) {
+			// A weak network times out: keep what the map already shows rather
+			// than emptying it, along with the reports stored on the device
+			if (isNetworkError(e) || e instanceof TimeoutError) {
 				const forms = formStorage.getValuesFromStorage(
 					clearCutFormVersionsSchema
 				)
 				const reports = forms.map((f) => f.current.report)
+				const displayed = selectClearCuts(getState()).value
 				return {
-					previews: reports,
-					points: {
+					previews: uniqBy(
+						[...(displayed?.previews ?? []), ...reports],
+						(report) => report.id
+					),
+					points: displayed?.points ?? {
 						total: reports.length,
 						content: reports.map((r) => ({
 							count: 1,
@@ -650,8 +657,15 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			getClearCutsThunk,
-			(state) => state.clearCuts
+			(state) => state.clearCuts,
+			{ cases: ["pending", "fulfilled"] }
 		)
+		// A request aborted for a newer map view must not empty the map
+		builder.addCase(getClearCutsThunk.rejected, (state, { meta }) => {
+			if (!meta.aborted) {
+				setError(state.clearCuts, undefined)
+			}
+		})
 		addRequestedContentCases(
 			builder,
 			submitClearCutFormThunk,
@@ -790,12 +804,16 @@ export const useGetClearCuts = () => {
 	const dispatch = useAppDispatch()
 	const { breakpoint } = useBreakpoint()
 	const ref = useRef<NodeJS.Timeout | undefined>(undefined)
+	const request = useRef<{ abort: () => void } | undefined>(undefined)
 	useEffect(() => {
 		clearTimeout(ref.current)
 		if ((breakpoint === "mobile" && filters) || filters?.geoBounds) {
 			// Debounce to avoid multiple calls when dragging, resizing, or zooming the map
 			ref.current = setTimeout(() => {
-				dispatch(getClearCutsThunk(filters))
+				// On a slow network, the answer for a former view could arrive last
+				// and replace the current one
+				request.current?.abort()
+				request.current = dispatch(getClearCutsThunk(filters))
 				clearTimeout(ref.current)
 			}, 100)
 		}
