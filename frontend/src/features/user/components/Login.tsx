@@ -16,7 +16,7 @@ export function Login() {
 						Visualiser les coupes rases abusives
 					</h1>
 					<h2 className="text-neutral-200 font-poppins text-center font-light">
-						Une seule source de données fiable xxx
+						Détectées par satellite, vérifiées sur le terrain
 					</h2>
 				</div>
 			</div>
