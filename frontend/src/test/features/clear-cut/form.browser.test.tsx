@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/dom"
+import { uniq } from "es-toolkit"
 import { HttpResponse, http } from "msw"
 import { beforeEach, describe, expect, it } from "vitest"
 import type { UserEvent } from "vitest/browser"
@@ -46,7 +47,7 @@ import { setStoredToken } from "@/features/user/store/me.slice"
 import { worker } from "@/mocks/browser"
 import { mockClearCutReportResponse } from "@/mocks/clear-cuts"
 import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms"
-import { fakeDepartments } from "@/mocks/referential"
+import { fakeDepartments, fakeEcologicalZonings } from "@/mocks/referential"
 import {
 	addPendingPhoto,
 	listPendingPhotos,
@@ -141,6 +142,16 @@ const setupTest = (
 				break
 			case "report.department.name":
 				expected = "Ain"
+				break
+			case "ecologicalZonings":
+				expected = uniq(
+					reportMock.response.clearCuts.flatMap(
+						(cut) => cut.ecologicalZoningIds
+					)
+				)
+					.map((id) => fakeEcologicalZonings[id])
+					.map((zoning) => `${zoning.name} (${zoning.code})`)
+					.join(", ")
 				break
 			case "report.averageLocation.coordinates.0":
 				expected = "1"
@@ -260,8 +271,12 @@ describe.each(defaultSetup.sections)(
 		} else {
 			// The field form is only served to connected accounts: a visitor sees
 			// the report data, never the volunteer's notes
+			// The zonings come from the report, so they show even without a form
 			itShouldHaveValue(
-				items.filter((item) => item.name.startsWith("report.")),
+				items.filter(
+					(item) =>
+						item.name.startsWith("report.") || item.name === "ecologicalZonings"
+				),
 				section
 			)
 			itShouldHaveDisabledState(items, section, true)

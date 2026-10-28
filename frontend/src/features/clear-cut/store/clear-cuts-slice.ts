@@ -155,6 +155,7 @@ async function loadClearCutFormVersions(
 		formReport = clearCutFormSchema.parse({
 			report: baseReport,
 			reportId: baseReport.id,
+			ecologicalZonings,
 			...computedProperties
 		} as ClearCutForm)
 	}
@@ -164,11 +165,13 @@ async function loadClearCutFormVersions(
 		clearCutFormVersionsSchema
 	)
 
-	// Always use the fresh report from the server (assignment status, userId, etc.)
-	// while keeping user's locally-cached form field edits.
+	// Always use the fresh report from the server (assignment status, userId,
+	// ecological zonings, etc.) while keeping user's locally-cached form field edits.
 	const withFreshReport = (cached: ClearCutForm) => ({
 		...cached,
-		report: formReport.report
+		report: formReport.report,
+		ecologicalZonings,
+		...computedProperties
 	})
 
 	const form = (type: "current" | "original") => {
