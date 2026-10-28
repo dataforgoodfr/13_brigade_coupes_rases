@@ -62,6 +62,18 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		renderConditions: []
 	},
 	{
+		name: "ecologicalZonings",
+		label: "Zonages écologiques",
+		type: "fixed",
+		renderConditions: [],
+		transformValue: ({ value }) => {
+			const zonings = (value as ClearCutFormInput["ecologicalZonings"]) ?? []
+			return zonings.length > 0
+				? zonings.map((zoning) => `${zoning.name} (${zoning.code})`).join(", ")
+				: "Aucun"
+		}
+	},
+	{
 		name: "report.totalAreaHectare",
 		label: "Taille de la coupe",
 		type: "fixed",
