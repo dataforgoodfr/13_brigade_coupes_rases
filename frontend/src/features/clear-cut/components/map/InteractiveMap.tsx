@@ -1,7 +1,7 @@
 import type * as L from "leaflet"
 import type { LatLngExpression, Map as LeafletMap } from "leaflet"
 import { useEffect, useRef } from "react"
-import { MapContainer, TileLayer } from "react-leaflet"
+import { MapContainer, TileLayer, useMapEvents } from "react-leaflet"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { cn } from "@/lib/utils"
@@ -281,6 +281,22 @@ function GeomanControls() {
 const FRANCE_CENTER: LatLngExpression = [46.695554, 2.440236]
 const WHOLE_FRANCE_ZOOM = 6
 
+// The map is unmounted on the other pages ("Mes coupes"…): coming back, it
+// shows the place it was left on rather than the whole of France
+let lastView: { center: LatLngExpression; zoom: number } = {
+	center: FRANCE_CENTER,
+	zoom: WHOLE_FRANCE_ZOOM
+}
+
+function RememberView() {
+	const map = useMapEvents({
+		moveend: () => {
+			lastView = { center: map.getCenter(), zoom: map.getZoom() }
+		}
+	})
+	return null
+}
+
 export function InteractiveMap() {
 	const mapRef = useRef<LeafletMap>(null)
 	const { layout } = useLayout()
@@ -300,14 +316,15 @@ export function InteractiveMap() {
 		<MapContainer
 			ref={mapRef}
 			className={cn("h-full w-full z-0", layout === "map" && "rounded-md")}
-			center={FRANCE_CENTER}
-			zoom={WHOLE_FRANCE_ZOOM}
+			center={lastView.center}
+			zoom={lastView.zoom}
 			scrollWheelZoom
 		>
 			<TileLayer
 				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 			/>
+			<RememberView />
 			<GeomanControls />
 			<ClearCuts />
 		</MapContainer>
