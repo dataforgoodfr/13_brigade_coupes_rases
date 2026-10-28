@@ -42,16 +42,21 @@ export const volunteerMock: MeResponse = {
 	favorites: [],
 	avatarUrl: faker.image.avatar()
 }
-export const mockMe = http.get("*/api/v1/me", async ({ request }) => {
+/** The user a request is sent by, from its access token */
+export const meFromRequest = (request: Request): MeResponse => {
 	const token = request.headers.get("Authorization")
 	if (token?.includes(adminToken)) {
-		return HttpResponse.json(adminMock)
+		return adminMock
 	}
 	if (token?.includes(volunteerAssignedToken)) {
-		return HttpResponse.json(volunteerAssignedMock)
+		return volunteerAssignedMock
 	}
-	return HttpResponse.json(volunteerMock)
-})
+	return volunteerMock
+}
+
+export const mockMe = http.get("*/api/v1/me", async ({ request }) =>
+	HttpResponse.json(meFromRequest(request))
+)
 
 export const mockToken = http.post("*/api/v1/token", async ({ request }) => {
 	const formData = await request.formData()

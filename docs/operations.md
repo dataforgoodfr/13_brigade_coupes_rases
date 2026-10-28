@@ -10,7 +10,7 @@ Avant de publier `vX.Y.Z`, fusionner une pull request qui porte la version `X.Y.
 
 Pour revenir à une version antérieure, lancer le workflow Release à la main (onglet Actions, « Run workflow ») en indiquant le tag à redéployer.
 
-Le Storybook est publié sur GitHub Pages à chaque modification du frontend sur `main`.
+La démo sur données fictives est publiée sur GitHub Pages à chaque modification du frontend sur `main` (`pnpm build:demo`). Elle tourne entièrement dans le navigateur : les appels à l'API sont servis par les mocks MSW, et ce que fait le visiteur n'est gardé que pour sa session.
 
 ## Data pipeline et synchronisation Airtable
 

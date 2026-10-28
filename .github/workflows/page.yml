@@ -1,4 +1,4 @@
-name: Storybook page
+name: Démo GitHub Pages
 
 on:
   push:
@@ -47,13 +47,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
-        run: pnpm build:storybook
+      - name: Build the demo
+        run: pnpm build:demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: "frontend/storybook-static"
+          path: "frontend/dist-demo"
 
       - name: Deploy to GitHub Pages
         id: deployment

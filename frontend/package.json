@@ -26,6 +26,7 @@
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/favicon.svg",
     "storybook": "storybook dev -p 6006",
     "build:storybook": "STORYBOOK=true storybook build",
+    "build:demo": "vite build --mode demo --outDir dist-demo && cp dist-demo/index.html dist-demo/404.html",
     "gen:routes": "tsr generate"
   },
   "dependencies": {

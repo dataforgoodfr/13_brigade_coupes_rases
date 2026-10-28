@@ -22,11 +22,22 @@ import "./index.css"
 import { store } from "./shared/store/store"
 
 async function enableMocking() {
-	if (import.meta.env.MODE !== "mock") {
+	const isDemo = import.meta.env.VITE_DEMO === "true"
+	if (import.meta.env.MODE !== "mock" && !isDemo) {
 		return
 	}
+	if (isDemo) {
+		// The same fake data on every visit, seeded before the mocks build it
+		const { faker, fakerFR } = await import("@faker-js/faker")
+		faker.seed(13)
+		fakerFR.seed(13)
+	}
 	const { worker } = await import("./mocks/browser")
-	return worker.start()
+	return worker.start({
+		serviceWorker: {
+			url: `${import.meta.env.BASE_URL}mockServiceWorker.js`
+		}
+	})
 }
 
 enableMocking().then(() => {

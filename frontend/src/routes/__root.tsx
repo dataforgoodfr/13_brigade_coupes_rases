@@ -11,6 +11,7 @@ import { useReloadPwa } from "@/features/offline/hooks/useReloadPwa"
 import type { AuthContext } from "@/features/user/components/Auth.context"
 import { AppLayout } from "@/shared/components/AppLayout"
 import { AppMobileLayout } from "@/shared/components/AppMobileLayout"
+import { DemoBanner } from "@/shared/components/DemoBanner"
 import { TimeProgress } from "@/shared/components/TimeProgress"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
@@ -55,6 +56,7 @@ function RootComponent() {
 	return referentialStatus === "success" ? (
 		<>
 			<div className="flex flex-col h-[100dvh]">
+				<DemoBanner />
 				<OfflineBanner />
 				<div className="flex-1 min-h-0">
 					<MapProvider>
