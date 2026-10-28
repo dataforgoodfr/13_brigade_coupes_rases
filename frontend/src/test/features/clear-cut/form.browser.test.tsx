@@ -387,7 +387,8 @@ describe("assignment request", () => {
 	const free = { userId: undefined, assignmentRequestedById: undefined }
 
 	describe("when the report is still to validate", () => {
-		defaultSetupServerBeforeEach(setupTest({ ...free, status: "to_validate" }))
+		const setup = setupTest({ ...free, status: "to_validate" })
+		defaultSetupServerBeforeEach(setup)
 		it("lets a volunteer request it", async () => {
 			await openAsVolunteer()
 			expect(
@@ -395,6 +396,37 @@ describe("assignment request", () => {
 					name: "Demander l'attribution"
 				})
 			).not.toHaveLength(0)
+		})
+
+		it("shows the pending request once sent from the bottom of the form", async () => {
+			let requested = false
+			worker.use(
+				http.post("*/api/v1/clear-cuts-reports/:id/request-assignment", () => {
+					requested = true
+					return HttpResponse.json({ message: "OK" })
+				}),
+				http.get("*/api/v1/clear-cuts-reports/:id", () => {
+					if (!requested) return
+					return HttpResponse.json({
+						...setup.reportMock.response,
+						id: "ABC",
+						assignmentRequestedById: volunteerMock.id,
+						assignmentRequestedBy: {
+							login: volunteerMock.login,
+							email: volunteerMock.email
+						}
+					})
+				})
+			)
+			const { user } = await openAsVolunteer()
+			const buttons = await screen.findAllByRole("button", {
+				name: "Demander l'attribution"
+			})
+			// The header one reloads the page; the bottom one did not refresh
+			await user.click(buttons[buttons.length - 1])
+
+			await screen.findByRole("button", { name: "Annuler ma demande" })
+			expect(requestButtons()).toHaveLength(0)
 		})
 	})
 

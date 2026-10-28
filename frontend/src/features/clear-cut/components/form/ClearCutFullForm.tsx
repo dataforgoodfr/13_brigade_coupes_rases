@@ -23,6 +23,8 @@ import {
 	clearCutFormSchema
 } from "@/features/clear-cut/store/clear-cuts"
 import {
+	getClearCutFormThunk,
+	getClearCutsThunk,
 	persistClearCutCurrentForm,
 	requestAssignReportThunk,
 	selectAssignation,
@@ -30,6 +32,7 @@ import {
 	submitClearCutFormThunk,
 	volunteerValidateThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
+import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
@@ -102,8 +105,15 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 		user?.role === "volunteer" &&
 		current.report.assignmentRequestedById === user.id
 
+	const filters = useAppSelector(selectFiltersRequest)
 	const handleRequestAssignment = () =>
-		singleFlight(() => dispatch(requestAssignReportThunk(current.report.id)))
+		singleFlight(async () => {
+			const action = await dispatch(requestAssignReportThunk(current.report.id))
+			if (!requestAssignReportThunk.fulfilled.match(action)) return
+			// The report now shows the pending request, and its form can be filled
+			dispatch(getClearCutFormThunk({ id: current.report.id }))
+			if (filters) dispatch(getClearCutsThunk(filters))
+		})
 
 	const form = useForm({
 		resolver: zodResolver(clearCutFormSchema),
