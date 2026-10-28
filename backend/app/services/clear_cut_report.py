@@ -20,6 +20,7 @@ from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSche
 from app.schemas.rule import AllRules
 from app.services.city import get_city_by_zip_code
 from app.services.ecological_zoning import find_or_add_ecological_zonings
+from app.services.idempotency import commit_once, request_fingerprint
 from app.services.rules import list_rules
 
 logger = getLogger(__name__)
@@ -232,6 +233,13 @@ def volunteer_create_clear_cut_report(
 
     from shapely.geometry import Polygon, shape
 
+    fingerprint = request_fingerprint(
+        "volunteer-create", volunteer.id, polygon_geojson, city_zip_code
+    )
+    existing = find_report_by_fingerprint(db, fingerprint)
+    if existing is not None:
+        return existing
+
     geom_type = polygon_geojson.get("type")
 
     # Support Polygon or MultiPolygon from Geoman
@@ -281,12 +289,18 @@ def volunteer_create_clear_cut_report(
         total_area_hectare=area_ha,
         last_cut_date=today,
         first_cut_date=today,
+        request_fingerprint=fingerprint,
     )
 
-    db.add(report)
-    db.commit()
-    db.refresh(report)
-    return report
+    return commit_once(db, report, lambda: find_report_by_fingerprint(db, fingerprint))
+
+
+def find_report_by_fingerprint(db: Session, fingerprint: str) -> ClearCutReport | None:
+    return (
+        db.query(ClearCutReport)
+        .filter(ClearCutReport.request_fingerprint == fingerprint)
+        .one_or_none()
+    )
 
 
 # Statuses that only make sense with a volunteer holding the report

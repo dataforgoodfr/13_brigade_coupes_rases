@@ -12,6 +12,7 @@ from app.schemas.clear_cut_form import (
     clear_cut_form_response_from_clear_cut_form,
 )
 from app.schemas.hateoas import PaginationMetadataSchema, PaginationResponseSchema
+from app.services.idempotency import commit_once, request_fingerprint
 
 logger = getLogger(__name__)
 
@@ -46,6 +47,15 @@ def add_clear_cut_form_entry(
             type="REPORT_NOT_FOUND",
             detail="Clear cut report not found",
         )
+    # A copy of a request already saved returns the version it created, before
+    # the ETag check that this version now fails
+    fingerprint = request_fingerprint(
+        "form", editor.id, report_id, etag, new_version.model_dump(mode="json")
+    )
+    existing = find_form_by_fingerprint(db, fingerprint)
+    if existing is not None:
+        return existing
+
     # The volunteer in charge fills the form; while their assignment request is
     # pending they may already draft it, as the frontend lets them do.
     is_in_charge = report.user_id == editor.id or (
@@ -130,10 +140,20 @@ def add_clear_cut_form_entry(
             )
             new_clear_cut_form_entry.request_engaged = last_form_entry.request_engaged
 
-    db.add(new_clear_cut_form_entry)
-    db.commit()
-    db.refresh(new_clear_cut_form_entry)
-    return new_clear_cut_form_entry
+    new_clear_cut_form_entry.request_fingerprint = fingerprint
+    return commit_once(
+        db,
+        new_clear_cut_form_entry,
+        lambda: find_form_by_fingerprint(db, fingerprint),
+    )
+
+
+def find_form_by_fingerprint(db: Session, fingerprint: str) -> ClearCutForm | None:
+    return (
+        db.query(ClearCutForm)
+        .filter(ClearCutForm.request_fingerprint == fingerprint)
+        .one_or_none()
+    )
 
 
 def find_clear_cut_form_by_report_id(

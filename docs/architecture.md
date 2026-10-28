@@ -86,6 +86,7 @@ erDiagram
         datetime first_cut_date
         datetime last_cut_date
         json statellite_images
+        string request_fingerprint UK
         datetime reported_at
         datetime created_at
         datetime updated_at
@@ -115,6 +116,7 @@ erDiagram
         int report_id FK
         int editor_id FK
         datetime created_at
+        string request_fingerprint UK
         datetime inspection_date
         string weather
         string forest
