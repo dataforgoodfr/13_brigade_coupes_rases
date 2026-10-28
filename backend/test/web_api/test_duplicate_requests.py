@@ -31,7 +31,8 @@ def volunteer_create(
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == status.HTTP_201_CREATED
-    return response.json()
+    created: dict[str, str] = response.json()
+    return created
 
 
 def test_resent_report_is_created_once(client: TestClient, db: Session) -> None:
