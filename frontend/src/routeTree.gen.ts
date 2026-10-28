@@ -12,6 +12,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ClearCutsRouteImport } from './routes/_clear-cuts'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdministrationRouteImport } from './routes/administration'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
@@ -34,6 +35,11 @@ const IndexLazyRoute = IndexLazyRouteImport.update({
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 const ClearCutsRoute = ClearCutsRouteImport.update({
   id: '/_clear-cuts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdministrationRoute = AdministrationRouteImport.update({
@@ -87,6 +93,7 @@ const ClearCutsClearCutsClearCutIdLazyRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/about': typeof AboutRoute
   '/administration': typeof AdministrationRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/about': typeof AboutRoute
   '/administration': typeof AdministrationRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
   '/_clear-cuts': typeof ClearCutsRouteWithChildren
+  '/about': typeof AboutRoute
   '/administration': typeof AdministrationRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/administration'
     | '/forgot-password'
     | '/login'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/administration'
     | '/forgot-password'
     | '/login'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_clear-cuts'
+    | '/about'
     | '/administration'
     | '/forgot-password'
     | '/login'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   ClearCutsRoute: typeof ClearCutsRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AdministrationRoute: typeof AdministrationRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -182,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof ClearCutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/administration': {
@@ -260,6 +280,7 @@ const ClearCutsRouteWithChildren = ClearCutsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   ClearCutsRoute: ClearCutsRouteWithChildren,
+  AboutRoute: AboutRoute,
   AdministrationRoute: AdministrationRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,

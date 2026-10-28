@@ -5,6 +5,8 @@ import { defineConfig, type PluginOption, type UserConfigFnObject } from "vite"
 import { VitePWA, type VitePWAOptions } from "vite-plugin-pwa"
 import { reactClickToComponent } from "vite-plugin-react-click-to-component"
 
+import { version } from "./package.json"
+
 type RuntimeCaching = NonNullable<
 	VitePWAOptions["workbox"]["runtimeCaching"]
 >[number]
@@ -41,6 +43,8 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 			}
 		},
 		build: { sourcemap: true },
+		// Shown on the "À propos" page, to tell which version a phone runs
+		define: { __APP_VERSION__: JSON.stringify(version) },
 		resolve: { tsconfigPaths: true },
 		plugins: [
 			VitePWA({

@@ -159,6 +159,13 @@ export function MyCuts() {
 					})}
 				</div>
 			)}
+			{/* The phone navigation bar has no room left for it */}
+			<Link
+				to="/about"
+				className="sm:hidden mt-10 self-center text-sm text-neutral-500 hover:underline"
+			>
+				À propos de l'application
+			</Link>
 		</div>
 	)
 }
