@@ -19,6 +19,7 @@ import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { ConfirmButton } from "@/shared/components/ConfirmDialog"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
@@ -100,6 +101,7 @@ export function ClearCutMapPopUp({
 	const map = useMap()
 	const navigate = useNavigate()
 	const popupRef = useRef<L.Popup>(null)
+	const { breakpoint } = useBreakpoint()
 
 	const ecological_zonings = useMemo(() => {
 		const uniqNames = new Set(
@@ -223,7 +225,10 @@ export function ClearCutMapPopUp({
 			ref={popupRef}
 			closeButton={false}
 			maxWidth={280}
-			autoPan={false}
+			// A phone shows the popup alone: it must fit the screen, below the
+			// search bar. A computer keeps its map view.
+			autoPan={breakpoint === "mobile"}
+			autoPanPaddingTopLeft={[16, 120]}
 			eventHandlers={{ add: disablePopupPropagation }}
 		>
 			<div className="flex justify-between items-center gap-2 mb-3 w-full font-inter">

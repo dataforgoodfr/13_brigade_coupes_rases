@@ -20,6 +20,7 @@ import { updateClearCutGeometryThunk } from "@/features/clear-cut/store/clear-cu
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status"
 import { useToast } from "@/hooks/use-toast"
 import { simplifyMultiPolygon } from "@/shared/geometry"
+import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch } from "@/shared/hooks/store"
 
 /**
@@ -71,6 +72,16 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 	const ref = useRef<L.FeatureGroup>(null)
 	const location = useLocation()
 	const navigateToDetail = useNavigateToClearCut(report.id)
+	const { breakpoint } = useBreakpoint()
+	// On a phone the report covers the map: a tap shows the popup summary
+	// first, whose button opens the report
+	const openDetails = () => {
+		if (breakpoint === "mobile") {
+			setFocusedClearCutId(report.id)
+		} else {
+			navigateToDetail()
+		}
+	}
 	const dispatch = useAppDispatch()
 	const { toast } = useToast()
 	const [isSaving, setIsSaving] = useState(false)
@@ -213,7 +224,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 					},
 					click: () => {
 						if (isEditingRef.current) return
-						navigateToDetail()
+						openDetails()
 					},
 					popupopen: () => {
 						setFocusedClearCutId(report.id)
@@ -232,7 +243,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 					interactive
 					keyboard={false}
 					eventHandlers={{
-						click: () => navigateToDetail()
+						click: openDetails
 					}}
 				/>
 			)}
