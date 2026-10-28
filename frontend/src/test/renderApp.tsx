@@ -78,37 +78,38 @@ export async function renderApp<R extends Route = Route>(options: Options<R>) {
 		history,
 		context: { auth: undefined as unknown as AuthContext }
 	})
-	function TestApp() {
-		return (
-			<AuthProvider>
-				<MapProvider>
-					<InnerTestApp />
-				</MapProvider>
-			</AuthProvider>
-		)
-	}
-	function InnerTestApp() {
-		const auth = useAuth()
-		return <RouterProvider router={router} context={{ auth }} />
-	}
-
-	const Wrapper = () => (
-		<IntlProvider locale="fr">
-			<Provider store={store}>
-				<TestApp />
-			</Provider>
-		</IntlProvider>
-	)
+	const app = <TestApp router={router} store={store} />
 	// render() est asynchrone depuis vitest-browser-react 2 et ses méthodes
 	// sont sur le prototype : on les expose explicitement.
-	const renderResult = await render(<Wrapper />, renderOptions)
+	const renderResult = await render(app, renderOptions)
 	return {
 		...renderResult,
 		unmount: () => renderResult.unmount(),
-		rerender: () => renderResult.rerender(<Wrapper />),
+		rerender: () => renderResult.rerender(app),
 		store,
 		page,
 		router,
 		user: userEvent.setup()
 	}
+}
+
+// At module level: components defined inside renderApp would be new component
+// types on every call
+function TestApp({ router, store }: { router: Router; store: AppStore }) {
+	return (
+		<IntlProvider locale="fr">
+			<Provider store={store}>
+				<AuthProvider>
+					<MapProvider>
+						<RoutedApp router={router} />
+					</MapProvider>
+				</AuthProvider>
+			</Provider>
+		</IntlProvider>
+	)
+}
+
+function RoutedApp({ router }: { router: Router }) {
+	const auth = useAuth()
+	return <RouterProvider router={router} context={{ auth }} />
 }
