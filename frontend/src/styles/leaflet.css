@@ -47,3 +47,10 @@
 .clear-cut-info-icon:hover {
 	background: #f3f4f6;
 }
+
+/* While a new cut is drawn, taps on existing cuts must reach the map
+   (more specific than Leaflet's `.leaflet-pane > svg path.leaflet-interactive`). */
+.drawing-clear-cut .leaflet-pane > svg path.clear-cut-zone,
+.drawing-clear-cut .clear-cut-info-icon {
+	pointer-events: none;
+}

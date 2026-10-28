@@ -56,6 +56,10 @@ function toMultiPolygon(geojson: any): MultiPolygon {
 	return { type: "MultiPolygon", coordinates }
 }
 
+// Leaflet hands the GeoJSON options down to each path it draws, className
+// included, but its typings leave className out of GeoJSONOptions.
+const ZONE_OPTIONS = { className: "clear-cut-zone" } as L.GeoJSONOptions
+
 export function ClearCutPreview({ report, clearCut }: Props) {
 	const {
 		map,
@@ -196,6 +200,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				key={clearCut.id}
 				ref={ref as RefObject<L.GeoJSON>}
 				data={clearCut.boundary}
+				{...ZONE_OPTIONS}
 				style={{
 					color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[report.status]})`,
 					weight,

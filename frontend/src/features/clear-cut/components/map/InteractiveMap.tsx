@@ -107,6 +107,24 @@ function GeomanControls() {
 		}
 	}, [map, user])
 
+	// While drawing, existing cuts must let taps through to the map so that a
+	// vertex can be placed inside them (their popup would otherwise stop the click)
+	useEffect(() => {
+		if (!map) return
+
+		const container = map.getContainer()
+		const handleDrawModeToggle = ({ enabled }: { enabled: boolean }) => {
+			container.classList.toggle("drawing-clear-cut", enabled)
+		}
+
+		map.on("pm:globaldrawmodetoggled", handleDrawModeToggle)
+
+		return () => {
+			map.off("pm:globaldrawmodetoggled", handleDrawModeToggle)
+			container.classList.remove("drawing-clear-cut")
+		}
+	}, [map])
+
 	useEffect(() => {
 		if (citySearch.length < 2) {
 			setCityResults([])
