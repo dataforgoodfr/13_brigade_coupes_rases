@@ -196,6 +196,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 				key={clearCut.id}
 				ref={ref as RefObject<L.GeoJSON>}
 				data={clearCut.boundary}
+				className="clear-cut-zone"
 				style={{
 					color: `var(--color-${CLEAR_CUTTING_STATUS_COLORS[report.status]})`,
 					weight,
