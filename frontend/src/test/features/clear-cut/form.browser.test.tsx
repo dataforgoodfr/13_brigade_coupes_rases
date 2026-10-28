@@ -683,6 +683,46 @@ describe("photos taken without network", () => {
 	})
 })
 
+describe("form sent for validation", () => {
+	const lockedNotice = /Fiche envoyée en validation/
+	const renderForm = async (connectedUser: Me) =>
+		renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: connectedUser
+		})
+
+	describe("for its volunteer", () => {
+		defaultSetupServerBeforeEach(
+			setupTest({
+				affectedUser: volunteerMock,
+				status: "waiting_for_validation"
+			})
+		)
+		it("says why it can no longer be edited", async () => {
+			await renderForm(volunteerMock)
+			expect(await screen.findByText(lockedNotice)).toBeInTheDocument()
+			expect(screen.getByRole("button", { name: "Sauvegarder" })).toBeDisabled()
+		})
+	})
+
+	describe("for an admin", () => {
+		defaultSetupServerBeforeEach(
+			setupTest({
+				affectedUser: volunteerMock,
+				status: "waiting_for_validation"
+			})
+		)
+		it("stays editable without the notice", async () => {
+			await renderForm(adminMock)
+			expect(
+				await screen.findByRole("button", { name: "Sauvegarder" })
+			).toBeEnabled()
+			expect(screen.queryByText(lockedNotice)).not.toBeInTheDocument()
+		})
+	})
+})
+
 async function openAccordion(section: SectionForm, user: UserEvent) {
 	const accordionButton = await screen.findByText(section.name, {
 		selector: "button"

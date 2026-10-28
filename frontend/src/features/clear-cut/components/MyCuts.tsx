@@ -9,6 +9,7 @@ import {
 	getMyAssignedReportsThunk,
 	selectMyAssignedReports
 } from "@/features/clear-cut/store/clear-cuts-slice"
+import { CLEAR_CUTTING_STATUS_TRANSLATIONS } from "@/features/clear-cut/store/status"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { IconButton } from "@/shared/components/button/Button"
 import { TimeProgress } from "@/shared/components/TimeProgress"
@@ -145,7 +146,7 @@ export function MyCuts() {
 										<span className="font-medium text-neutral-900">
 											Statut :
 										</span>{" "}
-										{report.status === "to_validate" ? "À valider" : "En cours"}
+										{CLEAR_CUTTING_STATUS_TRANSLATIONS[report.status]}
 									</p>
 								</div>
 
