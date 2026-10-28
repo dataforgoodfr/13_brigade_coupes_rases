@@ -147,9 +147,10 @@ export function ClearCuts() {
 
 	const dispatch = useAppDispatch()
 
+	// The map may come back zoomed in on a former view (see InteractiveMap)
 	useEffect(() => {
-		dispatch(setWithPoints(true))
-	}, [dispatch])
+		dispatch(setWithPoints(map.getZoom() <= DISPLAY_PREVIEW_ZOOM_LEVEL))
+	}, [dispatch, map])
 
 	const { value } = useAppSelector(selectClearCuts)
 
