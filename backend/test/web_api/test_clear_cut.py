@@ -180,6 +180,20 @@ def test_get_report(client: TestClient) -> None:
     assert data["id"] == "1"
 
 
+def test_list_clear_cuts_of_a_report(client: TestClient, db: Session) -> None:
+    report = new_clear_cut_report()
+    db.add(report)
+    db.commit()
+    cut_ids = {str(cut.id) for cut in report.clear_cuts}
+
+    response = client.get(f"/api/v1/clear-cuts-reports/{report.id}/clear-cuts")
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["metadata"]["totalCount"] == len(cut_ids)
+    assert {cut["id"] for cut in data["content"]} == cut_ids
+
+
 def test_volunteer_cannot_take_a_free_report_without_approval(
     db: Session, client: TestClient
 ) -> None:

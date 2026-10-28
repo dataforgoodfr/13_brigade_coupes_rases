@@ -4,7 +4,7 @@ from datetime import datetime
 from geoalchemy2 import Geography
 from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
 from shapely.geometry import shape
-from sqlalchemy import Row, case, cast, func, update
+from sqlalchemy import ColumnElement, Row, case, cast, func, update
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import RowReturningQuery
 
@@ -141,14 +141,16 @@ def update_clear_cut_geometry(
 
 
 def paginated_clear_cuts_query(
-    db: Session, page: int = 0, size: int = 10
+    db: Session, page: int = 0, size: int = 10, *criteria: ColumnElement[bool]
 ) -> RowReturningQuery[ClearCut, str, str]:
+    # Filters must come before OFFSET/LIMIT: SQLAlchemy refuses them after.
     return (
         db.query(
             ClearCut,
             ST_AsGeoJSON(ClearCut.boundary),
             ST_AsGeoJSON(ClearCut.location),
         )
+        .filter(*criteria)
         .offset(page * size)
         .limit(size)
     )
@@ -188,11 +190,9 @@ def find_clear_cuts(
 def find_clearcuts_by_report(
     db: Session, report_id: int, url: str, page: int = 0, size: int = 10
 ) -> PaginationResponseSchema[ClearCutResponseSchema]:
-    clear_cuts = (
-        paginated_clear_cuts_query(db, page, size)
-        .filter(ClearCut.report_id == report_id)
-        .all()
-    )
+    clear_cuts = paginated_clear_cuts_query(
+        db, page, size, ClearCut.report_id == report_id
+    ).all()
     clear_cuts_count = (
         db.query(ClearCut.id).filter(ClearCut.report_id == report_id).count()
     )
