@@ -158,6 +158,19 @@ def test_report_list_query_count_does_not_grow_with_the_page(
     assert count_queries(6) == count_queries(1)
 
 
+def test_report_list_is_compressed_for_clients_that_accept_it(
+    client: TestClient,
+) -> None:
+    path = "/api/v1/clear-cuts-reports/"
+    compressed = client.get(path, headers={"Accept-Encoding": "gzip"})
+    plain = client.get(path, headers={"Accept-Encoding": "identity"})
+
+    assert compressed.headers["content-encoding"] == "gzip"
+    assert "content-encoding" not in plain.headers
+    assert compressed.json() == plain.json()
+    assert compressed.num_bytes_downloaded < plain.num_bytes_downloaded / 3
+
+
 def test_get_report(client: TestClient) -> None:
     response = client.get(
         "/api/v1/clear-cuts-reports/1",

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.config import settings
 from app.routes import (
@@ -37,6 +38,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["ETag", "Location"],
 )
+# Lists carry the full outline of every clear cut: GeoJSON compresses well,
+# which matters on a phone network. Images are excluded by default.
+app.add_middleware(GZipMiddleware)
 
 # Include routes
 app.include_router(cities.router)
