@@ -383,6 +383,11 @@ class ClearCutReport(Base):
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
     statellite_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    # Fingerprint of the request that created a volunteer-drawn report, see
+    # services/idempotency.py
+    request_fingerprint: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True
+    )
     rules = relationship(
         "Rules",
         secondary=rules_clear_cut_reports,
@@ -422,6 +427,11 @@ class ClearCutForm(Base):
     editor: Mapped[User] = relationship(back_populates="forms")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now
+    )
+    # Fingerprint of the request that created this version, see
+    # services/idempotency.py
+    request_fingerprint: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True
     )
 
     # Ground datas
