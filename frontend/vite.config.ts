@@ -32,7 +32,10 @@ function cacheTiles(
 	}
 }
 export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
+	const isDemo = mode === "demo"
 	return {
+		// The demo is served from the repository's GitHub Pages
+		base: isDemo ? "/13_brigade_coupes_rases/" : "/",
 		preview: {
 			port: 8000
 		},
@@ -48,6 +51,9 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 		resolve: { tsconfigPaths: true },
 		plugins: [
 			VitePWA({
+				// The demo's requests are answered by the mock service worker,
+				// which cannot share the page with the offline one
+				disable: isDemo,
 				registerType: "prompt",
 				injectRegister: false,
 				workbox: {

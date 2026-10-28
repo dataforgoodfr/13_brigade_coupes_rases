@@ -305,7 +305,7 @@ Tests : `test/unit/` sans base, le reste avec la base `test` migrée (fixture `d
 
 Convention d'état : chaque appel asynchrone est un `createAppAsyncThunk` et son résultat un `RequestedContent<T>` (`{ status: "idle" | "pending" | "success" | "error", value?, error? }`) branché sur le slice par `addRequestedContentCases`. Les composants lisent l'état par des sélecteurs et affichent selon `status` ; pas d'appel HTTP hors des thunks.
 
-Tests : `*.test.ts` (Vitest, logique pure) et `*.browser.test.tsx` (Vitest browser mode, Playwright/Chromium, composants sur MSW). Storybook publie les composants sur GitHub Pages.
+Tests : `*.test.ts` (Vitest, logique pure) et `*.browser.test.tsx` (Vitest browser mode, Playwright/Chromium, composants sur MSW). Une démo de l'application sur données fictives (`pnpm build:demo`, mocks MSW de `src/mocks/`) est publiée sur GitHub Pages.
 
 ## Data pipeline
 

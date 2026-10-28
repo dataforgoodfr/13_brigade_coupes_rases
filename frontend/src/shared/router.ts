@@ -8,6 +8,7 @@ export type Routes = keyof FileRoutesByTo
 // Create a new router instance
 export const router = createRouter({
 	routeTree,
+	basepath: import.meta.env.BASE_URL,
 	context: { auth: undefined as unknown as AuthContext }
 })
 export type Router = typeof router

@@ -1,4 +1,4 @@
-import { faker } from "@faker-js/faker"
+import { fakerFR as faker } from "@faker-js/faker"
 import { HttpResponse, http } from "msw"
 
 import {
@@ -25,13 +25,14 @@ export const createClearCutResponseMock = (
 	override: Partial<ClearCutResponse> = {},
 	options: ClearCutResponseMockOptions = {}
 ): ClearCutResponse => {
-	const startDate = faker.date.anytime()
+	// Alerts reach the tool a few weeks to a few months after the cut
+	const startDate = faker.date.past({ years: 2 })
 	const location = override.location ?? franceRandomPointMock()
-	const endDate = new Date(startDate)
-	endDate.setMonth(startDate.getMonth() + faker.number.int({ min: 1, max: 12 }))
+	const endDate = faker.date.between({ from: startDate, to: Date.now() })
 	return {
 		id: faker.string.uuid(),
-		boundary: randomMultiPolygonFromLocation(location.coordinates, 3.5, 7),
+		// About 12 ha, the size of a typical clear cut
+		boundary: randomMultiPolygonFromLocation(location.coordinates, 0.2, 7),
 		ecologicalZoningIds: faker.helpers.arrayElements(
 			Object.keys(fakeEcologicalZonings),
 			options.ecologicalZoningsCount
@@ -50,8 +51,9 @@ export const createClearCutReportResponseBaseMock = (
 	override: Partial<ClearCutReportResponse> = {},
 	options: ClearCutReportResponseMockOptions = {}
 ): ClearCutReportResponse => {
-	const date = faker.date.anytime()
+	const date = faker.date.recent({ days: 60 })
 	const randomLocation = franceRandomPointMock()
+	const forest = forestOf(override.averageLocation ?? randomLocation)
 	const clear_cuts = [
 		...range<ClearCutResponse>(options.clearCutsCount ?? 1, () =>
 			createClearCutResponseMock(
@@ -71,9 +73,8 @@ export const createClearCutReportResponseBaseMock = (
 		id: faker.string.uuid(),
 		averageLocation: override.averageLocation ?? randomLocation,
 		name: faker.animal.dog(),
-		comment: faker.lorem.paragraph(),
-		departmentId: faker.helpers.arrayElement(Object.keys(fakeDepartments)),
-		city: faker.location.city(),
+		departmentId: departmentIdOf(forest.department),
+		city: faker.helpers.arrayElement(forest.cities),
 		createdAt: faker.date.past().toJSON().split("T")[0],
 		slopeAreaHectare: faker.number.float({ min: 0, max: total_area_hectare }),
 		status: faker.helpers.arrayElement(CLEAR_CUTTING_STATUSES),
@@ -107,19 +108,88 @@ export const createClearCutReportResponseBaseMock = (
 	}
 }
 
-const franceRandomPointMock = (): Point => ({
-	type: "Point",
-	coordinates: [
-		faker.location.longitude({
-			min: -0.3899356021470268,
-			max: 5.666435865557435
-		}),
-		faker.location.latitude({
-			min: 43.883918307385926,
-			max: 49.33292664908802
-		})
-	]
-})
+type Forest = {
+	center: [number, number]
+	department: string
+	cities: string[]
+}
+
+/** Large French forests ([longitude, latitude]) where clear cuts are found */
+export const FORESTS: Forest[] = [
+	{
+		center: [-0.9, 44.2],
+		department: "Landes",
+		cities: ["Mimizan", "Sabres", "Pissos", "Labouheyre"]
+	},
+	{
+		center: [6.9, 48.2],
+		department: "Vosges",
+		cities: ["Gérardmer", "Bruyères", "Saint-Dié-des-Vosges"]
+	},
+	{
+		center: [4.0, 47.15],
+		department: "Nièvre",
+		cities: ["Château-Chinon", "Montsauche-les-Settons", "Lormes"]
+	},
+	{
+		center: [2.0, 45.6],
+		department: "Corrèze",
+		cities: ["Meymac", "Peyrelevade", "Bugeat"]
+	},
+	{
+		center: [3.5, 44.6],
+		department: "Lozère",
+		cities: ["Le Malzieu-Ville", "Langogne", "Châteauneuf-de-Randon"]
+	},
+	{
+		center: [6.0, 46.7],
+		department: "Jura",
+		cities: ["Champagnole", "Morez", "Nozeroy"]
+	},
+	{
+		center: [1.9, 47.5],
+		department: "Loir-et-Cher",
+		cities: ["Lamotte-Beuvron", "Salbris", "Neung-sur-Beuvron"]
+	},
+	{
+		center: [4.7, 49.85],
+		department: "Ardennes",
+		cities: ["Revin", "Monthermé", "Fumay"]
+	},
+	{
+		center: [2.3, 43.45],
+		department: "Tarn",
+		cities: ["Mazamet", "Labruguière", "Arfons"]
+	},
+	{
+		center: [2.1, 47.95],
+		department: "Loiret",
+		cities: ["Lorris", "Ingrannes", "Châteauneuf-sur-Loire"]
+	}
+]
+
+const franceRandomPointMock = (): Point => {
+	const [longitude, latitude] = faker.helpers.arrayElement(FORESTS).center
+	return {
+		type: "Point",
+		coordinates: [
+			longitude + faker.number.float({ min: -0.25, max: 0.25 }),
+			latitude + faker.number.float({ min: -0.18, max: 0.18 })
+		]
+	}
+}
+
+/** The forest closest to the point */
+const forestOf = ({ coordinates: [longitude, latitude] }: Point) => {
+	const distance = ({ center }: Forest) =>
+		(center[0] - longitude) ** 2 + (center[1] - latitude) ** 2
+	return FORESTS.reduce((a, b) => (distance(b) < distance(a) ? b : a))
+}
+
+const departmentIdOf = (name: string) =>
+	Object.entries(fakeDepartments).find(([, d]) => d.name === name)?.[0] ??
+	faker.helpers.arrayElement(Object.keys(fakeDepartments))
+
 const randomMultiPolygonFromLocation = (
 	point: [number, number],
 	radius = 10,
@@ -155,7 +225,7 @@ const randomMultiPolygonFromLocation = (
 
 const randomPoints = range<Point>(100, franceRandomPointMock)
 
-const clearCutPreviews = randomPoints.map((center) =>
+export const clearCutPreviews = randomPoints.map((center) =>
 	createClearCutReportResponseBaseMock({ averageLocation: center })
 )
 

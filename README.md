@@ -15,7 +15,7 @@ Développé à l'origine par des bénévoles de [Data For Good](https://dataforg
 |---|---|
 | Application | <https://app-ab2f14d8-10a9-454d-9a7d-92ab22a54110.cleverapps.io> |
 | API | <https://app-5292f305-0563-4fd7-b50a-56f6caf806db.cleverapps.io> (Swagger sur `/docs` en local ; en production seulement si `API_DOCS_ENABLED` est défini) |
-| Storybook des composants | <https://dataforgoodfr.github.io/13_brigade_coupes_rases/> |
+| Démo sur données fictives | <https://dataforgoodfr.github.io/13_brigade_coupes_rases/> |
 | Suivi des tâches, échanges | [issues GitHub](https://github.com/dataforgoodfr/13_brigade_coupes_rases/issues) |
 
 ## Architecture

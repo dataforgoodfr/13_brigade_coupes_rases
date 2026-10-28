@@ -36,6 +36,16 @@ export const fakeEcologicalZonings: EcologicalZoningResponse = {
 		code: "FR5300050"
 	}
 }
+/** INSEE code of the department at this index of the list below, which
+ * follows the INSEE order */
+function departmentCode(index: number) {
+	if (index < 19) return String(index + 1).padStart(2, "0")
+	if (index < 28) return String(index + 2)
+	if (index < 30) return index === 28 ? "2A" : "2B"
+	if (index < 96) return String(index)
+	return ["971", "972", "973", "974", "976"][index - 96]
+}
+
 export const fakeDepartments: DepartmentResponse = [
 	"Ain",
 	"Aisne",
@@ -138,8 +148,8 @@ export const fakeDepartments: DepartmentResponse = [
 	"Guyane",
 	"La Réunion",
 	"Mayotte"
-].reduce<DepartmentResponse>((acc, department) => {
-	acc[faker.string.uuid()] = { name: department, code: faker.string.numeric(2) }
+].reduce<DepartmentResponse>((acc, department, index) => {
+	acc[faker.string.uuid()] = { name: department, code: departmentCode(index) }
 	return acc
 }, {})
 
