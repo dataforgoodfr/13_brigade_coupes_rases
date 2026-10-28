@@ -82,7 +82,8 @@ const setupTest = (
 			departmentId: Object.keys(fakeDepartments)[0],
 			updatedAt: "2026-03-13",
 			slopeAreaHectare: 0.54556,
-			totalAreaHectare: 1,
+			// Three decimals would read as thousands: "3,615 ha"
+			totalAreaHectare: 3.615,
 			averageLocation: { coordinates: [1, 2], type: "Point" },
 			...report
 		},
@@ -136,7 +137,7 @@ const setupTest = (
 				expected = "0,55 ha"
 				break
 			case "report.totalAreaHectare":
-				expected = `${expected} ha`
+				expected = "3,6 ha"
 				break
 			case "report.department.name":
 				expected = "Ain"

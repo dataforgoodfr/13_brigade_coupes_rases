@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { Check, ChevronRight, FileWarning, UserIcon, X } from "lucide-react"
 import { useEffect } from "react"
+import { FormattedNumber } from "react-intl"
 
 import { Button } from "@/components/ui/button"
 import { UpdateUserDialog } from "@/features/admin/components/users-list/UpdateUserDialog"
@@ -106,7 +107,11 @@ export function ActionRequiredTab() {
 										</h3>
 										<p className="text-xs text-neutral-500">
 											Dép. {report.department.code} ·{" "}
-											{report.totalAreaHectare?.toFixed(1) || 0} ha
+											<FormattedNumber
+												value={report.totalAreaHectare ?? 0}
+												maximumFractionDigits={1}
+											/>{" "}
+											ha
 										</p>
 									</div>
 									<div className="bg-orange-400 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase ml-2 shrink-0">
@@ -246,7 +251,11 @@ export function ActionRequiredTab() {
 										<span className="font-medium text-neutral-900">
 											Surface :
 										</span>{" "}
-										{report.totalAreaHectare?.toFixed(1) || 0} ha
+										<FormattedNumber
+											value={report.totalAreaHectare ?? 0}
+											maximumFractionDigits={1}
+										/>{" "}
+										ha
 									</p>
 									<p className="text-sm text-neutral-600">
 										<span className="font-medium text-neutral-900">

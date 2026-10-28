@@ -69,7 +69,8 @@ export const generalInfoValue: SectionFormItem<ClearCutFormInput>[] = [
 		transformValue: ({ value }) =>
 			value !== undefined ? (
 				<>
-					<FormattedNumber value={value as number} /> ha
+					<FormattedNumber value={value as number} maximumFractionDigits={1} />{" "}
+					ha
 				</>
 			) : undefined
 	},

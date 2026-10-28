@@ -319,7 +319,8 @@ export function AccordionHeader({
 				</div>
 				{areaHectare !== undefined && (
 					<p>
-						Superficie de la coupe : <FormattedNumber value={areaHectare} /> ha
+						Superficie de la coupe :{" "}
+						<FormattedNumber value={areaHectare} maximumFractionDigits={1} /> ha
 					</p>
 				)}
 				{ecologicalZonings && ecologicalZonings.length > 0 && (

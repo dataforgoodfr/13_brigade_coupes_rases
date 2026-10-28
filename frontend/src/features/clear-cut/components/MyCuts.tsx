@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router"
 import { ChevronRight, Clock, FileWarning, LogOut } from "lucide-react"
 import { useEffect } from "react"
+import { FormattedNumber } from "react-intl"
 
 import { Button } from "@/components/ui/button"
 import { PendingFormBadge } from "@/features/clear-cut/components/PendingFormBadge"
@@ -128,7 +129,11 @@ export function MyCuts() {
 										<span className="font-medium text-neutral-900">
 											Surface :
 										</span>{" "}
-										{report.totalAreaHectare.toFixed(1)} ha
+										<FormattedNumber
+											value={report.totalAreaHectare}
+											maximumFractionDigits={1}
+										/>{" "}
+										ha
 									</p>
 									<p className="text-sm text-neutral-600">
 										<span className="font-medium text-neutral-900">
