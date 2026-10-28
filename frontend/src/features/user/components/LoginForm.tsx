@@ -152,6 +152,11 @@ export function LoginForm() {
 					S'inscrire
 				</Link>
 			</div>
+			<div className="mt-2 text-center text-sm">
+				<Link to="/about" className="text-neutral-500 hover:underline">
+					À propos de l'application
+				</Link>
+			</div>
 		</>
 	)
 }

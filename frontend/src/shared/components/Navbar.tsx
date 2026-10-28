@@ -1,8 +1,7 @@
 import clsx from "clsx"
-import { House, LogIn, LogOutIcon, User } from "lucide-react"
+import { House, Info, LogIn, LogOutIcon, User } from "lucide-react"
 
 import canopeeWhiteIcon from "@/assets/canopee_icon-blanc-simplifiee-rvb.png"
-import dataForGoodIcon from "@/assets/dataforgoodLogo.png"
 import { NavbarItems } from "@/features/admin/components/navbar/NavbarItems"
 import { useConnectedMe } from "@/features/user/store/me.slice"
 import { NavbarItem } from "@/shared/components/NavbarItem"
@@ -24,16 +23,9 @@ export function Navbar({ className }: Props) {
 		>
 			<div className="flex flex-col items-center ">
 				<img
-					title="Data for Good"
-					alt="Data for Good"
-					src={dataForGoodIcon}
-					className="h-auto aspect-square object-cover size-11"
-				/>
-				<img
-					title="Canopée"
 					alt="Canopée"
 					src={canopeeWhiteIcon}
-					className="h-auto aspect-square object-cover mb-7 mt-8 size-11"
+					className="h-auto aspect-square object-cover mb-10 size-11"
 				/>
 				<div className="flex flex-col gap-10 items-center">
 					<NavbarItem type="link" to="/clear-cuts" Icon={House} title="Carte" />
@@ -48,6 +40,7 @@ export function Navbar({ className }: Props) {
 				</div>
 			</div>
 			<div className="flex flex-col items-center gap-5 ">
+				<NavbarItem type="link" to="/about" Icon={Info} title="À propos" />
 				{!user && (
 					<NavbarItem type="link" to="/login" Icon={LogIn} title="Connexion" />
 				)}
