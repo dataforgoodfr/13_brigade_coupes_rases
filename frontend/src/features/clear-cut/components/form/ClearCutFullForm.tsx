@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link, useLocation } from "@tanstack/react-router"
 import { isUndefined } from "es-toolkit"
 import { useEffect, useMemo } from "react"
 import { FormProvider, useForm } from "react-hook-form"
@@ -33,7 +34,7 @@ import {
 	volunteerValidateThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
-import { useConnectedMe, useMe } from "@/features/user/store/me.slice"
+import { useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { useUploadingTracker } from "@/shared/form/UploadingContext"
 import { useSingleFlight } from "@/shared/hooks/singleFlight"
@@ -58,10 +59,10 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 	const singleFlight = useSingleFlight()
 	const submission = useAppSelector(selectSubmission)
 	const assignation = useAppSelector(selectAssignation)
-	const loggedUser = useMe()
 	const user = useConnectedMe()
 	const { isUploading } = useUploadingTracker()
 	const isOnline = useOnlineStatus()
+	const { pathname } = useLocation()
 
 	const isAssignedVolunteer = useMemo(() => {
 		if (user?.role !== "volunteer") return false
@@ -197,7 +198,27 @@ export function ClearCutFullForm({ current, original, latest }: Props) {
 					<Accordion type="multiple" className="grow overflow-y-auto">
 						<AccordionContent original={original} form={form} latest={latest} />
 					</Accordion>
-					{!!loggedUser && (
+					{!user && (
+						<p className="text-sm text-neutral-600 text-center pt-2 pb-4">
+							Pour remplir cette fiche,{" "}
+							<Link
+								to="/login"
+								search={{ redirect: pathname }}
+								className="text-primary font-semibold hover:underline"
+							>
+								connectez-vous
+							</Link>
+							. Pas encore de compte ?{" "}
+							<Link
+								to="/register"
+								className="text-primary font-semibold hover:underline"
+							>
+								Inscrivez-vous
+							</Link>{" "}
+							: un administrateur validera votre compte.
+						</p>
+					)}
+					{!!user && (
 						<div className="flex flex-col gap-2 pt-2 pb-4">
 							{canRequestAssignment && (
 								<Button

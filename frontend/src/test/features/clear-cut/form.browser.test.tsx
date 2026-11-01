@@ -303,6 +303,34 @@ describe("field form when there isn't a connected user", () => {
 		}) as FieldInput
 		expect(await field.findValue()).toBe("")
 	})
+	it("says how to get access instead of leaving the fields greyed out", async () => {
+		await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" }
+		})
+		const login = await screen.findByRole("link", { name: "connectez-vous" })
+		expect(login).toHaveAttribute(
+			"href",
+			`/login?redirect=${encodeURIComponent("/clear-cuts/ABC")}`
+		)
+		expect(
+			screen.getByRole("link", { name: "Inscrivez-vous" })
+		).toHaveAttribute("href", "/register")
+		expect(
+			screen.queryByRole("button", { name: "Sauvegarder" })
+		).not.toBeInTheDocument()
+	})
+	it("does not show the notice to a connected volunteer", async () => {
+		await renderApp({
+			route: "/clear-cuts/$clearCutId",
+			params: { $clearCutId: "ABC" },
+			user: volunteerMock
+		})
+		await screen.findByRole("button", { name: "Sauvegarder" })
+		expect(
+			screen.queryByRole("link", { name: "connectez-vous" })
+		).not.toBeInTheDocument()
+	})
 })
 describe("general info edition controls", () => {
 	const editButton = () =>
