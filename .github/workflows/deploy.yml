@@ -26,7 +26,7 @@ jobs:
           # clever deploy refuses a shallow clone
           fetch-depth: 0
       - name: Deploy to clever cloud
-        uses: 47ng/actions-clever-cloud@v2.2.0
+        uses: 47ng/actions-clever-cloud@v2.3.0
         with:
           appID: ${{ inputs.app-id }}
           force: true
