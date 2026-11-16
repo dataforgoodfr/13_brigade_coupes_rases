@@ -12,11 +12,11 @@ Pour revenir à une version antérieure, lancer le workflow Release à la main (
 
 La démo sur données fictives est publiée sur GitHub Pages à chaque modification du frontend sur `main` (`pnpm build:demo`). Elle tourne entièrement dans le navigateur : les appels à l'API sont servis par les mocks MSW, et ce que fait le visiteur n'est gardé que pour sa session.
 
-## Data pipeline et synchronisation Airtable
+## Data pipeline
 
 La data pipeline est une application Docker distincte sur Clever Cloud (`CC_DOCKERFILE=data_pipeline/Dockerfile`, contexte de build à la racine du dépôt), déclarée comme tâche ([Clever Tasks](https://www.clever.cloud/developers/doc/develop/tasks/)) : chaque démarrage exécute la pipeline une fois, puis l'instance s'arrête. Aucun workflow ne la déploie, elle se met à jour depuis la console ou avec `clever deploy`.
 
-Le workflow **Pipeline mensuelle** (`pipeline-mensuelle.yml`) la redémarre le 2 de chaque mois ; il peut aussi être lancé à la main. Le chargement en base dépend de la variable `LOAD_DATABASE` de l'application (`off`, `dry-run` ou `on`, voir [data_pipeline/.env.example](../data_pipeline/.env.example)). Le workflow attend la fin de la tâche, puis cherche dans les journaux Clever la dernière ligne d'une exécution réussie (« Pipeline terminée sans erreur. »). Sans elle, le job échoue et le workflow ouvre l'issue « Échec de la pipeline mensuelle », ou la commente si elle est déjà ouverte : les personnes qui suivent le dépôt sont prévenues. Le détail d'une exécution se lit dans les journaux de l'application Clever (`clever logs --since …`). Une exécution lancée depuis la console Clever ou avec `clever restart` n'est pas surveillée. La synchronisation Airtable tourne dans GitHub Actions (`airtable-sync.yml`, deux fois par jour).
+Le workflow **Pipeline mensuelle** (`pipeline-mensuelle.yml`) la redémarre le 2 de chaque mois ; il peut aussi être lancé à la main. Le chargement en base dépend de la variable `LOAD_DATABASE` de l'application (`off`, `dry-run` ou `on`, voir [data_pipeline/.env.example](../data_pipeline/.env.example)). Le workflow attend la fin de la tâche, puis cherche dans les journaux Clever la dernière ligne d'une exécution réussie (« Pipeline terminée sans erreur. »). Sans elle, le job échoue et le workflow ouvre l'issue « Échec de la pipeline mensuelle », ou la commente si elle est déjà ouverte : les personnes qui suivent le dépôt sont prévenues. Le détail d'une exécution se lit dans les journaux de l'application Clever (`clever logs --since …`). Une exécution lancée depuis la console Clever ou avec `clever restart` n'est pas surveillée.
 
 ## Workflows GitHub Actions
 

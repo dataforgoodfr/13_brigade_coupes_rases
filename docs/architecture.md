@@ -14,7 +14,6 @@ flowchart LR
     API <--> FRONT[Frontend React]
     FRONT --> V[Bénévoles, administrateurs]
     API --> PHOTOS[(S3 photos)]
-    DB --> AT[Export Airtable]
 ```
 
 - La **data pipeline** ne connaît que les coupes : elle lit la base pour savoir jusqu'où elle a déjà traité, publie ses résultats dans S3, puis ajoute les nouvelles coupes (un signalement « à valider » chacune) et complète les coupes existantes, sans toucher au suivi des signalements ([data_pipeline/pipeline/README.md](../data_pipeline/pipeline/README.md)).

@@ -1,15 +1,13 @@
 # Data pipeline
 
-Trois sous-projets indépendants cohabitent dans ce dossier :
+Deux sous-projets cohabitent dans ce dossier :
 
 | Dossier | Rôle | Exécution |
 |---|---|---|
 | [`pipeline/`](./pipeline/README.md) | Mise à jour mensuelle : récupère les alertes RADD depuis Earth Engine, détecte les nouveaux clusters depuis la dernière date en base, les enrichit et publie un fichier « gold » dans S3. | Image Docker (`Dockerfile`, conda + GDAL) |
 | [`bootstrap/`](./bootstrap/README.md) | Chargement unique des détections historiques 2018-2025. **Efface la base.** | Poetry, en local |
-| [`airtable/`](./airtable/README.md) | Export des utilisateurs et des signalements de PostgreSQL vers Airtable. | `uv`, deux fois par jour via GitHub Actions |
 
-`pipeline/` et `bootstrap/` partagent ce `pyproject.toml` ; `airtable/` a son
-propre `requirements.txt`.
+`pipeline/` et `bootstrap/` partagent ce `pyproject.toml`.
 
 ## Arborescence
 
@@ -17,7 +15,6 @@ propre `requirements.txt`.
 data_pipeline/
 ├── pipeline/          # pipeline mensuelle (scripts/, data/ pour les fichiers locaux)
 ├── bootstrap/         # chargement historique (scripts/, data/ pour les fichiers téléchargés)
-├── airtable/          # export Airtable (scripts/, sql/)
 ├── tests/             # pytest, fonctions pures de pipeline/
 ├── .env.example       # variables pour pipeline/ et bootstrap/
 ├── Dockerfile         # image d'exécution de pipeline/ (contexte de build : racine du dépôt)

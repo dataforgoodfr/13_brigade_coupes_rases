@@ -105,7 +105,7 @@ Rien n'est nécessaire pour développer le frontend ou le backend en local. Les 
 
 - la data pipeline (bucket S3 Cellar de Clever Cloud : données brutes, couches de référence, fichiers gold) ;
 - l'envoi des photos des formulaires vers S3 (sans S3, le backend les stocke localement) ;
-- le déploiement (Clever Cloud), la synchronisation Airtable et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
+- le déploiement (Clever Cloud) et les actions manuelles sur les bases de dev et de prod (secrets du dépôt GitHub).
 
 Aucun secret n'est versionné dans le dépôt : les valeurs sont définies dans les variables d'environnement Clever Cloud et les secrets du dépôt GitHub, et s'obtiennent auprès des mainteneurs du projet.
 

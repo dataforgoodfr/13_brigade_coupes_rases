@@ -57,8 +57,7 @@ source = ["pipeline"]
 [tool.coverage.report]
 show_missing = true
 
-# Vérification de types : `poetry run mypy` (strict). Le sous-projet airtable/
-# a son propre environnement (requirements.txt, uv) et n'est pas couvert ici.
+# Vérification de types : `poetry run mypy` (strict).
 [tool.mypy]
 strict = true
 python_version = "3.14"

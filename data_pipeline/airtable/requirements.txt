@@ -1,3 +1,0 @@
-pyairtable>=3.5.0.post1
-psycopg[binary]>=3.3.6
-python-dotenv>=1.0
