@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import getLogger
 from typing import Any
 
@@ -428,6 +429,31 @@ def set_report_pipeline_override(
         )
     for clear_cut in report.clear_cuts:
         clear_cut.allow_pipeline_override = allow
+    db.commit()
+    db.refresh(report)
+    return report
+
+
+def set_report_priority(
+    report_id: int, db: Session, admin: User, prioritized: bool
+) -> ClearCutReport:
+    """Mark a report as followed by the association, or stop following it.
+
+    Marking an already followed report keeps its original date and author.
+    """
+    report = db.get(ClearCutReport, report_id)
+    if not report:
+        raise AppHTTPException(
+            status_code=404,
+            type="REPORT_NOT_FOUND",
+            detail="Clear cut report not found",
+        )
+    if not prioritized:
+        report.prioritized_at = None
+        report.prioritized_by_id = None
+    elif report.prioritized_at is None:
+        report.prioritized_at = datetime.now()
+        report.prioritized_by_id = admin.id
     db.commit()
     db.refresh(report)
     return report

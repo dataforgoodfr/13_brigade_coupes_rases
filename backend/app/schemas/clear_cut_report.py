@@ -50,6 +50,8 @@ class ClearCutReportResponseSchema(ClearCutReportPreviewSchema):
     affected_user: PublicUserResponseSchema | None = None
     assignment_requested_by_id: str | None = None
     assignment_requested_by: PublicUserResponseSchema | None = None
+    # Only sent to admins
+    prioritized: bool | None = None
 
 
 def report_to_response_schema(
@@ -80,6 +82,11 @@ def report_to_response_schema(
     return ClearCutReportResponseSchema(
         **preview.model_dump(),
         statellite_images=report.statellite_images,
+        prioritized=(
+            report.prioritized_at is not None
+            if current_user is not None and current_user.role == "admin"
+            else None
+        ),
         affected_user=(
             None
             if affected_user is None

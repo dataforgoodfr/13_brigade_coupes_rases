@@ -93,7 +93,9 @@ export const clearCutReportResponseSchema = z.object({
 	userId: z.string().optional().nullable(),
 	affectedUser: publicUserSchema.optional().nullable(),
 	assignmentRequestedById: z.string().optional().nullable(),
-	assignmentRequestedBy: publicUserSchema.optional().nullable()
+	assignmentRequestedBy: publicUserSchema.optional().nullable(),
+	// Only sent to admins: the report is followed by the association
+	prioritized: z.boolean().optional()
 })
 export type ClearCutReportResponse = z.infer<
 	typeof clearCutReportResponseSchema

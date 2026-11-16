@@ -398,7 +398,47 @@ describe("general info edition controls", () => {
 		})
 		it("lets an admin re-enable the pipeline", async () => {
 			await openGeneralInfo(adminMock)
-			expect(await screen.findByRole("switch")).toBeInTheDocument()
+			expect(
+				await screen.findByRole("switch", { name: /pipeline/ })
+			).toBeInTheDocument()
+		})
+	})
+
+	describe("following a report", () => {
+		const followSwitch = () =>
+			screen.queryByRole("switch", { name: /à suivre par l'association/ })
+
+		describe("when the assigned volunteer is connected", () => {
+			defaultSetupServerBeforeEach(setupTest({ userId: volunteerMock.id }))
+			it("hides the switch", async () => {
+				await openGeneralInfo(volunteerMock)
+				expect(editButton()).toBeInTheDocument()
+				expect(followSwitch()).not.toBeInTheDocument()
+			})
+		})
+
+		describe("when an admin is connected", () => {
+			defaultSetupServerBeforeEach(defaultSetup)
+			it("marks the report as followed", async () => {
+				let sent: unknown
+				worker.use(
+					http.post(
+						"*/api/v1/clear-cuts-reports/:id/priority",
+						async ({ request }) => {
+							const body = (await request.json()) as { prioritized: boolean }
+							sent = body
+							return HttpResponse.json(body)
+						}
+					)
+				)
+				await openGeneralInfo(adminMock)
+				const toggle = await screen.findByRole("switch", {
+					name: /à suivre par l'association/
+				})
+				expect(toggle).not.toBeChecked()
+				toggle.click()
+				await expect.poll(() => sent).toEqual({ prioritized: true })
+			})
 		})
 	})
 })

@@ -19,6 +19,7 @@ import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
 import {
 	setPipelineOverrideThunk,
+	setReportPriorityThunk,
 	updateClearCutGeometryThunk,
 	updateReportInfoThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
@@ -95,6 +96,7 @@ export function GeneralInfoEditControls({
 	const endDateId = useId()
 	const citySearchId = useId()
 	const overrideId = useId()
+	const priorityId = useId()
 
 	// Snapshot the dialog fields from fresh report data each time it opens.
 	const handleOpenChange = (next: boolean) => {
@@ -186,6 +188,19 @@ export function GeneralInfoEditControls({
 			toast({
 				id: "pipeline-override-error",
 				title: "Erreur lors de la mise à jour du paramètre"
+			})
+		}
+	}
+
+	const handleTogglePriority = async (prioritized: boolean) => {
+		try {
+			await dispatch(
+				setReportPriorityThunk({ reportId: report.id, prioritized })
+			).unwrap()
+		} catch {
+			toast({
+				id: "report-priority-error",
+				title: "Erreur lors du marquage de la coupe"
 			})
 		}
 	}
@@ -347,6 +362,19 @@ export function GeneralInfoEditControls({
 					<Label htmlFor={overrideId} className="text-xs font-normal">
 						Autoriser la mise à jour automatique par le pipeline (écrase les
 						corrections manuelles)
+					</Label>
+				</div>
+			)}
+
+			{user?.role === "admin" && (
+				<div className="flex items-center gap-2 mt-1">
+					<Switch
+						id={priorityId}
+						checked={report.prioritized ?? false}
+						onCheckedChange={handleTogglePriority}
+					/>
+					<Label htmlFor={priorityId} className="text-xs font-normal">
+						Coupe à suivre par l'association
 					</Label>
 				</div>
 			)}

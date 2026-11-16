@@ -28,12 +28,17 @@ from app.services.clear_cut_report import (
     find_clearcuts_reports,
     get_report_response_by_id,
     set_report_pipeline_override,
+    set_report_priority,
     sync_clear_cuts_reports,
     update_clear_cut_report,
     volunteer_create_clear_cut_report,
 )
 from app.services.report_workflow import WorkflowAction, transition
-from app.services.user_auth import get_current_user, get_optional_current_user
+from app.services.user_auth import (
+    get_admin_user,
+    get_current_user,
+    get_optional_current_user,
+)
 
 logger = getLogger(__name__)
 
@@ -170,6 +175,30 @@ def set_pipeline_override(
     """Toggle whether the pipeline may overwrite this report's manually edited cuts."""
     set_report_pipeline_override(report_id, db, user, params.allow)
     return PipelineOverrideResponseSchema(allow_pipeline_override=params.allow)
+
+
+class PriorityRequestSchema(BaseSchema):
+    prioritized: bool
+
+
+class PriorityResponseSchema(BaseSchema):
+    prioritized: bool
+
+
+@router.post(
+    "/{report_id}/priority",
+    status_code=status.HTTP_200_OK,
+    response_model=PriorityResponseSchema,
+)
+def set_priority(
+    report_id: int,
+    params: PriorityRequestSchema,
+    admin: User = Depends(get_admin_user),
+    db: Session = db_session,
+) -> PriorityResponseSchema:
+    """Mark a report as followed by the association (admins only)."""
+    report = set_report_priority(report_id, db, admin, params.prioritized)
+    return PriorityResponseSchema(prioritized=report.prioritized_at is not None)
 
 
 @router.get(

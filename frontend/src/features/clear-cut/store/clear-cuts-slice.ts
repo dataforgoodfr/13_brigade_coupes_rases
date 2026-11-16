@@ -593,6 +593,21 @@ export const setPipelineOverrideThunk = createAppAsyncThunk<
 	}
 )
 
+export const setReportPriorityThunk = createAppAsyncThunk<
+	void,
+	{ reportId: string; prioritized: boolean }
+>(
+	"clear-cuts/setReportPriority",
+	async ({ reportId, prioritized }, { extra: { api }, dispatch }) => {
+		await api()
+			.post(`api/v1/clear-cuts-reports/${reportId}/priority`, {
+				json: { prioritized }
+			})
+			.json()
+		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
+	}
+)
+
 type State = {
 	clearCuts: RequestedContent<ClearCuts>
 	detail: RequestedContent<ClearCutFormVersions>
@@ -749,6 +764,11 @@ export const clearCutsSlice = createSlice({
 		addRequestedContentCases(
 			builder,
 			setPipelineOverrideThunk,
+			(state) => state.edition
+		)
+		addRequestedContentCases(
+			builder,
+			setReportPriorityThunk,
 			(state) => state.edition
 		)
 		builder.addCase(getMeThunk.fulfilled, (_, { payload: me }) => {
