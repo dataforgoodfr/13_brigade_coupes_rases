@@ -30,3 +30,21 @@ export const tileUrl = (
 		.replace("{z}", String(z))
 		.replace("{x}", String(x))
 		.replace("{y}", String(y))
+
+/** Name of the commune nearest to the point, if the geocoder answers. */
+export async function communeNear(
+	lat: number,
+	lng: number
+): Promise<string | undefined> {
+	try {
+		const response = await fetch(
+			`https://data.geopf.fr/geocodage/reverse?lon=${lng}&lat=${lat}&index=poi&category=commune&limit=1`
+		)
+		const data = (await response.json()) as {
+			features?: { properties?: { toponym?: string } }[]
+		}
+		return data.features?.[0]?.properties?.toponym
+	} catch {
+		return undefined
+	}
+}
