@@ -5,18 +5,23 @@ from sqlalchemy.orm import Session
 
 from app.deps import PageParam, PageSizeParam, db_session
 from app.models import User
-from app.schemas.clear_cut import ClearCutPatchSchema, ClearCutResponseSchema
+from app.schemas.clear_cut import (
+    BoundaryHistoryEntrySchema,
+    ClearCutPatchSchema,
+    ClearCutResponseSchema,
+)
 from app.schemas.ecological_zoning import (
     ClearCutEcologicalZoningResponseSchema,
 )
 from app.schemas.hateoas import PaginationResponseSchema
 from app.services.clear_cut import (
+    find_boundary_history,
     find_clear_cuts,
     find_ecological_zonings_by_clear_cut,
     get_clearcut_by_id,
     update_clear_cut_geometry,
 )
-from app.services.user_auth import get_current_user
+from app.services.user_auth import get_admin_user, get_current_user
 
 logger = getLogger(__name__)
 
@@ -86,3 +91,15 @@ def list_clear_cuts(
         page=page,
         size=size,
     )
+
+
+@router.get(
+    "/{clear_cut_id}/boundary-history",
+    response_model=list[BoundaryHistoryEntrySchema],
+    dependencies=[Depends(get_admin_user)],
+)
+def list_boundary_history(
+    clear_cut_id: int, db: Session = db_session
+) -> list[BoundaryHistoryEntrySchema]:
+    """Perimeters replaced by manual corrections, most recent first (admins only)."""
+    return find_boundary_history(db, clear_cut_id)

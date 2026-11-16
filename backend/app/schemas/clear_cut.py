@@ -165,3 +165,13 @@ def clear_cut_to_clear_cut_response_schema(
         manually_edited_at=clear_cut.manually_edited_at,
         allow_pipeline_override=clear_cut.allow_pipeline_override,
     )
+
+
+class BoundaryHistoryEntrySchema(BaseSchema):
+    """A perimeter replaced by a manual correction."""
+
+    edited_at: datetime
+    # Login of the author of the correction
+    edited_by: str | None = None
+    previous_area_hectare: float
+    previous_boundary: MultiPolygon
