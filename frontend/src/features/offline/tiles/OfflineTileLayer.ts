@@ -1,6 +1,6 @@
 import * as L from "leaflet"
 
-import { OFFLINE_TILES_CACHE } from "./offlineZones"
+import { MAX_OFFLINE_ZOOM, OFFLINE_TILES_CACHE } from "./offlineZones"
 
 let offlineStore: Promise<Cache | undefined> | undefined
 
@@ -33,6 +33,22 @@ type TileCallbacks = {
  * from the network.
  */
 export class OfflineTileLayer extends L.TileLayer {
+	private readonly onlineMaxNativeZoom = this.options.maxNativeZoom
+
+	/**
+	 * Without network, zooms beyond the downloaded ones enlarge the tiles of
+	 * the deepest downloaded zoom instead of leaving the map blank. Returns
+	 * whether the setting changed.
+	 */
+	limitToDownloadedZooms(limit: boolean): boolean {
+		const maxNativeZoom = limit
+			? Math.min(this.onlineMaxNativeZoom ?? MAX_OFFLINE_ZOOM, MAX_OFFLINE_ZOOM)
+			: this.onlineMaxNativeZoom
+		if (this.options.maxNativeZoom === maxNativeZoom) return false
+		this.options.maxNativeZoom = maxNativeZoom
+		return true
+	}
+
 	override createTile(coords: L.Coords, done: L.DoneCallback): HTMLElement {
 		const tile = document.createElement("img")
 		const callbacks = this as unknown as TileCallbacks

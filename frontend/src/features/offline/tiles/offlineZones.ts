@@ -82,8 +82,28 @@ export const listOfflineZones = (): OfflineZone[] =>
 		.getValuesFromStorage(offlineZoneSchema)
 		.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 
-export const saveOfflineZone = (zone: OfflineZone) =>
+/** Dispatched on `window` whenever a zone is saved or deleted. */
+export const OFFLINE_ZONES_CHANGED = "offline-zones-changed"
+
+const notifyZonesChanged = () =>
+	window.dispatchEvent(new Event(OFFLINE_ZONES_CHANGED))
+
+export const saveOfflineZone = (zone: OfflineZone) => {
 	zonesRepository.setToLocalStorageById(zone.id, zone)
+	notifyZonesChanged()
+}
+
+/** Whether the zone has tiles for this view, at this zoom or below it. */
+export const zoneCovers = (
+	zone: OfflineZone,
+	{ lat, lng }: { lat: number; lng: number },
+	zoom: number
+) =>
+	zoom >= zone.minZoom &&
+	lat >= zone.bounds.south &&
+	lat <= zone.bounds.north &&
+	lng >= zone.bounds.west &&
+	lng <= zone.bounds.east
 
 export type ZonePlan = {
 	zone: OfflineZone
@@ -300,4 +320,5 @@ export async function deleteOfflineZone(
 		}
 	}
 	zonesRepository.setToLocalStorageById(zoneId, undefined)
+	notifyZonesChanged()
 }

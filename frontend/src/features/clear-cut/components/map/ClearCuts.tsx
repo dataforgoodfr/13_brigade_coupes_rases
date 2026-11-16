@@ -1,5 +1,11 @@
 import * as L from "leaflet"
-import { Layers, ListIcon, Map as MapIcon } from "lucide-react"
+import {
+	CloudDownload,
+	Layers,
+	ListIcon,
+	Map as MapIcon,
+	WifiOff
+} from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMap, useMapEvents } from "react-leaflet"
 
@@ -22,7 +28,16 @@ import {
 	setGeoBounds,
 	setWithPoints
 } from "@/features/clear-cut/store/filters.slice"
-import { offlineTileLayer } from "@/features/offline/tiles/OfflineTileLayer"
+import { OfflineZonesDialog } from "@/features/offline/components/OfflineZonesDialog"
+import { useOfflineZones } from "@/features/offline/hooks/useOfflineZones"
+import {
+	OfflineTileLayer,
+	offlineTileLayer
+} from "@/features/offline/tiles/OfflineTileLayer"
+import {
+	type OfflineSourceId,
+	zoneCovers
+} from "@/features/offline/tiles/offlineZones"
 import { cn } from "@/lib/utils"
 import { AddressInput } from "@/shared/components/input/AddressInput"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
@@ -33,6 +48,7 @@ import {
 	PLAN_IGN_URL
 } from "@/shared/geoplateforme"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
+import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
 
 const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
@@ -154,6 +170,52 @@ export function ClearCuts() {
 		}
 	}, [map, baseLayer])
 
+	// Without network, the map switches to a downloaded base layer, and back
+	// to the former one when the network returns
+	const isOnline = useOnlineStatus()
+	const zones = useOfflineZones()
+	const layerBeforeOffline =
+		useRef<SelectableItemEnhanced<L.TileLayer>>(undefined)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: on network changes only
+	useEffect(() => {
+		if (isOnline) {
+			const previous = layerBeforeOffline.current
+			layerBeforeOffline.current = undefined
+			if (previous) setLayer({ ...previous, isSelected: true })
+			return
+		}
+		const downloaded = new Set<string>(zones.flatMap(({ sources }) => sources))
+		if (!layer || downloaded.has(layer.value)) return
+		const fallback = (["plan-ign", "photos-ign"] as OfflineSourceId[]).find(
+			(source) => downloaded.has(source)
+		)
+		const target = layers.find(({ value }) => value === fallback)
+		if (target) {
+			layerBeforeOffline.current = layer
+			setLayer({ ...target, isSelected: true })
+		}
+	}, [isOnline])
+
+	useEffect(() => {
+		for (const tileLayer of [...LAYERS, ...OVERLAYS].map(({ item }) => item)) {
+			if (
+				tileLayer instanceof OfflineTileLayer &&
+				tileLayer.limitToDownloadedZooms(!isOnline) &&
+				map.hasLayer(tileLayer)
+			) {
+				tileLayer.redraw()
+			}
+		}
+	}, [isOnline, map])
+
+	const [view, setView] = useState(() => ({
+		center: map.getCenter(),
+		zoom: map.getZoom()
+	}))
+	const outsideZones =
+		!isOnline && !zones.some((zone) => zoneCovers(zone, view.center, view.zoom))
+	const [zonesDialogOpen, setZonesDialogOpen] = useState(false)
+
 	const handleLayerSelected = (
 		selectableItem: SelectableItemEnhanced<L.TileLayer>
 	) => setLayer(selectableItem)
@@ -220,6 +282,9 @@ export function ClearCuts() {
 		zoomend: onZoomEnd,
 		dragend: () => {
 			dispatchGeoBounds()
+		},
+		moveend: () => {
+			setView({ center: map.getCenter(), zoom: map.getZoom() })
 		},
 		resize: () => {
 			dispatchGeoBounds()
@@ -348,10 +413,33 @@ export function ClearCuts() {
 									onValueChange={handleOverlaysChanged}
 								/>
 							</div>
+							<button
+								type="button"
+								onClick={() => setZonesDialogOpen(true)}
+								className={cn(
+									buttonVariants({ variant: "outline", size: "sm" }),
+									"justify-start"
+								)}
+							>
+								<CloudDownload className="size-4" />
+								Zones hors ligne
+							</button>
 						</PopoverContent>
 					</Popover>
 				</div>
 			</div>
+			{outsideZones && (
+				<div className="leaflet-bottom flex w-full justify-center mb-16 pointer-events-none">
+					<output className="leaflet-control flex items-center gap-2 rounded-md bg-amber-100 px-3 py-1.5 text-sm text-amber-900 shadow-md">
+						<WifiOff className="size-4 shrink-0" />
+						Zone non téléchargée : le fond de carte peut manquer ici.
+					</output>
+				</div>
+			)}
+			<OfflineZonesDialog
+				open={zonesDialogOpen}
+				onOpenChange={setZonesDialogOpen}
+			/>
 			{previews}
 			{points}
 		</>
