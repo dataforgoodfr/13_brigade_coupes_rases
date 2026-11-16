@@ -383,6 +383,12 @@ class ClearCutReport(Base):
     average_location_json = column_property(functions.ST_AsGeoJSON(average_location))
 
     statellite_images: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    # Set by an admin when the report is followed by the association (synced to
+    # Notion); null when it is not followed
+    prioritized_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    prioritized_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
     # Fingerprint of the request that created a volunteer-drawn report, see
     # services/idempotency.py
     request_fingerprint: Mapped[str | None] = mapped_column(

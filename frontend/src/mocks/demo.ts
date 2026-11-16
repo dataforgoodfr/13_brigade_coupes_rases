@@ -252,6 +252,19 @@ export const demoHandlers = [
 		return new HttpResponse(null, { status: 204 })
 	}),
 	http.post(
+		"*/api/v1/clear-cuts-reports/:id/priority",
+		async ({ params, request }) => {
+			const report = reports().get(params.id as string)
+			if (!report) return
+			const { prioritized } = (await request.json()) as {
+				prioritized: boolean
+			}
+			report.prioritized = prioritized
+			save(report)
+			return HttpResponse.json({ prioritized })
+		}
+	),
+	http.post(
 		"*/api/v1/clear-cuts-reports/:id/:action",
 		({ params, request }) => {
 			const report = reports().get(params.id as string)
