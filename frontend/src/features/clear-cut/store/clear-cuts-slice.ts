@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react"
 import type { FiltersRequest } from "@/features/clear-cut/store/filters"
 import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import type { Bounds } from "@/features/clear-cut/store/types"
+import { readZoneClearCuts } from "@/features/offline/zoneClearCuts"
 import { getMeThunk, selectConnectedMe } from "@/features/user/store/me.slice"
 import { isNetworkError, parseParam, setError } from "@/shared/api/api"
 import {
@@ -249,8 +250,16 @@ export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 				const forms = formStorage.getValuesFromStorage(
 					clearCutFormVersionsSchema
 				)
-				const reports = forms.map((f) => f.current.report)
-				const displayed = selectClearCuts(getState()).value
+				const state = getState()
+				// The reports stored with the zones downloaded for offline use
+				const zoneReports = (await readZoneClearCuts(filters.geoBounds)).map(
+					(report) => mapReport(state, report)
+				)
+				const reports = uniqBy(
+					[...forms.map((f) => f.current.report), ...zoneReports],
+					(report) => report.id
+				)
+				const displayed = selectClearCuts(state).value
 				return {
 					previews: uniqBy(
 						[...(displayed?.previews ?? []), ...reports],

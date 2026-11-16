@@ -25,7 +25,9 @@ import {
 	type OfflineZone,
 	planOfflineZone
 } from "@/features/offline/tiles/offlineZones"
+import { downloadZoneClearCutsThunk } from "@/features/offline/zoneClearCuts"
 import { communeNear } from "@/shared/geoplateforme"
+import { useAppDispatch } from "@/shared/hooks/store"
 
 const megabytes = (bytes: number) =>
 	`${(bytes / 1_000_000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} Mo`
@@ -54,6 +56,7 @@ type Props = { open: boolean; onOpenChange: (open: boolean) => void }
  */
 export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 	const map = useMap()
+	const dispatch = useAppDispatch()
 	const zones = useOfflineZones()
 	const [options, setOptions] = useState<OfflineSourceId[]>([])
 	const [progress, setProgress] = useState<DownloadProgress>()
@@ -101,12 +104,22 @@ export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 				signal: controller.current.signal,
 				onProgress: setProgress
 			})
+			if (result.interruption) {
+				setMessage(INTERRUPTIONS[result.interruption])
+				return
+			}
+			const clearCuts = await dispatch(downloadZoneClearCutsThunk(result.zone))
+				.unwrap()
+				.catch(() => undefined)
 			setMessage(
-				result.interruption
-					? INTERRUPTIONS[result.interruption]
-					: result.zone.complete
+				[
+					result.zone.complete
 						? `« ${result.zone.name} » est disponible hors ligne.`
-						: `${result.failedTiles} tuiles n'ont pas pu être téléchargées : reprenez plus tard.`
+						: `${result.failedTiles} tuiles n'ont pas pu être téléchargées : reprenez plus tard.`,
+					clearCuts === undefined
+						? "Les coupes de la zone n'ont pas pu être enregistrées : reprenez plus tard."
+						: `${clearCuts} coupe${clearCuts > 1 ? "s" : ""} enregistrée${clearCuts > 1 ? "s" : ""}.`
+				].join(" ")
 			)
 		} finally {
 			setProgress(undefined)
@@ -123,10 +136,9 @@ export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 
 	const show = (zone: OfflineZone) => {
 		const { south, west, north, east } = zone.bounds
-		map.fitBounds([
-			[south, west],
-			[north, east]
-		])
+		// At its first zoom, the zone fills the screen it was downloaded from;
+		// fitting the bounds could zoom out to a level that was not downloaded
+		map.setView([(south + north) / 2, (west + east) / 2], zone.minZoom)
 		onOpenChange(false)
 	}
 
@@ -223,11 +235,18 @@ export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 											{zone.sources
 												.map((source) => OFFLINE_SOURCES[source].label)
 												.join(", ")}
+											{zone.clearCuts !== undefined &&
+												` · ${zone.clearCuts} coupe${zone.clearCuts > 1 ? "s" : ""}`}
 										</span>
 										{!zone.complete && (
 											<span className="text-amber-800">
 												Incomplète : {zone.storedTiles} / {zone.tileCount}{" "}
 												tuiles
+											</span>
+										)}
+										{zone.clearCuts === undefined && (
+											<span className="text-amber-800">
+												Coupes de la zone non enregistrées
 											</span>
 										)}
 									</div>
@@ -241,7 +260,7 @@ export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 										>
 											<Eye className="size-4" />
 										</Button>
-										{!zone.complete && (
+										{(!zone.complete || zone.clearCuts === undefined) && (
 											<Button
 												variant="ghost"
 												size="icon"

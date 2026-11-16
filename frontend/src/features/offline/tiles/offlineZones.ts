@@ -25,6 +25,8 @@ export const MAX_ZONE_TILES = 3000
 /** The Géoplateforme allows 10 to 50 requests per second and per address. */
 const REQUESTS_PER_SECOND = 8
 const CONCURRENT_REQUESTS = 4
+/** A request left without answer would block a download slot for good. */
+const TILE_TIMEOUT_MS = 20_000
 /** Consecutive network failures after which the network is deemed lost. */
 const MAX_CONSECUTIVE_FAILURES = 8
 
@@ -71,7 +73,9 @@ const offlineZoneSchema = z.object({
 	tileCount: z.number().int(),
 	storedTiles: z.number().int(),
 	storedBytes: z.number(),
-	complete: z.boolean()
+	complete: z.boolean(),
+	/** Clear cuts stored with the zone; missing until they are. */
+	clearCuts: z.number().int().optional()
 })
 export type OfflineZone = z.infer<typeof offlineZoneSchema>
 
@@ -81,6 +85,10 @@ export const listOfflineZones = (): OfflineZone[] =>
 	zonesRepository
 		.getValuesFromStorage(offlineZoneSchema)
 		.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+
+/** Where the clear cuts of a zone are kept, next to its tiles. */
+export const zoneClearCutsKey = (zoneId: string) =>
+	`/offline-zones/${zoneId}/clear-cuts.json`
 
 /** Dispatched on `window` whenever a zone is saved or deleted. */
 export const OFFLINE_ZONES_CHANGED = "offline-zones-changed"
@@ -173,7 +181,13 @@ const defaultDependencies: OfflineDependencies = {
 	openStore: () => caches.open(OFFLINE_TILES_CACHE),
 	// "no-store": the service worker leaves these requests alone, so the
 	// tiles are not stored twice
-	fetchTile: (url, signal) => fetch(url, { cache: "no-store", signal }),
+	fetchTile: (url, signal) => {
+		const timeout = AbortSignal.timeout(TILE_TIMEOUT_MS)
+		return fetch(url, {
+			cache: "no-store",
+			signal: signal ? AbortSignal.any([signal, timeout]) : timeout
+		})
+	},
 	sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 }
 
@@ -318,6 +332,7 @@ export async function deleteOfflineZone(
 		for (const url of zoneTileUrls(zone)) {
 			if (!kept.has(url)) await store.delete(url)
 		}
+		await store.delete(zoneClearCutsKey(zoneId))
 	}
 	zonesRepository.setToLocalStorageById(zoneId, undefined)
 	notifyZonesChanged()
