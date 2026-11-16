@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it } from "vitest"
 
 import {
 	getClearCutsThunk,
-	selectClearCuts
+	selectClearCuts,
+	selectDetail,
+	storeClearCutFormThunk
 } from "@/features/clear-cut/store/clear-cuts-slice"
 import {
 	listOfflineZones,
@@ -12,15 +14,24 @@ import {
 	saveOfflineZone
 } from "@/features/offline/tiles/offlineZones"
 import { downloadZoneClearCutsThunk } from "@/features/offline/zoneClearCuts"
+import { initialState } from "@/features/user/store/me.slice"
 import { worker } from "@/mocks/browser"
-import { createClearCutReportResponseBaseMock } from "@/mocks/clear-cuts"
+import {
+	createClearCutReportResponseBaseMock,
+	mockClearCutReportResponse
+} from "@/mocks/clear-cuts"
+import { mockClearCutFormsResponse } from "@/mocks/clear-cuts-forms"
+import { getReferentialThunk } from "@/shared/store/referential/referential.slice"
 import { setupStore } from "@/shared/store/store"
+import { volunteerMock } from "@/test/mocks/user"
 
 const ZONE = { south: 44.1, west: -0.8, north: 44.2, east: -0.7 }
 
 const report = (id: string, lat: number, lng: number) =>
 	createClearCutReportResponseBaseMock({
 		id,
+		// The first report of the zone is assigned to the volunteer
+		userId: id === "zone-0" ? volunteerMock.id : null,
 		averageLocation: { type: "Point", coordinates: [lng, lat] }
 	})
 
@@ -78,7 +89,7 @@ describe("clear cuts of an offline zone", () => {
 		const store = setupStore()
 		const zone = downloadedZone()
 
-		const count = await store
+		const { count } = await store
 			.dispatch(downloadZoneClearCutsThunk(zone))
 			.unwrap()
 
@@ -127,5 +138,29 @@ describe("clear cuts of an offline zone", () => {
 		)
 
 		expect(selectClearCuts(store.getState()).value?.previews).toEqual([])
+	})
+
+	it("names the reports of the user, whose forms are then stored", async () => {
+		mockMapApi()
+		const store = setupStore({
+			me: { ...initialState, me: { status: "success", value: volunteerMock } }
+		})
+		await store.dispatch(getReferentialThunk())
+		const { count, ownReportIds } = await store
+			.dispatch(downloadZoneClearCutsThunk(downloadedZone()))
+			.unwrap()
+		expect(count).toBe(REPORTS.length)
+		expect(ownReportIds).toEqual(["zone-0"])
+
+		worker.use(
+			mockClearCutReportResponse({ id: "zone-0" }).handler,
+			mockClearCutFormsResponse().handler
+		)
+		await store.dispatch(storeClearCutFormThunk({ id: "zone-0" })).unwrap()
+
+		const stored = JSON.parse(localStorage.getItem("clear-cut-form") ?? "{}")
+		expect(Object.keys(stored)).toEqual(["zone-0"])
+		// Stored in the background: the form shown is left alone
+		expect(selectDetail(store.getState()).status).toBe("idle")
 	})
 })

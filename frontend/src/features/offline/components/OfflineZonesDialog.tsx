@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
+import { storeClearCutFormThunk } from "@/features/clear-cut/store/clear-cuts-slice"
 import { useOfflineZones } from "@/features/offline/hooks/useOfflineZones"
 import {
 	type DownloadProgress,
@@ -108,9 +109,16 @@ export function OfflineZonesDialog({ open, onOpenChange }: Props) {
 				setMessage(INTERRUPTIONS[result.interruption])
 				return
 			}
-			const clearCuts = await dispatch(downloadZoneClearCutsThunk(result.zone))
+			const zoneClearCuts = await dispatch(
+				downloadZoneClearCutsThunk(result.zone)
+			)
 				.unwrap()
 				.catch(() => undefined)
+			// The forms of the user's reports, to fill them without network
+			for (const id of zoneClearCuts?.ownReportIds ?? []) {
+				await dispatch(storeClearCutFormThunk({ id })).catch(() => undefined)
+			}
+			const clearCuts = zoneClearCuts?.count
 			setMessage(
 				[
 					result.zone.complete

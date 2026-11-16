@@ -17,6 +17,7 @@ import {
 	zoneClearCutsKey
 } from "@/features/offline/tiles/offlineZones"
 import type { GeoBounds } from "@/features/offline/tiles/tileMath"
+import { selectConnectedMe } from "@/features/user/store/me.slice"
 import { createAppAsyncThunk } from "@/shared/store/thunk"
 
 /** The map API returns at most this many reports per request. */
@@ -35,7 +36,7 @@ function quarters({ south, west, north, east }: GeoBounds): GeoBounds[] {
 	]
 }
 
-type RawReport = { id: string; raw: unknown }
+type RawReport = { id: string; userId?: string | null; raw: unknown }
 
 /**
  * The reports of the map in these bounds, as the API sends them. Bounds that
@@ -63,7 +64,11 @@ export async function fetchReportsIn(
 		}
 		return uniqBy(parts, ({ id }) => id)
 	}
-	return previews.map(({ id }, index) => ({ id, raw: raw.previews[index] }))
+	return previews.map(({ id, userId }, index) => ({
+		id,
+		userId,
+		raw: raw.previews[index]
+	}))
 }
 
 const openStore = (): Promise<TileStore | undefined> =>
@@ -71,11 +76,17 @@ const openStore = (): Promise<TileStore | undefined> =>
 		? Promise.resolve(undefined)
 		: caches.open(OFFLINE_TILES_CACHE).catch(() => undefined)
 
-/** Stores the reports of the zone for use without network; returns their count. */
+export type ZoneClearCuts = {
+	count: number
+	/** Reports of the zone assigned to the user or in their favourites. */
+	ownReportIds: string[]
+}
+
+/** Stores the reports of the zone for use without network. */
 export const downloadZoneClearCutsThunk = createAppAsyncThunk<
-	number,
+	ZoneClearCuts,
 	OfflineZone
->("downloadZoneClearCuts", async (zone, { extra: { api } }) => {
+>("downloadZoneClearCuts", async (zone, { extra: { api }, getState }) => {
 	const reports = await fetchReportsIn(api(), zone.bounds)
 	const store = await openStore()
 	if (!store) throw new Error("Cache API unavailable")
@@ -86,7 +97,17 @@ export const downloadZoneClearCutsThunk = createAppAsyncThunk<
 		})
 	)
 	saveOfflineZone({ ...zone, clearCuts: reports.length })
-	return reports.length
+	const me = selectConnectedMe(getState())
+	return {
+		count: reports.length,
+		ownReportIds: me
+			? reports
+					.filter(
+						({ id, userId }) => userId === me.id || me.favorites.includes(id)
+					)
+					.map(({ id }) => id)
+			: []
+	}
 })
 
 const overlaps = (zone: OfflineZone, bounds?: Bounds) =>

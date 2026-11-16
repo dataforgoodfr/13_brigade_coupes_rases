@@ -208,6 +208,23 @@ export const getClearCutFormThunk = createAppAsyncThunk<
 	})
 )
 
+/**
+ * Stores the form of a report on the device without showing it, so that it
+ * can be filled without network.
+ */
+export const storeClearCutFormThunk = createAppAsyncThunk<
+	ClearCutFormVersions,
+	{ id: string }
+>(
+	"storeClearCutForm",
+	withEntityStorageActionCreator(loadClearCutFormVersions, {
+		getId: (v) => v.id,
+		storage: formStorage,
+		schema: clearCutFormVersionsSchema,
+		type: "controlled"
+	})
+)
+
 export const getClearCutsThunk = createAppAsyncThunk<ClearCuts, FiltersRequest>(
 	"getClearCuts",
 	async (filters, { getState, signal, extra: { api } }) => {
