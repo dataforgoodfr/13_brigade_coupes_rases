@@ -1,5 +1,7 @@
 import { createContext, useContext, useState } from "react"
 
+import type { MultiPolygon } from "@/features/clear-cut/store/clear-cuts"
+
 export type MapContext = {
 	map: L.Map | null
 	setMap: (map: L.Map | null) => void
@@ -8,7 +10,12 @@ export type MapContext = {
 	/** Report whose perimeter is currently being edited on the map, if any. */
 	editingPerimeterReportId?: string
 	setEditingPerimeterReportId: (id?: string) => void
+	/** Perimeter replaced by a manual correction, drawn over the map. */
+	previousBoundary?: PreviousBoundary
+	setPreviousBoundary: (boundary?: PreviousBoundary) => void
 } | null
+
+export type PreviousBoundary = { key: string; boundary: MultiPolygon }
 const MapCtx = createContext<MapContext>(null)
 
 export const useMapInstance = () => {
@@ -23,6 +30,7 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
 	const [focusedClearCutId, setFocusedClearCutId] = useState<string>()
 	const [editingPerimeterReportId, setEditingPerimeterReportId] =
 		useState<string>()
+	const [previousBoundary, setPreviousBoundary] = useState<PreviousBoundary>()
 	return (
 		<MapCtx.Provider
 			value={{
@@ -30,6 +38,8 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
 				setFocusedClearCutId,
 				editingPerimeterReportId,
 				setEditingPerimeterReportId,
+				previousBoundary,
+				setPreviousBoundary,
 				map,
 				setMap
 			}}

@@ -404,6 +404,58 @@ describe("general info edition controls", () => {
 		})
 	})
 
+	describe("boundary history", () => {
+		const historyButton = () =>
+			screen.queryByRole("button", { name: /Historique du contour/ })
+		defaultSetupServerBeforeEach(
+			setupTest({ isManuallyEdited: true, manuallyEditedAt: "2026-04-02" })
+		)
+
+		it("is hidden from volunteers", async () => {
+			await openGeneralInfo(volunteerMock)
+			expect(await screen.findByText(/Édité manuellement/)).toBeInTheDocument()
+			expect(historyButton()).not.toBeInTheDocument()
+		})
+
+		it("lists the replaced perimeters for admins", async () => {
+			worker.use(
+				http.get("*/api/v1/clear-cuts/:id/boundary-history", () =>
+					HttpResponse.json([
+						{
+							editedAt: "2026-04-02T10:15:30.123456",
+							editedBy: "AlicePinede",
+							previousAreaHectare: 3.25,
+							previousBoundary: {
+								type: "MultiPolygon",
+								coordinates: [
+									[
+										[
+											[2.35, 48.85],
+											[2.36, 48.85],
+											[2.36, 48.86],
+											[2.35, 48.85]
+										]
+									]
+								]
+							}
+						}
+					])
+				)
+			)
+			await openGeneralInfo(adminMock)
+			const button = await screen.findByRole("button", {
+				name: /Historique du contour/
+			})
+			button.click()
+			expect(await screen.findByText(/par AlicePinede/)).toBeInTheDocument()
+			const show = screen.getByRole("button", { name: "Voir sur la carte" })
+			show.click()
+			expect(
+				await screen.findByRole("button", { name: "Masquer sur la carte" })
+			).toBeInTheDocument()
+		})
+	})
+
 	describe("following a report", () => {
 		const followSwitch = () =>
 			screen.queryByRole("switch", { name: /à suivre par l'association/ })

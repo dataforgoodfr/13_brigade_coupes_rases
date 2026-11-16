@@ -31,6 +31,7 @@ import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 import { ClearCuts } from "./ClearCuts"
+import { PreviousBoundary } from "./PreviousBoundary"
 
 function authedApi() {
 	const token = getStoredToken()
@@ -327,6 +328,7 @@ export function InteractiveMap() {
 			<RememberView />
 			<GeomanControls />
 			<ClearCuts />
+			<PreviousBoundary />
 		</MapContainer>
 	)
 }

@@ -32,6 +32,8 @@ import {
 } from "@/shared/store/thunk"
 
 import {
+	type BoundaryHistoryEntry,
+	boundaryHistoryEntrySchema,
 	type ClearCutForm,
 	type ClearCutFormVersions,
 	type ClearCutReport,
@@ -606,6 +608,17 @@ export const setReportPriorityThunk = createAppAsyncThunk<
 			.json()
 		dispatch(getClearCutFormThunk({ id: reportId, hasBeenCreated: true }))
 	}
+)
+
+export const getBoundaryHistoryThunk = createAppAsyncThunk<
+	BoundaryHistoryEntry[],
+	{ clearCutId: string }
+>("clear-cuts/getBoundaryHistory", async ({ clearCutId }, { extra: { api } }) =>
+	boundaryHistoryEntrySchema
+		.array()
+		.parse(
+			await api().get(`api/v1/clear-cuts/${clearCutId}/boundary-history`).json()
+		)
 )
 
 type State = {
