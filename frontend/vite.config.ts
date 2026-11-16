@@ -78,10 +78,16 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 							"tiles-opentopomap",
 							/^https:\/\/[abc]\.tile\.opentopomap\.org\/\d+\/\d+\/\d+\.png$/i
 						),
-						// Plan IGN, aerial photographs and cadastre (IGN Géoplateforme)
+						// Plan IGN, aerial photographs and cadastre (IGN Géoplateforme).
+						// The downloads of offline zones ("no-store") have their own
+						// cache, filled by the page.
 						cacheTiles(
 							"tiles-ign",
-							/^https:\/\/data\.geopf\.fr\/wmts\?.*REQUEST=GetTile/i
+							({ url, request }) =>
+								url.origin === "https://data.geopf.fr" &&
+								url.pathname === "/wmts" &&
+								/REQUEST=GetTile/i.test(url.search) &&
+								request.cache !== "no-store"
 						),
 						cacheTiles(
 							"tiles-arcgis",
