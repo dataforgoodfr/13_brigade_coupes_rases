@@ -32,6 +32,7 @@ import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 import { ClearCuts } from "./ClearCuts"
+import { DrawingPreview } from "./DrawingPreview"
 import { GpxImportButton, type GpxImportHandle } from "./GpxImportButton"
 import { PreviousBoundary } from "./PreviousBoundary"
 
@@ -101,7 +102,18 @@ function GeomanControls() {
 			onClick: () => gpxImportRef.current?.open()
 		})
 
-		map.pm.setLang("fr")
+		// On a phone, tapping the first vertex exactly is hard: point to the
+		// toolbar's "Terminer" button as well
+		map.pm.setLang(
+			"fr",
+			{
+				tooltips: {
+					finishPoly:
+						"Touchez le premier sommet ou « Terminer » pour fermer le périmètre"
+				}
+			},
+			"fr"
+		)
 		isGeomanInitialized.current = true
 	}, [map, user])
 
@@ -379,6 +391,7 @@ export function InteractiveMap() {
 			/>
 			<RememberView />
 			<GeomanControls />
+			<DrawingPreview />
 			<ClearCuts />
 			<PreviousBoundary />
 		</MapContainer>

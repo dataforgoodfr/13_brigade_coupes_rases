@@ -1,4 +1,4 @@
-import { simplifyRing } from "@/shared/geometry"
+import { ringAreaHectare, simplifyRing } from "@/shared/geometry"
 
 type Position = [number, number]
 
@@ -47,16 +47,6 @@ function pathLengthMeters(points: Position[]): number {
 		length += Math.hypot(xy[i][0] - xy[i - 1][0], xy[i][1] - xy[i - 1][1])
 	}
 	return length
-}
-
-/** Shoelace formula on a closed ring, in square meters. */
-function ringAreaSquareMeters(ring: Position[]): number {
-	const xy = toLocalMeters(ring)
-	let twiceArea = 0
-	for (let i = 1; i < xy.length; i++) {
-		twiceArea += xy[i - 1][0] * xy[i][1] - xy[i][0] * xy[i - 1][1]
-	}
-	return Math.abs(twiceArea) / 2
 }
 
 function segmentsCross(
@@ -130,7 +120,7 @@ function toTrace(name: string, points: Position[]): GpxTrace {
 	if (ring.length >= 4 && isSelfIntersecting(ring)) {
 		return { ...measured, problem: "la trace se croise" }
 	}
-	const areaHectare = ringAreaSquareMeters(ring) / 10_000
+	const areaHectare = ringAreaHectare(ring)
 	if (ring.length < 4 || areaHectare === 0) {
 		return { ...measured, problem: "la trace n'entoure aucune surface" }
 	}

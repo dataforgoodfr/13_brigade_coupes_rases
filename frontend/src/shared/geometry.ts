@@ -123,3 +123,21 @@ export function simplifyMultiPolygon<T extends { coordinates: Position[][][] }>(
 		)
 	}
 }
+
+/**
+ * Area of a ring of [longitude, latitude] positions, in hectares (shoelace
+ * formula in a local equirectangular projection). The ring may be open: its
+ * last position is joined back to the first one.
+ */
+export function ringAreaHectare(ring: Position[]): number {
+	if (ring.length < 3) return 0
+	const lngScale = METERS_PER_DEGREE * Math.cos((ring[0][1] * Math.PI) / 180)
+	const xy = ring.map(([lng, lat]) => [lng * lngScale, lat * METERS_PER_DEGREE])
+	let twiceArea = 0
+	for (let i = 0; i < xy.length; i++) {
+		const [x1, y1] = xy[i]
+		const [x2, y2] = xy[(i + 1) % xy.length]
+		twiceArea += x1 * y2 - x2 * y1
+	}
+	return Math.abs(twiceArea) / 2 / 10_000
+}
