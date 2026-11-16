@@ -1,7 +1,7 @@
 import type * as L from "leaflet"
 import type { LatLngExpression, Map as LeafletMap } from "leaflet"
 import { useEffect, useRef } from "react"
-import { MapContainer, TileLayer, useMapEvents } from "react-leaflet"
+import { GeoJSON, MapContainer, TileLayer, useMapEvents } from "react-leaflet"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { cn } from "@/lib/utils"
@@ -27,10 +27,12 @@ import { selectFiltersRequest } from "@/features/clear-cut/store/filters.slice"
 import { getStoredToken, useConnectedMe } from "@/features/user/store/me.slice"
 import { useToast } from "@/hooks/use-toast"
 import { api } from "@/shared/api/api"
+import type { GpxPolygon, GpxTrace } from "@/shared/gpx"
 import { useSingleFlight } from "@/shared/hooks/singleFlight"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 
 import { ClearCuts } from "./ClearCuts"
+import { GpxImportButton, type GpxImportHandle } from "./GpxImportButton"
 import { PreviousBoundary } from "./PreviousBoundary"
 
 function authedApi() {
@@ -57,6 +59,12 @@ function GeomanControls() {
 	const [selectedCity, setSelectedCity] = useState<CityResult | null>(null)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const singleFlight = useSingleFlight()
+	// Trace imported from a GPX file, shown on the map until the dialog closes
+	const [gpxTrace, setGpxTrace] = useState<{
+		trace: GpxTrace
+		polygon: GpxPolygon
+	} | null>(null)
+	const gpxImportRef = useRef<GpxImportHandle>(null)
 
 	const dispatch = useAppDispatch()
 	const filters = useAppSelector(selectFiltersRequest)
@@ -82,6 +90,15 @@ function GeomanControls() {
 			cutPolygon: false,
 			removalMode: false,
 			drawPolygon: true
+		})
+
+		map.pm.Toolbar.createCustomControl({
+			name: "importGpx",
+			block: "draw",
+			title: "Importer un GPX",
+			className: "gpx-import-control",
+			toggle: false,
+			onClick: () => gpxImportRef.current?.open()
 		})
 
 		map.pm.setLang("fr")
@@ -160,8 +177,25 @@ function GeomanControls() {
 			setCityResults([])
 			setSelectedCity(null)
 			setGeometry(null)
+			setGpxTrace(null)
 		}
 		setIsOpen(open)
+	}
+
+	const handleGpxPolygon = (polygon: GpxPolygon, trace: GpxTrace) => {
+		const ring = polygon.coordinates[0][0]
+		const lngs = ring.map(([lng]) => lng)
+		const lats = ring.map(([, lat]) => lat)
+		map.fitBounds(
+			[
+				[Math.min(...lats), Math.min(...lngs)],
+				[Math.max(...lats), Math.max(...lngs)]
+			],
+			{ padding: [40, 40] }
+		)
+		setGpxTrace({ trace, polygon })
+		setGeometry({ type: "Feature", properties: {}, geometry: polygon })
+		setIsOpen(true)
 	}
 
 	const handleSubmit = async () => {
@@ -208,74 +242,92 @@ function GeomanControls() {
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleDialogClose}>
-			<DialogContent className="sm:max-w-md">
-				<DialogHeader>
-					<DialogTitle>Signaler une coupe rase manuellement</DialogTitle>
-					<DialogDescription>
-						Recherchez la commune où se trouve la coupe rase tracée.
-					</DialogDescription>
-				</DialogHeader>
-				<div className="flex flex-col gap-4 py-4">
-					<div className="flex flex-col gap-2">
-						<Label htmlFor={citySearchId}>Commune</Label>
-						<div className="relative">
-							<input
-								id={citySearchId}
-								placeholder="Ex: Limoges, Saint-Étienne..."
-								value={
-									selectedCity
-										? `${selectedCity.name} (${selectedCity.department_code})`
-										: citySearch
-								}
-								onChange={(e) => {
-									setSelectedCity(null)
-									setCitySearch(e.target.value)
-								}}
-								autoComplete="off"
-								className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-							/>
-							{cityResults.length > 0 && !selectedCity && (
-								<ul className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-md max-h-48 overflow-y-auto">
-									{cityResults.map((city) => (
-										<li
-											key={`${city.insee_code}-${city.name}`}
-											className="cursor-pointer px-3 py-2 text-sm hover:bg-neutral-100"
-											onMouseDown={(e) => {
-												e.preventDefault()
-												setSelectedCity(city)
-												setCitySearch("")
-												setCityResults([])
-											}}
-										>
-											{city.name}
-											<span className="ml-1 text-neutral-400 text-xs">
-												({city.department_code})
-											</span>
-										</li>
-									))}
-								</ul>
-							)}
+		<>
+			<GpxImportButton
+				ref={gpxImportRef}
+				hideButton
+				onPolygon={handleGpxPolygon}
+			/>
+			{gpxTrace && (
+				<GeoJSON
+					key={JSON.stringify(gpxTrace.polygon.coordinates[0][0][0])}
+					data={gpxTrace.polygon}
+					interactive={false}
+					style={{ color: "#2563eb", weight: 2, fillOpacity: 0.2 }}
+				/>
+			)}
+			<Dialog open={isOpen} onOpenChange={handleDialogClose}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Signaler une coupe rase manuellement</DialogTitle>
+						<DialogDescription>
+							{gpxTrace
+								? `Trace « ${gpxTrace.trace.name} » importée (${gpxTrace.trace.areaHectare.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} ha). `
+								: ""}
+							Recherchez la commune où se trouve la coupe rase tracée.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="flex flex-col gap-4 py-4">
+						<div className="flex flex-col gap-2">
+							<Label htmlFor={citySearchId}>Commune</Label>
+							<div className="relative">
+								<input
+									id={citySearchId}
+									placeholder="Ex: Limoges, Saint-Étienne..."
+									value={
+										selectedCity
+											? `${selectedCity.name} (${selectedCity.department_code})`
+											: citySearch
+									}
+									onChange={(e) => {
+										setSelectedCity(null)
+										setCitySearch(e.target.value)
+									}}
+									autoComplete="off"
+									className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+								/>
+								{cityResults.length > 0 && !selectedCity && (
+									<ul className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-md max-h-48 overflow-y-auto">
+										{cityResults.map((city) => (
+											<li
+												key={`${city.insee_code}-${city.name}`}
+												className="cursor-pointer px-3 py-2 text-sm hover:bg-neutral-100"
+												onMouseDown={(e) => {
+													e.preventDefault()
+													setSelectedCity(city)
+													setCitySearch("")
+													setCityResults([])
+												}}
+											>
+												{city.name}
+												<span className="ml-1 text-neutral-400 text-xs">
+													({city.department_code})
+												</span>
+											</li>
+										))}
+									</ul>
+								)}
+							</div>
 						</div>
 					</div>
-				</div>
-				<DialogFooter>
-					<Button
-						variant="outline"
-						onClick={() => handleDialogClose(false)}
-						disabled={isSubmitting}
-					>
-						Annuler
-					</Button>
-					<Button
-						onClick={() => singleFlight(handleSubmit)}
-						disabled={isSubmitting || !selectedCity}
-					>
-						{isSubmitting ? "Envoi..." : "Valider le signalement"}
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => handleDialogClose(false)}
+							disabled={isSubmitting}
+						>
+							Annuler
+						</Button>
+						<Button
+							onClick={() => singleFlight(handleSubmit)}
+							disabled={isSubmitting || !selectedCity}
+						>
+							{isSubmitting ? "Envoi..." : "Valider le signalement"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	)
 }
 
