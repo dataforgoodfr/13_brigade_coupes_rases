@@ -1,5 +1,11 @@
 import { Upload } from "lucide-react"
-import { type ChangeEvent, useRef, useState } from "react"
+import {
+	type ChangeEvent,
+	type Ref,
+	useImperativeHandle,
+	useRef,
+	useState
+} from "react"
 import { FormattedNumber } from "react-intl"
 
 import { Button } from "@/components/ui/button"
@@ -16,18 +22,26 @@ import { type GpxPolygon, type GpxTrace, readGpx } from "@/shared/gpx"
 /** A GPS recording of a few hours weighs well under a megabyte. */
 const MAX_GPX_BYTES = 10 * 1024 * 1024
 
+export type GpxImportHandle = { open: () => void }
+
 /**
  * Picks a GPX file and hands over the perimeter drawn by one of its traces.
  * With several traces, the user chooses one; the unusable ones say why.
+ * `hideButton` leaves the trigger to the caller, through `ref.open()`.
  */
 export function GpxImportButton({
 	onPolygon,
-	disabled
+	disabled,
+	hideButton,
+	ref
 }: {
 	onPolygon: (polygon: GpxPolygon, trace: GpxTrace) => void
 	disabled?: boolean
+	hideButton?: boolean
+	ref?: Ref<GpxImportHandle>
 }) {
 	const inputRef = useRef<HTMLInputElement>(null)
+	useImperativeHandle(ref, () => ({ open: () => inputRef.current?.click() }))
 	const [traces, setTraces] = useState<GpxTrace[]>()
 	const { toast } = useToast()
 
@@ -87,16 +101,18 @@ export function GpxImportButton({
 				aria-label="Fichier GPX"
 				onChange={handleFile}
 			/>
-			<Button
-				type="button"
-				variant="outline"
-				size="sm"
-				disabled={disabled}
-				onClick={() => inputRef.current?.click()}
-			>
-				<Upload size={14} className="mr-1" />
-				Importer un GPX
-			</Button>
+			{!hideButton && (
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					disabled={disabled}
+					onClick={() => inputRef.current?.click()}
+				>
+					<Upload size={14} className="mr-1" />
+					Importer un GPX
+				</Button>
+			)}
 			<Dialog
 				open={traces !== undefined}
 				onOpenChange={(open) => {
