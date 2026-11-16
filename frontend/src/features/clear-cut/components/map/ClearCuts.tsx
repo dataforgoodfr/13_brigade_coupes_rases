@@ -22,17 +22,18 @@ import {
 	setGeoBounds,
 	setWithPoints
 } from "@/features/clear-cut/store/filters.slice"
+import { offlineTileLayer } from "@/features/offline/tiles/OfflineTileLayer"
 import { cn } from "@/lib/utils"
 import { AddressInput } from "@/shared/components/input/AddressInput"
 import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
+import {
+	CADASTRE_URL,
+	IGN_ATTRIBUTION,
+	PHOTOS_IGN_URL,
+	PLAN_IGN_URL
+} from "@/shared/geoplateforme"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
-
-/** A WMTS layer of the IGN Géoplateforme: open licence, no key needed. */
-const geoplateformeUrl = (layer: string, format: "image/png" | "image/jpeg") =>
-	`https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=${format}`
-const IGN_ATTRIBUTION =
-	'&copy; <a href="https://geoservices.ign.fr/">IGN</a> - Géoplateforme'
 
 const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
@@ -76,29 +77,23 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	},
 	{
 		isSelected: false,
-		item: L.tileLayer(
-			geoplateformeUrl("GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "image/png"),
-			{
-				id: "PlanIGN",
-				attribution: `${IGN_ATTRIBUTION} - Plan IGN`,
-				maxNativeZoom: 19,
-				maxZoom: 20
-			}
-		),
+		item: offlineTileLayer(PLAN_IGN_URL, {
+			id: "PlanIGN",
+			attribution: `${IGN_ATTRIBUTION} - Plan IGN`,
+			maxNativeZoom: 19,
+			maxZoom: 20
+		}),
 		label: "Plan IGN",
 		value: "plan-ign"
 	},
 	{
 		isSelected: false,
-		item: L.tileLayer(
-			geoplateformeUrl("ORTHOIMAGERY.ORTHOPHOTOS", "image/jpeg"),
-			{
-				id: "OrthophotosIGN",
-				attribution: `${IGN_ATTRIBUTION} - Photographies aériennes`,
-				maxNativeZoom: 19,
-				maxZoom: 20
-			}
-		),
+		item: offlineTileLayer(PHOTOS_IGN_URL, {
+			id: "OrthophotosIGN",
+			attribution: `${IGN_ATTRIBUTION} - Photographies aériennes`,
+			maxNativeZoom: 19,
+			maxZoom: 20
+		}),
 		label: "Photos IGN",
 		value: "photos-ign"
 	}
@@ -107,16 +102,13 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 const OVERLAYS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
 		isSelected: false,
-		item: L.tileLayer(
-			geoplateformeUrl("CADASTRALPARCELS.PARCELLAIRE_EXPRESS", "image/png"),
-			{
-				id: "Cadastre",
-				attribution: `${IGN_ATTRIBUTION} - Parcellaire Express`,
-				maxZoom: 20,
-				opacity: 0.7,
-				pane: "overlayPane"
-			}
-		),
+		item: offlineTileLayer(CADASTRE_URL, {
+			id: "Cadastre",
+			attribution: `${IGN_ATTRIBUTION} - Parcellaire Express`,
+			maxZoom: 20,
+			opacity: 0.7,
+			pane: "overlayPane"
+		}),
 		label: "Cadastre",
 		value: "cadastre"
 	}
