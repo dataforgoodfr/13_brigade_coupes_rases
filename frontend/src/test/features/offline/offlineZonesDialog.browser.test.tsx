@@ -1,8 +1,11 @@
 import "leaflet/dist/leaflet.css"
 
 import { screen } from "@testing-library/dom"
+import type { Map as LeafletMap } from "leaflet"
 import { HttpResponse, http } from "msw"
+import { createRef } from "react"
 import { MapContainer } from "react-leaflet"
+import { Provider } from "react-redux"
 import { afterEach, describe, expect, it } from "vitest"
 import { userEvent } from "vitest/browser"
 import { render } from "vitest-browser-react"
@@ -15,6 +18,7 @@ import {
 	OFFLINE_TILES_CACHE
 } from "@/features/offline/tiles/offlineZones"
 import { worker } from "@/mocks/browser"
+import { setupStore } from "@/shared/store/store"
 
 const PNG = Uint8Array.from(
 	atob(
@@ -29,6 +33,9 @@ function mockGeoplateforme() {
 			"https://data.geopf.fr/wmts",
 			() => new HttpResponse(PNG, { headers: { "content-type": "image/png" } })
 		),
+		http.get("*/api/v1/clear-cuts-map", () =>
+			HttpResponse.json({ previews: [], points: { total: 0, content: [] } })
+		),
 		http.get("https://data.geopf.fr/geocodage/reverse", () =>
 			HttpResponse.json({
 				features: [{ properties: { toponym: "Sabres" } }]
@@ -37,16 +44,21 @@ function mockGeoplateforme() {
 	)
 }
 
+const mapRef = createRef<LeafletMap>()
+
 const renderDialog = (zoom: number) =>
 	render(
-		<MapContainer
-			center={{ lat: 44.15, lng: -0.74 }}
-			zoom={zoom}
-			zoomAnimation={false}
-			style={{ height: 200, width: 200 }}
-		>
-			<OfflineZonesDialog open onOpenChange={() => undefined} />
-		</MapContainer>
+		<Provider store={setupStore()}>
+			<MapContainer
+				ref={mapRef}
+				center={{ lat: 44.15, lng: -0.74 }}
+				zoom={zoom}
+				zoomAnimation={false}
+				style={{ height: 200, width: 200 }}
+			>
+				<OfflineZonesDialog open onOpenChange={() => undefined} />
+			</MapContainer>
+		</Provider>
 	)
 
 describe("OfflineZonesDialog", () => {
@@ -61,7 +73,7 @@ describe("OfflineZonesDialog", () => {
 		)
 		expect(
 			await screen.findByText(
-				"« Sabres » est disponible hors ligne.",
+				"« Sabres » est disponible hors ligne. 0 coupe enregistrée.",
 				{},
 				{
 					timeout: 15_000
@@ -75,11 +87,20 @@ describe("OfflineZonesDialog", () => {
 			complete: true,
 			sources: ["plan-ign"],
 			minZoom: 15,
-			maxZoom: MAX_OFFLINE_ZOOM
+			maxZoom: MAX_OFFLINE_ZOOM,
+			clearCuts: 0
 		})
 		const cache = await caches.open(OFFLINE_TILES_CACHE)
-		expect(await cache.keys()).toHaveLength(zone.tileCount)
+		// The tiles, and the clear cuts of the zone
+		expect(await cache.keys()).toHaveLength(zone.tileCount + 1)
 		expect(screen.getByText("Zones téléchargées")).toBeInTheDocument()
+
+		// Back on the zone, at a zoom that was downloaded
+		mapRef.current?.setZoom(12)
+		await userEvent.click(
+			screen.getByRole("button", { name: "Voir Sabres sur la carte" })
+		)
+		expect(mapRef.current?.getZoom()).toBe(15)
 
 		await userEvent.click(
 			screen.getByRole("button", { name: "Supprimer Sabres" })
