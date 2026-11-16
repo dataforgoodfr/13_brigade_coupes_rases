@@ -1,7 +1,7 @@
 import type * as L from "leaflet"
 import type { LatLngExpression, Map as LeafletMap } from "leaflet"
 import { useEffect, useRef } from "react"
-import { GeoJSON, MapContainer, TileLayer, useMapEvents } from "react-leaflet"
+import { GeoJSON, MapContainer, useMapEvents } from "react-leaflet"
 
 import { useLayout } from "@/features/clear-cut/components/Layout.context"
 import { cn } from "@/lib/utils"
@@ -385,10 +385,6 @@ export function InteractiveMap() {
 			zoom={lastView.zoom}
 			scrollWheelZoom
 		>
-			<TileLayer
-				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-			/>
 			<RememberView />
 			<GeomanControls />
 			<DrawingPreview />
