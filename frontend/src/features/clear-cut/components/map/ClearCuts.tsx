@@ -28,6 +28,12 @@ import { ToggleGroup } from "@/shared/components/toggle-group/ToggleGroup"
 import { useAppDispatch, useAppSelector } from "@/shared/hooks/store"
 import { type SelectableItemEnhanced, useSingleSelect } from "@/shared/items"
 
+/** A WMTS layer of the IGN Géoplateforme: open licence, no key needed. */
+const geoplateformeUrl = (layer: string, format: "image/png" | "image/jpeg") =>
+	`https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=${format}`
+const IGN_ATTRIBUTION =
+	'&copy; <a href="https://geoservices.ign.fr/">IGN</a> - Géoplateforme'
+
 const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
 		isSelected: true,
@@ -45,6 +51,8 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 		isSelected: false,
 		item: L.tileLayer("https://b.tile.opentopomap.org/{z}/{x}/{y}.png", {
 			id: "OpenTopoMap",
+			attribution:
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
 			maxNativeZoom: 17,
 			maxZoom: 20
 		}),
@@ -57,12 +65,42 @@ const LAYERS: SelectableItemEnhanced<L.TileLayer>[] = [
 			"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 			{
 				id: "ArcGIS.WorldImagery",
+				attribution:
+					"Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
 				maxNativeZoom: 19,
 				maxZoom: 20
 			}
 		),
 		label: "Satellite",
 		value: "satellite"
+	},
+	{
+		isSelected: false,
+		item: L.tileLayer(
+			geoplateformeUrl("GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "image/png"),
+			{
+				id: "PlanIGN",
+				attribution: `${IGN_ATTRIBUTION} - Plan IGN`,
+				maxNativeZoom: 19,
+				maxZoom: 20
+			}
+		),
+		label: "Plan IGN",
+		value: "plan-ign"
+	},
+	{
+		isSelected: false,
+		item: L.tileLayer(
+			geoplateformeUrl("ORTHOIMAGERY.ORTHOPHOTOS", "image/jpeg"),
+			{
+				id: "OrthophotosIGN",
+				attribution: `${IGN_ATTRIBUTION} - Photographies aériennes`,
+				maxNativeZoom: 19,
+				maxZoom: 20
+			}
+		),
+		label: "Photos IGN",
+		value: "photos-ign"
 	}
 ]
 
@@ -70,11 +108,10 @@ const OVERLAYS: SelectableItemEnhanced<L.TileLayer>[] = [
 	{
 		isSelected: false,
 		item: L.tileLayer(
-			"https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&STYLE=normal&TILEMATRIXSET=PM&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png",
+			geoplateformeUrl("CADASTRALPARCELS.PARCELLAIRE_EXPRESS", "image/png"),
 			{
 				id: "Cadastre",
-				attribution:
-					'&copy; <a href="https://geoservices.ign.fr/">IGN</a> - Parcellaire Express',
+				attribution: `${IGN_ATTRIBUTION} - Parcellaire Express`,
 				maxZoom: 20,
 				opacity: 0.7,
 				pane: "overlayPane"
@@ -114,20 +151,20 @@ export function ClearCuts() {
 	>(LAYERS)
 	const [overlays, setOverlays] = useState(OVERLAYS)
 
+	// The selected base layer is the only one on the map: the others must not
+	// keep loading tiles underneath (overlays live in a pane above)
+	const baseLayer = layer?.item
+	useEffect(() => {
+		if (!baseLayer) return
+		map.addLayer(baseLayer)
+		return () => {
+			map.removeLayer(baseLayer)
+		}
+	}, [map, baseLayer])
+
 	const handleLayerSelected = (
 		selectableItem: SelectableItemEnhanced<L.TileLayer>
-	) => {
-		if (layer?.item) {
-			map.removeLayer(layer?.item)
-		}
-		map.addLayer(selectableItem.item)
-		setLayer(selectableItem)
-		for (const overlay of overlays) {
-			if (overlay.isSelected && map.hasLayer(overlay.item)) {
-				overlay.item.bringToFront()
-			}
-		}
-	}
+	) => setLayer(selectableItem)
 
 	const handleOverlaysChanged = (
 		selectedItems: SelectableItemEnhanced<L.TileLayer>[]

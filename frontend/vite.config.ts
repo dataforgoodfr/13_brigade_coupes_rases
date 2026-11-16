@@ -78,6 +78,11 @@ export const baseConfigFn: UserConfigFnObject = ({ mode }) => {
 							"tiles-opentopomap",
 							/^https:\/\/[abc]\.tile\.opentopomap\.org\/\d+\/\d+\/\d+\.png$/i
 						),
+						// Plan IGN, aerial photographs and cadastre (IGN Géoplateforme)
+						cacheTiles(
+							"tiles-ign",
+							/^https:\/\/data\.geopf\.fr\/wmts\?.*REQUEST=GetTile/i
+						),
 						cacheTiles(
 							"tiles-arcgis",
 							/^https:\/\/server.arcgisonline.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/\d+\/\d+\/\d+$/i
