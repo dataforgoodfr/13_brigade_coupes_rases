@@ -309,6 +309,27 @@ class ClearCut(Base):
     )
 
 
+class ClearCutBoundaryHistory(Base):
+    """A perimeter replaced by a manual correction, kept with who replaced it."""
+
+    __tablename__ = "clear_cut_boundary_history"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    clear_cut_id: Mapped[int] = mapped_column(
+        ForeignKey("clear_cuts.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    previous_boundary: Mapped[str] = mapped_column(
+        Geometry(geometry_type="MultiPolygon", srid=SRID), nullable=False
+    )
+    previous_area_hectare: Mapped[float] = mapped_column(Float, nullable=False)
+    edited_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    edited_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    edited_by: Mapped[User | None] = relationship()
+    previous_boundary_json = column_property(functions.ST_AsGeoJSON(previous_boundary))
+
+
 class ClearCutReport(Base):
     __tablename__ = "clear_cuts_reports"
 

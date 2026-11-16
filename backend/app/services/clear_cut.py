@@ -3,14 +3,22 @@ from datetime import datetime
 
 from geoalchemy2 import Geography
 from geoalchemy2.functions import ST_Area, ST_AsGeoJSON, ST_Centroid
+from geojson_pydantic import MultiPolygon
 from shapely.geometry import shape
 from sqlalchemy import ColumnElement, Row, case, cast, func, update
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import RowReturningQuery
 
 from app.common.errors import AppHTTPException
-from app.models import SRID, ClearCut, ClearCutEcologicalZoning, User
+from app.models import (
+    SRID,
+    ClearCut,
+    ClearCutBoundaryHistory,
+    ClearCutEcologicalZoning,
+    User,
+)
 from app.schemas.clear_cut import (
+    BoundaryHistoryEntrySchema,
     ClearCutPatchSchema,
     ClearCutResponseSchema,
     clear_cut_to_clear_cut_response_schema,
@@ -80,6 +88,7 @@ def update_clear_cut_geometry(
             detail="Only admins or the assigned volunteer can edit a clear cut",
         )
 
+    now = datetime.now()
     changed = False
     if request.observation_start_date is not None:
         clear_cut.observation_start_date = request.observation_start_date
@@ -89,6 +98,15 @@ def update_clear_cut_geometry(
         changed = True
 
     if request.boundary is not None:
+        db.add(
+            ClearCutBoundaryHistory(
+                clear_cut_id=clear_cut_id,
+                previous_boundary=clear_cut.boundary,
+                previous_area_hectare=clear_cut.area_hectare,
+                edited_at=now,
+                edited_by_id=connected_user.id,
+            )
+        )
         # Area (hectares, metric via geography) and centroid are derived from the
         # new perimeter by PostGIS, in the same statement.
         boundary = func.ST_Multi(
@@ -128,7 +146,7 @@ def update_clear_cut_geometry(
         return get_clearcut_by_id(clear_cut_id, db)
 
     clear_cut.is_manually_edited = True
-    clear_cut.manually_edited_at = datetime.now()
+    clear_cut.manually_edited_at = now
     clear_cut.manually_edited_by_id = connected_user.id
     # A fresh manual correction must re-lock the cut against the pipeline, even if
     # the override had been re-enabled for a previous run.
@@ -138,6 +156,36 @@ def update_clear_cut_geometry(
     # Recompute report totals, first/last cut date, average location and rules.
     sync_clear_cuts_reports(db)
     return get_clearcut_by_id(clear_cut_id, db)
+
+
+def find_boundary_history(
+    db: Session, clear_cut_id: int
+) -> list[BoundaryHistoryEntrySchema]:
+    """Perimeters replaced by manual corrections, most recent first."""
+    if db.get(ClearCut, clear_cut_id) is None:
+        raise AppHTTPException(
+            status_code=404, type="CLEAR_CUT_NOT_FOUND", detail="ClearCut not found"
+        )
+    entries = (
+        db.query(ClearCutBoundaryHistory)
+        .filter(ClearCutBoundaryHistory.clear_cut_id == clear_cut_id)
+        .order_by(
+            ClearCutBoundaryHistory.edited_at.desc(),
+            ClearCutBoundaryHistory.id.desc(),
+        )
+        .all()
+    )
+    return [
+        BoundaryHistoryEntrySchema(
+            edited_at=entry.edited_at,
+            edited_by=entry.edited_by.login if entry.edited_by is not None else None,
+            previous_area_hectare=entry.previous_area_hectare,
+            previous_boundary=MultiPolygon.model_validate_json(
+                entry.previous_boundary_json
+            ),
+        )
+        for entry in entries
+    ]
 
 
 def paginated_clear_cuts_query(
