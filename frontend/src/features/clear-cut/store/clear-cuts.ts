@@ -36,6 +36,15 @@ const multiPolygonSchema = z.object({
 export type Point = z.infer<typeof pointSchema>
 export type MultiPolygon = z.infer<typeof multiPolygonSchema>
 
+// A perimeter replaced by a manual correction (admins only)
+export const boundaryHistoryEntrySchema = z.object({
+	editedAt: z.iso.datetime({ local: true }),
+	editedBy: z.string().nullable().optional(),
+	previousAreaHectare: z.number(),
+	previousBoundary: multiPolygonSchema
+})
+export type BoundaryHistoryEntry = z.infer<typeof boundaryHistoryEntrySchema>
+
 export const clearCutResponseSchema = z.object({
 	id: z.string(),
 	boundary: multiPolygonSchema,

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { BoundaryHistory } from "@/features/clear-cut/components/form/sections/BoundaryHistory"
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import type { ClearCutFormInput } from "@/features/clear-cut/store/clear-cuts"
 import {
@@ -365,6 +366,18 @@ export function GeneralInfoEditControls({
 					</Label>
 				</div>
 			)}
+
+			{user?.role === "admin" &&
+				report.isManuallyEdited &&
+				report.clearCuts.map((clearCut, index) => (
+					<BoundaryHistory
+						key={clearCut.id}
+						clearCutId={clearCut.id}
+						label={
+							report.clearCuts.length > 1 ? `coupe ${index + 1}` : undefined
+						}
+					/>
+				))}
 
 			{user?.role === "admin" && (
 				<div className="flex items-center gap-2 mt-1">
