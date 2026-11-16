@@ -9,6 +9,7 @@ import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"
 
 import { Button } from "@/components/ui/button"
 import { ClearCutMapPopUp } from "@/features/clear-cut/components/map/ClearCutMapPopUp"
+import { GpxImportButton } from "@/features/clear-cut/components/map/GpxImportButton"
 import { useMapInstance } from "@/features/clear-cut/components/map/Map.context"
 import { useNavigateToClearCut } from "@/features/clear-cut/hooks"
 import type {
@@ -20,6 +21,7 @@ import { updateClearCutGeometryThunk } from "@/features/clear-cut/store/clear-cu
 import { CLEAR_CUTTING_STATUS_COLORS } from "@/features/clear-cut/store/status"
 import { useToast } from "@/hooks/use-toast"
 import { simplifyMultiPolygon } from "@/shared/geometry"
+import type { GpxPolygon, GpxTrace } from "@/shared/gpx"
 import { useBreakpoint } from "@/shared/hooks/breakpoint"
 import { useAppDispatch } from "@/shared/hooks/store"
 
@@ -164,6 +166,28 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 
 	const handleCancelPerimeter = () => setEditingPerimeterReportId(undefined)
 
+	// The imported trace replaces the perimeter on screen only: it is checked,
+	// adjusted if needed, then saved like a hand-drawn one
+	const handleGpxPolygon = (polygon: GpxPolygon, trace: GpxTrace) => {
+		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
+		const layer = ref.current as any
+		if (!layer) return
+		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
+		layer.eachLayer((child: any) => child.pm?.disable())
+		layer.clearLayers()
+		layer.addData(polygon)
+		// biome-ignore lint/suspicious/noExplicitAny: Geoman augments Leaflet layers
+		layer.eachLayer((child: any) =>
+			child.pm?.enable({ allowSelfIntersection: false })
+		)
+		map?.fitBounds(layer.getBounds(), { padding: [40, 40] })
+		toast({
+			id: "gpx-imported",
+			title: `Trace « ${trace.name} » importée`,
+			description: `${trace.areaHectare.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} ha. Vérifiez le périmètre, puis enregistrez.`
+		})
+	}
+
 	useEffect(() => {
 		const group = ref.current
 		// Un groupe pas encore sur la carte ne peut pas ouvrir de popup (Leaflet lève une erreur)
@@ -257,6 +281,7 @@ export function ClearCutPreview({ report, clearCut }: Props) {
 						<span className="w-full px-2 text-center text-sm sm:w-auto sm:whitespace-nowrap">
 							Déplacez les sommets pour ajuster le périmètre
 						</span>
+						<GpxImportButton onPolygon={handleGpxPolygon} disabled={isSaving} />
 						<Button
 							variant="outline"
 							size="sm"
